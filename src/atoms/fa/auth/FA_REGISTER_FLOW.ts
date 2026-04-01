@@ -9,7 +9,7 @@ interface RegisterInput {
   email?: string;
   name: string;
   nickname: string;
-  role: string;
+  role: 'GENERAL' | 'EMPLOYER' | 'ADMIN' | 'SUPER_ADMIN';
   birthDate: string;
   gender: string;
   phoneNumber: string;
@@ -28,24 +28,24 @@ interface RegisterInput {
  */
 export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success: boolean; message: string }> {
   nvLog('AT', '▶️ FA_REGISTER_FLOW 시작', { loginId: input.loginId, role: input.role });
-  
+
   try {
     // 1. 아이디 및 닉네임 중복 확인
-    const duplicateCheck = await QA_CHECK_ID_NICKNAME_EXISTS({ 
-      loginId: input.loginId, 
-      nickname: input.nickname 
+    const duplicateCheck = await QA_CHECK_ID_NICKNAME_EXISTS({
+      loginId: input.loginId,
+      nickname: input.nickname
     });
-    
+
     if (duplicateCheck.idExists) {
       return { success: false, message: '이미 사용 중인 아이디입니다.' };
     }
     if (duplicateCheck.nicknameExists) {
       return { success: false, message: '이미 사용 중인 닉네임입니다.' };
     }
-    
+
     // 2. 비밀번호 해싱
     const hashResult = await RA_HASH_PASSWORD(input.password);
-    
+
     // 3. 사용자 생성 (DB 필드명에 맞춰 키 매핑)
     const createResult = await OA_CREATE_USER({
       login_id: input.loginId,
@@ -53,7 +53,7 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
       email: input.email,
       name: input.name,
       nickname: input.nickname,
-      role: input.role as "EMPLOYER" | "SUPER_ADMIN" | "ADMIN" | "GENERAL",
+      role: input.role,
       birth_date: input.birthDate,
       gender: input.gender,
       phone_number: input.phoneNumber,
@@ -66,11 +66,11 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
       opening_date: input.opening_date,
       sms_consent: input.smsConsent,
     });
-    
+
     if (!createResult.success) {
       return { success: false, message: createResult.error || '회원가입 중 오류가 발생했습니다.' };
     }
-    
+
     nvLog('AT', '✅ FA_REGISTER_FLOW 완료');
     return { success: true, message: '회원가입이 완료되었습니다.' };
   } catch (err: any) {
