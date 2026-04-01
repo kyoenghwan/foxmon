@@ -53,7 +53,7 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
       email: input.email,
       name: input.name,
       nickname: input.nickname,
-      role: input.role,
+      role: input.role as "EMPLOYER" | "SUPER_ADMIN" | "ADMIN" | "GENERAL",
       birth_date: input.birthDate,
       gender: input.gender,
       phone_number: input.phoneNumber,
