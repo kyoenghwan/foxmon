@@ -1,0 +1,652 @@
+# =============================================================================
+# Foxmon Project Map v1.1
+# 생성일: 2026-04-01 / 업데이트: 2026-04-02
+# 설명: Functional Atomic Design 시스템 - 전방위 AI 색인 맵
+# 모든 UI 수정/신규 생성 전 이 파일에서 타겟을 먼저 조회할 것
+# =============================================================================
+
+# ─────────────────────────────────────────────
+# 1. 전역 레이아웃 컴포넌트
+# ─────────────────────────────────────────────
+global_components:
+
+  TOP_NAVIGATION:
+    label: "상단 메인 헤더 네비게이션"
+    keywords: ["상단 메뉴", "네비게이션", "메뉴바", "헤더", "GNB"]
+    shared_style: true
+    style_group: "NAV_MENU_ITEMS"
+    files: ["components/layout/main-header.tsx"]
+    elements:
+      - name: "HOME_MENU"
+        keywords: ["홈", "home", "첫화면", "메인"]
+        type: "nav-item"
+      - name: "JOB_MENU"
+        keywords: ["구인정보", "jobs", "채용공고", "구인"]
+        type: "nav-item"
+      - name: "TALENT_MENU"
+        keywords: ["인재정보", "구직", "talent", "구직자"]
+        type: "nav-item"
+      - name: "COMMUNITY_MENU"
+        keywords: ["커뮤니티", "community", "게시판"]
+        type: "nav-item"
+      - name: "SUPPORT_MENU"
+        keywords: ["고객센터", "support", "문의", "FAQ"]
+        type: "nav-item"
+      - name: "NOTICE_DROPDOWN_LINK"
+        keywords: ["공지사항", "공지"]
+        selector: "header a[href='/notice']"
+        type: "link"
+      - name: "AD_PRODUCT_DROPDOWN_LINK"
+        keywords: ["광고상품안내", "광고 등록", "프리미엄 등록"]
+        selector: "header a[href='/jobs/post']"
+        type: "link"
+
+  SUB_PAGE_LAYOUT:
+    label: "서브 페이지 공통 레이아웃 (최대 너비/패딩)"
+    keywords: ["서브 레이아웃", "공통 레이아웃", "컨테이너"]
+    files: ["components/layout/sub-page-layout.tsx"]
+
+  SIDE_BANNERS:
+    label: "우측 사이드 배너 (PC 전용)"
+    keywords: ["사이드 배너", "우측 배너", "side banner"]
+    files: ["components/home/side-banners.tsx"]
+    responsive_variants:
+      - viewport: "desktop (xl+)"
+        note: "xl 해상도 이상에서만 표시"
+      - viewport: "mobile"
+        note: "모바일에서 hidden 처리"
+
+  MAIN_NAV:
+    label: "메인 네비게이션 (모바일/데스크톱 공용)"
+    keywords: ["메인 네비", "하단 탭", "네비 바"]
+    files: ["components/main-nav.tsx"]
+
+  USER_NAV:
+    label: "유저 네비게이션 드롭다운 (로그인 상태)"
+    keywords: ["유저 네비", "로그인 후 메뉴", "프로필 드롭다운"]
+    files: ["components/user-nav.tsx"]
+
+  AUTO_LOGOUT_WRAPPER:
+    label: "자동 로그아웃 래퍼"
+    keywords: ["자동 로그아웃", "세션 만료", "auto logout"]
+    files: ["components/auth/auto-logout-wrapper.tsx"]
+
+  LANGUAGE_PROVIDER:
+    label: "다국어 언어 컨텍스트 프로바이더"
+    keywords: ["언어", "다국어", "i18n", "language"]
+    files: ["components/providers/language-provider.tsx", "lib/dictionary.ts"]
+
+# ─────────────────────────────────────────────
+# 2. 페이지 색인
+# ─────────────────────────────────────────────
+pages:
+
+  # ── 메인 홈 ──
+  HOME_PAGE:
+    label: "메인 홈 페이지"
+    keywords: ["메인", "홈", "메인 화면", "첫 화면"]
+    files:
+      - "app/page.tsx"
+      - "components/home/hero-section.tsx"
+      - "components/home/main-banner.tsx"
+      - "components/home/home-job-sections.tsx"
+      - "components/home/login-info-box.tsx"
+    db_tables: []
+    ui_elements:
+      - name: "MAIN_HERO_SECTION"
+        keywords: ["히어로", "상단 배너 영역", "메인 슬로건"]
+        files: ["components/home/hero-section.tsx"]
+      - name: "MAIN_BANNER_CAROUSEL"
+        keywords: ["메인 배너", "광고 슬라이드", "캐러셀"]
+        files: ["components/home/main-banner.tsx"]
+        flows: ["getRotatedAds (PREMIUM, 5)"]
+      - name: "HOME_NOTICE_TICKER"
+        keywords: ["공지사항 티커", "롤링 공지", "공지 롤링"]
+        selector: ".notice-ticker"
+        files: ["components/home/home-job-sections.tsx"]
+        link_target: "/notice"
+      - name: "PREMIUM_JOB_SECTION"
+        keywords: ["프리미엄 공고", "premium", "임팩트 카드"]
+        files:
+          - "components/home/home-job-sections.tsx"
+          - "components/home/premium-job-card.tsx"
+        flows: ["getRotatedAds (PREMIUM, 50)"]
+      - name: "SPECIAL_JOB_SECTION"
+        keywords: ["스페셜 공고", "special", "스페셜 카드"]
+        files:
+          - "components/home/home-job-sections.tsx"
+          - "components/home/special-job-card.tsx"
+        flows: ["getRotatedAds (SPECIAL, 50)"]
+      - name: "GENERAL_JOB_SECTION"
+        keywords: ["일반 공고", "general", "일반 카드"]
+        files:
+          - "components/home/home-job-sections.tsx"
+          - "components/home/general-job-item.tsx"
+        flows: ["getRotatedAds (GENERAL, 50)"]
+      - name: "USER_INFO_BOX"
+        keywords: ["유저 정보", "로그인 박스", "회원 정보", "사용자 정보"]
+        files: ["components/home/login-info-box.tsx"]
+        flows: ["FA_LOGIN_FLOW", "FA_GUEST_AUTH"]
+
+  # ── 인증 ──
+  AGE_GATE_PAGE:
+    label: "성인 인증 게이트 페이지"
+    keywords: ["성인 인증", "나이 확인", "age gate"]
+    files: ["app/(auth)/age-gate/page.tsx", "src/components/auth/AgeVerificationBox.tsx"]
+    flows: ["FA_VERIFY_AGE_FLOW"]
+
+  LOGIN_PAGE:
+    label: "로그인 페이지/모달"
+    keywords: ["로그인", "로그인창", "회원 로그인", "sign in"]
+    files: ["app/(auth)/login/page.tsx", "src/components/auth/LoginForm.tsx"]
+    flows: ["FA_LOGIN_FLOW"]
+    ui_elements:
+      - name: "LOGIN_FORM"
+        keywords: ["로그인 폼", "이메일 입력", "비밀번호 입력"]
+        files: ["src/components/auth/LoginForm.tsx"]
+
+  REGISTER_PAGE:
+    label: "회원가입 페이지"
+    keywords: ["회원가입", "가입", "register", "sign up"]
+    files: ["app/(auth)/register/page.tsx", "src/components/auth/RegisterForm.tsx"]
+    flows: ["FA_REGISTER_FLOW"]
+
+  FIND_ACCOUNT_PAGE:
+    label: "아이디/비밀번호 찾기 페이지"
+    keywords: ["아이디 찾기", "비밀번호 찾기", "계정 찾기", "find account"]
+    files: ["app/(auth)/find-account/page.tsx"]
+    flows: ["FA_FIND_ACCOUNT_FLOW"]
+
+  # ── 공고 ──
+  JOB_LIST_PAGE:
+    label: "구인공고 목록 페이지"
+    keywords: ["구인 목록", "채용공고 리스트", "공고 목록", "jobs 페이지"]
+    files:
+      - "app/jobs/page.tsx"
+      - "app/jobs/jobs-list-content.tsx"
+    db_tables: ["jobs"]
+
+  JOB_DETAIL_PAGE:
+    label: "공고 상세 페이지"
+    keywords: ["공고 상세", "채용 상세", "job detail", "구인 상세"]
+    files: ["app/jobs/[id]/page.tsx"]
+    flows: ["QA_GET_JOB_BY_ID"]
+    db_tables: ["jobs"]
+
+  JOB_POST_PAGE:
+    label: "공고 등록 안내 페이지"
+    keywords: ["공고 등록", "광고 등록", "광고 신청", "광고 상품"]
+    files: ["app/jobs/post/page.tsx"]
+
+  SPECIAL_JOBS_PAGE:
+    label: "스페셜 공고 페이지"
+    keywords: ["스페셜 공고", "special jobs"]
+    files: ["app/special-jobs/page.tsx"]
+    db_tables: ["jobs"]
+
+  # ── 공지사항 ──
+  NOTICE_PAGE:
+    label: "공지사항 페이지"
+    keywords: ["공지사항", "공지", "notice", "안내"]
+    files: ["app/notice/page.tsx"]
+
+  # ── 마이페이지 / 회원 설정 ──
+  SETTINGS_MODAL:
+    label: "회원 상세 설정 모달 (메인 화면)"
+    keywords: ["회원 설정", "프로필 설정", "설정 모달", "내 정보 수정"]
+    files: ["components/mypage/SettingsModal.tsx"]
+    flows: ["FA_USER_SETTINGS_FLOW"]
+    ui_elements:
+      - name: "PROFILE_IMAGE_UPLOAD"
+        keywords: ["프로필 사진", "프로필 이미지", "사진 업로드", "이미지 잘림"]
+        selector: ".profile-image-container img"
+        type: "image"
+        note: "object-contain 적용 (잘림 방지)"
+
+  # ── 사업자 (BIZ) ──
+  BIZ_MAIN_PAGE:
+    label: "사업자 대시보드 메인"
+    keywords: ["사업자", "biz", "광고주", "업체"]
+    files: ["app/biz/page.tsx", "components/biz/BizSidebar.tsx"]
+
+  BIZ_ADS_PAGE:
+    label: "사업자 광고 관리"
+    keywords: ["광고 관리", "내 광고", "biz ads"]
+    files: ["app/biz/ads/page.tsx", "app/biz/ads/new/page.tsx", "components/biz/AdEditorForm.tsx"]
+    flows: ["FA_DEDUCT_POINT_FOR_AD"]
+    db_tables: ["jobs", "biz_point_ledger"]
+
+  BIZ_POINTS_PAGE:
+    label: "사업자 포인트 관리"
+    keywords: ["포인트", "충전", "환불", "포인트 관리", "biz points"]
+    files:
+      - "app/biz/points/page.tsx"
+      - "components/employer/point-status-card.tsx"
+      - "components/employer/refund-request-modal.tsx"
+      - "components/employer/refund-simulator.tsx"
+    flows:
+      - "FA_RECHARGE_POINT_FLOW"
+      - "FA_REQUEST_REFUND_FLOW"
+      - "FA_GET_REFUND_SIMULATION"
+    db_tables: ["biz_point_ledger", "biz_point_recharge_requests"]
+
+  BIZ_SEEKERS_PAGE:
+    label: "사업자 구직자 검색"
+    keywords: ["구직자 검색", "인재 검색", "seekers 검색"]
+    files: ["app/biz/seekers/page.tsx", "src/components/employer/SearchPage.tsx"]
+    flows: ["QA_SEARCH_RESUMES"]
+    db_tables: ["resumes"]
+
+  # ── 구직자 (SEEKER) ──
+  SEEKER_RESUME_PAGE:
+    label: "구직자 이력서 관리 페이지"
+    keywords: ["이력서", "resume", "이력서 관리", "이력서 등록"]
+    files:
+      - "app/seeker/resume/page.tsx"
+      - "src/components/seeker/ResumeEditor.tsx"
+      - "components/resume/ResumeManagementModal.tsx"
+    flows: ["FA_MANAGE_RESUME_FLOW"]
+    db_tables: ["resumes"]
+
+  SEEKERS_LIST_PAGE:
+    label: "구직자 목록 페이지 (공개)"
+    keywords: ["구직 목록", "구직자 리스트", "구직 정보"]
+    files: ["app/seekers/page.tsx"]
+    db_tables: ["resumes"]
+
+  # ── 커뮤니티 ──
+  COMMUNITY_PAGE:
+    label: "커뮤니티 게시판 페이지"
+    keywords: ["커뮤니티", "게시판", "community", "포럼"]
+    files:
+      - "app/community/page.tsx"
+      - "app/community/community-client.tsx"
+      - "components/community/CommunitySidebar.tsx"
+      - "components/community/WritePostModal.tsx"
+    db_tables: ["community_posts"]
+
+  # ── 고객센터 ──
+  HELP_PAGE:
+    label: "고객센터 메인"
+    keywords: ["고객센터", "help", "도움말", "문의"]
+    files: ["app/help/page.tsx", "components/help/HelpSidebar.tsx"]
+
+  HELP_FAQ_PAGE:
+    label: "자주 묻는 질문"
+    keywords: ["FAQ", "자주 묻는 질문", "faq"]
+    files: ["app/help/faq/page.tsx"]
+    db_tables: ["faq_items"]
+
+  HELP_INQUIRY_PAGE:
+    label: "1:1 문의"
+    keywords: ["1:1 문의", "문의하기", "inquiry"]
+    files: ["app/help/inquiry/page.tsx"]
+    db_tables: ["help_inquiries"]
+
+  # ── 관리자 ──
+  ADMIN_DASHBOARD:
+    label: "관리자 대시보드 (Fox Office)"
+    keywords: ["관리자", "admin", "fox office", "어드민"]
+    files:
+      - "app/(admin)/fox-office/page.tsx"
+      - "src/components/admin/AdminNavbar.tsx"
+      - "src/components/admin/AdminSidebar.tsx"
+    flows: ["QA_GET_ALL_USERS"]
+    db_tables: ["users"]
+
+  ADMIN_POINTS_PAGE:
+    label: "관리자 포인트 정책 관리"
+    keywords: ["포인트 정책", "티어 설정", "admin points"]
+    files:
+      - "app/(admin)/fox-office/points/page.tsx"
+      - "components/admin/points/PolicyFormModal.tsx"
+      - "components/admin/points/TierConfigEditor.tsx"
+    db_tables: ["point_policies", "point_tiers"]
+
+  # ── 대시보드 (Dashboard) ──
+  DASHBOARD_LAYOUT:
+    label: "대시보드 공통 레이아웃"
+    keywords: ["대시보드", "dashboard", "my page"]
+    files: ["app/(dashboard)/layout.tsx"]
+
+  EMPLOYER_DASHBOARD_PROFILE:
+    label: "고용주 프로필 대시보드"
+    keywords: ["고용주 프로필", "employer profile", "사업자 프로필"]
+    files:
+      - "app/(dashboard)/employer/profile/page.tsx"
+      - "components/employer/profile-form.tsx"
+    db_tables: ["users"]
+
+  EMPLOYER_DASHBOARD_JOBS_NEW:
+    label: "고용주 공고 등록 (대시보드)"
+    keywords: ["공고 등록", "새 공고", "employer new job"]
+    files:
+      - "app/(dashboard)/employer/jobs/new/page.tsx"
+      - "components/employer/job-post-form.tsx"
+    db_tables: ["jobs"]
+
+  EMPLOYER_DASHBOARD_POINTS:
+    label: "고용주 포인트 대시보드"
+    keywords: ["고용주 포인트", "employer points dashboard"]
+    files: ["app/(dashboard)/employer/points/page.tsx"]
+
+  JOB_SEEKER_DASHBOARD_PROFILE:
+    label: "구직자 프로필 대시보드"
+    keywords: ["구직자 프로필", "job seeker profile", "구직 프로필"]
+    files:
+      - "app/(dashboard)/job-seeker/profile/page.tsx"
+      - "components/job-seeker/profile-form.tsx"
+    db_tables: ["resumes", "users"]
+
+  EMPLOYER_SEARCH_PAGE:
+    label: "사업자/고용주 구직자 검색 페이지"
+    keywords: ["employer 검색", "구직자 찾기", "employer search"]
+    files:
+      - "app/employer/search/page.tsx"
+      - "src/components/employer/SearchPage.tsx"
+    flows: ["QA_SEARCH_RESUMES"]
+    db_tables: ["resumes"]
+
+  BIZ_PROFILE_PAGE:
+    label: "사업자 프로필 설정 페이지"
+    keywords: ["사업자 프로필", "biz profile", "업체 정보"]
+    files: ["app/biz/profile/page.tsx"]
+    db_tables: ["users"]
+
+  # ── 공고 관련 컴포넌트 ──
+  AD_PRICE_MODAL:
+    label: "광고 가격 안내 모달"
+    keywords: ["광고 가격", "광고 비용", "ad price", "요금 안내"]
+    files: ["components/jobs/AdPriceModal.tsx"]
+
+  GENERAL_JOB_LIST_ROW:
+    label: "일반 공고 목록 행 컴포넌트 (jobs 리스트 페이지)"
+    keywords: ["일반 공고 행", "공고 리스트 아이템", "job list row"]
+    files: ["components/jobs/general-job-list-row.tsx"]
+
+  REGION_SELECTOR:
+    label: "지역 선택 컴포넌트"
+    keywords: ["지역 선택", "region", "지역 필터"]
+    files: ["components/home/region-selector.tsx"]
+
+  INDUSTRY_SELECTOR:
+    label: "업종 선택 컴포넌트"
+    keywords: ["업종 선택", "industry", "업종 필터", "카테고리"]
+    files: ["components/home/industry-selector.tsx"]
+
+  # ── 채팅 ──
+  FOXTALK_WIDGET:
+    label: "FoxTalk 실시간 채팅 위젯"
+    keywords: ["채팅", "foxtalk", "fox talk", "메시지", "실시간 채팅"]
+    files: ["components/chat/foxtalk-widget.tsx"]
+    flows: ["QA_GET_CHAT_ROOMS", "QA_GET_CHAT_MESSAGES", "OA_INSERT_CHAT_MESSAGE"]
+    db_tables: ["chat_rooms", "chat_messages", "chat_participants"]
+
+# ─────────────────────────────────────────────
+# 3. Atom 색인 (FA / OA / QA / RA)
+# ─────────────────────────────────────────────
+atoms:
+
+  flow_atoms:
+    - id: "FA_LOGIN_FLOW"
+      file: "src/atoms/fa/auth/FA_LOGIN_FLOW.ts"
+      description: "로그인 전체 플로우"
+      uses: ["RA_VALIDATE_LOGIN", "QA_GET_USER_AUTH", "OA_CREATE_GUEST_SESSION"]
+
+    - id: "FA_REGISTER_FLOW"
+      file: "src/atoms/fa/auth/FA_REGISTER_FLOW.ts"
+      description: "회원가입 전체 플로우"
+      uses: ["RA_HASH_PASSWORD", "QA_CHECK_EMAIL_EXISTS", "OA_CREATE_USER"]
+
+    - id: "FA_USER_SETTINGS_FLOW"
+      file: "src/atoms/fa/auth/FA_USER_SETTINGS_FLOW.ts"
+      description: "회원 정보 수정 / 비밀번호 변경 플로우"
+      uses: ["RA_VALIDATE_USER_SETTINGS", "OA_UPDATE_USER_PROFILE", "OA_CHANGE_PASSWORD"]
+
+    - id: "FA_VERIFY_AGE_FLOW"
+      file: "src/atoms/fa/auth/FA_VERIFY_AGE_FLOW.ts"
+      description: "성인 인증 플로우"
+      uses: ["OA_UPDATE_AGE_VERIFIED"]
+
+    - id: "FA_FIND_ACCOUNT_FLOW"
+      file: "src/atoms/fa/auth/FA_FIND_ACCOUNT_FLOW.ts"
+      description: "아이디/비밀번호 찾기 플로우"
+      uses: ["QA_FIND_USER_BY_INFO", "OA_RESET_USER_PASSWORD"]
+
+    - id: "FA_GUEST_AUTH"
+      file: "src/atoms/fa/auth/FA_GUEST_AUTH.ts"
+      description: "게스트 세션 인증 플로우"
+      uses: ["OA_CREATE_GUEST_SESSION"]
+
+    - id: "FA_MANAGE_RESUME_FLOW"
+      file: "src/atoms/fa/resume/FA_MANAGE_RESUME_FLOW.ts"
+      description: "이력서 생성/수정/삭제/공개 토글 플로우"
+      uses: ["OA_UPSERT_RESUME", "OA_DELETE_RESUME", "OA_TOGGLE_RESUME_PUBLIC"]
+
+    - id: "FA_RECHARGE_POINT_FLOW"
+      file: "src/atoms/fa/points/FA_RECHARGE_POINT_FLOW.ts"
+      description: "포인트 충전 플로우"
+      uses: ["RA_CALC_RECHARGE_BONUS", "OA_EXECUTE_POINT_RECHARGE"]
+
+    - id: "FA_REQUEST_REFUND_FLOW"
+      file: "src/atoms/fa/points/FA_REQUEST_REFUND_FLOW.ts"
+      description: "포인트 환불 요청 플로우"
+      uses: ["RA_CALC_REFUND_PRO_RATA", "OA_SUBMIT_REFUND_REQUEST"]
+
+    - id: "FA_GET_REFUND_SIMULATION"
+      file: "src/atoms/fa/points/FA_GET_REFUND_SIMULATION.ts"
+      description: "환불 시뮬레이션 계산 플로우"
+      uses: ["RA_CALC_REFUND_PRO_RATA", "QA_GET_REFUND_CONTEXT"]
+
+    - id: "FA_DEDUCT_POINT_FOR_AD"
+      file: "src/atoms/fa/points/FA_DEDUCT_POINT_FOR_AD.ts"
+      description: "광고 등록 시 포인트 차감 플로우"
+      uses: ["RA_CALC_DEDUCTION_FIFO", "OA_EXECUTE_BATCH_DEDUCTION"]
+
+  query_atoms:
+    - id: "QA_GET_USER_AUTH"
+      file: "src/atoms/qa/auth/QA_GET_USER_AUTH.ts"
+    - id: "QA_GET_USER_PROFILE"
+      file: "src/atoms/qa/auth/QA_GET_USER_PROFILE.ts"
+    - id: "QA_CHECK_EMAIL_EXISTS"
+      file: "src/atoms/qa/auth/QA_CHECK_EMAIL_EXISTS.ts"
+    - id: "QA_GET_JOB_BY_ID"
+      file: "src/atoms/qa/auth/QA_GET_JOB_BY_ID.ts"
+      description: "공고 상세 조회 (mock ID 지원)"
+    - id: "QA_GET_USER_RESUMES"
+      file: "src/atoms/qa/resume/QA_GET_USER_RESUMES.ts"
+    - id: "QA_SEARCH_RESUMES"
+      file: "src/atoms/qa/search/QA_SEARCH_RESUMES.ts"
+    - id: "QA_GET_CHAT_ROOMS"
+      file: "src/atoms/qa/foxtalk/QA_GET_CHAT_ROOMS.ts"
+    - id: "QA_GET_CHAT_MESSAGES"
+      file: "src/atoms/qa/foxtalk/QA_GET_CHAT_MESSAGES.ts"
+    - id: "QA_GET_ALL_USERS"
+      file: "src/atoms/qa/admin/QA_GET_ALL_USERS.ts"
+    - id: "QA_CHECK_ID_NICKNAME_EXISTS"
+      file: "src/atoms/qa/auth/QA_CHECK_ID_NICKNAME_EXISTS.ts"
+    - id: "QA_FIND_USER_BY_INFO"
+      file: "src/atoms/qa/auth/QA_FIND_USER_BY_INFO.ts"
+    - id: "QA_GET_USER_AUTH_BY_ID"
+      file: "src/atoms/qa/auth/QA_GET_USER_AUTH_BY_ID.ts"
+    - id: "QA_GET_ACTIVE_POINT_POLICY"
+      file: "src/atoms/qa/points/QA_GET_ACTIVE_POINT_POLICY.ts"
+    - id: "QA_GET_DEDUCTION_CONTEXT"
+      file: "src/atoms/qa/points/QA_GET_DEDUCTION_CONTEXT.ts"
+    - id: "QA_GET_REFUND_CONTEXT"
+      file: "src/atoms/qa/points/QA_GET_REFUND_CONTEXT.ts"
+    - id: "QA_GET_USER_RECHARGE_CONTEXT"
+      file: "src/atoms/qa/points/QA_GET_USER_RECHARGE_CONTEXT.ts"
+    - id: "QA_GET_CHAT_ROOMS"
+      file: "src/atoms/qa/foxtalk/QA_GET_CHAT_ROOMS.ts"
+    - id: "QA_GET_CHAT_MESSAGES"
+      file: "src/atoms/qa/foxtalk/QA_GET_CHAT_MESSAGES.ts"
+
+  operation_atoms:
+    - id: "OA_CREATE_USER"
+      file: "src/atoms/oa/auth/OA_CREATE_USER.ts"
+    - id: "OA_UPDATE_USER_PROFILE"
+      file: "src/atoms/oa/auth/OA_UPDATE_USER_PROFILE.ts"
+      note: "updated_at 컬럼 없음 - 참조 금지"
+    - id: "OA_CHANGE_PASSWORD"
+      file: "src/atoms/oa/auth/OA_CHANGE_PASSWORD.ts"
+      note: "updated_at 컬럼 없음 - 참조 금지"
+    - id: "OA_UPSERT_RESUME"
+      file: "src/atoms/oa/resume/OA_UPSERT_RESUME.ts"
+    - id: "OA_DELETE_RESUME"
+      file: "src/atoms/oa/resume/OA_DELETE_RESUME.ts"
+    - id: "OA_TOGGLE_RESUME_PUBLIC"
+      file: "src/atoms/oa/resume/OA_TOGGLE_RESUME_PUBLIC.ts"
+    - id: "OA_INSERT_CHAT_MESSAGE"
+      file: "src/atoms/oa/foxtalk/OA_INSERT_CHAT_MESSAGE.ts"
+    - id: "OA_EXECUTE_POINT_RECHARGE"
+      file: "src/atoms/oa/points/OA_EXECUTE_POINT_RECHARGE.ts"
+    - id: "OA_SUBMIT_REFUND_REQUEST"
+      file: "src/atoms/oa/points/OA_SUBMIT_REFUND_REQUEST.ts"
+    - id: "OA_EXECUTE_BATCH_DEDUCTION"
+      file: "src/atoms/oa/points/OA_EXECUTE_BATCH_DEDUCTION.ts"
+    - id: "OA_CREATE_GUEST_SESSION"
+      file: "src/atoms/oa/auth/OA_CREATE_GUEST_SESSION.ts"
+    - id: "OA_RESET_USER_PASSWORD"
+      file: "src/atoms/oa/auth/OA_RESET_USER_PASSWORD.ts"
+    - id: "OA_UPDATE_AGE_VERIFIED"
+      file: "src/atoms/oa/auth/OA_UPDATE_AGE_VERIFIED.ts"
+    - id: "OA_INSERT_CHAT_ROOM"
+      file: "src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM.ts"
+    - id: "OA_INSERT_CHAT_PARTICIPANT"
+      file: "src/atoms/oa/foxtalk/OA_INSERT_CHAT_PARTICIPANT.ts"
+    - id: "OA_UPSERT_RESUME_SEARCH"
+      file: "src/atoms/oa/search/OA_UPSERT_RESUME.ts"
+      note: "검색 색인용 이력서 upsert (search 도메인)"
+
+  rule_atoms:
+    - id: "RA_VALIDATE_LOGIN"
+      file: "src/atoms/ra/auth/RA_VALIDATE_LOGIN.ts"
+    - id: "RA_HASH_PASSWORD"
+      file: "src/atoms/ra/auth/RA_HASH_PASSWORD.ts"
+    - id: "RA_VALIDATE_USER_SETTINGS"
+      file: "src/atoms/ra/auth/RA_VALIDATE_USER_SETTINGS.ts"
+    - id: "RA_CALC_RECHARGE_BONUS"
+      file: "src/atoms/ra/points/RA_CALC_RECHARGE_BONUS.ts"
+    - id: "RA_CALC_REFUND_PRO_RATA"
+      file: "src/atoms/ra/points/RA_CALC_REFUND_PRO_RATA.ts"
+    - id: "RA_CALC_DEDUCTION_FIFO"
+      file: "src/atoms/ra/points/RA_CALC_DEDUCTION_FIFO.ts"
+    - id: "RA_CHECK_BOARD_PERMISSION"
+      file: "src/atoms/ra/community/RA_CHECK_BOARD_PERMISSION.ts"
+    - id: "RA_VALIDATE_POST_INPUT"
+      file: "src/atoms/ra/community/RA_VALIDATE_POST_INPUT.ts"
+    - id: "RA_COMPARE_AND_HASH"
+      file: "src/atoms/ra/auth/RA_COMPARE_AND_HASH.ts"
+    - id: "RA_PARSE_EXTERNAL_AUTH_DATA"
+      file: "src/atoms/ra/auth/RA_PARSE_EXTERNAL_AUTH_DATA.ts"
+    - id: "RA_VERIFY_PASSWORD"
+      file: "src/atoms/ra/auth/RA_VERIFY_PASSWORD.ts"
+
+# ─────────────────────────────────────────────
+# 4. DB 테이블 색인
+# ─────────────────────────────────────────────
+db_tables:
+  - name: "users"
+    schema_doc: "docs/db/users_schema.md"
+    known_issues:
+      - "updated_at 컬럼 없음 - OA에서 참조 금지"
+  - name: "jobs"
+    schema_doc: "docs/db/jobs_schema.md"
+  - name: "resumes"
+    schema_doc: "docs/db/resumes_schema.md"
+  - name: "community_posts"
+    schema_doc: "docs/db/community_posts_schema.md"
+  - name: "chat_rooms"
+    schema_doc: "docs/db/foxtalk_schema.md"
+  - name: "chat_messages"
+    schema_doc: "docs/db/foxtalk_schema.md"
+  - name: "chat_participants"
+    schema_doc: "docs/db/foxtalk_schema.md"
+  - name: "biz_point_ledger"
+    schema_doc: "docs/db/point_system_master_schema.md"
+  - name: "biz_point_recharge_requests"
+    schema_doc: "docs/db/point_charge_requests_schema.md"
+  - name: "help_inquiries"
+    schema_doc: "docs/db/help_center_schema.md"
+  - name: "faq_items"
+    schema_doc: "docs/db/help_center_schema.md"
+  - name: "point_policies"
+    schema_doc: "docs/db/point_system_master_schema.md"
+  - name: "point_tiers"
+    schema_doc: "docs/db/point_system_master_schema.md"
+
+# ─────────────────────────────────────────────
+# 5. 공유 스타일 그룹
+# ─────────────────────────────────────────────
+style_groups:
+  NAV_MENU_ITEMS:
+    description: "상단 네비게이션 메뉴 아이템 공통 스타일"
+    members: ["HOME_MENU", "JOB_MENU", "TALENT_MENU", "COMMUNITY_MENU", "SUPPORT_MENU"]
+    files: ["components/layout/main-header.tsx"]
+
+  JOB_CARD_BASE:
+    description: "공고 카드 공통 스타일 (높이/패딩/반응형)"
+    members: ["PREMIUM_JOB_CARD", "SPECIAL_JOB_CARD", "GENERAL_JOB_ITEM"]
+    files:
+      - "components/home/premium-job-card.tsx"
+      - "components/home/special-job-card.tsx"
+      - "components/home/general-job-item.tsx"
+
+  PRIMARY_BUTTONS:
+    description: "주요 CTA 버튼 공통 스타일 (bg-primary)"
+    members: ["LOGIN_SUBMIT_BTN", "REGISTER_SUBMIT_BTN", "JOB_APPLY_BTN"]
+    files: ["components/ui/button.tsx"]
+
+  SIDEBAR_NAV_ITEMS:
+    description: "사이드바 네비게이션 아이템 공통 스타일"
+    members: ["BIZ_SIDEBAR", "HELP_SIDEBAR", "COMMUNITY_SIDEBAR"]
+    files:
+      - "components/biz/BizSidebar.tsx"
+      - "components/help/HelpSidebar.tsx"
+      - "components/community/CommunitySidebar.tsx"
+
+  FORM_INPUT_BASE:
+    description: "폼 입력 필드 공통 스타일"
+    members: ["LOGIN_EMAIL_INPUT", "LOGIN_PW_INPUT", "REGISTER_INPUTS", "PROFILE_INPUTS"]
+    files: ["components/ui/input.tsx"]
+
+# ─────────────────────────────────────────────
+# 6. 라이브러리/서비스 레이어
+# ─────────────────────────────────────────────
+lib_services:
+
+  AD_SERVICE:
+    label: "광고 공정 롤링 서비스"
+    keywords: ["광고 로딩", "롤링 알고리즘", "공고 페칭", "getRotatedAds"]
+    file: "lib/ad-service.ts"
+    exports:
+      - "getRotatedAds(tier, count)"
+      - "recordAdExposure(adId)"
+      - "AdItem (interface)"
+    db_tables: ["jobs"]
+    note: "Supabase 미연결 시 MOCK_ADS 150개 자동 사용"
+
+  ACTIONS:
+    label: "서버 액션 진입점"
+    keywords: ["서버 액션", "server action", "form action"]
+    files:
+      - "lib/actions.ts"
+      - "lib/actions/community.ts"
+    note: "UI → FA 호출의 브릿지 역할"
+
+  SUPABASE_CLIENT:
+    label: "Supabase 클라이언트"
+    keywords: ["supabase", "DB 연결", "데이터베이스"]
+    file: "lib/supabase.ts"
+
+  LOGGER:
+    label: "nvLog 로깅 유틸리티"
+    keywords: ["로그", "nvLog", "logger", "디버그"]
+    file: "lib/logger.ts"
+    note: "FW/AT 두 가지 타입으로 구분하여 로깅"
+
+  DICTIONARY:
+    label: "다국어 사전 (i18n)"
+    keywords: ["다국어", "번역", "i18n", "dictionary"]
+    file: "lib/dictionary.ts"
