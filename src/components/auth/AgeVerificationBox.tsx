@@ -29,10 +29,10 @@ export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificati
         alert('ℹ️ 개발/테스트 환경 안내\n\n현재 본인인증 대행사(PG) 정식 계약 전이므로 실제 인증창 대신 시스템 내부에서 가상 데이터로 인증을 통과시킵니다.');
         
         const mockData = {
-          name: '민경환',
-          birthDate: '19920104',
+          name: '홍길동',
+          birthDate: '19900101',
           gender: 'MALE',
-          phoneNumber: '01039573425',
+          phoneNumber: '01012345678',
           nationality: 'KOREAN' as const,
         };
 

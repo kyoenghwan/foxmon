@@ -242,7 +242,7 @@ export function SettingsModal() {
                                 <div className="flex flex-col items-center shrink-0 sm:w-[110px]">
                                     <div className="relative group flex-shrink-0 cursor-pointer w-[100px] h-[100px] bg-[#F8F9FA] rounded-2xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center transition-colors hover:border-[#F26E22]">
                                         {profileUrl ? (
-                                            <img src={profileUrl} alt="Profile" className="w-full h-full object-cover" />
+                                            <img src={profileUrl} alt="Profile" className="w-full h-full object-contain" />
                                         ) : (
                                             <div className="flex flex-col items-center gap-1.5 text-gray-400 group-hover:text-[#F26E22] transition-colors p-1 text-center">
                                                 <Upload className="w-6 h-6 stroke-[2]" />

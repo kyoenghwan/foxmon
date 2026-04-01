@@ -111,7 +111,10 @@ export function SideBanners() {
     return (
         <>
             {/* Left Wing */}
-            <div className="hidden 2xl:flex flex-col gap-3 fixed left-[calc(50%-880px)] top-[220px] w-[130px] z-20">
+            <div className={`
+                hidden xl:flex flex-col gap-3 fixed top-[220px] w-[130px] z-20 transition-all duration-300
+                left-[calc(50%-780px)] 2xl:left-[calc(50%-880px)]
+            `}>
                 <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Special Pick</div>
                 {leftAds.map((ad) => (
                     <BannerCard key={ad.id} ad={ad} />
@@ -125,7 +128,10 @@ export function SideBanners() {
             </div>
 
             {/* Right Wing */}
-            <div className="hidden 2xl:flex flex-col gap-3 fixed right-[calc(50%-880px)] top-[220px] w-[130px] z-20">
+            <div className={`
+                hidden xl:flex flex-col gap-3 fixed top-[220px] w-[130px] z-20 transition-all duration-300
+                right-[calc(50%-780px)] 2xl:right-[calc(50%-880px)]
+            `}>
                 <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Premium Ad</div>
                 {rightAds.map((ad) => (
                     <BannerCard key={ad.id} ad={ad} />

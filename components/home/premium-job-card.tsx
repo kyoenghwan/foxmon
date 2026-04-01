@@ -25,6 +25,7 @@ interface PremiumJobCardProps {
     tags?: string[];
     isBig?: boolean;
     impactType?: ImpactType;
+    id: string;
 }
 
 // 테마별 설정을 관리하는 매핑 객체 - 원래의 역동적인(Dynamic) 스타일로 복구
@@ -54,7 +55,7 @@ const THEME_CONFIG: Record<string, any> = {
     none: { label: 'HIT', color: 'text-gray-900', bg: 'bg-purple-700', border: 'border-gray-200', icon: Crown, animClass: '' }
 };
 
-export function PremiumJobCard({ company, title, location, pay, image, tags, isBig, impactType = 'none' }: PremiumJobCardProps) {
+export function PremiumJobCard({ company, title, location, pay, image, tags, isBig, impactType = 'none', id }: PremiumJobCardProps) {
     const { t } = useLanguage();
     
     // 1. 업체명 파싱
@@ -96,7 +97,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
 
             {/* --- [메인 카드 바디] --- */}
             <Link 
-                href="#" 
+                href={`/jobs/${id}`} 
                 className={`relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm transition-all duration-300 p-2.5 md:p-3 flex flex-col justify-between z-10 ${
                     isCyber ? 'bg-black/95 text-white' : 'bg-white'
                 }`}

@@ -17,7 +17,7 @@ export async function OA_UPDATE_USER_PROFILE(input: UpdateUserProfileInput) {
   nvLog('AT', '▶️ OA_UPDATE_USER_PROFILE 시작', { userId: input.userId });
 
   try {
-    const updates: any = { updated_at: new Date().toISOString() };
+    const updates: any = {};
 
     if (input.nickname !== undefined) updates.nickname = input.nickname;
     if (input.email !== undefined) updates.email = input.email;
@@ -29,7 +29,7 @@ export async function OA_UPDATE_USER_PROFILE(input: UpdateUserProfileInput) {
     if (input.sns_x !== undefined) updates.sns_x = input.sns_x;
 
     // 업데이트할 내용이 없는 경우
-    if (Object.keys(updates).length <= 1) { 
+    if (Object.keys(updates).length === 0) { 
        return { success: true, message: '변경할 정보가 없습니다.', error: null };
     }
 
@@ -37,7 +37,7 @@ export async function OA_UPDATE_USER_PROFILE(input: UpdateUserProfileInput) {
       .from('users')
       .update(updates)
       .eq('id', input.userId)
-      .select('id, nickname, phone_number, updated_at')
+      .select('id, nickname, phone_number')
       .single();
 
     if (error) {

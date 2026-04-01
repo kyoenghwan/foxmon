@@ -12,9 +12,10 @@ interface SpecialJobCardProps {
     pay: string;
     color?: string; // e.g., 'blue', 'orange', 'purple'
     isBig?: boolean;
+    id: string;
 }
 
-export function SpecialJobCard({ company, title, location, pay, color = 'orange', isBig }: SpecialJobCardProps) {
+export function SpecialJobCard({ company, title, location, pay, color = 'orange', isBig, id }: SpecialJobCardProps) {
     const { t } = useLanguage();
     const colorSchemes: Record<string, string> = {
         orange: 'bg-gradient-to-br from-orange-50/80 to-white border-orange-100 hover:border-orange-400 text-orange-600',
@@ -46,7 +47,7 @@ export function SpecialJobCard({ company, title, location, pay, color = 'orange'
     }
 
     return (
-        <Link href="#" className={`group relative block rounded-lg border-2 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ${isBig ? 'h-full min-h-[260px]' : 'h-[110px] md:h-[120px]'} p-2.5 md:p-3 flex flex-col justify-between ${scheme}`}>
+        <Link href={`/jobs/${id}`} className={`group relative block rounded-lg border-2 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ${isBig ? 'h-full min-h-[260px]' : 'h-[110px] md:h-[120px]'} p-2.5 md:p-3 flex flex-col justify-between ${scheme}`}>
             
             {/* 1. 상단: 업체명/지역 (로고 없음) */}
             <div className="flex gap-2 mb-2 justify-between items-start">

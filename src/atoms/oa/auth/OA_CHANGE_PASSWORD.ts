@@ -16,7 +16,7 @@ export async function OA_CHANGE_PASSWORD(input: ChangePasswordInput) {
   try {
     const { error } = await supabase
       .from('users')
-      .update({ password: input.hashedPassword, updated_at: new Date().toISOString() })
+      .update({ password: input.hashedPassword })
       .eq('id', input.userId);
 
     if (error) {

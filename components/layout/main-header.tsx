@@ -72,7 +72,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                         </button>
                         <span className="text-gray-300">|</span>
                         <button onClick={() => alert('📱 모바일: 브라우저 속성 메뉴에서 [홈 화면에 추가]를 누르시면 폰에 앱처럼 아이콘이 생깁니다!')} className="hover:text-primary transition-colors flex items-center gap-1">
-                            📱 폰에 앱 설치
+                            📱 <span className="hidden sm:inline">폰에 앱 설치</span><span className="sm:hidden">앱 설치</span>
                         </button>
                         <span className="text-gray-300">|</span>
                         <Link href="/notice" className="hover:text-primary transition-colors">공지사항</Link>
@@ -85,7 +85,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                 {/* Logo */}
                 <div className="flex-shrink-0">
                     <Link href="/" className="group flex items-center">
-                        <img src="/logo.png" alt="FOXMON" className="h-12 md:h-14 w-auto drop-shadow-sm hover:scale-105 transition-transform" />
+                        <img src="/logo.png" alt="FOXMON" className="h-9 sm:h-11 md:h-14 w-auto drop-shadow-sm hover:scale-105 transition-transform" />
                     </Link>
                 </div>
 
@@ -112,24 +112,24 @@ export function MainHeader({ session }: MainHeaderProps) {
                 </div>
 
                 {/* 우측: 언어 설정 및 로그인 (간소화) */}
-                <div className="flex items-center gap-3 text-[13px] font-bold text-gray-500">
+                <div className="flex items-center gap-2 sm:gap-4 text-[12px] sm:text-[13px] font-bold text-gray-500">
                     <button onClick={toggleLang} className="hover:text-primary transition-colors flex items-center gap-1">
-                        <Globe className="h-4 w-4" /> {language}
+                        <Globe className="h-3.5 w-3.5" /> <span className="hidden xs:inline">{language}</span>
                     </button>
                     <span className="text-gray-300">|</span>
                     {session ? (
-                        <div className="flex items-center gap-3">
-                            <span className="flex items-center gap-2 text-[13px] font-bold text-gray-600">
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black text-white ${
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <span className="flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-[13px] font-bold text-gray-600">
+                                <span className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full font-black text-white ${
                                     session.user?.role === 'SUPER_ADMIN' ? 'bg-red-500' : 
                                     session.user?.role === 'ADMIN' ? 'bg-purple-600' : 
                                     session.user?.role === 'EMPLOYER' ? 'bg-primary' : 'bg-blue-500'
                                 }`}>
-                                    {session.user?.role === 'SUPER_ADMIN' ? 'SUPER' : 
-                                     session.user?.role === 'ADMIN' ? 'ADMIN' : 
-                                     session.user?.role === 'EMPLOYER' ? 'BIZ' : 'USER'}
+                                    {session.user?.role === 'SUPER_ADMIN' ? 'S' : 
+                                     session.user?.role === 'ADMIN' ? 'A' : 
+                                     session.user?.role === 'EMPLOYER' ? 'B' : 'U'}
                                 </span>
-                                <span className="text-primary font-black ml-1">
+                                <span className="text-primary font-black ml-1 hidden sm:inline">
                                     {session.user?.role === 'SUPER_ADMIN' ? '최고 관리자' : 
                                      session.user?.role === 'ADMIN' ? '일반 관리자' : 
                                      session.user?.role === 'EMPLOYER' ? '업체회원' : '개인회원'}
@@ -137,8 +137,8 @@ export function MainHeader({ session }: MainHeaderProps) {
                             </span>
                             {(session.user?.role === 'ADMIN' || session.user?.role === 'SUPER_ADMIN') && (
                                 <>
-                                    <span className="text-gray-300">|</span>
-                                    <Link href="/fox-office" className="hover:text-primary transition-colors">관리자홈</Link>
+                                    <span className="text-gray-300 hidden sm:inline">|</span>
+                                    <Link href="/fox-office" className="hover:text-primary transition-colors hidden sm:inline">관리자홈</Link>
                                 </>
                             )}
                             <span className="text-gray-300">|</span>
@@ -149,12 +149,12 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 }} 
                                 className="flex items-center gap-1 font-black text-red-500 hover:text-red-700 transition-colors"
                             >
-                                <LogOut className="w-4 h-4" />
-                                로그아웃
+                                <LogOut className="w-3.5 h-3.5" />
+                                <span className="hidden xs:inline">로그아웃</span><span className="xs:hidden">OUT</span>
                             </button>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 whitespace-nowrap">
                             <Link href="/login" className="hover:text-gray-900 transition-colors">로그인</Link>
                             <span className="text-gray-300">|</span>
                             <Link href="/signup" className="hover:text-gray-900 transition-colors">회원가입</Link>
@@ -293,8 +293,8 @@ export function MainHeader({ session }: MainHeaderProps) {
                             <div className="grid grid-cols-1 gap-y-3 text-[14px] font-medium text-gray-600">
                                 <Link href="#" className="hover:text-primary transition-colors">질문답변</Link>
                                 <Link href="#" className="hover:text-primary transition-colors">자주묻는질문</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">공지사항</Link>
-                                <Link href="#" className="hover:text-primary transition-colors flex items-center gap-1">
+                                <Link href="/notice" className="hover:text-primary transition-colors">공지사항</Link>
+                                <Link href="/jobs/post" className="hover:text-primary transition-colors flex items-center gap-1">
                                     광고상품안내 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span>
                                 </Link>
                             </div>

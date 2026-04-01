@@ -41,12 +41,12 @@ export default async function SubPageLayout({ title, description, hideSearch = f
                 {!hideSearch && (
                     <section className="bg-white rounded-xl p-4 border shadow-sm space-y-4">
                         {/* Region Selection */}
-                        <div className="flex gap-4">
-                            <h2 className="text-sm font-extrabold flex items-center gap-2 text-gray-800 w-24 flex-shrink-0 mt-2">
-                                <span className="w-1 h-4 bg-primary rounded-full" />
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                            <h2 className="text-[13px] font-extrabold flex items-center gap-2 text-gray-800 w-full sm:w-24 shrink-0 mt-1 sm:mt-2">
+                                <span className="w-1.5 h-3.5 bg-primary rounded-full" />
                                 지역 선택
                             </h2>
-                            <div className="flex-1">
+                            <div className="flex-1 overflow-x-auto pb-1">
                                 <RegionSelector />
                             </div>
                         </div>
@@ -54,12 +54,12 @@ export default async function SubPageLayout({ title, description, hideSearch = f
                         <div className="border-t border-gray-100" />
 
                         {/* Industry Selection */}
-                        <div className="flex gap-4">
-                            <h2 className="text-sm font-extrabold flex items-center gap-2 text-gray-800 w-24 flex-shrink-0 mt-2">
-                                <span className="w-1 h-4 bg-orange-400 rounded-full" />
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                            <h2 className="text-[13px] font-extrabold flex items-center gap-2 text-gray-800 w-full sm:w-24 shrink-0 mt-1 sm:mt-2">
+                                <span className="w-1.5 h-3.5 bg-orange-400 rounded-full" />
                                 업종 선택
                             </h2>
-                            <div className="flex-1">
+                            <div className="flex-1 overflow-x-auto pb-1">
                                 <IndustrySelector />
                             </div>
                         </div>

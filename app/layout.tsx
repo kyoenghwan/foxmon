@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,9 +16,16 @@ import { LanguageProvider } from "@/components/providers/language-provider";
 import { FoxTalkWidget } from "@/components/chat/foxtalk-widget";
 import { AutoLogoutWrapper } from "@/components/auth/auto-logout-wrapper";
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
-  title: "Foxmon",
-  description: "Part-time job platform",
+  title: "Foxmon | 여우들의 쉼터",
+  description: "여우몬 커뮤니티 및 구인구직 플랫폼",
 };
 
 export default function RootLayout({

@@ -55,7 +55,7 @@ export function JobsListContent() {
                     <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-md">추천 20</span>
                 </div>
                 {premiumJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 grid-flow-dense">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4 lg:gap-5 grid-flow-dense">
                         {premiumJobs.map((job) => (
                             <PremiumJobCard key={job.id} {...(job as any)} />
                         ))}
@@ -77,7 +77,7 @@ export function JobsListContent() {
                     <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-md">추천 20</span>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 grid-flow-dense">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4 lg:gap-5 grid-flow-dense">
                         {specialJobs.map((job) => (
                             <SpecialJobCard key={job.id} {...(job as any)} />
                         ))}

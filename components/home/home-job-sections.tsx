@@ -126,7 +126,7 @@ export function HomeJobSections() {
                                 style={{ transform: `translateY(-${noticeIndex * 24}px)` }}
                             >
                                 {notices.map((n) => (
-                                    <Link key={n.id} href="#" className="h-6 flex items-center gap-3 group">
+                                    <Link key={n.id} href="/notice" className="h-6 flex items-center gap-3 group">
                                         <div className="flex items-center gap-1.5 shrink-0">
                                             {n.isNew && <span className="bg-orange-500 text-white text-[8px] font-black px-1 rounded-sm leading-none py-0.5">NEW</span>}
                                             {n.isHot && <span className="bg-primary text-black text-[8px] font-black px-1 rounded-sm leading-none py-0.5">HOT</span>}
@@ -142,7 +142,7 @@ export function HomeJobSections() {
                             </div>
                         </div>
 
-                        <Link href="#" className="pl-4 shrink-0 text-gray-300 hover:text-primary transition-colors">
+                        <Link href="/notice" className="pl-4 shrink-0 text-gray-300 hover:text-primary transition-colors">
                             <ChevronRight className="w-5 h-5" />
                         </Link>
                     </div>
@@ -194,7 +194,7 @@ export function HomeJobSections() {
                     </h2>
                     <div className="flex items-center gap-3">
                         <AdPriceModal type="special" title="Special" />
-                        <Link href="#" className="flex items-center gap-1.5 px-4 py-1.5 bg-yellow-400 text-black text-[11px] font-black rounded-lg hover:scale-105 transition-transform shadow-sm">
+                        <Link href="/jobs/post" className="flex items-center gap-1.5 px-4 py-1.5 bg-yellow-400 text-black text-[11px] font-black rounded-lg hover:scale-105 transition-transform shadow-sm">
                             <Plus className="w-3.5 h-3.5" /> {t.sections.postSpecial}
                         </Link>
                         <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
@@ -222,7 +222,7 @@ export function HomeJobSections() {
                         {t.sections.generalJobsTitle}
                     </h2>
                     <div className="flex items-center gap-3">
-                        <Link href="#" className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-600 text-[11px] font-bold rounded-lg hover:bg-gray-50 transition-colors">
+                        <Link href="/jobs/post" className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-600 text-[11px] font-bold rounded-lg hover:bg-gray-50 transition-colors">
                             <Plus className="w-3.5 h-3.5" /> {t.sections.postGeneral}
                         </Link>
                         <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
