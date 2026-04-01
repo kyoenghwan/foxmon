@@ -1,6 +1,6 @@
 import { nvLog } from '@/lib/logger';
-import { QA_GET_REFUND_CONTEXT } from '@/atoms/qa/points/QA_GET_REFUND_CONTEXT';
-import { RA_CALC_REFUND_PRO_RATA } from '@/atoms/ra/points/RA_CALC_REFUND_PRO_RATA';
+import { QA_GET_REFUND_CONTEXT } from '@/src/atoms/qa/points/QA_GET_REFUND_CONTEXT';
+import { RA_CALC_REFUND_PRO_RATA } from '@/src/atoms/ra/points/RA_CALC_REFUND_PRO_RATA';
 
 interface RefundSimulationOutput {
   success: boolean;

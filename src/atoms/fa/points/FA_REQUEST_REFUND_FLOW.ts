@@ -1,6 +1,6 @@
 import { nvLog } from '@/lib/logger';
-import { FA_GET_REFUND_SIMULATION } from '@/atoms/fa/points/FA_GET_REFUND_SIMULATION';
-import { OA_SUBMIT_REFUND_REQUEST } from '@/atoms/oa/points/OA_SUBMIT_REFUND_REQUEST';
+import { FA_GET_REFUND_SIMULATION } from '@/src/atoms/fa/points/FA_GET_REFUND_SIMULATION';
+import { OA_SUBMIT_REFUND_REQUEST } from '@/src/atoms/oa/points/OA_SUBMIT_REFUND_REQUEST';
 
 interface BankInfo {
   bankName: string;

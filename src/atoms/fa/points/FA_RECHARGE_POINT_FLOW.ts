@@ -1,8 +1,8 @@
 import { nvLog } from '@/lib/logger';
-import { QA_GET_ACTIVE_POINT_POLICY } from '@/atoms/qa/points/QA_GET_ACTIVE_POINT_POLICY';
-import { QA_GET_USER_RECHARGE_CONTEXT } from '@/atoms/qa/points/QA_GET_USER_RECHARGE_CONTEXT';
-import { RA_CALC_RECHARGE_BONUS } from '@/atoms/ra/points/RA_CALC_RECHARGE_BONUS';
-import { OA_EXECUTE_POINT_RECHARGE } from '@/atoms/oa/points/OA_EXECUTE_POINT_RECHARGE';
+import { QA_GET_ACTIVE_POINT_POLICY } from '@/src/atoms/qa/points/QA_GET_ACTIVE_POINT_POLICY';
+import { QA_GET_USER_RECHARGE_CONTEXT } from '@/src/atoms/qa/points/QA_GET_USER_RECHARGE_CONTEXT';
+import { RA_CALC_RECHARGE_BONUS } from '@/src/atoms/ra/points/RA_CALC_RECHARGE_BONUS';
+import { OA_EXECUTE_POINT_RECHARGE } from '@/src/atoms/oa/points/OA_EXECUTE_POINT_RECHARGE';
 
 interface RechargeFlowInput {
   userId: string;

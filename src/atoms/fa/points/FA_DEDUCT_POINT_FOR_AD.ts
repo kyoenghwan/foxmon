@@ -1,7 +1,7 @@
 import { nvLog } from '@/lib/logger';
-import { QA_GET_DEDUCTION_CONTEXT } from '@/atoms/qa/points/QA_GET_DEDUCTION_CONTEXT';
-import { RA_CALC_DEDUCTION_FIFO } from '@/atoms/ra/points/RA_CALC_DEDUCTION_FIFO';
-import { OA_EXECUTE_BATCH_DEDUCTION } from '@/atoms/oa/points/OA_EXECUTE_BATCH_DEDUCTION';
+import { QA_GET_DEDUCTION_CONTEXT } from '@/src/atoms/qa/points/QA_GET_DEDUCTION_CONTEXT';
+import { RA_CALC_DEDUCTION_FIFO } from '@/src/atoms/ra/points/RA_CALC_DEDUCTION_FIFO';
+import { OA_EXECUTE_BATCH_DEDUCTION } from '@/src/atoms/oa/points/OA_EXECUTE_BATCH_DEDUCTION';
 
 interface DeductFlowInput {
   userId: string;
