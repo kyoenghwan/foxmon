@@ -1,0 +1,27 @@
+FA_VERIFY_AGE_FLOW:
+  id: "FA_VERIFY_AGE_FLOW"
+  type: "flow"
+  description: "사용자의 본인 인증(성인 인증) 결과를 처리하고 DB에 반영합니다."
+  
+  input:
+    userId: "string"
+    verificationToken: "string" # 외부 연동 토큰
+  
+  output:
+    success: "boolean"
+    error: "string | null"
+  
+  steps:
+    - step: 1
+      name: "외부 인증 데이터 검증"
+      atom: "RA_VERIFY_TOKEN" # Mock
+      input_mapping:
+        token: "context.input.verificationToken"
+      output_save_as: "tokenVerifyResult"
+      
+    - step: 2
+      name: "인증 상태 업데이트"
+      atom: "OA_UPDATE_AGE_VERIFIED"
+      input_mapping:
+        userId: "context.input.userId"
+      output_save_as: "updateResult"

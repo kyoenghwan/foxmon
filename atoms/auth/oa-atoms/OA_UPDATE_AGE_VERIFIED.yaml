@@ -1,0 +1,19 @@
+OA_UPDATE_AGE_VERIFIED:
+  id: "OA_UPDATE_AGE_VERIFIED"
+  type: "operation"
+  description: "사용자의 성인 인증 상태를 완료로 업데이트합니다."
+  
+  input:
+    userId: "string"
+  
+  output:
+    success: "boolean"
+    error: "string | null"
+  
+  details:
+    table: "users"
+    operation: "UPDATE"
+    fields:
+      is_age_verified: true
+      verified_at: "now()"
+    condition: "id == input.userId"

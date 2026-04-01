@@ -1,26 +1,208 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 24.6 95% 53.1%; /* Foxmon Orange */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 24.6 95% 53.1%; /* Foxmon Orange */
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* ✨ Gold Shimmer Effect */
+  @keyframes shimmer {
+    0% { transform: translateX(-200%); }
+    100% { transform: translateX(200%); }
+  }
+  .animate-shimmer {
+    /* animation: shimmer 2s infinite linear; */
+  }
+
+  /* ⚛️ Neon Pulse Effect */
+  @keyframes neon-pulse {
+    0%, 100% { opacity: 0.3; filter: drop-shadow(0 0 2px var(--primary)); }
+    50% { opacity: 1; filter: drop-shadow(0 0 8px var(--primary)); }
+  }
+  .animate-neon {
+    animation: neon-pulse 1.5s infinite ease-in-out;
+  }
+
+  /* 🌃 Crazy Neon Flicker (Nightlife feel) */
+  @keyframes flicker {
+    0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+    20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+      opacity: 0.4;
+      filter: brightness(1.5) contrast(1.5) drop-shadow(0 0 10px rgba(255, 0, 255, 0.8));
+    }
+  }
+  .animate-flicker {
+    animation: flicker 4s infinite linear;
+  }
+
+  /* 🎨 Premium High-Impact Library (22+ Themes - Reverted to Dynamic) */
+  
+  /* 🔥 Inferno (Flicker) */
+  @keyframes fire-glow { 0%, 100% { filter: drop-shadow(0 0 5px #ff4500); } 50% { filter: drop-shadow(0 0 20px #ff0000); transform: scale(1.01); } }
+  .animate-fire { animation: fire-glow 0.8s infinite ease-in-out; }
+
+  /* ❄️ Frost (Shiver) */
+  @keyframes ice-shiver { 0%, 100% { filter: drop-shadow(0 0 5px #00ffff); transform: translate(0, 0); } 50% { transform: translate(0.5px, -0.5px); } }
+  .animate-ice { animation: ice-shiver 0.1s infinite linear; }
+
+  /* 💎 Emerald (Lux Shimmer) */
+  @keyframes emerald-lux { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  .animate-emerald { background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.4), transparent); background-size: 200% 100%; animation: emerald-lux 3s infinite linear; }
+
+  /* ⚡ Cyber Glitch */
+  @keyframes glitch-anim { 0% { clip-path: inset(10% 0 30% 0); transform: translate(-2px, 2px); } 50% { clip-path: inset(5% 0 70% 0); transform: translate(2px, -2px); } }
+  .animate-glitch { animation: glitch-anim 0.2s infinite linear alternate-reverse; }
+
+  /* 🍃 Forest Sway */
+  @keyframes forest-sway { 0%, 100% { transform: rotate(-0.5deg); filter: drop-shadow(0 0 2px #065f46); } 50% { transform: rotate(0.5deg); filter: drop-shadow(0 0 8px #059669); } }
+  .animate-forest { animation: forest-sway 3s infinite ease-in-out; }
+
+  /* 🌊 Ocean Flow */
+  @keyframes ocean-flow { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .animate-ocean { background: linear-gradient(270deg, #1e3a8a, #3b82f6, #1e3a8a); background-size: 400% 400%; animation: ocean-flow 5s infinite ease; }
+
+  /* 🌸 Sakura Petal - FIXED Visibility */
+  @keyframes sakura-petal { 0%, 100% { opacity: 0.2; transform: translateY(0); } 50% { opacity: 0.4; transform: translateY(-3px); } }
+  .animate-sakura { animation: sakura-petal 2s infinite ease-in-out; }
+
+  /* 🌌 Galaxy Twinkle */
+  @keyframes galaxy-twinkle { 0%, 100% { opacity: 0.3; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
+  .animate-galaxy { animation: galaxy-twinkle 4s infinite ease-in-out; }
+
+  /* ☀️ Sun Flare */
+  @keyframes sun-flare { 0%, 100% { opacity: 0.1; filter: blur(5px); } 50% { opacity: 0.4; filter: blur(2px); } }
+  .animate-sun { animation: sun-flare 3s infinite ease-in-out; }
+
+  /* 🌋 Lava Molten */
+  @keyframes lava-molten { 0%, 100% { background-color: #7f1d1d; } 50% { background-color: #b91c1c; } }
+  .animate-lava { animation: lava-molten 2s infinite ease-in-out; }
+
+  /* ⌨️ Matrix Code */
+  @keyframes matrix-code { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+  .animate-matrix { background: linear-gradient(180deg, transparent, #22c55e, transparent); background-size: 100% 50%; /* animation: matrix-code 1.5s infinite linear; */ }
+
+  /* 🕺 Retro Vibe */
+  @keyframes retro-pulse { 0%, 100% { border-color: #f472b6; box-shadow: 0 0 10px #f472b6; } 50% { border-color: #22d3ee; box-shadow: 0 0 20px #22d3ee; } }
+  .animate-retro { animation: retro-pulse 2s infinite ease-in-out; }
+
+  /* ✨ Gold Shimmer (L to R) */
+  @keyframes shimmer { 0% { transform: translateX(-200%); } 100% { transform: translateX(200%); } }
+  .animate-shimmer { /* animation: shimmer 2s infinite linear; */ }
+
+  /* 💎 Diamond Glint */
+  @keyframes diamond-glint { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
+  .animate-diamond { /* animation: diamond-glint 2s infinite ease-in-out; */ }
+
+  /* ✨ Platinum Shine */
+  @keyframes platinum-shine { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  .animate-platinum { background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent); background-size: 200% 100%; animation: platinum-shine 4s infinite linear; }
+
+  /* 🔮 Abyss Aura */
+  @keyframes aura-pulse { 0%, 100% { filter: blur(4px) brightness(0.8); } 50% { filter: blur(8px) brightness(1.2); } }
+  .animate-aura { animation: aura-pulse 3s infinite ease-in-out; }
+
+  /* 🍬 Candy Pop */
+  @keyframes candy-bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+  .animate-candy { animation: candy-bounce 0.8s infinite ease-in-out; }
+
+  /* 👑 Royal Luxury */
+  @keyframes royal-shimmer { 0%, 100% { background-color: #581c87; } 50% { background-color: #7e22ce; } }
+  .animate-royal { animation: royal-shimmer 3s infinite ease-in-out; }
+
+  /* 🍂 Autumn Warm */
+  @keyframes autumn-warm { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; filter: drop-shadow(0 0 10px #f59e0b); } }
+  .animate-autumn { animation: autumn-warm 3s infinite ease-in-out; }
+
+  /* 👾 Toxic Ooze */
+  @keyframes toxic-ooze { 0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } 50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; } 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } }
+  .animate-toxic { animation: toxic-ooze 4s infinite ease-in-out; }
+
+  /* 🌩️ Storm Flash */
+  @keyframes storm-flash { 0%, 90%, 100% { opacity: 0; } 92%, 95% { opacity: 0.8; background: white; } 93% { opacity: 0; } }
+  .animate-storm { animation: storm-flash 5s infinite; }
+
+  /* 👻 Ghost */
+  @keyframes ghost-pulse { 0%, 100% { opacity: 0.4; filter: blur(0px); } 50% { opacity: 0.1; filter: blur(2px); } }
+  .animate-ghost { animation: ghost-pulse 3s infinite ease-in-out; }
+
+  /* 🌈 Rainbow Rotating Border (Crazy) */
+  @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .animate-rainbow-border {
+    background: conic-gradient(from 0deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8f00ff, #ff0000);
+    /* animation: spin-slow 3s linear infinite; */
+  }
 }

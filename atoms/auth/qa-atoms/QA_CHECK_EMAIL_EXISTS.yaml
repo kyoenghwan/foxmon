@@ -1,0 +1,16 @@
+QA_CHECK_EMAIL_EXISTS:
+  id: "QA_CHECK_EMAIL_EXISTS"
+  type: "query"
+  description: "가입하려는 이메일이 이미 존재하는지 확인합니다."
+  
+  input:
+    email: "string"
+  
+  output:
+    exists: "boolean"
+    error: "string | null"
+  
+  details:
+    table: "users"
+    operation: "SELECT COUNT"
+    condition: "email == input.email"

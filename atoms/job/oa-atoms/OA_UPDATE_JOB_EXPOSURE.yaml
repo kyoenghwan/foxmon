@@ -1,0 +1,19 @@
+OA_UPDATE_JOB_EXPOSURE:
+  id: "OA_UPDATE_JOB_EXPOSURE"
+  type: "operation"
+  description: "특정 공고의 노출 횟수를 증가시키고 노출 시간을 갱신합니다."
+  
+  input:
+    adId: "string"
+  
+  output:
+    success: "boolean"
+    error: "string | null"
+  
+  details:
+    table: "jobs"
+    operation: "UPDATE"
+    fields:
+      exposure_count: "increment(1)"
+      last_exposed_at: "now()"
+    condition: "id == input.adId"

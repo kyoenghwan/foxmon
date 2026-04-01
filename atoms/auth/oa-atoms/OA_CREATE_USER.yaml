@@ -1,0 +1,27 @@
+OA_CREATE_USER:
+  id: "OA_CREATE_USER"
+  type: "operation"
+  description: "신규 사용자를 데이터베이스에 저장합니다."
+  
+  input:
+    email: "string"
+    password: "string (hashed)"
+    name: "string?"
+    role: "string" # EMPLOYER, GENERAL
+    is_age_verified: "boolean"
+  
+  output:
+    success: "boolean"
+    userId: "string | null"
+    error: "string | null"
+  
+  details:
+    table: "users"
+    operation: "INSERT"
+    fields:
+      email: "input.email"
+      password: "input.password"
+      name: "input.name"
+      role: "input.role"
+      is_age_verified: "input.is_age_verified"
+      created_at: "now()"

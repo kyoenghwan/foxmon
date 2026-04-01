@@ -1,0 +1,41 @@
+FA_REGISTER_FLOW:
+  id: "FA_REGISTER_FLOW"
+  type: "flow"
+  description: "사용자 회원가입 전체 프로세스 (중복 확인, 암호화, 저장)"
+  
+  input:
+    email: "string"
+    password: "string"
+    name: "string?"
+    role: "string"
+    is_age_verified: "boolean"
+  
+  output:
+    success: "boolean"
+    message: "string"
+  
+  steps:
+    - step: 1
+      name: "중복 이메일 확인"
+      atom: "QA_CHECK_EMAIL_EXISTS"
+      input_mapping:
+        email: "context.input.email"
+      output_save_as: "existsCheck"
+      
+    - step: 2
+      name: "비밀번호 해싱"
+      atom: "RA_HASH_PASSWORD" # 추가 필요
+      input_mapping:
+        password: "context.input.password"
+      output_save_as: "hashResult"
+      
+    - step: 3
+      name: "사용자 계정 생성"
+      atom: "OA_CREATE_USER"
+      input_mapping:
+        email: "context.input.email"
+        password: "context.hashResult.data"
+        name: "context.input.name"
+        role: "context.input.role"
+        is_age_verified: "context.input.is_age_verified"
+      output_save_as: "createResult"

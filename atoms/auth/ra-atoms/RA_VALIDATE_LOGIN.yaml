@@ -1,0 +1,16 @@
+RA_VALIDATE_LOGIN:
+  id: "RA_VALIDATE_LOGIN"
+  type: "rule"
+  description: "로그인 입력값(이메일, 비밀번호)의 유효성을 검사합니다."
+  
+  input:
+    email: "string"
+    password: "string"
+  
+  output:
+    isValid: "boolean"
+    error: "string | null"
+  
+  logic:
+    - "이메일 형식 검사 (RegExp)"
+    - "비밀번호 최소 길이 검사 (8자 이상)"

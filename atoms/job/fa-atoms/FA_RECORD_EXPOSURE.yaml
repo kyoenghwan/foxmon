@@ -1,0 +1,19 @@
+FA_RECORD_EXPOSURE:
+  id: "FA_RECORD_EXPOSURE"
+  type: "flow"
+  description: "광고 노출 데이터를 영구 저장소에 기록합니다."
+  
+  input:
+    adId: "string"
+  
+  output:
+    success: "boolean"
+    error: "string | null"
+  
+  steps:
+    - step: 1
+      name: "노출 횟수 갱신"
+      atom: "OA_UPDATE_JOB_EXPOSURE"
+      input_mapping:
+        adId: "context.input.adId"
+      output_save_as: "updateResult"

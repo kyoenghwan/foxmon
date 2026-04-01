@@ -1,0 +1,16 @@
+QA_GET_JOBS_BY_TIER:
+  id: "QA_GET_JOBS_BY_TIER"
+  type: "query"
+  description: "특정 등급(Tier)의 구인 공고 목록을 조회합니다."
+  
+  input:
+    tier: "string" # PREMIUM, SPECIAL, GENERAL
+  
+  output:
+    data: "AdItem[]"
+    error: "string | null"
+  
+  details:
+    table: "jobs"
+    conditions:
+      - "tier == input.tier"

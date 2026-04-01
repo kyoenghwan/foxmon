@@ -1,0 +1,12 @@
+DA_USER_AUTH:
+  id: "DA_USER_AUTH"
+  type: "data"
+  description: "사용자 인증 및 세션 상태 구조 정의"
+  
+  fields:
+    userId: "string"
+    email: "string"
+    role: "enum['EMPLOYER', 'GENERAL']"
+    is_age_verified: "boolean"
+    verified_at: "string (ISO Date) | null"
+    lastLogin: "string (ISO Date) | null"

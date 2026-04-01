@@ -1,0 +1,37 @@
+FA_LOGIN_FLOW:
+  id: "FA_LOGIN_FLOW"
+  type: "flow"
+  description: "로그인 유효성 검사 및 인증 결과 반환"
+  
+  input:
+    email: "string"
+    password: "string"
+  
+  output:
+    success: "boolean"
+    user: "DA_USER_AUTH | null"
+    message: "string | null"
+  
+  steps:
+    - step: 1
+      name: "입력값 검증"
+      atom: "RA_VALIDATE_LOGIN"
+      input_mapping:
+        email: "context.input.email"
+        password: "context.input.password"
+      output_save_as: "validationResult"
+      
+    - step: 2
+      name: "사용자 조회"
+      atom: "QA_GET_USER_AUTH"
+      input_mapping:
+        email: "context.input.email"
+      output_save_as: "authResult"
+      
+    - step: 3
+      name: "인증 로직 (bcrypt 검증 등)"
+      atom: "RA_VERIFY_PASSWORD" # 추가 필요
+      input_mapping:
+        password: "context.input.password"
+        hashedPassword: "context.authResult.data.password"
+      output_save_as: "verifyResult"

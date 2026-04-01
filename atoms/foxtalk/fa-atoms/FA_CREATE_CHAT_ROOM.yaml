@@ -1,0 +1,47 @@
+FA_CREATE_CHAT_ROOM:
+  id: "FA_CREATE_CHAT_ROOM"
+  type: "flow"
+  description: "여우토크 신규 채팅방 개설 플로우 (오픈방 및 비밀방)"
+  
+  input:
+    creatorId: "string"
+    title: "string"
+    roomType: "enum('OPEN', 'SECRET')"
+    password: "string?"
+    maxParticipants: "number"
+  
+  output:
+    success: "boolean"
+    roomId: "string"
+    roomCode: "string?"
+    message: "string"
+  
+  steps:
+    - step: 1
+      name: "유효성 및 파라미터 검증"
+      atom: "RA_VALIDATE_ROOM_CREATION"
+      input_mapping:
+        creatorId: "context.input.creatorId"
+        roomType: "context.input.roomType"
+        password: "context.input.password"
+      output_save_as: "validationResult"
+      
+    - step: 2
+      name: "비밀방일 경우 랜덤 코드 및 해싱 생성"
+      atom: "RA_GENERATE_ROOM_SECURITY"
+      input_mapping:
+        isSecret: "context.input.roomType === 'SECRET'"
+        rawPassword: "context.input.password"
+      output_save_as: "securityData"
+      
+    - step: 3
+      name: "Supabase DB에 Room 데이터 Insert"
+      atom: "OA_INSERT_CHAT_ROOM"
+      input_mapping:
+        title: "context.input.title"
+        type: "context.input.roomType"
+        roomCode: "context.securityData.data.roomCode"
+        hashedPassword: "context.securityData.data.hashedPassword"
+        maxParticipants: "context.input.maxParticipants"
+        createdBy: "context.input.creatorId"
+      output_save_as: "roomResult"

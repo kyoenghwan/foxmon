@@ -1,0 +1,29 @@
+FA_GET_ROTATED_ADS:
+  id: "FA_GET_ROTATED_ADS"
+  type: "flow"
+  description: "등급별 광고를 조회하고 정렬 규칙에 따라 반환합니다."
+  
+  input:
+    tier: "string"
+    count: "number"
+  
+  output:
+    success: "boolean"
+    data: "AdItem[]"
+    error: "string | null"
+  
+  steps:
+    - step: 1
+      name: "등급별 조회"
+      atom: "QA_GET_JOBS_BY_TIER"
+      input_mapping:
+        tier: "context.input.tier"
+      output_save_as: "queryResult"
+      
+    - step: 2
+      name: "정렬 및 필터링"
+      atom: "RA_SORT_ADS"
+      input_mapping:
+        ads: "context.queryResult.data"
+        count: "context.input.count"
+      output_save_as: "sortResult"

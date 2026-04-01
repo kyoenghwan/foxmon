@@ -1,0 +1,17 @@
+QA_GET_USER_AUTH:
+  id: "QA_GET_USER_AUTH"
+  type: "query"
+  description: "사용자 인증 정보를 조회합니다."
+  
+  input:
+    email: "string"
+  
+  output:
+    success: "boolean"
+    data: "UserAuthData | null"
+    error: "string | null"
+  
+  details:
+    table: "users"
+    fields: ["id", "email", "password", "is_age_verified"]
+    condition: "email == input.email"

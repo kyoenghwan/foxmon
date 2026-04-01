@@ -1,0 +1,18 @@
+DA_AD_ITEM:
+  id: "DA_AD_ITEM"
+  type: "data"
+  description: "구인 공고(AdItem) 데이터 구조 정의"
+  
+  fields:
+    id: "string"
+    company: "string"
+    title: "string"
+    location: "string"
+    pay: "string"
+    image: "string?"
+    color: "string?"
+    is_big: "boolean"
+    tier: "enum['PREMIUM', 'SPECIAL', 'GENERAL']"
+    weight: "number"
+    exposure_count: "number"
+    last_exposed_at: "string (ISO Date)"
