@@ -20,6 +20,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
   const [formData, setFormData] = useState({
     loginId: '',
     password: '',
+    autoLogin: false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +35,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
       const result = await signIn('credentials', {
         loginId: formData.loginId,
         password: formData.password,
+        autoLogin: formData.autoLogin ? 'true' : 'false',
         redirect: false,
       });
 
@@ -42,6 +44,13 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
         nvLog('FW', '로그인 실패', result.error);
       } else {
         nvLog('FW', '로그인 성공 -> 메인 이동 (Hard Refresh)');
+        if (!formData.autoLogin) {
+            // Set session cookie for PC Bang security. Max-age deleted on browser close.
+            document.cookie = "foxmon_transient=1; path=/;";
+        } else {
+            // Delete it just in case
+            document.cookie = "foxmon_transient=1; path=/; max-age=0";
+        }
         window.location.href = '/';
       }
     } catch (err) {
@@ -162,10 +171,25 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-500 text-[11px] font-bold mb-7">
+        <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-500 text-[11px] font-bold mb-5">
           ⚠️ {error}
         </div>
       )}
+
+      {/* Auto Login Checkbox */}
+      <div className="flex justify-end mb-6 w-full max-w-[280px] mx-auto">
+        <label className="flex items-center gap-2 cursor-pointer group">
+          <input 
+            type="checkbox" 
+            checked={formData.autoLogin}
+            onChange={(e) => setFormData(prev => ({...prev, autoLogin: e.target.checked}))}
+            className="w-4 h-4 rounded text-purple-600 border-gray-300 focus:ring-purple-500 shadow-sm"
+          />
+          <span className="text-[12px] font-bold text-gray-500 group-hover:text-purple-600 transition-colors">
+            자동 로그인 보존
+          </span>
+        </label>
+      </div>
 
       {/* Perfectly sized and centered login button with equal top/bottom spacing */}
       <div className="w-full flex justify-center mb-7">
