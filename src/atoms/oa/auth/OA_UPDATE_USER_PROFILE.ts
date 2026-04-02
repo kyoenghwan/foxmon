@@ -34,16 +34,22 @@ export async function OA_UPDATE_USER_PROFILE(input: UpdateUserProfileInput) {
     }
 
     // 서버 사이드 전용 어드민 클라이언트(supabaseAdmin)를 사용하여 RLS(Row Level Security) 차단 우회
+    // ⚠️ .single() 사용 금지: RLS가 UPDATE를 차단하면 0행 반환 → "Cannot coerce" 에러 발생
     const { data, error } = await supabaseAdmin
       .from('users')
       .update(updates)
       .eq('id', input.userId)
-      .select('id, nickname, phone_number')
-      .single();
+      .select('id, nickname, phone_number');
 
     if (error) {
       nvLog('AT', '❌ OA_UPDATE_USER_PROFILE 에러', error.message);
       return { success: false, data: null, error: error.message };
+    }
+
+    // RLS 차단 감지: 에러 없이 0행 반환 = 보안 정책이 UPDATE를 차단한 것
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+      nvLog('AT', '⚠️ OA_UPDATE_USER_PROFILE: RLS 차단 또는 사용자 미존재', { userId: input.userId });
+      return { success: false, data: null, error: '프로필 업데이트 권한이 없습니다. 관리자에게 문의하세요.' };
     }
 
     nvLog('AT', '✅ OA_UPDATE_USER_PROFILE 완료', data);
