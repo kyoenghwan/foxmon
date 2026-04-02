@@ -289,33 +289,85 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
             {activeTab === 'banner' && (
                 <div className="space-y-6">
 
-                    {/* ① 배너 미리보기 */}
+                    {/* ① 배너 미리보기 (실제 홈 화면 카드와 동일 구조) */}
                     <div className="bg-white rounded-2xl border border-gray-100 p-6">
                         <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2">
                             <Image className="w-4 h-4 text-primary" />
                             배너 미리보기
                         </h3>
-                        <div
-                            className="relative w-full max-w-sm h-28 rounded-xl overflow-hidden flex flex-col justify-end p-4 shadow-md"
-                            style={{ backgroundColor: form.tier === 'GENERAL' ? '#6B7280' : (form.color || '#FF6B35') }}
-                        >
-                            {form.image && (
-                                <img src={form.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
-                            )}
-                            {/* 로고 */}
-                            {form.logo_url && form.tier !== 'GENERAL' && (
-                                <img src={form.logo_url} alt="로고" className="absolute top-3 right-3 w-10 h-10 object-contain rounded-lg bg-white/20 p-0.5" />
-                            )}
-                            {/* 테마 뱃지 */}
-                            {form.tier === 'PREMIUM' && form.theme && (
-                                <span className="absolute top-2 left-2 text-[9px] font-black px-1.5 py-0.5 rounded-sm bg-black/40 text-white uppercase">
-                                    {PREMIUM_THEMES.find(t => t.key === form.theme)?.label || 'PREMIUM'}
-                                </span>
-                            )}
-                            <div className="relative z-10 text-white">
-                                <p className="font-black text-[16px] leading-tight truncate">{form.title || '공고 제목'}</p>
-                                <p className="text-[12px] font-bold opacity-90 mt-0.5">{form.company || '업체명'} · {form.location || '지역'}</p>
-                                <p className="text-[12px] font-black mt-1 text-yellow-200">{form.pay || '급여 정보'}</p>
+
+                        {/* 실제 카드 미리보기 */}
+                        <div className="w-full max-w-[220px]">
+                            <div className={`relative h-[130px] w-full p-[3px]`}>
+                                {/* 테마 배경 레이어 (프리미엄) */}
+                                {form.tier === 'PREMIUM' && form.theme && (
+                                    <div className="absolute inset-0 overflow-hidden rounded-xl z-0" style={{ backgroundColor: PREMIUM_THEMES.find(t => t.key === form.theme)?.color || '#EAB308', opacity: 0.4 }} />
+                                )}
+                                {/* 스페셜 배경 */}
+                                {form.tier === 'SPECIAL' && (
+                                    <div className="absolute inset-0 overflow-hidden rounded-xl z-0" style={{ backgroundColor: form.color || '#FF6B35', opacity: 0.4 }} />
+                                )}
+
+                                {/* 메인 카드 바디 */}
+                                <div className="relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm p-2.5 flex flex-col justify-between z-10 bg-white border border-gray-200">
+                                    {/* 콘텐츠: 로고 + 업체명 */}
+                                    <div className="flex gap-2 mb-1.5 relative z-10">
+                                        <div className="w-[80px] h-[40px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100">
+                                            {(form.logo_url || form.image) ? (
+                                                <div className="w-full h-full bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${form.logo_url || form.image})` }} />
+                                            ) : (
+                                                <div className="text-gray-300 font-black text-[10px] bg-gray-100 w-full h-full flex items-center justify-center">NO LOGO</div>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
+                                            <h3 className={`font-black text-[14px] truncate tracking-tight ${
+                                                form.tier === 'PREMIUM' ? 'text-yellow-600' :
+                                                form.tier === 'SPECIAL' ? 'text-purple-600' : 'text-gray-900'
+                                            }`}>
+                                                {form.company || '업체명'}
+                                            </h3>
+                                            <div className="flex items-center text-[11px] text-gray-500 truncate tracking-tight mt-0.5">
+                                                <span className="shrink-0 border px-1 py-0.5 leading-none mr-1.5 font-bold rounded-[2px] text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]">
+                                                    {(form.location || '지역').split(' ')[0]}
+                                                </span>
+                                                <span className="truncate font-medium">
+                                                    {(form.location || '전지역').split(' ').slice(1).join(' ') || '전지역'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 공고 제목 */}
+                                    <div className="mb-1.5 flex-1 flex flex-col justify-center relative z-10">
+                                        <p className="text-[12px] line-clamp-1 leading-[1.4] font-bold tracking-tight text-gray-800 bg-green-200/50 inline-block w-fit px-1 rounded-[2px]">
+                                            {form.title || '공고 제목을 입력하세요'}
+                                        </p>
+                                    </div>
+
+                                    {/* 급여 */}
+                                    <div className="flex items-end justify-between mt-auto relative z-10">
+                                        <div className="flex items-center text-[13px] font-bold text-gray-900 truncate tracking-tight gap-1.5">
+                                            <span className={`shrink-0 text-white text-[10px] px-1.5 py-0.5 rounded-sm shadow-sm ${
+                                                form.tier === 'PREMIUM' ? 'bg-yellow-400' :
+                                                form.tier === 'SPECIAL' ? 'bg-purple-500' : 'bg-[#805ad5]'
+                                            }`}>TC</span>
+                                            <span className="text-gray-800">{form.pay || '급여 정보'}</span>
+                                        </div>
+                                        <div className="shrink-0 flex items-center border px-1.5 py-0.5 rounded-sm text-[10px] font-bold bg-gray-50 text-gray-600 border-gray-300">
+                                            2회 180일
+                                        </div>
+                                    </div>
+
+                                    {/* 테마 뱃지 (프리미엄) */}
+                                    {form.tier === 'PREMIUM' && form.theme && (
+                                        <div className="absolute top-0 right-0 z-20">
+                                            <div className="flex items-center justify-center text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg min-w-[50px] shadow-sm"
+                                                style={{ backgroundColor: PREMIUM_THEMES.find(t => t.key === form.theme)?.color || '#EAB308' }}>
+                                                {PREMIUM_THEMES.find(t => t.key === form.theme)?.label || 'PREMIUM'}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
