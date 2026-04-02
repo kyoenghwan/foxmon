@@ -7,6 +7,11 @@ const withPWA = require("next-pwa")({
 });
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '5mb',
+    },
+  },
   webpack: (config, { dev }) => {
     if (dev) {
       // 개발 환경에서 파일시스템 캐시 비활성화

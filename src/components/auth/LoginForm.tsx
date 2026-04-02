@@ -68,7 +68,10 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
             document.cookie = "foxmon_auto_login=1; path=/; max-age=2592000"; // 30 days
             document.cookie = "foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         }
-        window.location.href = '/';
+        
+        // Fast client-side navigation instead of hard refresh
+        router.refresh();
+        router.push('/');
       }
     } catch (err) {
       setError('시스템 오류가 발생했습니다. 나중에 다시 시도해 주세요.');
