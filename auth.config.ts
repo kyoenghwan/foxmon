@@ -17,6 +17,10 @@ export const authConfig = {
 
             if (isOnAuth || isPublicStatic) {
                 if (isLoggedIn && isOnAuth) {
+                    // 무한 리디렉션 룹 방지: session_expired 파라미터가 있으면 로그인 페이지에 머물도록 허용
+                    if (nextUrl.searchParams.get('session_expired') === '1') {
+                        return true;
+                    }
                     return Response.redirect(new URL('/', nextUrl));
                 }
                 return true;

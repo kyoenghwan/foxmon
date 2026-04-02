@@ -132,6 +132,11 @@ export function RegisterForm() {
 
       if (result.success) {
         nvLog('FW', '회원가입 성공 -> 자동 로그인 시도');
+        
+        // 세션 쿠키 발급 (PC방 보안 로직과 충돌되어 500에러/리디렉션 루프 빠지는 것을 방지)
+        document.cookie = "foxmon_transient=1; path=/;";
+        document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
         // 가입 성공 즉시 로그인 처리
         await signIn('credentials', {
           loginId: formData.loginId,
