@@ -113,7 +113,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
         {error && <p className="text-red-500 text-[10px] font-bold mb-5 animate-bounce">⚠️ {error}</p>}
 
         {/* Checkboxes Group */}
-        <div className="w-full flex justify-end gap-3 mb-4 pr-1">
+        <div className="w-full flex justify-center gap-3 mb-4">
           <label className="flex items-center gap-1.5 cursor-pointer group">
             <input 
               type="checkbox" 
@@ -220,7 +220,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
       )}
 
       {/* Checkboxes Group */}
-      <div className="flex justify-end gap-3 mb-6 w-full max-w-[280px] mx-auto">
+      <div className="flex justify-center gap-3 mb-6 w-full max-w-[280px] mx-auto">
         <label className="flex items-center gap-1.5 cursor-pointer group">
           <input 
             type="checkbox" 
