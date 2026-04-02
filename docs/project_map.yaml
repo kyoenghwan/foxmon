@@ -211,10 +211,16 @@ pages:
 
   BIZ_ADS_PAGE:
     label: "사업자 광고 관리"
-    keywords: ["광고 관리", "내 광고", "biz ads"]
+    keywords: ["광고 관리", "내 광고", "biz ads", "광고 등급", "프리미엄", "스페셜", "테마", "자동연장", "리치 텍스트"]
     files: ["app/biz/ads/page.tsx", "app/biz/ads/new/page.tsx", "components/biz/AdEditorForm.tsx"]
     flows: ["FA_DEDUCT_POINT_FOR_AD"]
     db_tables: ["jobs", "biz_point_ledger"]
+    ui_features:
+      - "광고 등급 한줄 탭 (프리미엄/스페셜/일반)"
+      - "등급별 배너 설정 분기 (테마+효과+로고 / 색상+로고 / 기본)"
+      - "사이드/상단 배너 관리자 문의 안내"
+      - "자동 연장 5% 할인"
+      - "리치 텍스트 에디터 (contentEditable)"
 
   BIZ_POINTS_PAGE:
     label: "사업자 포인트 관리"
