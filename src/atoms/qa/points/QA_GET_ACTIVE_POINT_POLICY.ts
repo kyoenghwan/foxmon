@@ -12,7 +12,7 @@ interface ActivePointPolicy {
  * [QA] QA_GET_ACTIVE_POINT_POLICY
  * 결제 시점(NOW)에 유효한 전역 포인트 정책(보너스 %, 상한선, 수수료 등)을 조회합니다.
  */
-export const QA_GET_ACTIVE_POINT_POLICY = async (): Promise<ActivePointPolicy> => {
+export const QA_GET_ACTIVE_POINT_POLICY = async (): Promise<{ success: boolean; data: ActivePointPolicy | null; error: string | null }> => {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -27,10 +27,14 @@ export const QA_GET_ACTIVE_POINT_POLICY = async (): Promise<ActivePointPolicy> =
     nvLog('AT', `❌ QA_GET_ACTIVE_POINT_POLICY 에러`, error);
     // 💡 기본값 폴백 (DB 장애 시 최소 안정성 보장)
     return {
-      firstChargeBonusRatio: 0.5,
-      maxFirstBonus: 300000,
-      refundFeeRatio: 0.1,
-      refundDivisor: 1.5
+      success: false,
+      data: {
+        firstChargeBonusRatio: 0.5,
+        maxFirstBonus: 300000,
+        refundFeeRatio: 0.1,
+        refundDivisor: 1.5
+      },
+      error: error.message
     };
   }
 
@@ -49,5 +53,5 @@ export const QA_GET_ACTIVE_POINT_POLICY = async (): Promise<ActivePointPolicy> =
 
   nvLog('AT', `▶️ QA_GET_ACTIVE_POINT_POLICY 조회 완료`, result);
 
-  return result;
+  return { success: true, data: result, error: null };
 };

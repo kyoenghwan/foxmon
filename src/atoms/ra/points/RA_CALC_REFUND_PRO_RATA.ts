@@ -22,11 +22,13 @@ interface RefundItemDetail {
 
 interface RefundOutput {
   isValid: boolean;
-  totalOriginalCash: number;
-  totalRemainingCashValue: number;
-  refundFee: number;
-  finalRefundAmount: number;
-  details: RefundItemDetail[];
+  data?: {
+    totalOriginalCash: number;
+    totalRemainingCashValue: number;
+    refundFee: number;
+    finalRefundAmount: number;
+    details: RefundItemDetail[];
+  };
   error?: string;
 }
 
@@ -40,11 +42,6 @@ export const RA_CALC_REFUND_PRO_RATA = (input: RefundInput): RefundOutput => {
   if (!activeHistory || activeHistory.length === 0) {
     return {
       isValid: false,
-      totalOriginalCash: 0,
-      totalRemainingCashValue: 0,
-      refundFee: 0,
-      finalRefundAmount: 0,
-      details: [],
       error: '환불 가능한 충전 내역이 없습니다.'
     };
   }
@@ -93,10 +90,12 @@ export const RA_CALC_REFUND_PRO_RATA = (input: RefundInput): RefundOutput => {
 
   return {
     isValid: true,
-    totalOriginalCash,
-    totalRemainingCashValue,
-    refundFee,
-    finalRefundAmount,
-    details
+    data: {
+      totalOriginalCash,
+      totalRemainingCashValue,
+      refundFee,
+      finalRefundAmount,
+      details
+    }
   };
 };

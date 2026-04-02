@@ -10,7 +10,7 @@ export async function OA_TOGGLE_RESUME_PUBLIC(input: {
   resumeId: string; 
   userId: string; 
   is_public: boolean; 
-}) {
+}): Promise<{ success: boolean; data?: any; error?: string; rollbackData?: any }> {
   nvLog('AT', '▶️ OA_TOGGLE_RESUME_PUBLIC 시작', input);
 
   try {
@@ -30,7 +30,7 @@ export async function OA_TOGGLE_RESUME_PUBLIC(input: {
     }
 
     nvLog('AT', '✅ OA_TOGGLE_RESUME_PUBLIC 성공', { is_public: input.is_public });
-    return { success: true, data: data?.[0], error: null };
+    return { success: true, data: data?.[0], error: undefined, rollbackData: { ...input, is_public: !input.is_public } };
   } catch (error: any) {
     nvLog('AT', '❌ OA_TOGGLE_RESUME_PUBLIC 시스템 에러', error.message);
     return { success: false, error: error.message };

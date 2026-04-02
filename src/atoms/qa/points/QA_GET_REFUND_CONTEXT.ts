@@ -21,7 +21,7 @@ interface RefundContext {
  * [QA] QA_GET_REFUND_CONTEXT
  * 환불 가치 정산을 위해 사용자의 모든 유료 충전 이력 및 현재 환불 수수료 정책을 조회합니다.
  */
-export const QA_GET_REFUND_CONTEXT = async (userId: string): Promise<RefundContext | null> => {
+export const QA_GET_REFUND_CONTEXT = async (userId: string): Promise<{ success: boolean; data: RefundContext | null; error: string | null }> => {
   const supabase = await createClient();
 
   try {
@@ -64,9 +64,9 @@ export const QA_GET_REFUND_CONTEXT = async (userId: string): Promise<RefundConte
 
     nvLog('AT', `▶️ QA_GET_REFUND_CONTEXT 조회 완료`, { userId, historyCount: history?.length });
 
-    return result;
+    return { success: true, data: result, error: null };
   } catch (error: any) {
     nvLog('AT', `❌ QA_GET_REFUND_CONTEXT 에러`, error.message);
-    return null;
+    return { success: false, data: null, error: error.message };
   }
 };

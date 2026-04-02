@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { nvLog } from '@/lib/logger';
-import { OA_UPSERT_RESUME } from '@/src/atoms/oa/search/OA_UPSERT_RESUME';
+import { FA_MANAGE_RESUME_FLOW } from '@/src/atoms/fa/resume/FA_MANAGE_RESUME_FLOW';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,16 +37,22 @@ export function ResumeEditor({ userId, initialData, onSaveSuccess }: ResumeEdito
     setIsLoading(true);
 
     try {
-      const result = await OA_UPSERT_RESUME({
-        userId,
-        ...formData
-      });
+      const payload: any = {
+        title: formData.title,
+        experience: formData.experience,
+        introduction: formData.introduction,
+        region_province: formData.regionProvince,
+        region_city: formData.regionCity,
+        is_active: formData.isActive
+      };
+      
+      const result = await FA_MANAGE_RESUME_FLOW('SAVE', userId, payload);
 
       if (result.success) {
         alert('이력서가 성공적으로 저장되었습니다.');
         if (onSaveSuccess) onSaveSuccess();
       } else {
-        alert(result.error || '저장 중 오류가 발생했습니다.');
+        alert(result.message || '저장 중 오류가 발생했습니다.');
       }
     } catch (error) {
       alert('시스템 오류가 발생했습니다.');

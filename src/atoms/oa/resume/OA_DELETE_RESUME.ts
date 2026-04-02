@@ -6,7 +6,7 @@ import { nvLog } from '../../../../lib/logger';
  * Domain: Resume
  * Type: Operation Atom (CUD)
  */
-export async function OA_DELETE_RESUME(input: { resumeId: string; userId: string }) {
+export async function OA_DELETE_RESUME(input: { resumeId: string; userId: string }): Promise<{ success: boolean; data?: any; error?: string; rollbackData?: any }> {
   nvLog('AT', '▶️ OA_DELETE_RESUME 시작', input);
 
   try {
@@ -22,7 +22,7 @@ export async function OA_DELETE_RESUME(input: { resumeId: string; userId: string
     }
 
     nvLog('AT', '✅ OA_DELETE_RESUME 성공', { resumeId: input.resumeId });
-    return { success: true, error: null };
+    return { success: true, data: null, error: undefined, rollbackData: input };
   } catch (error: any) {
     nvLog('AT', '❌ OA_DELETE_RESUME 시스템 에러', error.message);
     return { success: false, error: error.message };

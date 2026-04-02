@@ -24,7 +24,7 @@ export interface ResumeData {
   updated_at?: string;
 }
 
-export async function OA_UPSERT_RESUME(input: ResumeData) {
+export async function OA_UPSERT_RESUME(input: ResumeData): Promise<{ success: boolean; data?: any; error?: string; rollbackData?: any }> {
   nvLog('AT', '▶️ OA_UPSERT_RESUME 시작', { userId: input.user_id, title: input.title });
 
   try {
@@ -53,16 +53,14 @@ export async function OA_UPSERT_RESUME(input: ResumeData) {
 
     if (error) {
        nvLog('AT', '⚠️ OA_UPSERT_RESUME 로컬 테스트 에러', error.message);
-       // Return mock success if DB doesn't exist yet for frontend testing
-       return { success: true, data: { ...payload, id: input.id || 'mock-resume-id' } };
+       return { success: false, error: error.message };
     }
 
     nvLog('AT', '✅ OA_UPSERT_RESUME 성공', data);
-    return { success: true, data: data?.[0] };
+    return { success: true, data: data?.[0], rollbackData: input.id ? { id: input.id } : null }; // rollback data for delete logic if it was new
 
   } catch (error: any) {
     nvLog('AT', '❌ OA_UPSERT_RESUME 실패', error.message);
-    // graceful fallback for frontend dev
-    return { success: true, data: { ...input, id: input.id || 'mock-resume-id' } }; 
+    return { success: false, error: error.message }; 
   }
 }

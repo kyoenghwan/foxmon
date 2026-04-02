@@ -17,8 +17,8 @@ export async function FA_MANAGE_RESUME_FLOW(
     const listResult = await QA_GET_USER_RESUMES(userId);
     return {
       success: listResult.success,
-      resumes: listResult.data,
-      message: listResult.success ? '이력서 목록 조회 완료' : '이력서 목록 조회 실패'
+      data: listResult.data,
+      message: listResult.success ? '이력서 목록 조회 완료' : listResult.error || '이력서 목록 조회 실패'
     };
   }
 
@@ -27,8 +27,8 @@ export async function FA_MANAGE_RESUME_FLOW(
     const userResult = await QA_GET_USER_PROFILE(userId);
     return {
       success: userResult.success,
-      defaults: userResult.data, 
-      message: '프로필 조회'
+      data: userResult.data, 
+      message: userResult.success ? '프로필 조회' : userResult.error || '프로필 조회 실패'
     };
   }
 
@@ -46,8 +46,8 @@ export async function FA_MANAGE_RESUME_FLOW(
 
     return {
       success: saveResult.success,
-      resumes: saveResult.success ? [saveResult.data] : [],
-      message: saveResult.success ? '이력서가 성공적으로 저장되었습니다.' : '저장에 실패했습니다.'
+      data: saveResult.success ? [saveResult.data] : [],
+      message: saveResult.success ? '이력서가 성공적으로 저장되었습니다.' : saveResult.error || '저장에 실패했습니다.'
     };
   }
 
@@ -58,7 +58,7 @@ export async function FA_MANAGE_RESUME_FLOW(
     });
     return {
       success: deleteResult.success,
-      message: deleteResult.success ? '이력서가 삭제되었습니다.' : '삭제에 실패했습니다.',
+      message: deleteResult.success ? '이력서가 삭제되었습니다.' : deleteResult.error || '삭제에 실패했습니다.',
     };
   }
 
@@ -72,7 +72,7 @@ export async function FA_MANAGE_RESUME_FLOW(
       success: toggleResult.success,
       message: toggleResult.success
         ? (resumeData.is_public ? '이력서가 공개되었습니다.' : '이력서가 비공개로 전환되었습니다.')
-        : '상태 변경에 실패했습니다.',
+        : toggleResult.error || '상태 변경에 실패했습니다.',
     };
   }
 

@@ -11,8 +11,11 @@ interface RechargeOperationInput {
 
 interface RechargeOperationOutput {
   success: boolean;
-  data?: any;
+  data?: {
+    rechargeId: string;
+  };
   error?: string;
+  rollbackData?: any;
 }
 
 /**
@@ -82,12 +85,14 @@ export const OA_EXECUTE_POINT_RECHARGE = async (input: RechargeOperationInput): 
 
     return {
       success: true,
-      data: { rechargeId: rechargeHistory.id }
+      data: { rechargeId: rechargeHistory.id },
+      rollbackData: { rechargeId: rechargeHistory.id, cashAmount, bonusAmount }
     };
   } catch (error: any) {
     nvLog('AT', `❌ OA_EXECUTE_POINT_RECHARGE 트랜잭션 에러`, error.message);
     return {
       success: false,
+      data: null,
       error: error.message
     };
   }

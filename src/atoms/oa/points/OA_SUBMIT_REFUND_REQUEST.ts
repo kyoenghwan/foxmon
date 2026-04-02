@@ -15,8 +15,11 @@ interface SubmitRefundInput {
 
 interface SubmitRefundOutput {
   success: boolean;
-  requestId?: string;
+  data?: {
+    requestId: string;
+  };
   error?: string;
+  rollbackData?: any;
 }
 
 /**
@@ -84,12 +87,14 @@ export const OA_SUBMIT_REFUND_REQUEST = async (input: SubmitRefundInput): Promis
 
     return {
       success: true,
-      requestId: request.id
+      data: { requestId: request.id },
+      rollbackData: { requestId: request.id, userId } // Simplified rollback data
     };
   } catch (error: any) {
     nvLog('AT', `❌ OA_SUBMIT_REFUND_REQUEST 에러`, error.message);
     return {
       success: false,
+      data: null,
       error: error.message
     };
   }

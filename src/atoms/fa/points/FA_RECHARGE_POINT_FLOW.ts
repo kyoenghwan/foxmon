@@ -27,25 +27,29 @@ export const FA_RECHARGE_POINT_FLOW = async (input: RechargeFlowInput): Promise<
     nvLog('AT', `▶️ FA_RECHARGE_POINT_FLOW 시작`, input);
 
     // 💡 1단계: 전역 포인트 정책 조회 (QA)
-    const policy = await QA_GET_ACTIVE_POINT_POLICY();
+    const policyResult = await QA_GET_ACTIVE_POINT_POLICY();
+    if (!policyResult.success || !policyResult.data) throw new Error(policyResult.error || '포인트 정책 조회 실패');
+    const policy = policyResult.data;
 
     // 💡 2단계: 사용자 결제 컨텍스트 조회 (QA)
-    const context = await QA_GET_USER_RECHARGE_CONTEXT(userId);
-    if (!context) {
-      throw new Error('사용자 정보를 조회할 수 없습니다.');
+    const contextResult = await QA_GET_USER_RECHARGE_CONTEXT(userId);
+    if (!contextResult.success || !contextResult.data) {
+      throw new Error(contextResult.error || '사용자 정보를 조회할 수 없습니다.');
     }
+    const context = contextResult.data;
 
     // 💡 3단계: 보너스 포인트 산출 (RA - Pure Logic)
-    const calculation = RA_CALC_RECHARGE_BONUS({
+    const calculationResult = RA_CALC_RECHARGE_BONUS({
       cashAmount,
       isFirstCharge: !context.hasFirstCharged,
       bonusRatio: context.currentTierRatio,
       maxFirstBonus: policy.maxFirstBonus
     });
 
-    if (!calculation.isValid) {
-      throw new Error(calculation.error || '보너스 계산 중 오류가 발생했습니다.');
+    if (!calculationResult.isValid || !calculationResult.data) {
+      throw new Error(calculationResult.error || '보너스 계산 중 오류가 발생했습니다.');
     }
+    const calculation = calculationResult.data;
 
     // 💡 4단계: DB 트랜잭션 실행 (OA)
     const result = await OA_EXECUTE_POINT_RECHARGE({
@@ -56,7 +60,7 @@ export const FA_RECHARGE_POINT_FLOW = async (input: RechargeFlowInput): Promise<
       bonusRatio: calculation.appliedType === 'FIRST' ? policy.firstChargeBonusRatio : context.currentTierRatio
     });
 
-    if (!result.success) {
+    if (!result.success || !result.data) {
       throw new Error(result.error || '포인트 충전 처리 중 오류가 발생했습니다.');
     }
 

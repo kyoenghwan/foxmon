@@ -17,9 +17,11 @@ interface DeductionPlan {
 }
 
 interface DeductionOutput {
-  canDeduct: boolean;
-  bonusDeduction: number;
-  paidDeductionList: DeductionPlan[];
+  isValid: boolean;
+  data?: {
+    bonusDeduction: number;
+    paidDeductionList: DeductionPlan[];
+  };
   error?: string;
 }
 
@@ -60,9 +62,7 @@ export const RA_CALC_DEDUCTION_FIFO = (input: DeductionInput): DeductionOutput =
   // 💡 3단계: 최종 검증 (잔액 부족 여부)
   if (remainingToDeduct > 0) {
     return {
-      canDeduct: false,
-      bonusDeduction: 0,
-      paidDeductionList: [],
+      isValid: false,
       error: '잔액이 부족하여 결제를 진행할 수 없습니다.'
     };
   }
@@ -74,8 +74,10 @@ export const RA_CALC_DEDUCTION_FIFO = (input: DeductionInput): DeductionOutput =
   });
 
   return {
-    canDeduct: true,
-    bonusDeduction,
-    paidDeductionList
+    isValid: true,
+    data: {
+      bonusDeduction,
+      paidDeductionList
+    }
   };
 };

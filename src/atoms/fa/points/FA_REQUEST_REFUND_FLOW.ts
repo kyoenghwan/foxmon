@@ -31,10 +31,11 @@ export const FA_REQUEST_REFUND_FLOW = async (input: RequestRefundFlowInput): Pro
     nvLog('AT', `▶️ FA_REQUEST_REFUND_FLOW 시작`, { userId });
 
     // 💡 1단계: 신청 시점 실시간 환불액 재검증 (QA + RA)
-    const simulation = await FA_GET_REFUND_SIMULATION(userId);
-    if (!simulation.success) {
-      throw new Error(simulation.reason || '환불 정보를 검증하는 중 오류가 발생했습니다.');
+    const simulationResult = await FA_GET_REFUND_SIMULATION(userId);
+    if (!simulationResult.success || !simulationResult.data) {
+      throw new Error(simulationResult.reason || '환불 정보를 검증하는 중 오류가 발생했습니다.');
     }
+    const simulation = simulationResult.data;
 
     if (simulation.totalRefundAmount <= 0) {
       throw new Error('환불 가능액이 0원 이하이므로 신청할 수 없습니다.');
@@ -47,19 +48,19 @@ export const FA_REQUEST_REFUND_FLOW = async (input: RequestRefundFlowInput): Pro
       bankInfo
     });
 
-    if (!result.success) {
+    if (!result.success || !result.data) {
       throw new Error(result.error || '환불 신청 처리 중 오류가 발생했습니다.');
     }
 
     // 💡 3단계: 사용자에게 처리 안내 메시지 반환
     const message = `총 ${simulation.totalRefundAmount.toLocaleString()}원의 환불 신청이 정상적으로 접수되었습니다. 신청하신 계좌(${bankInfo.bankName})로 영업일 기준 3일 이내에 입금될 예정입니다.`;
 
-    nvLog('AT', `✅ FA_REQUEST_REFUND_FLOW 성곡`, { userId, requestId: result.requestId });
+    nvLog('AT', `✅ FA_REQUEST_REFUND_FLOW 성곡`, { userId, requestId: result.data.requestId });
 
     return {
       success: true,
       data: {
-        requestId: result.requestId,
+        requestId: result.data.requestId,
         refundAmount: simulation.totalRefundAmount
       },
       message

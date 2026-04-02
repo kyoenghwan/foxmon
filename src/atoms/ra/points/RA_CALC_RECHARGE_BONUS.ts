@@ -9,8 +9,10 @@ interface RechargeBonusInput {
 
 interface RechargeBonusOutput {
   isValid: boolean;
-  bonusAmount: number;
-  appliedType: 'FIRST' | 'TIER';
+  data?: {
+    bonusAmount: number;
+    appliedType: 'FIRST' | 'TIER';
+  };
   error?: string;
 }
 
@@ -22,7 +24,7 @@ export const RA_CALC_RECHARGE_BONUS = (input: RechargeBonusInput): RechargeBonus
   const { cashAmount, isFirstCharge, bonusRatio, maxFirstBonus } = input;
 
   if (cashAmount <= 0) {
-    return { isValid: false, bonusAmount: 0, appliedType: 'TIER', error: '충전 금액이 0보다 커야 합니다.' };
+    return { isValid: false, error: '충전 금액이 0보다 커야 합니다.' };
   }
 
   let bonusAmount = 0;
@@ -44,7 +46,9 @@ export const RA_CALC_RECHARGE_BONUS = (input: RechargeBonusInput): RechargeBonus
 
   return {
     isValid: true,
-    bonusAmount,
-    appliedType
+    data: {
+      bonusAmount,
+      appliedType
+    }
   };
 };

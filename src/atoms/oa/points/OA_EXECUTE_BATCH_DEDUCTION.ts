@@ -16,7 +16,9 @@ interface BatchDeductionInput {
 
 interface BatchDeductionOutput {
   success: boolean;
+  data?: any;
   error?: string;
+  rollbackData?: any;
 }
 
 /**
@@ -87,9 +89,18 @@ export const OA_EXECUTE_BATCH_DEDUCTION = async (input: BatchDeductionInput): Pr
 
     nvLog('AT', `✅ OA_EXECUTE_BATCH_DEDUCTION 트랜잭션 성공`, { userId, totalDeduction });
 
-    return { success: true };
+    return { 
+      success: true, 
+      data: null,
+      rollbackData: {
+        userId,
+        bonusDeducted: bonusDeduction,
+        paidTotalDeducted: totalDeduction - bonusDeduction,
+        paidDeductionList
+      }
+    };
   } catch (error: any) {
     nvLog('AT', `❌ OA_EXECUTE_BATCH_DEDUCTION 트랜잭션 에러`, error.message);
-    return { success: false, error: error.message };
+    return { success: false, data: null, error: error.message };
   }
 };

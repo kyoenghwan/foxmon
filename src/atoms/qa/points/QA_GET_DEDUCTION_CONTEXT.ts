@@ -16,7 +16,7 @@ interface DeductionContext {
  * [QA] QA_GET_DEDUCTION_CONTEXT
  * 포인트 차감을 위해 사용자의 현재 잔액과 잔액이 남아있는 충전 이력(FIFO용)을 조회합니다.
  */
-export const QA_GET_DEDUCTION_CONTEXT = async (userId: string): Promise<DeductionContext | null> => {
+export const QA_GET_DEDUCTION_CONTEXT = async (userId: string): Promise<{ success: boolean; data: DeductionContext | null; error: string | null }> => {
   const supabase = await createClient();
 
   try {
@@ -56,9 +56,9 @@ export const QA_GET_DEDUCTION_CONTEXT = async (userId: string): Promise<Deductio
 
     nvLog('AT', `▶️ QA_GET_DEDUCTION_CONTEXT 조회 완료`, { userId, activeCount: recharges.length });
 
-    return result;
+    return { success: true, data: result, error: null };
   } catch (error: any) {
     nvLog('AT', `❌ QA_GET_DEDUCTION_CONTEXT 에러`, error.message);
-    return null;
+    return { success: false, data: null, error: error.message };
   }
 };

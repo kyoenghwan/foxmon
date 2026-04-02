@@ -12,7 +12,7 @@ interface UserRechargeContext {
  * [QA] QA_GET_USER_RECHARGE_CONTEXT
  * 결제 전 사용자의 첫 충전 여부 및 현재 등급에 따른 적립 혜택 정보를 조회합니다.
  */
-export const QA_GET_USER_RECHARGE_CONTEXT = async (userId: string): Promise<UserRechargeContext | null> => {
+export const QA_GET_USER_RECHARGE_CONTEXT = async (userId: string): Promise<{ success: boolean; data: UserRechargeContext | null; error: string | null }> => {
   const supabase = await createClient();
 
   // 💡 사용자의 기본 정보(첫 충전 여부, 등급) 조회
@@ -24,7 +24,7 @@ export const QA_GET_USER_RECHARGE_CONTEXT = async (userId: string): Promise<User
 
   if (userError || !user) {
     nvLog('AT', `❌ QA_GET_USER_RECHARGE_CONTEXT 사용자 조회 실패`, userError);
-    return null;
+    return { success: false, data: null, error: userError?.message || '사용자 조회 실패' };
   }
 
   // 💡 현재 등급에 대한 설정 정보(적립율) 조회
@@ -48,5 +48,5 @@ export const QA_GET_USER_RECHARGE_CONTEXT = async (userId: string): Promise<User
 
   nvLog('AT', `▶️ QA_GET_USER_RECHARGE_CONTEXT 조회 완료`, result);
 
-  return result;
+  return { success: true, data: result, error: null };
 };
