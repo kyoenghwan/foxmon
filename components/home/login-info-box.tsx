@@ -58,7 +58,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                     <div className="flex items-center gap-3">
                         <div className="h-12 w-12 rounded-full bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden">
                             {profileImageUrl ? (
-                                <img src={profileImageUrl} alt="프로필" className="w-full h-full object-cover" />
+                                <img src={profileImageUrl} alt="프로필" className="w-full h-full object-contain" />
                             ) : (
                                 <User className="h-6 w-6 stroke-[2.5]" />
                             )}
