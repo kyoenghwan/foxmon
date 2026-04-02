@@ -184,17 +184,54 @@ export function SettingsModal() {
 
     const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                alert('사진은 5MB 이하로 업로드해주세요.');
-                return;
-            }
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfileUrl(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        // 브라우저 뻗음 방지 (10MB 이상 컷)
+        if (file.size > 10 * 1024 * 1024) {
+            alert('사진은 10MB 이하로 업로드해주세요.');
+            return;
         }
+
+        const reader = new FileReader();
+        reader.onloadend = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                // 프로필 사진용으로 충분한 최대 300px 너비/높이
+                const MAX_WIDTH = 300;
+                const MAX_HEIGHT = 300;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    // 캔버스에 이미지 그리기 (리사이즈)
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // JPEG 포맷, 품질 80% (0.8) 로 압축하여 Base64로 변환
+                    // 이렇게 하면 5MB 짜리가 20~30KB 내외로 줄어듭니다.
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    setProfileUrl(compressedDataUrl);
+                }
+            };
+            img.src = event.target?.result as string;
+        };
+        reader.readAsDataURL(file);
     };
 
     return (
