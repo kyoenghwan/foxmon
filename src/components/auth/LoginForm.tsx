@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { nvLog } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,9 +21,17 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
     loginId: '',
     password: '',
     autoLogin: false,
+    rememberId: false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedId = localStorage.getItem('foxmon_saved_id');
+    if (savedId) {
+      setFormData(prev => ({ ...prev, loginId: savedId, rememberId: true }));
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +52,13 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
         nvLog('FW', '로그인 실패', result.error);
       } else {
         nvLog('FW', '로그인 성공 -> 메인 이동 (Hard Refresh)');
+
+        if (formData.rememberId) {
+            localStorage.setItem('foxmon_saved_id', formData.loginId);
+        } else {
+            localStorage.removeItem('foxmon_saved_id');
+        }
+
         if (!formData.autoLogin) {
             // Set session cookie for PC Bang security. Max-age deleted on browser close.
             document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -97,9 +112,20 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
 
         {error && <p className="text-red-500 text-[10px] font-bold mb-5 animate-bounce">⚠️ {error}</p>}
 
-        {/* Auto Login Checkbox */}
-        <div className="w-full flex justify-end mb-4 pr-1">
-          <label className="flex items-center gap-2 cursor-pointer group">
+        {/* Checkboxes Group */}
+        <div className="w-full flex justify-end gap-3 mb-4 pr-1">
+          <label className="flex items-center gap-1.5 cursor-pointer group">
+            <input 
+              type="checkbox" 
+              checked={formData.rememberId}
+              onChange={(e) => setFormData(prev => ({...prev, rememberId: e.target.checked}))}
+              className="w-3.5 h-3.5 rounded text-purple-600 border-gray-300 focus:ring-purple-500 shadow-sm"
+            />
+            <span className="text-[11px] font-bold text-gray-500 group-hover:text-purple-600 transition-colors">
+              아이디 저장
+            </span>
+          </label>
+          <label className="flex items-center gap-1.5 cursor-pointer group">
             <input 
               type="checkbox" 
               checked={formData.autoLogin}
@@ -193,9 +219,20 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
         </div>
       )}
 
-      {/* Auto Login Checkbox */}
-      <div className="flex justify-end mb-6 w-full max-w-[280px] mx-auto">
-        <label className="flex items-center gap-2 cursor-pointer group">
+      {/* Checkboxes Group */}
+      <div className="flex justify-end gap-3 mb-6 w-full max-w-[280px] mx-auto">
+        <label className="flex items-center gap-1.5 cursor-pointer group">
+          <input 
+            type="checkbox" 
+            checked={formData.rememberId}
+            onChange={(e) => setFormData(prev => ({...prev, rememberId: e.target.checked}))}
+            className="w-4 h-4 rounded text-purple-600 border-gray-300 focus:ring-purple-500 shadow-sm"
+          />
+          <span className="text-[12px] font-bold text-gray-500 group-hover:text-purple-600 transition-colors">
+            아이디 저장
+          </span>
+        </label>
+        <label className="flex items-center gap-1.5 cursor-pointer group">
           <input 
             type="checkbox" 
             checked={formData.autoLogin}
