@@ -18,10 +18,12 @@ export default auth((req) => {
     const isPublicStatic = nextUrl.pathname.includes('.') || nextUrl.pathname.startsWith('/_next');
 
     // 0. Transient Session (PC Bang Security) Check
-    if (session?.user && (session.user as any).autoLogin === false) {
+    if (session?.user) {
+        const isAutoLogin = cookies.has('foxmon_auto_login');
         const isTransientActive = cookies.has('foxmon_transient');
-        if (!isTransientActive) {
-            // 브라우저가 한 번 닫혀서 세션 쿠키가 날아간 상태 (PC방 등 강제 로그아웃)
+
+        // 만약 '자동 로그인' 상태가 아닌데, 브라우저 세션(transient)이 죽어있다면 -> 강제 로그아웃
+        if (!isAutoLogin && !isTransientActive) {
             const response = NextResponse.redirect(new URL('/login?session_expired=1', nextUrl));
             response.cookies.delete('authjs.session-token');
             response.cookies.delete('__Secure-authjs.session-token');

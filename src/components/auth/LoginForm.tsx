@@ -46,10 +46,12 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
         nvLog('FW', '로그인 성공 -> 메인 이동 (Hard Refresh)');
         if (!formData.autoLogin) {
             // Set session cookie for PC Bang security. Max-age deleted on browser close.
+            document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "foxmon_transient=1; path=/;";
         } else {
-            // Delete it just in case
-            document.cookie = "foxmon_transient=1; path=/; max-age=0";
+            // Keep persistent cookie
+            document.cookie = "foxmon_auto_login=1; path=/; max-age=2592000"; // 30 days
+            document.cookie = "foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         }
         window.location.href = '/';
       }

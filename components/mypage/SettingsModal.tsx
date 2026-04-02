@@ -23,6 +23,7 @@ export function SettingsModal() {
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [profileUrl, setProfileUrl] = useState('');
+    const [autoLogin, setAutoLogin] = useState(false);
     
     // SNS State
     const [snsKakao, setSnsKakao] = useState('');
@@ -47,10 +48,21 @@ export function SettingsModal() {
     useEffect(() => {
         if (isOpen) {
             fetchUserData();
+            setAutoLogin(document.cookie.includes('foxmon_auto_login=1'));
         } else {
             resetFields();
         }
     }, [isOpen]);
+
+    const handleAutoLoginToggle = (checked: boolean) => {
+        setAutoLogin(checked);
+        if (checked) {
+            document.cookie = "foxmon_auto_login=1; path=/; max-age=2592000";
+        } else {
+            document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "foxmon_transient=1; path=/;"; // Ensure session token exists
+        }
+    };
 
     const resetFields = () => {
         setNickname('');
@@ -416,7 +428,29 @@ export function SettingsModal() {
 
                         </div>
 
-                        {/* SECTION 4: 회원 탈퇴 링크 */}
+                        {/* SECTION 4: 환경 표시 및 부가설정 */}
+                        <div className="py-4 border-b border-gray-100 mb-6">
+                            <h3 className="font-extrabold text-[#333333] text-[14px] flex items-center gap-1.5 mb-2">
+                                <Settings className="w-4 h-4 text-gray-400 stroke-[2]" /> 환경 설정
+                            </h3>
+                            <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                <div className="flex flex-col">
+                                    <span className="text-[12px] font-bold text-gray-800">자동 로그인 유지</span>
+                                    <span className="text-[10px] text-gray-500 font-medium">브라우저를 닫아도 로그인이 유지됩니다. (PC방 등에서는 해제 권장)</span>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <input 
+                                    type="checkbox" 
+                                    className="sr-only peer" 
+                                    checked={autoLogin}
+                                    onChange={(e) => handleAutoLoginToggle(e.target.checked)}
+                                  />
+                                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* SECTION 5: 회원 탈퇴 링크 */}
                         <div className="pt-2 pb-6 text-center">
                             <button className="text-[11px] font-bold text-gray-400 hover:text-[#F26E22] transition-colors underline underline-offset-4 flex items-center justify-center gap-1 mx-auto">
                                 회원 탈퇴를 생각하시나요?
