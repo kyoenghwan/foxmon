@@ -150,7 +150,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 className="flex items-center gap-1 font-black text-red-500 hover:text-red-700 transition-colors"
                             >
                                 <LogOut className="w-3.5 h-3.5" />
-                                <span className="hidden xs:inline">로그아웃</span><span className="xs:hidden">OUT</span>
+                                <span className="hidden xs:inline">로그아웃</span><span className="xs:hidden">LOGOUT</span>
                             </button>
                         </div>
                     ) : (

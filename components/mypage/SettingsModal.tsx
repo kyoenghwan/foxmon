@@ -240,9 +240,11 @@ export function SettingsModal() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl text-[14px] font-black text-gray-700 hover:text-gray-900 transition-all shadow-sm active:scale-95">
-                    <Settings className="w-4 h-4 text-gray-500" />
-                    회원 설정
+                <button 
+                    className="flex items-center justify-center w-9 h-9 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl text-gray-500 hover:text-gray-900 transition-all shadow-sm active:scale-95"
+                    title="회원 설정"
+                >
+                    <Settings className="w-[18px] h-[18px]" />
                 </button>
             </DialogTrigger>
             

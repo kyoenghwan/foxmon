@@ -54,27 +54,26 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
             <div className="h-full bg-white rounded-2xl border p-5 flex flex-col shadow-sm">
                 
                 {/* Top Section: Avatar & Welcome text */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-full bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden">
-                            {profileImageUrl ? (
-                                <img src={profileImageUrl} alt="프로필" className="w-full h-full object-contain" />
-                            ) : (
-                                <User className="h-6 w-6 stroke-[2.5]" />
-                            )}
-                        </div>
-                        <div className="min-w-0 pr-2">
-                            <h3 className="font-black text-xl text-gray-900 leading-tight truncate">
-                                <span className="text-primary">{displayName}</span>님
-                            </h3>
-                            <p className="text-[12px] text-gray-500 font-bold tracking-tight mt-0.5">반갑습니다!</p>
-                        </div>
+                <div className="flex items-center gap-3">
+                    {/* 프로필 이미지 - 둥근 정사각형 */}
+                    <div className="h-14 w-14 rounded-xl bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden border border-orange-100">
+                        {profileImageUrl ? (
+                            <img src={profileImageUrl} alt="프로필" className="w-full h-full object-contain" />
+                        ) : (
+                            <User className="h-7 w-7 stroke-[2.5]" />
+                        )}
                     </div>
 
-                    {/* Top Right Quick Actions */}
-                    <div className="flex flex-col items-end shrink-0">
-                        <SettingsModal />
+                    {/* 닉네임 & 인사 - flex-1로 남은 공간 전부 사용 */}
+                    <div className="flex-1 min-w-0">
+                        <h3 className="font-black text-lg text-gray-900 leading-tight truncate">
+                            <span className="text-primary">{displayName}</span>님
+                        </h3>
+                        <p className="text-[11px] text-gray-500 font-bold tracking-tight mt-0.5">반갑습니다!</p>
                     </div>
+
+                    {/* 회원 설정 - 톱니 아이콘만 */}
+                    <SettingsModal />
                 </div>
 
                 {/* Bottom Icons - Flex spaced */}
