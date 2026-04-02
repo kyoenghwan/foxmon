@@ -128,6 +128,9 @@ export function SettingsModal() {
                 setMessage('설정이 저장되었습니다.');
                 setInitialNickname(nickname);
                 
+                // 메인 화면의 프로필 이미지도 즉시 갱신되도록 이벤트 발행
+                window.dispatchEvent(new Event('profile-updated'));
+                
                 // 3초 후 메시지 제거
                 setTimeout(() => setMessage(''), 3000);
             } else {

@@ -1,10 +1,12 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { User, FileText, Heart, Eye, Clock, LogIn, Mail, Settings, LogOut } from 'lucide-react';
 import { useLanguage } from '@/components/providers/language-provider';
 import { SettingsModal } from '@/components/mypage/SettingsModal';
+import { userSettingsAction } from '@/lib/actions';
 
 interface SessionUser {
     id?: string;
@@ -20,6 +22,29 @@ interface LoginInfoBoxProps {
 
 export function LoginInfoBox({ session }: LoginInfoBoxProps) {
     const { t } = useLanguage();
+    const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+
+    // 프로필 이미지를 DB에서 가져오기
+    const fetchProfile = () => {
+        if (session?.user?.id) {
+            userSettingsAction('GET_PROFILE').then(res => {
+                if (res.success && res.data?.profile_image_url) {
+                    setProfileImageUrl(res.data.profile_image_url);
+                }
+            }).catch(() => {});
+        }
+    };
+
+    useEffect(() => {
+        fetchProfile();
+    }, [session?.user?.id]);
+
+    // 설정 모달에서 저장 시 즉시 프로필 이미지 갱신
+    useEffect(() => {
+        const handleProfileUpdate = () => fetchProfile();
+        window.addEventListener('profile-updated', handleProfileUpdate);
+        return () => window.removeEventListener('profile-updated', handleProfileUpdate);
+    }, [session?.user?.id]);
 
         if (session && session.user) {
         // Logged In State
@@ -31,8 +56,12 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                 {/* Top Section: Avatar & Welcome text */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-full bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0">
-                            <User className="h-6 w-6 stroke-[2.5]" />
+                        <div className="h-12 w-12 rounded-full bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden">
+                            {profileImageUrl ? (
+                                <img src={profileImageUrl} alt="프로필" className="w-full h-full object-cover" />
+                            ) : (
+                                <User className="h-6 w-6 stroke-[2.5]" />
+                            )}
                         </div>
                         <div className="min-w-0 pr-2">
                             <h3 className="font-black text-xl text-gray-900 leading-tight truncate">
