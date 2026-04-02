@@ -53,7 +53,7 @@ export async function FA_USER_SETTINGS_FLOW(input: UserSettingsFlowInput) {
                 // 2. 닉네임 변경 시 중복 검사
                 if (input.profileData.nickname && input.profileData.nickname !== input.profileData.currentNickname) {
                     const existsCheck = await QA_CHECK_ID_NICKNAME_EXISTS({ nickname: input.profileData.nickname });
-                    if (existsCheck.nicknameExists) {
+                    if (existsCheck.data?.nicknameExists) {
                         return { success: false, message: '이미 사용 중인 닉네임입니다.' };
                     }
                 }

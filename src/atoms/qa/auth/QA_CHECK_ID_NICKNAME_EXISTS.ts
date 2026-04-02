@@ -5,9 +5,9 @@ import { nvLog } from '../../../../lib/logger';
  * QA_CHECK_ID_NICKNAME_EXISTS: 로그인 아이디 또는 닉네임의 중복 여부를 확인합니다.
  */
 export async function QA_CHECK_ID_NICKNAME_EXISTS(input: { loginId?: string; nickname?: string }): Promise<{ 
-  idExists: boolean; 
-  nicknameExists: boolean; 
-  error: string | null 
+  success: boolean;
+  data: { idExists: boolean; nicknameExists: boolean } | null; 
+  error: string | null;
 }> {
   nvLog('AT', '▶️ QA_CHECK_ID_NICKNAME_EXISTS 시작', input);
   
@@ -22,7 +22,10 @@ export async function QA_CHECK_ID_NICKNAME_EXISTS(input: { loginId?: string; nic
         .eq('login_id', input.loginId)
         .maybeSingle();
       
-      if (idError) throw idError;
+      if (idError) {
+         nvLog('AT', '❌ QA_CHECK_ID_NICKNAME_EXISTS (ID check) 에러', idError.message);
+         return { success: false, data: null, error: idError.message };
+      }
       idExists = !!idData;
     }
 
@@ -33,13 +36,16 @@ export async function QA_CHECK_ID_NICKNAME_EXISTS(input: { loginId?: string; nic
         .eq('nickname', input.nickname)
         .maybeSingle();
 
-      if (nickError) throw nickError;
+      if (nickError) {
+         nvLog('AT', '❌ QA_CHECK_ID_NICKNAME_EXISTS (Nickname check) 에러', nickError.message);
+         return { success: false, data: null, error: nickError.message };
+      }
       nicknameExists = !!nickData;
     }
 
-    return { idExists, nicknameExists, error: null };
+    return { success: true, data: { idExists, nicknameExists }, error: null };
   } catch (err: any) {
-    nvLog('AT', '❌ QA_CHECK_ID_NICKNAME_EXISTS 에러', err.message);
-    return { idExists: false, nicknameExists: false, error: err.message };
+    nvLog('AT', '❌ QA_CHECK_ID_NICKNAME_EXISTS 시스템 에러', err.message);
+    return { success: false, data: null, error: err.message };
   }
 }

@@ -22,13 +22,13 @@ export async function OA_RESET_USER_PASSWORD({ userId, newPassword }: ResetPassw
 
     if (error) {
       nvLog('AT', '❌ OA_RESET_USER_PASSWORD DB 에러', error);
-      return { success: false, message: '비밀번호 변경 중 오류가 발생했습니다.' };
+      return { success: false, data: null, error: '비밀번호 변경 중 오류가 발생했습니다.' };
     }
 
     nvLog('AT', '✅ OA_RESET_USER_PASSWORD 성공');
     return { success: true };
-  } catch (err) {
+  } catch (err: any) {
     nvLog('AT', '❌ OA_RESET_USER_PASSWORD 시스템 에러', err);
-    return { success: false, message: '시스템 오류로 비밀번호 변경에 실패했습니다.' };
+    return { success: false, data: null, error: '시스템 오류로 비밀번호 변경에 실패했습니다: ' + err.message };
   }
 }

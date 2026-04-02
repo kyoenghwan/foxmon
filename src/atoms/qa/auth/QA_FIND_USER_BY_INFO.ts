@@ -19,7 +19,7 @@ export async function QA_FIND_USER_BY_INFO({ name, phoneNumber }: FindUserByInfo
 
     if (error || !data) {
       nvLog('AT', '❌ QA_FIND_USER_BY_INFO: 일치하는 사용자 없음', error);
-      return { success: false, message: '일치하는 사용자 정보가 없습니다.' };
+      return { success: false, data: null, error: '일치하는 사용자 정보가 없습니다.' };
     }
 
     // Mask Login ID for security (e.g., testuser -> te******)
@@ -37,8 +37,8 @@ export async function QA_FIND_USER_BY_INFO({ name, phoneNumber }: FindUserByInfo
         maskedId: maskedId
       }
     };
-  } catch (err) {
+  } catch (err: any) {
     nvLog('AT', '❌ QA_FIND_USER_BY_INFO 시스템 에러', err);
-    return { success: false, message: '사용자 조회 중 오류가 발생했습니다.' };
+    return { success: false, data: null, error: '사용자 조회 중 오류가 발생했습니다: ' + err.message };
   }
 }

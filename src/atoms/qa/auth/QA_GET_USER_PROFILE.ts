@@ -35,12 +35,12 @@ export async function QA_GET_USER_PROFILE(userId: string) {
     if (error) {
        nvLog('AT', '❌ QA_GET_USER_PROFILE 에러', error.message);
        // Return mock if table is missing during dev
-       return { success: true, data: { gender: 'M', phone_number: '010-0000-0000', nickname: '사용자', email: '', role: 'GENERAL', business_name: null, business_number: null, profile_image_url: null, sns_kakao: null, sns_instagram: null, sns_telegram: null, sns_x: null } };
+       return { success: false, data: { gender: 'M', phone_number: '010-0000-0000', nickname: '사용자', email: '', role: 'GENERAL', business_name: null, business_number: null, profile_image_url: null, sns_kakao: null, sns_instagram: null, sns_telegram: null, sns_x: null }, error: error.message };
     }
 
-    return { success: true, data };
-  } catch (error: any) {
-    nvLog('AT', '❌ QA_GET_USER_PROFILE 실패', error.message);
-    return { success: true, data: { gender: 'M', phone_number: '010-0000-0000', nickname: '사용자', email: '', role: 'GENERAL', business_name: null, business_number: null, profile_image_url: null, sns_kakao: null, sns_instagram: null, sns_telegram: null, sns_x: null } }; 
+    return { success: true, data, error: null };
+  } catch (err: any) {
+    nvLog('AT', '❌ QA_GET_USER_PROFILE 실패', err.message);
+    return { success: false, data: null, error: err.message }; 
   }
 }

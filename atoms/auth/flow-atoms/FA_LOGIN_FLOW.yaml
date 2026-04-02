@@ -1,0 +1,40 @@
+FA_LOGIN_FLOW:
+  id: "FA_LOGIN_FLOW"
+  type: "flow"
+  description: "로그인 시도 시 입력값 검증, 회원 조회, 비밀번호 검증을 수행하는 전체 플로우"
+  
+  input:
+    loginId: "string"
+    password: "string"
+    authContext: "any?" # 로그인 전이므로 null 가능
+  
+  output:
+    success: "boolean"
+    data: "any?"
+    message: "string"
+  
+  steps:
+    - step: 1
+      name: "입력값 검증"
+      atom: "RA_VALIDATE_LOGIN"
+      input_mapping:
+        loginId: "context.input.loginId"
+        password: "context.input.password"
+      output_save_as: "validationResult"
+      
+    - step: 2
+      name: "사용자 정보 조회"
+      atom: "QA_GET_USER_AUTH"
+      input_mapping:
+        loginId: "context.input.loginId"
+      output_save_as: "authResult"
+      description: "존재하지 않는 회원일 경우 여기서 실패 처리"
+      
+    - step: 3
+      name: "비밀번호 검증"
+      atom: "RA_VERIFY_PASSWORD"
+      input_mapping:
+        password: "context.input.password"
+        hashedPassword: "context.authResult.data.password"
+      output_save_as: "passwordResult"
+      description: "비밀번호 불일치 시 실패 처리"

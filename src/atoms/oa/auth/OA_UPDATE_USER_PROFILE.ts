@@ -30,7 +30,7 @@ export async function OA_UPDATE_USER_PROFILE(input: UpdateUserProfileInput) {
 
     // 업데이트할 내용이 없는 경우
     if (Object.keys(updates).length === 0) { 
-       return { success: true, message: '변경할 정보가 없습니다.', error: null };
+       return { success: true, data: null, error: null };
     }
 
     const { data, error } = await supabase
@@ -42,13 +42,13 @@ export async function OA_UPDATE_USER_PROFILE(input: UpdateUserProfileInput) {
 
     if (error) {
       nvLog('AT', '❌ OA_UPDATE_USER_PROFILE 에러', error.message);
-      return { success: false, error: error.message };
+      return { success: false, data: null, error: error.message };
     }
 
     nvLog('AT', '✅ OA_UPDATE_USER_PROFILE 완료', data);
-    return { success: true, user: data, error: null };
+    return { success: true, data, error: null };
   } catch (err: any) {
     nvLog('AT', '❌ OA_UPDATE_USER_PROFILE 시스템 에러', err.message);
-    return { success: false, error: err.message };
+    return { success: false, data: null, error: err.message };
   }
 }

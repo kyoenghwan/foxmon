@@ -7,13 +7,12 @@ import { nvLog } from '../../../../lib/logger';
  * Type: Rule Atom (Pure Logic wrapped around library)
  */
 export const RA_VERIFY_PASSWORD = async (input: { password?: string; hashedPassword?: string }) => {
-  if (!input.password || !input.hashedPassword) return { isMatch: false };
+  if (!input.password || !input.hashedPassword) return { isValid: false, error: 'Missing inputs' };
   
   try {
-    const isMatch = await bcrypt.compare(input.password, input.hashedPassword);
-    return { isMatch };
-  } catch (error) {
-    nvLog('AT', '⚠️ RA_VERIFY_PASSWORD 에러', error);
-    return { isMatch: false };
+    const isValid = await bcrypt.compare(input.password, input.hashedPassword);
+    return { isValid, error: isValid ? null : '비밀번호 불일치' };
+  } catch (error: any) {
+    return { isValid: false, error: error.message };
   }
 };

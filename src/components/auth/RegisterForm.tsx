@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { nvLog } from '@/lib/logger';
 import { FA_REGISTER_FLOW } from '@/src/atoms/fa/auth/FA_REGISTER_FLOW';
-import { QA_CHECK_ID_NICKNAME_EXISTS } from '@/src/atoms/qa/auth/QA_CHECK_ID_NICKNAME_EXISTS';
+import { FA_CHECK_DUPLICATE_FLOW } from '@/src/atoms/fa/auth/FA_CHECK_DUPLICATE_FLOW';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,23 +53,27 @@ export function RegisterForm() {
 
   const checkId = async () => {
     if (!formData.loginId) return alert('아이디를 입력해주세요.');
-    const result = await QA_CHECK_ID_NICKNAME_EXISTS({ loginId: formData.loginId });
-    if (result.idExists) {
+    const result = await FA_CHECK_DUPLICATE_FLOW({ loginId: formData.loginId });
+    if (!result.success && result.duplicateType === 'ID') {
       alert('이미 사용 중인 아이디입니다.');
-    } else {
+    } else if (result.success) {
       alert('사용 가능한 아이디입니다.');
       setDuplicateChecked(prev => ({ ...prev, id: true }));
+    } else {
+      alert('오류가 발생했습니다.');
     }
   };
 
   const checkNickname = async () => {
     if (!formData.nickname) return alert('닉네임을 입력해주세요.');
-    const result = await QA_CHECK_ID_NICKNAME_EXISTS({ nickname: formData.nickname });
-    if (result.nicknameExists) {
+    const result = await FA_CHECK_DUPLICATE_FLOW({ nickname: formData.nickname });
+    if (!result.success && result.duplicateType === 'NICKNAME') {
       alert('이미 사용 중인 닉네임입니다.');
-    } else {
+    } else if (result.success) {
       alert('사용 가능한 닉네임입니다.');
       setDuplicateChecked(prev => ({ ...prev, nickname: true }));
+    } else {
+      alert('오류가 발생했습니다.');
     }
   };
 

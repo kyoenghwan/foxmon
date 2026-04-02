@@ -40,6 +40,10 @@ export async function QA_GET_USER_AUTH(input: { loginId: string }): Promise<{
       .single();
 
     if (error) {
+       if (error.code === 'PGRST116') {
+         nvLog('AT', '👤 QA_GET_USER_AUTH: User not found');
+         return { success: true, data: null, error: null };
+       }
        nvLog('AT', '❌ QA_GET_USER_AUTH 에러', error);
        return { success: false, data: null, error: error.message };
     }

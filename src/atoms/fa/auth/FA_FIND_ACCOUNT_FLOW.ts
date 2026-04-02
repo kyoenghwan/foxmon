@@ -50,7 +50,7 @@ export async function FA_FIND_ACCOUNT_FLOW({ mode, name, phoneNumber, loginId, n
       });
 
       if (!resetResult.success) {
-        return { success: false, message: resetResult.message };
+        return { success: false, message: resetResult.error };
       }
 
       nvLog('AT', '✅ FA_FIND_ACCOUNT_FLOW 완료 (비밀번호 재설정)');

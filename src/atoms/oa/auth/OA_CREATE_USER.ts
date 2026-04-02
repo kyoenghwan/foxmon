@@ -24,7 +24,7 @@ interface CreateUserParams {
 /**
  * OA_CREATE_USER: 신규 사용자를 데이터베이스에 저장합니다.
  */
-export async function OA_CREATE_USER(input: CreateUserParams): Promise<{ success: boolean; userId: string | null; error: string | null }> {
+export async function OA_CREATE_USER(input: CreateUserParams): Promise<{ success: boolean; data: { userId: string } | null; error: string | null }> {
   nvLog('AT', '▶️ OA_CREATE_USER 시작', { loginId: input.login_id, role: input.role });
   
   try {
@@ -69,9 +69,9 @@ export async function OA_CREATE_USER(input: CreateUserParams): Promise<{ success
 
     if (error) throw error;
     
-    return { success: true, userId: data.id, error: null };
+    return { success: true, data: { userId: data.id }, error: null };
   } catch (err: any) {
     nvLog('AT', '❌ OA_CREATE_USER 에러', err.message);
-    return { success: false, userId: null, error: err.message };
+    return { success: false, data: null, error: err.message };
   }
 }

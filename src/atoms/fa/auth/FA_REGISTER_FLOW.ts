@@ -36,10 +36,13 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
       nickname: input.nickname
     });
 
-    if (duplicateCheck.idExists) {
+    if (duplicateCheck.error) {
+      return { success: false, message: '중복 검사 중 시스템 오류가 발생했습니다.' };
+    }
+    if (duplicateCheck.data?.idExists) {
       return { success: false, message: '이미 사용 중인 아이디입니다.' };
     }
-    if (duplicateCheck.nicknameExists) {
+    if (duplicateCheck.data?.nicknameExists) {
       return { success: false, message: '이미 사용 중인 닉네임입니다.' };
     }
 
