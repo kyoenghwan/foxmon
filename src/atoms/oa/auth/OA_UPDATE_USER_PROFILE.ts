@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '../../../../lib/logger';
 
 export interface UpdateUserProfileInput {
@@ -33,7 +33,8 @@ export async function OA_UPDATE_USER_PROFILE(input: UpdateUserProfileInput) {
        return { success: true, data: null, error: null };
     }
 
-    const { data, error } = await supabase
+    // 서버 사이드 전용 어드민 클라이언트(supabaseAdmin)를 사용하여 RLS(Row Level Security) 차단 우회
+    const { data, error } = await supabaseAdmin
       .from('users')
       .update(updates)
       .eq('id', input.userId)
