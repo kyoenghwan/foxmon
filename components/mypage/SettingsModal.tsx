@@ -435,7 +435,7 @@ export function SettingsModal() {
                             </h3>
                             <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                                 <div className="flex flex-col">
-                                    <span className="text-[12px] font-bold text-gray-800">자동 로그인 유지</span>
+                                    <span className="text-[12px] font-bold text-gray-800">자동 로그인</span>
                                     <span className="text-[10px] text-gray-500 font-medium">브라우저를 닫아도 로그인이 유지됩니다. (PC방 등에서는 해제 권장)</span>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">

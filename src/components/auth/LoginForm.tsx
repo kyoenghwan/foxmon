@@ -133,7 +133,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
               className="w-3.5 h-3.5 rounded text-purple-600 border-gray-300 focus:ring-purple-500 shadow-sm"
             />
             <span className="text-[11px] font-bold text-gray-500 group-hover:text-purple-600 transition-colors">
-              자동 로그인 보존
+              자동 로그인
             </span>
           </label>
         </div>
@@ -240,7 +240,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
             className="w-4 h-4 rounded text-purple-600 border-gray-300 focus:ring-purple-500 shadow-sm"
           />
           <span className="text-[12px] font-bold text-gray-500 group-hover:text-purple-600 transition-colors">
-            자동 로그인 보존
+            자동 로그인
           </span>
         </label>
       </div>
