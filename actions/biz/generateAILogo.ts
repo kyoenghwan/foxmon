@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { auth } from "@/auth";
 import OpenAI from "openai";
 
 export async function generateAILogo(companyName: string) {
@@ -8,14 +9,14 @@ export async function generateAILogo(companyName: string) {
         return { success: false, error: "업체명을 입력해주세요." };
     }
 
-    const supabase = await createClient();
-    
     // 1. 유저 인증
-    const { data: userData, error: authError } = await supabase.auth.getUser();
-    if (authError || !userData?.user) {
+    const session = await auth();
+    if (!session?.user?.id) {
         return { success: false, error: "로그인이 필요합니다." };
     }
-    const userId = userData.user.id;
+    const userId = session.user.id;
+
+    const supabase = await createClient();
 
     // 2. 유저 정보 (무료 횟수 및 포인트) 조회
     const { data: userRecord, error: userError } = await supabase

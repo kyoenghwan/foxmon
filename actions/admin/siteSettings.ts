@@ -1,16 +1,17 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { auth } from "@/auth";
 
 export async function getSiteSettings() {
-    const supabase = await createClient();
+    const session = await auth();
     
-    // 이 작업은 안전을 위해 Role 체크 등을 수행할 수 있습니다.
-    // 하지만 본 예제에서는 RLS가 DB 레벨에서 보호하고 있다고 가정합니다.
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
+    // 안전을 위해 Role 체크 수행
+    if (!session?.user || !['ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role)) {
         return { success: false, error: 'Unauthorized' };
     }
+
+    const supabase = await createClient();
 
     const { data, error } = await supabase
         .from('site_settings')
@@ -31,12 +32,13 @@ export async function getSiteSettings() {
 }
 
 export async function updateSiteSettings(payload: Record<string, string>) {
-    const supabase = await createClient();
+    const session = await auth();
     
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
+    if (!session?.user || !['ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role)) {
         return { success: false, error: 'Unauthorized' };
     }
+
+    const supabase = await createClient();
 
     // 각 키에 대해 UPSERT 수행
     const entries = Object.entries(payload);
