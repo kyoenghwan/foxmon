@@ -290,146 +290,39 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
             {activeTab === 'banner' && (
                 <div className="space-y-6">
 
-                    {/* ① 배너 미리보기 (실제 홈 화면 카드와 동일 구조) */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                        <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2">
-                            <Image className="w-4 h-4 text-primary" />
-                            배너 미리보기
-                        </h3>
-
-                        {/* 실제 카드 미리보기 */}
-                        {(() => {
-                            const isPremium = form.tier === 'PREMIUM';
-                            const isSpecial = form.tier === 'SPECIAL';
-                            const isGeneral = form.tier === 'GENERAL';
-                            
-                            const themeColor = isSpecial ? (form.color || '#FF6B35') : '#6B7280';
-
-                            return (
-                                <div className="w-full max-w-[220px] pointer-events-none">
-                                    {isPremium ? (
-                                        <PremiumJobCard
-                                            id="preview"
-                                            company={form.company || '업체명'}
-                                            title={form.title || '공고 제목을 입력하세요'}
-                                            location={form.location || '전지역'}
-                                            pay={form.pay || '급여 정보'}
-                                            image={form.logo_url || form.image}
-                                            impactType={(form.theme as any) || 'gold'}
-                                        />
-                                    ) : (
-                                        <div className="relative h-[130px] w-full p-[3px]">
-                                            {/* 스페셜 배경 글로우 */}
-                                            {isSpecial && (
-                                                <div className="absolute inset-0 overflow-hidden rounded-xl z-0"
-                                                    style={{ backgroundColor: themeColor, opacity: 0.5 }} />
-                                            )}
-
-                                            {/* 메인 카드 바디 */}
-                                            <div className="relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm p-2.5 flex flex-col justify-between z-10 bg-white"
-                                                style={{ borderWidth: 2, borderColor: isSpecial ? themeColor + '80' : '#e5e7eb' }}>
-
-                                                {/* 카드 내부 은은한 그라디언트 (스페셜) */}
-                                                {isSpecial && (
-                                                    <div className="absolute inset-0 pointer-events-none z-0"
-                                                        style={{ background: `linear-gradient(135deg, ${themeColor}08 0%, transparent 60%)` }} />
-                                                )}
-
-                                                {/* 콘텐츠: 로고 + 업체명 */}
-                                                <div className="flex gap-2 mb-1.5 relative z-10">
-                                                    <div className="w-[80px] h-[40px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm"
-                                                        style={{ borderWidth: 1, borderColor: isSpecial ? themeColor + '30' : '#f3f4f6' }}>
-                                                        {(form.logo_url || form.image) && !isGeneral ? (
-                                                            <div className="w-full h-full bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${form.logo_url || form.image})` }} />
-                                                        ) : (
-                                                            <div className="text-gray-300 font-black text-[10px] bg-gray-100 w-full h-full flex items-center justify-center">NO LOGO</div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
-                                                        <h3 className="font-black text-[14px] truncate tracking-tight"
-                                                            style={{ color: isSpecial ? themeColor : '#111827' }}>
-                                                            {form.company || '업체명'}
-                                                        </h3>
-                                                        <div className="flex items-center text-[11px] text-gray-500 truncate tracking-tight mt-0.5">
-                                                            <span className="shrink-0 px-1 py-0.5 leading-none mr-1.5 font-bold rounded-[2px]"
-                                                                style={{
-                                                                    color: isSpecial ? themeColor : '#2b6cb0',
-                                                                    borderWidth: 1,
-                                                                    borderColor: isSpecial ? themeColor + '50' : '#2b6cb0',
-                                                                    backgroundColor: isSpecial ? themeColor + '10' : '#ebf8ff'
-                                                                }}>
-                                                                {(form.location || '지역').split(' ')[0]}
-                                                            </span>
-                                                            <span className="truncate font-medium">
-                                                                {(form.location || '전지역').split(' ').slice(1).join(' ') || '전지역'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* 공고 제목 */}
-                                                <div className="mb-1.5 flex-1 flex flex-col justify-center relative z-10">
-                                                    <p className="text-[12px] line-clamp-1 leading-[1.4] font-bold tracking-tight inline-block w-fit px-1 rounded-[2px]"
-                                                        style={{
-                                                            color: '#1f2937',
-                                                            backgroundColor: isSpecial ? themeColor + '15' : '#bbf7d050'
-                                                        }}>
-                                                        {form.title || '공고 제목을 입력하세요'}
-                                                    </p>
-                                                </div>
-
-                                                {/* 급여 */}
-                                                <div className="flex items-end justify-between mt-auto relative z-10">
-                                                    <div className="flex items-center text-[13px] font-bold text-gray-900 truncate tracking-tight gap-1.5">
-                                                        <span className="shrink-0 text-white text-[10px] px-1.5 py-0.5 rounded-sm shadow-sm"
-                                                            style={{ backgroundColor: isSpecial ? themeColor : '#805ad5' }}>
-                                                            TC
-                                                        </span>
-                                                        <span className="text-gray-800">{form.pay || '급여 정보'}</span>
-                                                    </div>
-                                                    <div className="shrink-0 flex items-center border px-1.5 py-0.5 rounded-sm text-[10px] font-bold bg-gray-50 text-gray-600 border-gray-300">
-                                                        2회 180일
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })()}
-                    </div>
-
-                    {/* ② 광고 등급 선택 (한 줄 탭) */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                        <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2">
+                    {/* ① 광고 등급 선택 (UI 간소화) */}
+                    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                        <h3 className="font-black text-[15px] text-gray-800 mb-3 flex items-center gap-2">
                             <Layers className="w-4 h-4 text-primary" />
                             광고 등급 선택
                         </h3>
 
-                        {/* 한 줄 탭 형태 */}
                         <div className="flex gap-2">
                             {TIER_OPTIONS.map(t => (
                                 <button
                                     key={t.value}
                                     onClick={() => update('tier', t.value)}
-                                    className={`flex-1 py-3 px-3 rounded-xl border-2 transition-all text-center ${
+                                    className={`flex-1 py-2 px-3 rounded-xl border-2 transition-all flex items-center justify-center gap-2 ${
                                         form.tier === t.value
-                                            ? t.value === 'PREMIUM' ? 'border-yellow-500 bg-yellow-50 ring-2 ring-yellow-300'
-                                            : t.value === 'SPECIAL' ? 'border-purple-500 bg-purple-50 ring-2 ring-purple-300'
-                                            : 'border-gray-500 bg-gray-50 ring-2 ring-gray-300'
-                                            : 'border-gray-200 bg-gray-50/50 hover:border-gray-300'
+                                            ? t.value === 'PREMIUM' ? 'border-yellow-500 bg-yellow-50 ring-1 ring-yellow-200'
+                                            : t.value === 'SPECIAL' ? 'border-purple-500 bg-purple-50 ring-1 ring-purple-200'
+                                            : 'border-gray-500 bg-gray-50 ring-1 ring-gray-200'
+                                            : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                                     }`}
                                 >
-                                    <span className="text-[15px]">{t.emoji}</span>
-                                    <p className={`font-black text-[13px] mt-0.5 ${form.tier === t.value ? 'text-gray-900' : 'text-gray-600'}`}>{t.label}</p>
-                                    <p className="text-[10px] text-gray-500 mt-0.5">{t.desc}</p>
-                                    <p className={`text-[12px] font-black mt-1 ${form.tier === t.value ? 'text-primary' : 'text-gray-400'}`}>{t.priceLabel}/30일</p>
+                                    <span className="text-[16px]">{t.emoji}</span>
+                                    <span className={`font-black text-[14px] ${form.tier === t.value ? 'text-gray-900' : 'text-gray-600'}`}>
+                                        {t.label} 
+                                        <span className={`ml-1 text-[12px] font-bold ${form.tier === t.value ? 'text-primary' : 'text-gray-400'}`}>
+                                            ({t.priceLabel})
+                                        </span>
+                                    </span>
                                 </button>
                             ))}
                         </div>
 
                         {/* 사이드/상단 배너 안내 */}
-                        <div className="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-start gap-2">
+                        <div className="mt-3 bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-start gap-2">
                             <MessageSquare className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                             <div className="text-[12px] text-blue-700 leading-relaxed">
                                 <p className="font-bold">📢 사이드 배너 · 상단 메인 배너 광고</p>
@@ -438,7 +331,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                         </div>
 
                         {/* 자동 연장 */}
-                        <div className="mt-4 bg-gray-50 rounded-xl p-3 flex items-center gap-3">
+                        <div className="mt-3 bg-gray-50 rounded-xl p-3 flex items-center gap-3">
                             <label className="flex items-center gap-2 cursor-pointer flex-1">
                                 <input
                                     type="checkbox" checked={form.auto_renew} onChange={e => update('auto_renew', e.target.checked)}
@@ -462,7 +355,195 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                         </div>
                     </div>
 
-                    {/* ③ 등급별 배너 설정 */}
+                    {/* ② 왼쪽(미리보기+로고) & 오른쪽(기본정보) 그리드 */}
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        
+                        {/* 왼쪽 컬럼 */}
+                        <div className="w-full lg:w-[240px] shrink-0 space-y-4">
+                            
+                            {/* 배너 미리보기 */}
+                            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                                <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2">
+                                    <Image className="w-4 h-4 text-primary" />
+                                    배너 미리보기
+                                </h3>
+
+                                <div className="w-full flex justify-center pointer-events-none">
+                                    {(() => {
+                                        const isPremium = form.tier === 'PREMIUM';
+                                        const isSpecial = form.tier === 'SPECIAL';
+                                        const isGeneral = form.tier === 'GENERAL';
+                                        const themeColor = isSpecial ? (form.color || '#FF6B35') : '#6B7280';
+
+                                        if (isPremium) {
+                                            return (
+                                                <PremiumJobCard
+                                                    id="preview"
+                                                    company={form.company || '업체명'}
+                                                    title={form.title || '공고 제목을 입력하세요'}
+                                                    location={form.location || '전지역'}
+                                                    pay={form.pay || '급여 정보'}
+                                                    image={form.logo_url || form.image}
+                                                    impactType={(form.theme as any) || 'gold'}
+                                                />
+                                            );
+                                        }
+
+                                        return (
+                                            <div className="relative h-[130px] w-full max-w-[220px] p-[3px]">
+                                                {/* 스페셜 배경 글로우 */}
+                                                {isSpecial && (
+                                                    <div className="absolute inset-0 overflow-hidden rounded-xl z-0"
+                                                        style={{ backgroundColor: themeColor, opacity: 0.5 }} />
+                                                )}
+
+                                                <div className="relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm p-2.5 flex flex-col justify-between z-10 bg-white"
+                                                    style={{ borderWidth: 2, borderColor: isSpecial ? themeColor + '80' : '#e5e7eb' }}>
+                                                    
+                                                    {isSpecial && (
+                                                        <div className="absolute inset-0 pointer-events-none z-0"
+                                                            style={{ background: `linear-gradient(135deg, ${themeColor}08 0%, transparent 60%)` }} />
+                                                    )}
+
+                                                    <div className="flex gap-2 mb-1.5 relative z-10">
+                                                        <div className="w-[80px] h-[40px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm"
+                                                            style={{ borderWidth: 1, borderColor: isSpecial ? themeColor + '30' : '#f3f4f6' }}>
+                                                            {(form.logo_url || form.image) && !isGeneral ? (
+                                                                <div className="w-full h-full bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${form.logo_url || form.image})` }} />
+                                                            ) : (
+                                                                <div className="text-gray-300 font-black text-[10px] bg-gray-100 w-full h-full flex items-center justify-center">NO LOGO</div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
+                                                            <h3 className="font-black text-[14px] truncate tracking-tight"
+                                                                style={{ color: isSpecial ? themeColor : '#111827' }}>
+                                                                {form.company || '업체명'}
+                                                            </h3>
+                                                            <div className="flex items-center text-[11px] text-gray-500 truncate tracking-tight mt-0.5">
+                                                                <span className="shrink-0 px-1 py-0.5 leading-none mr-1.5 font-bold rounded-[2px]"
+                                                                    style={{
+                                                                        color: isSpecial ? themeColor : '#2b6cb0',
+                                                                        borderWidth: 1,
+                                                                        borderColor: isSpecial ? themeColor + '50' : '#2b6cb0',
+                                                                        backgroundColor: isSpecial ? themeColor + '10' : '#ebf8ff'
+                                                                    }}>
+                                                                    {(form.location || '지역').split(' ')[0]}
+                                                                </span>
+                                                                <span className="truncate font-medium">
+                                                                    {(form.location || '전지역').split(' ').slice(1).join(' ') || '전지역'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mb-1.5 flex-1 flex flex-col justify-center relative z-10">
+                                                        <p className="text-[12px] line-clamp-1 leading-[1.4] font-bold tracking-tight inline-block w-fit px-1 rounded-[2px]"
+                                                            style={{
+                                                                color: '#1f2937',
+                                                                backgroundColor: isSpecial ? themeColor + '15' : '#bbf7d050'
+                                                            }}>
+                                                            {form.title || '공고 제목을 입력하세요'}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex items-end justify-between mt-auto relative z-10">
+                                                        <div className="flex items-center text-[13px] font-bold text-gray-900 truncate tracking-tight gap-1.5">
+                                                            <span className="shrink-0 text-white text-[10px] px-1.5 py-0.5 rounded-sm shadow-sm"
+                                                                style={{ backgroundColor: isSpecial ? themeColor : '#805ad5' }}>
+                                                                TC
+                                                            </span>
+                                                            <span className="text-gray-800">{form.pay || '급여 정보'}</span>
+                                                        </div>
+                                                        <div className="shrink-0 flex items-center border px-1.5 py-0.5 rounded-sm text-[10px] font-bold bg-gray-50 text-gray-600 border-gray-300">
+                                                            2회 180일
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            </div>
+
+                            {/* 로고 업로드 */}
+                            {form.tier !== 'GENERAL' && (
+                                <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center">
+                                    <h3 className="font-black text-[14px] text-gray-800 mb-3 w-full text-left">업체 로고</h3>
+                                    
+                                    <label className="relative group cursor-pointer">
+                                        <div className="w-[100px] h-[100px] rounded-2xl border-2 border-dashed border-gray-300 overflow-hidden bg-gray-50 flex items-center justify-center transition-all group-hover:border-primary group-hover:bg-blue-50/50">
+                                            {form.logo_url ? (
+                                                <img src={form.logo_url} alt="로고" className="w-full h-full object-contain" />
+                                            ) : (
+                                                <div className="flex flex-col items-center">
+                                                    <Upload className="w-7 h-7 text-gray-300 group-hover:text-primary transition-colors mb-1" />
+                                                    <span className="text-[11px] text-gray-400 font-bold group-hover:text-primary">로고 업로드</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                                    </label>
+                                    <p className="text-[10px] text-gray-400 mt-2 text-center">PNG/JPG 지원<br/>가로 폭이 넓은 직사각형 권장</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 오른쪽 컬럼 (기본 정보) */}
+                        <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+                            <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
+                                <Info className="w-4 h-4 text-primary" />
+                                기본 정보 입력
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">업체명 <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="text" value={form.company} onChange={e => update('company', e.target.value)}
+                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                        placeholder="예: 강남 스웨디시"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
+                                        <MapPin className="w-3 h-3" /> 지역 <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text" value={form.location} onChange={e => update('location', e.target.value)}
+                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                        placeholder="예: 서울 강남구"
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">공고 제목 <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="text" value={form.title} onChange={e => update('title', e.target.value)}
+                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                        placeholder="예: 경력무관! 즉시출근 가능한분"
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
+                                        <DollarSign className="w-3 h-3" /> 급여 <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text" value={form.pay} onChange={e => update('pay', e.target.value)}
+                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                        placeholder="예: 일 30~50만원"
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">배너 이미지 URL (로고 대신 사용)</label>
+                                    <input
+                                        type="text" value={form.image} onChange={e => update('image', e.target.value)}
+                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] h-10 font-medium outline-none focus:border-primary"
+                                        placeholder="https://example.com/image.jpg"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ③ 등급별 배너 테마 설정 */}
                     {form.tier === 'PREMIUM' && (
                         <div className="bg-white rounded-2xl border border-yellow-200 p-6 space-y-5">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
@@ -509,27 +590,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                                     ))}
                                 </div>
                             </div>
-
-                            {/* 로고 업로드 */}
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-2 block">업체 로고</label>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0">
-                                        {form.logo_url ? (
-                                            <img src={form.logo_url} alt="로고" className="w-full h-full object-contain" />
-                                        ) : (
-                                            <Upload className="w-5 h-5 text-gray-400" />
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-[12px] font-bold text-gray-700 cursor-pointer transition-colors">
-                                            <Upload className="w-3.5 h-3.5" /> 로고 업로드
-                                            <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-                                        </label>
-                                        <p className="text-[10px] text-gray-400 mt-1">PNG/JPG, 5MB 이하</p>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     )}
 
@@ -537,7 +597,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                         <div className="bg-white rounded-2xl border border-purple-200 p-6 space-y-5">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
                                 <span className="text-[16px]">⭐</span>
-                                스페셜 배너 설정
+                                스페셜 색상 설정
                             </h3>
 
                             {/* 색상 선택 */}
@@ -554,27 +614,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                                     ))}
                                 </div>
                             </div>
-
-                            {/* 로고 업로드 */}
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-2 block">업체 로고</label>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0">
-                                        {form.logo_url ? (
-                                            <img src={form.logo_url} alt="로고" className="w-full h-full object-contain" />
-                                        ) : (
-                                            <Upload className="w-5 h-5 text-gray-400" />
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-[12px] font-bold text-gray-700 cursor-pointer transition-colors">
-                                            <Upload className="w-3.5 h-3.5" /> 로고 업로드
-                                            <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-                                        </label>
-                                        <p className="text-[10px] text-gray-400 mt-1">PNG/JPG, 5MB 이하</p>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     )}
 
@@ -582,64 +621,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                         <div className="bg-white rounded-2xl border border-gray-100 p-6">
                             <div className="text-center py-4">
                                 <p className="text-[14px] font-bold text-gray-600">📋 일반 광고는 기본 정보만 표시됩니다.</p>
-                                <p className="text-[12px] text-gray-400 mt-1">테마, 로고, 색상 등의 커스텀 기능은 스페셜/프리미엄 등급에서 사용 가능합니다.</p>
+                                <p className="text-[12px] text-gray-400 mt-1">테마, 로고, 색상 등의 배너 꾸미기 기능은 스페셜/프리미엄 등급에서 사용 가능합니다.</p>
                             </div>
                         </div>
                     )}
-
-                    {/* ④ 기본 정보 입력 */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-                        <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                            <Info className="w-4 h-4 text-primary" />
-                            기본 정보
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">업체명 <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text" value={form.company} onChange={e => update('company', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                    placeholder="예: 강남 스웨디시"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">공고 제목 <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text" value={form.title} onChange={e => update('title', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                    placeholder="예: 경력무관! 즉시출근 가능한분"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" /> 지역 <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text" value={form.location} onChange={e => update('location', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                    placeholder="예: 서울 강남구"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                    <DollarSign className="w-3 h-3" /> 급여 <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text" value={form.pay} onChange={e => update('pay', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                    placeholder="예: 일 30~50만원"
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">배너 이미지 URL</label>
-                            <input
-                                type="text" value={form.image} onChange={e => update('image', e.target.value)}
-                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                placeholder="https://example.com/image.jpg"
-                            />
-                        </div>
-                    </div>
                 </div>
             )}
 
