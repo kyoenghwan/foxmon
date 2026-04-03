@@ -13,9 +13,10 @@ interface SpecialJobCardProps {
     color?: string; // e.g., 'blue', 'orange', 'purple'
     isBig?: boolean;
     id: string;
+    image?: string;
 }
 
-export function SpecialJobCard({ company, title, location, pay, color = 'orange', isBig, id }: SpecialJobCardProps) {
+export function SpecialJobCard({ company, title, location, pay, color = 'orange', isBig, id, image }: SpecialJobCardProps) {
     const { t } = useLanguage();
     const colorSchemes: Record<string, string> = {
         orange: 'bg-gradient-to-br from-orange-50/80 to-white border-orange-100 hover:border-orange-400 text-orange-600',
@@ -50,40 +51,60 @@ export function SpecialJobCard({ company, title, location, pay, color = 'orange'
         <div className="w-full aspect-[2/1] group transition-all">
             <Link href={`/jobs/${id}`} className={`relative block rounded-lg border-2 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full p-2.5 md:p-3 flex flex-col justify-between ${scheme}`}>
             
-            {/* 1. 상단: 업체명/지역 (로고 없음) */}
-            <div className="flex gap-2 mb-2 justify-between items-start">
-                <div className="flex flex-col min-w-0 py-0.5">
-                    <h3 className="font-bold text-[14px] md:text-[15px] text-gray-900 truncate tracking-tight group-hover:text-current transition-colors">
-                        {displayName}
-                    </h3>
-                    <div className="flex items-center text-[11px] md:text-[12px] text-gray-500 truncate tracking-tight mt-0.5">
-                        <span className="shrink-0 text-current border border-current/30 px-1 py-0.5 leading-none bg-white/50 mr-1.5 rounded-sm">
-                            {location.split(' ')[0] || '전국'}
-                        </span>
-                        <span className="truncate">{location.split(' ').slice(1).join(' ') || location}</span>
+            <div className="flex flex-col h-full w-full relative z-10 p-0">
+                {/* --- [상단: 로고 50%, 상호명 50%] --- */}
+                <div className="flex w-full h-[50%] gap-2 pb-1.5">
+                    {/* 로고 영역 (1:1 비율 왼쪽) */}
+                    <div className="flex-1 min-w-0 bg-white/60 flex items-center justify-center rounded-sm border border-black/5 overflow-hidden shrink-0">
+                        {image ? (
+                            <div 
+                                className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
+                                style={{ backgroundImage: `url(${image})` }} 
+                            />
+                        ) : (
+                            <div className="text-current/40 font-black text-[10px] sm:text-[11px] w-full h-full flex items-center justify-center tracking-widest text-center leading-[1.1]">NO<br/>LOGO</div>
+                        )}
+                    </div>
+                    
+                    {/* 상호명 영역 (1:1 비율 오른쪽) */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-center py-0.5 mt-[-2px]">
+                        <h3 className="font-bold text-[13px] sm:text-[14px] lg:text-[15px] text-gray-900 truncate tracking-tight group-hover:text-current transition-colors line-clamp-2 leading-tight">
+                            {displayName}
+                        </h3>
+                        <div className="flex flex-wrap items-center text-[10px] sm:text-[11px] text-gray-500 truncate tracking-tight mt-1">
+                            <span className="shrink-0 text-current border border-current/30 px-1 py-[1px] leading-none bg-white/50 mr-1.5 rounded-[2px] font-bold">
+                                {location.split(' ')[0] || '전국'}
+                            </span>
+                            <span className="truncate font-medium">{location.split(' ').slice(1).join(' ') || location}</span>
+                        </div>
                     </div>
                 </div>
-                <Zap className={`${isBig ? 'w-5 h-5' : 'w-3.5 h-3.5'} fill-current opacity-20 flex-shrink-0 mt-1`} />
-            </div>
 
-            {/* 2. 중단: 간단한 멘트 */}
-            <div className="mb-2 flex-1 flex flex-col justify-center">
-                <p className="text-[12px] md:text-[13px] text-gray-800 line-clamp-1 leading-[1.4] font-bold tracking-tight bg-white/60 inline-block w-fit px-1 rounded-sm">
-                    {title}
-                </p>
-            </div>
+                {/* --- [하단: 가로 줄, 광고글, 급여/등급] --- */}
+                <div className="flex flex-col w-full h-[50%] pt-1.5 sm:pt-2 border-t border-dashed border-current/20 justify-between">
+                    {/* 광고글 (멘트) */}
+                    <div className="w-full relative overflow-hidden">
+                        <p className="text-[11px] sm:text-[12px] lg:text-[13px] text-gray-800 line-clamp-1 leading-[1.3] font-bold tracking-tight bg-white/60 inline-block px-1 rounded-[2px]">
+                            {title}
+                        </p>
+                    </div>
 
-            {/* 3. 하단: 급여 정보 ও 배지 */}
-            <div className="flex items-end justify-between mt-auto">
-                <div className="flex items-center text-[13px] md:text-[14px] font-medium text-gray-900 truncate tracking-tight gap-1.5">
-                    {payType && (
-                        <span className="shrink-0 bg-gray-800 text-white text-[10px] md:text-[11px] px-1.5 py-0.5 rounded-sm">
-                            {payType}
-                        </span>
-                    )}
-                    <span className="text-[#e53e3e] inline-flex items-center gap-[1px]">
-                        {payAmount} <span className="text-[#e53e3e] text-[10px] md:text-[11px] font-black pb-[1px] ml-0.5">↑</span>
-                    </span>
+                    {/* 급여 및 뱃지 */}
+                    <div className="flex items-end justify-between mt-auto w-full pb-0.5">
+                        <div className="flex items-center text-[13px] sm:text-[14px] lg:text-[15px] font-bold text-gray-900 truncate tracking-tight gap-1 sm:gap-1.5">
+                            {payType && (
+                                <span className="shrink-0 bg-gray-800 text-white text-[9px] sm:text-[10px] lg:text-[11px] px-1 sm:px-1.5 py-[1px] sm:py-0.5 rounded-sm shadow-sm">
+                                    {payType}
+                                </span>
+                            )}
+                            <span className="text-[#e53e3e]">
+                                {payAmount}
+                            </span>
+                        </div>
+                        <div className="shrink-0 flex items-center px-1 sm:px-1.5 py-[1px] sm:py-0.5 rounded-sm text-[9px] sm:text-[10px] lg:text-[11px] font-black shadow-sm bg-white border border-current/20 text-current">
+                            <Zap className="w-[10px] h-[10px] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 fill-current" /> 스페셜
+                        </div>
+                    </div>
                 </div>
             </div>
             
