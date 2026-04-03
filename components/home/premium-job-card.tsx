@@ -5,10 +5,52 @@ import {
   Flame, Snowflake, Sparkles, Zap, Ghost, Monitor, 
   Trees, Waves, Cherry, Stars, Sun, Thermometer, 
   Terminal, Music, Gem, ShieldAlert, Heart, Skull,
-  Crown, Lightbulb
+  Crown, Lightbulb, Star
 } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/language-provider';
+
+// 텍스트 오버플로우 시 마퀴(Marquee) 효과를 주는 컴포넌트
+function MarqueeText({ children, className }: { children: React.ReactNode, className: string }) {
+    const textRef = React.useRef<HTMLDivElement>(null);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const [isOverflowing, setIsOverflowing] = React.useState(false);
+
+    React.useEffect(() => {
+        const checkOverflow = () => {
+            if (containerRef.current && textRef.current) {
+                setIsOverflowing(textRef.current.scrollWidth > containerRef.current.clientWidth);
+            }
+        };
+        checkOverflow();
+        window.addEventListener('resize', checkOverflow);
+        return () => window.removeEventListener('resize', checkOverflow);
+    }, [children]);
+
+    return (
+        <div ref={containerRef} className="w-full overflow-hidden relative flex items-center">
+            <div 
+                ref={textRef} 
+                className={`${className} whitespace-nowrap ${isOverflowing ? 'hover:animate-marquee-slow inline-block pr-10' : 'truncate'}`}
+                style={{ minWidth: 'min-content' }}
+            >
+                {children}
+            </div>
+            {/* 전역 style 애니메이션 추가 (오직 여기서만 필요) */}
+            <style jsx>{`
+                @keyframes marquee-slow {
+                    0% { transform: translateX(0); }
+                    50% { transform: translateX(calc(-100% + 150px)); }
+                    55% { transform: translateX(calc(-100% + 150px)); }
+                    100% { transform: translateX(0); }
+                }
+                .hover\\:animate-marquee-slow:hover {
+                    animation: marquee-slow 4s linear infinite;
+                }
+            `}</style>
+        </div>
+    );
+}
 
 // 22종류의 모든 임팩트 타입 정의
 type ImpactType = 
@@ -132,11 +174,11 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                     </div>
                     
                     <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
-                        <h3 className={`font-black text-[14px] md:text-[15px] truncate tracking-tight transition-colors ${
+                        <MarqueeText className={`font-black text-[14px] md:text-[15px] tracking-tight transition-colors ${
                             isCyber ? 'text-green-400 font-mono' : config.color
                         }`}>
                             {displayName}
-                        </h3>
+                        </MarqueeText>
                         <div className="flex items-center text-[11px] md:text-[12px] text-gray-500 truncate tracking-tight mt-0.5">
                             <span className={`shrink-0 border px-1 py-0.5 leading-none mr-1.5 font-bold rounded-[2px] ${
                                 isCyber ? 'text-black bg-cyan-400 border-none' : 
@@ -152,14 +194,14 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                     </div>
                 </div>
 
-                <div className="mb-1.5 flex-1 flex flex-col justify-center relative z-10">
-                    <p className={`text-[12px] md:text-[13px] line-clamp-1 leading-[1.4] font-bold tracking-tight inline-block w-fit px-1 rounded-[2px] ${
+                <div className="mb-1.5 flex-1 flex flex-col justify-center relative z-10 overflow-hidden w-full">
+                    <MarqueeText className={`text-[12px] md:text-[13px] leading-[1.4] font-bold tracking-tight px-1 rounded-[2px] ${
                         isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
                         isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
                         'text-gray-800 bg-green-200/50'
                     }`}>
                         {title}
-                    </p>
+                    </MarqueeText>
                 </div>
 
                 <div className="flex items-end justify-between mt-auto relative z-10">
@@ -175,11 +217,20 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                             {payAmount}
                         </span>
                     </div>
-                    <div className={`shrink-0 flex items-center border px-1.5 py-0.5 rounded-sm text-[10px] md:text-[11px] font-bold shadow-sm ${
-                        isCyber ? 'bg-cyan-900 text-cyan-200 border-cyan-700' : 'bg-gray-50 text-gray-600 border-gray-300'
+                    <div className={`shrink-0 flex items-center px-1.5 py-0.5 rounded-sm text-[10px] md:text-[11px] font-black shadow-sm ${
+                        isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
+                        isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
+                        'bg-gray-100 text-gray-700 border border-gray-300'
                     }`}>
-                        <span className="mr-1 pt-0.5">🥈</span>
-                        2회 180일
+                        {isImpact ? (
+                            <>
+                                <Crown className="w-3 h-3 justify-center mr-1 text-amber-500" /> VVIP
+                            </>
+                        ) : (
+                            <>
+                                <Star className="w-3 h-3 justify-center mr-1 text-gray-500" /> 우수업체
+                            </>
+                        )}
                     </div>
                 </div>
                 
