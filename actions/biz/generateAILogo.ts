@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase";
 import { auth } from "@/auth";
 import OpenAI from "openai";
 
@@ -16,7 +16,7 @@ export async function generateAILogo(companyName: string) {
     }
     const userId = session.user.id;
 
-    const supabase = await createClient();
+    const supabase = supabaseAdmin;
 
     // 2. 유저 정보 (무료 횟수 및 포인트) 조회
     const { data: userRecord, error: userError } = await supabase

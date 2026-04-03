@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase";
 import { auth } from "@/auth";
 
 export async function getSiteSettings() {
@@ -11,9 +11,7 @@ export async function getSiteSettings() {
         return { success: false, error: 'Unauthorized' };
     }
 
-    const supabase = await createClient();
-
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
         .from('site_settings')
         .select('*');
 
@@ -38,14 +36,12 @@ export async function updateSiteSettings(payload: Record<string, string>) {
         return { success: false, error: 'Unauthorized' };
     }
 
-    const supabase = await createClient();
-
     // 각 키에 대해 UPSERT 수행
     const entries = Object.entries(payload);
     let hasError = false;
 
     for (const [key, value] of entries) {
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('site_settings')
             .upsert({
                 category: key.includes('api_key') ? 'api_keys' : 'general',
