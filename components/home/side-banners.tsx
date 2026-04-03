@@ -112,9 +112,9 @@ export function SideBanners() {
             <div className={`
                 hidden xl:flex flex-col gap-3 fixed top-[220px] w-[170px] z-20 transition-all duration-300
                 left-[calc(50%-630px)] 
-                2xl:left-[calc(50%-758px)]
-                3xl:left-[calc(50%-950px)]
-                4xl:left-[calc(50%-1270px)]
+                2xl:left-[calc(50%-725px)]
+                3xl:left-[calc(50%-885px)]
+                4xl:left-[calc(50%-1145px)]
             `}>
                 <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Special Pick</div>
                 {leftAds.map((ad) => (
@@ -132,9 +132,9 @@ export function SideBanners() {
             <div className={`
                 hidden xl:flex flex-col gap-3 fixed top-[220px] w-[170px] z-20 transition-all duration-300
                 right-[calc(50%-630px)] 
-                2xl:right-[calc(50%-758px)]
-                3xl:right-[calc(50%-950px)]
-                4xl:right-[calc(50%-1270px)]
+                2xl:right-[calc(50%-725px)]
+                3xl:right-[calc(50%-885px)]
+                4xl:right-[calc(50%-1145px)]
             `}>
                 <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Premium Ad</div>
                 {rightAds.map((ad) => (
