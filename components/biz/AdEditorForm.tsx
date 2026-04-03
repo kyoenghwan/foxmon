@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Loader2, Save, Image, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PremiumJobCard } from '@/components/home/premium-job-card';
 
 export interface AdFormData {
     id?: string;
@@ -298,101 +299,101 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
 
                         {/* 실제 카드 미리보기 */}
                         {(() => {
-                            const themeColor = form.tier === 'PREMIUM' && form.theme
-                                ? PREMIUM_THEMES.find(t => t.key === form.theme)?.color || '#EAB308'
-                                : form.tier === 'SPECIAL' ? (form.color || '#FF6B35') : '#6B7280';
-                            const themeLabel = form.tier === 'PREMIUM' && form.theme
-                                ? PREMIUM_THEMES.find(t => t.key === form.theme)?.label || 'PREMIUM'
-                                : '';
-                            const isPremiumOrSpecial = form.tier !== 'GENERAL';
+                            const isPremium = form.tier === 'PREMIUM';
+                            const isSpecial = form.tier === 'SPECIAL';
+                            const isGeneral = form.tier === 'GENERAL';
+                            
+                            const themeColor = isSpecial ? (form.color || '#FF6B35') : '#6B7280';
 
                             return (
-                                <div className="w-full max-w-[220px]">
-                                    <div className="relative h-[130px] w-full p-[3px]">
-                                        {/* 테마 배경 글로우 */}
-                                        {isPremiumOrSpecial && (
-                                            <div className="absolute inset-0 overflow-hidden rounded-xl z-0"
-                                                style={{ backgroundColor: themeColor, opacity: 0.5 }} />
-                                        )}
-
-                                        {/* 메인 카드 바디 */}
-                                        <div className="relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm p-2.5 flex flex-col justify-between z-10 bg-white"
-                                            style={{ borderWidth: 2, borderColor: isPremiumOrSpecial ? themeColor + '80' : '#e5e7eb' }}>
-
-                                            {/* 카드 내부 은은한 그라디언트 (프리미엄/스페셜) */}
-                                            {isPremiumOrSpecial && (
-                                                <div className="absolute inset-0 pointer-events-none z-0"
-                                                    style={{ background: `linear-gradient(135deg, ${themeColor}08 0%, transparent 60%)` }} />
+                                <div className="w-full max-w-[220px] pointer-events-none">
+                                    {isPremium ? (
+                                        <PremiumJobCard
+                                            id="preview"
+                                            company={form.company || '업체명'}
+                                            title={form.title || '공고 제목을 입력하세요'}
+                                            location={form.location || '전지역'}
+                                            pay={form.pay || '급여 정보'}
+                                            image={form.logo_url || form.image}
+                                            impactType={(form.theme as any) || 'gold'}
+                                        />
+                                    ) : (
+                                        <div className="relative h-[130px] w-full p-[3px]">
+                                            {/* 스페셜 배경 글로우 */}
+                                            {isSpecial && (
+                                                <div className="absolute inset-0 overflow-hidden rounded-xl z-0"
+                                                    style={{ backgroundColor: themeColor, opacity: 0.5 }} />
                                             )}
 
-                                            {/* 콘텐츠: 로고 + 업체명 */}
-                                            <div className="flex gap-2 mb-1.5 relative z-10">
-                                                <div className="w-[80px] h-[40px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm"
-                                                    style={{ borderWidth: 1, borderColor: isPremiumOrSpecial ? themeColor + '30' : '#f3f4f6' }}>
-                                                    {(form.logo_url || form.image) ? (
-                                                        <div className="w-full h-full bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${form.logo_url || form.image})` }} />
-                                                    ) : (
-                                                        <div className="text-gray-300 font-black text-[10px] bg-gray-100 w-full h-full flex items-center justify-center">NO LOGO</div>
-                                                    )}
+                                            {/* 메인 카드 바디 */}
+                                            <div className="relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm p-2.5 flex flex-col justify-between z-10 bg-white"
+                                                style={{ borderWidth: 2, borderColor: isSpecial ? themeColor + '80' : '#e5e7eb' }}>
+
+                                                {/* 카드 내부 은은한 그라디언트 (스페셜) */}
+                                                {isSpecial && (
+                                                    <div className="absolute inset-0 pointer-events-none z-0"
+                                                        style={{ background: `linear-gradient(135deg, ${themeColor}08 0%, transparent 60%)` }} />
+                                                )}
+
+                                                {/* 콘텐츠: 로고 + 업체명 */}
+                                                <div className="flex gap-2 mb-1.5 relative z-10">
+                                                    <div className="w-[80px] h-[40px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm"
+                                                        style={{ borderWidth: 1, borderColor: isSpecial ? themeColor + '30' : '#f3f4f6' }}>
+                                                        {(form.logo_url || form.image) && !isGeneral ? (
+                                                            <div className="w-full h-full bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${form.logo_url || form.image})` }} />
+                                                        ) : (
+                                                            <div className="text-gray-300 font-black text-[10px] bg-gray-100 w-full h-full flex items-center justify-center">NO LOGO</div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
+                                                        <h3 className="font-black text-[14px] truncate tracking-tight"
+                                                            style={{ color: isSpecial ? themeColor : '#111827' }}>
+                                                            {form.company || '업체명'}
+                                                        </h3>
+                                                        <div className="flex items-center text-[11px] text-gray-500 truncate tracking-tight mt-0.5">
+                                                            <span className="shrink-0 px-1 py-0.5 leading-none mr-1.5 font-bold rounded-[2px]"
+                                                                style={{
+                                                                    color: isSpecial ? themeColor : '#2b6cb0',
+                                                                    borderWidth: 1,
+                                                                    borderColor: isSpecial ? themeColor + '50' : '#2b6cb0',
+                                                                    backgroundColor: isSpecial ? themeColor + '10' : '#ebf8ff'
+                                                                }}>
+                                                                {(form.location || '지역').split(' ')[0]}
+                                                            </span>
+                                                            <span className="truncate font-medium">
+                                                                {(form.location || '전지역').split(' ').slice(1).join(' ') || '전지역'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
-                                                    <h3 className="font-black text-[14px] truncate tracking-tight"
-                                                        style={{ color: isPremiumOrSpecial ? themeColor : '#111827' }}>
-                                                        {form.company || '업체명'}
-                                                    </h3>
-                                                    <div className="flex items-center text-[11px] text-gray-500 truncate tracking-tight mt-0.5">
-                                                        <span className="shrink-0 px-1 py-0.5 leading-none mr-1.5 font-bold rounded-[2px]"
-                                                            style={{
-                                                                color: isPremiumOrSpecial ? themeColor : '#2b6cb0',
-                                                                borderWidth: 1,
-                                                                borderColor: isPremiumOrSpecial ? themeColor + '50' : '#2b6cb0',
-                                                                backgroundColor: isPremiumOrSpecial ? themeColor + '10' : '#ebf8ff'
-                                                            }}>
-                                                            {(form.location || '지역').split(' ')[0]}
+
+                                                {/* 공고 제목 */}
+                                                <div className="mb-1.5 flex-1 flex flex-col justify-center relative z-10">
+                                                    <p className="text-[12px] line-clamp-1 leading-[1.4] font-bold tracking-tight inline-block w-fit px-1 rounded-[2px]"
+                                                        style={{
+                                                            color: '#1f2937',
+                                                            backgroundColor: isSpecial ? themeColor + '15' : '#bbf7d050'
+                                                        }}>
+                                                        {form.title || '공고 제목을 입력하세요'}
+                                                    </p>
+                                                </div>
+
+                                                {/* 급여 */}
+                                                <div className="flex items-end justify-between mt-auto relative z-10">
+                                                    <div className="flex items-center text-[13px] font-bold text-gray-900 truncate tracking-tight gap-1.5">
+                                                        <span className="shrink-0 text-white text-[10px] px-1.5 py-0.5 rounded-sm shadow-sm"
+                                                            style={{ backgroundColor: isSpecial ? themeColor : '#805ad5' }}>
+                                                            TC
                                                         </span>
-                                                        <span className="truncate font-medium">
-                                                            {(form.location || '전지역').split(' ').slice(1).join(' ') || '전지역'}
-                                                        </span>
+                                                        <span className="text-gray-800">{form.pay || '급여 정보'}</span>
+                                                    </div>
+                                                    <div className="shrink-0 flex items-center border px-1.5 py-0.5 rounded-sm text-[10px] font-bold bg-gray-50 text-gray-600 border-gray-300">
+                                                        2회 180일
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            {/* 공고 제목 */}
-                                            <div className="mb-1.5 flex-1 flex flex-col justify-center relative z-10">
-                                                <p className="text-[12px] line-clamp-1 leading-[1.4] font-bold tracking-tight inline-block w-fit px-1 rounded-[2px]"
-                                                    style={{
-                                                        color: '#1f2937',
-                                                        backgroundColor: isPremiumOrSpecial ? themeColor + '15' : '#bbf7d050'
-                                                    }}>
-                                                    {form.title || '공고 제목을 입력하세요'}
-                                                </p>
-                                            </div>
-
-                                            {/* 급여 */}
-                                            <div className="flex items-end justify-between mt-auto relative z-10">
-                                                <div className="flex items-center text-[13px] font-bold text-gray-900 truncate tracking-tight gap-1.5">
-                                                    <span className="shrink-0 text-white text-[10px] px-1.5 py-0.5 rounded-sm shadow-sm"
-                                                        style={{ backgroundColor: isPremiumOrSpecial ? themeColor : '#805ad5' }}>
-                                                        TC
-                                                    </span>
-                                                    <span className="text-gray-800">{form.pay || '급여 정보'}</span>
-                                                </div>
-                                                <div className="shrink-0 flex items-center border px-1.5 py-0.5 rounded-sm text-[10px] font-bold bg-gray-50 text-gray-600 border-gray-300">
-                                                    2회 180일
-                                                </div>
-                                            </div>
-
-                                            {/* 테마 뱃지 (프리미엄) */}
-                                            {form.tier === 'PREMIUM' && themeLabel && (
-                                                <div className="absolute top-0 right-0 z-20">
-                                                    <div className="flex items-center justify-center text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg min-w-[50px] shadow-sm"
-                                                        style={{ backgroundColor: themeColor }}>
-                                                        {themeLabel}
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             );
                         })()}
