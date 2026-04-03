@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { Loader2, Save, Image, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type } from 'lucide-react';
+import { Loader2, Save, Image, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
+import { generateAILogo } from '@/actions/biz/generateAILogo';
 
 export interface AdFormData {
     id?: string;
@@ -204,6 +205,8 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (html: s
 // ─── 메인 폼 컴포넌트 ───
 export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorFormProps) {
     const [saving, setSaving] = useState(false);
+    const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+    const [aiResultText, setAiResultText] = useState('');
     const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
     const [form, setForm] = useState<AdFormData>({
         company: '',
@@ -245,6 +248,36 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
 
     const currentTier = TIER_OPTIONS.find(t => t.value === form.tier)!;
     const discountedPrice = Math.floor(currentTier.price * 0.95);
+
+    const handleAILogoGenerate = async () => {
+        if (!form.company) {
+            alert('먼저 기본 정보에 업체명을 입력해주세요!');
+            return;
+        }
+        if (!confirm(`'${form.company}'에 어울리는 구조적인 AI 로고를 자동 생성합니다.\n(남은 무료 횟수를 소진하면 100P가 차감됩니다.) 진행하시겠습니까?`)) return;
+        
+        setIsGeneratingAI(true);
+        setAiResultText('AI 모델 구동 및 스케치 중... (약 10초)');
+        try {
+            const result = await generateAILogo(form.company);
+            if (result.success && result.data) {
+                update('logo_url', result.data);
+                const info = result.usedFree 
+                    ? `무료 생성됨! (남은 일찍 무료 횟수: ${result.remainingFree}회)` 
+                    : `생성 완료 (100P 차감 됨)`;
+                setAiResultText(info);
+                setTimeout(() => setAiResultText(''), 6000);
+            } else {
+                alert('로고 생성 기술 오류: ' + result.error);
+                setAiResultText('');
+            }
+        } catch (err) {
+            alert('네트워크 또는 시스템 에러가 발생했습니다.');
+            setAiResultText('');
+        } finally {
+            setIsGeneratingAI(false);
+        }
+    };
 
     const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -465,25 +498,48 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                                 </div>
                             </div>
 
-                            {/* 로고 업로드 */}
+                            {/* 로고 업로드 및 AI 통합 */}
                             {form.tier !== 'GENERAL' && (
                                 <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center">
-                                    <h3 className="font-black text-[14px] text-gray-800 mb-3 w-full text-left">업체 로고</h3>
+                                    <div className="flex flex-col gap-2 w-full mb-3">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="font-black text-[14px] text-gray-800">업체 로고</h3>
+                                            <button 
+                                                onClick={handleAILogoGenerate}
+                                                disabled={isGeneratingAI}
+                                                className="px-2 py-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white text-[10px] items-center gap-1 flex shadow-sm transition-all shadow-purple-500/20 disabled:opacity-50"
+                                            >
+                                                {isGeneratingAI ? <Loader2 className="w-3.5 h-3.5 animate-spin"/> : <Sparkles className="w-3.5 h-3.5 text-yellow-200"/>}
+                                                <span className="font-bold">AI 로고 생성</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                     
-                                    <label className="relative group cursor-pointer">
-                                        <div className="w-[100px] h-[100px] rounded-2xl border-2 border-dashed border-gray-300 overflow-hidden bg-gray-50 flex items-center justify-center transition-all group-hover:border-primary group-hover:bg-blue-50/50">
-                                            {form.logo_url ? (
+                                    <label className="relative group cursor-pointer w-full flex justify-center">
+                                        <div className={`w-[100px] h-[100px] rounded-2xl border-2 border-dashed overflow-hidden bg-gray-50 flex items-center justify-center transition-all ${isGeneratingAI ? 'border-purple-400 bg-purple-50 animate-pulse' : 'border-gray-300 group-hover:border-primary group-hover:bg-blue-50/50'}`}>
+                                            {form.logo_url && !isGeneratingAI ? (
                                                 <img src={form.logo_url} alt="로고" className="w-full h-full object-contain" />
                                             ) : (
                                                 <div className="flex flex-col items-center">
-                                                    <Upload className="w-7 h-7 text-gray-300 group-hover:text-primary transition-colors mb-1" />
-                                                    <span className="text-[11px] text-gray-400 font-bold group-hover:text-primary">로고 업로드</span>
+                                                    {isGeneratingAI ? (
+                                                        <Loader2 className="w-7 h-7 text-purple-400 animate-spin mb-1" />
+                                                    ) : (
+                                                        <Upload className="w-7 h-7 text-gray-300 group-hover:text-primary transition-colors mb-1" />
+                                                    )}
+                                                    <span className={`text-[11px] font-bold ${isGeneratingAI ? 'text-purple-500' : 'text-gray-400 group-hover:text-primary'}`}>
+                                                        {isGeneratingAI ? '그리는 중...' : '직접 업로드'}
+                                                    </span>
                                                 </div>
                                             )}
                                         </div>
-                                        <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                                        <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" disabled={isGeneratingAI} />
                                     </label>
-                                    <p className="text-[10px] text-gray-400 mt-2 text-center">PNG/JPG 지원<br/>가로 폭이 넓은 직사각형 권장</p>
+
+                                    {aiResultText ? (
+                                        <p className="text-[10px] font-bold text-purple-600 mt-2.5 text-center animate-pulse">{aiResultText}</p>
+                                    ) : (
+                                        <p className="text-[10px] text-gray-400 mt-2 text-center">PNG/JPG 지원<br/>가로 폭이 넓은 2:1 직사각형 권장</p>
+                                    )}
                                 </div>
                             )}
                         </div>
