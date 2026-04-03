@@ -47,7 +47,8 @@ export function SpecialJobCard({ company, title, location, pay, color = 'orange'
     }
 
     return (
-        <Link href={`/jobs/${id}`} className={`group relative block rounded-lg border-2 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ${isBig ? 'h-full min-h-[260px]' : 'h-[110px] md:h-[120px]'} p-2.5 md:p-3 flex flex-col justify-between ${scheme}`}>
+        <div className="w-full aspect-[2/1] group transition-all">
+            <Link href={`/jobs/${id}`} className={`relative block rounded-lg border-2 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full p-2.5 md:p-3 flex flex-col justify-between ${scheme}`}>
             
             {/* 1. 상단: 업체명/지역 (로고 없음) */}
             <div className="flex gap-2 mb-2 justify-between items-start">
@@ -86,6 +87,7 @@ export function SpecialJobCard({ company, title, location, pay, color = 'orange'
                 </div>
             </div>
             
-        </Link>
+            </Link>
+        </div>
     );
 }

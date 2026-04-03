@@ -396,7 +396,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                                         }
 
                                         return (
-                                            <div className="relative h-[120px] md:h-[130px] w-[240px] p-[3px] group">
+                                            <div className="relative aspect-[2/1] w-[240px] p-[3px] group">
                                                 {/* 스페셜 배경 글로우 */}
                                                 {isSpecial && (
                                                     <div className="absolute inset-0 overflow-hidden rounded-xl z-0"

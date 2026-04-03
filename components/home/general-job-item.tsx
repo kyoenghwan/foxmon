@@ -14,7 +14,8 @@ interface GeneralJobItemProps {
 
 export function GeneralJobItem({ company, title, location, pay, time, id }: GeneralJobItemProps) {
     return (
-        <Link href={`/jobs/${id}`} className="flex flex-col p-3 rounded-lg border border-gray-100 bg-white hover:border-primary/30 hover:shadow-sm transition-all h-full">
+        <div className="w-full aspect-[2/1] group transition-all">
+            <Link href={`/jobs/${id}`} className="flex flex-col p-3 rounded-lg border border-gray-100 bg-white hover:border-primary/30 hover:shadow-sm transition-all h-full">
             <div className="flex justify-between items-start mb-1">
                 <span className="text-[10px] font-bold text-primary truncate max-w-[80px]">{company}</span>
                 <span className="text-[9px] text-gray-400 whitespace-nowrap">{time}</span>
@@ -33,6 +34,7 @@ export function GeneralJobItem({ company, title, location, pay, time, id }: Gene
                     {pay}
                 </div>
             </div>
-        </Link>
+            </Link>
+        </div>
     );
 }
