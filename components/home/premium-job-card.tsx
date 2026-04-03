@@ -140,7 +140,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
             {/* --- [메인 카드 바디] --- */}
             <Link 
                 href={`/jobs/${id}`} 
-                className={`relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm transition-all duration-300 p-2 md:p-2.5 flex flex-col justify-between z-10 ${
+                className={`relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm transition-all duration-300 p-1.5 sm:p-2 lg:p-2.5 flex flex-col justify-between z-10 ${
                     isCyber ? 'bg-black/95 text-white' : 'bg-white'
                 }`}
             >
@@ -161,8 +161,8 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                 )}
 
                 {/* --- [콘텐츠 영역 (최상단)] --- */}
-                <div className="flex gap-2 mb-1 relative z-10">
-                    <div className="w-[90px] h-[45px] md:w-[120px] md:h-[60px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100">
+                <div className="flex gap-1.5 sm:gap-2 mb-1 relative z-10">
+                    <div className="w-[70px] h-[35px] sm:w-[85px] sm:h-[42px] lg:w-[110px] lg:h-[55px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 transition-all">
                         {image ? (
                             <div 
                                 className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
@@ -174,13 +174,13 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                     </div>
                     
                     <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
-                        <MarqueeText className={`font-black text-[14px] md:text-[15px] tracking-tight transition-colors ${
+                        <MarqueeText className={`font-black text-[12px] sm:text-[13px] lg:text-[15px] tracking-tight transition-colors ${
                             isCyber ? 'text-green-400 font-mono' : config.color
                         }`}>
                             {displayName}
                         </MarqueeText>
-                        <div className="flex items-center text-[11px] md:text-[12px] text-gray-500 truncate tracking-tight mt-0.5">
-                            <span className={`shrink-0 border px-1 py-0.5 leading-none mr-1.5 font-bold rounded-[2px] ${
+                        <div className="flex items-center text-[10px] sm:text-[11px] lg:text-[12px] text-gray-500 truncate tracking-tight mt-0.5">
+                            <span className={`shrink-0 border px-1 py-[1px] leading-none mr-1 sm:mr-1.5 font-bold rounded-[2px] ${
                                 isCyber ? 'text-black bg-cyan-400 border-none' : 
                                 isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
                                 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
@@ -195,7 +195,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                 </div>
 
                 <div className="mb-1 flex-1 flex flex-col justify-center relative z-10 overflow-hidden w-full">
-                    <MarqueeText className={`text-[12px] md:text-[13px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
+                    <MarqueeText className={`text-[11px] sm:text-[12px] lg:text-[13px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
                         isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
                         isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
                         'text-gray-800 bg-green-200/50'
@@ -205,9 +205,9 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                 </div>
 
                 <div className="flex items-end justify-between mt-auto relative z-10">
-                    <div className="flex items-center text-[13px] md:text-[15px] font-bold text-gray-900 truncate tracking-tight gap-1.5">
+                    <div className="flex items-center text-[12px] sm:text-[13px] lg:text-[15px] font-bold text-gray-900 truncate tracking-tight gap-1 sm:gap-1.5">
                         {payType && (
-                            <span className={`shrink-0 text-white text-[10px] md:text-[11px] px-1.5 py-0.5 rounded-sm shadow-sm ${
+                            <span className={`shrink-0 text-white text-[9px] sm:text-[10px] lg:text-[11px] px-1 sm:px-1.5 py-[1px] sm:py-0.5 rounded-sm shadow-sm ${
                                 isImpact ? config.bg : 'bg-[#805ad5]'
                             }`}>
                                 {payType}
@@ -217,18 +217,18 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                             {payAmount}
                         </span>
                     </div>
-                    <div className={`shrink-0 flex items-center px-1.5 py-0.5 rounded-sm text-[10px] md:text-[11px] font-black shadow-sm ${
+                    <div className={`shrink-0 flex items-center px-1 sm:px-1.5 py-[1px] sm:py-0.5 rounded-sm text-[9px] sm:text-[10px] lg:text-[11px] font-black shadow-sm ${
                         isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
                         isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
                         'bg-gray-100 text-gray-700 border border-gray-300'
                     }`}>
                         {isImpact ? (
                             <>
-                                <Crown className="w-3 h-3 justify-center mr-1 text-amber-500" /> VVIP
+                                <Crown className="w-[10px] h-[10px] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-amber-500" /> VVIP
                             </>
                         ) : (
                             <>
-                                <Star className="w-3 h-3 justify-center mr-1 text-gray-500" /> 우수업체
+                                <Star className="w-[10px] h-[10px] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-gray-500" /> 우수업체
                             </>
                         )}
                     </div>
