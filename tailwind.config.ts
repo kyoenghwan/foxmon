@@ -13,11 +13,12 @@ const config = {
     theme: {
         container: {
             center: true,
-            padding: "2rem",
+            padding: "1rem", // 컨테이너 내부 여유 공간 살짝 최적화
             screens: {
-                "2xl": "1536px",
-                "3xl": "1920px",
-                "4xl": "2348px",
+                "xl": "960px",
+                "2xl": "1216px",
+                "3xl": "1600px",
+                "4xl": "2240px",
             },
         },
         extend: {
