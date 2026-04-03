@@ -140,7 +140,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
             {/* --- [메인 카드 바디] --- */}
             <Link 
                 href={`/jobs/${id}`} 
-                className={`relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm transition-all duration-300 p-2.5 md:p-3 flex flex-col justify-between z-10 ${
+                className={`relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm transition-all duration-300 p-2 md:p-2.5 flex flex-col justify-between z-10 ${
                     isCyber ? 'bg-black/95 text-white' : 'bg-white'
                 }`}
             >
@@ -161,8 +161,8 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                 )}
 
                 {/* --- [콘텐츠 영역 (최상단)] --- */}
-                <div className="flex gap-2 md:gap-3 mb-1.5 relative z-10">
-                    <div className="w-[80px] h-[40px] md:w-[100px] md:h-[50px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100">
+                <div className="flex gap-2 mb-1 relative z-10">
+                    <div className="w-[90px] h-[45px] md:w-[120px] md:h-[60px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100">
                         {image ? (
                             <div 
                                 className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
@@ -194,8 +194,8 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                     </div>
                 </div>
 
-                <div className="mb-1.5 flex-1 flex flex-col justify-center relative z-10 overflow-hidden w-full">
-                    <MarqueeText className={`text-[12px] md:text-[13px] leading-[1.4] font-bold tracking-tight px-1 rounded-[2px] ${
+                <div className="mb-1 flex-1 flex flex-col justify-center relative z-10 overflow-hidden w-full">
+                    <MarqueeText className={`text-[12px] md:text-[13px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
                         isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
                         isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
                         'text-gray-800 bg-green-200/50'
@@ -233,16 +233,6 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                         )}
                     </div>
                 </div>
-                
-                {/* [라벨 배지] */}
-                {isImpact && (
-                    <div className="absolute top-0 right-0 z-20">
-                        <div className={`flex items-center justify-center text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg min-w-[50px] shadow-sm ${config.bg}`}>
-                            <Icon className="w-2.5 h-2.5 mr-0.5" />
-                            {config.label}
-                        </div>
-                    </div>
-                )}
                 
                 <div className={`absolute inset-0 border rounded-lg pointer-events-none transition-colors z-30 ${
                     isImpact ? config.border : 'border-gray-200 group-hover:border-purple-700'
