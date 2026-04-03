@@ -381,27 +381,29 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
 
                                         if (isPremium) {
                                             return (
-                                                <PremiumJobCard
-                                                    id="preview"
-                                                    company={form.company || '업체명'}
-                                                    title={form.title || '공고 제목을 입력하세요'}
-                                                    location={form.location || '전지역'}
-                                                    pay={form.pay || '급여 정보'}
-                                                    image={form.logo_url || form.image}
-                                                    impactType={(form.theme as any) || 'gold'}
-                                                />
+                                                <div className="w-full max-w-[200px]">
+                                                    <PremiumJobCard
+                                                        id="preview"
+                                                        company={form.company || '업체명'}
+                                                        title={form.title || '공고 제목을 입력하세요'}
+                                                        location={form.location || '전지역'}
+                                                        pay={form.pay || '급여 정보'}
+                                                        image={form.logo_url || form.image}
+                                                        impactType={(form.theme as any) || 'gold'}
+                                                    />
+                                                </div>
                                             );
                                         }
 
                                         return (
-                                            <div className="relative h-[130px] w-full max-w-[220px] p-[3px]">
+                                            <div className="relative h-[120px] md:h-[130px] w-full max-w-[200px] p-[3px] group">
                                                 {/* 스페셜 배경 글로우 */}
                                                 {isSpecial && (
                                                     <div className="absolute inset-0 overflow-hidden rounded-xl z-0"
                                                         style={{ backgroundColor: themeColor, opacity: 0.5 }} />
                                                 )}
 
-                                                <div className="relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm p-2.5 flex flex-col justify-between z-10 bg-white"
+                                                <div className="relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm p-2 md:p-2.5 flex flex-col justify-between z-10 bg-white transition-all duration-300"
                                                     style={{ borderWidth: 2, borderColor: isSpecial ? themeColor + '80' : '#e5e7eb' }}>
                                                     
                                                     {isSpecial && (
@@ -409,8 +411,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                                                             style={{ background: `linear-gradient(135deg, ${themeColor}08 0%, transparent 60%)` }} />
                                                     )}
 
-                                                    <div className="flex gap-2 mb-1.5 relative z-10">
-                                                        <div className="w-[80px] h-[40px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm"
+                                                    <div className="flex gap-2 mb-1 relative z-10 w-full">
+                                                        <div className="w-[90px] h-[45px] md:w-[120px] md:h-[60px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm"
                                                             style={{ borderWidth: 1, borderColor: isSpecial ? themeColor + '30' : '#f3f4f6' }}>
                                                             {(form.logo_url || form.image) && !isGeneral ? (
                                                                 <div className="w-full h-full bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${form.logo_url || form.image})` }} />
@@ -418,12 +420,14 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                                                                 <div className="text-gray-300 font-black text-[10px] bg-gray-100 w-full h-full flex items-center justify-center">NO LOGO</div>
                                                             )}
                                                         </div>
-                                                        <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
-                                                            <h3 className="font-black text-[14px] truncate tracking-tight"
-                                                                style={{ color: isSpecial ? themeColor : '#111827' }}>
-                                                                {form.company || '업체명'}
-                                                            </h3>
-                                                            <div className="flex items-center text-[11px] text-gray-500 truncate tracking-tight mt-0.5">
+                                                        <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5 overflow-hidden">
+                                                            <div className="relative w-full overflow-hidden whitespace-nowrap">
+                                                                <h3 className="font-black text-[14px] md:text-[15px] tracking-tight inline-block hover:animate-pulse"
+                                                                    style={{ color: isSpecial ? themeColor : '#111827' }}>
+                                                                    {form.company || '업체명'}
+                                                                </h3>
+                                                            </div>
+                                                            <div className="flex items-center text-[11px] md:text-[12px] text-gray-500 truncate tracking-tight mt-0.5">
                                                                 <span className="shrink-0 px-1 py-0.5 leading-none mr-1.5 font-bold rounded-[2px]"
                                                                     style={{
                                                                         color: isSpecial ? themeColor : '#2b6cb0',
@@ -440,26 +444,28 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                                                         </div>
                                                     </div>
 
-                                                    <div className="mb-1.5 flex-1 flex flex-col justify-center relative z-10">
-                                                        <p className="text-[12px] line-clamp-1 leading-[1.4] font-bold tracking-tight inline-block w-fit px-1 rounded-[2px]"
-                                                            style={{
-                                                                color: '#1f2937',
-                                                                backgroundColor: isSpecial ? themeColor + '15' : '#bbf7d050'
-                                                            }}>
-                                                            {form.title || '공고 제목을 입력하세요'}
-                                                        </p>
+                                                    <div className="mb-1 flex-1 flex flex-col justify-center relative z-10 w-full overflow-hidden">
+                                                        <div className="relative w-full overflow-hidden whitespace-nowrap">
+                                                            <p className="text-[12px] md:text-[13px] leading-[1.3] font-bold tracking-tight inline-block px-1 rounded-[2px] hover:animate-pulse"
+                                                                style={{
+                                                                    color: '#1f2937',
+                                                                    backgroundColor: isSpecial ? themeColor + '15' : '#bbf7d050'
+                                                                }}>
+                                                                {form.title || '공고 제목을 입력하세요'}
+                                                            </p>
+                                                        </div>
                                                     </div>
 
                                                     <div className="flex items-end justify-between mt-auto relative z-10">
-                                                        <div className="flex items-center text-[13px] font-bold text-gray-900 truncate tracking-tight gap-1.5">
-                                                            <span className="shrink-0 text-white text-[10px] px-1.5 py-0.5 rounded-sm shadow-sm"
+                                                        <div className="flex items-center text-[13px] md:text-[15px] font-bold text-gray-900 truncate tracking-tight gap-1.5">
+                                                            <span className="shrink-0 text-white text-[10px] md:text-[11px] px-1.5 py-0.5 rounded-sm shadow-sm"
                                                                 style={{ backgroundColor: isSpecial ? themeColor : '#805ad5' }}>
                                                                 TC
                                                             </span>
                                                             <span className="text-gray-800">{form.pay || '급여 정보'}</span>
                                                         </div>
-                                                        <div className="shrink-0 flex items-center border px-1.5 py-0.5 rounded-sm text-[10px] font-bold bg-gray-50 text-gray-600 border-gray-300">
-                                                            2회 180일
+                                                        <div className="shrink-0 flex items-center px-1.5 py-0.5 rounded-sm text-[10px] md:text-[11px] font-black shadow-sm bg-gray-100 text-gray-700 border border-gray-300">
+                                                            <Crown className="w-3 h-3 justify-center mr-1 text-gray-500" /> 일반업체
                                                         </div>
                                                     </div>
                                                 </div>
