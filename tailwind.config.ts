@@ -11,10 +11,22 @@ const config = {
     ],
     prefix: "",
     theme: {
+        screens: {
+            "sm": "640px",
+            "md": "768px",
+            "lg": "1024px",
+            "xl": "1280px",
+            "2xl": "1440px",
+            "3xl": "1920px",
+            "4xl": "2560px",
+        },
         container: {
             center: true,
             padding: "1rem", 
             screens: {
+                "sm": "600px",
+                "md": "728px",
+                "lg": "960px",
                 "xl": "890px",
                 "2xl": "1050px",
                 "3xl": "1400px",
@@ -22,11 +34,6 @@ const config = {
             },
         },
         extend: {
-            screens: {
-                "2xl": "1440px",
-                "3xl": "1920px",
-                "4xl": "2560px",
-            },
             colors: {
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
