@@ -170,10 +170,7 @@ export function HomeJobSections() {
                 </div>
                 
                 {demoJobs.length > 0 ? (
-                    <div 
-                        className="grid gap-2 sm:gap-3 md:gap-4 w-full"
-                        style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(165px, 1fr))' }}
-                    >
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 w-full">
                         {demoJobs.map((job) => (
                             <PremiumJobCard 
                                 key={job.id}
@@ -206,10 +203,7 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div 
-                        className="grid gap-2 sm:gap-3 md:gap-4 grid-flow-dense w-full"
-                        style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))' }}
-                    >
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 grid-flow-dense w-full">
                         {specialJobs.map((job) => (
                             <SpecialJobCard key={job.id} {...(job as any)} />
                         ))}
@@ -237,10 +231,7 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {generalJobs.length > 0 ? (
-                    <div 
-                        className="grid gap-2 sm:gap-3 w-full"
-                        style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))' }}
-                    >
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 w-full">
                         {generalJobs.map((job) => (
                             <GeneralJobItem key={job.id} {...(job as any)} />
                         ))}
