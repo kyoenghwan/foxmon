@@ -170,12 +170,12 @@ export function HomeJobSections() {
                 </div>
                 
                 {demoJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4 w-full
+                    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4 w-full
                         [&>*:nth-child(n+21)]:hidden 
                         sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
                         md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
-                        lg:[&>*:nth-child(n+41)]:block lg:[&>*:nth-child(n+51)]:hidden 
-                        xl:[&>*:nth-child(n+51)]:block xl:[&>*:nth-child(n+61)]:hidden
+                        2xl:[&>*:nth-child(n+41)]:block 2xl:[&>*:nth-child(n+51)]:hidden 
+                        3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
                     `}>
                         {demoJobs.map((job) => (
                             <PremiumJobCard 
@@ -209,12 +209,12 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4 w-full grid-flow-dense
+                    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4 w-full grid-flow-dense
                         [&>*:nth-child(n+21)]:hidden 
                         sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
                         md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
-                        lg:[&>*:nth-child(n+41)]:block lg:[&>*:nth-child(n+51)]:hidden 
-                        xl:[&>*:nth-child(n+51)]:block xl:[&>*:nth-child(n+61)]:hidden
+                        2xl:[&>*:nth-child(n+41)]:block 2xl:[&>*:nth-child(n+51)]:hidden 
+                        3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
                     `}>
                         {specialJobs.map((job) => (
                             <SpecialJobCard key={job.id} {...(job as any)} />
@@ -243,12 +243,12 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {generalJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 w-full
+                    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-2 sm:gap-3 w-full
                         [&>*:nth-child(n+21)]:hidden 
                         sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
                         md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
-                        lg:[&>*:nth-child(n+41)]:block lg:[&>*:nth-child(n+51)]:hidden 
-                        xl:[&>*:nth-child(n+51)]:block xl:[&>*:nth-child(n+61)]:hidden
+                        2xl:[&>*:nth-child(n+41)]:block 2xl:[&>*:nth-child(n+51)]:hidden 
+                        3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
                     `}>
                         {generalJobs.map((job) => (
                             <GeneralJobItem key={job.id} {...(job as any)} />
