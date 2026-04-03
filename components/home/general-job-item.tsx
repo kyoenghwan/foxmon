@@ -14,7 +14,7 @@ interface GeneralJobItemProps {
 
 export function GeneralJobItem({ company, title, location, pay, time, id }: GeneralJobItemProps) {
     return (
-        <div className="w-full aspect-[2/1] group transition-all">
+        <div className="w-full aspect-[3/2] group transition-all">
             <Link href={`/jobs/${id}`} className="flex flex-col rounded-lg border border-gray-100 bg-white hover:border-primary/30 hover:shadow-sm transition-all h-full p-2.5 md:p-3">
                 <div className="flex flex-col h-full w-full relative z-10 p-0">
                     {/* --- [상단: 상호명 50%, 지역 50%] --- */}

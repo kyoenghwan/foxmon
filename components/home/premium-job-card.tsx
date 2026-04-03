@@ -123,7 +123,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
     const isCyber = impactType === 'glitch';
 
     return (
-        <div className={`relative ${isBig ? 'h-full min-h-[292px]' : 'aspect-[2/1]'} w-full group p-[3px]`}>
+        <div className={`relative ${isBig ? 'h-full min-h-[292px]' : 'aspect-[3/2]'} w-full group p-[3px]`}>
             
             {/* --- [배로 아래 배경 레이어] --- */}
             {isImpact && (
