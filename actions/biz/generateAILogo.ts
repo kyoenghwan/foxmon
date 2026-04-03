@@ -58,9 +58,12 @@ export async function generateAILogo(companyName: string) {
         // 4. OpenAI 호출
         const openai = new OpenAI({ apiKey });
 
-        const prompt = `Create a professional, modern, minimalist vector logo for a company named "${companyName}". 
-The logo should have a completely clean background, no complex texts or weird random spellings, just a highly aesthetic flat or 3D iconic symbol representing a premium business context. 
-It must be suitable for a high-end mobile app or web platform banner. Style: corporate, sleek, vibrant abstract geometry or sleek crest.`;
+        const prompt = `Create a spectacular, high-impact typographical logo centered entirely around the exact text "${companyName}". 
+The text "${companyName}" MUST be written out explicitly, large, bold, and highly legible as the absolute centerpiece of the image. 
+Style: A flashy, vibrant, modern, premium nightclub, luxury brand, or esports team aesthetic. 
+Use rich, bright neon colors, 3D text effects, glossy gradients, or metallic textures. 
+The background should be either completely clean, dark and sleek, or have explosive colorful energy that complements the text but doesn't obscure it. 
+No abstract symbols unless they directly decorate the main text. Ensure the exact spelling "${companyName}" is featured perfectly.`;
 
         const response = await openai.images.generate({
             model: "dall-e-3",
