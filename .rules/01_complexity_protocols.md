@@ -4,7 +4,7 @@
 
 기능 추가/수정 요청 시 AI는 코딩 전 내부적으로 복잡도 점수를 계산합니다.
 
-```yaml
+~~~yaml
 complexity_scoring:
   high_complexity_indicators: # 각 10점
     - "저장", "조회", "계산", "검증", "결제", "이메일", "권한", "승인"
@@ -16,7 +16,7 @@ complexity_scoring:
     authentication_required: 10점
     authorization_required: 10점
     transaction_required: 15점
-```
+~~~
 
 ## 1.2 행동 결정 기준
 
@@ -46,11 +46,11 @@ complexity_scoring:
 ## 1.5 복잡도 계산 예시 (대표 샘플)
 
 ### 결제 및 저장 처리
-```text
+~~~text
 감지 키워드: "결제"(+10), "검증"(+10), "저장"(+10)
 구조적 복잡도: DB접근(+15), 트랜잭션(+15), 보안(+10)
 총점: 70점 → 고위험 기능이므로 즉시 YAML 설계 강제 진입 
-```
+~~~
 
 ## 1.6 요약
 - **무조건 설계부터**: 어떤 복잡한 로직이라도 YAML 승인 전에는 `ts/tsx` 코드를 작성하지 않는 것이 이 아키텍처의 핵심입니다. 세부 행동 강령은 `00_master_router`의 방어 지침에 따릅니다.

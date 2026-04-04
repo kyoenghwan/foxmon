@@ -38,7 +38,7 @@
 **UI 레벨 중복 호출 방지 (필수)**
 어떤 버튼 클릭이나 폼 제출 시에도 반드시 `isSubmitting` 검사를 통해 사용자의 다중 클릭/요청을 프레임워크 타임에서 블로킹해야 합니다.
 
-```typescript
+~~~typescript
 const [isSubmitting, setIsSubmitting] = useState(false);
 const handleSubmit = async () => {
   if (isSubmitting) return; // ← 반드시 포함
@@ -49,4 +49,4 @@ const handleSubmit = async () => {
     setIsSubmitting(false); // 성공/실패 무관 반드시 해제
   }
 };
-```
+~~~
