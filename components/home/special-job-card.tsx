@@ -48,7 +48,7 @@ export function SpecialJobCard({ company, title, location, pay, color = 'orange'
     }
 
     return (
-        <div className="w-full aspect-[3/2] group transition-all">
+        <div className="w-full min-w-[140px] aspect-[3/2] group transition-all">
             <Link href={`/jobs/${id}`} className={`relative block rounded-lg border-2 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full p-2.5 md:p-3 flex flex-col justify-between ${scheme}`}>
             
             <div className="flex flex-col h-full w-full relative z-10 p-0">

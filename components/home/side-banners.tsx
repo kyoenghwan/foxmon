@@ -59,7 +59,7 @@ export function SideBanners() {
                 key={ad.id}
                 href={`/jobs/${ad.id}`}
                 onClick={() => handleAdClick(ad.id)}
-                className="group relative flex flex-col w-full aspect-[2/3] bg-white rounded-xl border border-gray-200 hover:border-purple-600 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 p-2"
+                className="group relative flex flex-col w-full min-w-[93px] aspect-[2/3] bg-white rounded-xl border border-gray-200 hover:border-purple-600 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 p-2"
             >
                 {/* --- 상단 50%: 로고 --- */}
                 <div className="w-full h-[50%] rounded-[0.25rem] overflow-hidden bg-gray-50 flex items-center justify-center border border-gray-100 flex-shrink-0 mb-1.5 relative">
@@ -111,10 +111,10 @@ export function SideBanners() {
             {/* Left Wing */}
             <div className={`
                 hidden xl:flex flex-col gap-3 fixed top-[220px] z-20 transition-all duration-300
-                xl:w-[109px] xl:left-[calc(50%-624px)]
-                2xl:w-[100px] 2xl:left-[calc(50%-685px)]
-                3xl:w-[115px] 3xl:left-[calc(50%-900px)]
-                4xl:w-[165px] 4xl:left-[calc(50%-1250px)]
+                xl:w-[140px] xl:left-[calc(50%-620px)]
+                2xl:w-[134px] 2xl:left-[calc(50%-704px)]
+                3xl:w-[154px] 3xl:left-[calc(50%-924px)]
+                4xl:w-[158px] 4xl:left-[calc(50%-1198px)]
             `}>
                 <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Special Pick</div>
                 {leftAds.map((ad) => (
@@ -131,10 +131,10 @@ export function SideBanners() {
             {/* Right Wing */}
             <div className={`
                 hidden xl:flex flex-col gap-3 fixed top-[220px] z-20 transition-all duration-300
-                xl:w-[109px] xl:right-[calc(50%-624px)]
-                2xl:w-[100px] 2xl:right-[calc(50%-685px)]
-                3xl:w-[115px] 3xl:right-[calc(50%-900px)]
-                4xl:w-[165px] 4xl:right-[calc(50%-1250px)]
+                xl:w-[140px] xl:right-[calc(50%-620px)]
+                2xl:w-[134px] 2xl:right-[calc(50%-704px)]
+                3xl:w-[154px] 3xl:right-[calc(50%-924px)]
+                4xl:w-[158px] 4xl:right-[calc(50%-1198px)]
             `}>
                 <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Premium Ad</div>
                 {rightAds.map((ad) => (
