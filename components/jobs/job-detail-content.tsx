@@ -180,30 +180,32 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                        <span className="w-1 h-5 bg-primary rounded-full"></span> 상세 채용 내용
                     </h3>
 
-                    <div className="w-full text-center text-[15px] sm:text-[16px] leading-[1.8] text-gray-700 font-medium max-w-2xl px-4 mb-12">
-                        안녕하세요! <b className="text-primary font-black text-[17px]">{job.company}</b>에서 열정과 꿈을 가진 분들을 모십니다.<br/>
-                        동종 업계 최고의 대우를 약속드리며, 가족처럼 편안하고 즐겁게 일할 수 있는 환경을 제공합니다.<br/>
-                        망설이지 마시고 언제든 편하게 연락 주세요!
-                    </div>
-                    
-                    {/* 웅장한 전단지 이미지 */}
-                    {job.image ? (
-                        <div className="w-full flex justify-center mt-4 group">
-                            <div className="relative rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-200 group-hover:shadow-[0_20px_60px_rgba(0,0,0,0.15)] transition-shadow duration-500">
-                                <img 
-                                    src={job.image} 
-                                    className="w-full max-w-4xl object-contain bg-white" 
-                                    alt="채용 전단지" 
-                                />
-                                <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl"></div>
+                    <div className="w-full bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden p-6 md:p-10 flex flex-col items-center">
+                        <div className="w-full text-center text-[15px] sm:text-[16px] leading-[1.8] text-gray-700 font-medium max-w-2xl px-4 mb-10">
+                            안녕하세요! <b className="text-primary font-black text-[17px]">{job.company}</b>에서 열정과 꿈을 가진 분들을 모십니다.<br/>
+                            동종 업계 최고의 대우를 약속드리며, 가족처럼 편안하고 즐겁게 일할 수 있는 환경을 제공합니다.<br/>
+                            망설이지 마시고 언제든 편하게 연락 주세요!
+                        </div>
+                        
+                        {/* 웅장한 전단지 이미지 */}
+                        {job.image ? (
+                            <div className="w-full flex justify-center group">
+                                <div className="relative rounded-xl overflow-hidden shadow-sm border border-gray-200">
+                                    <img 
+                                        src={job.image} 
+                                        className="w-full max-w-4xl object-contain bg-white" 
+                                        alt="채용 전단지" 
+                                    />
+                                    <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-xl"></div>
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center py-32 bg-gray-50 rounded-3xl w-full text-gray-300 font-bold border-2 border-dashed border-gray-200 max-w-3xl">
-                            <span className="text-4xl mb-4 opacity-50">🦊</span>
-                            등록된 상세 전단지 이미지가 없습니다.
-                        </div>
-                    )}
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-24 bg-gray-50 rounded-2xl w-full text-gray-300 font-bold border-2 border-dashed border-gray-200 max-w-3xl">
+                                <span className="text-4xl mb-4 opacity-50">🦊</span>
+                                등록된 상세 전단지 이미지가 없습니다.
+                            </div>
+                        )}
+                    </div>
                 </div>
             </section>
         </div>
