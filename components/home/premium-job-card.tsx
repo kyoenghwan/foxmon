@@ -123,7 +123,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
     const isCyber = impactType === 'glitch';
 
     return (
-        <div className={`relative min-h-0 ${isBig ? 'h-full min-h-[292px]' : 'aspect-[3/2]'} w-full min-w-[140px] group p-[3px]`}>
+        <div className={`relative ${isBig ? 'h-full min-h-[292px]' : 'aspect-[3/2]'} w-full min-w-[140px] group p-[3px]`}>
             
             {/* --- [배로 아래 배경 레이어] --- */}
             {isImpact && (
@@ -164,7 +164,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                 <div className="flex flex-col h-full w-full relative z-10">
                     
                     {/* --- [상단: 로고 50%, 상호명 50%] --- */}
-                    <div className="flex w-full h-[50%] min-h-0 gap-2 pb-1.5">
+                    <div className="flex w-full h-[50%] gap-2 pb-1.5">
                         {/* 로고 영역 (1:1 비율 왼쪽) */}
                         <div className="flex-1 min-w-0 bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0">
                             {image ? (
@@ -200,7 +200,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                     </div>
 
                     {/* --- [하단: 가로 줄, 광고글, 급여/등급] --- */}
-                    <div className="flex flex-col w-full h-[50%] min-h-0 pt-1.5 sm:pt-2 border-t border-dashed border-gray-200 justify-between">
+                    <div className="flex flex-col w-full h-[50%] pt-1.5 sm:pt-2 border-t border-dashed border-gray-200 justify-between">
                         {/* 광고글 (멘트) */}
                         <div className="w-full relative overflow-hidden">
                             <MarqueeText className={`text-[11px] sm:text-[12px] lg:text-[13px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
