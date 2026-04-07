@@ -1,7 +1,7 @@
 import React from 'react';
 import { QA_GET_JOB_BY_ID } from '@/src/atoms/qa/auth/QA_GET_JOB_BY_ID';
 import { Button } from '@/components/ui/button';
-import { MapPin, Clock, DollarSign, Share2, Heart, ChevronLeft, Calendar, Phone } from 'lucide-react';
+import { Share2, Heart, MessageCircle, ArrowLeft, ThumbsUp, ThumbsDown } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -21,165 +21,215 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
 
   const job = result.data;
 
+  // DB에 없는 부가 정보들 하드코딩
+  const mockContact = {
+    nickname: '■ 20대 노래방알바 ■',
+    phone: '010-5444-3600',
+    kakao: 'foxmon123',
+    manager: '양승진 매니저'
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      {/* 1. Mobile-friendly Top Navigation */}
-      <div className="sticky top-0 bg-white/80 backdrop-blur-md z-50 border-b">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/jobs" className="p-2 -ml-2 text-gray-600 hover:text-primary transition-colors">
-            <ChevronLeft className="w-6 h-6" />
-          </Link>
-          <h1 className="text-[15px] font-black text-gray-900 truncate max-w-[200px]">{job.company}</h1>
-          <div className="flex items-center gap-1">
-            <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-              <Heart className="w-5 h-5" />
-            </button>
-            <button className="p-2 text-gray-400 hover:text-primary transition-colors">
-              <Share2 className="w-5 h-5" />
-            </button>
-          </div>
+    <div className="min-h-screen bg-[#f9f9f9]">
+        
+      {/* 홈 헤더 역할 보장 */}
+      <div className="bg-white border-b sticky top-0 z-50">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between lg:max-w-5xl">
+            <Link href="/jobs" className="flex items-center gap-1 text-gray-600 hover:text-primary transition-colors text-[13px] font-bold">
+                <ArrowLeft className="w-4 h-4" /> 뒤로가기
+            </Link>
+            <h1 className="text-[14px] font-black text-gray-900 truncate">업체정보안내</h1>
+            <div className="text-[11px] text-gray-500">조회 : {Math.floor(Math.random() * 5000)}</div>
         </div>
       </div>
 
-      <div className="container mx-auto px-0 md:px-4 md:pt-6">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row gap-6">
-          
-          {/* Main Content Side */}
-          <div className="flex-1">
-            {/* 2. Image Section */}
-            <div className="aspect-[16/9] md:rounded-2xl overflow-hidden bg-gray-100 shadow-sm relative">
-              {job.image ? (
-                <img 
-                  src={job.image} 
-                  alt={job.title} 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-300 font-black text-xl">
-                  FOXMON IMAGE
+      <main className="container mx-auto px-0 md:px-4 py-4 md:py-8 lg:max-w-5xl pb-32">
+        <div className="bg-white md:border md:shadow-sm">
+            
+            {/* 1단계. 업체정보 / 연락처 영역 */}
+            <div className="flex flex-col md:flex-row border-b">
+                
+                {/* 1-1. 좌측 로고 및 통계 */}
+                <div className="w-full md:w-[280px] p-6 border-b md:border-b-0 md:border-r bg-gray-50 flex flex-col items-center">
+                    <div className="w-full aspect-[4/3] bg-black rounded border border-gray-200 p-2 flex flex-col items-center justify-center mb-4 overflow-hidden relative shadow-inner">
+                        {/* 텍스트 로고 예시. DB 이미지가 사실상 전단지이므로 로고는 기본 텍스트 렌더링으로 사용 */}
+                        <div className="text-white text-center font-black leading-tight text-xl tracking-tighter">
+                            {job.company.split(' ').map((line, i) => <div key={i}>{line}</div>)}
+                        </div>
+                    </div>
+                    
+                    <div className="w-full bg-[#fdfaf5] border border-[#e2d5c3] p-3 rounded text-center mb-4">
+                        <div className="text-[11px] text-gray-500 mb-1">광고기간</div>
+                        <div className="text-[13px] font-bold text-gray-800 flex items-center justify-center gap-1">
+                            🥈 3회 90일
+                        </div>
+                    </div>
+
+                    <div className="w-full flex gap-2">
+                        <Button variant="outline" className="flex-1 h-9 rounded-sm flex items-center gap-1 border-blue-200 text-blue-700 bg-blue-50 text-[12px] font-bold px-0 shadow-sm hover:bg-blue-100">
+                            <span className="bg-white px-1.5 py-0.5 rounded border border-blue-100 text-black">0</span>
+                            <ThumbsUp className="w-3.5 h-3.5 fill-current" /> 좋아요
+                        </Button>
+                        <Button variant="outline" className="flex-1 h-9 rounded-sm flex items-center gap-1 border-red-200 text-red-700 bg-red-50 text-[12px] font-bold px-0 shadow-sm hover:bg-red-100">
+                            <span className="bg-white px-1.5 py-0.5 rounded border border-red-100 text-black">1</span>
+                            <ThumbsDown className="w-3.5 h-3.5 fill-current" /> 싫어요
+                        </Button>
+                    </div>
                 </div>
-              )}
-              {job.tier === 'PREMIUM' && (
-                <div className="absolute top-4 left-4 bg-primary text-black text-[11px] font-black px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
-                   🥈 PREMIUM
+
+                {/* 1-2. 우측 업체 정보 테이블 */}
+                <div className="flex-1 p-6 md:p-8 flex flex-col">
+                    <div className="grid grid-cols-[70px_1fr] sm:grid-cols-[100px_1fr] gap-y-4 md:gap-y-5 text-[13px] md:text-[14px]">
+                        
+                        <div className="text-gray-500 flex items-center gap-1.5 font-medium"><div className="w-1 h-1 bg-gray-400"></div> 닉네임</div>
+                        <div className="font-bold text-gray-900">{mockContact.nickname}</div>
+                        
+                        <div className="text-gray-500 flex items-center gap-1.5 font-medium"><div className="w-1 h-1 bg-gray-400"></div> 전화번호</div>
+                        <div className="font-black text-gray-900 text-[16px] md:text-[18px]">{mockContact.phone}</div>
+                        
+                        <div className="col-span-2 my-2 sm:my-3">
+                            <div className="bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white p-3 md:p-4 rounded-xl text-center shadow-md animate-pulse">
+                                <p className="font-bold text-[13px] md:text-[14px] text-purple-100 mb-0.5">'여우몬에서 보고 연락드립니다'</p>
+                                <p className="font-black text-[15px] md:text-[17px]">라고 하시면 정확한 상담을 받으실 수 있습니다.</p>
+                            </div>
+                        </div>
+
+                        <div className="text-gray-500 flex items-center gap-1.5 font-medium"><div className="w-1 h-1 bg-gray-400"></div> 카카오톡</div>
+                        <div className="font-bold text-gray-900 flex items-center gap-1.5">
+                            <span className="bg-[#fee500] text-[#000000] text-[10px] md:text-[11px] px-1.5 py-0.5 rounded font-black">TALK ID</span> 
+                            {mockContact.kakao}
+                        </div>
+
+                        <div className="text-gray-500 flex items-center gap-1.5 font-medium"><div className="w-1 h-1 bg-gray-400"></div> 상호</div>
+                        <div className="font-bold text-gray-900">{job.company}</div>
+
+                        <div className="text-gray-500 flex items-center gap-1.5 font-medium"><div className="w-1 h-1 bg-gray-400"></div> 담당자</div>
+                        <div className="font-bold text-gray-900">{mockContact.manager}</div>
+
+                        <div className="text-gray-500 flex items-center gap-1.5 font-medium"><div className="w-1 h-1 bg-gray-400"></div> 근무지역</div>
+                        <div className="font-bold text-gray-900">{job.location}</div>
+                    </div>
                 </div>
-              )}
             </div>
 
-            {/* 3. Title & Base Info */}
-            <div className="bg-white p-5 md:rounded-2xl md:mt-6 shadow-sm border-b md:border">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2 text-primary font-bold text-[13px]">
-                   <span className="px-2 py-0.5 bg-orange-50 rounded border border-orange-100">{job.company.split(' ')[1] || '모집중'}</span>
-                   <span className="text-gray-400">·</span>
-                   <span className="text-gray-500 font-medium">조회수 {Math.floor(Math.random() * 1000)}</span>
+            <div className="p-4 md:p-6 lg:p-8">
+                {/* 2. 업소 이미지 */}
+                <div className="mb-12">
+                    <div className="flex justify-start mb-0">
+                        <div className="bg-gray-500 text-white px-5 py-1.5 text-[13px] font-bold relative after:absolute after:top-full after:left-1/2 after:-translate-x-1/2 after:border-solid after:border-t-gray-500 after:border-t-4 after:border-x-transparent after:border-x-4 after:border-b-0">
+                            업소이미지
+                        </div>
+                    </div>
+                    <div className="w-full h-1 bg-gray-200 mb-6"></div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-gray-50 p-4 border border-gray-100">
+                        {[1,2,3,4].map(idx => (
+                        <div key={idx} className="aspect-[4/3] bg-white border border-gray-200 flex flex-col items-center justify-center text-center text-gray-300 shadow-sm relative group overflow-hidden">
+                            <span className="font-black text-[22px] tracking-tighter mb-1 relative z-10 group-hover:scale-110 transition-transform">NO IMG</span>
+                            <span className="text-[10px] sm:text-[11px] font-bold leading-tight relative z-10">첨부 된 이미지가<br/>없습니다.</span>
+                            {/* 데코 효과 */}
+                            <div className="absolute inset-0 bg-gray-100/50 opacity-0 group-hover:opacity-100 transition-opacity z-0"/>
+                        </div>
+                        ))}
+                    </div>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight">
-                  {job.title}
-                </h2>
-              </div>
 
-              {/* Quick Summary Grid */}
-              <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-gray-50">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                    <DollarSign className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-gray-400 font-bold">급여 정보</p>
-                    <p className="text-[15px] font-black text-gray-900">{job.pay}</p>
-                  </div>
+                {/* 3. 기본 채용정보 */}
+                <div className="mb-12">
+                    <div className="flex justify-start mb-0">
+                        <div className="bg-gray-500 text-white px-5 py-1.5 text-[13px] font-bold relative after:absolute after:top-full after:left-1/2 after:-translate-x-1/2 after:border-solid after:border-t-gray-500 after:border-t-4 after:border-x-transparent after:border-x-4 after:border-b-0">
+                            기본채용정보
+                        </div>
+                    </div>
+                    <div className="w-full h-1 bg-gray-200 mb-6"></div>
+                    
+                    <div className="border-t-2 border-primary border-b bg-white relative">
+                        <div className="grid grid-cols-[90px_1fr] sm:grid-cols-[120px_1fr] text-[13px] sm:text-[14px]">
+                            
+                            <div className="bg-gray-50 p-3 sm:p-4 border-b flex items-center text-gray-500 font-medium"><span className="text-gray-300 mr-2">›</span> 업무내용</div>
+                            <div className="p-3 sm:p-4 border-b font-medium text-gray-900">{job.title || '노래주점 - TC'}</div>
+                            
+                            <div className="bg-gray-50 p-3 sm:p-4 border-b flex items-center text-gray-500 font-medium"><span className="text-gray-300 mr-2">›</span> 고용형태</div>
+                            <div className="p-3 sm:p-4 border-b font-medium text-gray-900">고용</div>
+                            
+                            <div className="bg-gray-50 p-3 sm:p-4 border-b flex items-center text-gray-500 font-medium"><span className="text-gray-300 mr-2">›</span> 급여</div>
+                            <div className="p-3 sm:p-4 border-b font-medium text-gray-900 flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <span className="bg-[#5bc0de] text-white text-[10px] font-bold px-1.5 py-[2px] rounded-sm leading-none flex items-center justify-center">당일</span> 
+                                <span className="text-[#e03b8b] font-black text-[15px] sm:text-[16px]">{job.pay}</span>
+                                <span className="text-gray-400 text-[11px] sm:text-[12px] ml-1">2026년 최저시급 10,320원</span>
+                            </div>
+                            
+                            <div className="bg-gray-50 p-3 sm:p-4 border-b flex items-center text-gray-500 font-medium"><span className="text-gray-300 mr-2">›</span> 마감일자</div>
+                            <div className="p-3 sm:p-4 border-b font-medium text-gray-400"><span className="text-gray-900">2026-04-20</span> <span className="font-bold ml-1">D-13</span></div>
+                            
+                            <div className="bg-gray-50 p-3 sm:p-4 border-b flex items-center text-gray-500 font-medium"><span className="text-gray-300 mr-2">›</span> 편의사항</div>
+                            <div className="p-3 sm:p-4 border-b font-medium text-gray-400">선불가능, 팁별도, 갯수보장, 출퇴근지원, 초이스없음</div>
+                            
+                            <div className="bg-gray-50 p-3 sm:p-4 flex items-center text-gray-500 font-medium"><span className="text-gray-300 mr-2">›</span> 키워드</div>
+                            <div className="p-3 sm:p-4 font-bold text-[#428bca]">투잡알바, 당일지급, 초보가능, 주점, 룸싸롱</div>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-gray-400 font-bold">근무 지역</p>
-                    <p className="text-[15px] font-black text-gray-900">{job.location.split(' ')[0]}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-gray-400 font-bold">근무 시간</p>
-                    <p className="text-[15px] font-black text-gray-900">{job.time || '주야간 협의'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
-                    <Calendar className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-gray-400 font-bold">모집 마감</p>
-                    <p className="text-[15px] font-black text-gray-900">상시채용</p>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* 4. Detailed Description */}
-            <div className="bg-white p-5 md:rounded-2xl mt-4 shadow-sm md:border">
-              <h4 className="text-lg font-black text-gray-900 mb-6 border-l-4 border-primary pl-3">상세 모집요강</h4>
-              <div className="space-y-6 text-[15px] text-gray-700 leading-relaxed font-medium">
-                <p>
-                  안녕하요. <b>{job.company}</b>에서 열점적인 식구를 찾습니다.<br/>
-                  저희는 업계 최고의 대우와 가족 같은 분위기를 자랑하는 곳입니다.
-                </p>
-                <div className="bg-gray-50 p-4 rounded-xl space-y-3">
-                  <p className="font-bold text-gray-900 flex items-center gap-2">✅ 우대 및 지원 자격</p>
-                  <ul className="list-disc list-inside pl-1 space-y-1 text-[14px]">
-                    <li>초보자 환영 (친절히 가르쳐 드립니다!)</li>
-                    <li>장기 근무 가능자 우대</li>
-                    <li>밝고 긍정적인 마인드 소유자</li>
-                    <li>경력자 최고 대우 보장</li>
-                  </ul>
-                </div>
-                <p className="pt-2"> 
-                  궁금하신 점은 언제든 편하게 아래 버튼을 눌러 문의주세요.<br/>
-                  부재 시 문자 남겨주시면 확인 즉시 연락드리겠습니다.
-                </p>
-              </div>
-            </div>
-          </div>
+                {/* 4. 상세 채용 정보 (전단지) */}
+                <div className="mb-0">
+                    <div className="flex justify-start mb-0">
+                        <div className="bg-gray-500 text-white px-5 py-1.5 text-[13px] font-bold relative after:absolute after:top-full after:left-1/2 after:-translate-x-1/2 after:border-solid after:border-t-gray-500 after:border-t-4 after:border-x-transparent after:border-x-4 after:border-b-0">
+                            SNS공유
+                        </div>
+                    </div>
+                    <div className="w-full h-1 bg-gray-200 mb-6 flex items-center pt-5 pl-2 gap-1.5 border-b pb-3">
+                        <Button size="icon" className="w-[30px] h-[30px] bg-[#1da1f2] hover:bg-[#1a91da] text-white rounded-none p-0"><Share2 className="w-4 h-4"/></Button>
+                        <Button size="icon" className="w-[30px] h-[30px] bg-[#3b5998] hover:bg-[#324b80] text-white rounded-none p-0"><Heart className="w-4 h-4"/></Button>
+                    </div>
 
-          {/* Right Sidebar (Desktop only) */}
-          <div className="hidden lg:block w-[320px]">
-            <div className="bg-white p-6 rounded-2xl shadow-md border sticky top-24">
-              <div className="flex flex-col items-center text-center pb-6 border-b">
-                 <div className="w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center text-primary mb-3">
-                    <span className="font-black text-2xl tracking-tighter">FOX</span>
-                 </div>
-                 <h5 className="font-black text-lg text-gray-900">{job.company}</h5>
-                 <p className="text-[12px] text-gray-400 font-bold">인증된 우수 공고 업체</p>
-              </div>
-              <div className="py-6 space-y-4">
-                 <Button className="w-full h-14 bg-primary hover:bg-primary/90 text-black font-black text-lg shadow-lg">
-                    전화로 문의하기
-                 </Button>
-                 <Button variant="outline" className="w-full h-14 font-black text-gray-700 border-gray-200">
-                    문자 지원하기
-                 </Button>
-              </div>
-              <p className="text-[11px] text-gray-400 text-center leading-relaxed">
-                개인정보 보호를 위해 지원 시<br/> 안전 번호가 사용될 수 있습니다.
-              </p>
+                    <div className="font-bold text-[13px] mb-2 border-b border-gray-300 pb-2 text-gray-700">상세 채용정보</div>
+                    <div className="border border-gray-200 bg-white flex flex-col items-center">
+                        
+                        {/* 포스터 헤더 배너 처리 (기존 사이트의 퀸알바 바) */}
+                        <div className="w-full py-4 text-center border-b border-dashed border-gray-300 text-primary font-black flex flex-col items-center justify-center bg-[#fffafa]">
+                           <span className="text-2xl italic tracking-tighter">FOXMON</span>
+                           <span className="text-xs font-bold text-gray-400 uppercase">foxmon.vercel.app</span>
+                        </div>
+
+                        {/* 본문 텍스트가 있다면 여기에 */}
+                        <div className="w-full p-8 text-center text-[15px] sm:text-[16px] xl:text-[18px] leading-loose text-gray-800 font-bold bg-[#fffafa]">
+                            안녕하세요. <b className="text-primary text-xl">[{job.company}]</b>에서 열정을 가진 식구를 찾습니다.<br/>
+                            <span className="text-gray-500 text-sm mt-3 inline-block">저희는 업계 최고의 대우와 가족 같은 분위기를 자랑합니다. 최고 페이 보장!</span>
+                        </div>
+                        
+                        {/* 웅장한 전단지 이미지 위치 (기존의 Hero 16:9 였던 녀석) */}
+                        {job.image ? (
+                            <div className="w-full bg-black/5 flex justify-center py-10 px-4 md:px-10 border-t">
+                                <img 
+                                    src={job.image} 
+                                    className="w-full max-w-4xl object-contain shadow-2xl border bg-white" 
+                                    alt="상세 전단지" 
+                                    style={{ minHeight: '500px' }}
+                                />
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-center py-40 bg-gray-50 w-full text-gray-300 font-bold border-t">
+                                등록 된 상세 전단지 이미지가 없습니다.
+                            </div>
+                        )}
+                    </div>
+                </div>
+
             </div>
-          </div>
         </div>
+      </main>
+
+      {/* 모바일 하단 플로팅 지원 바 */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-3 flex gap-2 z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] pb-5">
+        <Button variant="outline" className="h-[48px] px-3 shrink-0 border-gray-200">
+           <Heart className="w-5 h-5 text-gray-400" />
+        </Button>
+        <Button className="flex-1 h-[48px] bg-primary hover:bg-primary/90 text-black font-black text-[15px] shadow-sm flex items-center justify-center gap-1.5 rounded-md">
+           <MessageCircle className="w-4 h-4 fill-current" /> 전화 지원하기
+        </Button>
       </div>
 
-      {/* 5. Mobile Floating Footer */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex gap-3 z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-        <Button variant="outline" className="w-14 h-14 md:h-14 p-0 shrink-0 border-gray-200">
-           <Heart className="w-6 h-6 text-gray-400" />
-        </Button>
-        <Button className="flex-1 h-14 bg-primary hover:bg-primary/90 text-black font-black text-lg shadow-md flex items-center justify-center gap-2">
-           <Phone className="w-5 h-5 fill-current" /> 전화지원
-        </Button>
-      </div>
     </div>
   );
 }
