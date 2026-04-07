@@ -48,12 +48,12 @@ export function SpecialJobCard({ company, title, location, pay, color = 'orange'
     }
 
     return (
-        <div className="w-full min-w-[140px] aspect-[3/2] group transition-all">
+        <div className="w-full min-h-0 min-w-[140px] aspect-[3/2] group transition-all">
             <Link href={`/jobs/${id}`} className={`relative block rounded-lg border-2 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full p-2.5 md:p-3 flex flex-col justify-between ${scheme}`}>
             
             <div className="flex flex-col h-full w-full relative z-10 p-0">
                 {/* --- [상단: 로고 50%, 상호명 50%] --- */}
-                <div className="flex w-full h-[50%] gap-2 pb-1.5">
+                <div className="flex w-full h-[50%] min-h-0 gap-2 pb-1.5">
                     {/* 로고 영역 (1:1 비율 왼쪽) */}
                     <div className="flex-1 min-w-0 bg-white/60 flex items-center justify-center rounded-sm border border-black/5 overflow-hidden shrink-0">
                         {image ? (
@@ -81,7 +81,7 @@ export function SpecialJobCard({ company, title, location, pay, color = 'orange'
                 </div>
 
                 {/* --- [하단: 가로 줄, 광고글, 급여/등급] --- */}
-                <div className="flex flex-col w-full h-[50%] pt-1.5 sm:pt-2 border-t border-dashed border-current/20 justify-between">
+                <div className="flex flex-col w-full h-[50%] min-h-0 pt-1.5 sm:pt-2 border-t border-dashed border-current/20 justify-between">
                     {/* 광고글 (멘트) */}
                     <div className="w-full relative overflow-hidden">
                         <p className="text-[11px] sm:text-[12px] lg:text-[13px] text-gray-800 line-clamp-1 leading-[1.3] font-bold tracking-tight bg-white/60 inline-block px-1 rounded-[2px]">

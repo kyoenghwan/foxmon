@@ -59,7 +59,7 @@ export function SideBanners() {
                 key={ad.id}
                 href={`/jobs/${ad.id}`}
                 onClick={() => handleAdClick(ad.id)}
-                className="group relative flex flex-col w-full min-w-[93px] aspect-[2/3] bg-white rounded-xl border border-gray-200 hover:border-purple-600 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 p-2"
+                className="group relative flex flex-col w-full min-h-0 min-w-[93px] aspect-[2/3] bg-white rounded-xl border border-gray-200 hover:border-purple-600 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 p-2"
             >
                 {/* --- 상단 50%: 로고 --- */}
                 <div className="w-full h-[50%] rounded-[0.25rem] overflow-hidden bg-gray-50 flex items-center justify-center border border-gray-100 flex-shrink-0 mb-1.5 relative">
