@@ -176,12 +176,9 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
             <section className="pt-8 border-t border-gray-100 mt-8">
                 <div className="flex flex-col items-center">
                     
-                    {/* 유려한 섹션 타이틀 */}
-                    <div className="inline-block text-center mb-10 relative">
-                        <span className="absolute -inset-1 block bg-gradient-to-r from-orange-200 to-primary/40 blur opacity-50 rounded-lg"></span>
-                        <h3 className="relative text-xl md:text-2xl font-black text-gray-900">상세 채용 내용</h3>
-                        <p className="relative mt-2 text-sm text-gray-400 font-semibold uppercase tracking-wider">{job.company}</p>
-                    </div>
+                    <h3 className="w-full text-left text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
+                       <span className="w-1 h-5 bg-primary rounded-full"></span> 상세 채용 내용
+                    </h3>
 
                     <div className="w-full text-center text-[15px] sm:text-[16px] leading-[1.8] text-gray-700 font-medium max-w-2xl px-4 mb-12">
                         안녕하세요! <b className="text-primary font-black text-[17px]">{job.company}</b>에서 열정과 꿈을 가진 분들을 모십니다.<br/>
