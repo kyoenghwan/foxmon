@@ -33,8 +33,8 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
         <div className="p-4 md:p-8 flex flex-col md:flex-row gap-6 md:gap-8 border-b border-gray-100">
             {/* 1-1. 좌측 로고 및 통계 */}
             <div className="w-full md:w-[280px] shrink-0 flex flex-col items-center">
-                <div className="w-full aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border border-gray-200/50 p-6 flex flex-col items-center justify-center mb-5 shadow-sm relative overflow-hidden group">
-                    <div className="text-gray-800 text-center font-black leading-tight text-2xl tracking-tighter drop-shadow-sm group-hover:scale-105 transition-transform duration-500">
+                <div className="w-full aspect-[3/2] bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border border-gray-200/50 p-6 flex flex-col items-center justify-center mb-5 shadow-sm relative overflow-hidden group">
+                    <div className="text-gray-800 text-center font-black leading-tight text-xl tracking-tighter drop-shadow-sm group-hover:scale-105 transition-transform duration-500">
                         {job.company.split(' ').map((line: string, i: number) => <div key={i}>{line}</div>)}
                     </div>
                     {/* Glassmorphism 빛 반사 효과 */}
@@ -43,7 +43,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 
                 <div className="w-full flex items-center justify-center gap-2 mb-5">
                     <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[11px] font-bold border border-amber-100/50 shadow-sm flex items-center gap-1">
-                        🥇 프리미엄 3회 90일
+                        👑 프리미엄 업체
                     </span>
                     <span className="text-[11px] text-gray-400 font-medium">
                         조회 {Math.floor(Math.random() * 5000)}
@@ -69,13 +69,9 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     <div className="text-gray-400 font-medium flex items-center">전화번호</div>
                     <div className="font-black text-primary text-[20px] md:text-[24px] tracking-tight">{mockContact.phone}</div>
                     
-                    <div className="col-span-2 my-2">
-                        <div className="bg-gradient-to-r from-[#6b21a8] via-[#86198f] to-[#be185d] p-[1px] rounded-2xl shadow-md overflow-hidden relative group cursor-pointer">
-                            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <div className="bg-white/10 backdrop-blur-sm p-4 md:p-5 text-center flex flex-col gap-1 items-center justify-center relative z-10">
-                                <p className="font-extrabold text-[13px] text-pink-100 tracking-wide uppercase">Partnership Alert</p>
-                                <p className="font-black text-[15px] md:text-[17px] text-white">'여우몬에서 보고 연락드립니다'<span className="font-medium text-[13px] md:text-[14px] text-pink-50 block mt-1">라고 하시면 정확한 상담을 받으실 수 있습니다.</span></p>
-                            </div>
+                    <div className="col-span-2 my-1">
+                        <div className="bg-pink-50/80 text-pink-600 border border-pink-100 rounded-lg p-2.5 text-center text-[12px] sm:text-[13px] font-medium shadow-sm">
+                            <b className="font-bold">'여우몬에서 보고 연락드립니다'</b> 라고 하시면 정확한 상담을 받으실 수 있습니다.
                         </div>
                     </div>
 
