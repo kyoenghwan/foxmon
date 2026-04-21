@@ -1,20 +1,20 @@
 'use client';
 
-import { useState } from 'react';
-import { Bell, Search, Eye, Pin } from 'lucide-react';
+import React, { useState } from 'react';
+import { Bell, Search, Eye, Pin, ChevronDown, ChevronUp } from 'lucide-react';
 
 // 추후 QA 원자 연동 예정 — 현재 데모 데이터
 const mockNotices = [
-    { id: '1', category: '공지', title: '포인트 마켓 베타오픈!', author_name: '영자', created_at: '2026-03-28', view_count: 8578, is_pinned: true },
-    { id: '2', category: '공지', title: '상단고정 배너 변경', author_name: '영자', created_at: '2026-03-27', view_count: 8896, is_pinned: true },
-    { id: '3', category: '공지', title: '모집·채용 시 성차별적 구인광고 금지요청', author_name: '영자', created_at: '2026-03-20', view_count: 18142, is_pinned: true },
-    { id: '4', category: '기타', title: '사업자번호 조회 오류 수정', author_name: '영자', created_at: '2026-03-15', view_count: 1340, is_pinned: false },
-    { id: '5', category: '기타', title: '서약서 📋', author_name: '영자', created_at: '2026-03-10', view_count: 11974, is_pinned: false },
-    { id: '6', category: '공지', title: '폭스몬 정식 서비스 오픈 안내', author_name: '영자', created_at: '2026-03-01', view_count: 6703, is_pinned: false },
-    { id: '7', category: '기타', title: '면접쿠폰 발송 재개', author_name: '영자', created_at: '2026-02-20', view_count: 6217, is_pinned: false },
-    { id: '8', category: '공지', title: '사이트 접속이 원활하지 않았습니다.', author_name: '영자', created_at: '2026-02-06', view_count: 5482, is_pinned: false },
-    { id: '9', category: '기타', title: '로그인 서버이전(앱 다시 로그인)', author_name: '영자', created_at: '2026-01-10', view_count: 6412, is_pinned: false },
-    { id: '10', category: '공지', title: '앱(안드로이드) 업데이트', author_name: '영자', created_at: '2025-12-14', view_count: 6752, is_pinned: false },
+    { id: '1', category: '공지', title: '포인트 마켓 베타오픈!', author_name: '영자', created_at: '2026-03-28', view_count: 8578, is_pinned: true, content: '여우몬 포인트 마켓이 베타 오픈했습니다!\n자세한 사항은 이벤트 페이지를 참고해주세요.' },
+    { id: '2', category: '공지', title: '상단고정 배너 변경', author_name: '영자', created_at: '2026-03-27', view_count: 8896, is_pinned: true, content: 'PC버전 및 모바일 상단고정 배너의 디자인 및 노출 로직이 변경되었습니다.' },
+    { id: '3', category: '공지', title: '모집·채용 시 성차별적 구인광고 금지요청', author_name: '영자', created_at: '2026-03-20', view_count: 18142, is_pinned: true, content: '남녀고용평등법에 따라 성차별적 구인광고는 법적으로 금지되어 있습니다. 등록 시 주의 부탁드립니다.' },
+    { id: '4', category: '기타', title: '사업자번호 조회 오류 수정', author_name: '영자', created_at: '2026-03-15', view_count: 1340, is_pinned: false, content: '나이스디앤비 사업자번호 조회 API 통신 오류가 수정되어 정상 작동합니다.' },
+    { id: '5', category: '기타', title: '서약서 📋', author_name: '영자', created_at: '2026-03-10', view_count: 11974, is_pinned: false, content: '윤리경영 실천을 위한 서약서 양식이 업데이트되었습니다.' },
+    { id: '6', category: '공지', title: '폭스몬 정식 서비스 오픈 안내', author_name: '영자', created_at: '2026-03-01', view_count: 6703, is_pinned: false, content: '드디어 폭스몬 정식 서비스가 오픈했습니다. 많은 이용 부탁드립니다.' },
+    { id: '7', category: '기타', title: '면접쿠폰 발송 재개', author_name: '영자', created_at: '2026-02-20', view_count: 6217, is_pinned: false, content: '일시 중단되었던 면접쿠폰 알림톡 발송 시스템이 재개되었습니다.' },
+    { id: '8', category: '공지', title: '사이트 접속이 원활하지 않았습니다.', author_name: '영자', created_at: '2026-02-06', view_count: 5482, is_pinned: false, content: 'DB 서버 점검으로 인해 약 20분간 접속이 지연된 점 사과드립니다.' },
+    { id: '9', category: '기타', title: '로그인 서버이전(앱 다시 로그인)', author_name: '영자', created_at: '2026-01-10', view_count: 6412, is_pinned: false, content: '인증 서버 안정화를 위한 이전 작업이 완료되었습니다. 앱 사용자분들은 다시 로그인해주시기 바랍니다.' },
+    { id: '10', category: '공지', title: '앱(안드로이드) 업데이트', author_name: '영자', created_at: '2025-12-14', view_count: 6752, is_pinned: false, content: 'Android OS 14 호환성 개선 업데이트가 완료되었습니다.' },
 ];
 
 const tabs = ['전체', '공지', '기타'];
@@ -22,6 +22,7 @@ const tabs = ['전체', '공지', '기타'];
 export default function NoticePage() {
     const [activeTab, setActiveTab] = useState('전체');
     const [searchQuery, setSearchQuery] = useState('');
+    const [expandedId, setExpandedId] = useState<string | null>(null);
 
     const filtered = mockNotices.filter(n => {
         const matchTab = activeTab === '전체' || n.category === activeTab;
@@ -88,39 +89,53 @@ export default function NoticePage() {
 
                 {/* 고정 항목 (알림) */}
                 {pinned.map((notice) => (
-                    <div
-                        key={notice.id}
-                        className="grid grid-cols-[60px_1fr_80px_100px_80px] border-b border-gray-100 bg-orange-50/30 hover:bg-orange-50 transition-colors cursor-pointer"
-                    >
-                        <div className="px-3 py-3 text-center">
-                            <span className="inline-block px-2 py-0.5 bg-red-500 text-white text-[10px] font-black rounded">알림</span>
+                    <React.Fragment key={notice.id}>
+                        <div
+                            onClick={() => setExpandedId(expandedId === notice.id ? null : notice.id)}
+                            className="grid grid-cols-[60px_1fr_80px_100px_80px] border-b border-gray-100 bg-orange-50/30 hover:bg-orange-50 transition-colors cursor-pointer"
+                        >
+                            <div className="px-3 py-3 text-center">
+                                <span className="inline-block px-2 py-0.5 bg-red-500 text-white text-[10px] font-black rounded">알림</span>
+                            </div>
+                            <div className="px-3 py-3 text-[14px] font-bold text-gray-900 flex items-center gap-2">
+                                <span className="text-yellow-500">📌</span>
+                                <span className="text-primary font-black text-[12px]">{notice.category}</span>
+                                {notice.title}
+                            </div>
+                            <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.author_name}</div>
+                            <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.created_at}</div>
+                            <div className="px-3 py-3 text-center text-[13px] text-gray-700 font-bold">{notice.view_count.toLocaleString()}</div>
                         </div>
-                        <div className="px-3 py-3 text-[14px] font-bold text-gray-900 flex items-center gap-2">
-                            <span className="text-yellow-500">📌</span>
-                            <span className="text-primary font-black text-[12px]">{notice.category}</span>
-                            {notice.title}
-                        </div>
-                        <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.author_name}</div>
-                        <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.created_at}</div>
-                        <div className="px-3 py-3 text-center text-[13px] text-gray-700 font-bold">{notice.view_count.toLocaleString()}</div>
-                    </div>
+                        {expandedId === notice.id && (
+                            <div className="bg-orange-50/10 p-6 border-b border-gray-200 text-[14px] text-gray-800 leading-relaxed font-medium whitespace-pre-wrap animate-in fade-in slide-in-from-top-2">
+                                {notice.content}
+                            </div>
+                        )}
+                    </React.Fragment>
                 ))}
 
                 {/* 일반 항목 */}
                 {normal.map((notice, idx) => (
-                    <div
-                        key={notice.id}
-                        className="grid grid-cols-[60px_1fr_80px_100px_80px] border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer"
-                    >
-                        <div className="px-3 py-3 text-center text-[13px] text-gray-500 font-medium">{normal.length - idx}</div>
-                        <div className="px-3 py-3 text-[14px] text-gray-800 flex items-center gap-2">
-                            <span className="text-gray-400 text-[12px] font-bold">{notice.category}</span>
-                            {notice.title}
+                    <React.Fragment key={notice.id}>
+                        <div
+                            onClick={() => setExpandedId(expandedId === notice.id ? null : notice.id)}
+                            className="grid grid-cols-[60px_1fr_80px_100px_80px] border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                            <div className="px-3 py-3 text-center text-[13px] text-gray-500 font-medium">{normal.length - idx}</div>
+                            <div className="px-3 py-3 text-[14px] text-gray-800 flex items-center gap-2">
+                                <span className="text-gray-400 text-[12px] font-bold">{notice.category}</span>
+                                <span className={expandedId === notice.id ? 'font-bold text-primary' : ''}>{notice.title}</span>
+                            </div>
+                            <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.author_name}</div>
+                            <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.created_at}</div>
+                            <div className="px-3 py-3 text-center text-[13px] text-gray-700 font-bold">{notice.view_count.toLocaleString()}</div>
                         </div>
-                        <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.author_name}</div>
-                        <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.created_at}</div>
-                        <div className="px-3 py-3 text-center text-[13px] text-gray-700 font-bold">{notice.view_count.toLocaleString()}</div>
-                    </div>
+                        {expandedId === notice.id && (
+                            <div className="bg-gray-50/50 p-6 border-b border-gray-200 text-[14px] text-gray-800 leading-relaxed font-medium whitespace-pre-wrap animate-in fade-in slide-in-from-top-2">
+                                {notice.content}
+                            </div>
+                        )}
+                    </React.Fragment>
                 ))}
 
                 {filtered.length === 0 && (

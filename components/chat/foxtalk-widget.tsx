@@ -274,14 +274,17 @@ export function FoxTalkWidget() {
             >
                 <div className="flex items-center gap-2">
                     {appState === 'CREATE_ROOM' || appState === 'ROOM' ? (
-                        <button onClick={() => {
+                        <button onClick={(e) => {
+                            e.stopPropagation();
                             if (appState === 'ROOM') {
                                 // 향후 나가기 시스템 메시지 추가 가능
                             }
                             setAppState('LOBBY'); 
                             loadRooms();
                             setCurrentRoom(null);
-                        }} className="p-1 hover:bg-white/20 rounded-full transition-colors mr-1">
+                        }} 
+                        onPointerDown={(e) => e.stopPropagation()}
+                        className="p-1 hover:bg-white/20 rounded-full transition-colors mr-1">
                             <ArrowLeft className="w-5 h-5 text-white" />
                         </button>
                     ) : (
@@ -294,7 +297,7 @@ export function FoxTalkWidget() {
                         <p className="text-[10px] text-white/80 font-medium">실시간 익명 오픈채팅</p>
                     </div>
                 </div>
-                <button onClick={() => setAppState('CLOSED')} className="p-1.5 hover:bg-white/20 rounded-full transition-colors">
+                <button onClick={(e) => { e.stopPropagation(); setAppState('CLOSED'); }} onPointerDown={(e) => e.stopPropagation()} className="p-1.5 hover:bg-white/20 rounded-full transition-colors">
                     <X className="w-5 h-5 text-white" />
                 </button>
             </div>

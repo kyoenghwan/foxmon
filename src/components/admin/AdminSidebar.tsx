@@ -24,6 +24,7 @@ const ADMIN_MENUS = [
   { id: 'community', label: '커뮤니티 관리', icon: MessageSquare, href: '/fox-office/community' },
   { id: 'support', label: '고객센터', icon: HelpCircle, href: '/fox-office/support' },
   { id: 'settings', label: '시스템 설정', icon: Settings, href: '/fox-office/settings' },
+  { id: 'master-data', label: '공통코드/마스터', icon: FileText, href: '/fox-office/master-data' },
 ];
 
 export function AdminSidebar() {
