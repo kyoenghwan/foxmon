@@ -41,25 +41,7 @@ INSERT INTO public.common_codes (list_type, code_value, code_name, sort_order) V
 ('NOTICE_TYPE', 'ETC', '기타', 2),
 ('NOTICE_TYPE', 'EVENT', '이벤트', 3),
 
--- 지역
-('JOB_REGION', 'SEOUL', '서울', 1),
-('JOB_REGION', 'GYEONGGI', '경기', 2),
-('JOB_REGION', 'INCHEON', '인천', 3),
-('JOB_REGION', 'BUSAN', '부산', 4),
-('JOB_REGION', 'DAEGU', '대구', 5),
-('JOB_REGION', 'GWANGJU', '광주', 6),
-('JOB_REGION', 'DAEJEON', '대전', 7),
-('JOB_REGION', 'ULSAN', '울산', 8),
-('JOB_REGION', 'SEJONG', '세종', 9),
-('JOB_REGION', 'GANGWON', '강원', 10),
-('JOB_REGION', 'GYEONGNAM', '경남', 11),
-('JOB_REGION', 'GYEONGBUK', '경북', 12),
-('JOB_REGION', 'JEONNAM', '전남', 13),
-('JOB_REGION', 'JEONBUK', '전북', 14),
-('JOB_REGION', 'CHUNGNAM', '충남', 15),
-('JOB_REGION', 'CHUNGBUK', '충북', 16),
-('JOB_REGION', 'JEJU', '제주', 17),
-('JOB_REGION', 'NATIONWIDE', '전국', 18),
+-- 지역 데이터는 하단 별도 INSERT 구문(5개 컬럼 스키마)에서 일괄 처리합니다.
 
 -- 직종 / 업종
 ('JOB_INDUSTRY', 'IT', 'IT/인터넷', 1),
@@ -102,3 +84,103 @@ INSERT INTO public.common_codes (list_type, code_value, code_name, sort_order) V
 ('BENEFITS', 'FLEXIBLE_HOURS', '자율출퇴근제(탄력근무제)', 9),
 ('BENEFITS', 'FREE_DRESS', '자율복장', 10)
 ON CONFLICT (list_type, code_value) DO NOTHING;
+
+-- ==============================================================================
+-- 지역 전용 2-Depth 계층 구조 데이터 (parent_code_value 사용)
+-- ==============================================================================
+INSERT INTO public.common_codes (list_type, code_value, parent_code_value, code_name, sort_order) VALUES
+-- =================== 지역 (시/도) (Depth 1) ===================
+('JOB_REGION', 'SEOUL', NULL, '서울', 1),
+('JOB_REGION', 'GYEONGGI', NULL, '경기', 2),
+('JOB_REGION', 'INCHEON', NULL, '인천', 3),
+('JOB_REGION', 'BUSAN', NULL, '부산', 4),
+('JOB_REGION', 'DAEGU', NULL, '대구', 5),
+('JOB_REGION', 'GWANGJU', NULL, '광주', 6),
+('JOB_REGION', 'DAEJEON', NULL, '대전', 7),
+('JOB_REGION', 'ULSAN', NULL, '울산', 8),
+('JOB_REGION', 'SEJONG', NULL, '세종', 9),
+('JOB_REGION', 'GANGWON', NULL, '강원', 10),
+('JOB_REGION', 'CHUNGBUK', NULL, '충북', 11),
+('JOB_REGION', 'CHUNGNAM', NULL, '충남', 12),
+('JOB_REGION', 'JEONBUK', NULL, '전북', 13),
+('JOB_REGION', 'JEONNAM', NULL, '전남', 14),
+('JOB_REGION', 'GYEONGBUK', NULL, '경북', 15),
+('JOB_REGION', 'GYEONGNAM', NULL, '경남', 16),
+('JOB_REGION', 'JEJU', NULL, '제주', 17),
+('JOB_REGION', 'ALL', NULL, '전국', 99),
+
+-- =================== 지역 (시/군/구) (Depth 2) ===================
+-- [서울]
+('JOB_REGION', 'SEOUL_GANGNAM', 'SEOUL', '강남구', 1),
+('JOB_REGION', 'SEOUL_GANGDONG', 'SEOUL', '강동구', 2),
+('JOB_REGION', 'SEOUL_GANGBUK', 'SEOUL', '강북구', 3),
+('JOB_REGION', 'SEOUL_GANGSEO', 'SEOUL', '강서구', 4),
+('JOB_REGION', 'SEOUL_GWANAK', 'SEOUL', '관악구', 5),
+('JOB_REGION', 'SEOUL_GWANGJIN', 'SEOUL', '광진구', 6),
+('JOB_REGION', 'SEOUL_GURO', 'SEOUL', '구로구', 7),
+('JOB_REGION', 'SEOUL_GEUMCHEON', 'SEOUL', '금천구', 8),
+('JOB_REGION', 'SEOUL_NOWON', 'SEOUL', '노원구', 9),
+('JOB_REGION', 'SEOUL_DOBONG', 'SEOUL', '도봉구', 10),
+('JOB_REGION', 'SEOUL_DONGDAEMUN', 'SEOUL', '동대문구', 11),
+('JOB_REGION', 'SEOUL_DONGJAK', 'SEOUL', '동작구', 12),
+('JOB_REGION', 'SEOUL_MAPO', 'SEOUL', '마포구', 13),
+('JOB_REGION', 'SEOUL_SEODAEMUN', 'SEOUL', '서대문구', 14),
+('JOB_REGION', 'SEOUL_SEOCHO', 'SEOUL', '서초구', 15),
+('JOB_REGION', 'SEOUL_SEONGDONG', 'SEOUL', '성동구', 16),
+('JOB_REGION', 'SEOUL_SEONGBUK', 'SEOUL', '성북구', 17),
+('JOB_REGION', 'SEOUL_SONGPA', 'SEOUL', '송파구', 18),
+('JOB_REGION', 'SEOUL_YANGCHEON', 'SEOUL', '양천구', 19),
+('JOB_REGION', 'SEOUL_YEONGDEUNGPO', 'SEOUL', '영등포구', 20),
+('JOB_REGION', 'SEOUL_YONGSAN', 'SEOUL', '용산구', 21),
+('JOB_REGION', 'SEOUL_EUNPYEONG', 'SEOUL', '은평구', 22),
+('JOB_REGION', 'SEOUL_JONGNO', 'SEOUL', '종로구', 23),
+('JOB_REGION', 'SEOUL_JUNG', 'SEOUL', '중구', 24),
+('JOB_REGION', 'SEOUL_JUNGNANG', 'SEOUL', '중랑구', 25),
+
+-- [경기] (주요 예시)
+('JOB_REGION', 'GYEONGGI_SUWON', 'GYEONGGI', '수원시', 1),
+('JOB_REGION', 'GYEONGGI_SEONGNAM', 'GYEONGGI', '성남시', 2),
+('JOB_REGION', 'GYEONGGI_GOYANG', 'GYEONGGI', '고양시', 3),
+('JOB_REGION', 'GYEONGGI_YONGIN', 'GYEONGGI', '용인시', 4),
+('JOB_REGION', 'GYEONGGI_BUCHEON', 'GYEONGGI', '부천시', 5),
+('JOB_REGION', 'GYEONGGI_ANSAN', 'GYEONGGI', '안산시', 6),
+('JOB_REGION', 'GYEONGGI_ANYANG', 'GYEONGGI', '안양시', 7),
+('JOB_REGION', 'GYEONGGI_NAMYANGJU', 'GYEONGGI', '남양주시', 8),
+('JOB_REGION', 'GYEONGGI_HWASEONG', 'GYEONGGI', '화성시', 9),
+('JOB_REGION', 'GYEONGGI_PYEONGTAEK', 'GYEONGGI', '평택시', 10),
+('JOB_REGION', 'GYEONGGI_UIJEONGBU', 'GYEONGGI', '의정부시', 11),
+('JOB_REGION', 'GYEONGGI_SIHEUNG', 'GYEONGGI', '시흥시', 12),
+('JOB_REGION', 'GYEONGGI_PAJU', 'GYEONGGI', '파주시', 13),
+('JOB_REGION', 'GYEONGGI_GIMPO', 'GYEONGGI', '김포시', 14),
+('JOB_REGION', 'GYEONGGI_GWANGMYEONG', 'GYEONGGI', '광명시', 15),
+
+-- [부산]
+('JOB_REGION', 'BUSAN_GANGSEO', 'BUSAN', '강서구', 1),
+('JOB_REGION', 'BUSAN_GEUMJEONG', 'BUSAN', '금정구', 2),
+('JOB_REGION', 'BUSAN_GIJANG', 'BUSAN', '기장군', 3),
+('JOB_REGION', 'BUSAN_NAM', 'BUSAN', '남구', 4),
+('JOB_REGION', 'BUSAN_DONG', 'BUSAN', '동구', 5),
+('JOB_REGION', 'BUSAN_DONGNAE', 'BUSAN', '동래구', 6),
+('JOB_REGION', 'BUSAN_BUSANJIN', 'BUSAN', '부산진구', 7),
+('JOB_REGION', 'BUSAN_BUK', 'BUSAN', '북구', 8),
+('JOB_REGION', 'BUSAN_SASANG', 'BUSAN', '사상구', 9),
+('JOB_REGION', 'BUSAN_SAHA', 'BUSAN', '사하구', 10),
+('JOB_REGION', 'BUSAN_SEO', 'BUSAN', '서구', 11),
+('JOB_REGION', 'BUSAN_SUYEONG', 'BUSAN', '수영구', 12),
+('JOB_REGION', 'BUSAN_YEONJE', 'BUSAN', '연제구', 13),
+('JOB_REGION', 'BUSAN_YEONGDO', 'BUSAN', '영도구', 14),
+('JOB_REGION', 'BUSAN_JUNG', 'BUSAN', '중구', 15),
+('JOB_REGION', 'BUSAN_HAEUNDAE', 'BUSAN', '해운대구', 16),
+
+-- [인천]
+('JOB_REGION', 'INCHEON_GANGHWA', 'INCHEON', '강화군', 1),
+('JOB_REGION', 'INCHEON_GYEYANG', 'INCHEON', '계양구', 2),
+('JOB_REGION', 'INCHEON_MICHUHOL', 'INCHEON', '미추홀구', 3),
+('JOB_REGION', 'INCHEON_NAMDONG', 'INCHEON', '남동구', 4),
+('JOB_REGION', 'INCHEON_DONG', 'INCHEON', '동구', 5),
+('JOB_REGION', 'INCHEON_BUPYEONG', 'INCHEON', '부평구', 6),
+('JOB_REGION', 'INCHEON_SEO', 'INCHEON', '서구', 7),
+('JOB_REGION', 'INCHEON_YEONSU', 'INCHEON', '연수구', 8),
+('JOB_REGION', 'INCHEON_ONGJIN', 'INCHEON', '옹진군', 9),
+('JOB_REGION', 'INCHEON_JUNG', 'INCHEON', '중구', 10)
+ON CONFLICT (list_type, code_value) DO UPDATE SET parent_code_value = EXCLUDED.parent_code_value;
