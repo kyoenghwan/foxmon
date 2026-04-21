@@ -27,6 +27,14 @@ CREATE INDEX IF NOT EXISTS idx_common_codes_list_type ON public.common_codes (li
 -- 초기 데모 데이터 (Migration용)
 -- ==============================================================================
 INSERT INTO public.common_codes (list_type, code_value, code_name, sort_order) VALUES
+-- 시스템 자체 메타 리스트 (단일 테이블 관리를 위한 메타 분류)
+('SYSTEM_LIST_TYPES', 'NOTICE_TYPE', '공지사항 분류', 1),
+('SYSTEM_LIST_TYPES', 'JOB_REGION', '지역 (근무지)', 2),
+('SYSTEM_LIST_TYPES', 'JOB_INDUSTRY', '직종/업종', 3),
+('SYSTEM_LIST_TYPES', 'WORK_TYPE', '고용 형태', 4),
+('SYSTEM_LIST_TYPES', 'SALARY_TYPE', '급여 종류', 5),
+('SYSTEM_LIST_TYPES', 'BENEFITS', '복리후생 및 혜택', 6),
+
 -- 공지사항 구분
 ('NOTICE_TYPE', 'NOTICE', '공지', 1),
 ('NOTICE_TYPE', 'ETC', '기타', 2),

@@ -8,19 +8,8 @@ import { Plus, Trash2, Edit2, Save, X, ToggleLeft, ToggleRight } from 'lucide-re
 
 export default function MasterDataPage() {
     const [codes, setCodes] = useState<CodeItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedType, setSelectedType] = useState<string>('NOTICE_TYPE');
-    
-    // Types available (metadata mapping)
-    const listTypesMeta: Record<string, string> = {
-        'NOTICE_TYPE': '공지사항 분류',
-        'JOB_REGION': '지역 (근무지)',
-        'JOB_INDUSTRY': '직종 / 업종',
-        'WORK_TYPE': '고용 형태',
-        'SALARY_TYPE': '급여 종류',
-        'BENEFITS': '복리후생 및 혜택'
-    };
-    const listTypes = Object.keys(listTypesMeta);
+    const [metaListTypes, setMetaListTypes] = useState<CodeItem[]>([]);
+    const [selectedType, setSelectedType] = useState<string>('SYSTEM_LIST_TYPES');
 
     // Form states for new/editing
     const [editingKey, setEditingKey] = useState<string | null>(null);
@@ -35,6 +24,12 @@ export default function MasterDataPage() {
         const res = await QA_GET_COMMON_CODES(undefined, false);
         if (res.success && res.data) {
             setCodes(res.data);
+            const systemMetas = res.data.filter(c => c.list_type === 'SYSTEM_LIST_TYPES').sort((a,b) => a.sort_order - b.sort_order);
+            setMetaListTypes(systemMetas);
+            // If the selectedType is not found in systemMetas or is not SYSTEM_LIST_TYPES
+            if (!systemMetas.find(m => m.code_value === selectedType) && selectedType !== 'SYSTEM_LIST_TYPES') {
+                if (systemMetas.length > 0) setSelectedType('SYSTEM_LIST_TYPES');
+            }
         }
         setLoading(false);
     };
@@ -121,14 +116,23 @@ export default function MasterDataPage() {
                 <div className="w-64 bg-white border border-gray-200 rounded-xl overflow-hidden shrink-0 shadow-sm">
                     <div className="p-4 bg-gray-50 border-b font-bold text-gray-700">분류 (List Type)</div>
                     <div className="flex flex-col divide-y divide-gray-100">
-                        {listTypes.map(type => (
+                        {/* 최상위 그룹 메타 관리 탭 */}
+                        <button
+                            onClick={() => setSelectedType('SYSTEM_LIST_TYPES')}
+                            className={`text-left px-5 py-3 transition-colors text-[14px] font-bold ${selectedType === 'SYSTEM_LIST_TYPES' ? 'bg-primary/20 text-primary border-l-4 border-primary' : 'hover:bg-gray-50 bg-white text-gray-800 border-l-4 border-transparent'}`}
+                        >
+                            <div className="flex items-center gap-2">⚙️ 시스템 기초 리스트 그룹</div>
+                            <div className={`text-[11px] mt-0.5 ${selectedType === 'SYSTEM_LIST_TYPES' ? 'text-primary/70' : 'text-gray-400 font-medium'}`}>SYSTEM_LIST_TYPES</div>
+                        </button>
+                        
+                        {metaListTypes.map(meta => (
                             <button
-                                key={type}
-                                onClick={() => setSelectedType(type)}
-                                className={`text-left px-5 py-3 transition-colors text-[14px] font-bold ${selectedType === type ? 'bg-primary/10 text-primary border-l-4 border-primary' : 'hover:bg-gray-50 bg-white text-gray-600 border-l-4 border-transparent'}`}
+                                key={meta.code_value}
+                                onClick={() => setSelectedType(meta.code_value)}
+                                className={`text-left px-5 py-3 transition-colors text-[14px] font-bold ${selectedType === meta.code_value ? 'bg-primary/10 text-primary border-l-4 border-primary' : 'hover:bg-gray-50 bg-white text-gray-600 border-l-4 border-transparent'}`}
                             >
-                                <div>{listTypesMeta[type]}</div>
-                                <div className={`text-[11px] mt-0.5 ${selectedType === type ? 'text-primary/70' : 'text-gray-400 font-medium'}`}>{type}</div>
+                                <div>{meta.code_name}</div>
+                                <div className={`text-[11px] mt-0.5 ${selectedType === meta.code_value ? 'text-primary/70' : 'text-gray-400 font-medium'}`}>{meta.code_value}</div>
                             </button>
                         ))}
                     </div>
@@ -138,7 +142,7 @@ export default function MasterDataPage() {
                 <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden min-h-[500px]">
                     <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
                         <h2 className="font-black text-gray-800 text-lg flex items-center gap-2">
-                            <span className="text-primary">{listTypesMeta[selectedType]}</span> <span className="text-sm font-medium text-gray-500 ml-1">항목 리스트</span>
+                            <span className="text-primary">{selectedType === 'SYSTEM_LIST_TYPES' ? '⚙️ 시스템 기초 리스트 그룹' : metaListTypes.find(m => m.code_value === selectedType)?.code_name || selectedType}</span> <span className="text-sm font-medium text-gray-500 ml-1">항목 리스트</span>
                         </h2>
                         {!newFormOpen && (
                             <button 
