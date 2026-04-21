@@ -1,7 +1,6 @@
 import { supabase } from '@/lib/supabase';
 
 export interface CodeItem {
-    id: string;
     list_type: string;
     code_value: string;
     code_name: string;

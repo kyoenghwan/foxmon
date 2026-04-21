@@ -4,7 +4,6 @@
 -- ==============================================================================
 
 CREATE TABLE IF NOT EXISTS public.common_codes (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     list_type VARCHAR NOT NULL,               -- e.g., 'NOTICE_TYPE', 'JOB_REGION', 'JOB_INDUSTRY'
     code_value VARCHAR NOT NULL,              -- e.g., 'SEOUL', 'IT', 'NOTICE', 'EVENT'
     code_name VARCHAR NOT NULL,               -- e.g., '서울', 'IT/스타트업', '공지사항', '이벤트'
@@ -12,12 +11,12 @@ CREATE TABLE IF NOT EXISTS public.common_codes (
     is_active BOOLEAN NOT NULL DEFAULT true,  -- 활성/비활성 처리
     description TEXT,                         -- 관리자용 비고
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    PRIMARY KEY (list_type, code_value)
 );
 
 -- 인덱스
 CREATE INDEX IF NOT EXISTS idx_common_codes_list_type ON public.common_codes (list_type);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_common_codes_unique_val ON public.common_codes (list_type, code_value);
 
 -- Row Level Security 설정 (필요시 활성화)
 -- ALTER TABLE public.common_codes ENABLE ROW LEVEL SECURITY;

@@ -1,7 +1,6 @@
 import { supabase } from '@/lib/supabase';
 
 export interface UpsertCodeParams {
-    id?: string;
     list_type: string;
     code_value: string;
     code_name: string;
@@ -23,14 +22,13 @@ export async function OA_UPSERT_COMMON_CODE(params: UpsertCodeParams) {
             updated_at: new Date().toISOString(),
         };
 
-        if (params.id) payload.id = params.id;
         if (params.sort_order !== undefined) payload.sort_order = params.sort_order;
         if (params.is_active !== undefined) payload.is_active = params.is_active;
         if (params.description !== undefined) payload.description = params.description;
 
         const { data, error } = await supabase
             .from('common_codes')
-            .upsert(payload, { onConflict: 'id' })
+            .upsert(payload, { onConflict: 'list_type,code_value' })
             .select()
             .single();
 

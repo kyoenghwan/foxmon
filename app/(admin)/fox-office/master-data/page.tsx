@@ -15,7 +15,7 @@ export default function MasterDataPage() {
     const listTypes = ['NOTICE_TYPE', 'JOB_REGION', 'JOB_INDUSTRY', 'SALARY_TYPE', 'BENEFITS', 'WORK_TYPE'];
 
     // Form states for new/editing
-    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editingKey, setEditingKey] = useState<string | null>(null);
     const [formVal, setFormVal] = useState({ code_value: '', code_name: '', sort_order: 0, description: '' });
     
     const [newFormOpen, setNewFormOpen] = useState(false);
@@ -39,23 +39,24 @@ export default function MasterDataPage() {
 
     const handleToggleActive = async (code: CodeItem) => {
         await OA_UPSERT_COMMON_CODE({
-            id: code.id,
             list_type: code.list_type,
             code_value: code.code_value,
             code_name: code.code_name,
-            is_active: !code.is_active
+            is_active: !code.is_active,
+            sort_order: code.sort_order,
+            description: code.description || undefined
         });
         loadData();
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (code: CodeItem) => {
         if (!confirm('정말로 해당 코드를 완전 삭제하시겠습니까? (보통 비활성화를 권장합니다)')) return;
-        await OA_DELETE_COMMON_CODE(id);
+        await OA_DELETE_COMMON_CODE(code.list_type, code.code_value);
         loadData();
     };
 
     const startEdit = (code: CodeItem) => {
-        setEditingId(code.id);
+        setEditingKey(`${code.list_type}_${code.code_value}`);
         setFormVal({
             code_value: code.code_value,
             code_name: code.code_name,
@@ -66,7 +67,6 @@ export default function MasterDataPage() {
 
     const saveEdit = async (code: CodeItem) => {
         const res = await OA_UPSERT_COMMON_CODE({
-            id: code.id,
             list_type: code.list_type,
             code_value: formVal.code_value,
             code_name: formVal.code_name,
@@ -75,7 +75,7 @@ export default function MasterDataPage() {
             is_active: code.is_active
         });
         if (res.success) {
-            setEditingId(null);
+            setEditingKey(null);
             loadData();
         } else {
             alert('저장 실패: ' + res.error);
@@ -189,9 +189,9 @@ export default function MasterDataPage() {
                                             </td>
                                         </tr>
                                     ) : typedCodes.map(code => {
-                                        const isEditing = editingId === code.id;
+                                        const isEditing = editingKey === `${code.list_type}_${code.code_value}`;
                                         return (
-                                            <tr key={code.id} className={`border-b border-gray-100 transition-colors ${!code.is_active ? 'bg-gray-50 opacity-60' : 'hover:bg-gray-50'}`}>
+                                            <tr key={`${code.list_type}_${code.code_value}`} className={`border-b border-gray-100 transition-colors ${!code.is_active ? 'bg-gray-50 opacity-60' : 'hover:bg-gray-50'}`}>
                                                 {isEditing ? (
                                                     <>
                                                         <td className="px-5 py-3"><input type="number" value={formVal.sort_order} onChange={e=>setFormVal({...formVal, sort_order: Number(e.target.value)})} className="w-16 p-1.5 border rounded text-center font-bold" /></td>
@@ -202,7 +202,7 @@ export default function MasterDataPage() {
                                                         <td className="px-5 py-3 text-right">
                                                             <div className="flex justify-end gap-1">
                                                                 <button onClick={()=>saveEdit(code)} className="p-1.5 bg-primary text-white rounded hover:bg-orange-600"><Save size={16} /></button>
-                                                                <button onClick={()=>setEditingId(null)} className="p-1.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"><X size={16} /></button>
+                                                                <button onClick={()=>setEditingKey(null)} className="p-1.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"><X size={16} /></button>
                                                             </div>
                                                         </td>
                                                     </>
@@ -220,7 +220,7 @@ export default function MasterDataPage() {
                                                         <td className="px-5 py-3 text-right">
                                                             <div className="flex justify-end gap-2 text-gray-400">
                                                                 <button onClick={()=>startEdit(code)} className="hover:text-primary transition-colors"><Edit2 size={16} /></button>
-                                                                <button onClick={()=>handleDelete(code.id)} className="hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                                                <button onClick={()=>handleDelete(code)} className="hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
                                                             </div>
                                                         </td>
                                                     </>
