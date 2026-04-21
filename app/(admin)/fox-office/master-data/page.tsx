@@ -11,8 +11,16 @@ export default function MasterDataPage() {
     const [loading, setLoading] = useState(true);
     const [selectedType, setSelectedType] = useState<string>('NOTICE_TYPE');
     
-    // Types available (can be dynamically extracted from codes or predefined)
-    const listTypes = ['NOTICE_TYPE', 'JOB_REGION', 'JOB_INDUSTRY', 'SALARY_TYPE', 'BENEFITS', 'WORK_TYPE'];
+    // Types available (metadata mapping)
+    const listTypesMeta: Record<string, string> = {
+        'NOTICE_TYPE': '공지사항 분류',
+        'JOB_REGION': '지역 (근무지)',
+        'JOB_INDUSTRY': '직종 / 업종',
+        'WORK_TYPE': '고용 형태',
+        'SALARY_TYPE': '급여 종류',
+        'BENEFITS': '복리후생 및 혜택'
+    };
+    const listTypes = Object.keys(listTypesMeta);
 
     // Form states for new/editing
     const [editingKey, setEditingKey] = useState<string | null>(null);
@@ -119,7 +127,8 @@ export default function MasterDataPage() {
                                 onClick={() => setSelectedType(type)}
                                 className={`text-left px-5 py-3 transition-colors text-[14px] font-bold ${selectedType === type ? 'bg-primary/10 text-primary border-l-4 border-primary' : 'hover:bg-gray-50 bg-white text-gray-600 border-l-4 border-transparent'}`}
                             >
-                                {type}
+                                <div>{listTypesMeta[type]}</div>
+                                <div className={`text-[11px] mt-0.5 ${selectedType === type ? 'text-primary/70' : 'text-gray-400 font-medium'}`}>{type}</div>
                             </button>
                         ))}
                     </div>
@@ -129,7 +138,7 @@ export default function MasterDataPage() {
                 <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden min-h-[500px]">
                     <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
                         <h2 className="font-black text-gray-800 text-lg flex items-center gap-2">
-                            <span className="text-primary">{selectedType}</span> 항목 리스트
+                            <span className="text-primary">{listTypesMeta[selectedType]}</span> <span className="text-sm font-medium text-gray-500 ml-1">항목 리스트</span>
                         </h2>
                         {!newFormOpen && (
                             <button 
