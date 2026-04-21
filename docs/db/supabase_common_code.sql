@@ -6,6 +6,7 @@
 CREATE TABLE IF NOT EXISTS public.common_codes (
     list_type VARCHAR NOT NULL,               -- e.g., 'NOTICE_TYPE', 'JOB_REGION', 'JOB_INDUSTRY'
     code_value VARCHAR NOT NULL,              -- e.g., 'SEOUL', 'IT', 'NOTICE', 'EVENT'
+    parent_code_value VARCHAR,                -- 2-Depth 계층 구조를 위한 부모 코드 
     code_name VARCHAR NOT NULL,               -- e.g., '서울', 'IT/스타트업', '공지사항', '이벤트'
     sort_order INT NOT NULL DEFAULT 0,        -- 정렬 우선순위
     is_active BOOLEAN NOT NULL DEFAULT true,  -- 활성/비활성 처리

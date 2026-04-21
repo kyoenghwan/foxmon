@@ -14,10 +14,10 @@ export default function MasterDataPage() {
 
     // Form states for new/editing
     const [editingKey, setEditingKey] = useState<string | null>(null);
-    const [formVal, setFormVal] = useState({ code_value: '', code_name: '', sort_order: 0, description: '' });
+    const [formVal, setFormVal] = useState({ code_value: '', parent_code_value: '', code_name: '', sort_order: 0, description: '' });
     
     const [newFormOpen, setNewFormOpen] = useState(false);
-    const [newFormVal, setNewFormVal] = useState({ code_value: '', code_name: '', sort_order: 0, description: '' });
+    const [newFormVal, setNewFormVal] = useState({ code_value: '', parent_code_value: '', code_name: '', sort_order: 0, description: '' });
 
     const loadData = async () => {
         setLoading(true);
@@ -63,6 +63,7 @@ export default function MasterDataPage() {
         setEditingKey(`${code.list_type}_${code.code_value}`);
         setFormVal({
             code_value: code.code_value,
+            parent_code_value: code.parent_code_value || '',
             code_name: code.code_name,
             sort_order: code.sort_order,
             description: code.description || ''
@@ -73,6 +74,7 @@ export default function MasterDataPage() {
         const res = await OA_UPSERT_COMMON_CODE({
             list_type: code.list_type,
             code_value: formVal.code_value,
+            parent_code_value: formVal.parent_code_value || null,
             code_name: formVal.code_name,
             sort_order: formVal.sort_order,
             description: formVal.description,
@@ -91,6 +93,7 @@ export default function MasterDataPage() {
         const res = await OA_UPSERT_COMMON_CODE({
             list_type: selectedType,
             code_value: newFormVal.code_value,
+            parent_code_value: newFormVal.parent_code_value || null,
             code_name: newFormVal.code_name,
             sort_order: newFormVal.sort_order,
             description: newFormVal.description,
@@ -98,7 +101,7 @@ export default function MasterDataPage() {
         });
         if (res.success) {
             setNewFormOpen(false);
-            setNewFormVal({ code_value: '', code_name: '', sort_order: 0, description: '' });
+            setNewFormVal({ code_value: '', parent_code_value: '', code_name: '', sort_order: 0, description: '' });
             loadData();
         } else {
             alert('생성 실패: ' + res.error);
@@ -164,6 +167,7 @@ export default function MasterDataPage() {
                                     <tr>
                                         <th className="px-5 py-3 border-b">순서</th>
                                         <th className="px-5 py-3 border-b">코드값 (code_value)</th>
+                                        <th className="px-5 py-3 border-b">부모 코드</th>
                                         <th className="px-5 py-3 border-b">표시명칭 (code_name)</th>
                                         <th className="px-5 py-3 border-b">활성</th>
                                         <th className="px-5 py-3 border-b">설명</th>
@@ -181,7 +185,10 @@ export default function MasterDataPage() {
                                                 <input type="text" placeholder="예: SEOUL" value={newFormVal.code_value} onChange={e=>setNewFormVal({...newFormVal, code_value: e.target.value})} className="w-full p-1.5 border rounded font-bold uppercase" />
                                             </td>
                                             <td className="px-5 py-3">
-                                                <input type="text" placeholder="예: 서울" value={newFormVal.code_name} onChange={e=>setNewFormVal({...newFormVal, code_name: e.target.value})} className="w-full p-1.5 border rounded font-bold" />
+                                                <input type="text" placeholder="예: 상위코드(선택)" value={newFormVal.parent_code_value} onChange={e=>setNewFormVal({...newFormVal, parent_code_value: e.target.value})} className="w-full p-1.5 border rounded uppercase" />
+                                            </td>
+                                            <td className="px-5 py-3">
+                                                <input type="text" placeholder="예: 강남구" value={newFormVal.code_name} onChange={e=>setNewFormVal({...newFormVal, code_name: e.target.value})} className="w-full p-1.5 border rounded font-bold" />
                                             </td>
                                             <td className="px-5 py-3 font-bold text-green-600">활성</td>
                                             <td className="px-5 py-3">
@@ -209,7 +216,8 @@ export default function MasterDataPage() {
                                                 {isEditing ? (
                                                     <>
                                                         <td className="px-5 py-3"><input type="number" value={formVal.sort_order} onChange={e=>setFormVal({...formVal, sort_order: Number(e.target.value)})} className="w-16 p-1.5 border rounded text-center font-bold" /></td>
-                                                        <td className="px-5 py-3"><input type="text" value={formVal.code_value} onChange={e=>setFormVal({...formVal, code_value: e.target.value})} className="w-full p-1.5 border rounded font-bold" /></td>
+                                                        <td className="px-5 py-3"><input type="text" value={formVal.code_value} onChange={e=>setFormVal({...formVal, code_value: e.target.value})} className="w-full p-1.5 border rounded font-bold uppercase" /></td>
+                                                        <td className="px-5 py-3"><input type="text" value={formVal.parent_code_value} onChange={e=>setFormVal({...formVal, parent_code_value: e.target.value})} className="w-full p-1.5 border rounded uppercase text-gray-500" /></td>
                                                         <td className="px-5 py-3"><input type="text" value={formVal.code_name} onChange={e=>setFormVal({...formVal, code_name: e.target.value})} className="w-full p-1.5 border rounded font-bold" /></td>
                                                         <td className="px-5 py-3 text-gray-500 font-bold">{code.is_active ? 'ON' : 'OFF'}</td>
                                                         <td className="px-5 py-3"><input type="text" value={formVal.description} onChange={e=>setFormVal({...formVal, description: e.target.value})} className="w-full p-1.5 border rounded text-xs" /></td>
@@ -222,8 +230,11 @@ export default function MasterDataPage() {
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <td className="px-5 py-3 font-bold text-gray-500">{code.sort_order}</td>
+                                                        <td className="px-5 py-3 font-bold text-gray-500 text-center">{code.sort_order}</td>
                                                         <td className="px-5 py-3 font-black text-gray-700">{code.code_value}</td>
+                                                        <td className="px-5 py-3 font-bold text-gray-400 text-xs">
+                                                            {code.parent_code_value ? <span className="bg-gray-100 px-2 py-1 rounded border border-gray-200">↳ {code.parent_code_value}</span> : '-'}
+                                                        </td>
                                                         <td className="px-5 py-3 font-bold text-gray-900">{code.code_name}</td>
                                                         <td className="px-5 py-3">
                                                             <button onClick={() => handleToggleActive(code)} className="transition-colors">

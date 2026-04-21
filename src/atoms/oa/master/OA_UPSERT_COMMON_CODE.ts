@@ -5,6 +5,7 @@ import { supabaseAdmin as supabase } from '@/lib/supabase';
 export interface UpsertCodeParams {
     list_type: string;
     code_value: string;
+    parent_code_value?: string | null;
     code_name: string;
     sort_order?: number;
     is_active?: boolean;
@@ -27,6 +28,7 @@ export async function OA_UPSERT_COMMON_CODE(params: UpsertCodeParams) {
         if (params.sort_order !== undefined) payload.sort_order = params.sort_order;
         if (params.is_active !== undefined) payload.is_active = params.is_active;
         if (params.description !== undefined) payload.description = params.description;
+        if (params.parent_code_value !== undefined) payload.parent_code_value = params.parent_code_value;
 
         const { data, error } = await supabase
             .from('common_codes')

@@ -5,6 +5,7 @@ import { supabaseAdmin as supabase } from '@/lib/supabase';
 export interface CodeItem {
     list_type: string;
     code_value: string;
+    parent_code_value?: string | null;
     code_name: string;
     sort_order: number;
     is_active: boolean;

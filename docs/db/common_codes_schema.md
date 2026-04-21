@@ -8,6 +8,7 @@
 |---|---|---|---|
 | `list_type` | VARCHAR | PK, Not Null | 코드 분류 (예: 'NOTICE_TYPE', 'JOB_REGION', 'JOB_INDUSTRY', 'SALARY_TYPE', 'BENEFITS') |
 | `code_value` | VARCHAR | PK, Not Null | 시스템 내부 저장용 논리 값 (예: 'SEOUL', 'IT') |
+| `parent_code_value`| VARCHAR | Nullable | 상위 카테고리 참조용 (예: 'SEOUL_GANGNAM'의 부모는 'SEOUL') |
 | `code_name` | VARCHAR | Not Null | 사용자 노출용 출력 값 (예: '서울', 'IT/스타트업') |
 | `sort_order` | INT | Default 0 | UI 출력 시 노출 순서 |
 | `is_active` | BOOLEAN | Default true | 활성화 상태 (Soft Delete 용도) |
