@@ -8,6 +8,7 @@ import { Plus, Trash2, Edit2, Save, X, ToggleLeft, ToggleRight } from 'lucide-re
 
 export default function MasterDataPage() {
     const [codes, setCodes] = useState<CodeItem[]>([]);
+    const [loading, setLoading] = useState(true);
     const [metaListTypes, setMetaListTypes] = useState<CodeItem[]>([]);
     const [selectedType, setSelectedType] = useState<string>('SYSTEM_LIST_TYPES');
 
