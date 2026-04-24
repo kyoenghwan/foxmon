@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, Crown, Zap, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
@@ -9,6 +9,7 @@ import { SpecialJobCard } from '@/components/home/special-job-card';
 import { GeneralJobItem } from '@/components/home/general-job-item';
 import { GeneralJobListRow } from '@/components/jobs/general-job-list-row';
 import { AdPriceModal } from '@/components/jobs/AdPriceModal';
+import { Button } from '@/components/ui/button';
 
 interface JobsListContentProps {
     isEmployer?: boolean;
@@ -40,6 +41,32 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
         fetchJobs();
     }, []);
 
+    // 🎨 [IMPACT DEMO] 22종 테마 전체 적용
+    const impacts: any[] = [
+        'gold', 'neon', 'neon_crazy', 'fire', 'ice', 'emerald', 'glitch', 'storm', 'ghost',
+        'forest', 'ocean', 'sakura', 'galaxy', 'sun', 'lava', 'matrix', 'retro',
+        'diamond', 'platinum', 'aura', 'candy', 'toxic'
+    ];
+    const demoJobs = Array.from({ length: 20 }, (_, i) => {
+        const baseJob = premiumJobs.length > 0 
+            ? premiumJobs[i % premiumJobs.length] 
+            : {
+                id: `mock-${i}`,
+                company: `프리미엄 업체 ${i + 1}`,
+                title: `최고의 대우 보장합니다 (${i + 1})`,
+                location: '서울 강남구',
+                pay: '[시급] 70,000원',
+                image: '',
+                impactType: 'none'
+            };
+
+        return {
+            ...baseJob,
+            id: `demo-${i}`,
+            impactType: impacts[i % impacts.length]
+        };
+    });
+
     if (loading) {
         return (
             <div className="py-24 flex flex-col items-center justify-center gap-4">
@@ -49,35 +76,53 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
         );
     }
 
-    // 2줄만 보여주기 위한 공통 반응형 숨김 클래스
-    const twoRowGridClasses = `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4 lg:gap-5 grid-flow-dense
+    // 프리미엄 & 스페셜 2줄 숨김 클래스 (Home과 동일한 그리드 기준)
+    const twoRowPremiumSpecialGridClasses = `grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-3 xl:gap-4 w-full
         [&>*:nth-child(n+5)]:hidden 
         md:[&>*:nth-child(n+7)]:hidden 
-        lg:[&>*:nth-child(n+9)]:hidden 
-        xl:[&>*:nth-child(n+11)]:hidden 
-        2xl:[&>*:nth-child(n+13)]:hidden`;
+        xl:[&>*:nth-child(n+9)]:hidden 
+        2xl:[&>*:nth-child(n+11)]:hidden 
+        3xl:[&>*:nth-child(n+13)]:hidden
+        4xl:[&>*:nth-child(n+17)]:hidden`;
+
+    // 일반 광고 2줄 숨김 클래스
+    const twoRowGeneralGridClasses = `grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-2 sm:gap-3 w-full
+        [&>*:nth-child(n+5)]:hidden 
+        sm:[&>*:nth-child(n+7)]:hidden 
+        md:[&>*:nth-child(n+9)]:hidden 
+        2xl:[&>*:nth-child(n+11)]:hidden 
+        3xl:[&>*:nth-child(n+13)]:hidden`;
 
     return (
         <div className="space-y-12">
             {/* Top 20 Premium Banners (2 Rows) */}
             <section>
-                <div className="mb-4 flex items-center justify-between border-b pb-2">
+                <div className="flex items-center justify-between mb-6 border-b pb-4">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-black text-gray-900 tracking-tight">프리미엄 구인정보</h2>
-                        <AdPriceModal type="premium" title="Premium" />
+                        <Crown className="w-6 h-6 text-primary fill-primary animate-bounce" />
+                        <h2 className="text-2xl font-black text-gray-900 italic uppercase">
+                            프리미엄 채용 (IMPACT DEMO)
+                        </h2>
                     </div>
-                    {isEmployer ? (
-                        <Link href="/biz/ads/new" className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-[11px] font-black rounded-lg hover:bg-orange-600 transition-colors shadow-sm">
-                            <Plus className="w-3.5 h-3.5" /> 프리미엄 등록
-                        </Link>
-                    ) : (
-                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-md">추천 20</span>
-                    )}
+                    <div className="flex items-center gap-3">
+                        <AdPriceModal type="premium" title="Premium" />
+                        {isEmployer && (
+                            <Link href="/biz/ads/new">
+                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white">
+                                    <Plus className="w-4 h-4 mr-1" /> 프리미엄 등록
+                                </Button>
+                            </Link>
+                        )}
+                    </div>
                 </div>
-                {premiumJobs.length > 0 ? (
-                    <div className={twoRowGridClasses}>
-                        {premiumJobs.map((job) => (
-                            <PremiumJobCard key={job.id} {...(job as any)} />
+                {demoJobs.length > 0 ? (
+                    <div className={twoRowPremiumSpecialGridClasses}>
+                        {demoJobs.map((job) => (
+                            <PremiumJobCard 
+                                key={job.id} 
+                                {...(job as any)} 
+                                impactType={(job as any).impactType}
+                            />
                         ))}
                     </div>
                 ) : (
@@ -89,21 +134,24 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
 
             {/* Special 20 Banners (2 Rows) */}
             <section>
-                <div className="mb-4 flex items-center justify-between border-b pb-2">
+                <div className="flex items-center justify-between mb-6 border-b pb-4">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-black text-gray-900 tracking-tight">스페셜 구인정보</h2>
-                        <AdPriceModal type="special" title="Special" />
+                        <Zap className="w-6 h-6 text-yellow-500 animate-pulse" />
+                        <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2 italic uppercase">
+                            스페셜 채용
+                        </h2>
                     </div>
-                    {isEmployer ? (
-                        <Link href="/biz/ads/new" className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-400 text-black text-[11px] font-black rounded-lg hover:bg-yellow-500 transition-colors shadow-sm">
-                            <Plus className="w-3.5 h-3.5" /> 스페셜 등록
-                        </Link>
-                    ) : (
-                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-md">추천 20</span>
-                    )}
+                    <div className="flex items-center gap-3">
+                        <AdPriceModal type="special" title="Special" />
+                        {isEmployer && (
+                            <Link href="/biz/ads/new" className="flex items-center gap-1.5 px-4 py-1.5 bg-yellow-400 text-black text-[11px] font-black rounded-lg hover:scale-105 transition-transform shadow-sm">
+                                <Plus className="w-3.5 h-3.5" /> 스페셜 등록
+                            </Link>
+                        )}
+                    </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className={twoRowGridClasses}>
+                    <div className={twoRowPremiumSpecialGridClasses}>
                         {specialJobs.map((job) => (
                             <SpecialJobCard key={job.id} {...(job as any)} />
                         ))}
@@ -117,21 +165,23 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
 
             {/* General Job Cards (2 Rows) */}
             <section>
-                <div className="mb-4 flex items-center justify-between border-b pb-2">
+                <div className="flex items-center justify-between mb-6 border-b pb-4">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-black text-gray-900 tracking-tight">일반 광고</h2>
-                        <AdPriceModal type="line" title="Line" />
+                        <h2 className="text-2xl font-black text-gray-900 italic uppercase">
+                            일반 채용
+                        </h2>
                     </div>
-                    {isEmployer ? (
-                        <Link href="/biz/ads/new" className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-600 text-[11px] font-bold rounded-lg hover:bg-gray-50 transition-colors">
-                            <Plus className="w-3.5 h-3.5" /> 일반 등록
-                        </Link>
-                    ) : (
-                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-md">추천 50</span>
-                    )}
+                    <div className="flex items-center gap-3">
+                        <AdPriceModal type="line" title="Line" />
+                        {isEmployer && (
+                            <Link href="/biz/ads/new" className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-600 text-[11px] font-bold rounded-lg hover:bg-gray-50 transition-colors">
+                                <Plus className="w-3.5 h-3.5" /> 일반 등록
+                            </Link>
+                        )}
+                    </div>
                 </div>
                 {generalJobs.length > 0 ? (
-                    <div className={twoRowGridClasses}>
+                    <div className={twoRowGeneralGridClasses}>
                         {generalJobs.map((job) => (
                             <GeneralJobItem key={job.id} {...(job as any)} />
                         ))}
