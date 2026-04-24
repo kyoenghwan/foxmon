@@ -10,6 +10,8 @@ import { GeneralJobItem } from '@/components/home/general-job-item';
 import { GeneralJobListRow } from '@/components/jobs/general-job-list-row';
 import { AdPriceModal } from '@/components/jobs/AdPriceModal';
 import { Button } from '@/components/ui/button';
+import { RegionSelector } from '@/components/home/region-selector';
+import { IndustrySelector } from '@/components/home/industry-selector';
 
 interface JobsListContentProps {
     isEmployer?: boolean;
@@ -79,19 +81,19 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
     // 프리미엄 & 스페셜 2줄 숨김 클래스 (Home과 동일한 그리드 기준)
     const twoRowPremiumSpecialGridClasses = `grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-3 xl:gap-4 w-full
         [&>*:nth-child(n+5)]:hidden 
-        md:[&>*:nth-child(n+7)]:hidden 
-        xl:[&>*:nth-child(n+9)]:hidden 
-        2xl:[&>*:nth-child(n+11)]:hidden 
-        3xl:[&>*:nth-child(n+13)]:hidden
-        4xl:[&>*:nth-child(n+17)]:hidden`;
+        md:[&>*:nth-child(n+5)]:block md:[&>*:nth-child(n+7)]:hidden 
+        xl:[&>*:nth-child(n+7)]:block xl:[&>*:nth-child(n+9)]:hidden 
+        2xl:[&>*:nth-child(n+9)]:block 2xl:[&>*:nth-child(n+11)]:hidden 
+        3xl:[&>*:nth-child(n+11)]:block 3xl:[&>*:nth-child(n+13)]:hidden
+        4xl:[&>*:nth-child(n+13)]:block 4xl:[&>*:nth-child(n+17)]:hidden`;
 
     // 일반 광고 2줄 숨김 클래스
     const twoRowGeneralGridClasses = `grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-2 sm:gap-3 w-full
         [&>*:nth-child(n+5)]:hidden 
-        sm:[&>*:nth-child(n+7)]:hidden 
-        md:[&>*:nth-child(n+9)]:hidden 
-        2xl:[&>*:nth-child(n+11)]:hidden 
-        3xl:[&>*:nth-child(n+13)]:hidden`;
+        sm:[&>*:nth-child(n+5)]:block sm:[&>*:nth-child(n+7)]:hidden 
+        md:[&>*:nth-child(n+7)]:block md:[&>*:nth-child(n+9)]:hidden 
+        2xl:[&>*:nth-child(n+9)]:block 2xl:[&>*:nth-child(n+11)]:hidden 
+        3xl:[&>*:nth-child(n+11)]:block 3xl:[&>*:nth-child(n+13)]:hidden`;
 
     return (
         <div className="space-y-12">
@@ -191,6 +193,33 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
                         <p className="text-gray-400 font-bold">등록된 일반 광고가 없습니다.</p>
                     </div>
                 )}
+            </section>
+
+            {/* Search Condition Card */}
+            <section className="bg-white rounded-xl p-4 border shadow-sm space-y-4">
+                {/* Region Selection */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                    <h2 className="text-[13px] font-extrabold flex items-center gap-2 text-gray-800 w-full sm:w-24 shrink-0 mt-1 sm:mt-2">
+                        <span className="w-1.5 h-3.5 bg-primary rounded-full" />
+                        지역 선택
+                    </h2>
+                    <div className="flex-1 overflow-x-auto pb-1">
+                        <RegionSelector />
+                    </div>
+                </div>
+
+                <div className="border-t border-gray-100" />
+
+                {/* Industry Selection */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                    <h2 className="text-[13px] font-extrabold flex items-center gap-2 text-gray-800 w-full sm:w-24 shrink-0 mt-1 sm:mt-2">
+                        <span className="w-1.5 h-3.5 bg-orange-400 rounded-full" />
+                        업종 선택
+                    </h2>
+                    <div className="flex-1 overflow-x-auto pb-1">
+                        <IndustrySelector />
+                    </div>
+                </div>
             </section>
 
             {/* General Jobs List */}
