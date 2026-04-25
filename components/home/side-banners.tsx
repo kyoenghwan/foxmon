@@ -10,6 +10,7 @@ export function SideBanners() {
     const [rightAds, setRightAds] = useState<AdItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [bannerScale, setBannerScale] = useState(1);
+    const containerRef = React.useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         async function fetchSideAds() {
@@ -33,15 +34,12 @@ export function SideBanners() {
     // 화면 크기 변화를 실시간으로 감지하여 배너 크기를 조절하는 로직
     useEffect(() => {
         const handleResize = () => {
-            const width = window.innerWidth;
-            let containerWidth = 0;
+            if (!containerRef.current) return;
             
-            // tailwind.config.ts의 container max-width 기준
-            if (width >= 2560) containerWidth = 2040;
-            else if (width >= 1920) containerWidth = 1500;
-            else if (width >= 1440) containerWidth = 1100;
-            else if (width >= 1280) containerWidth = 920;
-            else {
+            const width = window.innerWidth;
+            const containerWidth = containerRef.current.offsetWidth;
+            
+            if (width < 1280) {
                 setBannerScale(1);
                 return; // 1280 미만에서는 CSS에 의해 hidden 됨
             }
@@ -55,9 +53,10 @@ export function SideBanners() {
 
             const requiredSpace = bannerWidth + 16; // 배너 넓이 + margin(16px)
 
-            if (availableSpace < requiredSpace && availableSpace > 0) {
-                // 공간이 부족하면 비율에 맞춰 축소 (최소 0.5배까지)
-                const newScale = Math.max(0.5, availableSpace / requiredSpace);
+            // 공간이 부족할 경우 비율에 맞춰 축소
+            if (availableSpace < requiredSpace) {
+                // 여백이 아예 없거나 음수일 수 있으므로 Math.max로 최소 0.3배까지만 축소 허용
+                const newScale = Math.max(0.3, availableSpace / requiredSpace);
                 setBannerScale(newScale);
             } else {
                 setBannerScale(1);
@@ -65,10 +64,15 @@ export function SideBanners() {
         };
 
         window.addEventListener('resize', handleResize);
-        handleResize(); // 마운트 시 초기 실행
-
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        
+        // 렌더링 직후 컨테이너 크기가 잡힐 시간을 주기 위해 약간 지연 실행
+        const timer = setTimeout(handleResize, 50);
+        
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            clearTimeout(timer);
+        };
+    }, [leftAds]); // 광고가 로드되어 DOM이 완성될 때 다시 한 번 체크
 
     const handleAdClick = (adId: string) => {
         recordAdExposure(adId);
@@ -149,7 +153,7 @@ export function SideBanners() {
 
     return (
         <div className="fixed top-[220px] left-0 w-full z-20 pointer-events-none flex justify-center">
-            <div className="container relative w-full h-0">
+            <div ref={containerRef} className="container relative w-full h-0">
                 {/* Left Wing */}
                 <div 
                     className={`
