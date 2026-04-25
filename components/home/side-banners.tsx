@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { getRotatedAds, recordAdExposure, AdItem } from '@/lib/ad-service';
@@ -10,7 +10,7 @@ export function SideBanners() {
     const [rightAds, setRightAds] = useState<AdItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [bannerScale, setBannerScale] = useState(1);
-    const containerRef = React.useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         async function fetchSideAds() {
