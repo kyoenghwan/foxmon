@@ -107,46 +107,42 @@ export function SideBanners() {
     };
 
     return (
-        <>
-            {/* Left Wing */}
-            <div className={`
-                hidden xl:flex flex-col gap-3 fixed top-[220px] z-20 transition-all duration-300
-                xl:w-[140px] xl:left-[calc(50%-620px)]
-                2xl:w-[134px] 2xl:left-[calc(50%-704px)]
-                3xl:w-[154px] 3xl:left-[calc(50%-924px)]
-                4xl:w-[158px] 4xl:left-[calc(50%-1198px)]
-            `}>
-                <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Special Pick</div>
-                {leftAds.map((ad) => (
-                    <BannerCard key={ad.id} ad={ad} />
-                ))}
-                <Link
-                    href="/biz/ads/new"
-                    className="w-full py-2.5 bg-primary hover:bg-orange-600 text-white text-[11px] font-black rounded-xl text-center transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1"
-                >
-                    + 광고등록
-                </Link>
-            </div>
+        <div className="fixed top-[220px] left-0 w-full z-20 pointer-events-none flex justify-center">
+            <div className="container relative w-full h-0">
+                {/* Left Wing */}
+                <div className={`
+                    hidden xl:flex flex-col gap-3 absolute top-0 right-full mr-4 pointer-events-auto transition-all duration-300
+                    w-[140px] 2xl:w-[134px] 3xl:w-[154px] 4xl:w-[158px]
+                `}>
+                    <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Special Pick</div>
+                    {leftAds.map((ad) => (
+                        <BannerCard key={ad.id} ad={ad} />
+                    ))}
+                    <Link
+                        href="/biz/ads/new"
+                        className="w-full py-2.5 bg-primary hover:bg-orange-600 text-white text-[11px] font-black rounded-xl text-center transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1"
+                    >
+                        + 광고등록
+                    </Link>
+                </div>
 
-            {/* Right Wing */}
-            <div className={`
-                hidden xl:flex flex-col gap-3 fixed top-[220px] z-20 transition-all duration-300
-                xl:w-[140px] xl:right-[calc(50%-620px)]
-                2xl:w-[134px] 2xl:right-[calc(50%-704px)]
-                3xl:w-[154px] 3xl:right-[calc(50%-924px)]
-                4xl:w-[158px] 4xl:right-[calc(50%-1198px)]
-            `}>
-                <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Premium Ad</div>
-                {rightAds.map((ad) => (
-                    <BannerCard key={ad.id} ad={ad} />
-                ))}
-                <Link
-                    href="/biz/ads/new"
-                    className="w-full py-2.5 bg-primary hover:bg-orange-600 text-white text-[11px] font-black rounded-xl text-center transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1"
-                >
-                    + 광고등록
-                </Link>
+                {/* Right Wing */}
+                <div className={`
+                    hidden xl:flex flex-col gap-3 absolute top-0 left-full ml-4 pointer-events-auto transition-all duration-300
+                    w-[140px] 2xl:w-[134px] 3xl:w-[154px] 4xl:w-[158px]
+                `}>
+                    <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Premium Ad</div>
+                    {rightAds.map((ad) => (
+                        <BannerCard key={ad.id} ad={ad} />
+                    ))}
+                    <Link
+                        href="/biz/ads/new"
+                        className="w-full py-2.5 bg-primary hover:bg-orange-600 text-white text-[11px] font-black rounded-xl text-center transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1"
+                    >
+                        + 광고등록
+                    </Link>
+                </div>
             </div>
-        </>
+        </div>
     );
 }
