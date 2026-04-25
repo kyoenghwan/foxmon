@@ -9,6 +9,7 @@ export function SideBanners() {
     const [leftAds, setLeftAds] = useState<AdItem[]>([]);
     const [rightAds, setRightAds] = useState<AdItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [bannerScale, setBannerScale] = useState(1);
 
     useEffect(() => {
         async function fetchSideAds() {
@@ -29,6 +30,46 @@ export function SideBanners() {
         fetchSideAds();
     }, []);
 
+    // 화면 크기 변화를 실시간으로 감지하여 배너 크기를 조절하는 로직
+    useEffect(() => {
+        const handleResize = () => {
+            const width = window.innerWidth;
+            let containerWidth = 0;
+            
+            // tailwind.config.ts의 container max-width 기준
+            if (width >= 2560) containerWidth = 2040;
+            else if (width >= 1920) containerWidth = 1500;
+            else if (width >= 1440) containerWidth = 1100;
+            else if (width >= 1280) containerWidth = 920;
+            else {
+                setBannerScale(1);
+                return; // 1280 미만에서는 CSS에 의해 hidden 됨
+            }
+
+            const availableSpace = (width - containerWidth) / 2;
+            
+            let bannerWidth = 140;
+            if (width >= 2560) bannerWidth = 158;
+            else if (width >= 1920) bannerWidth = 154;
+            else if (width >= 1440) bannerWidth = 134;
+
+            const requiredSpace = bannerWidth + 16; // 배너 넓이 + margin(16px)
+
+            if (availableSpace < requiredSpace && availableSpace > 0) {
+                // 공간이 부족하면 비율에 맞춰 축소 (최소 0.5배까지)
+                const newScale = Math.max(0.5, availableSpace / requiredSpace);
+                setBannerScale(newScale);
+            } else {
+                setBannerScale(1);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        handleResize(); // 마운트 시 초기 실행
+
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const handleAdClick = (adId: string) => {
         recordAdExposure(adId);
     };
@@ -36,7 +77,7 @@ export function SideBanners() {
     if (loading) return null; // 사이드 배너 로딩 시에는 공간만 비워둠 (혹은 심플한 스켈레톤)
 
     const BannerCard = ({ ad }: { ad: AdItem }) => {
-        // 업체명 ও 업종 파싱
+        // 업체명 및 업종 파싱
         let displayName = ad.company;
         let category = '유흥';
         if (ad.company.includes('(') && ad.company.includes(')')) {
@@ -110,10 +151,13 @@ export function SideBanners() {
         <div className="fixed top-[220px] left-0 w-full z-20 pointer-events-none flex justify-center">
             <div className="container relative w-full h-0">
                 {/* Left Wing */}
-                <div className={`
-                    hidden xl:flex flex-col gap-3 absolute top-0 right-full mr-4 pointer-events-auto transition-all duration-300
-                    w-[140px] 2xl:w-[134px] 3xl:w-[154px] 4xl:w-[158px]
-                `}>
+                <div 
+                    className={`
+                        hidden xl:flex flex-col gap-3 absolute top-0 right-full mr-4 pointer-events-auto transition-all duration-300
+                        w-[140px] 2xl:w-[134px] 3xl:w-[154px] 4xl:w-[158px]
+                    `}
+                    style={{ transform: `scale(${bannerScale})`, transformOrigin: 'top right' }}
+                >
                     <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Special Pick</div>
                     {leftAds.map((ad) => (
                         <BannerCard key={ad.id} ad={ad} />
@@ -127,10 +171,13 @@ export function SideBanners() {
                 </div>
 
                 {/* Right Wing */}
-                <div className={`
-                    hidden xl:flex flex-col gap-3 absolute top-0 left-full ml-4 pointer-events-auto transition-all duration-300
-                    w-[140px] 2xl:w-[134px] 3xl:w-[154px] 4xl:w-[158px]
-                `}>
+                <div 
+                    className={`
+                        hidden xl:flex flex-col gap-3 absolute top-0 left-full ml-4 pointer-events-auto transition-all duration-300
+                        w-[140px] 2xl:w-[134px] 3xl:w-[154px] 4xl:w-[158px]
+                    `}
+                    style={{ transform: `scale(${bannerScale})`, transformOrigin: 'top left' }}
+                >
                     <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Premium Ad</div>
                     {rightAds.map((ad) => (
                         <BannerCard key={ad.id} ad={ad} />
