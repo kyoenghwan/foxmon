@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { auth } from '@/auth';
-import { Plus, Megaphone, Eye, Pause, Play, Pencil, Clock } from 'lucide-react';
+import { Plus, Briefcase, Eye, Pause, Play, Pencil, Clock } from 'lucide-react';
 
 // 추후 QA_GET_MY_ADS 연동 예정
 const mockAds: any[] = [];
@@ -42,26 +42,26 @@ const StatusBadge = ({ status }: { status: string }) => {
     );
 };
 
-export default async function BizAdsPage() {
+export default async function BizJobsPage() {
     return (
         <div className="space-y-6">
             {/* 페이지 헤더 */}
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
-                        <Megaphone className="w-5 h-5 text-primary" />
-                        광고 관리
+                        <Briefcase className="w-5 h-5 text-primary" />
+                        구인 관리
                     </h2>
                     <p className="text-[13px] text-gray-500 font-medium mt-1">
-                        등록한 유료 배너 광고를 확인하고 관리하세요.
+                        등록한 구인 공고를 확인하고 수정·관리하세요.
                     </p>
                 </div>
                 <Link 
-                    href="/biz/ads/new"
+                    href="/biz/jobs/new"
                     className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95"
                 >
                     <Plus className="w-4 h-4" />
-                    새 광고 등록
+                    새 구인 공고 등록
                 </Link>
             </div>
 
@@ -69,20 +69,20 @@ export default async function BizAdsPage() {
             {mockAds.length === 0 ? (
                 <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-16 flex flex-col items-center justify-center text-center gap-4">
                     <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center">
-                        <Megaphone className="w-8 h-8 text-primary/60" />
+                        <Briefcase className="w-8 h-8 text-primary/60" />
                     </div>
                     <div>
-                        <h3 className="font-black text-lg text-gray-800">등록된 광고가 없습니다</h3>
+                        <h3 className="font-black text-lg text-gray-800">등록된 구인 공고가 없습니다</h3>
                         <p className="text-[13px] font-medium text-gray-500 mt-1">
-                            첫 광고를 등록하고 구직자에게 업체를 알려보세요!
+                            첫 구인 공고를 등록하고 구직자에게 업체를 알려보세요!
                         </p>
                     </div>
                     <Link 
-                        href="/biz/ads/new"
+                        href="/biz/jobs/new"
                         className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-md"
                     >
                         <Plus className="w-4 h-4" />
-                        첫 광고 등록하기
+                        첫 구인 공고 등록하기
                     </Link>
                 </div>
             ) : (
@@ -135,7 +135,7 @@ export default async function BizAdsPage() {
                                             <Link href={`/jobs/${ad.id}`} target="_blank" className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="미리보기">
                                                 <Eye className="w-4 h-4 text-primary" />
                                             </Link>
-                                            <Link href={`/biz/ads/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
+                                            <Link href={`/biz/jobs/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
                                                 <Pencil className="w-4 h-4 text-gray-500" />
                                             </Link>
                                             <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="일시정지">

@@ -75,6 +75,7 @@ interface AdEditorFormProps {
     initialData?: Partial<AdFormData>;
     onSubmit: (data: AdFormData) => Promise<void>;
     isNew?: boolean;
+    mode?: 'JOB' | 'AD';
 }
 
 // ─── 리치 텍스트 에디터 컴포넌트 ───
@@ -202,7 +203,7 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (html: s
 }
 
 // ─── 메인 폼 컴포넌트 ───
-export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorFormProps) {
+export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD' }: AdEditorFormProps) {
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
     const [form, setForm] = useState<AdFormData>({
@@ -295,14 +296,15 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                 <div className="space-y-6">
 
                     {/* ① 광고 등급 선택 (UI 간소화) */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                        <h3 className="font-black text-[15px] text-gray-800 mb-3 flex items-center gap-2">
-                            <Layers className="w-4 h-4 text-primary" />
-                            광고 등급 선택
-                        </h3>
+                    {mode === 'AD' && (
+                        <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                            <h3 className="font-black text-[15px] text-gray-800 mb-3 flex items-center gap-2">
+                                <Layers className="w-4 h-4 text-primary" />
+                                광고 등급 선택
+                            </h3>
 
                         <div className="flex gap-2">
-                            {TIER_OPTIONS.map(t => (
+                            {TIER_OPTIONS.filter(t => mode === 'JOB' || t.value !== 'GENERAL').map(t => (
                                 <button
                                     key={t.value}
                                     onClick={() => update('tier', t.value)}
@@ -357,7 +359,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                                 </div>
                             )}
                         </div>
-                    </div>
+                    )}
 
                     {/* ② 왼쪽(미리보기+로고) & 오른쪽(기본정보) 그리드 */}
                     <div className="flex flex-col lg:flex-row gap-6">
@@ -641,7 +643,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                         </div>
                     )}
 
-                    {form.tier === 'GENERAL' && (
+                    {form.tier === 'GENERAL' && mode === 'AD' && (
                         <div className="bg-white rounded-2xl border border-gray-100 p-6">
                             <div className="text-center py-4">
                                 <p className="text-[14px] font-bold text-gray-600">📋 일반 광고는 기본 정보만 표시됩니다.</p>
@@ -713,7 +715,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false }: AdEditorF
                 </Button>
                 <Button onClick={handleSubmit} disabled={saving} className="font-black h-11 px-8 rounded-xl shadow-md">
                     {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                    {isNew ? '광고 등록하기' : '광고 저장하기'}
+                    {isNew ? (mode === 'JOB' ? '구인 공고 등록하기' : '광고 등록하기') : (mode === 'JOB' ? '구인 공고 저장하기' : '광고 저장하기')}
                 </Button>
             </div>
         </div>
