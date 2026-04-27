@@ -101,6 +101,9 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
                                 </Button>
                             </Link>
                         )}
+                        <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
+                            전체보기 <ChevronRight className="w-4 h-4" />
+                        </Link>
                     </div>
                 </div>
                 {demoJobs.length > 0 ? (
@@ -136,6 +139,9 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
                                 <Plus className="w-3.5 h-3.5" /> 스페셜 등록
                             </Link>
                         )}
+                        <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
+                            전체보기 <ChevronRight className="w-4 h-4" />
+                        </Link>
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
@@ -166,6 +172,9 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
                                 <Plus className="w-3.5 h-3.5" /> 일반 등록
                             </Link>
                         )}
+                        <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
+                            전체보기 <ChevronRight className="w-4 h-4" />
+                        </Link>
                     </div>
                 </div>
                 {generalJobs.length > 0 ? (

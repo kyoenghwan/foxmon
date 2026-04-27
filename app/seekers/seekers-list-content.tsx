@@ -101,6 +101,9 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                                 </Button>
                             </Link>
                         )}
+                        <Link href="/seekers" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
+                            전체보기 <ChevronRight className="w-4 h-4" />
+                        </Link>
                     </div>
                 </div>
                 {demoJobs.length > 0 ? (
@@ -136,6 +139,9 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                                 <Plus className="w-3.5 h-3.5" /> 스페셜 등록
                             </Link>
                         )}
+                        <Link href="/seekers" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
+                            전체보기 <ChevronRight className="w-4 h-4" />
+                        </Link>
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
@@ -166,6 +172,9 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                                 <Plus className="w-3.5 h-3.5" /> 이력서 등록
                             </Link>
                         )}
+                        <Link href="/seekers" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
+                            전체보기 <ChevronRight className="w-4 h-4" />
+                        </Link>
                     </div>
                 </div>
                 {generalJobs.length > 0 ? (
