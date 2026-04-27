@@ -50,10 +50,10 @@ export default async function BizAdsPage() {
                 <div>
                     <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
                         <Megaphone className="w-5 h-5 text-primary" />
-                        광고 관리
+                        구인·광고 관리
                     </h2>
                     <p className="text-[13px] text-gray-500 font-medium mt-1">
-                        등록한 광고를 확인하고 수정·관리하세요.
+                        등록한 구인 공고 및 광고를 확인하고 수정·관리하세요.
                     </p>
                 </div>
                 <Link 
@@ -72,7 +72,7 @@ export default async function BizAdsPage() {
                         <Megaphone className="w-8 h-8 text-primary/60" />
                     </div>
                     <div>
-                        <h3 className="font-black text-lg text-gray-800">등록된 광고가 없습니다</h3>
+                        <h3 className="font-black text-lg text-gray-800">등록된 구인 공고나 광고가 없습니다</h3>
                         <p className="text-[13px] font-medium text-gray-500 mt-1">
                             첫 광고를 등록하고 구직자에게 업체를 알려보세요!
                         </p>

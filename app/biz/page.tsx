@@ -61,18 +61,18 @@ export default async function BizDashboardPage() {
                     </Link>
                 </div>
 
-                {/* 진행 중 광고 */}
+                {/* 진행 중 구인/광고 */}
                 <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
-                        <span className="text-[13px] font-bold text-gray-500">진행 중 광고</span>
+                        <span className="text-[13px] font-bold text-gray-500">진행 중 구인·광고</span>
                         <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
                             <Megaphone className="w-5 h-5 text-blue-500" />
                         </div>
                     </div>
                     <p className="text-3xl font-black text-gray-900">0개</p>
-                    <p className="text-[12px] font-medium text-gray-400 mt-2">현재 ACTIVE 상태 광고</p>
+                    <p className="text-[12px] font-medium text-gray-400 mt-2">현재 ACTIVE 상태 공고</p>
                     <Link href="/biz/ads" className="mt-4 flex items-center gap-1 text-[12px] font-bold text-blue-500 hover:underline">
-                        광고 관리하기 <ArrowRight className="w-3.5 h-3.5" />
+                        구인·광고 관리하기 <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>
 
@@ -105,7 +105,7 @@ export default async function BizDashboardPage() {
                         </div>
                         <div className="flex-1">
                             <p className="font-bold text-[14px] text-gray-800">1단계: 포인트 충전</p>
-                            <p className="text-[12px] text-gray-500 mt-0.5">광고 등록에 포인트가 필요합니다. 먼저 충전해 주세요.</p>
+                            <p className="text-[12px] text-gray-500 mt-0.5">유료 구인/광고 등록에 포인트가 필요합니다. 먼저 충전해 주세요.</p>
                         </div>
                         <Link href="/biz/points" className="shrink-0 px-4 py-2 bg-primary text-white text-[12px] font-black rounded-lg hover:bg-orange-600 transition-colors">
                             충전하기
@@ -116,8 +116,8 @@ export default async function BizDashboardPage() {
                             <Megaphone className="w-4 h-4 text-blue-500" />
                         </div>
                         <div className="flex-1">
-                            <p className="font-bold text-[14px] text-gray-800">2단계: 광고 등록</p>
-                            <p className="text-[12px] text-gray-500 mt-0.5">공고 내용을 작성하고 광고 등급을 선택해 등록합니다.</p>
+                            <p className="font-bold text-[14px] text-gray-800">2단계: 구인·광고 등록</p>
+                            <p className="text-[12px] text-gray-500 mt-0.5">공고 내용을 작성하고 등급(일반/스페셜/프리미엄)을 선택해 등록합니다.</p>
                         </div>
                         <Link href="/biz/ads/new" className="shrink-0 px-4 py-2 bg-blue-500 text-white text-[12px] font-black rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-1">
                             <Plus className="w-3.5 h-3.5" /> 등록하기
