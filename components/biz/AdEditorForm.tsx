@@ -359,6 +359,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 </div>
                             )}
                         </div>
+                        </div>
                     )}
 
                     {/* ② 왼쪽(미리보기+로고) & 오른쪽(기본정보) 그리드 */}
