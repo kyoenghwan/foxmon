@@ -1,5 +1,6 @@
 import { MainHeader } from '@/components/layout/main-header';
 import { HelpSidebar } from '@/components/help/HelpSidebar';
+import { SideBanners } from '@/components/home/side-banners';
 import { auth } from '@/auth';
 import Link from 'next/link';
 
@@ -9,6 +10,7 @@ export default async function HelpLayout({ children }: { children: React.ReactNo
     return (
         <div className="flex flex-col min-h-screen bg-white relative">
             <MainHeader session={session} />
+            <SideBanners />
 
             {/* 서브 헤더 */}
             <div className="bg-gray-50 border-b border-gray-200">
