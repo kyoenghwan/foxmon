@@ -23,6 +23,10 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
     const [generalJobs, setGeneralJobs] = useState<AdItem[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // Pagination state for the list table
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 20;
+
     useEffect(() => {
         async function fetchJobs() {
             setLoading(true);
@@ -80,6 +84,10 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
 
     // 프리미엄, 스페셜, 일반 모두 2줄 고정 
     const twoRowPremiumSpecialGridClasses = `limit-2-rows grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 4xl:grid-cols-8 gap-2 sm:gap-3 xl:gap-4 w-full`;
+
+    // Pagination logic
+    const totalPages = Math.ceil(generalJobs.length / ITEMS_PER_PAGE);
+    const paginatedTableJobs = generalJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     return (
         <div className="space-y-12">
@@ -246,11 +254,44 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {generalJobs.map((job) => (
+                                {paginatedTableJobs.map((job) => (
                                     <GeneralJobListRow key={job.id} {...(job as any)} />
                                 ))}
                             </tbody>
                         </table>
+                        
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center gap-1.5 py-6">
+                                <button 
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-3 py-1.5 border border-gray-200 rounded-md text-[13px] font-bold text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
+                                >
+                                    이전
+                                </button>
+                                {Array.from({ length: totalPages }).map((_, i) => (
+                                    <button 
+                                        key={i}
+                                        onClick={() => setCurrentPage(i + 1)}
+                                        className={`w-8 h-8 flex items-center justify-center rounded-md text-[13px] font-bold transition-colors ${
+                                            currentPage === i + 1 
+                                                ? 'bg-gray-800 text-white border-transparent' 
+                                                : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                ))}
+                                <button 
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="px-3 py-1.5 border border-gray-200 rounded-md text-[13px] font-bold text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
+                                >
+                                    다음
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
