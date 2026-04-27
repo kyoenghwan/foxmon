@@ -75,6 +75,18 @@
   }
 }
 
+/* Force container width for mid-to-large screens to prevent layout stretching */
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1100px !important;
+  }
+}
+@media (min-width: 2560px) {
+  .container {
+    max-width: 2040px !important;
+  }
+}
+
 @layer utilities {
   /* ✨ Gold Shimmer Effect */
   @keyframes shimmer {
