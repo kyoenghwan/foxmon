@@ -287,7 +287,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     onClick={() => setActiveTab('detail')}
                     className={`px-5 py-2 rounded-lg text-[13px] font-bold transition-all ${activeTab === 'detail' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                 >
-                    📋 공고 상세 내용
+                    📋 {mode === 'JOB' ? '공고 상세 내용' : '광고 상세 내용'}
                 </button>
             </div>
 
@@ -388,7 +388,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                     <PremiumJobCard
                                                         id="preview"
                                                         company={form.company || '업체명'}
-                                                        title={form.title || '공고 제목을 입력하세요'}
+                                                        title={form.title || (mode === 'JOB' ? '공고 제목을 입력하세요' : '광고 제목을 입력하세요')}
                                                         location={form.location || '전지역'}
                                                         pay={form.pay || '급여 정보'}
                                                         image={form.logo_url || form.image}
@@ -541,11 +541,13 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     />
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">공고 제목 <span className="text-red-500">*</span></label>
+                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
+                                        <Type className="w-3 h-3" /> {mode === 'JOB' ? '공고 제목' : '광고 제목'} <span className="text-red-500">*</span>
+                                    </label>
                                     <input
                                         type="text" value={form.title} onChange={e => update('title', e.target.value)}
                                         className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                        placeholder="예: 경력무관! 즉시출근 가능한분"
+                                        placeholder={mode === 'JOB' ? "예: 경력무관! 즉시출근 가능하신 분" : "예: 최고의 우대조건! 지금 바로 지원하세요"}
                                     />
                                 </div>
                                 <div className="md:col-span-2">
