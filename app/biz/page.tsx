@@ -62,21 +62,6 @@ export default async function BizDashboardPage() {
                     </Link>
                 </div>
 
-                {/* 진행 중 구인 공고 */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-[13px] font-bold text-gray-500">진행 중 구인 공고</span>
-                        <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
-                            <Briefcase className="w-5 h-5 text-primary" />
-                        </div>
-                    </div>
-                    <p className="text-3xl font-black text-gray-900">0개</p>
-                    <p className="text-[12px] font-medium text-gray-400 mt-2">현재 ACTIVE 상태 공고</p>
-                    <Link href="/biz/jobs" className="mt-4 flex items-center gap-1 text-[12px] font-bold text-primary hover:underline">
-                        구인 공고 관리 <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                </div>
-
                 {/* 진행 중 배너 광고 */}
                 <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
@@ -89,6 +74,21 @@ export default async function BizDashboardPage() {
                     <p className="text-[12px] font-medium text-gray-400 mt-2">스페셜/프리미엄 광고</p>
                     <Link href="/biz/ads" className="mt-4 flex items-center gap-1 text-[12px] font-bold text-purple-500 hover:underline">
                         광고 관리하기 <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                </div>
+
+                {/* 진행 중 구인 공고 */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-[13px] font-bold text-gray-500">진행 중 구인 공고</span>
+                        <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                            <Briefcase className="w-5 h-5 text-primary" />
+                        </div>
+                    </div>
+                    <p className="text-3xl font-black text-gray-900">0개</p>
+                    <p className="text-[12px] font-medium text-gray-400 mt-2">현재 ACTIVE 상태 공고</p>
+                    <Link href="/biz/jobs" className="mt-4 flex items-center gap-1 text-[12px] font-bold text-primary hover:underline">
+                        구인 공고 관리 <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>
 
