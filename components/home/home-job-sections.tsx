@@ -293,11 +293,11 @@ export function HomeJobSections() {
                         </ul>
                     </div>
 
-                    {/* 2. 구직정보 리스트 */}
+                    {/* 2. 인재정보 리스트 */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between pb-2 border-b-2 border-gray-900">
                             <h3 className="font-black text-[16px] md:text-lg uppercase tracking-tight text-gray-900 flex items-center gap-2">
-                                🙋‍♀️ 구직정보 리스트
+                                🙋‍♀️ 인재정보 리스트
                             </h3>
                             <Link href="/seekers" className="text-[11px] font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-0.5">
                                 더보기 <ChevronRight className="w-3.5 h-3.5" />

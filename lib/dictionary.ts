@@ -15,7 +15,7 @@ export const dictionary = {
         },
         header: {
             findJobs: '구인정보',
-            seekers: '구직정보',
+            seekers: '인재정보',
             specialJobs: '특별구인',
             specialSeekers: '특별구직',
             customerCenter: '고객센터',
