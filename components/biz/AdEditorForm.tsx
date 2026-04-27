@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Loader2, Save, Image, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
+import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 
 export interface AdFormData {
     id?: string;
@@ -11,6 +12,8 @@ export interface AdFormData {
     title: string;
     location: string;
     pay: string;
+    pay_type?: string;
+    pay_amount?: string;
     image: string;
     color: string;
     tier: 'PREMIUM' | 'SPECIAL' | 'GENERAL';
@@ -25,6 +28,7 @@ export interface AdFormData {
     contact_info: string;
     address: string;
     detail_content: string;
+    detail_bg_image?: string;
 }
 
 // 프리미엄 테마 목록 (premium-job-card.tsx THEME_CONFIG 기반)
@@ -211,6 +215,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         title: '',
         location: '',
         pay: '',
+        pay_type: '월급',
+        pay_amount: '',
         image: '',
         color: '#FF6B35',
         tier: 'GENERAL',
@@ -227,8 +233,57 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         ...initialData,
     });
 
+    const [regions, setRegions] = useState<CodeItem[]>([]);
+    const [selectedSido, setSelectedSido] = useState<string>('');
+    const [selectedSigungu, setSelectedSigungu] = useState<string>('');
+
+    // 초기 데이터 로딩 시 지역 및 급여 분리
+    useEffect(() => {
+        const fetchRegions = async () => {
+            const res = await QA_GET_COMMON_CODES('REGION', true);
+            if (res.success && res.data) {
+                setRegions(res.data);
+            }
+        };
+        fetchRegions();
+    }, []);
+
+    useEffect(() => {
+        // location이 "서울 강남구" 형태일 때 분리
+        if (form.location) {
+            const parts = form.location.split(' ');
+            if (parts.length >= 2) {
+                setSelectedSido(parts[0]);
+                setSelectedSigungu(parts.slice(1).join(' '));
+            } else {
+                setSelectedSido(parts[0]);
+            }
+        }
+    }, [initialData?.location]);
+
     const update = (key: keyof AdFormData, value: any) => {
         setForm(prev => ({ ...prev, [key]: value }));
+    };
+
+    // 지역 선택 핸들러
+    const handleSidoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const sido = e.target.value;
+        setSelectedSido(sido);
+        setSelectedSigungu('');
+        update('location', sido);
+    };
+
+    const handleSigunguChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const sigungu = e.target.value;
+        setSelectedSigungu(sigungu);
+        update('location', `${selectedSido} ${sigungu}`.trim());
+    };
+
+    // 급여 업데이트 핸들러
+    const handlePayChange = (type: string, amount: string) => {
+        update('pay_type', type);
+        update('pay_amount', amount);
+        update('pay', amount ? `${type} ${amount}` : '');
     };
 
     const handleSubmit = async () => {
@@ -246,6 +301,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
     const currentTier = TIER_OPTIONS.find(t => t.value === form.tier)!;
     const discountedPrice = Math.floor(currentTier.price * 0.95);
+
+    const sidoOptions = regions.filter(r => !r.parent_code_value);
+    const sidoCode = regions.find(r => r.code_name === selectedSido)?.code_value;
+    const sigunguOptions = sidoCode ? regions.filter(r => r.parent_code_value === sidoCode) : [];
 
     const handleLogoRequest = () => {
         alert('로고 제작 대행 문의는 카카오톡 고객센터(@foxmon)로 상호명과 함께 연락해 주세요.\n전문 디자이너가 원장님만의 맞춤형 타이포그래피 로고를 제작해 드립니다!');
@@ -534,11 +593,29 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
                                         <MapPin className="w-3 h-3" /> 지역 <span className="text-red-500">*</span>
                                     </label>
-                                    <input
-                                        type="text" value={form.location} onChange={e => update('location', e.target.value)}
-                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                        placeholder="예: 서울 강남구"
-                                    />
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={selectedSido}
+                                            onChange={handleSidoChange}
+                                            className="w-1/2 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                        >
+                                            <option value="">시/도 선택</option>
+                                            {sidoOptions.map(sido => (
+                                                <option key={sido.code_value} value={sido.code_name}>{sido.code_name}</option>
+                                            ))}
+                                        </select>
+                                        <select
+                                            value={selectedSigungu}
+                                            onChange={handleSigunguChange}
+                                            disabled={!selectedSido}
+                                            className="w-1/2 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary disabled:bg-gray-50"
+                                        >
+                                            <option value="">시/군/구 선택</option>
+                                            {sigunguOptions.map(sigungu => (
+                                                <option key={sigungu.code_value} value={sigungu.code_name}>{sigungu.code_name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
@@ -554,11 +631,27 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
                                         <DollarSign className="w-3 h-3" /> 급여 <span className="text-red-500">*</span>
                                     </label>
-                                    <input
-                                        type="text" value={form.pay} onChange={e => update('pay', e.target.value)}
-                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                        placeholder="예: 일 30~50만원"
-                                    />
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={form.pay_type}
+                                            onChange={e => handlePayChange(e.target.value, form.pay_amount || '')}
+                                            className="w-1/3 sm:w-1/4 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                        >
+                                            <option value="시급">시급</option>
+                                            <option value="일급">일급</option>
+                                            <option value="주급">주급</option>
+                                            <option value="월급">월급</option>
+                                            <option value="연봉">연봉</option>
+                                            <option value="건별">건별</option>
+                                            <option value="협의">협의</option>
+                                        </select>
+                                        <input
+                                            type="text" value={form.pay_amount || ''} 
+                                            onChange={e => handlePayChange(form.pay_type || '월급', e.target.value)}
+                                            className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                            placeholder="예: 30~50만원"
+                                        />
+                                    </div>
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">배너 이미지 URL (로고 대신 사용)</label>
@@ -698,9 +791,24 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 placeholder="예: 식사 제공, 주차 가능, 4대보험" />
                         </div>
 
+                        {/* 상세 페이지 테마(배경 이미지) */}
+                        {mode === 'AD' && (
+                            <div>
+                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 flex items-center gap-1">
+                                    <Image className="w-3.5 h-3.5" /> 상세 페이지 배경 이미지 URL
+                                    <span className="text-[11px] font-medium text-gray-400 ml-2">(광고 클릭 시 보여질 상세 페이지의 배경으로 사용됩니다)</span>
+                                </label>
+                                <input type="text" value={form.detail_bg_image || ''} onChange={e => update('detail_bg_image', e.target.value)}
+                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary"
+                                    placeholder="https://example.com/background.jpg" />
+                            </div>
+                        )}
+
                         {/* 리치 텍스트 에디터 */}
                         <div>
-                            <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">상세 공고 내용</label>
+                            <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">
+                                {mode === 'JOB' ? '상세 공고 내용' : '상세 광고 내용'}
+                            </label>
                             <RichTextEditor
                                 value={form.detail_content}
                                 onChange={(html) => update('detail_content', html)}
