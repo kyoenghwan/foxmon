@@ -304,7 +304,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             </h3>
 
                         <div className="flex gap-2">
-                            {TIER_OPTIONS.filter(t => mode === 'JOB' || t.value !== 'GENERAL').map(t => (
+                            {TIER_OPTIONS.filter(t => t.value !== 'GENERAL').map(t => (
                                 <button
                                     key={t.value}
                                     onClick={() => update('tier', t.value)}
