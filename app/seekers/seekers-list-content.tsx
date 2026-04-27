@@ -78,22 +78,8 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
         );
     }
 
-    // 프리미엄 & 스페셜 2줄 숨김 클래스 (Home과 동일한 그리드 기준)
-    const twoRowPremiumSpecialGridClasses = `grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-3 xl:gap-4 w-full
-        [&>*:nth-child(n+5)]:hidden 
-        md:[&>*:nth-child(n+5)]:block md:[&>*:nth-child(n+7)]:hidden 
-        xl:[&>*:nth-child(n+7)]:block xl:[&>*:nth-child(n+9)]:hidden 
-        2xl:[&>*:nth-child(n+9)]:block 2xl:[&>*:nth-child(n+11)]:hidden 
-        3xl:[&>*:nth-child(n+11)]:block 3xl:[&>*:nth-child(n+13)]:hidden
-        4xl:[&>*:nth-child(n+13)]:block 4xl:[&>*:nth-child(n+17)]:hidden`;
-
-    // 일반 광고 2줄 숨김 클래스
-    const twoRowGeneralGridClasses = `grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-2 sm:gap-3 w-full
-        [&>*:nth-child(n+5)]:hidden 
-        sm:[&>*:nth-child(n+5)]:block sm:[&>*:nth-child(n+7)]:hidden 
-        md:[&>*:nth-child(n+7)]:block md:[&>*:nth-child(n+9)]:hidden 
-        2xl:[&>*:nth-child(n+9)]:block 2xl:[&>*:nth-child(n+11)]:hidden 
-        3xl:[&>*:nth-child(n+11)]:block 3xl:[&>*:nth-child(n+13)]:hidden`;
+    // 프리미엄, 스페셜, 일반 모두 2줄 고정 
+    const twoRowPremiumSpecialGridClasses = `limit-2-rows grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 4xl:grid-cols-8 gap-2 sm:gap-3 xl:gap-4 w-full`;
 
     return (
         <div className="space-y-12">
