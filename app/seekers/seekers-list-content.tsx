@@ -103,7 +103,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     <div className="flex items-center gap-2">
                         <Crown className="w-6 h-6 text-primary fill-primary animate-bounce" />
                         <h2 className="text-2xl font-black text-gray-900 italic uppercase">
-                            프리미엄 인재 (IMPACT DEMO)
+                            프리미엄 광고 (IMPACT DEMO)
                         </h2>
                     </div>
                     <div className="flex items-center gap-3">
@@ -140,7 +140,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     <div className="flex items-center gap-2">
                         <Zap className="w-6 h-6 text-yellow-500 animate-pulse" />
                         <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2 italic uppercase">
-                            스페셜 인재
+                            스페셜 광고
                         </h2>
                     </div>
                     <div className="flex items-center gap-3">
@@ -170,7 +170,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                 <div className="flex items-center justify-between mb-6 border-b pb-4">
                     <div className="flex items-center gap-2">
                         <h2 className="text-2xl font-black text-gray-900 italic uppercase">
-                            일반 인재
+                            일반 광고
                         </h2>
                     </div>
                     <div className="flex items-center gap-3">
@@ -183,7 +183,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     </div>
                 </div>
                 {generalJobs.length > 0 ? (
-                    <div className={twoRowGeneralGridClasses}>
+                    <div className={twoRowPremiumSpecialGridClasses}>
                         {generalJobs.map((job) => (
                             <GeneralJobItem key={job.id} {...(job as any)} />
                         ))}
