@@ -5,6 +5,10 @@ import { Loader2, Save, Image, Info, DollarSign, MapPin, AlignLeft, Layers, Crow
 import { Button } from '@/components/ui/button';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
+import dynamic from 'next/dynamic';
+
+// Fabric.js는 브라우저 전용이므로 SSR 비활성화
+const AdCanvasEditor = dynamic(() => import('@/components/biz/AdCanvasEditor'), { ssr: false });
 
 export interface AdFormData {
     id?: string;
@@ -791,30 +795,35 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 placeholder="예: 식사 제공, 주차 가능, 4대보험" />
                         </div>
 
-                        {/* 상세 페이지 테마(배경 이미지) */}
+                        {/* ─── 광고 모드: 캔버스 디자이너 ─── */}
                         {mode === 'AD' && (
                             <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 flex items-center gap-1">
-                                    <Image className="w-3.5 h-3.5" /> 상세 페이지 배경 이미지 URL
-                                    <span className="text-[11px] font-medium text-gray-400 ml-2">(광고 클릭 시 보여질 상세 페이지의 배경으로 사용됩니다)</span>
+                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 flex items-center gap-2">
+                                    <Paintbrush className="w-3.5 h-3.5" /> 광고 상세 디자인
+                                    <span className="text-[11px] font-medium text-gray-400 ml-1">(배경 이미지 + 텍스트 배치)</span>
                                 </label>
-                                <input type="text" value={form.detail_bg_image || ''} onChange={e => update('detail_bg_image', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary"
-                                    placeholder="https://example.com/background.jpg" />
+                                <AdCanvasEditor
+                                    value={form.detail_content}
+                                    onChange={(json) => update('detail_content', json)}
+                                    bgImage={form.detail_bg_image}
+                                    onBgImageChange={(url) => update('detail_bg_image', url)}
+                                />
                             </div>
                         )}
 
-                        {/* 리치 텍스트 에디터 */}
-                        <div>
-                            <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">
-                                {mode === 'JOB' ? '상세 공고 내용' : '상세 광고 내용'}
-                            </label>
-                            <RichTextEditor
-                                value={form.detail_content}
-                                onChange={(html) => update('detail_content', html)}
-                            />
-                            <p className="text-[11px] text-gray-400 mt-1.5">배너를 클릭하면 이 내용이 팝업으로 표시됩니다. 글꼴, 색상, 정렬 등을 자유롭게 편집할 수 있습니다.</p>
-                        </div>
+                        {/* ─── 구인 모드: 리치 텍스트 에디터 ─── */}
+                        {mode === 'JOB' && (
+                            <div>
+                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">
+                                    상세 공고 내용
+                                </label>
+                                <RichTextEditor
+                                    value={form.detail_content}
+                                    onChange={(html) => update('detail_content', html)}
+                                />
+                                <p className="text-[11px] text-gray-400 mt-1.5">배너를 클릭하면 이 내용이 팝업으로 표시됩니다. 글꼴, 색상, 정렬 등을 자유롭게 편집할 수 있습니다.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
