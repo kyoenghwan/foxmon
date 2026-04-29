@@ -86,16 +86,31 @@ export default function AdCanvasEditor({
         const obj = canvas?.getActiveObject() as any;
         if (!obj || !canvas) return;
         
-        obj.set({
-            fontWeight: 'normal',
-            fontStyle: 'normal',
-            underline: false,
-            linethrough: false,
-            shadow: null,
-            charSpacing: 0,
-            textBackgroundColor: '',
-            lineHeight: 1.16
-        });
+        const isSelectedText = (obj.type === 'textbox' || obj.type === 'itext') && obj.isEditing && obj.selectionStart !== obj.selectionEnd;
+
+        if (isSelectedText) {
+            obj.setSelectionStyles({
+                fontWeight: 'normal',
+                fontStyle: 'normal',
+                underline: false,
+                linethrough: false,
+                textBackgroundColor: ''
+            });
+        } else {
+            obj.set({
+                fontWeight: 'normal',
+                fontStyle: 'normal',
+                underline: false,
+                linethrough: false,
+                shadow: null,
+                charSpacing: 0,
+                textBackgroundColor: '',
+                lineHeight: 1.16
+            });
+            if (obj.styles) {
+                obj.styles = {};
+            }
+        }
         
         setTextProps(prev => ({
             ...prev,
@@ -507,10 +522,18 @@ export default function AdCanvasEditor({
     // ── 선택 객체 속성 변경 ──
     const updateActiveObject = (key: string, val: any) => {
         const canvas = fabricRef.current;
-        const obj = canvas?.getActiveObject();
+        const obj = canvas?.getActiveObject() as any;
         if (!canvas || !obj) return;
 
-        obj.set(key as any, val);
+        const isInlineStyleKey = ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'underline', 'linethrough', 'fill', 'textBackgroundColor'].includes(key);
+        const isSelectedText = (obj.type === 'textbox' || obj.type === 'itext') && obj.isEditing && obj.selectionStart !== obj.selectionEnd;
+
+        if (isInlineStyleKey && isSelectedText) {
+            obj.setSelectionStyles({ [key]: val });
+        } else {
+            obj.set(key as any, val);
+        }
+        
         canvas.renderAll();
         emitChange(canvas);
 
