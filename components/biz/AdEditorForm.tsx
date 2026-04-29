@@ -9,11 +9,11 @@ import dynamic from 'next/dynamic';
 
 // Fabric.js는 브라우저 전용이므로 SSR 비활성화
 const AdCanvasEditor = dynamic(() => import('@/components/biz/AdCanvasEditor'), { ssr: false });
-const ReactQuill = dynamic(() => import('react-quill'), { 
+const ReactQuill = dynamic(() => import('react-quill-new'), { 
     ssr: false, 
     loading: () => <div className="min-h-[400px] flex items-center justify-center bg-gray-50 border rounded-xl"><Loader2 className="w-6 h-6 animate-spin text-gray-400"/></div> 
 });
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 export interface AdFormData {
     id?: string;
