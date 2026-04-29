@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
     Image as ImageIcon, Type, Trash2, Download, Plus, Move, RotateCcw,
     Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
-    Palette, Layers, Copy, ChevronUp, ChevronDown, Square
+    Palette, Layers, Copy, ChevronUp, ChevronDown, Square, AlignHorizontalSpaceAround
 } from 'lucide-react';
 
 // Fabric.js v6: named imports
@@ -90,6 +90,24 @@ export default function AdCanvasEditor({
         canvas.on('selection:created', (e) => handleSelection(e.selected?.[0]));
         canvas.on('selection:updated', (e) => handleSelection(e.selected?.[0]));
         canvas.on('selection:cleared', () => { setActiveObj(null); });
+
+        // 자석(스냅) 기능: 중앙 근처로 가면 찰칵 붙음
+        canvas.on('object:moving', (e) => {
+            const obj = e.target;
+            if (!obj) return;
+            const SNAP_DISTANCE = 20;
+            const centerX = width / 2;
+            const center = obj.getCenterPoint();
+            if (Math.abs(center.x - centerX) < SNAP_DISTANCE) {
+                if (obj.originX === 'center') {
+                    obj.set({ left: centerX });
+                } else if (obj.originX === 'left') {
+                    obj.set({ left: centerX - (obj.getScaledWidth() / 2) });
+                } else if (obj.originX === 'right') {
+                    obj.set({ left: centerX + (obj.getScaledWidth() / 2) });
+                }
+            }
+        });
 
         // 변경 이벤트 → 부모에 JSON 전달
         canvas.on('object:modified', () => emitChange(canvas));
@@ -331,6 +349,27 @@ export default function AdCanvasEditor({
         canvas.renderAll();
     };
 
+    // ── 객체 가운데 정렬 ──
+    const centerActiveObject = () => {
+        const canvas = fabricRef.current;
+        const obj = canvas?.getActiveObject();
+        if (!canvas || !obj) return;
+        
+        // originX 에 따라 left 값 계산
+        const centerX = width / 2;
+        if (obj.originX === 'center') {
+            obj.set({ left: centerX });
+        } else if (obj.originX === 'left') {
+            obj.set({ left: centerX - (obj.getScaledWidth() / 2) });
+        } else if (obj.originX === 'right') {
+            obj.set({ left: centerX + (obj.getScaledWidth() / 2) });
+        }
+        
+        obj.setCoords(); // 바운딩 박스 업데이트
+        canvas.renderAll();
+        emitChange(canvas);
+    };
+
     // ── 캔버스 → 이미지 다운로드 ──
     const exportAsImage = () => {
         const canvas = fabricRef.current;
@@ -479,6 +518,7 @@ export default function AdCanvasEditor({
                             <Palette className="w-4 h-4 text-blue-400" /> 텍스트 속성
                         </h4>
                         <div className="flex items-center gap-1">
+                            <button onClick={centerActiveObject} title="가운데 정렬" className="flex items-center gap-1 px-2 py-1 text-[11px] font-bold text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-md transition-all border border-gray-700 mr-2"><AlignHorizontalSpaceAround className="w-3.5 h-3.5" /> 중앙 배치</button>
                             <button onClick={duplicateActive} title="복제" className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all"><Copy className="w-3.5 h-3.5" /></button>
                             <button onClick={bringForward} title="앞으로" className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all"><ChevronUp className="w-3.5 h-3.5" /></button>
                             <button onClick={sendBackward} title="뒤로" className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all"><ChevronDown className="w-3.5 h-3.5" /></button>
@@ -563,6 +603,7 @@ export default function AdCanvasEditor({
                             <Layers className="w-4 h-4 text-purple-400" /> 도형 속성
                         </h4>
                         <div className="flex items-center gap-1">
+                            <button onClick={centerActiveObject} title="가운데 정렬" className="flex items-center gap-1 px-2 py-1 text-[11px] font-bold text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-md transition-all border border-gray-700 mr-2"><AlignHorizontalSpaceAround className="w-3.5 h-3.5" /> 중앙 배치</button>
                             <button onClick={duplicateActive} title="복제" className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all"><Copy className="w-3.5 h-3.5" /></button>
                             <button onClick={bringForward} title="앞으로" className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all"><ChevronUp className="w-3.5 h-3.5" /></button>
                             <button onClick={sendBackward} title="뒤로" className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all"><ChevronDown className="w-3.5 h-3.5" /></button>
