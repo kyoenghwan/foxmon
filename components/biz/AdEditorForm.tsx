@@ -919,14 +919,19 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     >
                                         {/* HTML 에디터 배경을 투명하게 만들어 바깥 div의 배경이 보이게 함 */}
                                         <style dangerouslySetInnerHTML={{ __html: `
+                                            .sun-editor { background-color: transparent !important; border: none !important; }
+                                            .sun-editor .se-wrapper { background-color: transparent !important; }
                                             .sun-editor .se-wrapper .se-wrapper-inner { background-color: transparent !important; }
-                                            .sun-editor-editable { background-color: rgba(255, 255, 255, 0.4) !important; color: #000 !important; }
+                                            .sun-editor .se-container { background-color: transparent !important; }
+                                            .sun-editor-editable { background-color: rgba(255, 255, 255, 0.6) !important; color: #000 !important; min-height: 450px; }
+                                            .sun-editor .se-toolbar { background-color: rgba(255, 255, 255, 0.95) !important; outline: 1px solid #e5e7eb !important; }
                                         `}} />
                                         <SunEditor
                                             setContents={form.detail_content}
                                             onChange={(val) => update('detail_content', val)}
                                             setOptions={{
                                                 height: '450px',
+                                                defaultStyle: 'background-color: transparent;',
                                                 font: [
                                                     'Pretendard',
                                                     'Noto Sans KR',
