@@ -5,7 +5,7 @@ import {
     Image as ImageIcon, Type, Trash2, Download, Plus, Move, RotateCcw,
     Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
     Palette, Layers, Copy, ChevronUp, ChevronDown, Square, AlignHorizontalSpaceAround,
-    Crown, Paintbrush
+    Crown, Paintbrush, Eye
 } from 'lucide-react';
 
 // Fabric.js v6: named imports
@@ -60,6 +60,7 @@ export default function AdCanvasEditor({
     const [isPattern, setIsPattern] = useState(true); // 배경을 패턴으로 깔지 여부
     const [canvasReady, setCanvasReady] = useState(false);
     const [canvasHeight, setCanvasHeight] = useState(height); // 가변 높이
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null); // 미리보기 URL
 
     // ── 텍스트 속성 상태 (선택된 텍스트 오브젝트의 현재 값) ──
     const [textProps, setTextProps] = useState({
@@ -284,11 +285,13 @@ export default function AdCanvasEditor({
             const titleColor = themeName === 'gold_bar' ? '#FDE047' : '#FFFFFF';
             const titleShadow = themeName === 'gold_bar' ? new Shadow({ color: 'rgba(0,0,0,0.8)', blur: 10, offsetX: 2, offsetY: 2 }) : new Shadow({ color: '#ec4899', blur: 20, offsetX: 0, offsetY: 0 });
             
-            const titleText = new FabricText('상호명/제목을 입력하세요', {
+            const titleText = new Textbox('상호명/제목을 입력하세요', {
                 left: width / 2, top: topH / 2,
                 originX: 'center', originY: 'center',
                 fontFamily: 'Black Han Sans', fontSize: 52, fill: titleColor,
                 shadow: titleShadow,
+                width: 480,
+                textAlign: 'center',
                 editable: true
             } as any);
 
@@ -301,19 +304,22 @@ export default function AdCanvasEditor({
                 shadow: new Shadow({ color: themeName === 'gold_bar' ? '#CA8A04' : '#3B82F6', blur: 15, offsetX: 0, offsetY: 0 })
             });
 
-            const bodyText = new FabricText('✔ 모집부문: 00명\n✔ 급여조건: 월 000만원\n✔ 근무시간: 19:00 ~ 03:00\n✔ 자격요건: 20세 이상 누구나\n\n[더블클릭하여 필수 내용을 수정하세요]', {
+            const bodyText = new Textbox('✔ 모집부문: 00명\n✔ 급여조건: 월 000만원\n✔ 근무시간: 19:00 ~ 03:00\n✔ 자격요건: 20세 이상 누구나\n\n[더블클릭하여 필수 내용을 수정하세요]', {
                 left: width / 2, top: topH + 80,
                 originX: 'center', originY: 'top',
                 fontFamily: 'Noto Sans KR', fontSize: 24, fill: '#FFFFFF',
                 textAlign: 'center', fontWeight: 'bold',
+                width: 450,
                 editable: true
             } as any);
 
-            const footerText = new FabricText('편하게 연락주세요! ☎ 010-0000-0000', {
+            const footerText = new Textbox('편하게 연락주세요! ☎ 010-0000-0000', {
                 left: width / 2, top: initialHeight - (botH / 2),
                 originX: 'center', originY: 'center',
                 fontFamily: 'Black Han Sans', fontSize: 32, fill: '#FFFFFF',
                 shadow: new Shadow({ color: 'rgba(0,0,0,0.9)', blur: 10, offsetX: 2, offsetY: 2 }),
+                width: 500,
+                textAlign: 'center',
                 editable: true
             } as any);
 
@@ -334,7 +340,7 @@ export default function AdCanvasEditor({
         let obj: any;
 
         if (preset === 'goldTitle') {
-            obj = new FabricText('골드 타이틀', {
+            obj = new Textbox('골드 타이틀', {
                 left: width / 2,
                 top: canvasHeight / 2,
                 originX: 'center',
@@ -346,6 +352,7 @@ export default function AdCanvasEditor({
                 stroke: '#854D0E',
                 strokeWidth: 2,
                 textAlign: 'center',
+                width: 400,
                 shadow: new Shadow({ color: 'rgba(0,0,0,0.8)', blur: 10, offsetX: 3, offsetY: 3 }),
                 editable: true,
             } as any);
@@ -363,7 +370,7 @@ export default function AdCanvasEditor({
                 strokeWidth: 2,
                 shadow: new Shadow({ color: '#3B82F6', blur: 15, offsetX: 0, offsetY: 0 }),
             });
-            const text = new FabricText('여기를 클릭하여 내용을 입력하세요\n- 조건 1\n- 조건 2\n- 연락처: 010-0000-0000', {
+            const text = new Textbox('여기를 클릭하여 내용을 입력하세요\n- 조건 1\n- 조건 2\n- 연락처: 010-0000-0000', {
                 left: width / 2,
                 top: canvasHeight / 2,
                 originX: 'center',
@@ -373,6 +380,7 @@ export default function AdCanvasEditor({
                 fontWeight: 'bold',
                 fill: '#FFFFFF',
                 textAlign: 'center',
+                width: 360,
                 editable: true,
             } as any);
             canvas.add(rect, text);
@@ -380,7 +388,7 @@ export default function AdCanvasEditor({
             canvas.renderAll();
             return;
         } else if (preset === 'title') {
-            obj = new FabricText('제목을 입력하세요', {
+            obj = new Textbox('제목을 입력하세요', {
                 left: width / 2,
                 top: canvasHeight / 2,
                 originX: 'center',
@@ -390,10 +398,11 @@ export default function AdCanvasEditor({
                 fontWeight: 'bold',
                 fill: '#000000',
                 textAlign: 'center',
+                width: 400,
                 editable: true,
             } as any);
         } else {
-            obj = new FabricText('본문 내용을 입력하세요', {
+            obj = new Textbox('본문 내용을 입력하세요', {
                 left: width / 2,
                 top: canvasHeight / 2,
                 originX: 'center',
@@ -403,6 +412,7 @@ export default function AdCanvasEditor({
                 fontWeight: 'normal',
                 fill: '#000000',
                 textAlign: 'center',
+                width: 400,
                 editable: true,
             } as any);
         }
@@ -524,6 +534,16 @@ export default function AdCanvasEditor({
         link.click();
     };
 
+    // ── 미리보기 ──
+    const showPreview = () => {
+        const canvas = fabricRef.current;
+        if (!canvas) return;
+        canvas.discardActiveObject();
+        canvas.renderAll();
+        const dataURL = canvas.toDataURL({ format: 'png', quality: 1, multiplier: 1 } as any);
+        setPreviewUrl(dataURL);
+    };
+
     // ── 전체 초기화 ──
     const clearCanvas = () => {
         const canvas = fabricRef.current;
@@ -592,8 +612,12 @@ export default function AdCanvasEditor({
                     <div className="flex-1" />
 
                     {/* 유틸리티 버튼 */}
+                    <button onClick={showPreview} title="미리보기"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[12px] font-bold transition-all shadow-sm">
+                        <Eye className="w-4 h-4" /> 미리보기
+                    </button>
                     <button onClick={exportAsImage} title="이미지로 다운로드"
-                        className="p-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all">
+                        className="p-1.5 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all shadow-sm">
                         <Download className="w-4 h-4" />
                     </button>
                 </div>
@@ -794,6 +818,19 @@ export default function AdCanvasEditor({
                     <canvas ref={canvasRef} />
                 </div>
             </div>
+
+            {/* ─── 미리보기 모달 ─── */}
+            {previewUrl && (
+                <div className="fixed inset-0 z-[9999] bg-black/80 flex flex-col items-center justify-center p-4" onClick={() => setPreviewUrl(null)}>
+                    <div className="relative bg-white rounded-xl shadow-2xl p-4 max-h-[90vh] overflow-y-auto w-full max-w-3xl flex flex-col items-center animate-in fade-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <div className="w-full flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-gray-800">배너 미리보기</h3>
+                            <button onClick={() => setPreviewUrl(null)} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg text-sm font-bold transition-all">닫기</button>
+                        </div>
+                        <img src={previewUrl} alt="Preview" className="rounded-lg border border-gray-200 shadow-sm" style={{ maxWidth: '100%' }} />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
