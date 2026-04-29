@@ -252,11 +252,11 @@ export default function AdCanvasEditor({
             ]);
 
             const scale1 = width / img1.width!;
-            img1.set({ scaleX: scale1, scaleY: scale1, left: 0, top: 0, selectable: false, evented: false, id: 'bgTop' } as any);
+            img1.set({ scaleX: scale1, scaleY: scale1, left: 0, top: 0, originX: 'left', originY: 'top', selectable: false, evented: false, id: 'bgTop' } as any);
             const topH = img1.height! * scale1;
 
             const scale3 = width / img3.width!;
-            img3.set({ scaleX: scale3, scaleY: scale3, left: 0, selectable: false, evented: false, id: 'bgBottom' } as any);
+            img3.set({ scaleX: scale3, scaleY: scale3, left: 0, originX: 'left', originY: 'top', selectable: false, evented: false, id: 'bgBottom' } as any);
             const botH = img3.height! * scale3;
 
             const patternImg = img2.getElement();
@@ -269,6 +269,7 @@ export default function AdCanvasEditor({
 
             const rect = new Rect({
                 left: 0, top: topH,
+                originX: 'left', originY: 'top',
                 width: width, height: initialHeight - topH - botH,
                 fill: pattern as any,
                 selectable: false, evented: false,
