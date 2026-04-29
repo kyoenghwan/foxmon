@@ -5,7 +5,8 @@ import {
     Image as ImageIcon, Type, Trash2, Download, Plus, Move, RotateCcw,
     Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
     Palette, Layers, Copy, ChevronUp, ChevronDown, Square, AlignHorizontalSpaceAround,
-    Crown, Paintbrush, Eye, Eraser, MoveHorizontal, Highlighter
+    Crown, Paintbrush, Eye, Eraser, MoveHorizontal, Highlighter,
+    List, ListOrdered, IndentDecrease, IndentIncrease, ArrowUpDown, AlignJustify
 } from 'lucide-react';
 
 // Fabric.js v6: named imports
@@ -76,6 +77,7 @@ export default function AdCanvasEditor({
         shadow: '',
         charSpacing: 0,
         textBackgroundColor: '',
+        lineHeight: 1.16,
     });
 
     // ── 텍스트 서식 초기화 ──
@@ -91,7 +93,8 @@ export default function AdCanvasEditor({
             linethrough: false,
             shadow: null,
             charSpacing: 0,
-            textBackgroundColor: ''
+            textBackgroundColor: '',
+            lineHeight: 1.16
         });
         
         setTextProps(prev => ({
@@ -102,7 +105,8 @@ export default function AdCanvasEditor({
             linethrough: false,
             shadow: '',
             charSpacing: 0,
-            textBackgroundColor: ''
+            textBackgroundColor: '',
+            lineHeight: 1.16
         }));
         
         canvas.renderAll();
@@ -276,6 +280,7 @@ export default function AdCanvasEditor({
                 shadow: obj.shadow ? (typeof obj.shadow === 'string' ? obj.shadow : '') : '',
                 charSpacing: obj.charSpacing || 0,
                 textBackgroundColor: obj.textBackgroundColor || '',
+                lineHeight: obj.lineHeight || 1.16,
             });
         }
     };
@@ -758,82 +763,115 @@ export default function AdCanvasEditor({
                     {/* ─── 플로팅 선택 오브젝트 속성 패널 ─── */}
                     {activeObj && (
                         <div
-                            className="absolute z-50 bg-gray-100/95 backdrop-blur-sm rounded shadow-lg border border-gray-300 p-1.5 animate-in fade-in zoom-in-95 duration-200"
+                            className="absolute z-50 bg-[#f3f2f1] rounded-md shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-[#c8c6c4] flex animate-in fade-in zoom-in-95 duration-200 overflow-hidden"
                             style={{
-                                left: Math.max(0, Math.min(activeObjCoords.left + (activeObjCoords.width / 2) - (isTextSelected ? 160 : 120), width - (isTextSelected ? 320 : 240))),
+                                left: Math.max(0, Math.min(activeObjCoords.left + (activeObjCoords.width / 2) - (isTextSelected ? 220 : 120), width - (isTextSelected ? 440 : 240))),
                                 top: activeObjCoords.top + activeObjCoords.height + 15
                             }}
                             onClick={e => e.stopPropagation()}
                             onMouseDown={e => e.stopPropagation()}
                         >
                             {isTextSelected ? (
-                                <div className="flex flex-col gap-1">
-                                    {/* 텍스트: Row 1 (파워포인트 스타일) */}
-                                    <div className="flex items-center gap-1">
-                                        <select
-                                            value={textProps.fontFamily}
-                                            onChange={(e) => updateActiveObject('fontFamily', e.target.value)}
-                                            className="w-32 px-1 py-0.5 bg-white border border-gray-300 rounded text-xs text-gray-800 outline-none hover:border-gray-400"
-                                        >
-                                            {FONT_LIST.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
-                                        </select>
-                                        <select
-                                            value={textProps.fontSize}
-                                            onChange={(e) => updateActiveObject('fontSize', parseInt(e.target.value) || 16)}
-                                            className="w-12 px-1 py-0.5 bg-white border border-gray-300 rounded text-xs text-gray-800 outline-none hover:border-gray-400"
-                                        >
-                                            {[8,9,10,11,12,14,16,18,20,24,28,32,36,40,44,48,54,60,66,72,80,88,96].map(s => <option key={s} value={s}>{s}</option>)}
-                                        </select>
-                                        <button onClick={() => updateActiveObject('fontSize', textProps.fontSize + 2)} className="px-1.5 py-0.5 text-xs font-serif text-gray-700 hover:bg-gray-200 rounded transition-all">A^</button>
-                                        <button onClick={() => updateActiveObject('fontSize', Math.max(8, textProps.fontSize - 2))} className="px-1.5 py-0.5 text-xs font-serif text-gray-700 hover:bg-gray-200 rounded transition-all">Aˇ</button>
-                                        <div className="w-px h-4 bg-gray-300 mx-1" />
-                                        <button onClick={clearFormatting} title="모든 서식 지우기" className="p-1 text-gray-600 hover:bg-gray-200 rounded transition-all"><Eraser className="w-3.5 h-3.5" /></button>
+                                <div className="flex">
+                                    {/* 글꼴 그룹 */}
+                                    <div className="flex flex-col border-r border-[#c8c6c4] p-1.5 relative min-w-[240px]">
+                                        <div className="flex flex-col gap-1 mb-4">
+                                            {/* 첫번째 줄 */}
+                                            <div className="flex items-center gap-1">
+                                                <select
+                                                    value={textProps.fontFamily}
+                                                    onChange={(e) => updateActiveObject('fontFamily', e.target.value)}
+                                                    className="w-24 px-1 py-0.5 bg-white border border-[#8a8886] rounded-sm text-[11px] text-[#323130] outline-none focus:border-[#0078d4]"
+                                                >
+                                                    {FONT_LIST.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
+                                                </select>
+                                                <select
+                                                    value={textProps.fontSize}
+                                                    onChange={(e) => updateActiveObject('fontSize', parseInt(e.target.value) || 16)}
+                                                    className="w-11 px-1 py-0.5 bg-white border border-[#8a8886] rounded-sm text-[11px] text-[#323130] outline-none focus:border-[#0078d4]"
+                                                >
+                                                    {[8,9,10,11,12,14,16,18,20,24,28,32,36,40,44,48,54,60,66,72,80,88,96].map(s => <option key={s} value={s}>{s}</option>)}
+                                                </select>
+                                                <button onClick={() => updateActiveObject('fontSize', textProps.fontSize + 2)} className="p-1 text-[11px] font-serif text-[#323130] hover:bg-[#e1dfdd] rounded-sm" title="글꼴 크기 크게">A^</button>
+                                                <button onClick={() => updateActiveObject('fontSize', Math.max(8, textProps.fontSize - 2))} className="p-1 text-[11px] font-serif text-[#323130] hover:bg-[#e1dfdd] rounded-sm" title="글꼴 크기 작게">Aˇ</button>
+                                                <div className="w-px h-4 bg-[#c8c6c4] mx-0.5" />
+                                                <button onClick={clearFormatting} className="p-1 text-[#323130] hover:bg-[#e1dfdd] rounded-sm" title="모든 서식 지우기"><Eraser className="w-3 h-3" /></button>
+                                            </div>
+                                            {/* 두번째 줄 */}
+                                            <div className="flex items-center gap-0.5">
+                                                <button onClick={() => updateActiveObject('fontWeight', textProps.fontWeight === 'bold' ? 'normal' : 'bold')} className={`p-1 text-[11px] font-bold rounded-sm ${textProps.fontWeight === 'bold' ? 'bg-[#cce8ff] border border-[#99d1ff]' : 'hover:bg-[#e1dfdd] border border-transparent'} text-[#323130]`} title="굵게">가</button>
+                                                <button onClick={() => updateActiveObject('fontStyle', textProps.fontStyle === 'italic' ? 'normal' : 'italic')} className={`p-1 text-[11px] italic rounded-sm ${textProps.fontStyle === 'italic' ? 'bg-[#cce8ff] border border-[#99d1ff]' : 'hover:bg-[#e1dfdd] border border-transparent'} text-[#323130]`} title="기울임꼴">가</button>
+                                                <button onClick={() => updateActiveObject('underline', !textProps.underline)} className={`p-1 text-[11px] underline rounded-sm ${textProps.underline ? 'bg-[#cce8ff] border border-[#99d1ff]' : 'hover:bg-[#e1dfdd] border border-transparent'} text-[#323130]`} title="밑줄">가</button>
+                                                <button onClick={() => updateActiveObject('shadow', textProps.shadow ? '' : '2px 2px 4px rgba(0,0,0,0.5)')} className={`p-1 text-[11px] font-bold rounded-sm ${textProps.shadow ? 'bg-[#cce8ff] border border-[#99d1ff]' : 'hover:bg-[#e1dfdd] border border-transparent'} text-[#323130]`} style={{ textShadow: '1px 1px 2px gray' }} title="텍스트 그림자">S</button>
+                                                <button onClick={() => updateActiveObject('linethrough', !textProps.linethrough)} className={`p-1 text-[11px] line-through rounded-sm ${textProps.linethrough ? 'bg-[#cce8ff] border border-[#99d1ff]' : 'hover:bg-[#e1dfdd] border border-transparent'} text-[#323130]`} title="취소선">abc</button>
+                                                <button onClick={() => updateActiveObject('charSpacing', textProps.charSpacing === 0 ? 100 : 0)} className={`p-1 rounded-sm ${textProps.charSpacing !== 0 ? 'bg-[#cce8ff] border border-[#99d1ff]' : 'hover:bg-[#e1dfdd] border border-transparent'} text-[#323130]`} title="문자 간격"><MoveHorizontal className="w-3 h-3" /></button>
+                                                <button onClick={() => {
+                                                    const obj = fabricRef.current?.getActiveObject() as any;
+                                                    if(obj && obj.text) {
+                                                        obj.set('text', obj.text === obj.text.toUpperCase() ? obj.text.toLowerCase() : obj.text.toUpperCase());
+                                                        fabricRef.current?.renderAll();
+                                                    }
+                                                }} className="p-1 text-[10px] font-serif text-[#323130] hover:bg-[#e1dfdd] rounded-sm border border-transparent" title="대소문자 바꾸기">Aa</button>
+                                                
+                                                <div className="w-px h-4 bg-[#c8c6c4] mx-0.5" />
+                                                
+                                                {/* 형광펜 */}
+                                                <div className="relative flex items-center">
+                                                    <label className="cursor-pointer p-0.5 hover:bg-[#e1dfdd] rounded-sm flex flex-col items-center gap-[1px] border border-transparent" title="텍스트 강조 색">
+                                                        <Highlighter className="w-3 h-3 text-[#323130]" />
+                                                        <div className="w-3.5 h-1" style={{ backgroundColor: textProps.textBackgroundColor || 'transparent' }}></div>
+                                                        <input type="color" className="absolute opacity-0 w-0 h-0" value={textProps.textBackgroundColor || '#ffff00'} onChange={e => updateActiveObject('textBackgroundColor', e.target.value)} />
+                                                    </label>
+                                                </div>
+
+                                                {/* 글꼴 색 */}
+                                                <div className="relative flex items-center">
+                                                    <label className="cursor-pointer px-1 py-0.5 hover:bg-[#e1dfdd] rounded-sm flex flex-col items-center border border-transparent" title="글꼴 색">
+                                                        <span className="text-[11px] font-bold leading-none mb-[1px] text-[#323130]">가</span>
+                                                        <div className="w-3.5 h-1" style={{ backgroundColor: textProps.fill }}></div>
+                                                        <input type="color" className="absolute opacity-0 w-0 h-0" value={textProps.fill} onChange={e => updateActiveObject('fill', e.target.value)} />
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="absolute bottom-0.5 left-0 w-full text-center text-[9px] text-[#605e5c]">글꼴</div>
+                                    </div>
+
+                                    {/* 단락 그룹 */}
+                                    <div className="flex flex-col p-1.5 relative border-r border-[#c8c6c4] min-w-[140px]">
+                                        <div className="flex flex-col gap-1 mb-4">
+                                            {/* 첫번째 줄 */}
+                                            <div className="flex items-center gap-0.5">
+                                                <button onClick={() => alert("지원 예정입니다.")} className="p-1 rounded-sm hover:bg-[#e1dfdd] text-[#323130]" title="글머리 기호"><List className="w-3 h-3" /></button>
+                                                <button onClick={() => alert("지원 예정입니다.")} className="p-1 rounded-sm hover:bg-[#e1dfdd] text-[#323130]" title="번호 매기기"><ListOrdered className="w-3 h-3" /></button>
+                                                <div className="w-px h-4 bg-[#c8c6c4] mx-0.5" />
+                                                <button onClick={() => alert("지원 예정입니다.")} className="p-1 rounded-sm hover:bg-[#e1dfdd] text-[#323130]" title="내어쓰기"><IndentDecrease className="w-3 h-3" /></button>
+                                                <button onClick={() => alert("지원 예정입니다.")} className="p-1 rounded-sm hover:bg-[#e1dfdd] text-[#323130]" title="들여쓰기"><IndentIncrease className="w-3 h-3" /></button>
+                                                <div className="w-px h-4 bg-[#c8c6c4] mx-0.5" />
+                                                {/* 줄 간격 */}
+                                                <div className="relative flex items-center">
+                                                    <button onClick={() => updateActiveObject('lineHeight', textProps.lineHeight === 1.16 ? 1.5 : textProps.lineHeight === 1.5 ? 2.0 : 1.16)} className={`p-1 rounded-sm ${textProps.lineHeight !== 1.16 ? 'bg-[#cce8ff] border border-[#99d1ff]' : 'hover:bg-[#e1dfdd] border border-transparent'} text-[#323130]`} title="줄 간격"><ArrowUpDown className="w-3 h-3" /></button>
+                                                </div>
+                                            </div>
+                                            {/* 두번째 줄 */}
+                                            <div className="flex items-center gap-0.5">
+                                                <button onClick={() => updateActiveObject('textAlign', 'left')} className={`p-1 rounded-sm ${textProps.textAlign === 'left' ? 'bg-[#cce8ff] border border-[#99d1ff]' : 'hover:bg-[#e1dfdd] border border-transparent'} text-[#323130]`} title="텍스트 왼쪽 맞춤"><AlignLeft className="w-3 h-3" /></button>
+                                                <button onClick={() => updateActiveObject('textAlign', 'center')} className={`p-1 rounded-sm ${textProps.textAlign === 'center' ? 'bg-[#cce8ff] border border-[#99d1ff]' : 'hover:bg-[#e1dfdd] border border-transparent'} text-[#323130]`} title="가운데 맞춤"><AlignCenter className="w-3 h-3" /></button>
+                                                <button onClick={() => updateActiveObject('textAlign', 'right')} className={`p-1 rounded-sm ${textProps.textAlign === 'right' ? 'bg-[#cce8ff] border border-[#99d1ff]' : 'hover:bg-[#e1dfdd] border border-transparent'} text-[#323130]`} title="텍스트 오른쪽 맞춤"><AlignRight className="w-3 h-3" /></button>
+                                                <button onClick={() => updateActiveObject('textAlign', 'justify')} className={`p-1 rounded-sm ${textProps.textAlign === 'justify' ? 'bg-[#cce8ff] border border-[#99d1ff]' : 'hover:bg-[#e1dfdd] border border-transparent'} text-[#323130]`} title="양쪽 맞춤"><AlignJustify className="w-3 h-3" /></button>
+                                            </div>
+                                        </div>
+                                        <div className="absolute bottom-0.5 left-0 w-full text-center text-[9px] text-[#605e5c]">단락</div>
                                     </div>
                                     
-                                    {/* 텍스트: Row 2 */}
-                                    <div className="flex items-center gap-0.5">
-                                        <button onClick={() => updateActiveObject('fontWeight', textProps.fontWeight === 'bold' ? 'normal' : 'bold')} className={`px-1.5 py-0.5 text-xs font-bold rounded transition-all ${textProps.fontWeight === 'bold' ? 'bg-gray-300 text-gray-900' : 'text-gray-700 hover:bg-gray-200'}`}>가</button>
-                                        <button onClick={() => updateActiveObject('fontStyle', textProps.fontStyle === 'italic' ? 'normal' : 'italic')} className={`px-1.5 py-0.5 text-xs italic rounded transition-all ${textProps.fontStyle === 'italic' ? 'bg-gray-300 text-gray-900' : 'text-gray-700 hover:bg-gray-200'}`}>가</button>
-                                        <button onClick={() => updateActiveObject('underline', !textProps.underline)} className={`px-1.5 py-0.5 text-xs underline rounded transition-all ${textProps.underline ? 'bg-gray-300 text-gray-900' : 'text-gray-700 hover:bg-gray-200'}`}>가</button>
-                                        <button onClick={() => updateActiveObject('shadow', textProps.shadow ? '' : '2px 2px 4px rgba(0,0,0,0.5)')} className={`px-1.5 py-0.5 text-xs font-bold rounded transition-all ${textProps.shadow ? 'bg-gray-300 text-gray-900' : 'text-gray-700 hover:bg-gray-200'}`} style={{ textShadow: '1px 1px 2px gray' }}>S</button>
-                                        <button onClick={() => updateActiveObject('linethrough', !textProps.linethrough)} className={`px-1.5 py-0.5 text-xs line-through rounded transition-all ${textProps.linethrough ? 'bg-gray-300 text-gray-900' : 'text-gray-700 hover:bg-gray-200'}`}>abc</button>
-                                        <button onClick={() => updateActiveObject('charSpacing', textProps.charSpacing === 0 ? 100 : 0)} title="자간 넓게" className={`p-1 rounded transition-all ${textProps.charSpacing !== 0 ? 'bg-gray-300 text-gray-900' : 'text-gray-600 hover:bg-gray-200'}`}><MoveHorizontal className="w-3.5 h-3.5" /></button>
-                                        <button onClick={() => {
-                                            const obj = fabricRef.current?.getActiveObject() as any;
-                                            if(obj && obj.text) {
-                                                obj.set('text', obj.text === obj.text.toUpperCase() ? obj.text.toLowerCase() : obj.text.toUpperCase());
-                                                fabricRef.current?.renderAll();
-                                            }
-                                        }} title="대소문자 변경" className="px-1.5 py-0.5 text-xs font-serif text-gray-700 hover:bg-gray-200 rounded transition-all">Aa</button>
-                                        
-                                        <div className="w-px h-4 bg-gray-300 mx-1" />
-                                        
-                                        {/* 형광펜 (배경색) */}
-                                        <div className="relative flex items-center">
-                                            <label className="cursor-pointer p-1 hover:bg-gray-200 rounded text-gray-600 flex flex-col items-center gap-[2px] transition-all" title="텍스트 강조 색">
-                                                <Highlighter className="w-3 h-3" />
-                                                <div className="w-3 h-0.5" style={{ backgroundColor: textProps.textBackgroundColor || 'transparent' }}></div>
-                                                <input type="color" className="absolute opacity-0 w-0 h-0" value={textProps.textBackgroundColor || '#ffff00'} onChange={e => updateActiveObject('textBackgroundColor', e.target.value)} />
-                                            </label>
-                                        </div>
-
-                                        {/* 글자색 */}
-                                        <div className="relative flex items-center">
-                                            <label className="cursor-pointer px-1.5 py-0.5 hover:bg-gray-200 rounded text-gray-800 font-bold flex flex-col items-center transition-all" title="글꼴 색">
-                                                <span className="text-[11px] leading-none mb-[2px]">가</span>
-                                                <div className="w-3 h-1" style={{ backgroundColor: textProps.fill }}></div>
-                                                <input type="color" className="absolute opacity-0 w-0 h-0" value={textProps.fill} onChange={e => updateActiveObject('fill', e.target.value)} />
-                                            </label>
-                                        </div>
-
-                                        <div className="w-px h-4 bg-gray-300 mx-1" />
-                                        <button onClick={centerActiveObject} title="중앙 정렬" className="p-1 text-gray-500 hover:text-gray-900 transition-all"><AlignHorizontalSpaceAround className="w-3.5 h-3.5" /></button>
-                                        <button onClick={duplicateActive} title="복제" className="p-1 text-gray-500 hover:text-gray-900 transition-all"><Copy className="w-3.5 h-3.5" /></button>
-                                        <button onClick={deleteActive} title="삭제" className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                                    {/* 유틸리티 그룹 */}
+                                    <div className="flex flex-col p-1.5 justify-center items-center gap-1">
+                                        <button onClick={duplicateActive} className="p-1 hover:bg-[#e1dfdd] rounded-sm text-[#323130]" title="복사"><Copy className="w-3.5 h-3.5" /></button>
+                                        <button onClick={deleteActive} className="p-1 hover:bg-[#e1dfdd] rounded-sm text-red-600" title="삭제"><Trash2 className="w-3.5 h-3.5" /></button>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="space-y-1.5 w-60">
+                                <div className="space-y-1.5 w-60 p-1">
                                     {/* 도형/이미지 속성 */}
                                     <div className="flex items-center justify-between border-b border-gray-200 pb-1.5">
                                         <span className="text-[11px] font-bold text-gray-600 ml-1">배경색</span>
@@ -857,12 +895,12 @@ export default function AdCanvasEditor({
                                                 className="flex-1 h-1 accent-blue-500" />
                                         </div>
                                         <div className="flex items-center gap-0.5 ml-auto">
-                                            <button onClick={centerActiveObject} title="중앙 정렬" className="p-1 text-gray-500 hover:text-gray-900 transition-all"><AlignHorizontalSpaceAround className="w-3.5 h-3.5" /></button>
-                                            <button onClick={bringForward} title="앞으로" className="p-1 text-gray-500 hover:text-gray-900 transition-all"><ChevronUp className="w-3.5 h-3.5" /></button>
-                                            <button onClick={sendBackward} title="뒤로" className="p-1 text-gray-500 hover:text-gray-900 transition-all"><ChevronDown className="w-3.5 h-3.5" /></button>
+                                            <button onClick={centerActiveObject} title="중앙 정렬" className="p-1 text-[#323130] hover:bg-[#e1dfdd] rounded-sm transition-all"><AlignHorizontalSpaceAround className="w-3.5 h-3.5" /></button>
+                                            <button onClick={bringForward} title="앞으로" className="p-1 text-[#323130] hover:bg-[#e1dfdd] rounded-sm transition-all"><ChevronUp className="w-3.5 h-3.5" /></button>
+                                            <button onClick={sendBackward} title="뒤로" className="p-1 text-[#323130] hover:bg-[#e1dfdd] rounded-sm transition-all"><ChevronDown className="w-3.5 h-3.5" /></button>
                                             <div className="w-px h-4 bg-gray-300 mx-1" />
-                                            <button onClick={duplicateActive} title="복제" className="p-1 text-gray-500 hover:text-gray-900 transition-all"><Copy className="w-3.5 h-3.5" /></button>
-                                            <button onClick={deleteActive} title="삭제" className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                                            <button onClick={duplicateActive} title="복제" className="p-1 text-[#323130] hover:bg-[#e1dfdd] rounded-sm transition-all"><Copy className="w-3.5 h-3.5" /></button>
+                                            <button onClick={deleteActive} title="삭제" className="p-1 text-red-500 hover:bg-red-50 rounded-sm transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                                         </div>
                                     </div>
                                 </div>
