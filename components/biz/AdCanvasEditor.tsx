@@ -616,7 +616,7 @@ export default function AdCanvasEditor({
         emitChange(canvas);
     };
 
-    const isTextSelected = activeObj && activeObj.type === 'text';
+    const isTextSelected = activeObj && (activeObj.type === 'text' || activeObj.type === 'textbox' || activeObj.type === 'itext');
 
     return (
         <div className="space-y-4">
