@@ -220,6 +220,17 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (html: s
 export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD' }: AdEditorFormProps) {
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
+    
+    // 모드 전환 시 이전 데이터를 임시 저장하기 위한 ref
+    const canvasContentRef = useRef<string>(initialData?.detail_content?.startsWith('{"version":') ? initialData.detail_content : '');
+    const htmlContentRef = useRef<string>(!initialData?.detail_content?.startsWith('{"version":') ? (initialData?.detail_content || '') : '');
+    const [isRawHtml, setIsRawHtml] = useState(false);
+    
+    // 초기 모드 결정
+    const initialDesignMode = initialData?.detail_content 
+        ? (initialData.detail_content.startsWith('{"version":') ? 'canvas' : 'html') 
+        : 'canvas';
+
     const [form, setForm] = useState<AdFormData>({
         company: '',
         title: '',
@@ -240,7 +251,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         contact_info: '',
         address: '',
         detail_content: '',
-        design_mode: 'canvas',
+        design_mode: initialDesignMode,
         ...initialData,
     });
 
@@ -288,6 +299,21 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         const sigungu = e.target.value;
         setSelectedSigungu(sigungu);
         update('location', `${selectedSido} ${sigungu}`.trim());
+    };
+
+    const handleDesignModeSwitch = (mode: 'canvas' | 'html') => {
+        // 기존 작성 내용 백업
+        if (form.design_mode === 'canvas') {
+            canvasContentRef.current = form.detail_content;
+        } else {
+            htmlContentRef.current = form.detail_content;
+        }
+        
+        // 상태 변경
+        update('design_mode', mode);
+        
+        // 백업된 내용 불러오기
+        update('detail_content', mode === 'canvas' ? canvasContentRef.current : htmlContentRef.current);
     };
 
     // 급여 업데이트 핸들러
@@ -813,14 +839,14 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     {/* 디자인 방식 선택 라디오 버튼 */}
                                     <div className="flex bg-gray-50 p-1 rounded-lg border border-gray-200">
                                         <label className={`cursor-pointer px-4 py-1.5 rounded-md text-[12px] font-bold transition-all flex items-center gap-1.5 ${form.design_mode === 'canvas' ? 'bg-white text-gray-900 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700'}`}>
-                                            <input type="radio" name="design_mode" className="hidden" checked={form.design_mode === 'canvas'} onChange={() => update('design_mode', 'canvas')} />
+                                            <input type="radio" name="design_mode" className="hidden" checked={form.design_mode === 'canvas'} onChange={() => handleDesignModeSwitch('canvas')} />
                                             <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${form.design_mode === 'canvas' ? 'border-primary' : 'border-gray-400'}`}>
                                                 {form.design_mode === 'canvas' && <div className="w-1.5 h-1.5 bg-primary rounded-full" />}
                                             </div>
                                             테마 템플릿 제작 (기본)
                                         </label>
                                         <label className={`cursor-pointer px-4 py-1.5 rounded-md text-[12px] font-bold transition-all flex items-center gap-1.5 ${form.design_mode === 'html' ? 'bg-white text-gray-900 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700'}`}>
-                                            <input type="radio" name="design_mode" className="hidden" checked={form.design_mode === 'html'} onChange={() => update('design_mode', 'html')} />
+                                            <input type="radio" name="design_mode" className="hidden" checked={form.design_mode === 'html'} onChange={() => handleDesignModeSwitch('html')} />
                                             <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${form.design_mode === 'html' ? 'border-primary' : 'border-gray-400'}`}>
                                                 {form.design_mode === 'html' && <div className="w-1.5 h-1.5 bg-primary rounded-full" />}
                                             </div>
@@ -839,25 +865,44 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         />
                                     </div>
                                 ) : (
-                                    <div className="animate-in fade-in zoom-in-95 duration-300 border border-gray-200 rounded-xl overflow-hidden bg-white">
-                                        <ReactQuill 
-                                            theme="snow"
-                                            value={form.detail_content} 
-                                            onChange={(val) => update('detail_content', val)}
-                                            className="h-[500px] [&_.ql-editor]:text-[14px] [&_.ql-toolbar]:border-none [&_.ql-toolbar]:bg-gray-50 [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200 [&_.ql-container]:border-none [&_.ql-container]:h-[450px]"
-                                            modules={{
-                                                toolbar: [
-                                                    [{ 'header': [1, 2, 3, false] }],
-                                                    ['bold', 'italic', 'underline', 'strike'],
-                                                    [{ 'color': [] }, { 'background': [] }],
-                                                    [{ 'align': [] }],
-                                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                                                    ['link', 'image', 'video'],
-                                                    ['clean']
-                                                ]
-                                            }}
-                                            placeholder="원하시는 통이미지 팜플렛, 움직이는 GIF 애니메이션, 영상 등을 자유롭게 삽입하거나 구인 상세 내용을 작성해 주세요."
-                                        />
+                                    <div className="animate-in fade-in zoom-in-95 duration-300 space-y-2">
+                                        <div className="flex justify-end">
+                                            <label className="flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors border border-gray-200">
+                                                <input type="checkbox" checked={isRawHtml} onChange={e => setIsRawHtml(e.target.checked)} className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary cursor-pointer" />
+                                                <span className="text-[12px] font-bold text-gray-700">&lt; / &gt; HTML 코드 직접 입력 (전문가용)</span>
+                                            </label>
+                                        </div>
+                                        
+                                        <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                                            {isRawHtml ? (
+                                                <textarea
+                                                    value={form.detail_content}
+                                                    onChange={e => update('detail_content', e.target.value)}
+                                                    className="w-full h-[500px] p-4 text-[13px] font-mono text-blue-800 bg-gray-50 outline-none resize-none leading-relaxed"
+                                                    placeholder="HTML 코드를 직접 입력하세요. <iframe>, <script> 등의 악성 태그는 저장 시 자동으로 필터링됩니다."
+                                                    spellCheck={false}
+                                                />
+                                            ) : (
+                                                <ReactQuill 
+                                                    theme="snow"
+                                                    value={form.detail_content} 
+                                                    onChange={(val) => update('detail_content', val)}
+                                                    className="h-[500px] [&_.ql-editor]:text-[14px] [&_.ql-toolbar]:border-none [&_.ql-toolbar]:bg-gray-50 [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200 [&_.ql-container]:border-none [&_.ql-container]:h-[450px]"
+                                                    modules={{
+                                                        toolbar: [
+                                                            [{ 'header': [1, 2, 3, false] }],
+                                                            ['bold', 'italic', 'underline', 'strike'],
+                                                            [{ 'color': [] }, { 'background': [] }],
+                                                            [{ 'align': [] }],
+                                                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                                            ['link', 'image', 'video'],
+                                                            ['clean']
+                                                        ]
+                                                    }}
+                                                    placeholder="원하시는 통이미지 팜플렛, 움직이는 GIF 애니메이션, 영상 등을 자유롭게 삽입하거나 구인 상세 내용을 작성해 주세요."
+                                                />
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
