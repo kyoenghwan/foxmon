@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 // Fabric.js v6: named imports
-import { Canvas, FabricText, FabricImage, Rect } from 'fabric';
+import { Canvas, FabricText, Textbox, FabricImage, Rect, Pattern, Shadow } from 'fabric';
 
 // ─── 타입 ───
 interface AdCanvasEditorProps {
@@ -55,7 +55,9 @@ export default function AdCanvasEditor({
     const fabricRef = useRef<Canvas | null>(null);
     const [activeObj, setActiveObj] = useState<any>(null);
     const [bgUrl, setBgUrl] = useState(bgImage || '');
+    const [isPattern, setIsPattern] = useState(true); // 배경을 패턴으로 깔지 여부
     const [canvasReady, setCanvasReady] = useState(false);
+    const [canvasHeight, setCanvasHeight] = useState(height); // 가변 높이
 
     // ── 텍스트 속성 상태 (선택된 텍스트 오브젝트의 현재 값) ──
     const [textProps, setTextProps] = useState({
@@ -75,7 +77,7 @@ export default function AdCanvasEditor({
 
         const canvas = new Canvas(canvasRef.current, {
             width,
-            height,
+            height: canvasHeight,
             backgroundColor: '#1a1a2e',
             selection: true,
             preserveObjectStacking: true,
@@ -109,30 +111,48 @@ export default function AdCanvasEditor({
         };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // ── 배경 이미지 변경 시 적용 ──
+    // ── 캔버스 크기/배경 리렌더링 ──
     useEffect(() => {
         if (!fabricRef.current || !canvasReady) return;
         const canvas = fabricRef.current;
 
+        // 높이 변경 적용
+        canvas.setDimensions({ width, height: canvasHeight });
+
         if (bgUrl) {
             FabricImage.fromURL(bgUrl, { crossOrigin: 'anonymous' }).then((img) => {
                 if (!img) return;
-                // 캔버스에 맞게 스케일
-                const scaleX = width / (img.width || 1);
-                const scaleY = height / (img.height || 1);
-                const scale = Math.max(scaleX, scaleY);
-                img.set({ scaleX: scale, scaleY: scale, originX: 'center', originY: 'center' });
-                canvas.set('backgroundImage', img);
+                
+                if (isPattern) {
+                    // 심리스 패턴으로 설정
+                    const pattern = new Pattern({
+                        source: img.getElement(),
+                        repeat: 'repeat',
+                    });
+                    canvas.set('backgroundColor', pattern as any);
+                    canvas.set('backgroundImage', undefined);
+                } else {
+                    // 캔버스에 꽉 차게 스케일
+                    const scaleX = width / (img.width || 1);
+                    const scaleY = canvasHeight / (img.height || 1);
+                    const scale = Math.max(scaleX, scaleY);
+                    img.set({ scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', top: canvasHeight / 2, left: width / 2 });
+                    canvas.set('backgroundImage', img);
+                    canvas.set('backgroundColor', '#1a1a2e');
+                }
                 canvas.renderAll();
                 emitChange(canvas);
             }).catch(() => { /* 이미지 로드 실패 무시 */ });
         } else {
             canvas.set('backgroundImage', undefined);
-            canvas.set('backgroundColor', '#1a1a2e');
+            // 만약 기본 프리셋 색상이라면 그대로 유지 (여기서는 덮어쓰지 않음)
+            if (canvas.backgroundColor instanceof Pattern) {
+                canvas.set('backgroundColor', '#1a1a2e');
+            }
             canvas.renderAll();
             emitChange(canvas);
         }
-    }, [bgUrl, canvasReady]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [bgUrl, canvasReady, isPattern, canvasHeight, width]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── 선택 핸들러 ──
     const handleSelection = (obj: any) => {
@@ -159,34 +179,77 @@ export default function AdCanvasEditor({
         }
     }, [onChange]);
 
-    // ── 텍스트 추가 ──
-    const addText = (preset: 'title' | 'subtitle' | 'body') => {
+    // ── 텍스트 추가 (템플릿 기능) ──
+    const addTemplate = (preset: 'title' | 'neonBox' | 'goldTitle' | 'body') => {
         const canvas = fabricRef.current;
         if (!canvas) return;
 
-        const configs = {
-            title: { text: '제목을 입력하세요', fontSize: 42, fontWeight: 'bold' },
-            subtitle: { text: '부제목을 입력하세요', fontSize: 28, fontWeight: 'bold' },
-            body: { text: '본문 내용을 입력하세요', fontSize: 18, fontWeight: 'normal' },
-        };
-        const cfg = configs[preset];
+        let obj: any;
 
-        const t = new FabricText(cfg.text, {
-            left: width / 2,
-            top: height / 2,
-            originX: 'center',
-            originY: 'center',
-            fontFamily: 'Noto Sans KR',
-            fontSize: cfg.fontSize,
-            fontWeight: cfg.fontWeight,
-            fill: '#FFFFFF',
-            textAlign: 'center',
-            shadow: '2px 2px 4px rgba(0,0,0,0.5)',
-            editable: true,
-        } as any);
+        if (preset === 'goldTitle') {
+            obj = new FabricText('골드 타이틀', {
+                left: width / 2,
+                top: canvasHeight / 2,
+                originX: 'center',
+                originY: 'center',
+                fontFamily: 'Black Han Sans',
+                fontSize: 64,
+                fontWeight: 'bold',
+                fill: '#FDE047', // 노란색 (그라데이션 효과는 텍스트에 적용하기 까다로워 단순 색상과 그림자로 대체)
+                stroke: '#854D0E',
+                strokeWidth: 2,
+                textAlign: 'center',
+                shadow: new Shadow({ color: 'rgba(0,0,0,0.8)', blur: 10, offsetX: 3, offsetY: 3 }),
+                editable: true,
+            } as any);
+        } else if (preset === 'neonBox') {
+            obj = new Textbox('여기를 클릭하여 내용을 입력하세요\n- 조건 1\n- 조건 2\n- 연락처: 010-0000-0000', {
+                left: width / 2,
+                top: canvasHeight / 2,
+                originX: 'center',
+                originY: 'center',
+                fontFamily: 'Noto Sans KR',
+                fontSize: 24,
+                fontWeight: 'bold',
+                fill: '#FFFFFF',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)', // 반투명 검정 배경
+                textAlign: 'center',
+                width: 400,
+                padding: 20,
+                shadow: new Shadow({ color: '#3B82F6', blur: 15, offsetX: 0, offsetY: 0 }), // 네온 글로우 효과
+                editable: true,
+            } as any);
+        } else if (preset === 'title') {
+            obj = new FabricText('제목을 입력하세요', {
+                left: width / 2,
+                top: canvasHeight / 2,
+                originX: 'center',
+                originY: 'center',
+                fontFamily: 'Noto Sans KR',
+                fontSize: 42,
+                fontWeight: 'bold',
+                fill: '#FFFFFF',
+                textAlign: 'center',
+                shadow: new Shadow({ color: 'rgba(0,0,0,0.5)', blur: 4, offsetX: 2, offsetY: 2 }),
+                editable: true,
+            } as any);
+        } else {
+            obj = new FabricText('본문 내용을 입력하세요', {
+                left: width / 2,
+                top: canvasHeight / 2,
+                originX: 'center',
+                originY: 'center',
+                fontFamily: 'Noto Sans KR',
+                fontSize: 18,
+                fontWeight: 'normal',
+                fill: '#FFFFFF',
+                textAlign: 'center',
+                editable: true,
+            } as any);
+        }
 
-        canvas.add(t);
-        canvas.setActiveObject(t);
+        canvas.add(obj);
+        canvas.setActiveObject(obj);
         canvas.renderAll();
     };
 
@@ -197,7 +260,7 @@ export default function AdCanvasEditor({
 
         const rect = new Rect({
             left: width / 2 - 75,
-            top: height / 2 - 25,
+            top: canvasHeight / 2 - 25,
             width: 150,
             height: 50,
             fill: 'rgba(0,0,0,0.4)',
@@ -298,24 +361,29 @@ export default function AdCanvasEditor({
         <div className="space-y-4">
             {/* ─── 상단 툴바 ─── */}
             <div className="bg-gray-900 rounded-2xl p-3 space-y-3">
-                {/* Row 1: 요소 추가 */}
+                {/* Row 1: 템플릿 및 요소 추가 */}
                 <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mr-1">요소 추가</span>
-                    <button onClick={() => addText('title')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-[12px] font-bold transition-all">
-                        <Type className="w-3.5 h-3.5" /> 제목
+                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mr-1">디자인 블록</span>
+                    <button onClick={() => addTemplate('goldTitle')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg text-[12px] font-bold transition-all border border-yellow-400">
+                        <Type className="w-3.5 h-3.5" /> 골드 타이틀
                     </button>
-                    <button onClick={() => addText('subtitle')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-[12px] font-bold transition-all">
-                        <Type className="w-3 h-3" /> 부제목
+                    <button onClick={() => addTemplate('neonBox')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 hover:bg-blue-800 text-blue-100 rounded-lg text-[12px] font-bold transition-all border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]">
+                        <Layers className="w-3.5 h-3.5" /> 네온 정보 박스
                     </button>
-                    <button onClick={() => addText('body')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-600 hover:bg-gray-500 text-white rounded-lg text-[12px] font-bold transition-all">
-                        <Type className="w-2.5 h-2.5" /> 본문
+                    <div className="w-px h-6 bg-gray-700 mx-1" />
+                    <button onClick={() => addTemplate('title')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-[12px] font-bold transition-all">
+                        <Type className="w-3 h-3" /> 일반 제목
+                    </button>
+                    <button onClick={() => addTemplate('body')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-[12px] font-bold transition-all">
+                        <Type className="w-2.5 h-2.5" /> 일반 본문
                     </button>
                     <button onClick={addShape}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-[12px] font-bold transition-all">
-                        <Square className="w-3.5 h-3.5" /> 박스
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-lg text-[12px] font-bold transition-all">
+                        <Square className="w-3.5 h-3.5" /> 빈 박스
                     </button>
 
                     <div className="flex-1" />
@@ -331,7 +399,7 @@ export default function AdCanvasEditor({
                     </button>
                 </div>
 
-                {/* Row 2: 배경 이미지 URL */}
+                {/* Row 2: 배경 이미지 URL 및 설정 */}
                 <div className="flex items-center gap-2">
                     <ImageIcon className="w-4 h-4 text-gray-400 shrink-0" />
                     <input
@@ -342,8 +410,12 @@ export default function AdCanvasEditor({
                             onBgImageChange?.(e.target.value);
                         }}
                         className="flex-1 px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-[13px] text-white outline-none focus:border-blue-500 placeholder-gray-500"
-                        placeholder="배경 이미지 URL을 입력하세요 (예: https://example.com/bg.jpg)"
+                        placeholder="배경 이미지 URL (예: 무한 반복용 심리스 패턴 이미지)"
                     />
+                    <label className="flex items-center gap-1.5 cursor-pointer text-[12px] text-gray-300">
+                        <input type="checkbox" checked={isPattern} onChange={e => setIsPattern(e.target.checked)} className="rounded border-gray-600" />
+                        패턴(반복) 모드
+                    </label>
                 </div>
 
                 {/* 배경 프리셋 */}
@@ -382,10 +454,19 @@ export default function AdCanvasEditor({
                 </div>
             </div>
 
+            {/* ─── 캔버스 높이 조절 ─── */}
+            <div className="flex items-center justify-between bg-gray-950 px-4 py-2 rounded-t-xl border-b border-gray-800">
+                <span className="text-[12px] font-bold text-gray-400">광고 세로 길이 조절 (현재: {canvasHeight}px)</span>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => setCanvasHeight(h => Math.max(200, h - 200))} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">-200px</button>
+                    <button onClick={() => setCanvasHeight(h => h + 200)} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">+200px</button>
+                    <button onClick={() => setCanvasHeight(h => h + 500)} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">+500px</button>
+                </div>
+            </div>
+
             {/* ─── 캔버스 영역 ─── */}
-            <div className="relative bg-gray-950 rounded-2xl overflow-hidden flex items-center justify-center p-4"
-                style={{ minHeight: height + 40 }}>
-                <div className="rounded-lg overflow-hidden shadow-2xl ring-1 ring-white/10">
+            <div className="relative bg-gray-950 rounded-b-2xl overflow-hidden flex flex-col items-center p-4">
+                <div className="rounded-lg overflow-hidden shadow-2xl ring-1 ring-white/10" style={{ height: canvasHeight, width }}>
                     <canvas ref={canvasRef} />
                 </div>
             </div>
