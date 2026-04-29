@@ -706,24 +706,12 @@ export default function AdCanvasEditor({
                     </button>
                 </div>
 
-                {/* Row 2: 배경 이미지 URL 및 설정 */}
-                <div className="flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4 text-gray-400 shrink-0" />
-                    <input
-                        type="text"
-                        value={bgUrl}
-                        onChange={(e) => {
-                            setBgUrl(e.target.value);
-                            onBgImageChange?.(e.target.value);
-                        }}
-                        className="flex-1 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-900 outline-none focus:border-blue-500 placeholder-gray-400"
-                        placeholder="배경 이미지 URL (예: 무한 반복용 심리스 패턴 이미지)"
-                    />
-                    <label className="flex items-center gap-1.5 cursor-pointer text-[12px] text-gray-600 font-medium">
+                {/* Row 2: 배경 프리셋 및 설정 */}
+                <div className="flex items-center gap-4 border-t border-gray-100 pt-2 w-full">
+                    <label className="flex items-center gap-1.5 cursor-pointer text-[12px] text-gray-600 font-medium bg-gray-50 px-2 py-1 rounded">
                         <input type="checkbox" checked={isPattern} onChange={e => setIsPattern(e.target.checked)} className="rounded border-gray-300 text-blue-500" />
-                        패턴(반복) 모드
+                        배경 패턴(반복) 모드
                     </label>
-                </div>
 
                 {/* 배경 프리셋 */}
                 <div className="flex items-center gap-1.5">

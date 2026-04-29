@@ -854,6 +854,51 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 </div>
                                 
+                                {/* ─── 공통 배경 이미지 설정 ─── */}
+                                <div className="flex flex-col gap-1.5 mb-4 bg-indigo-50/50 p-3 rounded-lg border border-indigo-100">
+                                    <label className="text-[12px] font-bold text-gray-700 flex items-center gap-1.5">
+                                        <ImageIcon className="w-3.5 h-3.5 text-indigo-500" /> 공통 배경 이미지 (포스터/전단지 배경 깔기)
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        <input 
+                                            type="text" 
+                                            value={form.detail_bg_image || ''} 
+                                            onChange={e => update('detail_bg_image', e.target.value)}
+                                            className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-[13px] outline-none focus:border-indigo-500 bg-white" 
+                                            placeholder="배경 이미지 URL을 입력하거나 우측 버튼으로 내 PC에서 직접 불러오세요"
+                                        />
+                                        <label className="cursor-pointer bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-300 text-[12px] font-bold text-gray-700 transition-all flex items-center gap-1.5 shadow-sm">
+                                            <Upload className="w-3.5 h-3.5" /> 내 PC에서 사진 첨부
+                                            <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                className="hidden" 
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if(file) {
+                                                        const reader = new FileReader();
+                                                        reader.onload = (event) => {
+                                                            update('detail_bg_image', event.target?.result as string);
+                                                        };
+                                                        reader.readAsDataURL(file);
+                                                    }
+                                                }}
+                                            />
+                                        </label>
+                                        {form.detail_bg_image && (
+                                            <button 
+                                                onClick={() => update('detail_bg_image', '')}
+                                                className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-[12px] font-bold transition-all border border-red-200"
+                                            >
+                                                배경 지우기
+                                            </button>
+                                        )}
+                                    </div>
+                                    <p className="text-[11px] text-gray-500 ml-5">
+                                        💡 템플릿(캔버스) 모드와 직접 작성 모드 모두 이 배경 이미지가 밑바탕으로 깔리게 됩니다.
+                                    </p>
+                                </div>
+                                
                                 {form.design_mode === 'canvas' ? (
                                     <div className="animate-in fade-in zoom-in-95 duration-300">
                                         <AdCanvasEditor
@@ -864,7 +909,19 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         />
                                     </div>
                                 ) : (
-                                    <div className="animate-in fade-in zoom-in-95 duration-300 border border-gray-200 rounded-xl overflow-hidden bg-white">
+                                    <div 
+                                        className="animate-in fade-in zoom-in-95 duration-300 border border-gray-200 rounded-xl overflow-hidden relative"
+                                        style={{
+                                            backgroundImage: form.detail_bg_image ? `url(${form.detail_bg_image})` : 'none',
+                                            backgroundSize: 'cover',
+                                            backgroundPosition: 'center'
+                                        }}
+                                    >
+                                        {/* HTML 에디터 배경을 투명하게 만들어 바깥 div의 배경이 보이게 함 */}
+                                        <style dangerouslySetInnerHTML={{ __html: `
+                                            .sun-editor .se-wrapper .se-wrapper-inner { background-color: transparent !important; }
+                                            .sun-editor-editable { background-color: rgba(255, 255, 255, 0.4) !important; color: #000 !important; }
+                                        `}} />
                                         <SunEditor
                                             setContents={form.detail_content}
                                             onChange={(val) => update('detail_content', val)}
