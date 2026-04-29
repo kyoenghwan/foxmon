@@ -712,6 +712,7 @@ export default function AdCanvasEditor({
                         <input type="checkbox" checked={isPattern} onChange={e => setIsPattern(e.target.checked)} className="rounded border-gray-300 text-blue-500" />
                         배경 패턴(반복) 모드
                     </label>
+                </div>
 
                 {/* 배경 프리셋 */}
                 <div className="flex items-center gap-1.5">
