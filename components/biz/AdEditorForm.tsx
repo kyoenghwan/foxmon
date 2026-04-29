@@ -9,11 +9,11 @@ import dynamic from 'next/dynamic';
 
 // Fabric.js는 브라우저 전용이므로 SSR 비활성화
 const AdCanvasEditor = dynamic(() => import('@/components/biz/AdCanvasEditor'), { ssr: false });
-const ReactQuill = dynamic(() => import('react-quill-new'), { 
+const SunEditor = dynamic(() => import('suneditor-react'), { 
     ssr: false, 
     loading: () => <div className="min-h-[400px] flex items-center justify-center bg-gray-50 border rounded-xl"><Loader2 className="w-6 h-6 animate-spin text-gray-400"/></div> 
 });
-import 'react-quill-new/dist/quill.snow.css';
+import 'suneditor/dist/css/suneditor.min.css';
 
 export interface AdFormData {
     id?: string;
@@ -224,7 +224,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     // 모드 전환 시 이전 데이터를 임시 저장하기 위한 ref
     const canvasContentRef = useRef<string>(initialData?.detail_content?.startsWith('{"version":') ? initialData.detail_content : '');
     const htmlContentRef = useRef<string>(!initialData?.detail_content?.startsWith('{"version":') ? (initialData?.detail_content || '') : '');
-    const [isRawHtml, setIsRawHtml] = useState(false);
     
     // 초기 모드 결정
     const initialDesignMode = initialData?.detail_content 
@@ -865,44 +864,28 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         />
                                     </div>
                                 ) : (
-                                    <div className="animate-in fade-in zoom-in-95 duration-300 space-y-2">
-                                        <div className="flex justify-end">
-                                            <label className="flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors border border-gray-200">
-                                                <input type="checkbox" checked={isRawHtml} onChange={e => setIsRawHtml(e.target.checked)} className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary cursor-pointer" />
-                                                <span className="text-[12px] font-bold text-gray-700">&lt; / &gt; HTML 코드 직접 입력 (전문가용)</span>
-                                            </label>
-                                        </div>
-                                        
-                                        <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-                                            {isRawHtml ? (
-                                                <textarea
-                                                    value={form.detail_content}
-                                                    onChange={e => update('detail_content', e.target.value)}
-                                                    className="w-full h-[500px] p-4 text-[13px] font-mono text-blue-800 bg-gray-50 outline-none resize-none leading-relaxed"
-                                                    placeholder="HTML 코드를 직접 입력하세요. <iframe>, <script> 등의 악성 태그는 저장 시 자동으로 필터링됩니다."
-                                                    spellCheck={false}
-                                                />
-                                            ) : (
-                                                <ReactQuill 
-                                                    theme="snow"
-                                                    value={form.detail_content} 
-                                                    onChange={(val) => update('detail_content', val)}
-                                                    className="h-[500px] [&_.ql-editor]:text-[14px] [&_.ql-toolbar]:border-none [&_.ql-toolbar]:bg-gray-50 [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200 [&_.ql-container]:border-none [&_.ql-container]:h-[450px]"
-                                                    modules={{
-                                                        toolbar: [
-                                                            [{ 'header': [1, 2, 3, false] }],
-                                                            ['bold', 'italic', 'underline', 'strike'],
-                                                            [{ 'color': [] }, { 'background': [] }],
-                                                            [{ 'align': [] }],
-                                                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                                                            ['link', 'image', 'video'],
-                                                            ['clean']
-                                                        ]
-                                                    }}
-                                                    placeholder="원하시는 통이미지 팜플렛, 움직이는 GIF 애니메이션, 영상 등을 자유롭게 삽입하거나 구인 상세 내용을 작성해 주세요."
-                                                />
-                                            )}
-                                        </div>
+                                    <div className="animate-in fade-in zoom-in-95 duration-300 border border-gray-200 rounded-xl overflow-hidden bg-white">
+                                        <SunEditor
+                                            setContents={form.detail_content}
+                                            onChange={(val) => update('detail_content', val)}
+                                            setOptions={{
+                                                height: '450px',
+                                                buttonList: [
+                                                    ['undo', 'redo'],
+                                                    ['font', 'fontSize', 'formatBlock'],
+                                                    ['paragraphStyle', 'blockquote'],
+                                                    ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
+                                                    ['fontColor', 'hiliteColor', 'textStyle'],
+                                                    ['removeFormat'],
+                                                    '/', // Line break
+                                                    ['outdent', 'indent'],
+                                                    ['align', 'horizontalRule', 'list', 'lineHeight'],
+                                                    ['table', 'link', 'image', 'video'],
+                                                    ['fullScreen', 'showBlocks', 'codeView']
+                                                ],
+                                                placeholder: "원하시는 통이미지 팜플렛, 움직이는 GIF 애니메이션, 영상 등을 자유롭게 삽입하거나 구인 상세 내용을 작성해 주세요."
+                                            }}
+                                        />
                                     </div>
                                 )}
                             </div>
