@@ -9,6 +9,11 @@ import dynamic from 'next/dynamic';
 
 // Fabric.js는 브라우저 전용이므로 SSR 비활성화
 const AdCanvasEditor = dynamic(() => import('@/components/biz/AdCanvasEditor'), { ssr: false });
+const ReactQuill = dynamic(() => import('react-quill'), { 
+    ssr: false, 
+    loading: () => <div className="min-h-[400px] flex items-center justify-center bg-gray-50 border rounded-xl"><Loader2 className="w-6 h-6 animate-spin text-gray-400"/></div> 
+});
+import 'react-quill/dist/quill.snow.css';
 
 export interface AdFormData {
     id?: string;
@@ -33,6 +38,7 @@ export interface AdFormData {
     address: string;
     detail_content: string;
     detail_bg_image?: string;
+    design_mode?: 'canvas' | 'html';
 }
 
 // 프리미엄 테마 목록 (premium-job-card.tsx THEME_CONFIG 기반)
@@ -234,6 +240,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         contact_info: '',
         address: '',
         detail_content: '',
+        design_mode: 'canvas',
         ...initialData,
     });
 
@@ -795,19 +802,64 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 placeholder="예: 식사 제공, 주차 가능, 4대보험" />
                         </div>
 
-                        {/* ─── 광고 모드: 캔버스 디자이너 ─── */}
+                        {/* ─── 광고 모드: 상세 디자인 / 에디터 ─── */}
                         {mode === 'AD' && (
                             <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 flex items-center gap-2">
-                                    <Paintbrush className="w-3.5 h-3.5" /> 광고 상세 디자인
-                                    <span className="text-[11px] font-medium text-gray-400 ml-1">(배경 이미지 + 텍스트 배치)</span>
-                                </label>
-                                <AdCanvasEditor
-                                    value={form.detail_content}
-                                    onChange={(json) => update('detail_content', json)}
-                                    bgImage={form.detail_bg_image}
-                                    onBgImageChange={(url) => update('detail_bg_image', url)}
-                                />
+                                <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-3">
+                                    <label className="text-[13px] font-bold text-gray-800 flex items-center gap-2">
+                                        <Paintbrush className="w-4 h-4 text-primary" /> 광고 본문 작성 방식
+                                    </label>
+                                    
+                                    {/* 디자인 방식 선택 라디오 버튼 */}
+                                    <div className="flex bg-gray-50 p-1 rounded-lg border border-gray-200">
+                                        <label className={`cursor-pointer px-4 py-1.5 rounded-md text-[12px] font-bold transition-all flex items-center gap-1.5 ${form.design_mode === 'canvas' ? 'bg-white text-gray-900 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700'}`}>
+                                            <input type="radio" name="design_mode" className="hidden" checked={form.design_mode === 'canvas'} onChange={() => update('design_mode', 'canvas')} />
+                                            <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${form.design_mode === 'canvas' ? 'border-primary' : 'border-gray-400'}`}>
+                                                {form.design_mode === 'canvas' && <div className="w-1.5 h-1.5 bg-primary rounded-full" />}
+                                            </div>
+                                            테마 템플릿 제작 (기본)
+                                        </label>
+                                        <label className={`cursor-pointer px-4 py-1.5 rounded-md text-[12px] font-bold transition-all flex items-center gap-1.5 ${form.design_mode === 'html' ? 'bg-white text-gray-900 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700'}`}>
+                                            <input type="radio" name="design_mode" className="hidden" checked={form.design_mode === 'html'} onChange={() => update('design_mode', 'html')} />
+                                            <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${form.design_mode === 'html' ? 'border-primary' : 'border-gray-400'}`}>
+                                                {form.design_mode === 'html' && <div className="w-1.5 h-1.5 bg-primary rounded-full" />}
+                                            </div>
+                                            직접 작성 (이미지/GIF 첨부)
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                {form.design_mode === 'canvas' ? (
+                                    <div className="animate-in fade-in zoom-in-95 duration-300">
+                                        <AdCanvasEditor
+                                            value={form.detail_content}
+                                            onChange={(json) => update('detail_content', json)}
+                                            bgImage={form.detail_bg_image}
+                                            onBgImageChange={(url) => update('detail_bg_image', url)}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="animate-in fade-in zoom-in-95 duration-300 border border-gray-200 rounded-xl overflow-hidden bg-white">
+                                        <ReactQuill 
+                                            theme="snow"
+                                            value={form.detail_content} 
+                                            onChange={(val) => update('detail_content', val)}
+                                            className="h-[500px] [&_.ql-editor]:text-[14px] [&_.ql-toolbar]:border-none [&_.ql-toolbar]:bg-gray-50 [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200 [&_.ql-container]:border-none [&_.ql-container]:h-[450px]"
+                                            modules={{
+                                                toolbar: [
+                                                    [{ 'header': [1, 2, 3, false] }],
+                                                    ['bold', 'italic', 'underline', 'strike'],
+                                                    [{ 'color': [] }, { 'background': [] }],
+                                                    [{ 'align': [] }],
+                                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                                    ['link', 'image', 'video'],
+                                                    ['clean']
+                                                ]
+                                            }}
+                                            placeholder="원하시는 통이미지 팜플렛, 움직이는 GIF 애니메이션, 영상 등을 자유롭게 삽입하거나 구인 상세 내용을 작성해 주세요."
+                                        />
+                                    </div>
+                                )}
                             </div>
                         )}
 
