@@ -40,6 +40,7 @@ const BG_PRESETS = [
     { label: '그라데이션 2', value: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
     { label: '그라데이션 3', value: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
     { label: '다크', value: '#1a1a2e' },
+    { label: '화이트', value: '#ffffff' },
     { label: '웜', value: '#ffecd2' },
 ];
 
@@ -64,7 +65,7 @@ export default function AdCanvasEditor({
     const [textProps, setTextProps] = useState({
         fontFamily: 'Noto Sans KR',
         fontSize: 32,
-        fill: '#FFFFFF',
+        fill: '#000000',
         fontWeight: 'normal' as string,
         fontStyle: 'normal' as string,
         underline: false,
@@ -79,7 +80,7 @@ export default function AdCanvasEditor({
         const canvas = new Canvas(canvasRef.current, {
             width,
             height: canvasHeight,
-            backgroundColor: '#1a1a2e',
+            backgroundColor: '#ffffff',
             selection: true,
             preserveObjectStacking: true,
         });
@@ -189,7 +190,7 @@ export default function AdCanvasEditor({
                     const scale = Math.max(scaleX, scaleY);
                     img.set({ scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', top: canvasHeight / 2, left: width / 2 });
                     canvas.set('backgroundImage', img);
-                    canvas.set('backgroundColor', '#1a1a2e');
+                    canvas.set('backgroundColor', '#ffffff');
                 }
                 canvas.renderAll();
                 emitChange(canvas);
@@ -198,7 +199,7 @@ export default function AdCanvasEditor({
             canvas.set('backgroundImage', undefined);
             // 만약 기본 프리셋 색상이라면 그대로 유지 (여기서는 덮어쓰지 않음)
             if (canvas.backgroundColor instanceof Pattern) {
-                canvas.set('backgroundColor', '#1a1a2e');
+                canvas.set('backgroundColor', '#ffffff');
             }
             canvas.renderAll();
             emitChange(canvas);
@@ -212,7 +213,7 @@ export default function AdCanvasEditor({
             setTextProps({
                 fontFamily: obj.fontFamily || 'Noto Sans KR',
                 fontSize: obj.fontSize || 32,
-                fill: (obj.fill as string) || '#FFFFFF',
+                fill: (obj.fill as string) || '#000000',
                 fontWeight: obj.fontWeight || 'normal',
                 fontStyle: obj.fontStyle || 'normal',
                 underline: obj.underline || false,
@@ -238,7 +239,7 @@ export default function AdCanvasEditor({
         if (!confirm('기존 캔버스 내용이 모두 지워지고 새로운 테마로 덮어씌워집니다. 계속하시겠습니까?')) return;
 
         canvas.clear();
-        canvas.set('backgroundColor', '#1a1a2e');
+        canvas.set('backgroundColor', '#ffffff');
         canvas.set('backgroundImage', undefined);
         setBgUrl('');
         if (onBgImageChange) onBgImageChange('');
@@ -385,9 +386,8 @@ export default function AdCanvasEditor({
                 fontFamily: 'Noto Sans KR',
                 fontSize: 42,
                 fontWeight: 'bold',
-                fill: '#FFFFFF',
+                fill: '#000000',
                 textAlign: 'center',
-                shadow: new Shadow({ color: 'rgba(0,0,0,0.5)', blur: 4, offsetX: 2, offsetY: 2 }),
                 editable: true,
             } as any);
         } else {
@@ -399,7 +399,7 @@ export default function AdCanvasEditor({
                 fontFamily: 'Noto Sans KR',
                 fontSize: 18,
                 fontWeight: 'normal',
-                fill: '#FFFFFF',
+                fill: '#000000',
                 textAlign: 'center',
                 editable: true,
             } as any);
@@ -528,7 +528,7 @@ export default function AdCanvasEditor({
         if (!canvas) return;
         if (!confirm('캔버스의 모든 요소를 초기화 하시겠습니까?')) return;
         canvas.clear();
-        canvas.set('backgroundColor', '#1a1a2e');
+        canvas.set('backgroundColor', '#ffffff');
         canvas.renderAll();
         emitChange(canvas);
     };
@@ -628,7 +628,7 @@ export default function AdCanvasEditor({
                                     const canvas = fabricRef.current;
                                     if (canvas) {
                                         canvas.set('backgroundImage', undefined);
-                                        canvas.set('backgroundColor', '#1a1a2e');
+                                        canvas.set('backgroundColor', '#ffffff');
                                         canvas.renderAll();
                                     }
                                 } else if (preset.value.startsWith('#')) {
@@ -777,18 +777,18 @@ export default function AdCanvasEditor({
             )}
 
             {/* ─── 캔버스 높이 조절 ─── */}
-            <div className="flex items-center justify-between bg-gray-950 px-4 py-2 rounded-t-xl border-b border-gray-800 mt-2">
-                <span className="text-[12px] font-bold text-gray-400">광고 세로 길이 조절 (현재: {canvasHeight}px)</span>
+            <div className="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-t-xl border border-gray-200 mt-2">
+                <span className="text-[12px] font-bold text-gray-600">광고 세로 길이 조절 (현재: {canvasHeight}px)</span>
                 <div className="flex items-center gap-2">
-                    <button onClick={() => setCanvasHeight(h => Math.max(200, h - 200))} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">-200px</button>
-                    <button onClick={() => setCanvasHeight(h => h + 200)} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">+200px</button>
-                    <button onClick={() => setCanvasHeight(h => h + 500)} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">+500px</button>
+                    <button onClick={() => setCanvasHeight(h => Math.max(200, h - 200))} className="px-2 py-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded text-[11px]">-200px</button>
+                    <button onClick={() => setCanvasHeight(h => h + 200)} className="px-2 py-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded text-[11px]">+200px</button>
+                    <button onClick={() => setCanvasHeight(h => h + 500)} className="px-2 py-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded text-[11px]">+500px</button>
                 </div>
             </div>
 
             {/* ─── 캔버스 영역 ─── */}
-            <div className="relative bg-gray-950 rounded-b-2xl overflow-hidden flex flex-col items-center p-4">
-                <div className="rounded-lg overflow-hidden shadow-2xl ring-1 ring-white/10" style={{ height: canvasHeight, width }}>
+            <div className="relative bg-white rounded-b-2xl overflow-hidden flex flex-col items-center p-4 border-b border-l border-r border-gray-200 shadow-sm">
+                <div className="rounded-lg overflow-hidden ring-1 ring-black/5 shadow-md" style={{ height: canvasHeight, width }}>
                     <canvas ref={canvasRef} />
                 </div>
             </div>
