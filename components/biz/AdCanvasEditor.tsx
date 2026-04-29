@@ -4,7 +4,8 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
     Image as ImageIcon, Type, Trash2, Download, Plus, Move, RotateCcw,
     Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
-    Palette, Layers, Copy, ChevronUp, ChevronDown, Square, AlignHorizontalSpaceAround
+    Palette, Layers, Copy, ChevronUp, ChevronDown, Square, AlignHorizontalSpaceAround,
+    Crown, Paintbrush
 } from 'lucide-react';
 
 // Fabric.js v6: named imports
@@ -155,6 +156,20 @@ export default function AdCanvasEditor({
         // 높이 변경 적용
         canvas.setDimensions({ width, height: canvasHeight });
 
+        // 전체 테마 배경(상/중/하)가 있는 경우, 높이 변경에 맞춰 중간 패턴 크기 및 하단 이미지 위치 조정
+        const objects = canvas.getObjects() as any[];
+        const topBg = objects.find(o => o.id === 'bgTop');
+        const middleBg = objects.find(o => o.id === 'bgMiddle');
+        const bottomBg = objects.find(o => o.id === 'bgBottom');
+
+        if (topBg && middleBg && bottomBg) {
+             const topH = topBg.getScaledHeight();
+             const botH = bottomBg.getScaledHeight();
+             const midH = Math.max(0, canvasHeight - topH - botH);
+             middleBg.set({ height: midH });
+             bottomBg.set({ top: canvasHeight - botH });
+        }
+
         if (bgUrl) {
             FabricImage.fromURL(bgUrl, { crossOrigin: 'anonymous' }).then((img) => {
                 if (!img) return;
@@ -210,10 +225,103 @@ export default function AdCanvasEditor({
     // ── 부모에 JSON 전달 ──
     const emitChange = useCallback((canvas: Canvas) => {
         if (onChange) {
-            const json = canvas.toJSON();
+            const json = (canvas as any).toJSON(['id', 'selectable', 'evented']);
             onChange(JSON.stringify(json));
         }
     }, [onChange]);
+
+    // ── 전체 테마 템플릿 적용 ──
+    const applyFullTheme = async (themeName: 'gold_bar' | 'neon_nightclub') => {
+        const canvas = fabricRef.current;
+        if (!canvas) return;
+
+        if (!confirm('기존 캔버스 내용이 모두 지워지고 새로운 테마로 덮어씌워집니다. 계속하시겠습니까?')) return;
+
+        canvas.clear();
+        canvas.set('backgroundColor', '#1a1a2e');
+        canvas.set('backgroundImage', undefined);
+        setBgUrl('');
+        if (onBgImageChange) onBgImageChange('');
+
+        try {
+            const [img1, img2, img3] = await Promise.all([
+                new Promise<any>((resolve, reject) => FabricImage.fromURL(`/images/themes/${themeName}_1.png`, { crossOrigin: 'anonymous' }).then(resolve).catch(reject)),
+                new Promise<any>((resolve, reject) => FabricImage.fromURL(`/images/themes/${themeName}_2.png`, { crossOrigin: 'anonymous' }).then(resolve).catch(reject)),
+                new Promise<any>((resolve, reject) => FabricImage.fromURL(`/images/themes/${themeName}_3.png`, { crossOrigin: 'anonymous' }).then(resolve).catch(reject))
+            ]);
+
+            const scale1 = width / img1.width!;
+            img1.set({ scaleX: scale1, scaleY: scale1, left: 0, top: 0, selectable: false, evented: false, id: 'bgTop' } as any);
+            const topH = img1.getScaledHeight();
+
+            const scale3 = width / img3.width!;
+            img3.set({ scaleX: scale3, scaleY: scale3, left: 0, selectable: false, evented: false, id: 'bgBottom' } as any);
+            const botH = img3.getScaledHeight();
+
+            const patternImg = img2.getElement();
+            const pattern = new Pattern({ source: patternImg, repeat: 'repeat' });
+
+            const initialHeight = Math.max(1000, topH + botH + 400);
+            setCanvasHeight(initialHeight);
+            canvas.setDimensions({ width, height: initialHeight });
+
+            const rect = new Rect({
+                left: 0, top: topH,
+                width: width, height: initialHeight - topH - botH,
+                fill: pattern as any,
+                selectable: false, evented: false,
+                id: 'bgMiddle'
+            } as any);
+
+            img3.set({ top: initialHeight - botH });
+
+            canvas.add(img1, rect, img3);
+
+            // 텍스트 블록 추가
+            const titleColor = themeName === 'gold_bar' ? '#FDE047' : '#FFFFFF';
+            const titleShadow = themeName === 'gold_bar' ? new Shadow({ color: 'rgba(0,0,0,0.8)', blur: 10, offsetX: 2, offsetY: 2 }) : new Shadow({ color: '#ec4899', blur: 20, offsetX: 0, offsetY: 0 });
+            
+            const titleText = new FabricText('상호명/제목을 입력하세요', {
+                left: width / 2, top: topH / 2,
+                originX: 'center', originY: 'center',
+                fontFamily: 'Black Han Sans', fontSize: 52, fill: titleColor,
+                shadow: titleShadow,
+                editable: true
+            } as any);
+
+            const bodyBox = new Rect({
+                left: width / 2, top: topH + 50,
+                originX: 'center', originY: 'top',
+                width: 480, height: 280,
+                fill: 'rgba(0,0,0,0.75)', rx: 15, ry: 15,
+                stroke: themeName === 'gold_bar' ? '#EAB308' : '#3B82F6', strokeWidth: 2,
+                shadow: new Shadow({ color: themeName === 'gold_bar' ? '#CA8A04' : '#3B82F6', blur: 15, offsetX: 0, offsetY: 0 })
+            });
+
+            const bodyText = new FabricText('✔ 모집부문: 00명\n✔ 급여조건: 월 000만원\n✔ 근무시간: 19:00 ~ 03:00\n✔ 자격요건: 20세 이상 누구나\n\n[더블클릭하여 필수 내용을 수정하세요]', {
+                left: width / 2, top: topH + 80,
+                originX: 'center', originY: 'top',
+                fontFamily: 'Noto Sans KR', fontSize: 24, fill: '#FFFFFF',
+                textAlign: 'center', fontWeight: 'bold',
+                editable: true
+            } as any);
+
+            const footerText = new FabricText('편하게 연락주세요! ☎ 010-0000-0000', {
+                left: width / 2, top: initialHeight - (botH / 2),
+                originX: 'center', originY: 'center',
+                fontFamily: 'Black Han Sans', fontSize: 32, fill: '#FFFFFF',
+                shadow: new Shadow({ color: 'rgba(0,0,0,0.9)', blur: 10, offsetX: 2, offsetY: 2 }),
+                editable: true
+            } as any);
+
+            canvas.add(titleText, bodyBox, bodyText, footerText);
+            canvas.renderAll();
+            emitChange(canvas);
+
+        } catch (err) {
+            alert('테마 이미지를 불러오는데 실패했습니다.');
+        }
+    };
 
     // ── 텍스트 추가 (템플릿 기능) ──
     const addTemplate = (preset: 'title' | 'neonBox' | 'goldTitle' | 'body') => {
@@ -435,6 +543,25 @@ export default function AdCanvasEditor({
             
             {/* ─── 상단 툴바 ─── */}
             <div className="bg-gray-900 rounded-2xl p-3 space-y-3">
+                
+                {/* Row 0: 전체 테마 템플릿 */}
+                <div className="flex items-center gap-2 flex-wrap border-b border-gray-800 pb-3 mb-2">
+                    <span className="text-[12px] font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-500 mr-2">👑 풀세트 테마 템플릿</span>
+                    <button onClick={() => applyFullTheme('gold_bar')}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-yellow-600 to-yellow-800 hover:from-yellow-500 hover:to-yellow-700 text-white rounded-lg text-[13px] font-bold transition-all shadow-lg border border-yellow-500/50">
+                        <Crown className="w-4 h-4" /> 골드 바 테마
+                    </button>
+                    <button onClick={() => applyFullTheme('neon_nightclub')}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-800 hover:from-purple-500 hover:to-blue-700 text-white rounded-lg text-[13px] font-bold transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)] border border-purple-500/50">
+                        <Paintbrush className="w-4 h-4" /> 네온 나이트클럽
+                    </button>
+                    <div className="flex-1" />
+                    <button onClick={clearCanvas} title="전체 초기화"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-red-600/80 hover:bg-red-500 text-white rounded-lg transition-all text-[12px] font-bold">
+                        <RotateCcw className="w-4 h-4" /> 리셋
+                    </button>
+                </div>
+
                 {/* Row 1: 템플릿 및 요소 추가 */}
                 <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mr-1">디자인 블록</span>
@@ -466,10 +593,6 @@ export default function AdCanvasEditor({
                     <button onClick={exportAsImage} title="이미지로 다운로드"
                         className="p-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all">
                         <Download className="w-4 h-4" />
-                    </button>
-                    <button onClick={clearCanvas} title="전체 초기화"
-                        className="p-2 bg-red-600/80 hover:bg-red-500 text-white rounded-lg transition-all">
-                        <RotateCcw className="w-4 h-4" />
                     </button>
                 </div>
 
