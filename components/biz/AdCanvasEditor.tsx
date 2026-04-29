@@ -894,36 +894,36 @@ export default function AdCanvasEditor({
                                     </div>
                                 </div>
                             ) : (
-                                <div className="space-y-1.5 w-60 p-1">
+                                <div className="space-y-1.5 min-w-[280px] p-1.5">
                                     {/* 도형/이미지 속성 */}
-                                    <div className="flex items-center justify-between border-b border-gray-200 pb-1.5">
-                                        <span className="text-[11px] font-bold text-gray-600 ml-1">배경색</span>
+                                    <div className="flex items-center justify-between border-b border-[#c8c6c4] pb-1.5">
+                                        <span className="text-[11px] font-bold text-[#323130] ml-1 whitespace-nowrap">배경색</span>
                                         <div className="flex items-center gap-1">
                                             {['rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(255,255,255,0.4)', '#FF6B35', '#3B82F6', '#EF4444'].map(c => (
                                                 <button key={c} onClick={() => updateActiveObject('fill', c)}
-                                                    className="w-4 h-4 rounded border border-gray-300 shadow-sm hover:scale-110 transition-all"
+                                                    className="w-4 h-4 rounded-sm border border-[#c8c6c4] hover:border-[#0078d4] transition-all"
                                                     style={{ backgroundColor: c }} />
                                             ))}
-                                            <label className="w-4 h-4 rounded border border-gray-300 shadow-sm hover:scale-110 transition-all cursor-pointer" title="색상 선택기">
+                                            <label className="w-4 h-4 rounded-sm border border-[#c8c6c4] hover:border-[#0078d4] transition-all cursor-pointer overflow-hidden relative" title="색상 선택기">
                                                 <input type="color" className="absolute opacity-0 w-0 h-0" onChange={e => updateActiveObject('fill', e.target.value)} />
-                                                <div className="w-full h-full rounded" style={{ background: 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)' }}></div>
+                                                <div className="w-full h-full" style={{ background: 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)' }}></div>
                                             </label>
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-between pt-0.5">
-                                        <div className="flex items-center gap-2 w-24">
-                                            <span className="text-[10px] font-bold text-gray-500">투명도</span>
+                                        <div className="flex items-center gap-2 flex-1 mr-3">
+                                            <span className="text-[11px] font-bold text-[#323130] whitespace-nowrap ml-1">투명도</span>
                                             <input type="range" min={0} max={100} value={(activeObj?.opacity || 1) * 100}
                                                 onChange={(e) => updateActiveObject('opacity', parseInt(e.target.value) / 100)}
-                                                className="flex-1 h-1 accent-blue-500" />
+                                                className="flex-1 h-1 bg-[#c8c6c4] appearance-none rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#0078d4] [&::-webkit-slider-thumb]:cursor-pointer" />
                                         </div>
-                                        <div className="flex items-center gap-0.5 ml-auto">
+                                        <div className="flex items-center gap-0.5 shrink-0">
                                             <button onClick={centerActiveObject} title="중앙 정렬" className="p-1 text-[#323130] hover:bg-[#e1dfdd] rounded-sm transition-all"><AlignHorizontalSpaceAround className="w-3.5 h-3.5" /></button>
                                             <button onClick={bringForward} title="앞으로" className="p-1 text-[#323130] hover:bg-[#e1dfdd] rounded-sm transition-all"><ChevronUp className="w-3.5 h-3.5" /></button>
                                             <button onClick={sendBackward} title="뒤로" className="p-1 text-[#323130] hover:bg-[#e1dfdd] rounded-sm transition-all"><ChevronDown className="w-3.5 h-3.5" /></button>
-                                            <div className="w-px h-4 bg-gray-300 mx-1" />
+                                            <div className="w-px h-4 bg-[#c8c6c4] mx-0.5" />
                                             <button onClick={duplicateActive} title="복제" className="p-1 text-[#323130] hover:bg-[#e1dfdd] rounded-sm transition-all"><Copy className="w-3.5 h-3.5" /></button>
-                                            <button onClick={deleteActive} title="삭제" className="p-1 text-red-500 hover:bg-red-50 rounded-sm transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                                            <button onClick={deleteActive} title="삭제" className="p-1 text-red-600 hover:bg-red-50 rounded-sm transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                                         </div>
                                     </div>
                                 </div>
