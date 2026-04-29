@@ -870,6 +870,23 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             onChange={(val) => update('detail_content', val)}
                                             setOptions={{
                                                 height: '450px',
+                                                font: [
+                                                    'Pretendard',
+                                                    'Noto Sans KR',
+                                                    '나눔고딕',
+                                                    '나눔명조',
+                                                    '맑은 고딕',
+                                                    '굴림',
+                                                    '돋움',
+                                                    '바탕',
+                                                    'Arial',
+                                                    'Comic Sans MS',
+                                                    'Courier New',
+                                                    'Impact',
+                                                    'Georgia',
+                                                    'Tahoma',
+                                                    'Verdana'
+                                                ],
                                                 buttonList: [
                                                     ['undo', 'redo'],
                                                     ['font', 'fontSize', 'formatBlock'],
