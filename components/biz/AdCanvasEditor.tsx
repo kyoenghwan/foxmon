@@ -164,8 +164,8 @@ export default function AdCanvasEditor({
         const bottomBg = objects.find(o => o.id === 'bgBottom');
 
         if (topBg && middleBg && bottomBg) {
-             const topH = topBg.getScaledHeight();
-             const botH = bottomBg.getScaledHeight();
+             const topH = topBg.height! * topBg.scaleY!;
+             const botH = bottomBg.height! * bottomBg.scaleY!;
              const midH = Math.max(0, canvasHeight - topH - botH);
              middleBg.set({ height: midH });
              bottomBg.set({ top: canvasHeight - botH });
@@ -253,18 +253,19 @@ export default function AdCanvasEditor({
 
             const scale1 = width / img1.width!;
             img1.set({ scaleX: scale1, scaleY: scale1, left: 0, top: 0, selectable: false, evented: false, id: 'bgTop' } as any);
-            const topH = img1.getScaledHeight();
+            const topH = img1.height! * scale1;
 
             const scale3 = width / img3.width!;
             img3.set({ scaleX: scale3, scaleY: scale3, left: 0, selectable: false, evented: false, id: 'bgBottom' } as any);
-            const botH = img3.getScaledHeight();
+            const botH = img3.height! * scale3;
 
             const patternImg = img2.getElement();
             const pattern = new Pattern({ source: patternImg, repeat: 'repeat' });
 
             const initialHeight = Math.max(1000, topH + botH + 400);
+            
+            // 캔버스 크기(높이) 강제 업데이트 - 이후 useEffect 에서 처리됨
             setCanvasHeight(initialHeight);
-            canvas.setDimensions({ width, height: initialHeight });
 
             const rect = new Rect({
                 left: 0, top: topH,
@@ -542,11 +543,11 @@ export default function AdCanvasEditor({
             `}</style>
             
             {/* ─── 상단 툴바 ─── */}
-            <div className="bg-gray-900 rounded-2xl p-3 space-y-3">
+            <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4 space-y-4">
                 
                 {/* Row 0: 전체 테마 템플릿 */}
-                <div className="flex items-center gap-2 flex-wrap border-b border-gray-800 pb-3 mb-2">
-                    <span className="text-[12px] font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-500 mr-2">👑 풀세트 테마 템플릿</span>
+                <div className="flex items-center gap-2 flex-wrap border-b border-gray-100 pb-4">
+                    <span className="text-[13px] font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-pink-500 mr-2">👑 풀세트 테마 템플릿</span>
                     <button onClick={() => applyFullTheme('gold_bar')}
                         className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-yellow-600 to-yellow-800 hover:from-yellow-500 hover:to-yellow-700 text-white rounded-lg text-[13px] font-bold transition-all shadow-lg border border-yellow-500/50">
                         <Crown className="w-4 h-4" /> 골드 바 테마
@@ -564,7 +565,7 @@ export default function AdCanvasEditor({
 
                 {/* Row 1: 템플릿 및 요소 추가 */}
                 <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mr-1">디자인 블록</span>
+                    <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mr-1">디자인 블록</span>
                     <button onClick={() => addTemplate('goldTitle')}
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg text-[12px] font-bold transition-all border border-yellow-400">
                         <Type className="w-3.5 h-3.5" /> 골드 타이틀
@@ -573,17 +574,17 @@ export default function AdCanvasEditor({
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 hover:bg-blue-800 text-blue-100 rounded-lg text-[12px] font-bold transition-all border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]">
                         <Layers className="w-3.5 h-3.5" /> 네온 정보 박스
                     </button>
-                    <div className="w-px h-6 bg-gray-700 mx-1" />
+                    <div className="w-px h-6 bg-gray-200 mx-1" />
                     <button onClick={() => addTemplate('title')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-[12px] font-bold transition-all">
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-[12px] font-bold transition-all border border-gray-200">
                         <Type className="w-3 h-3" /> 일반 제목
                     </button>
                     <button onClick={() => addTemplate('body')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-[12px] font-bold transition-all">
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-[12px] font-bold transition-all border border-gray-200">
                         <Type className="w-2.5 h-2.5" /> 일반 본문
                     </button>
                     <button onClick={addShape}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-lg text-[12px] font-bold transition-all">
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 rounded-lg text-[12px] font-bold transition-all">
                         <Square className="w-3.5 h-3.5" /> 빈 박스
                     </button>
 
@@ -606,11 +607,11 @@ export default function AdCanvasEditor({
                             setBgUrl(e.target.value);
                             onBgImageChange?.(e.target.value);
                         }}
-                        className="flex-1 px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-[13px] text-white outline-none focus:border-blue-500 placeholder-gray-500"
+                        className="flex-1 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-900 outline-none focus:border-blue-500 placeholder-gray-400"
                         placeholder="배경 이미지 URL (예: 무한 반복용 심리스 패턴 이미지)"
                     />
-                    <label className="flex items-center gap-1.5 cursor-pointer text-[12px] text-gray-300">
-                        <input type="checkbox" checked={isPattern} onChange={e => setIsPattern(e.target.checked)} className="rounded border-gray-600" />
+                    <label className="flex items-center gap-1.5 cursor-pointer text-[12px] text-gray-600 font-medium">
+                        <input type="checkbox" checked={isPattern} onChange={e => setIsPattern(e.target.checked)} className="rounded border-gray-300 text-blue-500" />
                         패턴(반복) 모드
                     </label>
                 </div>
@@ -642,8 +643,8 @@ export default function AdCanvasEditor({
                                     }
                                 }
                             }}
-                            className="px-2 py-1 rounded-md text-[10px] font-bold text-gray-300 bg-gray-800 hover:bg-gray-700 transition-all border border-gray-700"
-                            style={preset.value.startsWith('linear') ? { background: preset.value } : preset.value.startsWith('#') ? { backgroundColor: preset.value } : {}}
+                            className="px-2 py-1 rounded-md text-[10px] font-bold text-gray-600 bg-white hover:bg-gray-50 transition-all border border-gray-200 shadow-sm"
+                            style={preset.value.startsWith('linear') ? { background: preset.value } : preset.value.startsWith('#') ? { backgroundColor: preset.value, color: preset.label === '다크' ? '#fff' : '#000' } : {}}
                         >
                             {!preset.value.startsWith('linear') && !preset.value.startsWith('#') ? preset.label : ''}
                         </button>
