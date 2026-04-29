@@ -114,6 +114,23 @@ export default function AdCanvasEditor({
         canvas.on('object:added', () => emitChange(canvas));
         canvas.on('object:removed', () => emitChange(canvas));
 
+        // 키보드 이벤트 (DEL 삭제)
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                const active = canvas.getActiveObject() as any;
+                if (!active) return;
+                
+                if (active.isEditing) return; // 텍스트 편집 중이면 삭제 안함
+                if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+                canvas.remove(active);
+                canvas.discardActiveObject();
+                canvas.renderAll();
+                emitChange(canvas);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+
         // 기존 데이터 로드
         if (value) {
             try {
@@ -124,6 +141,7 @@ export default function AdCanvasEditor({
         }
 
         return () => {
+            window.removeEventListener('keydown', handleKeyDown);
             canvas.dispose();
             fabricRef.current = null;
         };
@@ -221,7 +239,20 @@ export default function AdCanvasEditor({
                 editable: true,
             } as any);
         } else if (preset === 'neonBox') {
-            obj = new Textbox('여기를 클릭하여 내용을 입력하세요\n- 조건 1\n- 조건 2\n- 연락처: 010-0000-0000', {
+            const rect = new Rect({
+                left: width / 2,
+                top: canvasHeight / 2,
+                originX: 'center',
+                originY: 'center',
+                width: 400,
+                height: 150,
+                fill: 'rgba(0,0,0,0.7)',
+                rx: 15, ry: 15,
+                stroke: '#3B82F6',
+                strokeWidth: 2,
+                shadow: new Shadow({ color: '#3B82F6', blur: 15, offsetX: 0, offsetY: 0 }),
+            });
+            const text = new FabricText('여기를 클릭하여 내용을 입력하세요\n- 조건 1\n- 조건 2\n- 연락처: 010-0000-0000', {
                 left: width / 2,
                 top: canvasHeight / 2,
                 originX: 'center',
@@ -230,13 +261,13 @@ export default function AdCanvasEditor({
                 fontSize: 24,
                 fontWeight: 'bold',
                 fill: '#FFFFFF',
-                backgroundColor: 'rgba(0, 0, 0, 0.7)', // 반투명 검정 배경
                 textAlign: 'center',
-                width: 400,
-                padding: 20,
-                shadow: new Shadow({ color: '#3B82F6', blur: 15, offsetX: 0, offsetY: 0 }), // 네온 글로우 효과
                 editable: true,
             } as any);
+            canvas.add(rect, text);
+            canvas.setActiveObject(text);
+            canvas.renderAll();
+            return;
         } else if (preset === 'title') {
             obj = new FabricText('제목을 입력하세요', {
                 left: width / 2,
@@ -398,6 +429,10 @@ export default function AdCanvasEditor({
 
     return (
         <div className="space-y-4">
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gaegu&family=Gothic+A1:wght@400;700&family=Inter:wght@400;700&family=Jua&family=Montserrat:wght@400;700&family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;700&family=Poppins:wght@400;700&family=Roboto:wght@400;700&display=swap');
+            `}</style>
+            
             {/* ─── 상단 툴바 ─── */}
             <div className="bg-gray-900 rounded-2xl p-3 space-y-3">
                 {/* Row 1: 템플릿 및 요소 추가 */}
@@ -493,24 +528,7 @@ export default function AdCanvasEditor({
                 </div>
             </div>
 
-            {/* ─── 캔버스 높이 조절 ─── */}
-            <div className="flex items-center justify-between bg-gray-950 px-4 py-2 rounded-t-xl border-b border-gray-800">
-                <span className="text-[12px] font-bold text-gray-400">광고 세로 길이 조절 (현재: {canvasHeight}px)</span>
-                <div className="flex items-center gap-2">
-                    <button onClick={() => setCanvasHeight(h => Math.max(200, h - 200))} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">-200px</button>
-                    <button onClick={() => setCanvasHeight(h => h + 200)} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">+200px</button>
-                    <button onClick={() => setCanvasHeight(h => h + 500)} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">+500px</button>
-                </div>
-            </div>
-
-            {/* ─── 캔버스 영역 ─── */}
-            <div className="relative bg-gray-950 rounded-b-2xl overflow-hidden flex flex-col items-center p-4">
-                <div className="rounded-lg overflow-hidden shadow-2xl ring-1 ring-white/10" style={{ height: canvasHeight, width }}>
-                    <canvas ref={canvasRef} />
-                </div>
-            </div>
-
-            {/* ─── 하단: 선택 오브젝트 속성 패널 ─── */}
+            {/* ─── 선택 오브젝트 속성 패널 (캔버스 위로 이동) ─── */}
             {isTextSelected && (
                 <div className="bg-gray-900 rounded-2xl p-4 space-y-3 animate-in fade-in duration-200">
                     <div className="flex items-center justify-between">
@@ -634,6 +652,23 @@ export default function AdCanvasEditor({
                     📌 캔버스 위의 요소를 <strong className="text-gray-300">클릭</strong>하여 선택하고, <strong className="text-gray-300">드래그</strong>하여 이동시키세요. 텍스트를 <strong className="text-gray-300">더블클릭</strong>하면 내용을 편집할 수 있습니다.
                 </p>
             )}
+
+            {/* ─── 캔버스 높이 조절 ─── */}
+            <div className="flex items-center justify-between bg-gray-950 px-4 py-2 rounded-t-xl border-b border-gray-800 mt-2">
+                <span className="text-[12px] font-bold text-gray-400">광고 세로 길이 조절 (현재: {canvasHeight}px)</span>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => setCanvasHeight(h => Math.max(200, h - 200))} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">-200px</button>
+                    <button onClick={() => setCanvasHeight(h => h + 200)} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">+200px</button>
+                    <button onClick={() => setCanvasHeight(h => h + 500)} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-[11px]">+500px</button>
+                </div>
+            </div>
+
+            {/* ─── 캔버스 영역 ─── */}
+            <div className="relative bg-gray-950 rounded-b-2xl overflow-hidden flex flex-col items-center p-4">
+                <div className="rounded-lg overflow-hidden shadow-2xl ring-1 ring-white/10" style={{ height: canvasHeight, width }}>
+                    <canvas ref={canvasRef} />
+                </div>
+            </div>
         </div>
     );
 }
