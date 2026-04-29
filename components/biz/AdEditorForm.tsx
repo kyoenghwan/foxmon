@@ -221,6 +221,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
     
+    // HTML 모드 전용 상태
+    const [htmlEditorHeight, setHtmlEditorHeight] = useState(450);
+    const [previewHtml, setPreviewHtml] = useState(false);
+    
     // 모드 전환 시 이전 데이터를 임시 저장하기 위한 ref
     const canvasContentRef = useRef<string>(initialData?.detail_content?.startsWith('{"version":') ? initialData.detail_content : '');
     const htmlContentRef = useRef<string>(!initialData?.detail_content?.startsWith('{"version":') ? (initialData?.detail_content || '') : '');
@@ -909,7 +913,21 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         />
                                     </div>
                                 ) : (
-                                    <div 
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-t-xl border border-gray-200">
+                                            <span className="text-[12px] font-bold text-gray-600">직접 작성 에디터 도구</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[11px] text-gray-500 mr-1">에디터 길이: {htmlEditorHeight}px</span>
+                                                <button onClick={() => setHtmlEditorHeight(h => Math.max(200, h - 200))} className="px-2 py-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded text-[11px]">-200px</button>
+                                                <button onClick={() => setHtmlEditorHeight(h => h + 200)} className="px-2 py-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded text-[11px]">+200px</button>
+                                                <div className="w-px h-4 bg-gray-300 mx-1" />
+                                                <button onClick={() => setPreviewHtml(true)} title="미리보기"
+                                                    className="flex items-center gap-1.5 px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[11px] font-bold transition-all shadow-sm">
+                                                    <Eye className="w-3.5 h-3.5" /> 미리보기
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div 
                                         className="animate-in fade-in zoom-in-95 duration-300 border border-gray-200 rounded-xl overflow-hidden relative"
                                         style={{
                                             backgroundImage: form.detail_bg_image ? `url(${form.detail_bg_image})` : 'none',
@@ -930,7 +948,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             setContents={form.detail_content}
                                             onChange={(val) => update('detail_content', val)}
                                             setOptions={{
-                                                height: '450px',
+                                                height: `${htmlEditorHeight}px`,
                                                 defaultStyle: 'background-color: transparent;',
                                                 font: [
                                                     'Pretendard',
@@ -997,6 +1015,32 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     {isNew ? (mode === 'JOB' ? '구인 공고 등록하기' : '광고 등록하기') : (mode === 'JOB' ? '구인 공고 저장하기' : '광고 저장하기')}
                 </Button>
             </div>
+
+            {/* ─── HTML 모드 미리보기 모달 ─── */}
+            {previewHtml && (
+                <div className="fixed inset-0 z-[9999] bg-black/80 flex flex-col items-center justify-center p-4" onClick={() => setPreviewHtml(false)}>
+                    <div className="relative bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-3xl flex flex-col animate-in fade-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()} style={{ maxHeight: '90vh' }}>
+                        <div className="w-full flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50 shrink-0">
+                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2"><Eye className="w-5 h-5 text-indigo-500" /> 직접 작성 (HTML) 미리보기</h3>
+                            <button onClick={() => setPreviewHtml(false)} className="px-4 py-1.5 bg-white border border-gray-300 hover:bg-gray-100 text-gray-800 rounded-lg text-sm font-bold transition-all shadow-sm">닫기</button>
+                        </div>
+                        <div className="w-full overflow-y-auto bg-gray-200 p-4 flex justify-center">
+                            {/* 고객이 보는 실제 화면과 최대한 유사한 컨테이너 */}
+                            <div 
+                                className="w-full max-w-[600px] min-h-[450px] bg-white shadow-md relative"
+                                style={{
+                                    backgroundImage: form.detail_bg_image ? `url(${form.detail_bg_image})` : 'none',
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                    height: htmlEditorHeight > 450 ? htmlEditorHeight : 'auto'
+                                }}
+                            >
+                                <div className="p-4 prose prose-sm max-w-none break-words" dangerouslySetInnerHTML={{ __html: form.detail_content || '<p class="text-gray-400 text-center mt-10">내용이 없습니다.</p>' }} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
