@@ -293,7 +293,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         const fetchMasterData = async () => {
             const res = await QA_GET_COMMON_CODES(undefined, true);
             if (res.success && res.data) {
-                setRegions(res.data.filter(c => c.list_type === 'JOB_REGION'));
+                setRegions(res.data.filter(c => c.list_type === 'JOB_REGION_1' || c.list_type === 'JOB_REGION_2'));
                 setCategories1(res.data.filter(c => c.list_type === 'CATEGORY_1'));
                 setCategories2(res.data.filter(c => c.list_type === 'CATEGORY_2'));
                 setAmenitiesList(res.data.filter(c => c.list_type === 'AMENITY'));
@@ -675,7 +675,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             className="w-1/2 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
                                         >
                                             <option value="">시/도 선택</option>
-                                            {regions.filter(r => !r.parent_code_value).map(sido => (
+                                            {regions.filter(r => r.list_type === 'JOB_REGION_1').map(sido => (
                                                 <option key={sido.code_value} value={sido.code_name}>{sido.code_name}</option>
                                             ))}
                                         </select>
@@ -687,8 +687,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         >
                                             <option value="">시/군/구 선택</option>
                                             {regions.filter(r => {
-                                                const sido = regions.find(s => s.code_name === selectedSido);
-                                                return r.parent_code_value === sido?.code_value;
+                                                const sido = regions.find(s => s.code_name === selectedSido && s.list_type === 'JOB_REGION_1');
+                                                return r.list_type === 'JOB_REGION_2' && r.parent_code_value === sido?.code_value;
                                             }).map(sigungu => (
                                                 <option key={sigungu.code_value} value={sigungu.code_name}>{sigungu.code_name}</option>
                                             ))}
