@@ -71,4 +71,23 @@ export async function userSettingsAction(actionType: UserSettingsFlowInput['acti
 
     return FA_USER_SETTINGS_FLOW(inputData);
 }
+import { FA_AD_CRUD_FLOW } from '@/src/atoms/fa/biz/FA_AD_CRUD_FLOW';
+import { AdFormData } from '@/components/biz/AdEditorForm';
 
+export async function manageAdAction(
+  actionType: 'CREATE' | 'UPDATE' | 'DELETE' | 'GET',
+  payload?: Partial<AdFormData>,
+  jobId?: string
+) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { success: false, message: '로그인이 필요합니다.' };
+    }
+
+    return FA_AD_CRUD_FLOW({
+        actionType,
+        userId: session.user.id,
+        jobId,
+        payload
+    });
+}

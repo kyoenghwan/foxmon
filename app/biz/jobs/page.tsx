@@ -2,10 +2,11 @@ import Link from 'next/link';
 import { auth } from '@/auth';
 import { Plus, Briefcase, Eye, Pause, Play, Pencil, Clock } from 'lucide-react';
 
-// 추후 QA_GET_MY_ADS 연동 예정
-const mockAds: any[] = [];
+import { manageAdAction } from '@/lib/actions';
 
-const TierBadge = ({ tier }: { tier: string }) => {
+export default async function BizJobsPage() {
+    const res = await manageAdAction('GET');
+    const mockAds = res.success ? (res.data || []) : [];
     const styles: Record<string, string> = {
         PREMIUM: 'bg-yellow-100 text-yellow-800 border-yellow-200',
         SPECIAL: 'bg-purple-100 text-purple-800 border-purple-200',
@@ -42,7 +43,6 @@ const StatusBadge = ({ status }: { status: string }) => {
     );
 };
 
-export default async function BizJobsPage() {
     return (
         <div className="space-y-6">
             {/* 페이지 헤더 */}
