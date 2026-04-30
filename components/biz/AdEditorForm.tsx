@@ -983,6 +983,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                 placeholder: "원하시는 통이미지 팜플렛, 움직이는 GIF 애니메이션, 영상 등을 자유롭게 삽입하거나 구인 상세 내용을 작성해 주세요."
                                             }}
                                         />
+                                        </div>
                                     </div>
                                 )}
                             </div>
