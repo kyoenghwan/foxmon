@@ -4,9 +4,7 @@ import { Plus, Briefcase, Eye, Pause, Play, Pencil, Clock } from 'lucide-react';
 
 import { manageAdAction } from '@/lib/actions';
 
-export default async function BizJobsPage() {
-    const res = await manageAdAction('GET');
-    const mockAds = res.success ? (res.data || []) : [];
+const TierBadge = ({ tier }: { tier: string }) => {
     const styles: Record<string, string> = {
         PREMIUM: 'bg-yellow-100 text-yellow-800 border-yellow-200',
         SPECIAL: 'bg-purple-100 text-purple-800 border-purple-200',
@@ -42,6 +40,10 @@ const StatusBadge = ({ status }: { status: string }) => {
         </span>
     );
 };
+
+export default async function BizJobsPage() {
+    const res = await manageAdAction('GET');
+    const mockAds = res.success ? (res.data || []) : [];
 
     return (
         <div className="space-y-6">
