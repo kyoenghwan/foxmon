@@ -882,7 +882,9 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                     if(file) {
                                                         const reader = new FileReader();
                                                         reader.onload = (event) => {
-                                                            update('detail_bg_image', event.target?.result as string);
+                                                            const currentIsPattern = form.detail_bg_image?.startsWith('PATTERN|');
+                                                            const newUrl = event.target?.result as string;
+                                                            update('detail_bg_image', currentIsPattern ? 'PATTERN|' + newUrl : newUrl);
                                                         };
                                                         reader.readAsDataURL(file);
                                                     }
@@ -890,12 +892,31 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             />
                                         </label>
                                         {form.detail_bg_image && (
-                                            <button 
-                                                onClick={() => update('detail_bg_image', '')}
-                                                className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-[12px] font-bold transition-all border border-red-200"
-                                            >
-                                                배경 지우기
-                                            </button>
+                                            <>
+                                                <label className="flex items-center gap-1.5 cursor-pointer text-[12px] text-gray-700 font-bold bg-white border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-all shadow-sm">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={form.detail_bg_image.startsWith('PATTERN|')} 
+                                                        onChange={e => {
+                                                            const isChecked = e.target.checked;
+                                                            const isCurrentlyPattern = form.detail_bg_image!.startsWith('PATTERN|');
+                                                            if (isChecked && !isCurrentlyPattern) {
+                                                                update('detail_bg_image', 'PATTERN|' + form.detail_bg_image);
+                                                            } else if (!isChecked && isCurrentlyPattern) {
+                                                                update('detail_bg_image', form.detail_bg_image!.replace('PATTERN|', ''));
+                                                            }
+                                                        }} 
+                                                        className="rounded border-gray-300 text-indigo-500 w-3.5 h-3.5" 
+                                                    />
+                                                    바둑판식 패턴(반복)
+                                                </label>
+                                                <button 
+                                                    onClick={() => update('detail_bg_image', '')}
+                                                    className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-[12px] font-bold transition-all border border-red-200"
+                                                >
+                                                    배경 지우기
+                                                </button>
+                                            </>
                                         )}
                                     </div>
                                     <p className="text-[11px] text-gray-500 ml-5">
@@ -930,9 +951,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         <div 
                                         className="animate-in fade-in zoom-in-95 duration-300 border border-gray-200 rounded-xl overflow-hidden relative"
                                         style={{
-                                            backgroundImage: form.detail_bg_image ? `url(${form.detail_bg_image})` : 'none',
-                                            backgroundSize: 'cover',
-                                            backgroundPosition: 'center'
+                                            backgroundImage: form.detail_bg_image ? `url(${form.detail_bg_image.replace('PATTERN|', '')})` : 'none',
+                                            backgroundSize: form.detail_bg_image?.startsWith('PATTERN|') ? 'auto' : 'cover',
+                                            backgroundRepeat: form.detail_bg_image?.startsWith('PATTERN|') ? 'repeat' : 'no-repeat',
+                                            backgroundPosition: 'top center'
                                         }}
                                     >
                                         {/* HTML 에디터 배경을 투명하게 만들어 바깥 div의 배경이 보이게 함 */}
@@ -1026,13 +1048,13 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             <button onClick={() => setPreviewHtml(false)} className="px-4 py-1.5 bg-white border border-gray-300 hover:bg-gray-100 text-gray-800 rounded-lg text-sm font-bold transition-all shadow-sm">닫기</button>
                         </div>
                         <div className="w-full overflow-y-auto bg-gray-200 p-4 flex justify-center">
-                            {/* 고객이 보는 실제 화면과 최대한 유사한 컨테이너 */}
                             <div 
                                 className="w-full max-w-[600px] min-h-[450px] bg-white shadow-md relative"
                                 style={{
-                                    backgroundImage: form.detail_bg_image ? `url(${form.detail_bg_image})` : 'none',
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center',
+                                    backgroundImage: form.detail_bg_image ? `url(${form.detail_bg_image.replace('PATTERN|', '')})` : 'none',
+                                    backgroundSize: form.detail_bg_image?.startsWith('PATTERN|') ? 'auto' : 'cover',
+                                    backgroundRepeat: form.detail_bg_image?.startsWith('PATTERN|') ? 'repeat' : 'no-repeat',
+                                    backgroundPosition: 'top center',
                                     height: htmlEditorHeight > 450 ? htmlEditorHeight : 'auto'
                                 }}
                             >

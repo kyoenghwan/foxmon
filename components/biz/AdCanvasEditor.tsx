@@ -57,8 +57,8 @@ export default function AdCanvasEditor({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricRef = useRef<Canvas | null>(null);
     const [activeObj, setActiveObj] = useState<any>(null);
-    const [bgUrl, setBgUrl] = useState(bgImage || '');
-    const [isPattern, setIsPattern] = useState(true); // 배경을 패턴으로 깔지 여부
+    const [bgUrl, setBgUrl] = useState('');
+    const [isPattern, setIsPattern] = useState(false); // 배경을 패턴으로 깔지 여부
     const [canvasReady, setCanvasReady] = useState(false);
     const [canvasHeight, setCanvasHeight] = useState(height); // 가변 높이
     const [previewUrl, setPreviewUrl] = useState<string | null>(null); // 미리보기 URL
@@ -708,10 +708,7 @@ export default function AdCanvasEditor({
 
                 {/* Row 2: 배경 프리셋 및 설정 */}
                 <div className="flex items-center gap-4 border-t border-gray-100 pt-2 w-full">
-                    <label className="flex items-center gap-1.5 cursor-pointer text-[12px] text-gray-600 font-medium bg-gray-50 px-2 py-1 rounded">
-                        <input type="checkbox" checked={isPattern} onChange={e => setIsPattern(e.target.checked)} className="rounded border-gray-300 text-blue-500" />
-                        배경 패턴(반복) 모드
-                    </label>
+                    {/* 패턴 체크박스는 AdEditorForm 공통 UI로 이동됨 */}
                 </div>
 
                 {/* 배경 프리셋 */}
