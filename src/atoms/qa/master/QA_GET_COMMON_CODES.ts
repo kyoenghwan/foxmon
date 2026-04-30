@@ -18,7 +18,10 @@ export interface CodeItem {
  * @param listType 대상 리스트별 타입 지정. (전체 조회 시 undefined/null)
  * @param activeOnly true일 경우 is_active가 true인 건만 조회 (기본값 true)
  */
+import { unstable_noStore as noStore } from 'next/cache';
+
 export async function QA_GET_COMMON_CODES(listType?: string, activeOnly: boolean = true) {
+    noStore();
     try {
         let query = supabase.from('common_codes').select('*');
         if (listType) {

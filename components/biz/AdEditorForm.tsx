@@ -666,7 +666,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 </div>
                                 <div>
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                        <MapPin className="w-3 h-3" /> 지역 <span className="text-red-500">*</span>
+                                        <MapPin className="w-3 h-3" /> 지역 <span className="text-red-500">*</span> <span className="text-xs text-red-500 ml-2">(Debug: Total {regions.length}, Sido: {regions.filter(r => r.list_type === 'JOB_REGION_1').length})</span>
                                     </label>
                                     <div className="flex gap-2">
                                         <select
