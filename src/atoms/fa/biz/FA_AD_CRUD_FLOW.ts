@@ -16,44 +16,44 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             if (!payload) return { success: false, message: 'payload가 필요합니다.' };
 
             // 기본 ad-service.ts의 jobs 스키마 호환성을 위한 매핑
-            const payString = `[${payload.salary_type}] ${payload.salary_amount}원`;
+            const payString = `[${payload.pay_type || ''}] ${payload.pay_amount || ''}원`;
 
             const dbPayload = {
                 user_id: userId,
                 // 호환성 컬럼
-                company: payload.company_name,
+                company: payload.company || payload.business_name,
                 title: payload.title,
                 location: payload.location,
                 pay: payString,
-                image: payload.logo_url,
-                color: payload.detail_bg_color || 'orange',
-                time: payload.work_time,
+                image: payload.logo_url || payload.image,
+                color: payload.color || 'orange',
+                time: payload.work_hours,
                 is_big: false,
-                tier: 'GENERAL',
+                tier: payload.tier || 'GENERAL',
                 weight: 1,
                 exposure_count: 0,
                 last_exposed_at: new Date().toISOString(),
                 
-                // 상세 컬럼
-                company_name: payload.company_name,
-                salary_type: payload.salary_type,
-                salary_amount: payload.salary_amount,
-                logo_url: payload.logo_url,
-                contact_name: payload.contact_name,
+                // 상세 컬럼 (DB 스키마에 추가된 컬럼들)
+                company_name: payload.company || payload.business_name,
+                salary_type: payload.pay_type,
+                salary_amount: payload.pay_amount,
+                logo_url: payload.logo_url || payload.image,
+                contact_name: payload.manager_name,
                 contact_phone: payload.contact_phone,
                 kakao_id: payload.kakao_id,
                 line_id: payload.line_id,
                 telegram_id: payload.telegram_id,
                 wechat_id: payload.wechat_id,
                 employment_type: payload.employment_type,
-                category1: payload.category1,
-                category2: payload.category2,
-                work_time: payload.work_time,
+                category1: payload.category_1,
+                category2: payload.category_2,
+                work_time: payload.work_hours,
                 amenities: payload.amenities || [],
                 keywords: payload.keywords || [],
                 design_mode: payload.design_mode,
                 detail_content: payload.detail_content,
-                detail_bg_color: payload.detail_bg_color,
+                detail_bg_color: payload.color,
                 detail_bg_image: payload.detail_bg_image,
             };
 
