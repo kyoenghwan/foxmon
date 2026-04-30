@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush } from 'lucide-react';
+import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
@@ -224,6 +224,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     // HTML 모드 전용 상태
     const [htmlEditorHeight, setHtmlEditorHeight] = useState(450);
     const [previewHtml, setPreviewHtml] = useState(false);
+    const [showLoadModal, setShowLoadModal] = useState(false);
     
     // 모드 전환 시 이전 데이터를 임시 저장하기 위한 ref
     const canvasContentRef = useRef<string>(initialData?.detail_content?.startsWith('{"version":') ? initialData.detail_content : '');
@@ -853,9 +854,15 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${form.design_mode === 'html' ? 'border-primary' : 'border-gray-400'}`}>
                                                 {form.design_mode === 'html' && <div className="w-1.5 h-1.5 bg-primary rounded-full" />}
                                             </div>
-                                            직접 작성 (이미지/GIF 첨부)
                                         </label>
                                     </div>
+                                    <button 
+                                        onClick={() => setShowLoadModal(true)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-[12px] font-bold transition-all shadow-sm ml-auto"
+                                    >
+                                        <FolderOpen className="w-3.5 h-3.5" /> 기존 작성글 불러오기
+                                    </button>
+                                </div>
                                 </div>
                                 
                                 {/* ─── 공통 배경 이미지 설정 ─── */}
@@ -1065,5 +1072,70 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                 </div>
             )}
         </div>
+
+        {/* ─── 기존 디자인 불러오기 모달 (Mock) ─── */}
+        {showLoadModal && (
+            <div className="fixed inset-0 z-[9999] bg-black/80 flex flex-col items-center justify-center p-4" onClick={() => setShowLoadModal(false)}>
+                <div className="relative bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                    <div className="w-full flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50 shrink-0">
+                        <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <FolderOpen className="w-5 h-5 text-indigo-500" /> 기존에 작성했던 디자인 불러오기
+                        </h3>
+                        <button onClick={() => setShowLoadModal(false)} className="px-4 py-1.5 bg-white border border-gray-300 hover:bg-gray-100 text-gray-800 rounded-lg text-sm font-bold transition-all shadow-sm">닫기</button>
+                    </div>
+                    <div className="p-5 flex flex-col gap-3 max-h-[60vh] overflow-y-auto bg-gray-100">
+                        <p className="text-[13px] text-gray-500 mb-2">
+                            과거에 등록했던 광고나 구인글의 '배경 이미지'와 '본문 디자인'을 그대로 복사해 옵니다. (백엔드 연동 전 임시 데이터입니다)
+                        </p>
+                        {[
+                            {
+                                id: 'mock1',
+                                title: '여름 시즌 신메뉴 홍보 (HTML 모드)',
+                                type: '광고',
+                                date: '2026-04-20',
+                                design_mode: 'html',
+                                detail_bg_image: 'PATTERN|https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=400',
+                                detail_content: '<h2 style="text-align: center;"><span style="color: rgb(255, 255, 255); background-color: rgb(255, 0, 0);">여름 신메뉴 출시!</span></h2><p style="text-align: center;"><br></p><p style="text-align: center;"><strong><span style="color: rgb(255, 255, 255);">지금 방문하시면 10% 할인</span></strong></p>'
+                            },
+                            {
+                                id: 'mock2',
+                                title: '주말 알바 긴급 구인 (템플릿 모드)',
+                                type: '구인',
+                                date: '2026-04-15',
+                                design_mode: 'canvas',
+                                detail_bg_image: '',
+                                detail_content: '{"version":"6.0.0","objects":[{"type":"textbox","version":"6.0.0","originX":"center","originY":"center","left":300,"top":200,"width":400,"height":60,"fill":"#000000","text":"급구! 주말 알바 구합니다","fontSize":40,"fontWeight":"bold","fontFamily":"Noto Sans KR","textAlign":"center"}]}'
+                            }
+                        ].map(post => (
+                            <div key={post.id} className="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200 hover:border-indigo-500 hover:shadow-md transition-all cursor-pointer"
+                                onClick={() => {
+                                    if (post.design_mode === 'canvas') {
+                                        canvasContentRef.current = post.detail_content;
+                                    } else {
+                                        htmlContentRef.current = post.detail_content;
+                                    }
+                                    update('design_mode', post.design_mode);
+                                    update('detail_bg_image', post.detail_bg_image);
+                                    update('detail_content', post.detail_content);
+                                    setShowLoadModal(false);
+                                    alert(`[${post.title}] 디자인을 불러왔습니다!`);
+                                }}
+                            >
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${post.type === '광고' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>{post.type}</span>
+                                        <span className="text-[12px] text-gray-400">{post.date}</span>
+                                    </div>
+                                    <h4 className="text-[14px] font-bold text-gray-800">{post.title}</h4>
+                                </div>
+                                <button className="px-4 py-2 bg-gray-50 hover:bg-indigo-50 text-indigo-600 border border-gray-200 hover:border-indigo-200 rounded-lg text-[12px] font-bold transition-all">
+                                    이 디자인 쓰기
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )}
     );
 }
