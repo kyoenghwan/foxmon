@@ -293,7 +293,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         const fetchMasterData = async () => {
             const res = await QA_GET_COMMON_CODES(undefined, true);
             if (res.success && res.data) {
-                setRegions(res.data.filter(c => c.list_type === 'REGION'));
+                setRegions(res.data.filter(c => c.list_type === 'JOB_REGION'));
                 setCategories1(res.data.filter(c => c.list_type === 'CATEGORY_1'));
                 setCategories2(res.data.filter(c => c.list_type === 'CATEGORY_2'));
                 setAmenitiesList(res.data.filter(c => c.list_type === 'AMENITY'));
