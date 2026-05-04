@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, Building2 } from 'lucide-react';
+import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { userSettingsAction } from '@/lib/actions';
@@ -236,7 +235,8 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (html: s
 }
 
 // ─── 메인 폼 컴포넌트 ───
-export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD' }: AdEditorFormProps) {
+export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditorFormProps) {
+    const mode = 'JOB' as string;
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
     
@@ -247,10 +247,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     
     // 사업자 인증 상태
     const [isBizVerified, setIsBizVerified] = useState(false);
-    const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
-    const [manualBizNumber, setManualBizNumber] = useState('');
-    const [manualCeoName, setManualCeoName] = useState('');
-    const [manualBizName, setManualBizName] = useState('');
     
     // 모드 전환 시 이전 데이터를 임시 저장하기 위한 ref
     const canvasContentRef = useRef<string>(initialData?.detail_content?.startsWith('{"version":') ? initialData.detail_content : '');
@@ -432,23 +428,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
     return (
         <div className="space-y-6">
-            {/* 탭 메뉴 */}
-            {mode === 'AD' && (
-                <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
-                    <button
-                        onClick={() => setActiveTab('banner')}
-                        className={`px-5 py-2 rounded-lg text-[13px] font-bold transition-all ${activeTab === 'banner' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                        📢 배너 정보
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('detail')}
-                        className={`px-5 py-2 rounded-lg text-[13px] font-bold transition-all ${activeTab === 'detail' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                        📋 광고 상세 내용
-                    </button>
-                </div>
-            )}
+
 
             {/* ═══════ 배너 정보 탭 ═══════ */}
             {(mode === 'JOB' || activeTab === 'banner') && (
@@ -680,7 +660,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
                                 <Info className="w-4 h-4 text-primary" />
-                                기본 정보 입력 (배너용)
+                                {mode === 'JOB' ? '공고 기본 정보' : '기본 정보 입력 (배너용)'}
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
@@ -763,7 +743,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">
-                                        배너 이미지 (로고 대신 사용)
+                                        로고 이미지
                                     </label>
                                     <div className="flex items-center gap-3">
                                         <div className="flex-1 relative">
@@ -888,7 +868,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             )}
 
             {/* ═══════ 공고 상세 내용 탭 ═══════ */}
-            {activeTab === 'detail' && (
+            {(mode === 'JOB' || activeTab === 'detail') && (
                 <div className="space-y-4">
                     <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
                         <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
@@ -907,16 +887,13 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 </label>
                                 <input
                                     type="text" value={form.business_name || ''} 
-                                    className={`w-full px-3 py-2.5 border rounded-lg text-[14px] font-medium outline-none bg-gray-50 border-gray-200 text-gray-600 cursor-not-allowed`}
-                                    placeholder={isBizVerified ? "인증된 상호명" : "하단의 '직접 입력하기'를 이용해주세요"}
-                                    readOnly={true}
+                                    onChange={e => {
+                                        update('business_name', e.target.value);
+                                        update('company', e.target.value);
+                                    }}
+                                    className={`w-full px-3 py-2.5 border rounded-lg text-[14px] font-medium outline-none border-gray-200 focus:border-primary bg-white`}
+                                    placeholder="상호명을 입력해주세요"
                                 />
-                                {!isBizVerified && (
-                                    <p className="text-[11px] font-medium text-gray-400 mt-1.5 flex items-center justify-between">
-                                        <span>사업자 등록이 아직 안 되어있다면?</span> 
-                                        <button type="button" className="text-primary hover:underline font-bold" onClick={() => setIsManualEntryOpen(true)}>직접 입력하기</button>
-                                    </p>
-                                )}
                             </div>
                             <div>
                                 <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
@@ -1299,6 +1276,19 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             </div>
                         )}
 
+                        {/* ─── 구인 모드: 리치 텍스트 에디터 ─── */}
+                        {mode === 'JOB' && (
+                            <div>
+                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">
+                                    상세 공고 내용
+                                </label>
+                                <RichTextEditor
+                                    value={form.detail_content}
+                                    onChange={(html) => update('detail_content', html)}
+                                />
+                                <p className="text-[11px] text-gray-400 mt-1.5">배너를 클릭하면 이 내용이 팝업으로 표시됩니다. 글꼴, 색상, 정렬 등을 자유롭게 편집할 수 있습니다.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
@@ -1310,7 +1300,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                 </Button>
                 <Button onClick={handleSubmit} disabled={saving} className="font-black h-11 px-8 rounded-xl shadow-md">
                     {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                    {isNew ? '광고 등록하기' : '광고 저장하기'}
+                    {isNew ? (mode === 'JOB' ? '구인 공고 등록하기' : '광고 등록하기') : (mode === 'JOB' ? '구인 공고 저장하기' : '광고 저장하기')}
                 </Button>
             </div>
 
@@ -1403,73 +1393,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     </div>
                 </div>
             )}
-            {/* 직접 입력 팝업 */}
-            <Dialog open={isManualEntryOpen} onOpenChange={setIsManualEntryOpen}>
-                <DialogContent className="max-w-md bg-white p-6 border-0 shadow-2xl rounded-2xl">
-                    <div className="flex flex-col gap-4">
-                        <div className="flex flex-col items-center justify-center text-center py-2">
-                            <Building2 className="w-10 h-10 text-primary mb-2" />
-                            <h2 className="text-[18px] font-black text-gray-900 tracking-tight">사업자 정보 직접 입력</h2>
-                            <p className="text-[13px] text-gray-500 font-medium mt-1">
-                                사업자 등록 전이거나 인증을 나중에 하시려면<br/>아래 필수 정보를 기입해 주세요.
-                            </p>
-                        </div>
-                        <div className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-700 mb-1.5 block">상호명</label>
-                                <input 
-                                    type="text" value={manualBizName} onChange={e => setManualBizName(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none focus:border-primary" 
-                                    placeholder="예: 폭스 엔터테인먼트"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-700 mb-1.5 block">대표자 성명</label>
-                                <input 
-                                    type="text" value={manualCeoName} onChange={e => setManualCeoName(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none focus:border-primary" 
-                                    placeholder="대표자 이름"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-700 mb-1.5 block">사업자등록번호 (선택)</label>
-                                <input 
-                                    type="text" value={manualBizNumber} onChange={e => setManualBizNumber(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none focus:border-primary" 
-                                    placeholder="숫자 10자리"
-                                    maxLength={10}
-                                />
-                            </div>
-                        </div>
-                        <div className="flex gap-2 mt-2">
-                            <Button 
-                                type="button" 
-                                variant="outline" 
-                                onClick={() => setIsManualEntryOpen(false)}
-                                className="flex-1 h-11 text-[14px] font-bold"
-                            >
-                                취소
-                            </Button>
-                            <Button 
-                                type="button" 
-                                onClick={() => {
-                                    if (!manualBizName || !manualCeoName) {
-                                        return alert('상호명과 대표자 성명은 필수 입력입니다.');
-                                    }
-                                    // 폼에 상호명 적용
-                                    update('business_name', manualBizName);
-                                    update('company', manualBizName);
-                                    setIsManualEntryOpen(false);
-                                    alert('직접 입력 정보가 적용되었습니다. 노출 랭킹에 제한이 있을 수 있습니다.');
-                                }}
-                                className="flex-1 h-11 bg-primary hover:bg-primary/90 text-white font-bold text-[14px]"
-                            >
-                                적용하기
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { AdEditorForm, AdFormData } from '@/components/biz/AdEditorForm';
+import { JobEditorForm, AdFormData } from '@/components/biz/JobEditorForm';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { manageAdAction } from '@/lib/actions';
@@ -39,7 +39,7 @@ export default function NewAdPage() {
                 </div>
             </div>
 
-            <AdEditorForm isNew mode="JOB" onSubmit={handleSubmit} />
+            <JobEditorForm isNew onSubmit={handleSubmit} />
         </div>
     );
 }
