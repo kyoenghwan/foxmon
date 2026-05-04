@@ -26,7 +26,6 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 location: payload.location,
                 pay: payString,
                 image: payload.logo_url || payload.image,
-                color: payload.color || 'orange',
                 time: payload.work_hours,
                 is_big: false,
                 tier: payload.tier || 'GENERAL',

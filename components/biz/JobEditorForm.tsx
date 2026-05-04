@@ -1088,9 +1088,8 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                     </div>
 
                     <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-                        {/* ─── 광고 모드: 상세 디자인 / 에디터 ─── */}
-                        {mode === 'AD' && (
-                            <div>
+                        {/* ─── 상세 디자인 / 에디터 ─── */}
+                        <div>
                                 <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-3">
                                     <label className="text-[13px] font-bold text-gray-800 flex items-center gap-2">
                                         <Paintbrush className="w-4 h-4 text-primary" /> 광고 본문 작성 방식
@@ -1274,21 +1273,6 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                     </div>
                                 )}
                             </div>
-                        )}
-
-                        {/* ─── 구인 모드: 리치 텍스트 에디터 ─── */}
-                        {mode === 'JOB' && (
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">
-                                    상세 공고 내용
-                                </label>
-                                <RichTextEditor
-                                    value={form.detail_content}
-                                    onChange={(html) => update('detail_content', html)}
-                                />
-                                <p className="text-[11px] text-gray-400 mt-1.5">배너를 클릭하면 이 내용이 팝업으로 표시됩니다. 글꼴, 색상, 정렬 등을 자유롭게 편집할 수 있습니다.</p>
-                            </div>
-                        )}
                     </div>
                 </div>
             )}
