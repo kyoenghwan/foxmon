@@ -245,10 +245,55 @@ export function SettingsModal() {
                     // 캔버스에 이미지 그리기 (리사이즈)
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // JPEG 포맷, 품질 80% (0.8) 로 압축하여 Base64로 변환
                     // 이렇게 하면 5MB 짜리가 20~30KB 내외로 줄어듭니다.
                     const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
                     setProfileUrl(compressedDataUrl);
+                }
+            };
+            img.src = event.target?.result as string;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleBizCertUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 10 * 1024 * 1024) {
+            alert('사진은 10MB 이하로 업로드해주세요.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const MAX_WIDTH = 800; // 텍스트를 읽을 수 있도록 좀 더 크게 유지
+                const MAX_HEIGHT = 800;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    setBizCertUrl(compressedDataUrl);
                 }
             };
             img.src = event.target?.result as string;
@@ -565,9 +610,10 @@ export function SettingsModal() {
                                                         if (!ceoName) return alert('대표자 성명을 입력해주세요.');
                                                         if (!bizNumber || bizNumber.length < 10) return alert('올바른 사업자등록번호를 입력해주세요.');
                                                         if (!verifiedBizName) return alert('상호명을 입력해주세요.');
+                                                        if (!bizCertUrl) return alert('유흥업종 2차 검수용 사업자등록증 이미지를 업로드해주세요.');
                                                         
                                                         // Mock 인증 로직
-                                                        alert(`[MOCK] 국세청 조회 결과: 정상 사업자로 인증되었습니다!\n(대표자: ${ceoName})`);
+                                                        alert(`[MOCK] 국세청 조회 결과: 정상 사업자로 1차 인증되었습니다!\n(대표자: ${ceoName})\n\n이제 광고를 등록하실 수 있으며, 관리자의 사업자등록증 2차 검수 후 허위 업종으로 판명될 경우 광고가 중단될 수 있습니다.`);
                                                         setIsBizVerified(true);
                                                     }}
                                                     className="shrink-0 px-3 h-8 bg-primary hover:bg-primary/90 text-white rounded-md text-[11px] font-bold"
@@ -591,9 +637,35 @@ export function SettingsModal() {
                                             )}
                                         </div>
                                     </div>
+                                    
+                                    <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-orange-100">
+                                        <label className="text-[12px] font-bold text-gray-500 flex items-center justify-between">
+                                            사업자등록증 업로드 (2차 검수용)
+                                        </label>
+                                        <div className="relative group cursor-pointer w-full h-[120px] bg-white rounded-lg overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center transition-colors hover:border-primary">
+                                            {bizCertUrl ? (
+                                                <img src={bizCertUrl} alt="Business Certificate" className="w-full h-full object-contain" />
+                                            ) : (
+                                                <div className="flex flex-col items-center gap-1.5 text-gray-400 group-hover:text-primary transition-colors p-2 text-center">
+                                                    <Upload className="w-5 h-5 stroke-[2]" />
+                                                    <span className="text-[11px] font-bold leading-tight">유흥업종 여부 확인용<br/>등록증 이미지 업로드</span>
+                                                </div>
+                                            )}
+                                            <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                onChange={handleBizCertUpload} 
+                                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" 
+                                                title="사업자등록증 업로드"
+                                            />
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 font-medium leading-tight">
+                                            * 국세청 인증 후, 관리자가 등록증을 통해 '유흥업종' 여부를 2차 확인합니다. 허위 업종일 경우 광고가 중단될 수 있습니다.
+                                        </p>
+                                    </div>
                                 </div>
-                                <p className="text-[10px] text-gray-400 font-medium mt-2 leading-tight">
-                                    * 인증된 업체는 광고 등록 시 상호명이 자동으로 입력되며 변경할 수 없습니다.
+                                <p className="text-[10px] text-gray-400 font-medium mt-3 leading-tight text-center bg-white py-1.5 rounded text-orange-600/80">
+                                    인증된 업체는 광고 등록 시 상호명이 자동으로 입력되며 임의로 변경할 수 없습니다.
                                 </p>
                             </div>
                         )}
