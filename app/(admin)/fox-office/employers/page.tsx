@@ -18,7 +18,7 @@ export default function EmployersManagementPage() {
         setLoading(true);
         try {
             const res = await adminEmployerAction({ actionType: 'GET_LIST' });
-            if (res.success && res.data) {
+            if (res.success && 'data' in res && res.data) {
                 setEmployers(res.data as EmployerListItem[]);
             }
         } catch (error) {
@@ -50,7 +50,8 @@ export default function EmployersManagementPage() {
                     emp.id === userId ? { ...emp, is_business_verified: !currentStatus } : emp
                 ));
             } else {
-                alert(`오류 발생: ${res.message}`);
+                const errorMsg = 'message' in res ? res.message : ('error' in res ? res.error : '알 수 없는 오류');
+                alert(`오류 발생: ${errorMsg}`);
             }
         } catch (error) {
             alert('시스템 오류가 발생했습니다.');
