@@ -246,6 +246,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     
     // 사업자 인증 상태
     const [isBizVerified, setIsBizVerified] = useState(false);
+    const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
+    const [manualBizNumber, setManualBizNumber] = useState('');
+    const [manualCeoName, setManualCeoName] = useState('');
+    const [manualBizName, setManualBizName] = useState('');
     
     // 모드 전환 시 이전 데이터를 임시 저장하기 위한 ref
     const canvasContentRef = useRef<string>(initialData?.detail_content?.startsWith('{"version":') ? initialData.detail_content : '');
@@ -874,17 +878,15 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     )}
                                 </label>
                                 <input
-                                    type="text" value={form.business_name || ''} onChange={e => {
-                                        update('business_name', e.target.value);
-                                        update('company', e.target.value);
-                                    }}
-                                    className={`w-full px-3 py-2.5 border rounded-lg text-[14px] font-medium outline-none ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' : 'border-gray-200 focus:border-primary bg-white'}`}
-                                    placeholder="사업자등록증 상호명"
-                                    readOnly={isBizVerified}
+                                    type="text" value={form.business_name || ''} 
+                                    className={`w-full px-3 py-2.5 border rounded-lg text-[14px] font-medium outline-none bg-gray-50 border-gray-200 text-gray-600 cursor-not-allowed`}
+                                    placeholder={isBizVerified ? "인증된 상호명" : "하단의 '직접 입력하기'를 이용해주세요"}
+                                    readOnly={true}
                                 />
                                 {!isBizVerified && (
-                                    <p className="text-[11px] font-medium text-gray-400 mt-1.5">
-                                        사업자 등록이 아직 안 되어있다면? <button type="button" className="text-primary hover:underline font-bold" onClick={() => alert('직접 입력 방식으로 진행됩니다. 추후 노출 순위에서 불이익이 있을 수 있습니다.')}>직접 입력하기</button>
+                                    <p className="text-[11px] font-medium text-gray-400 mt-1.5 flex items-center justify-between">
+                                        <span>사업자 등록이 아직 안 되어있다면?</span> 
+                                        <button type="button" className="text-primary hover:underline font-bold" onClick={() => setIsManualEntryOpen(true)}>직접 입력하기</button>
                                     </p>
                                 )}
                             </div>
@@ -1386,6 +1388,73 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     </div>
                 </div>
             )}
+            {/* 직접 입력 팝업 */}
+            <Dialog open={isManualEntryOpen} onOpenChange={setIsManualEntryOpen}>
+                <DialogContent className="max-w-md bg-white p-6 border-0 shadow-2xl rounded-2xl">
+                    <div className="flex flex-col gap-4">
+                        <div className="flex flex-col items-center justify-center text-center py-2">
+                            <Building2 className="w-10 h-10 text-primary mb-2" />
+                            <h2 className="text-[18px] font-black text-gray-900 tracking-tight">사업자 정보 직접 입력</h2>
+                            <p className="text-[13px] text-gray-500 font-medium mt-1">
+                                사업자 등록 전이거나 인증을 나중에 하시려면<br/>아래 필수 정보를 기입해 주세요.
+                            </p>
+                        </div>
+                        <div className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <div>
+                                <label className="text-[12px] font-bold text-gray-700 mb-1.5 block">상호명</label>
+                                <input 
+                                    type="text" value={manualBizName} onChange={e => setManualBizName(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none focus:border-primary" 
+                                    placeholder="예: 폭스 엔터테인먼트"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[12px] font-bold text-gray-700 mb-1.5 block">대표자 성명</label>
+                                <input 
+                                    type="text" value={manualCeoName} onChange={e => setManualCeoName(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none focus:border-primary" 
+                                    placeholder="대표자 이름"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[12px] font-bold text-gray-700 mb-1.5 block">사업자등록번호 (선택)</label>
+                                <input 
+                                    type="text" value={manualBizNumber} onChange={e => setManualBizNumber(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none focus:border-primary" 
+                                    placeholder="숫자 10자리"
+                                    maxLength={10}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={() => setIsManualEntryOpen(false)}
+                                className="flex-1 h-11 text-[14px] font-bold"
+                            >
+                                취소
+                            </Button>
+                            <Button 
+                                type="button" 
+                                onClick={() => {
+                                    if (!manualBizName || !manualCeoName) {
+                                        return alert('상호명과 대표자 성명은 필수 입력입니다.');
+                                    }
+                                    // 폼에 상호명 적용
+                                    update('business_name', manualBizName);
+                                    update('company', manualBizName);
+                                    setIsManualEntryOpen(false);
+                                    alert('직접 입력 정보가 적용되었습니다. 노출 랭킹에 제한이 있을 수 있습니다.');
+                                }}
+                                className="flex-1 h-11 bg-primary hover:bg-primary/90 text-white font-bold text-[14px]"
+                            >
+                                적용하기
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
