@@ -78,31 +78,31 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
 
                 {/* Bottom Icons - Flex spaced */}
                 <div className="flex justify-around items-center pt-4 border-t border-gray-100 mt-auto px-1">
-                    <Link href="/mypage/scraps" className="flex flex-col items-center gap-1.5 group">
+                    <Link href="/mypage/scraps" prefetch={false} className="flex flex-col items-center gap-1.5 group">
                         <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110">
                             <Heart className="h-5 w-5 fill-current" />
                         </div>
                         <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">스크랩알바</span>
                     </Link>
-                    <Link href="/mypage/applications" className="flex flex-col items-center gap-1.5 group">
+                    <Link href="/mypage/applications" prefetch={false} className="flex flex-col items-center gap-1.5 group">
                         <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gray-50 group-hover:bg-blue-50 transition-all duration-300 text-gray-400 group-hover:text-blue-500 group-hover:scale-110">
                             <FileText className="h-5 w-5" />
                         </div>
                         <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">지원현황</span>
                     </Link>
-                    <Link href="/mypage/viewers" className="flex flex-col items-center gap-1.5 group">
+                    <Link href="/mypage/viewers" prefetch={false} className="flex flex-col items-center gap-1.5 group">
                         <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gray-50 group-hover:bg-emerald-50 transition-all duration-300 text-gray-400 group-hover:text-emerald-500 group-hover:scale-110">
                             <Eye className="h-5 w-5" />
                         </div>
                         <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">나를 본 업체</span>
                     </Link>
-                    <Link href="/mypage/recent" className="flex flex-col items-center gap-1.5 group">
+                    <Link href="/mypage/recent" prefetch={false} className="flex flex-col items-center gap-1.5 group">
                         <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gray-50 group-hover:bg-indigo-50 transition-all duration-300 text-gray-400 group-hover:text-indigo-500 group-hover:scale-110">
                             <Clock className="h-5 w-5" />
                         </div>
                         <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">최근 본 알바</span>
                     </Link>
-                    <Link href="/mypage/messages" className="flex flex-col items-center gap-1.5 group">
+                    <Link href="/mypage/messages" prefetch={false} className="flex flex-col items-center gap-1.5 group">
                         <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gray-50 group-hover:bg-purple-50 transition-all duration-300 text-gray-400 group-hover:text-purple-500 group-hover:scale-110">
                             <Mail className="h-5 w-5" />
                         </div>
