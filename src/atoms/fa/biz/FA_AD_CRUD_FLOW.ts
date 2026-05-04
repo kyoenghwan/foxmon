@@ -19,11 +19,6 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 user_id: userId,
                 title: payload.title,
                 location: payload.location,
-                is_big: false,
-                tier: payload.tier || 'GENERAL',
-                weight: 1,
-                exposure_count: 0,
-                last_exposed_at: new Date().toISOString(),
                 
                 // 상세 컬럼 (DB 스키마에 추가된 컬럼들)
                 company_name: payload.company || payload.business_name,
