@@ -69,6 +69,10 @@ export async function FA_USER_SETTINGS_FLOW(input: UserSettingsFlowInput) {
                     sns_instagram: input.profileData.sns_instagram,
                     sns_telegram: input.profileData.sns_telegram,
                     sns_x: input.profileData.sns_x,
+                    business_registration_number: input.profileData.business_registration_number,
+                    is_business_verified: input.profileData.is_business_verified,
+                    verified_business_name: input.profileData.verified_business_name,
+                    business_cert_image_url: input.profileData.business_cert_image_url,
                 };
 
                 const updateResult = await OA_UPDATE_USER_PROFILE(updatePayload);

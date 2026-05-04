@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { userSettingsAction } from '@/lib/actions';
-import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload } from 'lucide-react';
+import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2 } from 'lucide-react';
 
 export function SettingsModal() {
     const [isOpen, setIsOpen] = useState(false);
@@ -29,6 +29,13 @@ export function SettingsModal() {
     const [snsKakao, setSnsKakao] = useState('');
     const [snsInsta, setSnsInsta] = useState('');
     const [snsTelegram, setSnsTelegram] = useState('');
+    
+    // Business Verification State
+    const [role, setRole] = useState('');
+    const [bizNumber, setBizNumber] = useState('');
+    const [isBizVerified, setIsBizVerified] = useState(false);
+    const [verifiedBizName, setVerifiedBizName] = useState('');
+    const [bizCertUrl, setBizCertUrl] = useState('');
     
     // Password State
     const [currentPassword, setCurrentPassword] = useState('');
@@ -95,6 +102,11 @@ export function SettingsModal() {
                 setSnsKakao(data.sns_kakao || '');
                 setSnsInsta(data.sns_instagram || '');
                 setSnsTelegram(data.sns_telegram || '');
+                setRole(data.role || 'GENERAL');
+                setBizNumber(data.business_registration_number || '');
+                setIsBizVerified(data.is_business_verified || false);
+                setVerifiedBizName(data.verified_business_name || '');
+                setBizCertUrl(data.business_cert_image_url || '');
             } else {
                 setError('사용자 정보를 불러올 수 없습니다.');
             }
@@ -120,7 +132,11 @@ export function SettingsModal() {
                     sns_kakao: snsKakao,
                     sns_instagram: snsInsta,
                     sns_telegram: snsTelegram,
-                    currentNickname: initialNickname
+                    currentNickname: initialNickname,
+                    business_registration_number: bizNumber,
+                    is_business_verified: isBizVerified,
+                    verified_business_name: verifiedBizName,
+                    business_cert_image_url: bizCertUrl
                 }
             });
 
@@ -492,7 +508,84 @@ export function SettingsModal() {
                             </div>
                         </div>
 
-                        {/* SECTION 5: 회원 탈퇴 링크 */}
+                        {/* SECTION 5: 사업자 정보 관리 (업체회원 이상) */}
+                        {(role === 'EMPLOYER' || role === 'ADMIN') && (
+                            <div className="py-4 border-b border-gray-100 mb-6 bg-orange-50/30 -mx-5 px-5 rounded-lg border border-orange-100/50">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="font-extrabold text-[#333333] text-[14px] flex items-center gap-1.5">
+                                        <Building2 className="w-4 h-4 text-primary stroke-[2]" /> 사업자 정보 관리
+                                    </h3>
+                                    {isBizVerified ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-green-100 text-green-700">
+                                            <Check className="w-3 h-3 stroke-[3]" /> 인증 완료
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500">
+                                            미인증 상태
+                                        </span>
+                                    )}
+                                </div>
+                                
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">상호명</label>
+                                        <input 
+                                            type="text" value={verifiedBizName} onChange={e => setVerifiedBizName(e.target.value)}
+                                            className={`w-full px-2.5 py-1.5 border rounded-md outline-none text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 text-gray-800 focus:border-primary'}`} 
+                                            placeholder="사업자등록증 상호명"
+                                            readOnly={isBizVerified}
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">사업자번호</label>
+                                        <div className="flex items-center gap-1.5 flex-1 w-full">
+                                            <input 
+                                                type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)}
+                                                className={`w-full px-2.5 py-1.5 border rounded-md outline-none text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 text-gray-800 focus:border-primary'}`} 
+                                                placeholder="숫자 10자리"
+                                                readOnly={isBizVerified}
+                                                maxLength={10}
+                                            />
+                                            {!isBizVerified && (
+                                                <Button 
+                                                    type="button" 
+                                                    onClick={() => {
+                                                        if (!bizNumber || bizNumber.length < 10) return alert('올바른 사업자등록번호를 입력해주세요.');
+                                                        if (!verifiedBizName) return alert('상호명을 입력해주세요.');
+                                                        
+                                                        // Mock 인증 로직 (실제로는 FA_BIZ_VERIFY_FLOW 호출)
+                                                        alert('[MOCK] 국세청 조회 결과: 정상 사업자로 인증되었습니다!');
+                                                        setIsBizVerified(true);
+                                                    }}
+                                                    className="shrink-0 px-3 h-8 bg-primary hover:bg-primary/90 text-white rounded-md text-[11px] font-bold"
+                                                >
+                                                    인증하기
+                                                </Button>
+                                            )}
+                                            {isBizVerified && (
+                                                <Button 
+                                                    type="button" 
+                                                    onClick={() => {
+                                                        if (confirm('사업자 인증을 해제하시겠습니까? (기존 광고가 중단될 수 있습니다)')) {
+                                                            setIsBizVerified(false);
+                                                        }
+                                                    }}
+                                                    variant="outline"
+                                                    className="shrink-0 px-3 h-8 border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-md text-[11px] font-bold"
+                                                >
+                                                    해제
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-gray-400 font-medium mt-2 leading-tight">
+                                    * 인증된 업체는 광고 등록 시 상호명이 자동으로 입력되며 변경할 수 없습니다.
+                                </p>
+                            </div>
+                        )}
+
+                        {/* SECTION 6: 회원 탈퇴 링크 */}
                         <div className="pt-2 pb-6 text-center">
                             <button className="text-[11px] font-bold text-gray-400 hover:text-[#F26E22] transition-colors underline underline-offset-4 flex items-center justify-center gap-1 mx-auto">
                                 회원 탈퇴를 생각하시나요?

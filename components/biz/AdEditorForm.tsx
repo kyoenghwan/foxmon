@@ -5,6 +5,7 @@ import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLe
 import { Button } from '@/components/ui/button';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
+import { userSettingsAction } from '@/lib/actions';
 import dynamic from 'next/dynamic';
 
 // Fabric.js는 브라우저 전용이므로 SSR 비활성화
@@ -243,6 +244,9 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const [previewHtml, setPreviewHtml] = useState(false);
     const [showLoadModal, setShowLoadModal] = useState(false);
     
+    // 사업자 인증 상태
+    const [isBizVerified, setIsBizVerified] = useState(false);
+    
     // 모드 전환 시 이전 데이터를 임시 저장하기 위한 ref
     const canvasContentRef = useRef<string>(initialData?.detail_content?.startsWith('{"version":') ? initialData.detail_content : '');
     const htmlContentRef = useRef<string>(!initialData?.detail_content?.startsWith('{"version":') ? (initialData?.detail_content || '') : '');
@@ -301,8 +305,26 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                 setEmploymentTypes(res.data.filter(c => c.list_type === 'EMPLOYMENT_TYPE'));
             }
         };
+        const fetchUserProfile = async () => {
+            if (isNew) {
+                const res = await userSettingsAction('GET_PROFILE');
+                if (res.success && res.data) {
+                    const profile = res.data;
+                    if (profile.is_business_verified) {
+                        setIsBizVerified(true);
+                        setForm(prev => ({
+                            ...prev,
+                            business_name: profile.verified_business_name,
+                            company: profile.verified_business_name, // 하위 호환성
+                        }));
+                    }
+                }
+            }
+        };
+
         fetchMasterData();
-    }, []);
+        fetchUserProfile();
+    }, [isNew]);
 
     useEffect(() => {
         // location이 "서울 강남구" 형태일 때 분리
@@ -843,12 +865,28 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">상호명</label>
+                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 flex items-center gap-2">
+                                    상호명
+                                    {isBizVerified && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-black bg-green-100 text-green-700">
+                                            <CheckCircle2 className="w-3 h-3 stroke-[3]" /> 인증된 업체
+                                        </span>
+                                    )}
+                                </label>
                                 <input
-                                    type="text" value={form.business_name || ''} onChange={e => update('business_name', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                    type="text" value={form.business_name || ''} onChange={e => {
+                                        update('business_name', e.target.value);
+                                        update('company', e.target.value);
+                                    }}
+                                    className={`w-full px-3 py-2.5 border rounded-lg text-[14px] font-medium outline-none ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' : 'border-gray-200 focus:border-primary bg-white'}`}
                                     placeholder="사업자등록증 상호명"
+                                    readOnly={isBizVerified}
                                 />
+                                {!isBizVerified && (
+                                    <p className="text-[11px] font-medium text-gray-400 mt-1.5">
+                                        사업자 등록이 아직 안 되어있다면? <button type="button" className="text-primary hover:underline font-bold" onClick={() => alert('직접 입력 방식으로 진행됩니다. 추후 노출 순위에서 불이익이 있을 수 있습니다.')}>직접 입력하기</button>
+                                    </p>
+                                )}
                             </div>
                             <div>
                                 <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
