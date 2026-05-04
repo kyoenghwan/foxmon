@@ -33,6 +33,7 @@ export function SettingsModal() {
     // Business Verification State
     const [role, setRole] = useState('');
     const [bizNumber, setBizNumber] = useState('');
+    const [ceoName, setCeoName] = useState(''); // 대표자명 추가
     const [isBizVerified, setIsBizVerified] = useState(false);
     const [verifiedBizName, setVerifiedBizName] = useState('');
     const [bizCertUrl, setBizCertUrl] = useState('');
@@ -104,6 +105,7 @@ export function SettingsModal() {
                 setSnsTelegram(data.sns_telegram || '');
                 setRole(data.role || 'GENERAL');
                 setBizNumber(data.business_registration_number || '');
+                setCeoName(data.verified_ceo_name || '');
                 setIsBizVerified(data.is_business_verified || false);
                 setVerifiedBizName(data.verified_business_name || '');
                 setBizCertUrl(data.business_cert_image_url || '');
@@ -135,6 +137,7 @@ export function SettingsModal() {
                     currentNickname: initialNickname,
                     business_registration_number: bizNumber,
                     is_business_verified: isBizVerified,
+                    verified_ceo_name: ceoName,
                     verified_business_name: verifiedBizName,
                     business_cert_image_url: bizCertUrl
                 }
@@ -528,6 +531,15 @@ export function SettingsModal() {
                                 
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2">
+                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">대표자명</label>
+                                        <input 
+                                            type="text" value={ceoName} onChange={e => setCeoName(e.target.value)}
+                                            className={`w-full px-2.5 py-1.5 border rounded-md outline-none text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 text-gray-800 focus:border-primary'}`} 
+                                            placeholder="사업자등록증상 대표자 성명"
+                                            readOnly={isBizVerified}
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2">
                                         <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">상호명</label>
                                         <input 
                                             type="text" value={verifiedBizName} onChange={e => setVerifiedBizName(e.target.value)}
@@ -550,11 +562,12 @@ export function SettingsModal() {
                                                 <Button 
                                                     type="button" 
                                                     onClick={() => {
+                                                        if (!ceoName) return alert('대표자 성명을 입력해주세요.');
                                                         if (!bizNumber || bizNumber.length < 10) return alert('올바른 사업자등록번호를 입력해주세요.');
                                                         if (!verifiedBizName) return alert('상호명을 입력해주세요.');
                                                         
-                                                        // Mock 인증 로직 (실제로는 FA_BIZ_VERIFY_FLOW 호출)
-                                                        alert('[MOCK] 국세청 조회 결과: 정상 사업자로 인증되었습니다!');
+                                                        // Mock 인증 로직
+                                                        alert(`[MOCK] 국세청 조회 결과: 정상 사업자로 인증되었습니다!\n(대표자: ${ceoName})`);
                                                         setIsBizVerified(true);
                                                     }}
                                                     className="shrink-0 px-3 h-8 bg-primary hover:bg-primary/90 text-white rounded-md text-[11px] font-bold"

@@ -71,6 +71,7 @@ export async function FA_USER_SETTINGS_FLOW(input: UserSettingsFlowInput) {
                     sns_x: input.profileData.sns_x,
                     business_registration_number: input.profileData.business_registration_number,
                     is_business_verified: input.profileData.is_business_verified,
+                    verified_ceo_name: input.profileData.verified_ceo_name,
                     verified_business_name: input.profileData.verified_business_name,
                     business_cert_image_url: input.profileData.business_cert_image_url,
                 };

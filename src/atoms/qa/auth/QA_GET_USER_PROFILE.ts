@@ -28,14 +28,14 @@ export async function QA_GET_USER_PROFILE(userId: string) {
 
     const { data, error } = await supabase
       .from('users')
-      .select('nickname, email, phone_number, gender, sns_kakao, sns_instagram, sns_telegram, sns_x, profile_image_url, role, business_name, business_number, business_registration_number, is_business_verified, verified_business_name, business_cert_image_url')
+      .select('nickname, email, phone_number, gender, sns_kakao, sns_instagram, sns_telegram, sns_x, profile_image_url, role, business_name, business_number, business_registration_number, is_business_verified, verified_ceo_name, verified_business_name, business_cert_image_url')
       .eq('id', userId)
       .single();
 
     if (error) {
        nvLog('AT', '❌ QA_GET_USER_PROFILE 에러', error.message);
        // Return mock if table is missing during dev
-       return { success: false, data: { gender: 'M', phone_number: '010-0000-0000', nickname: '사용자', email: '', role: 'GENERAL', business_name: null, business_number: null, business_registration_number: null, is_business_verified: false, verified_business_name: null, business_cert_image_url: null, profile_image_url: null, sns_kakao: null, sns_instagram: null, sns_telegram: null, sns_x: null }, error: error.message };
+       return { success: false, data: { gender: 'M', phone_number: '010-0000-0000', nickname: '사용자', email: '', role: 'GENERAL', business_name: null, business_number: null, business_registration_number: null, is_business_verified: false, verified_ceo_name: null, verified_business_name: null, business_cert_image_url: null, profile_image_url: null, sns_kakao: null, sns_instagram: null, sns_telegram: null, sns_x: null }, error: error.message };
     }
 
     return { success: true, data, error: null };
