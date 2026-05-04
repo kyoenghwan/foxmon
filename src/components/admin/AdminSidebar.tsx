@@ -12,12 +12,14 @@ import {
   MessageSquare, 
   HelpCircle, 
   ArrowLeftRight,
-  ShieldCheck
+  ShieldCheck,
+  Building2
 } from 'lucide-react';
 
 const ADMIN_MENUS = [
   { id: 'dashboard', label: '대시보드', icon: BarChart3, href: '/fox-office' },
   { id: 'users', label: '회원 관리', icon: Users, href: '/fox-office/users' },
+  { id: 'employers', label: '업체/인증 관리', icon: Building2, href: '/fox-office/employers' },
   { id: 'jobs', label: '공고 승인/관리', icon: FileText, href: '/fox-office/jobs' },
   { id: 'ads', label: '광고 및 배너', icon: CreditCard, href: '/fox-office/ads' },
   { id: 'points', label: '정산 및 정책 관리', icon: ArrowLeftRight, href: '/fox-office/points' },

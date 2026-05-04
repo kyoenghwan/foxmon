@@ -91,3 +91,17 @@ export async function manageAdAction(
         payload
     });
 }
+
+import { FA_ADMIN_EMPLOYER_FLOW, AdminEmployerFlowInput } from '@/src/atoms/fa/admin/FA_ADMIN_EMPLOYER_FLOW';
+
+export async function adminEmployerAction(input: Omit<AdminEmployerFlowInput, 'adminId'>) {
+    const session = await auth();
+    if (!session?.user?.id || (session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'SUPER_ADMIN') {
+        return { success: false, message: '관리자 권한이 없습니다.' };
+    }
+
+    return FA_ADMIN_EMPLOYER_FLOW({
+        ...input,
+        adminId: session.user.id
+    });
+}
