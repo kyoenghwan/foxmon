@@ -50,6 +50,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
       if (result?.error) {
         setError('아이디 또는 비밀번호가 일치하지 않습니다.');
         nvLog('FW', '로그인 실패', result.error);
+        setIsLoading(false);
       } else {
         nvLog('FW', '로그인 성공 -> 메인 이동 (Hard Refresh)');
 
@@ -69,13 +70,12 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
             document.cookie = "foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         }
         
-        // Fast client-side navigation instead of hard refresh
-        router.refresh();
-        router.push('/');
+        // Use hard navigation to prevent race condition between router.refresh() and router.push()
+        // And keep the loading spinner spinning until the page unmounts
+        window.location.href = '/';
       }
     } catch (err) {
       setError('시스템 오류가 발생했습니다. 나중에 다시 시도해 주세요.');
-    } finally {
       setIsLoading(false);
     }
   };
