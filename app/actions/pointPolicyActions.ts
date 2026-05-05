@@ -37,10 +37,13 @@ export async function GET_POINT_POLICIES() {
             return { success: false, data: [] };
         }
 
-        // DB가 비어있다면, 초기 설정을 넣고 반환한다.
-        if (!data || data.length === 0) {
-            nvLog('AT', '💡 point_policies 비어있음 - 기본값 삽입 시작');
-            const insertData = DEFAULT_POLICIES.map(p => ({
+        // 기존 데이터와 기본 설정값을 비교하여 누락된 옵션이 있는지 확인합니다.
+        let existingData = data || [];
+        const missingPolicies = DEFAULT_POLICIES.filter(dp => !existingData.some(ed => ed.config_key === dp.config_key));
+
+        if (missingPolicies.length > 0) {
+            nvLog('AT', `💡 누락된 정책 ${missingPolicies.length}개 기본값 삽입 시작`);
+            const insertData = missingPolicies.map(p => ({
                 ...p,
                 start_at: new Date().toISOString(),
                 end_at: '9999-12-31 23:59:59'
@@ -53,12 +56,14 @@ export async function GET_POINT_POLICIES() {
                 
             if (insertError) {
                 nvLog('AT', '❌ 초기값 삽입 에러', insertError.message);
-                return { success: true, data: insertData }; // DB오류여도 기본값 리턴해서 UI 방어
+                // DB오류(RLS 등)여도 기본값 합쳐서 리턴해서 UI 방어
+                existingData = [...existingData, ...insertData];
+            } else if (insertedData) {
+                existingData = [...existingData, ...insertedData];
             }
-            return { success: true, data: insertedData as PointPolicyItem[] };
         }
 
-        return { success: true, data: data as PointPolicyItem[] };
+        return { success: true, data: existingData as PointPolicyItem[] };
     } catch (err: any) {
         nvLog('AT', '❌ GET_POINT_POLICIES 예외', err.message);
         return { success: false, data: [] };
@@ -81,6 +86,7 @@ export async function UPDATE_POINT_POLICIES(policies: { config_key: string, conf
                 
             if (error) {
                 nvLog('AT', `❌ 업데이트 에러 (${policy.config_key})`, error.message);
+                return { success: false, error: error.message };
             }
         }
         return { success: true };
