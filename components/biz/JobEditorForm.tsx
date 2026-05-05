@@ -623,6 +623,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                                             pay={form.pay || '급여 정보'}
                                                             image={form.logo_url || form.image}
                                                             impactType={(form.theme as any) || 'gold'}
+                                                            effectIntensity={(form.effect_intensity as any) || 'medium'}
                                                         />
                                                     </div>
                                                 );
@@ -818,6 +819,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                             <option value="주급">주급</option>
                                             <option value="월급">월급</option>
                                             <option value="건당">건당</option>
+                                            <option value="협의">협의</option>
                                             <option value="기타">기타</option>
                                         </select>
                                         <div className="flex-1 relative">

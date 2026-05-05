@@ -27,7 +27,7 @@ export interface AdFormData {
     pay_amount?: string;
     image: string;
     color: string;
-    tier: 'PREMIUM' | 'SPECIAL' | 'GENERAL';
+    tier: 'PREMIUM' | 'SPECIAL' | 'GENERAL' | 'SIDE';
     auto_renew: boolean;
     theme?: string;
     effect_intensity?: 'high' | 'medium' | 'low' | 'none';
@@ -118,6 +118,7 @@ const PREMIUM_THEMES = [
 
 const TIER_OPTIONS = [
     { value: 'PREMIUM' as const, label: '프리미엄', price: 300000, priceLabel: '300,000P', desc: '최상단 테마 강조 노출', emoji: '👑' },
+    { value: 'SIDE' as const, label: '사이드', price: 200000, priceLabel: '200,000P', desc: '우측 사이드 세로 배너', emoji: '🚀' },
     { value: 'SPECIAL' as const, label: '스페셜', price: 150000, priceLabel: '150,000P', desc: '상단 우선 노출', emoji: '⭐' },
     { value: 'GENERAL' as const, label: '일반', price: 50000, priceLabel: '50,000P', desc: '기본 노출', emoji: '📋' },
 ];
@@ -515,48 +516,15 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 </button>
                             ))}
                         </div>
-
-                        {/* 사이드/상단 배너 안내 */}
-                        <div className="mt-3 bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-start gap-2">
-                            <MessageSquare className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                            <div className="text-[12px] text-blue-700 leading-relaxed">
-                                <p className="font-bold">📢 사이드 배너 · 상단 메인 배너 광고</p>
-                                <p className="mt-0.5">별도 협의가 필요합니다. <span className="font-black text-blue-900">관리자에게 문의</span>해 주세요. (카카오톡: <span className="font-black">@foxmon</span>)</p>
-                            </div>
-                        </div>
-
-                        {/* 자동 연장 */}
-                        <div className="mt-3 bg-gray-50 rounded-xl p-3 flex items-center gap-3">
-                            <label className="flex items-center gap-2 cursor-pointer flex-1">
-                                <input
-                                    type="checkbox" checked={form.auto_renew} onChange={e => update('auto_renew', e.target.checked)}
-                                    className="w-4 h-4 accent-primary rounded"
-                                />
-                                <div>
-                                    <span className="text-[13px] font-bold text-gray-700 flex items-center gap-1.5">
-                                        <RefreshCw className="w-3.5 h-3.5 text-primary" />
-                                        자동 연장
-                                        <span className="text-[11px] font-black text-green-600 bg-green-100 px-1.5 py-0.5 rounded-full">5% 할인</span>
-                                    </span>
-                                    <p className="text-[11px] text-gray-500 mt-0.5">30일 만료 시 동일 등급으로 자동 재등록됩니다.</p>
-                                </div>
-                            </label>
-                            {form.auto_renew && (
-                                <div className="text-right shrink-0">
-                                    <p className="text-[11px] text-gray-400 line-through">{currentTier.priceLabel}</p>
-                                    <p className="text-[14px] font-black text-primary">{discountedPrice.toLocaleString()}P</p>
-                                </div>
-                            )}
-                        </div>
                         </div>
                     )}
 
-                    {/* ② 왼쪽(미리보기+로고) & 오른쪽(기본정보) 그리드 */}
-                    <div className="flex flex-col lg:flex-row gap-6">
+                    {/* ② 배너 미리보기 & 로고 (상단) / 기본정보 (하단) */}
+                    <div className="flex flex-col gap-6">
                         
-                        {/* 왼쪽 컬럼 */}
+                        {/* 상단: 미리보기 + 로고 (mode === 'AD'일 때만) */}
                         {mode === 'AD' && (
-                            <div className="w-full lg:w-[240px] shrink-0 space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 
                                 {/* 배너 미리보기 */}
                                 <div className="bg-white rounded-2xl border border-gray-100 p-5">
@@ -568,13 +536,14 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     <div className="w-full flex justify-center pointer-events-none">
                                         {(() => {
                                             const isPremium = form.tier === 'PREMIUM';
+                                            const isSide = form.tier === 'SIDE';
                                             const isSpecial = form.tier === 'SPECIAL';
                                             const isGeneral = form.tier === 'GENERAL';
                                             const themeColor = isSpecial ? (form.color || '#FF6B35') : '#6B7280';
 
-                                            if (isPremium) {
+                                            if (isPremium || isSide) {
                                                 return (
-                                                    <div className="w-[240px]">
+                                                    <div className={`${isSide ? 'w-[140px]' : 'w-[240px]'}`}>
                                                         <PremiumJobCard
                                                             id="preview"
                                                             company={form.company || '업체명'}
@@ -583,6 +552,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                             pay={form.pay || '급여 정보'}
                                                             image={form.logo_url || form.image}
                                                             impactType={(form.theme as any) || 'gold'}
+                                                            effectIntensity={(form.effect_intensity as any) || 'medium'}
+                                                            isSide={isSide}
                                                         />
                                                     </div>
                                                 );
@@ -706,8 +677,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             </div>
                         )}
 
-                        {/* 오른쪽 컬럼 (기본 정보) */}
-                        <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+                        {/* 하단 컬럼 (기본 정보) */}
+                        <div className="w-full bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
                                 <Info className="w-4 h-4 text-primary" />
                                 기본 정보 입력 (배너용)
@@ -778,6 +749,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             <option value="주급">주급</option>
                                             <option value="월급">월급</option>
                                             <option value="건당">건당</option>
+                                            <option value="협의">협의</option>
                                             <option value="기타">기타</option>
                                         </select>
                                         <div className="flex-1 relative">
