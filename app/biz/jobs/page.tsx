@@ -4,6 +4,8 @@ import { Plus, Briefcase, Eye, Pause, Play, Pencil, Clock, CreditCard } from 'lu
 
 import { manageAdAction } from '@/lib/actions';
 
+import { PaymentModalTrigger } from '@/components/biz/PaymentModalTrigger';
+
 const TierBadge = ({ tier }: { tier: string }) => {
     const styles: Record<string, string> = {
         PREMIUM: 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -137,9 +139,7 @@ export default async function BizJobsPage() {
                                             <Link href={`/jobs/${ad.id}`} target="_blank" className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="미리보기">
                                                 <Eye className="w-4 h-4 text-primary" />
                                             </Link>
-                                            <Link href={`/biz/jobs/${ad.id}?pay=true`} className="p-2 hover:bg-orange-50 rounded-lg transition-colors group" title="연장 및 옵션 결제">
-                                                <CreditCard className="w-4 h-4 text-orange-400 group-hover:text-orange-600" />
-                                            </Link>
+                                            <PaymentModalTrigger ad={ad} />
                                             <Link href={`/biz/jobs/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
                                                 <Pencil className="w-4 h-4 text-gray-500" />
                                             </Link>
