@@ -82,7 +82,7 @@ export function HomeJobSections() {
             ? premiumJobs[i % premiumJobs.length] 
             : {
                 id: `mock-${i}`,
-                company: `프리미엄 업체 ${i + 1}`,
+                company: `프리미엄 광고 ${i + 1}`,
                 title: `최고의 대우 보장합니다 (${i + 1})`,
                 location: '서울 강남구',
                 pay: '[시급] 70,000원',
@@ -190,7 +190,7 @@ export function HomeJobSections() {
                     </div>
                 ) : (
                     <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
-                        <p className="text-gray-400 font-bold">등록된 프리미엄 공고가 없습니다.</p>
+                        <p className="text-gray-400 font-bold">등록된 프리미엄 광고가 없습니다.</p>
                     </div>
                 )}
             </section>
@@ -225,7 +225,7 @@ export function HomeJobSections() {
                     </div>
                 ) : (
                     <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
-                        <p className="text-gray-400 font-bold">등록된 스페셜 공고가 없습니다.</p>
+                        <p className="text-gray-400 font-bold">등록된 스페셜 광고가 없습니다.</p>
                     </div>
                 )}
             </section>

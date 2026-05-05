@@ -43,7 +43,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 
                 <div className="w-full flex items-center justify-center gap-2 mb-5">
                     <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[11px] font-bold border border-amber-100/50 shadow-sm flex items-center gap-1">
-                        👑 프리미엄 업체
+                        👑 프리미엄 광고
                     </span>
                     <span className="text-[11px] text-gray-400 font-medium">
                         조회 {Math.floor(Math.random() * 5000)}
