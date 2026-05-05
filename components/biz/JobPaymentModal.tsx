@@ -38,6 +38,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
     const [saving, setSaving] = useState(false);
     const [userPoints, setUserPoints] = useState<number>(0);
     const [loadingPoints, setLoadingPoints] = useState(true);
+    const [activePicker, setActivePicker] = useState<string | null>(null);
 
     // 모달 전용 상태 (초기값 설정)
     const [form, setForm] = useState<Partial<AdFormData>>({
@@ -248,6 +249,78 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2 shrink-0">
+                                                    {/* 색상 팝오버 트리거 */}
+                                                    {isChecked && (opt.id === 'color' || opt.id === 'highlight' || opt.id === 'bg') && (
+                                                        <div className="relative">
+                                                            <button 
+                                                                type="button" 
+                                                                onClick={(e) => { e.stopPropagation(); setActivePicker(activePicker === opt.id ? null : opt.id); }}
+                                                                className="w-6 h-6 rounded-full border border-gray-300 shadow-sm transition-transform hover:scale-110 flex items-center justify-center"
+                                                                style={{ backgroundColor: form[`option_${opt.id}_value` as keyof AdFormData] as string || '#ffffff' }}
+                                                            />
+                                                            {activePicker === opt.id && (
+                                                                <div className="absolute top-full mt-2 right-0 bg-white border border-gray-200 shadow-2xl rounded-xl p-3 z-50 w-[200px]" onClick={e => e.stopPropagation()}>
+                                                                    <div className="text-[12px] font-bold text-gray-700 mb-3 flex justify-between items-center">
+                                                                        <span>색상 선택</span>
+                                                                        <button type="button" className="text-gray-400 hover:text-gray-600 text-[14px]" onClick={() => setActivePicker(null)}>✕</button>
+                                                                    </div>
+                                                                    <div className="flex flex-wrap gap-2">
+                                                                        {(opt.id === 'color' ? TITLE_COLORS : opt.id === 'highlight' ? HIGHLIGHT_COLORS : BG_COLORS).map(c => (
+                                                                            <button key={c} type="button" onClick={() => { update(`option_${opt.id}_value` as keyof AdFormData, c); setActivePicker(null); }}
+                                                                                className={`w-6 h-6 rounded-full border-2 transition-all ${form[`option_${opt.id}_value` as keyof AdFormData] === c ? 'border-primary scale-110 shadow-sm' : 'border-gray-200 hover:scale-105'}`}
+                                                                                style={{ backgroundColor: c }}
+                                                                            />
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    {/* 아이콘 팝오버 트리거 */}
+                                                    {isChecked && opt.id === 'general_icons' && (
+                                                        <div className="relative">
+                                                            <button 
+                                                                type="button" 
+                                                                onClick={(e) => { e.stopPropagation(); setActivePicker(activePicker === opt.id ? null : opt.id); }}
+                                                                className="px-2 py-1 rounded border border-gray-300 bg-white text-[12px] font-bold text-gray-700 hover:bg-gray-50 shadow-sm"
+                                                            >
+                                                                아이콘 선택
+                                                            </button>
+                                                            {activePicker === opt.id && (
+                                                                <div className="absolute top-full mt-2 right-0 bg-white border border-gray-200 shadow-2xl rounded-xl p-3 z-50 w-[240px]" onClick={e => e.stopPropagation()}>
+                                                                    <div className="text-[12px] font-bold text-gray-700 mb-3 flex justify-between items-center">
+                                                                        <span>아이콘 선택 (최대 2개)</span>
+                                                                        <button type="button" className="text-gray-400 hover:text-gray-600 text-[14px]" onClick={() => setActivePicker(null)}>✕</button>
+                                                                    </div>
+                                                                    <div className="flex flex-wrap gap-2">
+                                                                        {GENERAL_ICONS.map(icon => {
+                                                                            const selected = form.option_general_icons?.includes(icon) || false;
+                                                                            return (
+                                                                                <button key={icon} type="button"
+                                                                                    onClick={() => {
+                                                                                        let current = form.option_general_icons || [];
+                                                                                        if (selected) {
+                                                                                            current = current.filter(x => x !== icon);
+                                                                                            if (current.length === 0) return; // 최소 1개는 유지
+                                                                                        } else {
+                                                                                            if (current.length >= 2) return alert('일반 아이콘은 최대 2개까지만 선택 가능합니다.');
+                                                                                            current = [...current, icon];
+                                                                                        }
+                                                                                        update('option_general_icons', current);
+                                                                                    }}
+                                                                                    className={`text-[12px] font-black px-2 py-1 rounded border transition-colors ${selected ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                                                                                >
+                                                                                    {icon}
+                                                                                </button>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+
                                                     {isChecked && (
                                                         <select
                                                             className="text-[12px] font-bold border border-gray-300 rounded px-2 py-1 outline-none focus:border-primary bg-white cursor-pointer"
@@ -265,74 +338,6 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                             </div>
                                             <span className="text-[12px] text-gray-500 font-medium sm:hidden mt-2 ml-8">{opt.desc}</span>
                                             
-                                            {/* 세부 설정 영역 (색상, 아이콘 등) */}
-                                            {isChecked && opt.id !== 'bold' && opt.id !== 'jump' && (
-                                                <div className="mt-4 ml-8 flex flex-col gap-4" onClick={e => e.stopPropagation()}>
-
-                                                    {/* 색상 선택 팔레트 (옵션 활성화 시) */}
-                                                    {opt.id === 'color' && (
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <span className="text-[12px] font-bold text-gray-600 shrink-0 w-16">글씨 색상</span>
-                                                            {TITLE_COLORS.map(c => (
-                                                                <button key={c} type="button" onClick={() => update('option_color_value', c)}
-                                                                    className={`w-6 h-6 rounded-full border-2 transition-all ${form.option_color_value === c ? 'border-primary scale-110 shadow-sm' : 'border-transparent hover:scale-105'}`}
-                                                                    style={{ backgroundColor: c }}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                    {opt.id === 'highlight' && (
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <span className="text-[12px] font-bold text-gray-600 shrink-0 w-16">형광펜 색상</span>
-                                                            {HIGHLIGHT_COLORS.map(c => (
-                                                                <button key={c} type="button" onClick={() => update('option_highlight_value', c)}
-                                                                    className={`w-6 h-6 rounded-full border-2 transition-all ${form.option_highlight_value === c ? 'border-primary scale-110 shadow-sm' : 'border-transparent hover:scale-105'}`}
-                                                                    style={{ backgroundColor: c }}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                    {opt.id === 'bg' && (
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <span className="text-[12px] font-bold text-gray-600 shrink-0 w-16">배경 색상</span>
-                                                            {BG_COLORS.map((c, i) => (
-                                                                <button key={c} type="button" onClick={() => update('option_bg_value', c)}
-                                                                    className={`w-6 h-6 rounded-full border-2 transition-all ${form.option_bg_value === c ? 'border-primary scale-110 shadow-sm' : 'border-gray-200 hover:scale-105'}`}
-                                                                    style={{ backgroundColor: c }} title={['주황', '빨강', '파랑', '보라', '초록', '핑크'][i]}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                    {opt.id === 'general_icons' && (
-                                                        <div className="flex gap-2 flex-wrap items-start">
-                                                            <span className="text-[12px] font-bold text-gray-600 shrink-0 w-16 mt-1">아이콘 선택</span>
-                                                            <div className="flex-1 flex flex-wrap gap-2">
-                                                                {GENERAL_ICONS.map(icon => {
-                                                                    const selected = form.option_general_icons?.includes(icon) || false;
-                                                                    return (
-                                                                        <button key={icon} type="button"
-                                                                            onClick={() => {
-                                                                                let current = form.option_general_icons || [];
-                                                                                if (selected) {
-                                                                                    current = current.filter(x => x !== icon);
-                                                                                    if (current.length === 0) return; // 최소 1개는 유지
-                                                                                } else {
-                                                                                    if (current.length >= 2) return alert('일반 아이콘은 최대 2개까지만 선택 가능합니다.');
-                                                                                    current = [...current, icon];
-                                                                                }
-                                                                                update('option_general_icons', current);
-                                                                            }}
-                                                                            className={`text-[12px] font-black px-2 py-1 rounded border transition-colors ${selected ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-                                                                        >
-                                                                            {icon}
-                                                                        </button>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
                                         </div>
                                     );
                                 })}
