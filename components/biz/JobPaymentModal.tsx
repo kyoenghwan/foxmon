@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { AdFormData } from '@/components/biz/AdEditorForm';
 import { getUserPointsAction } from '@/app/actions/pointActions';
 import { manageAdAction } from '@/lib/actions';
+import { QA_GET_COMMON_CODES } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 
 interface JobPaymentModalProps {
     initialData: Partial<AdFormData>;
@@ -32,13 +33,12 @@ const TITLE_COLORS = ['#f97316', '#ef4444', '#3b82f6', '#8b5cf6', '#10b981', '#e
 const BG_COLORS = ['#fff7ed', '#fef2f2', '#eff6ff', '#f5f3ff', '#ecfdf5', '#fdf2f8']; // 주황, 빨강, 파랑, 보라, 초록, 핑크 배경
 const HIGHLIGHT_COLORS = ['#fde047', '#86efac', '#f9a8d4', '#93c5fd', '#c4b5fd', '#fdba74']; // 노랑, 초록, 핑크, 하늘, 보라, 주황 (형광펜용)
 
-const GENERAL_ICONS = ['💖초보환영', '🏠원룸제공', '✨최고급시설', '🚫블랙관리', '💰당일지급', '👍숙식제공', '💪열정페이', '🤝가족같은'];
-
 export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobPaymentModalProps) {
     const [saving, setSaving] = useState(false);
     const [userPoints, setUserPoints] = useState<number>(0);
     const [loadingPoints, setLoadingPoints] = useState(true);
     const [activePicker, setActivePicker] = useState<string | null>(null);
+    const [generalIcons, setGeneralIcons] = useState<string[]>([]);
 
     // 모달 전용 상태 (초기값 설정)
     const [form, setForm] = useState<Partial<AdFormData>>({
@@ -51,21 +51,28 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         setForm(prev => ({ ...prev, [field]: value }));
     };
 
-    // 포인트 로드
+    // 데이터(포인트 및 마스터코드) 로드
     useEffect(() => {
-        const loadPoints = async () => {
+        const loadData = async () => {
             try {
+                // 포인트 로드
                 const res = await getUserPointsAction();
                 if (res.success && res.points !== undefined) {
                     setUserPoints(res.points);
                 }
+                
+                // 일반 아이콘 리스트 로드 (DB 공통코드)
+                const codesRes = await QA_GET_COMMON_CODES('AD_GENERAL_ICONS', true);
+                if (codesRes.success && codesRes.data) {
+                    setGeneralIcons(codesRes.data.map(c => c.code_name));
+                }
             } catch (err) {
-                console.error("포인트 로드 실패", err);
+                console.error("데이터 로드 실패", err);
             } finally {
                 setLoadingPoints(false);
             }
         };
-        loadPoints();
+        loadData();
     }, []);
 
     // 예상 결제 포인트
@@ -237,7 +244,9 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                         if (opt.id === 'color' && !form.option_color_value) update('option_color_value', TITLE_COLORS[0]);
                                                         if (opt.id === 'bg' && !form.option_bg_value) update('option_bg_value', BG_COLORS[0]);
                                                         if (opt.id === 'highlight' && !form.option_highlight_value) update('option_highlight_value', HIGHLIGHT_COLORS[0]);
-                                                        if (opt.id === 'general_icons' && (!form.option_general_icons || form.option_general_icons.length === 0)) update('option_general_icons', [GENERAL_ICONS[0]]);
+                                                        if (opt.id === 'general_icons' && (!form.option_general_icons || form.option_general_icons.length === 0)) {
+                                                            update('option_general_icons', generalIcons.length > 0 ? [generalIcons[0]] : []);
+                                                        }
                                                     }
                                                 }}>
                                                     <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0 ${isChecked ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'}`}>
@@ -279,7 +288,9 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                                         <button type="button" className="text-gray-400 hover:text-gray-600 text-[14px]" onClick={() => setActivePicker(null)}>✕</button>
                                                                     </div>
                                                                     <div className="flex flex-wrap gap-2">
-                                                                        {GENERAL_ICONS.map(icon => {
+                                                                        {generalIcons.length === 0 ? (
+                                                                            <span className="text-gray-400 text-xs py-2">등록된 아이콘이 없습니다.</span>
+                                                                        ) : generalIcons.map(icon => {
                                                                             const selected = form.option_general_icons?.includes(icon) || false;
                                                                             return (
                                                                                 <button key={icon} type="button"
