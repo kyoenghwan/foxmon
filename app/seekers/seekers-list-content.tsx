@@ -20,6 +20,7 @@ interface SeekersListContentProps {
 export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
     const [specialJobs, setSpecialJobs] = useState<AdItem[]>([]);
+    const [lineJobs, setLineJobs] = useState<AdItem[]>([]);
     const [generalJobs, setGeneralJobs] = useState<AdItem[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -31,13 +32,15 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
         async function fetchJobs() {
             setLoading(true);
             try {
-                const [p, s, g] = await Promise.all([
-                    getRotatedAds('PREMIUM', 20),
-                    getRotatedAds('SPECIAL', 20),
+                const [p, s, l, g] = await Promise.all([
+                    getRotatedAds('PREMIUM', 50),
+                    getRotatedAds('SPECIAL', 50),
+                    getRotatedAds('LINE', 50),
                     getRotatedAds('GENERAL', 50)
                 ]);
                 setPremiumJobs(p);
                 setSpecialJobs(s);
+                setLineJobs(l);
                 setGeneralJobs(g);
             } catch (error) {
                 console.error("Failed to fetch jobs:", error);
@@ -185,15 +188,15 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                         </Link>
                     </div>
                 </div>
-                {generalJobs.length > 0 ? (
+                {lineJobs.length > 0 ? (
                     <div className={twoRowPremiumSpecialGridClasses}>
-                        {generalJobs.map((job) => (
+                        {lineJobs.map((job) => (
                             <GeneralJobItem key={job.id} {...(job as any)} />
                         ))}
                     </div>
                 ) : (
                     <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
-                        <p className="text-gray-400 font-bold">등록된 일반 인재가 없습니다.</p>
+                        <p className="text-gray-400 font-bold">등록된 일반 광고가 없습니다.</p>
                     </div>
                 )}
             </section>

@@ -10,7 +10,7 @@ export interface AdItem {
     color?: string;
     time?: string;
     is_big: boolean; // Supabase 스네이크 케이스 대응
-    tier: 'PREMIUM' | 'SPECIAL' | 'GENERAL';
+    tier: 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL';
     weight: number;
     exposure_count: number; // Supabase 스네이크 케이스 대응
     last_exposed_at: string; // Supabase ISO String
@@ -149,10 +149,10 @@ function applyRollingLogic(ads: AdItem[], count: number): AdItem[] {
 /**
  * Fair Ad Rotation Service (Supabase)
  */
-export async function getRotatedAds(tier: 'PREMIUM' | 'SPECIAL' | 'GENERAL', count: number = 10): Promise<AdItem[]> {
+export async function getRotatedAds(tier: 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL', limitCount: number = 20): Promise<AdItem[]> {
     if (!IS_SUPABASE_ENABLED) {
         const filtered = MOCK_ADS.filter(ad => ad.tier === tier);
-        return applyRollingLogic(filtered, count);
+        return applyRollingLogic(filtered, limitCount);
     }
 
     try {
@@ -162,20 +162,20 @@ export async function getRotatedAds(tier: 'PREMIUM' | 'SPECIAL' | 'GENERAL', cou
             .eq('tier', tier);
 
         if (error || !data || data.length === 0) {
-            return getMockAds(tier, count);
+            return getMockAds(tier, limitCount);
         }
 
         let ads: AdItem[] = data as AdItem[];
-        return applyRollingLogic(ads, count);
+        return applyRollingLogic(ads, limitCount);
     } catch (error) {
-        return getMockAds(tier, count);
+        return getMockAds(tier, limitCount);
     }
 }
 
 /**
  * Internal Helper for Fallback Mocking
  */
-function getMockAds(tier: 'PREMIUM' | 'SPECIAL' | 'GENERAL', count: number): AdItem[] {
+function getMockAds(tier: 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL', count: number): AdItem[] {
     const filtered = MOCK_ADS.filter(ad => ad.tier === tier);
     return applyRollingLogic(filtered, count);
 }
