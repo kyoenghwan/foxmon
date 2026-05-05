@@ -58,6 +58,14 @@ export interface AdFormData {
     business_registration_url?: string;
     is_address_same?: boolean;
     business_name?: string;
+    
+    // 결제 및 부가 옵션
+    exposure_period?: 30 | 60 | 90;
+    option_bold?: boolean;
+    option_color?: boolean;
+    option_bg?: boolean;
+    option_icon?: boolean;
+    option_jump?: boolean;
 }
 
 // 프리미엄 테마 목록 (premium-job-card.tsx THEME_CONFIG 기반)

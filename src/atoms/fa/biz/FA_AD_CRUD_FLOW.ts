@@ -8,12 +8,51 @@ interface AdCrudInput {
     payload?: Partial<AdFormData>;
 }
 
+// 결제 및 옵션 가격 정책 (프론트엔드와 동일)
+const JOB_PRICING = {
+    period: { 30: 70000, 60: 125000, 90: 170000 },
+    options: {
+        bold: { 30: 30000, 60: 55000, 90: 70000 },
+        color: { 30: 15000, 60: 25000, 90: 35000 },
+        bg: { 30: 15000, 60: 25000, 90: 35000 },
+        icon: { 30: 15000, 60: 25000, 90: 35000 },
+        jump: { 30: 30000, 60: 55000, 90: 70000 },
+    }
+};
+
 export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: AdCrudInput) {
     console.log(`⚛️ [FA_AD_CRUD_FLOW] ${actionType} 요청 - User: ${userId}, JobId: ${jobId}`);
 
     try {
         if (actionType === 'CREATE') {
             if (!payload) return { success: false, message: 'payload가 필요합니다.' };
+
+            // 1. 서버 측에서 최종 결제 포인트 재계산 (보안 검증)
+            const p = (payload.exposure_period || 30) as 30 | 60 | 90;
+            let totalPoints = JOB_PRICING.period[p] || 0;
+            if (payload.option_bold) totalPoints += JOB_PRICING.options.bold[p] || 0;
+            if (payload.option_color) totalPoints += JOB_PRICING.options.color[p] || 0;
+            if (payload.option_bg) totalPoints += JOB_PRICING.options.bg[p] || 0;
+            if (payload.option_icon) totalPoints += JOB_PRICING.options.icon[p] || 0;
+            if (payload.option_jump) totalPoints += JOB_PRICING.options.jump[p] || 0;
+
+            // 2. 포인트 차감 진행 (무조건 자동 차감)
+            if (totalPoints > 0) {
+                const { FA_DEDUCT_POINT_FOR_AD } = await import('@/src/atoms/fa/points/FA_DEDUCT_POINT_FOR_AD');
+                const deductResult = await FA_DEDUCT_POINT_FOR_AD({
+                    userId,
+                    adPrice: totalPoints,
+                    description: `구인 공고 등록 (${p}일 + 옵션)`
+                });
+
+                if (!deductResult.success) {
+                    return { success: false, message: deductResult.message || '포인트가 부족합니다.' };
+                }
+            }
+
+            // 3. 만료일 계산
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + p);
 
             const dbPayload = {
                 user_id: userId,
@@ -41,6 +80,16 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 detail_content: payload.detail_content,
                 detail_bg_color: payload.color,
                 detail_bg_image: payload.detail_bg_image,
+                
+                // 결제 및 옵션 추가 컬럼
+                exposure_period: p,
+                option_bold: !!payload.option_bold,
+                option_color: !!payload.option_color,
+                option_bg: !!payload.option_bg,
+                option_icon: !!payload.option_icon,
+                option_jump: !!payload.option_jump,
+                total_points: totalPoints,
+                expires_at: expiresAt.toISOString()
             };
 
             const { data, error } = await supabase
