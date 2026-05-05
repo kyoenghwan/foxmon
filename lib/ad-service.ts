@@ -10,7 +10,7 @@ export interface AdItem {
     color?: string;
     time?: string;
     is_big: boolean; // Supabase 스네이크 케이스 대응
-    tier: 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL';
+    tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL';
     weight: number;
     exposure_count: number; // Supabase 스네이크 케이스 대응
     last_exposed_at: string; // Supabase ISO String
@@ -149,7 +149,7 @@ function applyRollingLogic(ads: AdItem[], count: number): AdItem[] {
 /**
  * Fair Ad Rotation Service (Supabase)
  */
-export async function getRotatedAds(tier: 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL', limitCount: number = 20): Promise<AdItem[]> {
+export async function getRotatedAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL', limitCount: number = 20): Promise<AdItem[]> {
     if (!IS_SUPABASE_ENABLED) {
         const filtered = MOCK_ADS.filter(ad => ad.tier === tier);
         return applyRollingLogic(filtered, limitCount);
@@ -175,7 +175,7 @@ export async function getRotatedAds(tier: 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENE
 /**
  * Internal Helper for Fallback Mocking
  */
-function getMockAds(tier: 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL', count: number): AdItem[] {
+function getMockAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL', count: number): AdItem[] {
     const filtered = MOCK_ADS.filter(ad => ad.tier === tier);
     return applyRollingLogic(filtered, count);
 }

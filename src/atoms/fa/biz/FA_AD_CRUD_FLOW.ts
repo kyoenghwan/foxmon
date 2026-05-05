@@ -10,6 +10,13 @@ interface AdCrudInput {
 
 // 결제 및 옵션 가격 정책 (프론트엔드와 동일)
 const JOB_PRICING = {
+    tier: {
+        PREMIUM_MAIN: 500000,
+        SIDE: 200000,
+        PREMIUM: 300000,
+        SPECIAL: 150000,
+        GENERAL: 50000
+    },
     period: { 30: 70000, 60: 125000, 90: 170000 },
     options: {
         bold: { 30: 30000, 60: 55000, 90: 70000 },
@@ -31,7 +38,16 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
 
             // 1. 서버 측에서 최종 결제 포인트 재계산 (보안 검증)
             const p = (payload.exposure_period || 30) as 30 | 60 | 90;
-            let totalPoints = JOB_PRICING.period[p] || 0;
+            const t = payload.tier || 'GENERAL';
+            
+            // 티어 기본료 + 기간 기본료 + 옵션
+            let totalPoints = (JOB_PRICING.tier[t as keyof typeof JOB_PRICING.tier] || 0);
+            
+            // 일반 구인 공고의 경우 기간 요금이 부과될 수 있음 (기획에 따라 다름)
+            if (t === 'GENERAL') {
+                totalPoints += (JOB_PRICING.period[p] || 0);
+            }
+            
             if (payload.option_bold) totalPoints += JOB_PRICING.options.bold[p] || 0;
             if (payload.option_color) totalPoints += JOB_PRICING.options.color[p] || 0;
             if (payload.option_bg) totalPoints += JOB_PRICING.options.bg[p] || 0;

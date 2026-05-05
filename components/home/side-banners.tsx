@@ -16,10 +16,10 @@ export function SideBanners() {
         async function fetchSideAds() {
             setLoading(true);
             try {
-                // 사이드 배너용으로 SPECIAL 티어 광고를 활용 (좌4, 우4)
+                // 사이드 배너용으로 SIDE 티어 광고를 활용 (좌4, 우4)
                 const [left, right] = await Promise.all([
-                    getRotatedAds('SPECIAL', 4),
-                    getRotatedAds('SPECIAL', 4)
+                    getRotatedAds('SIDE', 4),
+                    getRotatedAds('SIDE', 4)
                 ]);
                 setLeftAds(left);
                 setRightAds(right);

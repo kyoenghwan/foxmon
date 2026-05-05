@@ -27,7 +27,7 @@ export interface AdFormData {
     pay_amount?: string;
     image: string;
     color: string;
-    tier: 'PREMIUM' | 'SPECIAL' | 'GENERAL' | 'SIDE';
+    tier: 'PREMIUM_MAIN' | 'PREMIUM' | 'SPECIAL' | 'GENERAL' | 'SIDE';
     auto_renew: boolean;
     theme?: string;
     effect_intensity?: 'high' | 'medium' | 'low' | 'none';
@@ -117,12 +117,34 @@ const PREMIUM_THEMES = [
     { key: 'toxic', label: 'TOXIC', color: '#84CC16', bg: 'bg-lime-500' },
 ];
 
-const TIER_OPTIONS = [
-    { value: 'PREMIUM' as const, label: '프리미엄', price: 300000, priceLabel: '300,000P', desc: '최상단 테마 강조 노출', emoji: '👑' },
-    { value: 'SIDE' as const, label: '사이드', price: 200000, priceLabel: '200,000P', desc: '우측 사이드 세로 배너', emoji: '🚀' },
-    { value: 'SPECIAL' as const, label: '스페셜', price: 150000, priceLabel: '150,000P', desc: '상단 우선 노출', emoji: '⭐' },
-    { value: 'GENERAL' as const, label: '일반', price: 50000, priceLabel: '50,000P', desc: '기본 노출', emoji: '📋' },
+interface TierOption {
+    value: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'GENERAL';
+    label: string;
+    price: number;
+    priceLabel: string;
+    desc: string;
+    emoji: string;
+}
+
+const TIER_GROUPS: { title: string; options: TierOption[] }[] = [
+    {
+        title: '상단 고정 배너 (플랫폼 메인)',
+        options: [
+            { value: 'PREMIUM_MAIN' as const, label: '프리미엄 메인', price: 500000, priceLabel: '500,000P', desc: '최상단 롤링 배너 (AI 배경 생성 제공)', emoji: '👑' },
+            { value: 'SIDE' as const, label: '사이드', price: 200000, priceLabel: '200,000P', desc: '우측 사이드 세로 배너', emoji: '🚀' },
+        ]
+    },
+    {
+        title: '본문 리스트 광고 (시선 강탈용)',
+        options: [
+            { value: 'PREMIUM' as const, label: '프리미엄', price: 300000, priceLabel: '300,000P', desc: '본문 최상단 테마 강조 노출', emoji: '💎' },
+            { value: 'SPECIAL' as const, label: '스페셜', price: 150000, priceLabel: '150,000P', desc: '프리미엄 하단 우선 노출', emoji: '⭐' },
+            { value: 'GENERAL' as const, label: '일반', price: 50000, priceLabel: '50,000P', desc: '기본 리스트 노출', emoji: '📋' },
+        ]
+    }
 ];
+
+const TIER_OPTIONS: TierOption[] = TIER_GROUPS.flatMap(g => g.options);
 
 const COLOR_PALETTE = [
     '#FF6B35', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6',
@@ -434,7 +456,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         }
     };
 
-    const currentTier = TIER_OPTIONS.find(t => t.value === form.tier)!;
+    const currentTier = TIER_OPTIONS.find(t => t.value === form.tier) || TIER_OPTIONS[0];
     const discountedPrice = Math.floor(currentTier.price * 0.95);
 
     const sidoOptions = regions.filter(r => !r.parent_code_value);
@@ -491,37 +513,51 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             {(mode === 'JOB' || activeTab === 'banner') && (
                 <div className="space-y-6">
 
-                    {/* ① 광고 등급 선택 (UI 간소화) */}
+                    {/* ① 광고 등급 선택 (UI 간소화 및 그룹 분리) */}
                     {mode === 'AD' && (
-                        <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                            <h3 className="font-black text-[15px] text-gray-800 mb-3 flex items-center gap-2">
+                        <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
+                            <h3 className="font-black text-[15px] text-gray-800 mb-1 flex items-center gap-2">
                                 <Layers className="w-4 h-4 text-primary" />
                                 광고 등급 선택
                             </h3>
 
-                        <div className="flex gap-2">
-                            {TIER_OPTIONS.map(t => (
-                                <button
-                                    key={t.value}
-                                    onClick={() => update('tier', t.value)}
-                                    className={`flex-1 py-2 px-3 rounded-xl border-2 transition-all flex items-center justify-center gap-2 ${
-                                        form.tier === t.value
-                                            ? t.value === 'PREMIUM' ? 'border-yellow-500 bg-yellow-50 ring-1 ring-yellow-200'
-                                            : t.value === 'SPECIAL' ? 'border-purple-500 bg-purple-50 ring-1 ring-purple-200'
-                                            : 'border-gray-500 bg-gray-50 ring-1 ring-gray-200'
-                                            : 'border-gray-200 bg-gray-50 hover:border-gray-300'
-                                    }`}
-                                >
-                                    <span className="text-[16px]">{t.emoji}</span>
-                                    <span className={`font-black text-[14px] ${form.tier === t.value ? 'text-gray-900' : 'text-gray-600'}`}>
-                                        {t.label} 
-                                        <span className={`ml-1 text-[12px] font-bold ${form.tier === t.value ? 'text-primary' : 'text-gray-400'}`}>
-                                            ({t.priceLabel})
-                                        </span>
-                                    </span>
-                                </button>
-                            ))}
-                        </div>
+                            <div className="space-y-4">
+                                {TIER_GROUPS.map((group, gIdx) => (
+                                    <div key={gIdx} className="space-y-2">
+                                        <h4 className="text-[12px] font-bold text-gray-500 bg-gray-50 inline-block px-2 py-0.5 rounded-md">
+                                            {group.title}
+                                        </h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {group.options.map(t => (
+                                                <button
+                                                    key={t.value}
+                                                    onClick={() => update('tier', t.value)}
+                                                    className={`flex-1 min-w-[140px] py-2.5 px-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 ${
+                                                        form.tier === t.value
+                                                            ? t.value.includes('PREMIUM') ? 'border-yellow-500 bg-yellow-50 ring-1 ring-yellow-200'
+                                                            : t.value === 'SPECIAL' ? 'border-purple-500 bg-purple-50 ring-1 ring-purple-200'
+                                                            : 'border-gray-500 bg-gray-50 ring-1 ring-gray-200'
+                                                            : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[16px] leading-none">{t.emoji}</span>
+                                                        <span className={`font-black text-[14px] ${form.tier === t.value ? 'text-gray-900' : 'text-gray-600'}`}>
+                                                            {t.label} 
+                                                        </span>
+                                                    </div>
+                                                    <div className={`text-[12px] font-bold ${form.tier === t.value ? 'text-primary' : 'text-gray-400'}`}>
+                                                        {t.priceLabel}
+                                                    </div>
+                                                    <p className="text-[10px] text-gray-400 font-medium mt-1 w-full text-center truncate px-1">
+                                                        {t.desc}
+                                                    </p>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
 
@@ -776,18 +812,18 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         </div>
                     </div>
 
-                    {/* ③ 등급별 배너 테마 설정 */}
-                    {mode === 'AD' && form.tier === 'PREMIUM' && (
-                        <div className="bg-white rounded-2xl border border-yellow-200 p-6 space-y-5">
+                    {/* ③ 등급별 배너 디자인 설정 */}
+                    {mode === 'AD' && form.tier === 'PREMIUM_MAIN' && (
+                        <div className="bg-white rounded-2xl border border-indigo-200 p-6 space-y-5">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                                <Crown className="w-4 h-4 text-yellow-500" />
-                                프리미엄 테마 및 디자인 설정
+                                <Crown className="w-4 h-4 text-indigo-500" />
+                                프리미엄 메인 디자인 설정
                             </h3>
 
                             {/* AI 배경 생성기 */}
                             <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 border border-purple-100">
                                 <h4 className="font-bold text-[13px] text-purple-900 mb-2 flex items-center gap-1.5">
-                                    <span className="text-base">✨</span> AI 배경 이미지 생성 (베타)
+                                    <span className="text-base">✨</span> AI 퀄리티 배경 생성 (베타)
                                 </h4>
                                 <div className="flex flex-col sm:flex-row gap-2">
                                     <input
@@ -805,11 +841,11 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             const btn = document.getElementById('ai-gen-btn');
                                             if (btn) btn.innerHTML = '<span class="animate-spin mr-1">⏳</span> 생성 중...';
                                             
-                                            // 임시 모킹: 프롬프트를 쿼리로 활용해 Unsplash 랜덤 이미지 가져오기
+                                            // 임시 모킹
                                             setTimeout(() => {
                                                 const keywords = encodeURIComponent(form.ai_prompt || 'neon');
                                                 const mockUrl = `https://source.unsplash.com/random/800x600/?${keywords}`;
-                                                update('image', mockUrl); // 썸네일에 적용
+                                                update('image', mockUrl);
                                                 
                                                 if (btn) btn.innerHTML = '✨ 배경 적용하기';
                                                 alert('AI 배경 생성이 완료되었습니다! 우측 미리보기에서 확인하세요.');
@@ -822,9 +858,18 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </button>
                                 </div>
                                 <p className="text-[11px] text-purple-600/70 mt-2 font-medium">
-                                    * 입력하신 텍스트를 바탕으로 AI가 최적의 고품질 배경 이미지를 즉시 그려줍니다.
+                                    * 입력하신 텍스트를 바탕으로 AI가 최적의 고품질 배경 이미지를 즉시 그려줍니다. (현재는 데모용 샘플 이미지로 대체됩니다)
                                 </p>
                             </div>
+                        </div>
+                    )}
+
+                    {mode === 'AD' && form.tier === 'PREMIUM' && (
+                        <div className="bg-white rounded-2xl border border-yellow-200 p-6 space-y-5">
+                            <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
+                                <Crown className="w-4 h-4 text-yellow-500" />
+                                프리미엄 테마 설정
+                            </h3>
 
                             {/* 테마 선택 */}
                             <div>

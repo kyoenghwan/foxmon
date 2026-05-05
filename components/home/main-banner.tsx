@@ -17,7 +17,8 @@ export function MainBanner() {
     useEffect(() => {
         async function fetchAds() {
             setLoading(true);
-            const rotatedAds = await getRotatedAds('PREMIUM', 5);
+            // VVIP (메인 롤링) 티어만 조회
+            const rotatedAds = await getRotatedAds('PREMIUM_MAIN', 5);
             setAds(rotatedAds);
             setLoading(false);
         }
