@@ -1561,11 +1561,11 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                     </h4>
                                     <div className="flex flex-col gap-2">
                                         {[
-                                            { id: 'bold', label: '굵은 글씨 (Bold)', desc: '제목을 굵게 표시하여 눈에 띄게', price: JOB_PRICING.options.bold[form.exposure_period as 30|60|90] },
-                                            { id: 'color', label: '제목 컬러 (Color)', desc: '제목에 매력적인 브랜드 컬러 적용', price: JOB_PRICING.options.color[form.exposure_period as 30|60|90] },
-                                            { id: 'bg', label: '리스트 배경색 (Background)', desc: '공고 영역 전체 배경색을 은은하게 강조', price: JOB_PRICING.options.bg[form.exposure_period as 30|60|90] },
-                                            { id: 'icon', label: '급구 아이콘 (Icon)', desc: '시선을 사로잡는 🚨급구 마크', price: JOB_PRICING.options.icon[form.exposure_period as 30|60|90] },
-                                            { id: 'jump', label: '자동 점프 (Auto Jump)', desc: '매일 6회 자동으로 리스트 최상단 끌어올림!', price: JOB_PRICING.options.jump[form.exposure_period as 30|60|90] },
+                                            { id: 'bold', label: '굵은 글씨 (Bold)', desc: '제목을 굵게 표시하여 눈에 띄게', price: JOB_PRICING.options.bold[(form.exposure_period || 30) as 30|60|90] },
+                                            { id: 'color', label: '제목 컬러 (Color)', desc: '제목에 매력적인 브랜드 컬러 적용', price: JOB_PRICING.options.color[(form.exposure_period || 30) as 30|60|90] },
+                                            { id: 'bg', label: '리스트 배경색 (Background)', desc: '공고 영역 전체 배경색을 은은하게 강조', price: JOB_PRICING.options.bg[(form.exposure_period || 30) as 30|60|90] },
+                                            { id: 'icon', label: '급구 아이콘 (Icon)', desc: '시선을 사로잡는 🚨급구 마크', price: JOB_PRICING.options.icon[(form.exposure_period || 30) as 30|60|90] },
+                                            { id: 'jump', label: '자동 점프 (Auto Jump)', desc: '매일 6회 자동으로 리스트 최상단 끌어올림!', price: JOB_PRICING.options.jump[(form.exposure_period || 30) as 30|60|90] },
                                         ].map(opt => (
                                             <label key={opt.id} className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${form[`option_${opt.id}` as keyof AdFormData] ? 'border-primary bg-white shadow-sm' : 'border-gray-200 bg-gray-50/50 hover:bg-white'}`}>
                                                 <div className="flex items-center gap-3">
