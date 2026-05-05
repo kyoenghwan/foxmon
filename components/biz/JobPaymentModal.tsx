@@ -249,31 +249,16 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2 shrink-0">
-                                                    {/* 색상 팝오버 트리거 */}
+                                                    {/* 색상 선택 (OS 기본 컬러 피커) */}
                                                     {isChecked && (opt.id === 'color' || opt.id === 'highlight' || opt.id === 'bg') && (
-                                                        <div className="relative">
-                                                            <button 
-                                                                type="button" 
-                                                                onClick={(e) => { e.stopPropagation(); setActivePicker(activePicker === opt.id ? null : opt.id); }}
-                                                                className="w-6 h-6 rounded-full border border-gray-300 shadow-sm transition-transform hover:scale-110 flex items-center justify-center"
-                                                                style={{ backgroundColor: form[`option_${opt.id}_value` as keyof AdFormData] as string || '#ffffff' }}
+                                                        <div className="relative w-6 h-6 rounded-full overflow-hidden border border-gray-300 shadow-sm cursor-pointer transition-transform hover:scale-110 shrink-0" title="색상 변경">
+                                                            <input 
+                                                                type="color" 
+                                                                value={form[`option_${opt.id}_value` as keyof AdFormData] as string || '#ffffff'}
+                                                                onChange={(e) => update(`option_${opt.id}_value` as keyof AdFormData, e.target.value)}
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                className="absolute -top-2 -left-2 w-10 h-10 cursor-pointer border-0 p-0"
                                                             />
-                                                            {activePicker === opt.id && (
-                                                                <div className="absolute top-full mt-2 right-0 bg-white border border-gray-200 shadow-2xl rounded-xl p-3 z-50 w-[200px]" onClick={e => e.stopPropagation()}>
-                                                                    <div className="text-[12px] font-bold text-gray-700 mb-3 flex justify-between items-center">
-                                                                        <span>색상 선택</span>
-                                                                        <button type="button" className="text-gray-400 hover:text-gray-600 text-[14px]" onClick={() => setActivePicker(null)}>✕</button>
-                                                                    </div>
-                                                                    <div className="flex flex-wrap gap-2">
-                                                                        {(opt.id === 'color' ? TITLE_COLORS : opt.id === 'highlight' ? HIGHLIGHT_COLORS : BG_COLORS).map(c => (
-                                                                            <button key={c} type="button" onClick={() => { update(`option_${opt.id}_value` as keyof AdFormData, c); setActivePicker(null); }}
-                                                                                className={`w-6 h-6 rounded-full border-2 transition-all ${form[`option_${opt.id}_value` as keyof AdFormData] === c ? 'border-primary scale-110 shadow-sm' : 'border-gray-200 hover:scale-105'}`}
-                                                                                style={{ backgroundColor: c }}
-                                                                            />
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            )}
                                                         </div>
                                                     )}
 
