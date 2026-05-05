@@ -12,16 +12,39 @@ export interface PointPolicyItem {
     is_override?: boolean;
 }
 
-// 기본 유료 광고 설정값 (최초 삽입용 30일 기준)
+// 기본 유료 광고 설정값 (최초 삽입용 30/60/90일 개별 기준)
 const DEFAULT_POLICIES = [
-    { config_key: 'OPTION_PRICE_BASE_PERIOD', config_value: 70000 },
-    { config_key: 'OPTION_PRICE_BOLD', config_value: 30000 },
-    { config_key: 'OPTION_PRICE_COLOR', config_value: 15000 },
-    { config_key: 'OPTION_PRICE_BG', config_value: 15000 },
-    { config_key: 'OPTION_PRICE_HIGHLIGHT', config_value: 15000 },
-    { config_key: 'OPTION_PRICE_ICON', config_value: 15000 },
-    { config_key: 'OPTION_PRICE_GENERAL_ICONS', config_value: 10000 },
-    { config_key: 'OPTION_PRICE_JUMP', config_value: 30000 },
+    { config_key: 'OPTION_PRICE_BASE_PERIOD_30', config_value: 70000 },
+    { config_key: 'OPTION_PRICE_BASE_PERIOD_60', config_value: 125000 },
+    { config_key: 'OPTION_PRICE_BASE_PERIOD_90', config_value: 170000 },
+    
+    { config_key: 'OPTION_PRICE_BOLD_30', config_value: 30000 },
+    { config_key: 'OPTION_PRICE_BOLD_60', config_value: 55000 },
+    { config_key: 'OPTION_PRICE_BOLD_90', config_value: 70000 },
+    
+    { config_key: 'OPTION_PRICE_COLOR_30', config_value: 15000 },
+    { config_key: 'OPTION_PRICE_COLOR_60', config_value: 25000 },
+    { config_key: 'OPTION_PRICE_COLOR_90', config_value: 35000 },
+    
+    { config_key: 'OPTION_PRICE_BG_30', config_value: 15000 },
+    { config_key: 'OPTION_PRICE_BG_60', config_value: 25000 },
+    { config_key: 'OPTION_PRICE_BG_90', config_value: 35000 },
+    
+    { config_key: 'OPTION_PRICE_HIGHLIGHT_30', config_value: 15000 },
+    { config_key: 'OPTION_PRICE_HIGHLIGHT_60', config_value: 25000 },
+    { config_key: 'OPTION_PRICE_HIGHLIGHT_90', config_value: 35000 },
+    
+    { config_key: 'OPTION_PRICE_ICON_30', config_value: 15000 },
+    { config_key: 'OPTION_PRICE_ICON_60', config_value: 25000 },
+    { config_key: 'OPTION_PRICE_ICON_90', config_value: 35000 },
+    
+    { config_key: 'OPTION_PRICE_GENERAL_ICONS_30', config_value: 10000 },
+    { config_key: 'OPTION_PRICE_GENERAL_ICONS_60', config_value: 18000 },
+    { config_key: 'OPTION_PRICE_GENERAL_ICONS_90', config_value: 25000 },
+    
+    { config_key: 'OPTION_PRICE_JUMP_30', config_value: 30000 },
+    { config_key: 'OPTION_PRICE_JUMP_60', config_value: 55000 },
+    { config_key: 'OPTION_PRICE_JUMP_90', config_value: 70000 },
 ];
 
 export async function GET_POINT_POLICIES() {

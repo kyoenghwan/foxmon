@@ -16,12 +16,6 @@ interface JobPaymentModalProps {
     onSuccess: () => void;
 }
 
-// 옵션 가격 계산 헬퍼 함수 (30일 기준 가격을 받아 60일, 90일 할인가 계산)
-const calculateOptionPrice = (basePrice: number, period: number) => {
-    if (period === 60) return Math.floor(basePrice * 2 * 0.9 / 1000) * 1000; // 10% 할인
-    if (period === 90) return Math.floor(basePrice * 3 * 0.8 / 1000) * 1000; // 20% 할인
-    return basePrice;
-};
 
 const TITLE_COLORS = ['#f97316', '#ef4444', '#3b82f6', '#8b5cf6', '#10b981', '#ec4899']; // 주황, 빨강, 파랑, 보라, 초록, 핑크
 const BG_COLORS = ['#fff7ed', '#fef2f2', '#eff6ff', '#f5f3ff', '#ecfdf5', '#fdf2f8']; // 주황, 빨강, 파랑, 보라, 초록, 핑크 배경
@@ -80,8 +74,8 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         loadData();
     }, []);
 
-    // 예상 결제 포인트
-    const getPrice = (key: string, period: number) => calculateOptionPrice(policies[key] || 0, period);
+    // 예상 결제 포인트 (이제 30, 60, 90일 키가 DB에 각각 저장되어 있으므로 그대로 가져옵니다)
+    const getPrice = (key: string, period: number) => policies[`${key}_${period}`] || 0;
     
     const calculateTotalPoints = () => {
         const p = form.exposure_period || 30;

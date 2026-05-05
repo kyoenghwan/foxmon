@@ -25,6 +25,81 @@ import { PolicyFormModal } from '@/components/admin/points/PolicyFormModal';
 import { TierConfigEditor } from '@/components/admin/points/TierConfigEditor';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
+const BASE_OPTIONS = [
+    { key: 'OPTION_PRICE_BASE_PERIOD', title: '기본 패키지', desc: '구인광고 기본 노출 요금입니다.' },
+    { key: 'OPTION_PRICE_BOLD', title: '제목 굵게', desc: '제목을 굵게 표시하여 눈에 띄게' },
+    { key: 'OPTION_PRICE_COLOR', title: '글자색 변경', desc: '제목에 매력적인 브랜드 컬러 적용' },
+    { key: 'OPTION_PRICE_HIGHLIGHT', title: '형광펜 효과', desc: '글씨 뒷배경을 형광펜으로 강조' },
+    { key: 'OPTION_PRICE_BG', title: '배경색 변경', desc: '공고 영역 전체 배경색을 은은하게 강조' },
+    { key: 'OPTION_PRICE_ICON', title: '급구/특수 아이콘', desc: '시선을 사로잡는 급구 마크' },
+    { key: 'OPTION_PRICE_GENERAL_ICONS', title: '일반 아이콘', desc: '최대 2개 중복 선택 가능한 예쁜 뱃지' },
+    { key: 'OPTION_PRICE_JUMP', title: '상단 끌어올리기', desc: '매일 6회 자동으로 리스트 최상단 끌어올림' },
+];
+
+function OptionCard({ baseOpt, pricingOptions, setPricingOptions }: any) {
+    const val30 = pricingOptions.find((p: PointPolicyItem) => p.config_key === `${baseOpt.key}_30`)?.config_value || 0;
+    const val60 = pricingOptions.find((p: PointPolicyItem) => p.config_key === `${baseOpt.key}_60`)?.config_value || 0;
+    const val90 = pricingOptions.find((p: PointPolicyItem) => p.config_key === `${baseOpt.key}_90`)?.config_value || 0;
+
+    const [percent60, setPercent60] = useState('');
+    const [percent90, setPercent90] = useState('');
+
+    const handlePriceChange = (period: number, value: number) => {
+        setPricingOptions((prev: PointPolicyItem[]) => prev.map(p => p.config_key === `${baseOpt.key}_${period}` ? { ...p, config_value: value } : p));
+    };
+
+    const handlePercentChange = (period: number, percent: number) => {
+        const months = period / 30;
+        const calculated = Math.floor((val30 * months) * ((100 - percent) / 100) / 1000) * 1000;
+        handlePriceChange(period, calculated);
+    };
+
+    return (
+        <div className="p-5 border border-gray-100 rounded-2xl bg-gray-50 hover:border-primary/30 transition-all shadow-sm">
+            <div className="text-[12px] font-black text-primary opacity-60 uppercase tracking-widest">{baseOpt.key}</div>
+            <div className="font-bold text-[16px] text-gray-900 mt-1">{baseOpt.title}</div>
+            <p className="text-[12px] text-gray-500 mt-1 mb-4 h-8">{baseOpt.desc}</p>
+            
+            <div className="space-y-3">
+                {/* 30일 */}
+                <div className="flex items-center gap-2">
+                    <span className="w-10 text-[13px] font-bold text-gray-600">30일</span>
+                    <input type="number" value={val30} onChange={e => handlePriceChange(30, parseInt(e.target.value) || 0)} className="flex-1 px-3 py-1.5 border-2 border-gray-200 rounded-lg text-right font-black focus:border-primary outline-none transition-colors" />
+                    <span className="text-gray-400 font-black text-sm">P</span>
+                </div>
+
+                {/* 60일 */}
+                <div className="flex items-center gap-2">
+                    <span className="w-10 text-[13px] font-bold text-gray-600">60일</span>
+                    <input type="number" placeholder="%" value={percent60} onChange={e => {
+                        setPercent60(e.target.value);
+                        if (e.target.value) handlePercentChange(60, parseFloat(e.target.value));
+                    }} className="w-14 px-1 py-1.5 border border-gray-200 rounded-lg text-center text-sm font-bold text-blue-600 focus:border-blue-500 outline-none bg-blue-50" />
+                    <input type="number" value={val60} onChange={e => {
+                        setPercent60('');
+                        handlePriceChange(60, parseInt(e.target.value) || 0);
+                    }} className="flex-1 px-3 py-1.5 border-2 border-gray-200 rounded-lg text-right font-black focus:border-primary outline-none transition-colors" />
+                    <span className="text-gray-400 font-black text-sm">P</span>
+                </div>
+
+                {/* 90일 */}
+                <div className="flex items-center gap-2">
+                    <span className="w-10 text-[13px] font-bold text-gray-600">90일</span>
+                    <input type="number" placeholder="%" value={percent90} onChange={e => {
+                        setPercent90(e.target.value);
+                        if (e.target.value) handlePercentChange(90, parseFloat(e.target.value));
+                    }} className="w-14 px-1 py-1.5 border border-gray-200 rounded-lg text-center text-sm font-bold text-blue-600 focus:border-blue-500 outline-none bg-blue-50" />
+                    <input type="number" value={val90} onChange={e => {
+                        setPercent90('');
+                        handlePriceChange(90, parseInt(e.target.value) || 0);
+                    }} className="flex-1 px-3 py-1.5 border-2 border-gray-200 rounded-lg text-right font-black focus:border-primary outline-none transition-colors" />
+                    <span className="text-gray-400 font-black text-sm">P</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function AdminPointsPolicyPage() {
   const [activeMainTab, setActiveMainTab] = useState('pricing');
   const [activeTab, setActiveTab] = useState('current');
@@ -131,35 +206,14 @@ export default function AdminPointsPolicyPage() {
               <Button onClick={handleSavePricing} disabled={isLoading} className="font-bold gap-2"><Save className="w-4 h-4" /> 일괄 저장</Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-              {pricingOptions.map(opt => (
-                <div key={opt.config_key} className="p-5 border border-gray-100 rounded-2xl bg-gray-50 hover:border-primary/30 transition-all shadow-sm">
-                  <div className="text-[12px] font-black text-primary opacity-60 uppercase tracking-widest">{opt.config_key}</div>
-                  <div className="font-bold text-[16px] text-gray-900 mt-1">
-                    {opt.config_key === 'OPTION_PRICE_BASE_PERIOD' && '기본 30일 패키지'}
-                    {opt.config_key === 'OPTION_PRICE_BOLD' && '제목 굵게'}
-                    {opt.config_key === 'OPTION_PRICE_COLOR' && '글자색 변경'}
-                    {opt.config_key === 'OPTION_PRICE_BG' && '배경색 변경'}
-                    {opt.config_key === 'OPTION_PRICE_HIGHLIGHT' && '형광펜 효과'}
-                    {opt.config_key === 'OPTION_PRICE_ICON' && '급구/특수 아이콘'}
-                    {opt.config_key === 'OPTION_PRICE_GENERAL_ICONS' && '일반 아이콘'}
-                    {opt.config_key === 'OPTION_PRICE_JUMP' && '상단 끌어올리기'}
-                  </div>
-                  <p className="text-[12px] text-gray-500 mt-1 mb-4 h-8">기본 30일 기준 요금입니다. 60일/90일은 이 요금을 기준으로 자동 산출됩니다.</p>
-                  
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="number" 
-                      value={opt.config_value} 
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        setPricingOptions(prev => prev.map(p => p.config_key === opt.config_key ? { ...p, config_value: val } : p));
-                      }}
-                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl font-black text-lg focus:border-primary focus:ring-0 outline-none transition-colors"
-                    />
-                    <span className="font-black text-gray-400">P</span>
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 mt-6">
+              {BASE_OPTIONS.map(baseOpt => (
+                <OptionCard 
+                  key={baseOpt.key} 
+                  baseOpt={baseOpt} 
+                  pricingOptions={pricingOptions} 
+                  setPricingOptions={setPricingOptions} 
+                />
               ))}
             </div>
           </div>
