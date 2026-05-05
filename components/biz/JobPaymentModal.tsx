@@ -7,6 +7,7 @@ import { AdFormData } from '@/components/biz/AdEditorForm';
 import { getUserPointsAction } from '@/app/actions/pointActions';
 import { manageAdAction } from '@/lib/actions';
 import { QA_GET_COMMON_CODES } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
+import { GET_POINT_POLICIES, PointPolicyItem } from '@/app/actions/pointPolicyActions';
 
 interface JobPaymentModalProps {
     initialData: Partial<AdFormData>;
@@ -15,18 +16,11 @@ interface JobPaymentModalProps {
     onSuccess: () => void;
 }
 
-// 결제 및 옵션 가격 정책
-const JOB_PRICING = {
-    period: { 30: 70000, 60: 125000, 90: 170000 },
-    options: {
-        bold: { 30: 30000, 60: 55000, 90: 70000 },
-        color: { 30: 15000, 60: 25000, 90: 35000 },
-        bg: { 30: 15000, 60: 25000, 90: 35000 },
-        highlight: { 30: 15000, 60: 25000, 90: 35000 },
-        icon: { 30: 15000, 60: 25000, 90: 35000 },
-        general_icons: { 30: 10000, 60: 18000, 90: 25000 },
-        jump: { 30: 30000, 60: 55000, 90: 70000 },
-    }
+// 옵션 가격 계산 헬퍼 함수 (30일 기준 가격을 받아 60일, 90일 할인가 계산)
+const calculateOptionPrice = (basePrice: number, period: number) => {
+    if (period === 60) return Math.floor(basePrice * 2 * 0.9 / 1000) * 1000; // 10% 할인
+    if (period === 90) return Math.floor(basePrice * 3 * 0.8 / 1000) * 1000; // 20% 할인
+    return basePrice;
 };
 
 const TITLE_COLORS = ['#f97316', '#ef4444', '#3b82f6', '#8b5cf6', '#10b981', '#ec4899']; // 주황, 빨강, 파랑, 보라, 초록, 핑크
@@ -39,6 +33,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
     const [loadingPoints, setLoadingPoints] = useState(true);
     const [activePicker, setActivePicker] = useState<string | null>(null);
     const [generalIcons, setGeneralIcons] = useState<string[]>([]);
+    const [policies, setPolicies] = useState<Record<string, number>>({});
 
     // 모달 전용 상태 (초기값 설정)
     const [form, setForm] = useState<Partial<AdFormData>>({
@@ -66,6 +61,16 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                 if (codesRes.success && codesRes.data) {
                     setGeneralIcons(codesRes.data.map(c => c.code_name));
                 }
+
+                // 포인트 정책 로드
+                const policiesRes = await GET_POINT_POLICIES();
+                if (policiesRes.success && policiesRes.data) {
+                    const policyMap: Record<string, number> = {};
+                    policiesRes.data.forEach(p => {
+                        policyMap[p.config_key] = p.config_value;
+                    });
+                    setPolicies(policyMap);
+                }
             } catch (err) {
                 console.error("데이터 로드 실패", err);
             } finally {
@@ -76,19 +81,21 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
     }, []);
 
     // 예상 결제 포인트
+    const getPrice = (key: string, period: number) => calculateOptionPrice(policies[key] || 0, period);
+    
     const calculateTotalPoints = () => {
         const p = form.exposure_period || 30;
-        let total = JOB_PRICING.period[p] || 0;
+        let total = getPrice('OPTION_PRICE_BASE_PERIOD', p);
         
-        if (form.option_bold) total += JOB_PRICING.options.bold[form.option_bold_period || 30] || 0;
-        if (form.option_color) total += JOB_PRICING.options.color[form.option_color_period || 30] || 0;
-        if (form.option_bg) total += JOB_PRICING.options.bg[form.option_bg_period || 30] || 0;
-        if (form.option_highlight) total += JOB_PRICING.options.highlight[form.option_highlight_period || 30] || 0;
-        if (form.option_icon) total += JOB_PRICING.options.icon[form.option_icon_period || 30] || 0;
+        if (form.option_bold) total += getPrice('OPTION_PRICE_BOLD', p);
+        if (form.option_color) total += getPrice('OPTION_PRICE_COLOR', p);
+        if (form.option_bg) total += getPrice('OPTION_PRICE_BG', p);
+        if (form.option_highlight) total += getPrice('OPTION_PRICE_HIGHLIGHT', p);
+        if (form.option_icon) total += getPrice('OPTION_PRICE_ICON', p);
         if (form.option_general_icons && form.option_general_icons.length > 0) {
-            total += (JOB_PRICING.options.general_icons[form.option_general_icons_period || 30] || 0) * form.option_general_icons.length;
+            total += getPrice('OPTION_PRICE_GENERAL_ICONS', p) * form.option_general_icons.length;
         }
-        if (form.option_jump) total += JOB_PRICING.options.jump[form.option_jump_period || 30] || 0;
+        if (form.option_jump) total += getPrice('OPTION_PRICE_JUMP', p);
         return total;
     };
 
@@ -204,7 +211,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                             {days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
                                             {days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
                                         </div>
-                                        <span className="text-[13px] font-bold text-gray-500 mt-1">{JOB_PRICING.period[days as 30|60|90].toLocaleString()} P</span>
+                                        <span className="text-[13px] font-bold text-gray-500 mt-1">{getPrice('OPTION_PRICE_BASE_PERIOD', days).toLocaleString()} P</span>
                                     </button>
                                 ))}
                             </div>
@@ -218,18 +225,18 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                             </h4>
                             <div className="flex flex-col gap-2">
                                 {[
-                                    { id: 'bold', label: '굵은 글씨 (Bold)', desc: '제목을 굵게 표시하여 눈에 띄게', basePrices: JOB_PRICING.options.bold },
-                                    { id: 'color', label: '제목 컬러 (Color)', desc: '제목에 매력적인 브랜드 컬러 적용', basePrices: JOB_PRICING.options.color },
-                                    { id: 'highlight', label: '형광펜 효과 (Highlight)', desc: '글씨 뒷배경을 형광펜으로 강조', basePrices: JOB_PRICING.options.highlight },
-                                    { id: 'bg', label: '리스트 배경색 (Background)', desc: '공고 영역 전체 배경색을 은은하게 강조', basePrices: JOB_PRICING.options.bg },
-                                    { id: 'icon', label: '급구 아이콘 (Urgent Icon)', desc: '시선을 사로잡는 🚨급구 마크 (항상 맨 앞에 표시)', basePrices: JOB_PRICING.options.icon },
-                                    { id: 'general_icons', label: '일반 아이콘 (General Icons)', desc: '최대 2개까지 중복 선택 가능한 예쁜 뱃지 (개당 비용 발생)', basePrices: JOB_PRICING.options.general_icons },
-                                    { id: 'jump', label: '자동 점프 (Auto Jump)', desc: '매일 6회 (4시간 마다 실행) 자동으로 리스트 최상단 끌어올림!', basePrices: JOB_PRICING.options.jump },
+                                    { id: 'bold', label: '굵은 글씨 (Bold)', desc: '제목을 굵게 표시하여 눈에 띄게', key: 'OPTION_PRICE_BOLD' },
+                                    { id: 'color', label: '제목 컬러 (Color)', desc: '제목에 매력적인 브랜드 컬러 적용', key: 'OPTION_PRICE_COLOR' },
+                                    { id: 'highlight', label: '형광펜 효과 (Highlight)', desc: '글씨 뒷배경을 형광펜으로 강조', key: 'OPTION_PRICE_HIGHLIGHT' },
+                                    { id: 'bg', label: '리스트 배경색 (Background)', desc: '공고 영역 전체 배경색을 은은하게 강조', key: 'OPTION_PRICE_BG' },
+                                    { id: 'icon', label: '급구 아이콘 (Urgent Icon)', desc: '시선을 사로잡는 🚨급구 마크 (항상 맨 앞에 표시)', key: 'OPTION_PRICE_ICON' },
+                                    { id: 'general_icons', label: '일반 아이콘 (General Icons)', desc: '최대 2개까지 중복 선택 가능한 예쁜 뱃지 (개당 비용 발생)', key: 'OPTION_PRICE_GENERAL_ICONS' },
+                                    { id: 'jump', label: '자동 점프 (Auto Jump)', desc: '매일 6회 (4시간 마다 실행) 자동으로 리스트 최상단 끌어올림!', key: 'OPTION_PRICE_JUMP' },
                                 ].map(opt => {
                                     const isChecked = !!form[`option_${opt.id}` as keyof AdFormData];
                                     const periodKey = `option_${opt.id}_period` as keyof AdFormData;
                                     const currentPeriod = form[periodKey] || 30;
-                                    const price = opt.basePrices[currentPeriod as 30|60|90] || 0;
+                                    const price = getPrice(opt.key, currentPeriod as number);
                                     const isGeneralIcons = opt.id === 'general_icons';
                                     const finalPrice = isGeneralIcons && isChecked ? price * (form.option_general_icons?.length || 1) : price;
                                     

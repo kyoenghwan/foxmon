@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { GET_POINT_POLICIES, UPDATE_POINT_POLICIES, PointPolicyItem } from '@/app/actions/pointPolicyActions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,14 +32,8 @@ export default function AdminPointsPolicyPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOverride, setIsOverride] = useState(false);
 
-  // 💡 포인트 가격 Mock
-  const [pricingOptions, setPricingOptions] = useState([
-    { id: 'p1', key: 'OPTION_PRICE_BOLD', name: '제목 굵게', value: 1000, desc: '채용 제목 굵게 처리 비용' },
-    { id: 'p2', key: 'OPTION_PRICE_COLOR', name: '글자색 변경', value: 1000, desc: '채용 제목 폰트 컬러 변경 비용' },
-    { id: 'p3', key: 'OPTION_PRICE_HIGHLIGHT', name: '형광펜 효과', value: 1500, desc: '채용 제목 배경 형광펜 처리 비용' },
-    { id: 'p4', key: 'OPTION_PRICE_ICON', name: '일반 아이콘', value: 500, desc: '아이콘 1개당 부과되는 비용' },
-    { id: 'p5', key: 'OPTION_PRICE_JUMP', name: '상단 끌어올리기', value: 2000, desc: '리스트 최상단 강제 점프 비용' },
-  ]);
+  // 💡 포인트 가격 상태
+  const [pricingOptions, setPricingOptions] = useState<PointPolicyItem[]>([]);
 
   // 💡 정책 데이터 (Mock)
   const [policies, setPolicies] = useState([
@@ -49,8 +44,29 @@ export default function AdminPointsPolicyPage() {
   ]);
 
   useEffect(() => {
-    setTimeout(() => setIsLoading(false), 500);
+    const fetchData = async () => {
+      const res = await GET_POINT_POLICIES();
+      if (res.success && res.data) {
+        setPricingOptions(res.data.filter(p => p.config_key.startsWith('OPTION_PRICE_')));
+      }
+      setIsLoading(false);
+    };
+    fetchData();
   }, []);
+
+  const handleSavePricing = async () => {
+    setIsLoading(true);
+    const res = await UPDATE_POINT_POLICIES(pricingOptions.map(p => ({
+      config_key: p.config_key,
+      config_value: p.config_value
+    })));
+    if (res.success) {
+      alert('저장되었습니다.');
+    } else {
+      alert('오류가 발생했습니다.');
+    }
+    setIsLoading(false);
+  };
 
   if (isLoading) {
     return (
@@ -112,20 +128,33 @@ export default function AdminPointsPolicyPage() {
                 </h2>
                 <p className="text-[13px] text-gray-500 font-medium mt-1">구인광고 등록 시 차감되는 옵션별 기본 포인트를 설정합니다.</p>
               </div>
-              <Button className="font-bold gap-2"><Save className="w-4 h-4" /> 일괄 저장</Button>
+              <Button onClick={handleSavePricing} disabled={isLoading} className="font-bold gap-2"><Save className="w-4 h-4" /> 일괄 저장</Button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
               {pricingOptions.map(opt => (
-                <div key={opt.id} className="p-5 border border-gray-100 rounded-2xl bg-gray-50 hover:border-primary/30 transition-all shadow-sm">
-                  <div className="text-[12px] font-black text-primary opacity-60 uppercase tracking-widest">{opt.key}</div>
-                  <div className="font-bold text-[16px] text-gray-900 mt-1">{opt.name}</div>
-                  <p className="text-[12px] text-gray-500 mt-1 mb-4 h-8">{opt.desc}</p>
+                <div key={opt.config_key} className="p-5 border border-gray-100 rounded-2xl bg-gray-50 hover:border-primary/30 transition-all shadow-sm">
+                  <div className="text-[12px] font-black text-primary opacity-60 uppercase tracking-widest">{opt.config_key}</div>
+                  <div className="font-bold text-[16px] text-gray-900 mt-1">
+                    {opt.config_key === 'OPTION_PRICE_BASE_PERIOD' && '기본 30일 패키지'}
+                    {opt.config_key === 'OPTION_PRICE_BOLD' && '제목 굵게'}
+                    {opt.config_key === 'OPTION_PRICE_COLOR' && '글자색 변경'}
+                    {opt.config_key === 'OPTION_PRICE_BG' && '배경색 변경'}
+                    {opt.config_key === 'OPTION_PRICE_HIGHLIGHT' && '형광펜 효과'}
+                    {opt.config_key === 'OPTION_PRICE_ICON' && '급구/특수 아이콘'}
+                    {opt.config_key === 'OPTION_PRICE_GENERAL_ICONS' && '일반 아이콘'}
+                    {opt.config_key === 'OPTION_PRICE_JUMP' && '상단 끌어올리기'}
+                  </div>
+                  <p className="text-[12px] text-gray-500 mt-1 mb-4 h-8">기본 30일 기준 요금입니다. 60일/90일은 이 요금을 기준으로 자동 산출됩니다.</p>
                   
                   <div className="flex items-center gap-2">
                     <input 
                       type="number" 
-                      defaultValue={opt.value} 
+                      value={opt.config_value} 
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        setPricingOptions(prev => prev.map(p => p.config_key === opt.config_key ? { ...p, config_value: val } : p));
+                      }}
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl font-black text-lg focus:border-primary focus:ring-0 outline-none transition-colors"
                     />
                     <span className="font-black text-gray-400">P</span>
