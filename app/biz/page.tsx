@@ -13,16 +13,21 @@ import {
     Briefcase
 } from 'lucide-react';
 
+import { supabaseAdmin as supabase } from '@/lib/supabase';
+
 export default async function BizDashboardPage() {
     const session = await auth();
     const user = session?.user as any;
     const displayName = user?.nickname || user?.name || '업체회원';
 
-    // 추후 QA_GET_EMPLOYER_DASHBOARD 연동 예정
-    // 현재는 UI 뼈대 + users 테이블의 포인트 필드 활용
-    const paidPoints = user?.paid_points ?? 0;
-    const bonusPoints = user?.bonus_points ?? 0;
+    // DB에서 실시간 포인트 및 공고 수 조회
+    const { data: userData } = await supabase.from('users').select('paid_points, bonus_points').eq('id', user.id).single();
+    const paidPoints = userData?.paid_points ?? 0;
+    const bonusPoints = userData?.bonus_points ?? 0;
     const totalPoints = paidPoints + bonusPoints;
+
+    const { count: jobCount } = await supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('tier', 'GENERAL');
+    const { count: adCount } = await supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('user_id', user.id).neq('tier', 'GENERAL');
 
     return (
         <div className="space-y-6">
@@ -70,7 +75,7 @@ export default async function BizDashboardPage() {
                             <Megaphone className="w-5 h-5 text-purple-500" />
                         </div>
                     </div>
-                    <p className="text-3xl font-black text-gray-900">0개</p>
+                    <p className="text-3xl font-black text-gray-900">{adCount || 0}개</p>
                     <p className="text-[12px] font-medium text-gray-400 mt-2">스페셜/프리미엄 광고</p>
                     <Link href="/biz/ads" className="mt-4 flex items-center gap-1 text-[12px] font-bold text-purple-500 hover:underline">
                         광고 관리하기 <ArrowRight className="w-3.5 h-3.5" />
@@ -85,7 +90,7 @@ export default async function BizDashboardPage() {
                             <Briefcase className="w-5 h-5 text-primary" />
                         </div>
                     </div>
-                    <p className="text-3xl font-black text-gray-900">0개</p>
+                    <p className="text-3xl font-black text-gray-900">{jobCount || 0}개</p>
                     <p className="text-[12px] font-medium text-gray-400 mt-2">현재 ACTIVE 상태 공고</p>
                     <Link href="/biz/jobs" className="mt-4 flex items-center gap-1 text-[12px] font-bold text-primary hover:underline">
                         구인 공고 관리 <ArrowRight className="w-3.5 h-3.5" />

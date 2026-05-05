@@ -83,6 +83,11 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 detail_bg_color: payload.color,
                 detail_bg_image: payload.detail_bg_image,
                 
+                tier: payload.tier || 'GENERAL',
+                theme: payload.theme || null,
+                effect_intensity: payload.effect_intensity || null,
+                color: payload.color || null,
+                
                 // 결제 및 옵션 추가 컬럼
                 exposure_period: p,
                 option_bold: !!payload.option_bold,
@@ -197,6 +202,10 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 detail_content: payload.detail_content,
                 detail_bg_color: payload.color,
                 detail_bg_image: payload.detail_bg_image,
+                tier: payload.tier || 'GENERAL',
+                theme: payload.theme || null,
+                effect_intensity: payload.effect_intensity || null,
+                color: payload.color || null,
                 updated_at: new Date().toISOString()
             };
 

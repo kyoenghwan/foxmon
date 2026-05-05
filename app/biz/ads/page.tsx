@@ -8,17 +8,19 @@ const mockAds: any[] = [];
 const TierBadge = ({ tier }: { tier: string }) => {
     const styles: Record<string, string> = {
         PREMIUM: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        SIDE: 'bg-blue-100 text-blue-800 border-blue-200',
         SPECIAL: 'bg-purple-100 text-purple-800 border-purple-200',
         GENERAL: 'bg-gray-100 text-gray-600 border-gray-200',
     };
     const labels: Record<string, string> = {
         PREMIUM: '🔥 프리미엄',
+        SIDE: '🚀 사이드',
         SPECIAL: '⚡ 스페셜',
         GENERAL: '일반',
     };
     return (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black border ${styles[tier] || styles.GENERAL}`}>
-            {labels[tier] || tier}
+            {labels[tier] || tier || '일반'}
         </span>
     );
 };
