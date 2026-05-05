@@ -3,8 +3,9 @@ import { JobEditorForm } from '@/components/biz/JobEditorForm';
 import { manageAdAction } from '@/lib/actions';
 import { notFound } from 'next/navigation';
 
-export default async function BizJobEditPage({ params }: { params: { id: string } }) {
-    const res = await manageAdAction('GET_ONE', undefined, params.id);
+export default async function BizJobEditPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = await params;
+    const res = await manageAdAction('GET_ONE', undefined, resolvedParams.id);
     
     if (!res.success || !res.data) {
         notFound();
@@ -73,7 +74,7 @@ export default async function BizJobEditPage({ params }: { params: { id: string 
                 onSubmit={async (data) => {
                     'use server';
                     // 업데이트 액션 호출
-                    const updateRes = await manageAdAction('UPDATE', data, params.id);
+                    const updateRes = await manageAdAction('UPDATE', data, resolvedParams.id);
                     if (!updateRes.success) {
                         throw new Error(updateRes.message);
                     }
