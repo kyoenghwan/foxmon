@@ -98,7 +98,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
 
     return (
         <div className="fixed inset-0 z-[9999] bg-black/80 flex flex-col items-center justify-center p-4" onClick={onClose}>
-            <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-5xl flex flex-col animate-in fade-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()} style={{ maxHeight: '90vh' }}>
+            <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-3xl flex flex-col animate-in fade-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()} style={{ maxHeight: '90vh' }}>
                 <div className="w-full flex justify-between items-center p-4 md:p-6 border-b border-gray-100 bg-white shrink-0">
                     <h3 className="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
                         <Crown className="w-6 h-6 text-yellow-500" /> 구인 공고 노출 옵션 선택
@@ -108,9 +108,9 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                     </button>
                 </div>
                 
-                <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6 md:gap-8 bg-gray-50/50">
-                    {/* 좌측: 라이브 프리뷰 (가로형 리스트 UI) */}
-                    <div className="w-full lg:w-[500px] shrink-0 flex flex-col gap-4">
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-6 md:gap-8 bg-gray-50/50">
+                    {/* 1. 라이브 프리뷰 (가로형 리스트 UI) */}
+                    <div className="w-full shrink-0 flex flex-col gap-4">
                         <h4 className="font-bold text-gray-700 flex items-center gap-2"><Eye className="w-4 h-4 text-primary" /> 라이브 프리뷰 (리스트 노출 화면)</h4>
                         
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
@@ -149,8 +149,8 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                         </div>
                     </div>
 
-                    {/* 우측: 패키지 및 옵션 선택 */}
-                    <div className="flex-1 flex flex-col gap-6">
+                    {/* 2 & 3. 노출 기간 패키지 및 추가 옵션 */}
+                    <div className="w-full flex flex-col gap-6">
                         {/* 노출 기간 선택 */}
                         <section>
                             <h4 className="text-[15px] font-black text-gray-800 mb-3 flex items-center justify-between">
