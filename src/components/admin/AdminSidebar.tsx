@@ -22,7 +22,7 @@ const ADMIN_MENUS = [
   { id: 'employers', label: '업체/인증 관리', icon: Building2, href: '/fox-office/employers' },
   { id: 'jobs', label: '공고 승인/관리', icon: FileText, href: '/fox-office/jobs' },
   { id: 'ads', label: '광고 및 배너', icon: CreditCard, href: '/fox-office/ads' },
-  { id: 'points', label: '정산 및 정책 관리', icon: ArrowLeftRight, href: '/fox-office/points' },
+  { id: 'points', label: '포인트 및 정책 관리', icon: ArrowLeftRight, href: '/fox-office/points' },
   { id: 'community', label: '커뮤니티 관리', icon: MessageSquare, href: '/fox-office/community' },
   { id: 'support', label: '고객센터', icon: HelpCircle, href: '/fox-office/support' },
   { id: 'settings', label: '시스템 설정', icon: Settings, href: '/fox-office/settings' },

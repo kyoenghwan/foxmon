@@ -12,18 +12,19 @@ export interface EmployerListItem {
     verified_business_name: string | null;
     business_cert_image_url: string | null;
     created_at: string;
+    paid_points: number;
+    bonus_points: number;
 }
 
 export async function QA_GET_EMPLOYER_LIST() {
     nvLog('AT', '▶️ QA_GET_EMPLOYER_LIST 시작');
 
     try {
-        // 사업자번호가 있거나 등록증 이미지가 있는 유저(혹은 role이 EMPLOYER인 유저)를 모두 조회
-        // 여기서는 사업자등록번호나 증명서가 존재하는 유저를 가져옵니다.
+        // role이 EMPLOYER인 모든 유저를 조회 (미인증 포함)
         const { data, error } = await supabaseAdmin
             .from('users')
-            .select('id, nickname, email, role, business_registration_number, is_business_verified, verified_ceo_name, verified_business_name, business_cert_image_url, created_at')
-            .or('business_registration_number.not.is.null,business_cert_image_url.not.is.null')
+            .select('id, nickname, email, role, business_registration_number, is_business_verified, verified_ceo_name, verified_business_name, business_cert_image_url, created_at, paid_points, bonus_points')
+            .eq('role', 'EMPLOYER')
             .order('created_at', { ascending: false });
 
         if (error) {
