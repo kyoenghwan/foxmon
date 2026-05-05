@@ -26,6 +26,9 @@ const JOB_PRICING = {
     }
 };
 
+const TITLE_COLORS = ['#f97316', '#ef4444', '#3b82f6', '#8b5cf6', '#10b981', '#111827']; // 주황, 빨강, 파랑, 보라, 초록, 검정
+const BG_COLORS = ['#fff7ed', '#fef2f2', '#eff6ff', '#f5f3ff', '#ecfdf5', '#f8fafc']; // 주황, 빨강, 파랑, 보라, 초록, 회색 배경
+
 export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobPaymentModalProps) {
     const [saving, setSaving] = useState(false);
     const [userPoints, setUserPoints] = useState<number>(0);
@@ -124,11 +127,17 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                             </div>
                             
                             {/* Row 영역 (옵션 효과 적용) */}
-                            <div className={`grid grid-cols-6 gap-2 p-3 items-center text-[13px] transition-all duration-300 ${form.option_bg ? 'bg-orange-50/80 border-orange-200' : 'bg-white'}`}>
+                            <div 
+                                className={`grid grid-cols-6 gap-2 p-3 items-center text-[13px] transition-all duration-300 ${form.option_bg ? 'border' : 'bg-white'}`}
+                                style={form.option_bg && form.option_bg_value ? { backgroundColor: form.option_bg_value, borderColor: form.option_bg_value.replace('f', 'e') } : form.option_bg ? { backgroundColor: '#fff7ed', borderColor: '#fed7aa' } : {}}
+                            >
                                 <div className="col-span-1 text-center text-gray-600 truncate px-1">
                                     {form.location || '지역 미입력'}
                                 </div>
-                                <div className={`col-span-2 flex items-center gap-1.5 truncate ${form.option_bold ? 'font-black' : 'font-medium'} ${form.option_color ? 'text-primary' : 'text-gray-900'}`}>
+                                <div 
+                                    className={`col-span-2 flex items-center gap-1.5 truncate ${form.option_bold ? 'font-black' : 'font-medium'}`}
+                                    style={form.option_color && form.option_color_value ? { color: form.option_color_value } : form.option_color ? { color: '#f97316' } : { color: '#111827' }}
+                                >
                                     {form.option_icon && <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 animate-pulse">급구</span>}
                                     <span className="truncate">{form.title || '공고 제목이 표시됩니다'}</span>
                                 </div>
@@ -165,10 +174,12 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                         onClick={() => update('exposure_period', days as 30|60|90)}
                                         className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${form.exposure_period === days ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
                                     >
-                                        <span className={`text-lg font-black ${form.exposure_period === days ? 'text-primary' : 'text-gray-700'}`}>{days}일</span>
+                                        <div className="flex items-center justify-center gap-1.5">
+                                            <span className={`text-lg font-black ${form.exposure_period === days ? 'text-primary' : 'text-gray-700'}`}>{days}일</span>
+                                            {days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
+                                            {days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
+                                        </div>
                                         <span className="text-[13px] font-bold text-gray-500 mt-1">{JOB_PRICING.period[days as 30|60|90].toLocaleString()} P</span>
-                                        {days === 60 && <span className="mt-2 text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
-                                        {days === 90 && <span className="mt-2 text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
                                     </button>
                                 ))}
                             </div>
@@ -188,24 +199,60 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                     { id: 'icon', label: '급구 아이콘 (Icon)', desc: '시선을 사로잡는 🚨급구 마크', price: JOB_PRICING.options.icon[(form.exposure_period || 30) as 30|60|90] },
                                     { id: 'jump', label: '자동 점프 (Auto Jump)', desc: '매일 6회 (4시간 마다 실행) 자동으로 리스트 최상단 끌어올림!', price: JOB_PRICING.options.jump[(form.exposure_period || 30) as 30|60|90] },
                                 ].map(opt => (
-                                    <label key={opt.id} className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${form[`option_${opt.id}` as keyof AdFormData] ? 'border-primary bg-white shadow-sm' : 'border-gray-200 bg-gray-50/50 hover:bg-white'}`}>
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${form[`option_${opt.id}` as keyof AdFormData] ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'}`}>
-                                                {form[`option_${opt.id}` as keyof AdFormData] && <CheckCircle2 className="w-3.5 h-3.5" />}
+                                    <div key={opt.id} className={`flex flex-col p-3.5 rounded-xl border transition-all ${form[`option_${opt.id}` as keyof AdFormData] ? 'border-primary bg-white shadow-sm' : 'border-gray-200 bg-gray-50/50 hover:bg-white'}`}>
+                                        <label className="flex items-center justify-between cursor-pointer">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0 ${form[`option_${opt.id}` as keyof AdFormData] ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'}`}>
+                                                    {form[`option_${opt.id}` as keyof AdFormData] && <CheckCircle2 className="w-3.5 h-3.5" />}
+                                                </div>
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className={`text-[14px] font-bold ${form[`option_${opt.id}` as keyof AdFormData] ? 'text-gray-900' : 'text-gray-700'}`}>{opt.label}</span>
+                                                    <span className="text-[12px] text-gray-500 font-medium hidden sm:inline-block">· {opt.desc}</span>
+                                                </div>
                                             </div>
-                                            <div className="flex flex-col">
-                                                <span className={`text-[14px] font-bold ${form[`option_${opt.id}` as keyof AdFormData] ? 'text-gray-900' : 'text-gray-700'}`}>{opt.label}</span>
-                                                <span className="text-[12px] text-gray-500">{opt.desc}</span>
+                                            <span className="text-[14px] font-bold text-indigo-600 shrink-0">+{opt.price.toLocaleString()} P</span>
+                                            <input 
+                                                type="checkbox" 
+                                                className="hidden" 
+                                                checked={!!form[`option_${opt.id}` as keyof AdFormData]} 
+                                                onChange={(e) => {
+                                                    update(`option_${opt.id}` as keyof AdFormData, e.target.checked);
+                                                    if (e.target.checked && opt.id === 'color' && !form.option_color_value) update('option_color_value', TITLE_COLORS[0]);
+                                                    if (e.target.checked && opt.id === 'bg' && !form.option_bg_value) update('option_bg_value', BG_COLORS[0]);
+                                                }} 
+                                            />
+                                        </label>
+                                        <span className="text-[12px] text-gray-500 font-medium sm:hidden mt-2 ml-8">{opt.desc}</span>
+                                        
+                                        {/* 색상 선택 팔레트 (옵션 활성화 시) */}
+                                        {opt.id === 'color' && form.option_color && (
+                                            <div className="mt-3 ml-8 pl-4 border-l-2 border-gray-100 flex items-center gap-2">
+                                                <span className="text-[12px] font-bold text-gray-600 mr-1">글씨 색상:</span>
+                                                {TITLE_COLORS.map(c => (
+                                                    <button 
+                                                        key={c} type="button" 
+                                                        onClick={() => update('option_color_value', c)}
+                                                        className={`w-6 h-6 rounded-full border-2 transition-all ${form.option_color_value === c ? 'border-primary scale-110 shadow-sm' : 'border-transparent hover:scale-105'}`}
+                                                        style={{ backgroundColor: c }}
+                                                    />
+                                                ))}
                                             </div>
-                                        </div>
-                                        <span className="text-[14px] font-bold text-indigo-600">+{opt.price.toLocaleString()} P</span>
-                                        <input 
-                                            type="checkbox" 
-                                            className="hidden" 
-                                            checked={!!form[`option_${opt.id}` as keyof AdFormData]} 
-                                            onChange={(e) => update(`option_${opt.id}` as keyof AdFormData, e.target.checked)} 
-                                        />
-                                    </label>
+                                        )}
+                                        {opt.id === 'bg' && form.option_bg && (
+                                            <div className="mt-3 ml-8 pl-4 border-l-2 border-gray-100 flex items-center gap-2">
+                                                <span className="text-[12px] font-bold text-gray-600 mr-1">배경 색상:</span>
+                                                {BG_COLORS.map((c, i) => (
+                                                    <button 
+                                                        key={c} type="button" 
+                                                        onClick={() => update('option_bg_value', c)}
+                                                        className={`w-6 h-6 rounded-full border-2 transition-all ${form.option_bg_value === c ? 'border-primary scale-110 shadow-sm' : 'border-gray-200 hover:scale-105'}`}
+                                                        style={{ backgroundColor: c }}
+                                                        title={['주황', '빨강', '파랑', '보라', '초록', '회색'][i]}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
                             </div>
                         </section>

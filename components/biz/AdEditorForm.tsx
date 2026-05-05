@@ -63,7 +63,9 @@ export interface AdFormData {
     exposure_period?: 30 | 60 | 90;
     option_bold?: boolean;
     option_color?: boolean;
+    option_color_value?: string;
     option_bg?: boolean;
+    option_bg_value?: string;
     option_icon?: boolean;
     option_jump?: boolean;
     
