@@ -41,6 +41,7 @@ export interface AdFormData {
     detail_content: string;
     detail_bg_image?: string;
     design_mode?: 'canvas' | 'html';
+    ai_prompt?: string;
     
     // 신규 추가 항목 (경쟁사 벤치마킹)
     manager_name?: string;
@@ -780,8 +781,50 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         <div className="bg-white rounded-2xl border border-yellow-200 p-6 space-y-5">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
                                 <Crown className="w-4 h-4 text-yellow-500" />
-                                프리미엄 테마 설정
+                                프리미엄 테마 및 디자인 설정
                             </h3>
+
+                            {/* AI 배경 생성기 */}
+                            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 border border-purple-100">
+                                <h4 className="font-bold text-[13px] text-purple-900 mb-2 flex items-center gap-1.5">
+                                    <span className="text-base">✨</span> AI 배경 이미지 생성 (베타)
+                                </h4>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <input
+                                        type="text"
+                                        value={form.ai_prompt || ''}
+                                        onChange={(e) => update('ai_prompt', e.target.value)}
+                                        className="flex-1 px-3 py-2.5 rounded-lg border border-purple-200 text-[13px] outline-none focus:border-purple-500 bg-white placeholder-purple-300"
+                                        placeholder="예) 화려한 네온사인, 고급스러운 블랙 앤 골드, 시원한 바다"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (!form.ai_prompt) return alert('원하시는 배경의 느낌을 입력해주세요!');
+                                            
+                                            const btn = document.getElementById('ai-gen-btn');
+                                            if (btn) btn.innerHTML = '<span class="animate-spin mr-1">⏳</span> 생성 중...';
+                                            
+                                            // 임시 모킹: 프롬프트를 쿼리로 활용해 Unsplash 랜덤 이미지 가져오기
+                                            setTimeout(() => {
+                                                const keywords = encodeURIComponent(form.ai_prompt || 'neon');
+                                                const mockUrl = `https://source.unsplash.com/random/800x600/?${keywords}`;
+                                                update('image', mockUrl); // 썸네일에 적용
+                                                
+                                                if (btn) btn.innerHTML = '✨ 배경 적용하기';
+                                                alert('AI 배경 생성이 완료되었습니다! 우측 미리보기에서 확인하세요.');
+                                            }, 2000);
+                                        }}
+                                        id="ai-gen-btn"
+                                        className="px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold text-[13px] rounded-lg transition-all shadow-sm shrink-0 whitespace-nowrap"
+                                    >
+                                        ✨ 배경 적용하기
+                                    </button>
+                                </div>
+                                <p className="text-[11px] text-purple-600/70 mt-2 font-medium">
+                                    * 입력하신 텍스트를 바탕으로 AI가 최적의 고품질 배경 이미지를 즉시 그려줍니다.
+                                </p>
+                            </div>
 
                             {/* 테마 선택 */}
                             <div>

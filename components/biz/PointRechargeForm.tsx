@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { requestPointRecharge } from '@/lib/points-actions';
+import { requestPointRecharge } from '@/lib/actions';
 
 export function PointRechargeForm() {
     const [amount, setAmount] = useState('');

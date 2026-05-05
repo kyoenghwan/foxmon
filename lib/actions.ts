@@ -105,3 +105,35 @@ export async function adminEmployerAction(input: Omit<AdminEmployerFlowInput, 'a
         adminId: session.user.id
     });
 }
+
+import { supabaseAdmin } from '@/lib/supabase';
+import { revalidatePath } from 'next/cache';
+
+export async function requestPointRecharge(payload: { amount: number, depositor_name: string }) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { success: false, message: '로그인이 필요합니다.' };
+    }
+
+    try {
+        const { error } = await supabaseAdmin
+            .from('point_recharge_requests')
+            .insert({
+                user_id: session.user.id,
+                amount: payload.amount,
+                depositor_name: payload.depositor_name,
+                status: 'PENDING'
+            });
+
+        if (error) {
+            console.error('Insert error:', error);
+            throw error;
+        }
+
+        revalidatePath('/biz/points');
+        return { success: true, message: '충전 신청이 완료되었습니다.' };
+    } catch (e: any) {
+        console.error('requestPointRecharge error:', e);
+        return { success: false, message: e.message || '충전 신청 중 오류가 발생했습니다.' };
+    }
+}
