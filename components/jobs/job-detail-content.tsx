@@ -35,7 +35,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
             <div className="w-full md:w-[280px] shrink-0 flex flex-col items-center">
                 <div className="w-full aspect-[3/2] bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border border-gray-200/50 p-6 flex flex-col items-center justify-center mb-5 shadow-sm relative overflow-hidden group">
                     <div className="text-gray-800 text-center font-black leading-tight text-xl tracking-tighter drop-shadow-sm group-hover:scale-105 transition-transform duration-500">
-                        {job.company.split(' ').map((line: string, i: number) => <div key={i}>{line}</div>)}
+                        {(job.company_name || job.company || '').split(' ').map((line: string, i: number) => <div key={i}>{line}</div>)}
                     </div>
                     {/* Glassmorphism 빛 반사 효과 */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/50 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%]"></div>
@@ -82,7 +82,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     </div>
 
                     <div className="text-gray-400 font-medium flex items-center">상호명</div>
-                    <div className="font-bold text-gray-900">{job.company}</div>
+                    <div className="font-bold text-gray-900">{job.company_name || job.company}</div>
 
                     <div className="text-gray-400 font-medium flex items-center">담당자</div>
                     <div className="font-bold text-gray-900">{mockContact.manager}</div>
@@ -132,7 +132,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                         <div className="flex items-center p-3 border-b border-gray-50">
                            <div className="w-24 shrink-0 text-gray-400 font-medium text-[13px]">급여조건</div>
                            <div className="flex-1 font-black text-pink-600 flex items-center gap-2">
-                               {job.pay}
+                               {job.pay || (job.salary_type ? `[${job.salary_type}] ${job.salary_amount}원` : '협의')}
                                <span className="bg-pink-50 text-pink-500 px-1.5 py-0.5 rounded text-[10px] uppercase font-black border border-pink-100">당일 지급</span>
                            </div>
                         </div>
@@ -178,17 +178,34 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
 
                     <div className="w-full bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden p-6 md:p-10 flex flex-col items-center">
                         <div className="w-full text-center text-[15px] sm:text-[16px] leading-[1.8] text-gray-700 font-medium max-w-2xl px-4 mb-10">
-                            안녕하세요! <b className="text-primary font-black text-[17px]">{job.company}</b>에서 열정과 꿈을 가진 분들을 모십니다.<br/>
+                            안녕하세요! <b className="text-primary font-black text-[17px]">{job.company_name || job.company}</b>에서 열정과 꿈을 가진 분들을 모십니다.<br/>
                             동종 업계 최고의 대우를 약속드리며, 가족처럼 편안하고 즐겁게 일할 수 있는 환경을 제공합니다.<br/>
                             망설이지 마시고 언제든 편하게 연락 주세요!
                         </div>
                         
-                        {/* 웅장한 전단지 이미지 */}
-                        {job.image ? (
+                        {/* 에디터 본문 내용 또는 웅장한 전단지 이미지 */}
+                        {job.detail_content ? (
+                            <div 
+                                className="w-full rounded-xl overflow-hidden shadow-sm border border-gray-200 min-h-[400px] flex justify-center"
+                                style={{
+                                    backgroundColor: job.detail_bg_color || 'transparent',
+                                    backgroundImage: job.detail_bg_image ? `url(${job.detail_bg_image.replace('PATTERN|', '')})` : 'none',
+                                    backgroundSize: job.detail_bg_image?.startsWith('PATTERN|') ? 'auto' : 'cover',
+                                    backgroundRepeat: job.detail_bg_image?.startsWith('PATTERN|') ? 'repeat' : 'no-repeat',
+                                    backgroundPosition: 'top center'
+                                }}
+                            >
+                                <div 
+                                    className="w-full max-w-4xl min-h-full"
+                                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+                                    dangerouslySetInnerHTML={{ __html: job.detail_content }} 
+                                />
+                            </div>
+                        ) : (job.logo_url || job.image) ? (
                             <div className="w-full flex justify-center group">
                                 <div className="relative rounded-xl overflow-hidden shadow-sm border border-gray-200">
                                     <img 
-                                        src={job.image} 
+                                        src={job.logo_url || job.image} 
                                         className="w-full max-w-4xl object-contain bg-white" 
                                         alt="채용 전단지" 
                                     />
@@ -198,7 +215,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                         ) : (
                             <div className="flex flex-col items-center justify-center py-24 bg-gray-50 rounded-2xl w-full text-gray-300 font-bold border-2 border-dashed border-gray-200 max-w-3xl">
                                 <span className="text-4xl mb-4 opacity-50">🦊</span>
-                                등록된 상세 전단지 이미지가 없습니다.
+                                등록된 상세 내용이 없습니다.
                             </div>
                         )}
                     </div>
