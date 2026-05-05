@@ -55,7 +55,9 @@ function MarqueeText({ children, className }: { children: React.ReactNode, class
 type ImpactType = 
     | 'gold' | 'neon' | 'neon_crazy' | 'fire' | 'ice' | 'emerald' | 'glitch' | 'storm' | 'ghost' 
     | 'forest' | 'ocean' | 'sakura' | 'galaxy' | 'sun' | 'lava' | 'matrix' | 'retro' 
-    | 'diamond' | 'platinum' | 'aura' | 'candinterface PremiumJobCardProps {
+    | 'diamond' | 'platinum' | 'aura' | 'candy' | 'toxic' | 'none';
+
+interface PremiumJobCardProps {
     company: string;
     title: string;
     location: string;
@@ -319,10 +321,3 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
         </div>
     );
 }  
-                <div className={`absolute inset-0 border rounded-lg pointer-events-none transition-colors z-30 ${
-                    isImpact ? config.border : 'border-gray-200 group-hover:border-purple-700'
-                }`} />
-            </Link>
-        </div>
-    );
-}
