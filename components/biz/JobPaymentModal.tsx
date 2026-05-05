@@ -227,52 +227,47 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                     
                                     return (
                                         <div key={opt.id} className={`flex flex-col p-3.5 rounded-xl border transition-all ${isChecked ? 'border-primary bg-white shadow-sm' : 'border-gray-200 bg-gray-50/50 hover:bg-white'}`}>
-                                            <div className="flex items-center justify-between cursor-pointer" onClick={() => {
-                                                const newVal = !isChecked;
-                                                update(`option_${opt.id}` as keyof AdFormData, newVal);
-                                                if (newVal) {
-                                                    update(periodKey, 30);
-                                                    if (opt.id === 'color' && !form.option_color_value) update('option_color_value', TITLE_COLORS[0]);
-                                                    if (opt.id === 'bg' && !form.option_bg_value) update('option_bg_value', BG_COLORS[0]);
-                                                    if (opt.id === 'highlight' && !form.option_highlight_value) update('option_highlight_value', HIGHLIGHT_COLORS[0]);
-                                                    if (opt.id === 'general_icons' && (!form.option_general_icons || form.option_general_icons.length === 0)) update('option_general_icons', [GENERAL_ICONS[0]]);
-                                                }
-                                            }}>
-                                                <div className="flex items-center gap-3">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3 cursor-pointer flex-1" onClick={() => {
+                                                    const newVal = !isChecked;
+                                                    update(`option_${opt.id}` as keyof AdFormData, newVal);
+                                                    if (newVal) {
+                                                        update(periodKey, 30);
+                                                        if (opt.id === 'color' && !form.option_color_value) update('option_color_value', TITLE_COLORS[0]);
+                                                        if (opt.id === 'bg' && !form.option_bg_value) update('option_bg_value', BG_COLORS[0]);
+                                                        if (opt.id === 'highlight' && !form.option_highlight_value) update('option_highlight_value', HIGHLIGHT_COLORS[0]);
+                                                        if (opt.id === 'general_icons' && (!form.option_general_icons || form.option_general_icons.length === 0)) update('option_general_icons', [GENERAL_ICONS[0]]);
+                                                    }
+                                                }}>
                                                     <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0 ${isChecked ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'}`}>
                                                         {isChecked && <CheckCircle2 className="w-3.5 h-3.5" />}
                                                     </div>
                                                     <div className="flex items-center gap-2 flex-wrap">
                                                         <span className={`text-[14px] font-bold ${isChecked ? 'text-gray-900' : 'text-gray-700'}`}>{opt.label}</span>
-                                                        <span className="text-[12px] text-gray-500 font-medium hidden sm:inline-block">· {opt.desc}</span>
+                                                        <span className="text-[12px] text-gray-500 font-medium hidden lg:inline-block">· {opt.desc}</span>
                                                     </div>
                                                 </div>
-                                                <span className="text-[14px] font-bold text-indigo-600 shrink-0">+{finalPrice.toLocaleString()} P</span>
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    {isChecked && (
+                                                        <select
+                                                            className="text-[12px] font-bold border border-gray-300 rounded px-2 py-1 outline-none focus:border-primary bg-white cursor-pointer"
+                                                            value={currentPeriod}
+                                                            onChange={(e) => update(periodKey, Number(e.target.value))}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <option value={30}>30일</option>
+                                                            <option value={60}>60일 (-10%)</option>
+                                                            <option value={90}>90일 (-20%)</option>
+                                                        </select>
+                                                    )}
+                                                    <span className="text-[14px] font-bold text-indigo-600 min-w-[60px] text-right">+{finalPrice.toLocaleString()} P</span>
+                                                </div>
                                             </div>
                                             <span className="text-[12px] text-gray-500 font-medium sm:hidden mt-2 ml-8">{opt.desc}</span>
                                             
-                                            {/* 기간 및 세부 설정 영역 */}
-                                            {isChecked && (
+                                            {/* 세부 설정 영역 (색상, 아이콘 등) */}
+                                            {isChecked && opt.id !== 'bold' && opt.id !== 'jump' && (
                                                 <div className="mt-4 ml-8 flex flex-col gap-4" onClick={e => e.stopPropagation()}>
-                                                    {/* 기간 선택기 */}
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className="text-[12px] font-bold text-gray-600 shrink-0 w-16">이용 기간</span>
-                                                        {[30, 60, 90].map(days => {
-                                                            const p = opt.basePrices[days as 30|60|90];
-                                                            const discountText = days === 60 ? '10%' : days === 90 ? '20%' : '';
-                                                            return (
-                                                                <button
-                                                                    key={days} type="button"
-                                                                    onClick={() => update(periodKey, days)}
-                                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold border transition-colors ${currentPeriod === days ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-                                                                >
-                                                                    <span>{days}일</span>
-                                                                    <span className="font-normal opacity-70">({p.toLocaleString()}P)</span>
-                                                                    {discountText && <span className="text-[9px] bg-red-100 text-red-600 px-1 py-0.5 rounded">{discountText} OFF</span>}
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
 
                                                     {/* 색상 선택 팔레트 (옵션 활성화 시) */}
                                                     {opt.id === 'color' && (
