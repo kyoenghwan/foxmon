@@ -100,7 +100,7 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
                     <div className="flex items-center gap-2">
                         <Crown className="w-6 h-6 text-primary fill-primary animate-bounce" />
                         <h2 className="text-2xl font-black text-gray-900 italic uppercase">
-                            프리미엄 광고 (IMPACT DEMO)
+                            프리미엄 채용 (IMPACT DEMO)
                         </h2>
                     </div>
                     <div className="flex items-center gap-3">

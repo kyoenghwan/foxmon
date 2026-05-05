@@ -71,7 +71,7 @@ export function MainBanner() {
     if (ads.length === 0) {
         return (
             <div className="w-full h-full bg-white border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 text-center">
-                <p className="text-gray-400 font-bold mb-2">등록된 프리미엄 광고가 없습니다.</p>
+                <p className="text-gray-400 font-bold mb-2">등록된 프리미엄 채용이 없습니다.</p>
                 <Link href="/jobs/post">
                     <Button variant="outline" size="sm" className="font-bold">광고 등록하기</Button>
                 </Link>
