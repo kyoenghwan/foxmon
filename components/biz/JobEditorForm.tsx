@@ -7,6 +7,7 @@ import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { userSettingsAction } from '@/lib/actions';
 import { getUserPointsAction } from '@/app/actions/pointActions';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
 // Fabric.js는 브라우저 전용이므로 SSR 비활성화
@@ -66,6 +67,9 @@ export interface AdFormData {
     option_bg?: boolean;
     option_icon?: boolean;
     option_jump?: boolean;
+    
+    // 결제 업데이트 플래그
+    _isPayment?: boolean;
 }
 
 // 프리미엄 테마 목록 (premium-job-card.tsx THEME_CONFIG 기반)
@@ -281,6 +285,19 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [userPoints, setUserPoints] = useState<number>(0);
     const [loadingPoints, setLoadingPoints] = useState(false);
+
+    const searchParams = useSearchParams();
+    const isPayMode = searchParams.get('pay') === 'true';
+
+    useEffect(() => {
+        if (!isNew && isPayMode && initialData) {
+            // 폼 데이터가 세팅된 후 약간의 딜레이를 주어 모달 오픈
+            const timer = setTimeout(() => {
+                handleSubmit(true);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isNew, isPayMode]);
     
     // 초기 모드 결정
     const initialDesignMode = initialData?.detail_content 
@@ -416,7 +433,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
         update('pay', amount ? `${type} ${amount}` : '');
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (autoOpenModal?: boolean) => {
         if (!form.company && !form.business_name) {
             alert('상호명은 필수 입력 항목입니다.');
             return;
@@ -441,10 +458,10 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
         }
     };
 
-    const handleFinalSubmit = async () => {
+    const handleFinalSubmit = async (isPayment: boolean = false) => {
         setSaving(true);
         try {
-            await onSubmit(form);
+            await onSubmit({ ...form, _isPayment: isPayment });
             setShowPaymentModal(false);
         } finally {
             setSaving(false);
@@ -1354,10 +1371,23 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                 <Button variant="outline" onClick={() => window.history.back()} className="font-bold h-11 px-6 rounded-xl">
                     취소
                 </Button>
-                <Button onClick={handleSubmit} disabled={saving} className="font-black h-11 px-8 rounded-xl shadow-md">
-                    {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                    {isNew ? (mode === 'JOB' ? '구인 공고 등록하기' : '광고 등록하기') : (mode === 'JOB' ? '구인 공고 저장하기' : '광고 저장하기')}
-                </Button>
+                {isNew ? (
+                    <Button onClick={() => handleSubmit()} disabled={saving} className="font-black h-11 px-8 rounded-xl shadow-md">
+                        {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                        {mode === 'JOB' ? '구인 공고 등록하기' : '광고 등록하기'}
+                    </Button>
+                ) : (
+                    <div className="flex gap-2">
+                        <Button onClick={() => handleFinalSubmit(false)} disabled={saving} variant="outline" className="font-black h-11 px-6 rounded-xl border-gray-300">
+                            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                            단순 내용 수정 (무료)
+                        </Button>
+                        <Button onClick={() => handleSubmit()} disabled={saving} className="font-black h-11 px-6 rounded-xl shadow-md bg-orange-500 hover:bg-orange-600 text-white">
+                            <DollarSign className="w-4 h-4 mr-2" />
+                            기간 연장 / 옵션 결제
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {/* ─── HTML 모드 미리보기 모달 ─── */}
@@ -1584,7 +1614,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                         포인트 충전하기
                                     </Button>
                                 ) : (
-                                    <Button onClick={handleFinalSubmit} disabled={saving || loadingPoints} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-gray-900 hover:bg-black text-white">
+                                    <Button onClick={() => handleFinalSubmit(true)} disabled={saving || loadingPoints} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-gray-900 hover:bg-black text-white">
                                         {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <DollarSign className="w-5 h-5 mr-2" />}
                                         결제 및 최종 등록하기
                                     </Button>

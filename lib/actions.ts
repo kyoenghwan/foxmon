@@ -75,7 +75,7 @@ import { FA_AD_CRUD_FLOW } from '@/src/atoms/fa/biz/FA_AD_CRUD_FLOW';
 import { AdFormData } from '@/components/biz/AdEditorForm';
 
 export async function manageAdAction(
-  actionType: 'CREATE' | 'UPDATE' | 'DELETE' | 'GET',
+  actionType: 'CREATE' | 'UPDATE' | 'DELETE' | 'GET' | 'GET_ONE',
   payload?: Partial<AdFormData>,
   jobId?: string
 ) {

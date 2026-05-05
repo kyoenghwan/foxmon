@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { auth } from '@/auth';
-import { Plus, Briefcase, Eye, Pause, Play, Pencil, Clock } from 'lucide-react';
+import { Plus, Briefcase, Eye, Pause, Play, Pencil, Clock, CreditCard } from 'lucide-react';
 
 import { manageAdAction } from '@/lib/actions';
 
@@ -136,6 +136,9 @@ export default async function BizJobsPage() {
                                         <div className="flex items-center justify-end gap-2">
                                             <Link href={`/jobs/${ad.id}`} target="_blank" className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="미리보기">
                                                 <Eye className="w-4 h-4 text-primary" />
+                                            </Link>
+                                            <Link href={`/biz/jobs/${ad.id}?pay=true`} className="p-2 hover:bg-orange-50 rounded-lg transition-colors group" title="연장 및 옵션 결제">
+                                                <CreditCard className="w-4 h-4 text-orange-400 group-hover:text-orange-600" />
                                             </Link>
                                             <Link href={`/biz/jobs/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
                                                 <Pencil className="w-4 h-4 text-gray-500" />

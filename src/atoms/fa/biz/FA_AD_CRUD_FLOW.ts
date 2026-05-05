@@ -2,7 +2,7 @@ import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { AdFormData } from '@/components/biz/AdEditorForm';
 
 interface AdCrudInput {
-    actionType: 'CREATE' | 'UPDATE' | 'DELETE' | 'GET';
+    actionType: 'CREATE' | 'UPDATE' | 'DELETE' | 'GET' | 'GET_ONE';
     userId: string;
     jobId?: string;
     payload?: Partial<AdFormData>;
@@ -113,7 +113,115 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             return { success: true, data };
         }
 
-        // TODO: UPDATE, DELETE 구현
+        if (actionType === 'GET_ONE') {
+            if (!jobId) return { success: false, message: 'jobId가 필요합니다.' };
+            const { data, error } = await supabase
+                .from('jobs')
+                .select('*')
+                .eq('id', jobId)
+                .single();
+
+            if (error) throw error;
+            return { success: true, data };
+        }
+
+        if (actionType === 'UPDATE') {
+            if (!jobId || !payload) return { success: false, message: 'jobId와 payload가 필요합니다.' };
+
+            // 1. 기존 공고 확인
+            const { data: existingJob, error: checkError } = await supabase
+                .from('jobs')
+                .select('user_id, expires_at')
+                .eq('id', jobId)
+                .single();
+            
+            if (checkError || !existingJob) return { success: false, message: '공고를 찾을 수 없습니다.' };
+            if (existingJob.user_id !== userId) return { success: false, message: '수정 권한이 없습니다.' };
+
+            // 2. 결제 여부 확인 (pay=true 딥링크 등을 통해 넘어온 유료 옵션 변경인지)
+            let totalPoints = 0;
+            const isPaymentUpdate = !!payload.exposure_period && payload._isPayment === true;
+
+            if (isPaymentUpdate) {
+                const p = payload.exposure_period as 30 | 60 | 90;
+                totalPoints = JOB_PRICING.period[p] || 0;
+                if (payload.option_bold) totalPoints += JOB_PRICING.options.bold[p] || 0;
+                if (payload.option_color) totalPoints += JOB_PRICING.options.color[p] || 0;
+                if (payload.option_bg) totalPoints += JOB_PRICING.options.bg[p] || 0;
+                if (payload.option_icon) totalPoints += JOB_PRICING.options.icon[p] || 0;
+                if (payload.option_jump) totalPoints += JOB_PRICING.options.jump[p] || 0;
+
+                if (totalPoints > 0) {
+                    const { FA_DEDUCT_POINT_FOR_AD } = await import('@/src/atoms/fa/points/FA_DEDUCT_POINT_FOR_AD');
+                    const deductResult = await FA_DEDUCT_POINT_FOR_AD({
+                        userId,
+                        adPrice: totalPoints,
+                        description: `구인 공고 연장/옵션 변경 (${p}일)`
+                    });
+
+                    if (!deductResult.success) {
+                        return { success: false, message: deductResult.message || '포인트가 부족합니다.' };
+                    }
+                }
+            }
+
+            // 3. 업데이트 데이터 구성
+            const updatePayload: any = {
+                title: payload.title,
+                location: payload.location,
+                company_name: payload.company || payload.business_name,
+                salary_type: payload.pay_type,
+                salary_amount: payload.pay_amount,
+                logo_url: payload.logo_url || payload.image,
+                contact_name: payload.manager_name,
+                contact_phone: payload.contact_phone,
+                kakao_id: payload.kakao_id,
+                line_id: payload.line_id,
+                telegram_id: payload.telegram_id,
+                wechat_id: payload.wechat_id,
+                employment_type: payload.employment_type,
+                category1: payload.category_1,
+                category2: payload.category_2,
+                work_time: payload.work_hours,
+                amenities: payload.amenities || [],
+                keywords: payload.keywords || [],
+                design_mode: payload.design_mode,
+                detail_content: payload.detail_content,
+                detail_bg_color: payload.color,
+                detail_bg_image: payload.detail_bg_image,
+                updated_at: new Date().toISOString()
+            };
+
+            // 결제 연장인 경우 만료일 및 옵션 갱신
+            if (isPaymentUpdate) {
+                const p = payload.exposure_period as 30 | 60 | 90;
+                const expiresAt = existingJob.expires_at ? new Date(existingJob.expires_at) : new Date();
+                // 기존 만료일이 과거라면 현재 시간 기준으로 연장
+                if (expiresAt < new Date()) expiresAt.setTime(new Date().getTime());
+                expiresAt.setDate(expiresAt.getDate() + p);
+
+                updatePayload.exposure_period = p;
+                updatePayload.option_bold = !!payload.option_bold;
+                updatePayload.option_color = !!payload.option_color;
+                updatePayload.option_bg = !!payload.option_bg;
+                updatePayload.option_icon = !!payload.option_icon;
+                updatePayload.option_jump = !!payload.option_jump;
+                updatePayload.total_points = totalPoints;
+                updatePayload.expires_at = expiresAt.toISOString();
+            }
+
+            const { data, error } = await supabase
+                .from('jobs')
+                .update(updatePayload)
+                .eq('id', jobId)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return { success: true, message: '구인 공고가 수정되었습니다.', data };
+        }
+
+        // TODO: DELETE 구현
         return { success: false, message: '지원하지 않는 액션입니다.' };
 
     } catch (error: any) {
