@@ -241,24 +241,12 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     )}
                 </div>
                 {generalJobs.length > 0 ? (
-                    <div className="bg-white border-t-2 border-gray-400 overflow-x-auto overflow-y-hidden shadow-sm">
-                        <table className="w-full text-left border-collapse min-w-[700px]">
-                            <thead>
-                                <tr className="bg-[#f8f8f8] border-b border-gray-200 text-gray-600 text-[12px] font-bold">
-                                    <th className="py-2.5 px-4 font-bold text-center w-[15%]">희망지역</th>
-                                    <th className="py-2.5 px-4 font-bold text-center w-[40%]">인재제목</th>
-                                    <th className="py-2.5 px-4 font-bold text-center w-[15%]">닉네임</th>
-                                    <th className="py-2.5 px-4 font-bold text-center w-[10%] hidden md:table-cell">성별</th>
-                                    <th className="py-2.5 px-4 font-bold text-center w-[10%]">희망급여</th>
-                                    <th className="py-2.5 px-4 font-bold text-center w-[10%] hidden sm:table-cell">나이</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {paginatedTableJobs.map((job) => (
-                                    <GeneralJobListRow key={job.id} {...(job as any)} />
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className="bg-white border-t-2 border-gray-900 shadow-sm rounded-b-xl overflow-hidden">
+                        <div className="flex flex-col">
+                            {paginatedTableJobs.map((job) => (
+                                <GeneralJobListRow key={job.id} {...(job as any)} />
+                            ))}
+                        </div>
                         
                         {/* Pagination Controls */}
                         {totalPages > 1 && (

@@ -15,6 +15,12 @@ export interface AdItem {
     exposure_count: number; // Supabase 스네이크 케이스 대응
     last_exposed_at: string; // Supabase ISO String
     created_at?: string; // 등록일시 (신규 광고 판별용)
+    // 유료 옵션 필드
+    option_bold?: boolean;
+    option_color_value?: string;
+    option_bg_value?: string;
+    option_highlight_value?: string;
+    option_general_icons?: string[];
 }
 
 const IS_SUPABASE_ENABLED = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
