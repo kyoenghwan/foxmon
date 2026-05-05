@@ -411,8 +411,13 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     // 급여 업데이트 핸들러
     const handlePayChange = (type: string, amount: string) => {
         update('pay_type', type);
-        update('pay_amount', amount);
-        update('pay', amount ? `${type} ${amount}` : '');
+        if (type === '협의') {
+            update('pay_amount', '');
+            update('pay', '추후협의');
+        } else {
+            update('pay_amount', amount);
+            update('pay', amount ? `${type} ${amount}` : '');
+        }
     };
 
     const handleSubmit = async () => {
@@ -756,10 +761,13 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             <input
                                                 type="text" value={form.pay_amount || ''} 
                                                 onChange={e => handlePayChange(form.pay_type || '월급', e.target.value)}
-                                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary pr-8"
-                                                placeholder="금액 또는 조건 입력"
+                                                disabled={form.pay_type === '협의'}
+                                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary pr-8 disabled:bg-gray-100 disabled:text-gray-400"
+                                                placeholder={form.pay_type === '협의' ? "입력 불필요" : "금액 또는 조건 입력"}
                                             />
-                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[14px] text-gray-500 font-medium">원</span>
+                                            {form.pay_type !== '협의' && (
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[14px] text-gray-500 font-medium">원</span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
