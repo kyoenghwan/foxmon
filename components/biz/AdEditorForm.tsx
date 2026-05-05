@@ -763,44 +763,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         </div>
                                     </div>
                                 </div>
-                                <div className="md:col-span-2">
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">
-                                        배너 이미지 (로고 대신 사용)
-                                    </label>
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex-1 relative">
-                                            <input
-                                                type="text" value={form.image || ''} readOnly
-                                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] h-10 font-medium outline-none bg-gray-50 text-gray-500"
-                                                placeholder="우측 버튼을 눌러 이미지를 업로드하세요"
-                                            />
-                                        </div>
-                                        <label className="cursor-pointer bg-white hover:bg-gray-50 px-4 py-2 rounded-lg border border-gray-300 text-[13px] font-bold text-gray-700 transition-all flex items-center gap-2 h-10 shadow-sm shrink-0">
-                                            <Upload className="w-4 h-4" /> 사진 선택
-                                            <input 
-                                                type="file" 
-                                                accept="image/*" 
-                                                className="hidden" 
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if(file) {
-                                                        const reader = new FileReader();
-                                                        reader.onload = (event) => {
-                                                            update('image', event.target?.result as string);
-                                                        };
-                                                        reader.readAsDataURL(file);
-                                                    }
-                                                }}
-                                            />
-                                        </label>
-                                    </div>
-                                    {form.image && form.image.startsWith('data:image') && (
-                                        <div className="mt-3 relative w-24 h-24 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                                            <img src={form.image} alt="Logo Preview" className="w-full h-full object-cover" />
-                                        </div>
-                                    )}
                                 </div>
-                            </div>
                         </div>
                     </div>
 
