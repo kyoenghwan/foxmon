@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { auth } from '@/auth';
-import { Plus, Briefcase, Eye, Pause, Play, Pencil, Clock, CreditCard } from 'lucide-react';
+import { Plus, Briefcase, Eye, Pencil, Clock, CreditCard } from 'lucide-react';
 
 import { manageAdAction } from '@/lib/actions';
 
@@ -24,23 +24,23 @@ const TierBadge = ({ tier }: { tier: string }) => {
     );
 };
 
-const StatusBadge = ({ status }: { status: string }) => {
-    const styles: Record<string, string> = {
-        ACTIVE: 'bg-green-100 text-green-700',
-        PAUSED: 'bg-gray-100 text-gray-500',
-        EXPIRED: 'bg-red-100 text-red-600',
-    };
-    const labels: Record<string, string> = {
-        ACTIVE: '진행 중',
-        PAUSED: '일시정지',
-        EXPIRED: '만료',
-    };
-    return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${styles[status] || ''}`}>
-            {status === 'ACTIVE' && <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />}
-            {labels[status] || status}
-        </span>
-    );
+const StatusBadge = ({ expiresAt }: { expiresAt: string | null | undefined }) => {
+    const isPaid = expiresAt && new Date(expiresAt).getTime() > Date.now();
+    
+    if (isPaid) {
+        return (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-black bg-blue-50 text-blue-600 border border-blue-200">
+                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                ON
+            </span>
+        );
+    } else {
+        return (
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-black bg-gray-50 text-gray-400 border border-gray-200">
+                OFF
+            </span>
+        );
+    }
 };
 
 export default async function BizJobsPage() {
@@ -120,7 +120,7 @@ export default async function BizJobsPage() {
                                         <TierBadge tier={ad.tier} />
                                     </td>
                                     <td className="px-4 py-4">
-                                        <StatusBadge status={ad.status} />
+                                        <StatusBadge expiresAt={ad.expires_at} />
                                     </td>
                                     <td className="px-4 py-4">
                                         <span className="flex items-center gap-1 text-[13px] font-bold text-gray-700">
@@ -136,19 +136,10 @@ export default async function BizJobsPage() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <Link href={`/jobs/${ad.id}`} target="_blank" className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="미리보기">
-                                                <Eye className="w-4 h-4 text-primary" />
-                                            </Link>
                                             <PaymentModalTrigger ad={ad} />
                                             <Link href={`/biz/jobs/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
                                                 <Pencil className="w-4 h-4 text-gray-500" />
                                             </Link>
-                                            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="일시정지">
-                                                {ad.status === 'ACTIVE' 
-                                                    ? <Pause className="w-4 h-4 text-gray-500" />
-                                                    : <Play className="w-4 h-4 text-green-500" />
-                                                }
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
