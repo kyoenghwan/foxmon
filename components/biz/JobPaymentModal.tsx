@@ -26,8 +26,8 @@ const JOB_PRICING = {
     }
 };
 
-const TITLE_COLORS = ['#f97316', '#ef4444', '#3b82f6', '#8b5cf6', '#10b981', '#111827']; // 주황, 빨강, 파랑, 보라, 초록, 검정
-const BG_COLORS = ['#fff7ed', '#fef2f2', '#eff6ff', '#f5f3ff', '#ecfdf5', '#f8fafc']; // 주황, 빨강, 파랑, 보라, 초록, 회색 배경
+const TITLE_COLORS = ['#f97316', '#ef4444', '#3b82f6', '#8b5cf6', '#10b981', '#ec4899']; // 주황, 빨강, 파랑, 보라, 초록, 핑크
+const BG_COLORS = ['#fff7ed', '#fef2f2', '#eff6ff', '#f5f3ff', '#ecfdf5', '#fdf2f8']; // 주황, 빨강, 파랑, 보라, 초록, 핑크 배경
 
 export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobPaymentModalProps) {
     const [saving, setSaving] = useState(false);
@@ -247,7 +247,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                         onClick={() => update('option_bg_value', c)}
                                                         className={`w-6 h-6 rounded-full border-2 transition-all ${form.option_bg_value === c ? 'border-primary scale-110 shadow-sm' : 'border-gray-200 hover:scale-105'}`}
                                                         style={{ backgroundColor: c }}
-                                                        title={['주황', '빨강', '파랑', '보라', '초록', '회색'][i]}
+                                                        title={['주황', '빨강', '파랑', '보라', '초록', '핑크'][i]}
                                                     />
                                                 ))}
                                             </div>

@@ -85,7 +85,9 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 exposure_period: p,
                 option_bold: !!payload.option_bold,
                 option_color: !!payload.option_color,
+                option_color_value: payload.option_color_value || null,
                 option_bg: !!payload.option_bg,
+                option_bg_value: payload.option_bg_value || null,
                 option_icon: !!payload.option_icon,
                 option_jump: !!payload.option_jump,
                 total_points: totalPoints,
@@ -201,10 +203,16 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 expiresAt.setDate(expiresAt.getDate() + p);
 
                 updatePayload.exposure_period = p;
-                updatePayload.option_bold = !!payload.option_bold;
-                updatePayload.option_color = !!payload.option_color;
-                updatePayload.option_bg = !!payload.option_bg;
-                updatePayload.option_icon = !!payload.option_icon;
+                if (payload.option_bold !== undefined) updatePayload.option_bold = !!payload.option_bold;
+                if (payload.option_color !== undefined) {
+                    updatePayload.option_color = !!payload.option_color;
+                    updatePayload.option_color_value = payload.option_color_value || null;
+                }
+                if (payload.option_bg !== undefined) {
+                    updatePayload.option_bg = !!payload.option_bg;
+                    updatePayload.option_bg_value = payload.option_bg_value || null;
+                }
+                if (payload.option_icon !== undefined) updatePayload.option_icon = !!payload.option_icon;
                 updatePayload.option_jump = !!payload.option_jump;
                 updatePayload.total_points = totalPoints;
                 updatePayload.expires_at = expiresAt.toISOString();
