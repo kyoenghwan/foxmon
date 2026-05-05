@@ -52,7 +52,7 @@ export default function JobPostPage() {
              여우몬에서 최고의 인재를 만나보세요.
            </h2>
            <p className="text-gray-500 mb-8 max-w-lg mx-auto text-sm leading-relaxed">
-             프리미엄 채용부터 일반 공고까지,<br/> 업체 상황에 맞는 최적의 채용 솔루션을 제공합니다.
+             프리미엄 광고부터 일반 공고까지,<br/> 업체 상황에 맞는 최적의 채용 솔루션을 제공합니다.
            </p>
         </div>
 

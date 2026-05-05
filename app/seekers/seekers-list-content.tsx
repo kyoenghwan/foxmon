@@ -61,7 +61,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
             ? premiumJobs[i % premiumJobs.length] 
             : {
                 id: `mock-${i}`,
-                company: `프리미엄 인재 ${i + 1}`,
+                company: `프리미엄 광고 ${i + 1}`,
                 title: `성실하게 일하겠습니다 (${i + 1})`,
                 location: '서울 강남구',
                 pay: '[시급] 70,000원',
@@ -100,7 +100,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     <div className="flex items-center gap-2">
                         <Crown className="w-6 h-6 text-primary fill-primary animate-bounce" />
                         <h2 className="text-2xl font-black text-gray-900 italic uppercase">
-                            프리미엄 인재 (IMPACT DEMO)
+                            프리미엄 광고 (IMPACT DEMO)
                         </h2>
                     </div>
                     <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     </div>
                 ) : (
                     <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
-                        <p className="text-gray-400 font-bold">등록된 프리미엄 인재가 없습니다.</p>
+                        <p className="text-gray-400 font-bold">등록된 프리미엄 광고가 없습니다.</p>
                     </div>
                 )}
             </section>
@@ -163,7 +163,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     </div>
                 ) : (
                     <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
-                        <p className="text-gray-400 font-bold">등록된 스페셜 인재가 없습니다.</p>
+                        <p className="text-gray-400 font-bold">등록된 스페셜 광고가 없습니다.</p>
                     </div>
                 )}
             </section>
@@ -286,7 +286,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     </div>
                 ) : (
                     <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
-                        <p className="text-gray-400 font-bold">등록된 일반 인재가 없습니다.</p>
+                        <p className="text-gray-400 font-bold">등록된 일반 광고가 없습니다.</p>
                     </div>
                 )}
             </section>

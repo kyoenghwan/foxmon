@@ -19,7 +19,7 @@ export async function QA_GET_JOB_BY_ID(jobId: string) {
         success: true,
         data: {
           id: jobId,
-          company: '프리미엄 채용 업체',
+          company: '프리미엄 광고 업체',
           title: '최고의 대우와 환경을 보장합니다',
           location: '서울 강남구 역삼동',
           pay: '[시급] 70,000원',
