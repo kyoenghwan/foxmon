@@ -103,7 +103,7 @@ export default function EmployersManagementPage() {
     };
 
     const searchFiltered = employers.filter(emp => {
-        const matchesSearch = 
+        const matchesSearch = !searchTerm ||
             (emp.verified_business_name && emp.verified_business_name.includes(searchTerm)) ||
             (emp.verified_ceo_name && emp.verified_ceo_name.includes(searchTerm)) ||
             (emp.business_registration_number && emp.business_registration_number.includes(searchTerm)) ||
