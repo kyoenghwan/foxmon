@@ -251,7 +251,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     {isChecked && (
                                                         <select
                                                             className="text-[12px] font-bold border border-gray-300 rounded px-2 py-1 outline-none focus:border-primary bg-white cursor-pointer"
-                                                            value={currentPeriod}
+                                                            value={currentPeriod as number}
                                                             onChange={(e) => update(periodKey, Number(e.target.value))}
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
