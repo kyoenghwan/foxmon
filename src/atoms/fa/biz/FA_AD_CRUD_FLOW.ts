@@ -15,7 +15,9 @@ const JOB_PRICING = {
         bold: { 30: 30000, 60: 55000, 90: 70000 },
         color: { 30: 15000, 60: 25000, 90: 35000 },
         bg: { 30: 15000, 60: 25000, 90: 35000 },
+        highlight: { 30: 15000, 60: 25000, 90: 35000 },
         icon: { 30: 15000, 60: 25000, 90: 35000 },
+        general_icons: { 30: 10000, 60: 18000, 90: 25000 },
         jump: { 30: 30000, 60: 55000, 90: 70000 },
     }
 };
@@ -147,11 +149,15 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             if (isPaymentUpdate) {
                 const p = payload.exposure_period as 30 | 60 | 90;
                 totalPoints = JOB_PRICING.period[p] || 0;
-                if (payload.option_bold) totalPoints += JOB_PRICING.options.bold[p] || 0;
-                if (payload.option_color) totalPoints += JOB_PRICING.options.color[p] || 0;
-                if (payload.option_bg) totalPoints += JOB_PRICING.options.bg[p] || 0;
-                if (payload.option_icon) totalPoints += JOB_PRICING.options.icon[p] || 0;
-                if (payload.option_jump) totalPoints += JOB_PRICING.options.jump[p] || 0;
+                if (payload.option_bold) totalPoints += JOB_PRICING.options.bold[payload.option_bold_period || 30] || 0;
+                if (payload.option_color) totalPoints += JOB_PRICING.options.color[payload.option_color_period || 30] || 0;
+                if (payload.option_bg) totalPoints += JOB_PRICING.options.bg[payload.option_bg_period || 30] || 0;
+                if (payload.option_highlight) totalPoints += JOB_PRICING.options.highlight[payload.option_highlight_period || 30] || 0;
+                if (payload.option_icon) totalPoints += JOB_PRICING.options.icon[payload.option_icon_period || 30] || 0;
+                if (payload.option_general_icons && payload.option_general_icons.length > 0) {
+                    totalPoints += (JOB_PRICING.options.general_icons[payload.option_general_icons_period || 30] || 0) * payload.option_general_icons.length;
+                }
+                if (payload.option_jump) totalPoints += JOB_PRICING.options.jump[payload.option_jump_period || 30] || 0;
 
                 if (totalPoints > 0) {
                     const { FA_DEDUCT_POINT_FOR_AD } = await import('@/src/atoms/fa/points/FA_DEDUCT_POINT_FOR_AD');
@@ -197,23 +203,55 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             // 결제 연장인 경우 만료일 및 옵션 갱신
             if (isPaymentUpdate) {
                 const p = payload.exposure_period as 30 | 60 | 90;
+                
+                // 베이스 (공고 자체) 만료일 계산 (기존 남은 기간에 연장)
                 const expiresAt = existingJob.expires_at ? new Date(existingJob.expires_at) : new Date();
-                // 기존 만료일이 과거라면 현재 시간 기준으로 연장
                 if (expiresAt < new Date()) expiresAt.setTime(new Date().getTime());
                 expiresAt.setDate(expiresAt.getDate() + p);
+                
+                // 개별 옵션 만료일 계산 헬퍼 함수 (옵션은 현재 결제 시점부터 시작)
+                const getOptionExpiresAt = (period: 30 | 60 | 90) => {
+                    const optDate = new Date();
+                    optDate.setDate(optDate.getDate() + period);
+                    return optDate.toISOString();
+                };
 
                 updatePayload.exposure_period = p;
-                if (payload.option_bold !== undefined) updatePayload.option_bold = !!payload.option_bold;
+                
+                if (payload.option_bold !== undefined) {
+                    updatePayload.option_bold = !!payload.option_bold;
+                    if (updatePayload.option_bold) updatePayload.option_bold_expires_at = getOptionExpiresAt(payload.option_bold_period || 30);
+                }
                 if (payload.option_color !== undefined) {
                     updatePayload.option_color = !!payload.option_color;
                     updatePayload.option_color_value = payload.option_color_value || null;
+                    if (updatePayload.option_color) updatePayload.option_color_expires_at = getOptionExpiresAt(payload.option_color_period || 30);
                 }
                 if (payload.option_bg !== undefined) {
                     updatePayload.option_bg = !!payload.option_bg;
                     updatePayload.option_bg_value = payload.option_bg_value || null;
+                    if (updatePayload.option_bg) updatePayload.option_bg_expires_at = getOptionExpiresAt(payload.option_bg_period || 30);
                 }
-                if (payload.option_icon !== undefined) updatePayload.option_icon = !!payload.option_icon;
-                updatePayload.option_jump = !!payload.option_jump;
+                if (payload.option_highlight !== undefined) {
+                    updatePayload.option_highlight = !!payload.option_highlight;
+                    updatePayload.option_highlight_value = payload.option_highlight_value || null;
+                    if (updatePayload.option_highlight) updatePayload.option_highlight_expires_at = getOptionExpiresAt(payload.option_highlight_period || 30);
+                }
+                if (payload.option_icon !== undefined) {
+                    updatePayload.option_icon = !!payload.option_icon;
+                    if (updatePayload.option_icon) updatePayload.option_icon_expires_at = getOptionExpiresAt(payload.option_icon_period || 30);
+                }
+                if (payload.option_general_icons !== undefined) {
+                    updatePayload.option_general_icons = payload.option_general_icons;
+                    if (updatePayload.option_general_icons && updatePayload.option_general_icons.length > 0) {
+                        updatePayload.option_general_icons_expires_at = getOptionExpiresAt(payload.option_general_icons_period || 30);
+                    }
+                }
+                if (payload.option_jump !== undefined) {
+                    updatePayload.option_jump = !!payload.option_jump;
+                    if (updatePayload.option_jump) updatePayload.option_jump_expires_at = getOptionExpiresAt(payload.option_jump_period || 30);
+                }
+
                 updatePayload.total_points = totalPoints;
                 updatePayload.expires_at = expiresAt.toISOString();
             }

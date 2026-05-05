@@ -61,13 +61,30 @@ export interface AdFormData {
     
     // 결제 및 부가 옵션 (팝업)
     exposure_period?: 30 | 60 | 90;
+    
     option_bold?: boolean;
+    option_bold_period?: 30 | 60 | 90;
+    
     option_color?: boolean;
     option_color_value?: string;
+    option_color_period?: 30 | 60 | 90;
+    
     option_bg?: boolean;
     option_bg_value?: string;
-    option_icon?: boolean;
+    option_bg_period?: 30 | 60 | 90;
+    
+    option_highlight?: boolean;
+    option_highlight_value?: string;
+    option_highlight_period?: 30 | 60 | 90;
+    
+    option_icon?: boolean; // 급구 아이콘
+    option_icon_period?: 30 | 60 | 90;
+    
+    option_general_icons?: string[]; // 최대 2개
+    option_general_icons_period?: 30 | 60 | 90;
+    
     option_jump?: boolean;
+    option_jump_period?: 30 | 60 | 90;
     
     // 결제 업데이트 플래그
     _isPayment?: boolean;

@@ -21,13 +21,18 @@ const JOB_PRICING = {
         bold: { 30: 30000, 60: 55000, 90: 70000 },
         color: { 30: 15000, 60: 25000, 90: 35000 },
         bg: { 30: 15000, 60: 25000, 90: 35000 },
+        highlight: { 30: 15000, 60: 25000, 90: 35000 },
         icon: { 30: 15000, 60: 25000, 90: 35000 },
+        general_icons: { 30: 10000, 60: 18000, 90: 25000 },
         jump: { 30: 30000, 60: 55000, 90: 70000 },
     }
 };
 
 const TITLE_COLORS = ['#f97316', '#ef4444', '#3b82f6', '#8b5cf6', '#10b981', '#ec4899']; // 주황, 빨강, 파랑, 보라, 초록, 핑크
 const BG_COLORS = ['#fff7ed', '#fef2f2', '#eff6ff', '#f5f3ff', '#ecfdf5', '#fdf2f8']; // 주황, 빨강, 파랑, 보라, 초록, 핑크 배경
+const HIGHLIGHT_COLORS = ['#fde047', '#86efac', '#f9a8d4', '#93c5fd', '#c4b5fd', '#fdba74']; // 노랑, 초록, 핑크, 하늘, 보라, 주황 (형광펜용)
+
+const GENERAL_ICONS = ['💖초보환영', '🏠원룸제공', '✨최고급시설', '🚫블랙관리', '💰당일지급', '👍숙식제공', '💪열정페이', '🤝가족같은'];
 
 export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobPaymentModalProps) {
     const [saving, setSaving] = useState(false);
@@ -67,11 +72,15 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         const p = form.exposure_period || 30;
         let total = JOB_PRICING.period[p] || 0;
         
-        if (form.option_bold) total += JOB_PRICING.options.bold[p] || 0;
-        if (form.option_color) total += JOB_PRICING.options.color[p] || 0;
-        if (form.option_bg) total += JOB_PRICING.options.bg[p] || 0;
-        if (form.option_icon) total += JOB_PRICING.options.icon[p] || 0;
-        if (form.option_jump) total += JOB_PRICING.options.jump[p] || 0;
+        if (form.option_bold) total += JOB_PRICING.options.bold[form.option_bold_period || 30] || 0;
+        if (form.option_color) total += JOB_PRICING.options.color[form.option_color_period || 30] || 0;
+        if (form.option_bg) total += JOB_PRICING.options.bg[form.option_bg_period || 30] || 0;
+        if (form.option_highlight) total += JOB_PRICING.options.highlight[form.option_highlight_period || 30] || 0;
+        if (form.option_icon) total += JOB_PRICING.options.icon[form.option_icon_period || 30] || 0;
+        if (form.option_general_icons && form.option_general_icons.length > 0) {
+            total += (JOB_PRICING.options.general_icons[form.option_general_icons_period || 30] || 0) * form.option_general_icons.length;
+        }
+        if (form.option_jump) total += JOB_PRICING.options.jump[form.option_jump_period || 30] || 0;
         return total;
     };
 
@@ -139,7 +148,15 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                     style={form.option_color && form.option_color_value ? { color: form.option_color_value } : form.option_color ? { color: '#f97316' } : { color: '#111827' }}
                                 >
                                     {form.option_icon && <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 animate-pulse">급구</span>}
-                                    <span className="truncate">{form.title || '공고 제목이 표시됩니다'}</span>
+                                    {form.option_general_icons?.map(icon => (
+                                        <span key={icon} className="text-[12px] font-black shrink-0 px-1 py-0.5 rounded border border-gray-200 bg-white">{icon}</span>
+                                    ))}
+                                    <span 
+                                        className={`truncate ${form.option_highlight ? 'px-1 rounded' : ''}`}
+                                        style={form.option_highlight && form.option_highlight_value ? { backgroundColor: form.option_highlight_value } : form.option_highlight ? { backgroundColor: '#fde047' } : {}}
+                                    >
+                                        {form.title || '공고 제목이 표시됩니다'}
+                                    </span>
                                 </div>
                                 <div className="col-span-1 text-center text-gray-600 truncate px-1">
                                     {form.business_name || form.company || '업체명'}
@@ -193,67 +210,137 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                             </h4>
                             <div className="flex flex-col gap-2">
                                 {[
-                                    { id: 'bold', label: '굵은 글씨 (Bold)', desc: '제목을 굵게 표시하여 눈에 띄게', price: JOB_PRICING.options.bold[(form.exposure_period || 30) as 30|60|90] },
-                                    { id: 'color', label: '제목 컬러 (Color)', desc: '제목에 매력적인 브랜드 컬러 적용', price: JOB_PRICING.options.color[(form.exposure_period || 30) as 30|60|90] },
-                                    { id: 'bg', label: '리스트 배경색 (Background)', desc: '공고 영역 전체 배경색을 은은하게 강조', price: JOB_PRICING.options.bg[(form.exposure_period || 30) as 30|60|90] },
-                                    { id: 'icon', label: '급구 아이콘 (Icon)', desc: '시선을 사로잡는 🚨급구 마크', price: JOB_PRICING.options.icon[(form.exposure_period || 30) as 30|60|90] },
-                                    { id: 'jump', label: '자동 점프 (Auto Jump)', desc: '매일 6회 (4시간 마다 실행) 자동으로 리스트 최상단 끌어올림!', price: JOB_PRICING.options.jump[(form.exposure_period || 30) as 30|60|90] },
-                                ].map(opt => (
-                                    <div key={opt.id} className={`flex flex-col p-3.5 rounded-xl border transition-all ${form[`option_${opt.id}` as keyof AdFormData] ? 'border-primary bg-white shadow-sm' : 'border-gray-200 bg-gray-50/50 hover:bg-white'}`}>
-                                        <label className="flex items-center justify-between cursor-pointer">
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0 ${form[`option_${opt.id}` as keyof AdFormData] ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'}`}>
-                                                    {form[`option_${opt.id}` as keyof AdFormData] && <CheckCircle2 className="w-3.5 h-3.5" />}
+                                    { id: 'bold', label: '굵은 글씨 (Bold)', desc: '제목을 굵게 표시하여 눈에 띄게', basePrices: JOB_PRICING.options.bold },
+                                    { id: 'color', label: '제목 컬러 (Color)', desc: '제목에 매력적인 브랜드 컬러 적용', basePrices: JOB_PRICING.options.color },
+                                    { id: 'highlight', label: '형광펜 효과 (Highlight)', desc: '글씨 뒷배경을 형광펜으로 강조', basePrices: JOB_PRICING.options.highlight },
+                                    { id: 'bg', label: '리스트 배경색 (Background)', desc: '공고 영역 전체 배경색을 은은하게 강조', basePrices: JOB_PRICING.options.bg },
+                                    { id: 'icon', label: '급구 아이콘 (Urgent Icon)', desc: '시선을 사로잡는 🚨급구 마크 (항상 맨 앞에 표시)', basePrices: JOB_PRICING.options.icon },
+                                    { id: 'general_icons', label: '일반 아이콘 (General Icons)', desc: '최대 2개까지 중복 선택 가능한 예쁜 뱃지 (개당 비용 발생)', basePrices: JOB_PRICING.options.general_icons },
+                                    { id: 'jump', label: '자동 점프 (Auto Jump)', desc: '매일 6회 (4시간 마다 실행) 자동으로 리스트 최상단 끌어올림!', basePrices: JOB_PRICING.options.jump },
+                                ].map(opt => {
+                                    const isChecked = !!form[`option_${opt.id}` as keyof AdFormData];
+                                    const periodKey = `option_${opt.id}_period` as keyof AdFormData;
+                                    const currentPeriod = form[periodKey] || 30;
+                                    const price = opt.basePrices[currentPeriod as 30|60|90] || 0;
+                                    const isGeneralIcons = opt.id === 'general_icons';
+                                    const finalPrice = isGeneralIcons && isChecked ? price * (form.option_general_icons?.length || 1) : price;
+                                    
+                                    return (
+                                        <div key={opt.id} className={`flex flex-col p-3.5 rounded-xl border transition-all ${isChecked ? 'border-primary bg-white shadow-sm' : 'border-gray-200 bg-gray-50/50 hover:bg-white'}`}>
+                                            <div className="flex items-center justify-between cursor-pointer" onClick={() => {
+                                                const newVal = !isChecked;
+                                                update(`option_${opt.id}` as keyof AdFormData, newVal);
+                                                if (newVal) {
+                                                    update(periodKey, 30);
+                                                    if (opt.id === 'color' && !form.option_color_value) update('option_color_value', TITLE_COLORS[0]);
+                                                    if (opt.id === 'bg' && !form.option_bg_value) update('option_bg_value', BG_COLORS[0]);
+                                                    if (opt.id === 'highlight' && !form.option_highlight_value) update('option_highlight_value', HIGHLIGHT_COLORS[0]);
+                                                    if (opt.id === 'general_icons' && (!form.option_general_icons || form.option_general_icons.length === 0)) update('option_general_icons', [GENERAL_ICONS[0]]);
+                                                }
+                                            }}>
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0 ${isChecked ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'}`}>
+                                                        {isChecked && <CheckCircle2 className="w-3.5 h-3.5" />}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className={`text-[14px] font-bold ${isChecked ? 'text-gray-900' : 'text-gray-700'}`}>{opt.label}</span>
+                                                        <span className="text-[12px] text-gray-500 font-medium hidden sm:inline-block">· {opt.desc}</span>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <span className={`text-[14px] font-bold ${form[`option_${opt.id}` as keyof AdFormData] ? 'text-gray-900' : 'text-gray-700'}`}>{opt.label}</span>
-                                                    <span className="text-[12px] text-gray-500 font-medium hidden sm:inline-block">· {opt.desc}</span>
+                                                <span className="text-[14px] font-bold text-indigo-600 shrink-0">+{finalPrice.toLocaleString()} P</span>
+                                            </div>
+                                            <span className="text-[12px] text-gray-500 font-medium sm:hidden mt-2 ml-8">{opt.desc}</span>
+                                            
+                                            {/* 기간 및 세부 설정 영역 */}
+                                            {isChecked && (
+                                                <div className="mt-4 ml-8 flex flex-col gap-4" onClick={e => e.stopPropagation()}>
+                                                    {/* 기간 선택기 */}
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="text-[12px] font-bold text-gray-600 shrink-0 w-16">이용 기간</span>
+                                                        {[30, 60, 90].map(days => {
+                                                            const p = opt.basePrices[days as 30|60|90];
+                                                            const discountText = days === 60 ? '10%' : days === 90 ? '20%' : '';
+                                                            return (
+                                                                <button
+                                                                    key={days} type="button"
+                                                                    onClick={() => update(periodKey, days)}
+                                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold border transition-colors ${currentPeriod === days ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                                                                >
+                                                                    <span>{days}일</span>
+                                                                    <span className="font-normal opacity-70">({p.toLocaleString()}P)</span>
+                                                                    {discountText && <span className="text-[9px] bg-red-100 text-red-600 px-1 py-0.5 rounded">{discountText} OFF</span>}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    {/* 색상 선택 팔레트 (옵션 활성화 시) */}
+                                                    {opt.id === 'color' && (
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span className="text-[12px] font-bold text-gray-600 shrink-0 w-16">글씨 색상</span>
+                                                            {TITLE_COLORS.map(c => (
+                                                                <button key={c} type="button" onClick={() => update('option_color_value', c)}
+                                                                    className={`w-6 h-6 rounded-full border-2 transition-all ${form.option_color_value === c ? 'border-primary scale-110 shadow-sm' : 'border-transparent hover:scale-105'}`}
+                                                                    style={{ backgroundColor: c }}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {opt.id === 'highlight' && (
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span className="text-[12px] font-bold text-gray-600 shrink-0 w-16">형광펜 색상</span>
+                                                            {HIGHLIGHT_COLORS.map(c => (
+                                                                <button key={c} type="button" onClick={() => update('option_highlight_value', c)}
+                                                                    className={`w-6 h-6 rounded-full border-2 transition-all ${form.option_highlight_value === c ? 'border-primary scale-110 shadow-sm' : 'border-transparent hover:scale-105'}`}
+                                                                    style={{ backgroundColor: c }}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {opt.id === 'bg' && (
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span className="text-[12px] font-bold text-gray-600 shrink-0 w-16">배경 색상</span>
+                                                            {BG_COLORS.map((c, i) => (
+                                                                <button key={c} type="button" onClick={() => update('option_bg_value', c)}
+                                                                    className={`w-6 h-6 rounded-full border-2 transition-all ${form.option_bg_value === c ? 'border-primary scale-110 shadow-sm' : 'border-gray-200 hover:scale-105'}`}
+                                                                    style={{ backgroundColor: c }} title={['주황', '빨강', '파랑', '보라', '초록', '핑크'][i]}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {opt.id === 'general_icons' && (
+                                                        <div className="flex gap-2 flex-wrap items-start">
+                                                            <span className="text-[12px] font-bold text-gray-600 shrink-0 w-16 mt-1">아이콘 선택</span>
+                                                            <div className="flex-1 flex flex-wrap gap-2">
+                                                                {GENERAL_ICONS.map(icon => {
+                                                                    const selected = form.option_general_icons?.includes(icon) || false;
+                                                                    return (
+                                                                        <button key={icon} type="button"
+                                                                            onClick={() => {
+                                                                                let current = form.option_general_icons || [];
+                                                                                if (selected) {
+                                                                                    current = current.filter(x => x !== icon);
+                                                                                    if (current.length === 0) return; // 최소 1개는 유지
+                                                                                } else {
+                                                                                    if (current.length >= 2) return alert('일반 아이콘은 최대 2개까지만 선택 가능합니다.');
+                                                                                    current = [...current, icon];
+                                                                                }
+                                                                                update('option_general_icons', current);
+                                                                            }}
+                                                                            className={`text-[12px] font-black px-2 py-1 rounded border transition-colors ${selected ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                                                                        >
+                                                                            {icon}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
-                                            <span className="text-[14px] font-bold text-indigo-600 shrink-0">+{opt.price.toLocaleString()} P</span>
-                                            <input 
-                                                type="checkbox" 
-                                                className="hidden" 
-                                                checked={!!form[`option_${opt.id}` as keyof AdFormData]} 
-                                                onChange={(e) => {
-                                                    update(`option_${opt.id}` as keyof AdFormData, e.target.checked);
-                                                    if (e.target.checked && opt.id === 'color' && !form.option_color_value) update('option_color_value', TITLE_COLORS[0]);
-                                                    if (e.target.checked && opt.id === 'bg' && !form.option_bg_value) update('option_bg_value', BG_COLORS[0]);
-                                                }} 
-                                            />
-                                        </label>
-                                        <span className="text-[12px] text-gray-500 font-medium sm:hidden mt-2 ml-8">{opt.desc}</span>
-                                        
-                                        {/* 색상 선택 팔레트 (옵션 활성화 시) */}
-                                        {opt.id === 'color' && form.option_color && (
-                                            <div className="mt-3 ml-8 pl-4 border-l-2 border-gray-100 flex items-center gap-2">
-                                                <span className="text-[12px] font-bold text-gray-600 mr-1">글씨 색상:</span>
-                                                {TITLE_COLORS.map(c => (
-                                                    <button 
-                                                        key={c} type="button" 
-                                                        onClick={() => update('option_color_value', c)}
-                                                        className={`w-6 h-6 rounded-full border-2 transition-all ${form.option_color_value === c ? 'border-primary scale-110 shadow-sm' : 'border-transparent hover:scale-105'}`}
-                                                        style={{ backgroundColor: c }}
-                                                    />
-                                                ))}
-                                            </div>
-                                        )}
-                                        {opt.id === 'bg' && form.option_bg && (
-                                            <div className="mt-3 ml-8 pl-4 border-l-2 border-gray-100 flex items-center gap-2">
-                                                <span className="text-[12px] font-bold text-gray-600 mr-1">배경 색상:</span>
-                                                {BG_COLORS.map((c, i) => (
-                                                    <button 
-                                                        key={c} type="button" 
-                                                        onClick={() => update('option_bg_value', c)}
-                                                        className={`w-6 h-6 rounded-full border-2 transition-all ${form.option_bg_value === c ? 'border-primary scale-110 shadow-sm' : 'border-gray-200 hover:scale-105'}`}
-                                                        style={{ backgroundColor: c }}
-                                                        title={['주황', '빨강', '파랑', '보라', '초록', '핑크'][i]}
-                                                    />
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </section>
                     </div>
