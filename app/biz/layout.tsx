@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { MainHeader } from '@/components/layout/main-header';
 import { BizSidebar } from '@/components/biz/BizSidebar';
+import { SideBanners } from '@/components/home/side-banners';
 import Link from 'next/link';
 
 export default async function BizLayout({ children }: { children: React.ReactNode }) {
@@ -17,6 +18,7 @@ export default async function BizLayout({ children }: { children: React.ReactNod
 
     return (
         <div className="flex flex-col min-h-screen bg-white relative">
+            <SideBanners />
             {/* 기존 메인 헤더 재사용 */}
             <MainHeader session={session} />
 

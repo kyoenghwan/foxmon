@@ -1,15 +1,26 @@
 import { auth } from '@/auth';
 import { Coins, Plus, ArrowDownLeft, ArrowUpRight, Clock, Info } from 'lucide-react';
-import Link from 'next/link';
+import { PointRechargeForm } from '@/components/biz/PointRechargeForm';
+import { supabaseAdmin as supabase } from '@/lib/supabase';
 
 export default async function BizPointsPage() {
     const session = await auth();
     const user = session?.user as any;
-    const paidPoints = user?.paid_points ?? 0;
-    const bonusPoints = user?.bonus_points ?? 0;
+    
+    // DB에서 실시간 포인트 조회
+    const { data: userData } = await supabase.from('users').select('paid_points, bonus_points').eq('id', user.id).single();
+    const paidPoints = userData?.paid_points ?? 0;
+    const bonusPoints = userData?.bonus_points ?? 0;
 
-    // 추후 QA_GET_POINT_HISTORY 연동예정
-    const transactions: any[] = [];
+    // 거래 내역 조회
+    const { data: txData } = await supabase
+        .from('point_transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+        
+    const transactions = txData || [];
 
     return (
         <div className="space-y-6">
@@ -60,35 +71,7 @@ export default async function BizPointsPage() {
                     </div>
                 </div>
 
-                <form className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">충전 금액 (원)</label>
-                            <select className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary font-medium">
-                                <option value="">금액 선택</option>
-                                <option value="100000">100,000원 (100,000P)</option>
-                                <option value="300000">300,000원 (300,000P + 보너스 15,000P)</option>
-                                <option value="500000">500,000원 (500,000P + 보너스 50,000P)</option>
-                                <option value="1000000">1,000,000원 (1,000,000P + 보너스 150,000P)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">입금자명</label>
-                            <input
-                                type="text"
-                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary"
-                                placeholder="실제 입금하실 이름을 입력해주세요"
-                            />
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => alert('충전 신청이 완료되었습니다.\n담당자 확인 후 1영업일 이내 포인트가 지급됩니다.')}
-                        className="w-full py-3 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-md"
-                    >
-                        충전 신청하기
-                    </button>
-                </form>
+                <PointRechargeForm />
             </div>
 
             {/* 거래 내역 */}
