@@ -88,51 +88,68 @@ export function MainBanner() {
                     transform: `translateX(calc(-${currentIndex * 50}% - ${currentIndex * 8}px))`,
                 }}
             >
-                {extendedBanners.map((banner, idx) => (
-                    <div
-                        key={`${banner.id}-${idx}`}
-                        className={`flex-shrink-0 h-full rounded-2xl ${banner.color || 'bg-gradient-to-br from-gray-700 to-gray-900'} p-6 shadow-md relative overflow-hidden group cursor-pointer`}
-                        style={{ width: 'calc((100% - 16px) / 2)' }}
-                        onClick={() => handleAdClick(banner.id)}
-                    >
-                        {/* 가독성을 위한 어두운 그라데이션 오버레이 (강화) */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
+                {extendedBanners.map((banner, idx) => {
+                    const hasImage = !!(banner.image || (banner as any).logo_url);
+                    const bgUrl = hasImage ? (banner.image || (banner as any).logo_url) : null;
+                    
+                    // 이미지가 없을 때 사용할 프리미엄 AI 느낌의 fallback 그라데이션 배열
+                    const fallbackGradients = [
+                        'bg-gradient-to-br from-indigo-900 via-purple-900 to-black',
+                        'bg-gradient-to-br from-slate-900 via-sky-900 to-black',
+                        'bg-gradient-to-br from-rose-900 via-fuchsia-900 to-black',
+                        'bg-gradient-to-br from-emerald-900 via-teal-900 to-black',
+                    ];
+                    const bgClass = hasImage ? 'bg-black' : fallbackGradients[idx % fallbackGradients.length];
 
-                        {/* 호버 시 밝기 조절 */}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors z-15" />
+                    return (
+                        <div
+                            key={`${banner.id}-${idx}`}
+                            className={`flex-shrink-0 h-full rounded-2xl ${bgClass} p-6 shadow-md relative overflow-hidden group cursor-pointer`}
+                            style={{ 
+                                width: 'calc((100% - 16px) / 2)',
+                                ...(hasImage ? { backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {})
+                            }}
+                            onClick={() => handleAdClick(banner.id)}
+                        >
+                            {/* 가독성을 위한 어두운 그라데이션 오버레이 (강화) */}
+                            <div className={`absolute inset-0 bg-gradient-to-t ${hasImage ? 'from-black/95 via-black/60 to-black/20' : 'from-black/80 via-black/30 to-transparent'} z-10`} />
 
-                        <div className="relative z-20 h-full flex flex-col justify-between">
-                            <div className="space-y-3">
-                                <h3 className="text-white font-black text-2xl mb-1 line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform origin-left duration-300">
-                                    {banner.company}
-                                </h3>
-                                <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
-                                    {banner.title}
-                                </p>
+                            {/* 호버 시 밝기 조절 */}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors z-15" />
+
+                            <div className="relative z-20 h-full flex flex-col justify-between">
+                                <div className="space-y-3">
+                                    <h3 className="text-white font-black text-2xl mb-1 line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform origin-left duration-300">
+                                        {banner.company}
+                                    </h3>
+                                    <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
+                                        {banner.title}
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                    <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest">{banner.location}</p>
+                                    <Link href={`/jobs/${banner.id}`} onClick={(e) => e.stopPropagation()}>
+                                        <Button
+                                            variant="secondary"
+                                            size="default"
+                                            className="font-bold bg-white text-gray-900 border-none hover:bg-gray-100 px-6 py-2 h-10 shadow-lg"
+                                            onClick={() => handleAdClick(banner.id)}
+                                        >
+                                            상세보기
+                                        </Button>
+                                    </Link>
+                                </div>
                             </div>
 
-                            <div className="flex flex-col gap-1">
-                                <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest">{banner.location}</p>
-                                <Link href={`/jobs/${banner.id}`} onClick={(e) => e.stopPropagation()}>
-                                    <Button
-                                        variant="secondary"
-                                        size="default"
-                                        className="font-bold bg-white text-gray-900 border-none hover:bg-gray-100 px-6 py-2 h-10 shadow-lg"
-                                        onClick={() => handleAdClick(banner.id)}
-                                    >
-                                        상세보기
-                                    </Button>
-                                </Link>
+                            {/* 장식용 요소 */}
+                            <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                            <div className="absolute right-5 top-4 text-white/10 font-black text-4xl italic select-none z-10">
+                                {((idx % originalLength) + 1).toString().padStart(2, '0')}
                             </div>
                         </div>
-
-                        {/* 장식용 요소 */}
-                        <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-                        <div className="absolute right-5 top-4 text-white/10 font-black text-4xl italic select-none">
-                            {((idx % originalLength) + 1).toString().padStart(2, '0')}
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* 좌우 네비게이션 버튼 (필요 시) */}

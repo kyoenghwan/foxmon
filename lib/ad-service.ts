@@ -61,7 +61,11 @@ const CATEGORIES = ['(노래주점)', '(룸싸롱)', '(단란주점)', '(마사�
 const PAY_LIST = ['[TC] 120,000원', '[TC] 150,000원', '[시급] 65,000원', '[TC] 110,000원', '[협의]면접후결정', '[TC] 180,000원'];
 
 let MOCK_ADS: AdItem[] = Array.from({ length: 150 }).map((_, i) => {
-    const tier: 'PREMIUM' | 'SPECIAL' | 'GENERAL' = i < 50 ? 'PREMIUM' : i < 100 ? 'SPECIAL' : 'GENERAL';
+    let tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'GENERAL' = 'GENERAL';
+    if (i < 10) tier = 'PREMIUM_MAIN';
+    else if (i < 20) tier = 'SIDE';
+    else if (i < 50) tier = 'PREMIUM';
+    else if (i < 100) tier = 'SPECIAL';
     const company = COMPANIES[i % COMPANIES.length];
     const category = CATEGORIES[i % CATEGORIES.length];
     // 테스트 시 10%는 '방금(10분 이내) 등록된 광고'로 시뮬레이션
