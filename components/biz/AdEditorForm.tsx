@@ -741,7 +741,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                                         </label>
 
-                                        <p className="text-[10px] text-gray-400 mt-2 text-center leading-relaxed">PNG/JPG 지원<br/>가로 형태(2:1 비율) 권장</p>
+                                        <p className="text-[10px] text-gray-400 mt-2 text-center leading-relaxed">
+                                            PNG/JPG 지원<br/>
+                                            {form.tier === 'SIDE' ? '정방형(1:1 비율) 권장' : '가로 형태(1.5:1 비율) 권장'}
+                                        </p>
                                     </div>
                                 )}
                             </div>
