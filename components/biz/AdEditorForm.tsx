@@ -7,6 +7,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { userSettingsAction } from '@/lib/actions';
+import { compressImageFile } from '@/lib/image-utils';
 import dynamic from 'next/dynamic';
 
 // Fabric.js는 브라우저 전용이므로 SSR 비활성화
@@ -496,26 +497,18 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         alert('로고 제작 대행 문의는 카카오톡 고객센터(@foxmon)로 상호명과 함께 연락해 주세요.\n전문 디자이너가 원장님만의 맞춤형 타이포그래피 로고를 제작해 드립니다!');
     };
 
-    const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        if (file.size > 5 * 1024 * 1024) { alert('로고는 5MB 이하로 업로드해주세요.'); return; }
-        const reader = new FileReader();
-        reader.onloadend = (event) => {
-            const img = new window.Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const MAX = 200;
-                let w = img.width, h = img.height;
-                if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
-                else { if (h > MAX) { w *= MAX / h; h = MAX; } }
-                canvas.width = w; canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                if (ctx) { ctx.drawImage(img, 0, 0, w, h); update('logo_url', canvas.toDataURL('image/png', 0.9)); }
-            };
-            img.src = event.target?.result as string;
-        };
-        reader.readAsDataURL(file);
+        
+        try {
+            // 로고는 최대 300px 크기로 충분하며 PNG 포맷 유지(투명도 지원)
+            const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 300, quality: 0.9, format: 'image/png' });
+            update('logo_url', compressedBase64);
+        } catch (error) {
+            console.error('로고 이미지 압축 실패:', error);
+            alert('이미지 처리 중 오류가 발생했습니다.');
+        }
     };
 
     return (
@@ -1179,16 +1172,18 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                 type="file" 
                                                 accept="image/*" 
                                                 className="hidden" 
-                                                onChange={(e) => {
+                                                onChange={async (e) => {
                                                     const file = e.target.files?.[0];
                                                     if(file) {
-                                                        const reader = new FileReader();
-                                                        reader.onload = (event) => {
+                                                        try {
                                                             const currentIsPattern = form.detail_bg_image?.startsWith('PATTERN|');
-                                                            const newUrl = event.target?.result as string;
-                                                            update('detail_bg_image', currentIsPattern ? 'PATTERN|' + newUrl : newUrl);
-                                                        };
-                                                        reader.readAsDataURL(file);
+                                                            // 상세 배경 이미지는 최대 1200px, WEBP 형식으로 압축하여 용량 대폭 절감
+                                                            const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 1200, quality: 0.8, format: 'image/webp' });
+                                                            update('detail_bg_image', currentIsPattern ? 'PATTERN|' + compressedBase64 : compressedBase64);
+                                                        } catch (error) {
+                                                            console.error('배경 이미지 압축 실패:', error);
+                                                            alert('이미지 처리 중 오류가 발생했습니다.');
+                                                        }
                                                     }
                                                 }}
                                             />
