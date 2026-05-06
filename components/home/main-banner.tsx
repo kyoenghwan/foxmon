@@ -12,6 +12,7 @@ export function MainBanner() {
     const [loading, setLoading] = useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isTransitioning, setIsTransitioning] = useState(true);
+    const [isHovered, setIsHovered] = useState(false);
 
     // 1. Firestore에서 공정한 알고리즘이 적용된 광고 가져오기
     useEffect(() => {
@@ -29,14 +30,14 @@ export function MainBanner() {
     const extendedBanners = [...ads, ...ads, ...ads];
 
     useEffect(() => {
-        if (originalLength === 0) return;
+        if (originalLength === 0 || isHovered) return;
 
         const timer = setInterval(() => {
             handleNext();
         }, 4000); // 노출 시간을 조금 더 길게 조정 (4초)
 
         return () => clearInterval(timer);
-    }, [currentIndex, originalLength]);
+    }, [currentIndex, originalLength, isHovered]);
 
     const handleNext = () => {
         if (originalLength === 0) return;
@@ -81,7 +82,11 @@ export function MainBanner() {
     }
 
     return (
-        <div className="relative w-full !h-full overflow-hidden rounded-xl">
+        <div 
+            className="relative w-full !h-full overflow-hidden rounded-xl"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             <div
                 className={`flex gap-4 h-full ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
                 style={{
@@ -100,6 +105,24 @@ export function MainBanner() {
                         'bg-gradient-to-br from-emerald-900 via-teal-900 to-black',
                     ];
                     const bgClass = fallbackGradients[idx % fallbackGradients.length];
+
+                    // 급여 파싱 로직
+                    let payType = '';
+                    let payAmount = banner.pay || '';
+                    if (payAmount.includes(']') && payAmount.startsWith('[')) {
+                        const splitIndex = payAmount.indexOf(']');
+                        payType = payAmount.substring(1, splitIndex).trim();
+                        payAmount = payAmount.substring(splitIndex + 1).trim();
+                    } else if (payAmount === '추후협의') {
+                        payType = '협의';
+                        payAmount = '추후협의';
+                    } else {
+                        const parts = payAmount.split(' ');
+                        if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0])) {
+                            payType = parts[0];
+                            payAmount = parts.slice(1).join(' ');
+                        }
+                    }
 
                     return (
                         <div
@@ -136,18 +159,18 @@ export function MainBanner() {
                                     </p>
                                 </div>
 
-                                <div className="flex flex-col gap-1">
-                                    <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest">{banner.location}</p>
-                                    <Link href={`/jobs/${banner.id}`} onClick={(e) => e.stopPropagation()}>
-                                        <Button
-                                            variant="secondary"
-                                            size="default"
-                                            className="font-bold bg-white text-gray-900 border-none hover:bg-gray-100 px-6 py-2 h-10 shadow-lg"
-                                            onClick={() => handleAdClick(banner.id)}
-                                        >
-                                            상세보기
-                                        </Button>
-                                    </Link>
+                                <div className="flex flex-col gap-1.5 mt-auto">
+                                    <p className="text-white/70 text-[11px] font-bold tracking-wider">{banner.location}</p>
+                                    <div className="flex items-center gap-2">
+                                        {payType && (
+                                            <span className="px-2 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[11px] font-black tracking-wide border border-white/10 shadow-sm">
+                                                {payType}
+                                            </span>
+                                        )}
+                                        <span className="text-white font-black text-lg sm:text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                            {payAmount}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
