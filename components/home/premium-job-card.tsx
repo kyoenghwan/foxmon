@@ -165,12 +165,18 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
     const validOpacity = isNaN(parsedOpacity) ? 0 : Math.max(0, Math.min(100, parsedOpacity));
     const hexOpacity = Math.round((validOpacity / 100) * 255).toString(16).padStart(2, '0').toUpperCase();
 
+    // 테두리(Wrapper) 자체를 애니메이션하면 밖으로 튀어나가는(Translate/Scale) 효과 필터링
+    const safeWrapperAnims = ['storm', 'ghost', 'sun', 'lava', 'retro', 'platinum', 'aura', 'royal', 'autumn', 'toxic'];
+    const currentAction = action || (config.animClass ? config.animClass.replace('animate-', '') : '');
+    const isSafeForWrapper = safeWrapperAnims.includes(currentAction);
+    const wrapperAnimClass = (action !== 'rainbow-border' && isSafeForWrapper) ? animClass : '';
+
     return (
         <div className={`relative ${isBig ? 'h-full min-h-[292px]' : isSide ? 'aspect-[2/3]' : 'aspect-[3/2]'} w-full min-w-[140px] group p-[3px]`}>
             
             {/* --- [배로 아래 배경 레이어] --- */}
             {isImpact && (
-                <div className={`absolute inset-0 overflow-hidden rounded-xl z-0 ${action !== 'rainbow-border' ? animClass : ''}`}>
+                <div className={`absolute inset-0 overflow-hidden rounded-xl z-0 ${wrapperAnimClass}`}>
                     {!isCrazy && !isCyber && action !== 'rainbow-border' && (
                         <div className={`absolute inset-0 ${opacityClass} blur-[1px] ${config.bg}`} />
                     )}
