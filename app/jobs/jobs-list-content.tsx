@@ -5,8 +5,6 @@ import { Loader2, Plus, Crown, Zap, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
-import { SpecialJobCard } from '@/components/home/special-job-card';
-import { GeneralJobItem } from '@/components/home/general-job-item';
 import { GeneralJobListRow } from '@/components/jobs/general-job-list-row';
 import { AdPriceModal } from '@/components/jobs/AdPriceModal';
 import { Button } from '@/components/ui/button';
@@ -158,7 +156,7 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
                 {specialJobs.length > 0 ? (
                     <div className={twoRowPremiumSpecialGridClasses}>
                         {specialJobs.map((job) => (
-                            <SpecialJobCard key={job.id} {...(job as any)} />
+                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" tier="SPECIAL" />
                         ))}
                     </div>
                 ) : (
@@ -191,7 +189,7 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
                 {lineJobs.length > 0 ? (
                     <div className={twoRowPremiumSpecialGridClasses}>
                         {lineJobs.map((job) => (
-                            <GeneralJobItem key={job.id} {...(job as any)} />
+                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" hideLogo={true} tier="GENERAL" />
                         ))}
                     </div>
                 ) : (
