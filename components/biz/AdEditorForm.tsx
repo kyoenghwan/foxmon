@@ -612,7 +612,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                         location={form.location || '전지역'}
                                                         pay={form.pay || '급여 정보'}
                                                         image={form.logo_url || form.image}
-                                                        impactType={isSpecial || isGeneral ? 'none' : ((form.theme as any) || 'gold')}
+                                                        impactType={isGeneral ? 'none' : ((form.theme as any) || 'gold')}
                                                         effectIntensity={isSpecial || isGeneral ? 'none' : ((form.effect_intensity as any) || 'medium')}
                                                         isSide={isSide}
                                                         hideLogo={isGeneral}
@@ -811,11 +811,11 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         </div>
                     )}
 
-                    {mode === 'AD' && form.tier === 'PREMIUM' && (
+                    {mode === 'AD' && (form.tier === 'PREMIUM' || form.tier === 'SPECIAL') && (
                         <div className="bg-white rounded-2xl border border-yellow-200 p-6 space-y-5">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                                <Crown className="w-4 h-4 text-yellow-500" />
-                                프리미엄 테마 설정
+                                <Crown className={`w-4 h-4 ${form.tier === 'PREMIUM' ? 'text-yellow-500' : 'text-purple-500'}`} />
+                                {form.tier === 'PREMIUM' ? '프리미엄' : '스페셜'} 테마 설정
                             </h3>
 
                             {/* 테마 선택 */}
@@ -837,10 +837,11 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 </div>
                             </div>
 
-                            {/* 효과 강도 */}
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-2 block">효과 강도</label>
-                                <div className="flex gap-2">
+                            {/* 효과 강도 (프리미엄 전용) */}
+                            {form.tier === 'PREMIUM' && (
+                                <div>
+                                    <label className="text-[12px] font-bold text-gray-600 mb-2 block">효과 강도</label>
+                                    <div className="flex gap-2">
                                     {EFFECT_OPTIONS.map(opt => (
                                         <button
                                             key={opt.value}
@@ -857,14 +858,15 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     ))}
                                 </div>
                             </div>
+                            )}
                         </div>
                     )}
 
-                    {mode === 'AD' && form.tier === 'SPECIAL' && (
-                        <div className="bg-white rounded-2xl border border-purple-200 p-6 space-y-5">
+                    {mode === 'AD' && form.tier === 'GENERAL' && (
+                        <div className="bg-white rounded-2xl border border-blue-200 p-6 space-y-5">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                                <span className="text-[16px]">⭐</span>
-                                스페셜 색상 설정
+                                <span className="text-[16px]">🎨</span>
+                                일반 배너 색상 설정
                             </h3>
 
                             {/* 색상 선택 */}
@@ -884,11 +886,11 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         </div>
                     )}
 
-                    {form.tier === 'GENERAL' && mode === 'AD' && (
+                    {form.tier === 'LINE' && mode === 'AD' && (
                         <div className="bg-white rounded-2xl border border-gray-100 p-6">
                             <div className="text-center py-4">
-                                <p className="text-[14px] font-bold text-gray-600">📋 일반 광고는 기본 정보만 표시됩니다.</p>
-                                <p className="text-[12px] text-gray-400 mt-1">테마, 로고, 색상 등의 배너 꾸미기 기능은 스페셜/프리미엄 등급에서 사용 가능합니다.</p>
+                                <p className="text-[14px] font-bold text-gray-600">📋 줄 광고는 텍스트만 표시됩니다.</p>
+                                <p className="text-[12px] text-gray-400 mt-1">테마, 로고, 색상 등의 배너 꾸미기 기능은 스페셜/프리미엄/일반 등급에서 사용 가능합니다.</p>
                             </div>
                         </div>
                     )}

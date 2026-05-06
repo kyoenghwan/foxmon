@@ -189,7 +189,7 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
                 {lineJobs.length > 0 ? (
                     <div className={twoRowPremiumSpecialGridClasses}>
                         {lineJobs.map((job) => (
-                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" hideLogo={true} tier="GENERAL" />
+                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" hideLogo={true} tier="GENERAL" customColor={(job as any).color} />
                         ))}
                     </div>
                 ) : (
