@@ -99,29 +99,38 @@ export function MainBanner() {
                         'bg-gradient-to-br from-rose-900 via-fuchsia-900 to-black',
                         'bg-gradient-to-br from-emerald-900 via-teal-900 to-black',
                     ];
-                    const bgClass = hasImage ? 'bg-black' : fallbackGradients[idx % fallbackGradients.length];
+                    const bgClass = fallbackGradients[idx % fallbackGradients.length];
 
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
                             className={`flex-shrink-0 h-full rounded-2xl ${bgClass} p-6 shadow-md relative overflow-hidden group cursor-pointer`}
                             style={{ 
-                                width: 'calc((100% - 16px) / 2)',
-                                ...(hasImage ? { backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {})
+                                width: 'calc((100% - 16px) / 2)'
                             }}
                             onClick={() => handleAdClick(banner.id)}
                         >
                             {/* 가독성을 위한 어두운 그라데이션 오버레이 (강화) */}
-                            <div className={`absolute inset-0 bg-gradient-to-t ${hasImage ? 'from-black/95 via-black/60 to-black/20' : 'from-black/80 via-black/30 to-transparent'} z-10`} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
 
                             {/* 호버 시 밝기 조절 */}
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors z-15" />
 
                             <div className="relative z-20 h-full flex flex-col justify-between">
                                 <div className="space-y-3">
-                                    <h3 className="text-white font-black text-2xl mb-1 line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform origin-left duration-300">
-                                        {banner.company}
-                                    </h3>
+                                    <div className="flex items-center gap-3 mb-1">
+                                        {hasImage && (
+                                            <div className="w-12 h-8 sm:w-[60px] sm:h-[40px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
+                                                <div 
+                                                    className="w-full h-full bg-contain bg-center bg-no-repeat" 
+                                                    style={{ backgroundImage: `url(${bgUrl})` }} 
+                                                />
+                                            </div>
+                                        )}
+                                        <h3 className="text-white font-black text-xl sm:text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform origin-left duration-300">
+                                            {banner.company}
+                                        </h3>
+                                    </div>
                                     <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
                                         {banner.title}
                                     </p>
