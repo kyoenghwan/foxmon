@@ -241,10 +241,10 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                         </>
                     ) : (
                         <>
-                            {/* --- 기존 가로 레이아웃 상단: 로고 50%, 상호명 50% --- */}
+                            {/* --- 기존 가로 레이아웃 상단: 로고 2:1, 상호명 나머지 --- */}
                             <div className="flex w-full h-[50%] gap-2 pb-1.5">
-                                {/* 로고 영역 (1:1 비율 왼쪽) */}
-                                <div className="flex-1 min-w-0 bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0">
+                                {/* 로고 영역 (2:1 비율) */}
+                                <div className="aspect-[2/1] h-full min-w-0 bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0">
                                     {image ? (
                                         <div 
                                             className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
