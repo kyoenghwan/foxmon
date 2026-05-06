@@ -886,14 +886,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         </div>
                     )}
 
-                    {form.tier === 'LINE' && mode === 'AD' && (
-                        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                            <div className="text-center py-4">
-                                <p className="text-[14px] font-bold text-gray-600">📋 줄 광고는 텍스트만 표시됩니다.</p>
-                                <p className="text-[12px] text-gray-400 mt-1">테마, 로고, 색상 등의 배너 꾸미기 기능은 스페셜/프리미엄/일반 등급에서 사용 가능합니다.</p>
-                            </div>
-                        </div>
-                    )}
                 </div>
             )}
 
