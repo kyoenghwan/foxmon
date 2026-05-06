@@ -28,10 +28,12 @@ export interface AdFormData {
     pay_amount?: string;
     image: string;
     color: string;
+    bg_opacity?: string;
     tier: 'PREMIUM_MAIN' | 'PREMIUM' | 'SPECIAL' | 'GENERAL' | 'SIDE';
     auto_renew: boolean;
     theme?: string;
-    effect_intensity?: 'high' | 'medium' | 'low' | 'none';
+    effect_intensity?: string;
+    action_type?: string;
     logo_url?: string;
     // 상세 내용
     work_type: string;
@@ -153,12 +155,47 @@ const COLOR_PALETTE = [
 ];
 
 const ACTION_OPTIONS = [
-    { value: 'shimmer', label: '✨ 반짝임', desc: '사선으로 빛이 지나감' },
+    { value: 'shimmer', label: '✨ 반짝임', desc: '빛이 지나감' },
     { value: 'pulse', label: '🫀 숨쉬기', desc: '전체적으로 깜빡임' },
-    { value: 'rainbow-border', label: '🌈 무지개', desc: '화려한 테두리 회전' },
-    { value: 'glitch', label: '⚡ 글리치', desc: '사이버펑크 흔들림' },
+    { value: 'neon', label: '⚛️ 네온 펄스', desc: '네온사인 깜빡임' },
+    { value: 'flicker', label: '🌃 플리커', desc: '불안정하게 깜빡임' },
     { value: 'fire', label: '🔥 이글거림', desc: '불타는 듯한 효과' },
+    { value: 'ice', label: '❄️ 얼음 떨림', desc: '차갑게 떨리는 효과' },
+    { value: 'emerald', label: '💎 에메랄드', desc: '고급스러운 빛 흐름' },
+    { value: 'glitch', label: '⚡ 글리치', desc: '사이버펑크 흔들림' },
+    { value: 'forest', label: '🍃 숲의 일렁임', desc: '바람에 흔들리는 느낌' },
+    { value: 'ocean', label: '🌊 파도 흐름', desc: '부드러운 물결 흐름' },
+    { value: 'sakura', label: '🌸 벚꽃 흩날림', desc: '꽃잎 떨어지는 느낌' },
+    { value: 'galaxy', label: '🌌 은하수', desc: '별빛 반짝임' },
+    { value: 'sun', label: '☀️ 태양 눈부심', desc: '강렬한 빛 번짐' },
+    { value: 'lava', label: '🌋 마그마', desc: '용암이 끓는 느낌' },
+    { value: 'matrix', label: '⌨️ 매트릭스', desc: '디지털 코드 흐름' },
+    { value: 'retro', label: '🕺 레트로 펄스', desc: '복고풍 반짝임' },
+    { value: 'diamond', label: '💎 다이아몬드', desc: '날카로운 빛 반사' },
+    { value: 'platinum', label: '✨ 플래티넘', desc: '백금빛 흐름' },
+    { value: 'aura', label: '🔮 신비한 오라', desc: '주변이 일렁이는 기운' },
+    { value: 'candy', label: '🍬 캔디 팝', desc: '톡톡 튀는 젤리 느낌' },
+    { value: 'royal', label: '👑 로얄 럭셔리', desc: '고급스러운 보라빛 심연' },
+    { value: 'autumn', label: '🍂 가을빛', desc: '따스한 빛의 번짐' },
+    { value: 'toxic', label: '👾 맹독 슬라임', desc: '녹아내리는 끈적임' },
+    { value: 'storm', label: '🌩️ 뇌우 번개', desc: '강렬한 번개 번쩍임' },
+    { value: 'ghost', label: '👻 유령의 떨림', desc: '음산한 투명도 변화' },
+    { value: 'rainbow-border', label: '🌈 무지개', desc: '화려한 테두리 회전' },
     { value: 'none', label: '⛔ 없음', desc: '애니메이션 끄기' },
+];
+
+const EFFECT_OPTIONS = [
+    { value: 'high', label: '강', desc: '최대 애니메이션' },
+    { value: 'medium', label: '중', desc: '적당한 효과' },
+    { value: 'low', label: '약', desc: '은은한 효과' },
+];
+
+const BG_OPACITY_OPTIONS = [
+    { value: '0', label: '0% (투명)' },
+    { value: '5', label: '5% (아주 연하게)' },
+    { value: '10', label: '10% (연하게)' },
+    { value: '20', label: '20% (조금 진하게)' },
+    { value: '40', label: '40% (진하게)' },
 ];
 
 interface AdEditorFormProps {
@@ -318,6 +355,37 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         ? (initialData.detail_content.startsWith('{"version":') ? 'canvas' : 'html') 
         : 'canvas';
 
+    // effect_intensity 복합 데이터 파싱 ('강도::액션' 형식)
+    const initialIntensityData = initialData?.effect_intensity || 'medium';
+    let initIntensity = 'medium';
+    let initAction = 'shimmer';
+    if (initialIntensityData.includes('::')) {
+        const parts = initialIntensityData.split('::');
+        initIntensity = parts[0] || 'medium';
+        initAction = parts[1] || 'shimmer';
+    } else if (['high', 'medium', 'low', 'none'].includes(initialIntensityData)) {
+        initIntensity = initialIntensityData;
+        initAction = 'shimmer';
+    } else {
+        initIntensity = 'medium';
+        initAction = initialIntensityData;
+    }
+
+    // color 및 bg_opacity 파싱 ('#FF6B35::10' 형식)
+    const initialColorData = initialData?.color || '#FF6B35';
+    let initColor = '#FF6B35';
+    let initBgOpacity = '10'; // 기본값 10%
+    if (initialColorData.includes('::')) {
+        const parts = initialColorData.split('::');
+        initColor = parts[0] || '#FF6B35';
+        initBgOpacity = parts[1] || '10';
+    } else {
+        initColor = initialColorData;
+        initBgOpacity = '10';
+    }
+
+    const { effect_intensity: _ignore, color: _ignoreColor, ...restInitialData } = initialData || {};
+
     const [form, setForm] = useState<AdFormData>({
         company: '',
         title: '',
@@ -326,11 +394,13 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         pay_type: '월급',
         pay_amount: '',
         image: '',
-        color: '#FF6B35',
+        color: initColor,
+        bg_opacity: initBgOpacity,
         tier: 'GENERAL',
         auto_renew: false,
         theme: 'gold',
-        effect_intensity: 'medium',
+        effect_intensity: initIntensity,
+        action_type: initAction,
         logo_url: '',
         work_type: '',
         work_hours: '',
@@ -341,7 +411,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         design_mode: initialDesignMode,
         amenities: [],
         keywords: [],
-        ...initialData,
+        ...restInitialData,
     });
 
     const [regions, setRegions] = useState<CodeItem[]>([]);
@@ -482,7 +552,19 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         }
         setSaving(true);
         try {
-            await onSubmit(form);
+            const payload = { ...form };
+            if (payload.action_type && payload.effect_intensity) {
+                payload.effect_intensity = `${payload.effect_intensity}::${payload.action_type}`;
+            } else if (payload.action_type) {
+                payload.effect_intensity = `medium::${payload.action_type}`;
+            }
+            
+            // color 필드에 투명도 결합
+            if (payload.color && payload.bg_opacity) {
+                payload.color = `${payload.color}::${payload.bg_opacity}`;
+            }
+            
+            await onSubmit(payload);
         } finally {
             setSaving(false);
         }
@@ -615,11 +697,12 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                         pay={form.pay || '급여 정보'}
                                                         image={form.logo_url || form.image}
                                                         impactType={isGeneral ? 'none' : ((form.theme as any) || 'gold')}
-                                                        effectIntensity={isSpecial || isGeneral ? 'none' : ((form.effect_intensity as any) || 'shimmer')}
+                                                        effectIntensity={isSpecial || isGeneral || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'shimmer'}`}
                                                         isSide={isSide}
                                                         hideLogo={isGeneral}
                                                         tier={form.tier}
                                                         customColor={form.color}
+                                                        bgOpacity={form.bg_opacity}
                                                     />
                                                 </div>
                                             );
@@ -841,48 +924,98 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
                             {/* 액션 (애니메이션) 선택 (프리미엄 전용) */}
                             {form.tier === 'PREMIUM' && (
-                                <div>
-                                    <label className="text-[12px] font-bold text-gray-600 mb-2 block">액션(애니메이션) 선택</label>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                    {ACTION_OPTIONS.map(opt => (
-                                        <button
-                                            key={opt.value}
-                                            onClick={() => update('effect_intensity', opt.value)}
-                                            className={`py-2.5 px-2 rounded-lg border-2 text-center transition-all ${
-                                                form.effect_intensity === opt.value
-                                                    ? 'border-primary bg-orange-50 text-primary'
-                                                    : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            <p className="font-black text-[13px]">{opt.label}</p>
-                                            <p className="text-[10px] mt-0.5">{opt.desc}</p>
-                                        </button>
-                                    ))}
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-[12px] font-bold text-gray-600 mb-2 block">액션(애니메이션) 선택</label>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                        {ACTION_OPTIONS.map(opt => (
+                                            <button
+                                                key={opt.value}
+                                                type="button"
+                                                onClick={() => update('action_type', opt.value)}
+                                                className={`py-2 px-1.5 rounded-lg border-2 text-center transition-all flex flex-col items-center justify-center ${
+                                                    form.action_type === opt.value
+                                                        ? 'border-primary bg-orange-50 text-primary'
+                                                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                                                }`}
+                                            >
+                                                <p className="font-black text-[12px] whitespace-nowrap">{opt.label}</p>
+                                                <p className="text-[9px] mt-0.5 text-gray-400 leading-tight">{opt.desc}</p>
+                                            </button>
+                                        ))}
+                                        </div>
+                                    </div>
+
+                                    {form.action_type !== 'none' && (
+                                        <div>
+                                            <label className="text-[12px] font-bold text-gray-600 mb-2 block">액션 강도</label>
+                                            <div className="flex gap-2">
+                                            {EFFECT_OPTIONS.map(opt => (
+                                                <button
+                                                    key={opt.value}
+                                                    type="button"
+                                                    onClick={() => update('effect_intensity', opt.value)}
+                                                    className={`flex-1 py-2 rounded-lg border-2 text-center transition-all ${
+                                                        form.effect_intensity === opt.value
+                                                            ? 'border-primary bg-orange-50 text-primary'
+                                                            : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                                                    }`}
+                                                >
+                                                    <p className="font-black text-[13px]">{opt.label}</p>
+                                                    <p className="text-[10px] mt-0.5">{opt.desc}</p>
+                                                </button>
+                                            ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
                             )}
                         </div>
                     )}
 
-                    {mode === 'AD' && form.tier === 'GENERAL' && (
-                        <div className="bg-white rounded-2xl border border-blue-200 p-6 space-y-5">
+                    {mode === 'AD' && form.tier !== 'PREMIUM_MAIN' && (
+                        <div className="bg-white rounded-2xl border border-blue-200 p-6 space-y-5 mt-4">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
                                 <span className="text-[16px]">🎨</span>
-                                일반 배너 색상 설정
+                                배너 내부 배경색 설정
                             </h3>
 
                             {/* 색상 선택 */}
                             <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-2 block">배너 색상</label>
+                                <label className="text-[12px] font-bold text-gray-600 mb-2 block">색상 선택</label>
                                 <div className="flex gap-2 flex-wrap">
                                     {COLOR_PALETTE.map(color => (
                                         <button
                                             key={color}
+                                            type="button"
                                             onClick={() => update('color', color)}
                                             className={`w-9 h-9 rounded-full transition-all ${form.color === color ? 'ring-4 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-110'}`}
                                             style={{ backgroundColor: color }}
                                         />
                                     ))}
+                                </div>
+                            </div>
+
+                            {/* 배경 투명도 선택 */}
+                            <div>
+                                <label className="text-[12px] font-bold text-gray-600 mb-2 flex justify-between">
+                                    <span>배경 투명도 (적용 농도)</span>
+                                    <span className="text-blue-600 font-black">{form.bg_opacity || '10'}%</span>
+                                </label>
+                                <div className="flex items-center gap-4 py-2 px-1">
+                                    <input 
+                                        type="range" 
+                                        min="0" 
+                                        max="100" 
+                                        step="1"
+                                        value={form.bg_opacity || '10'} 
+                                        onChange={(e) => update('bg_opacity', e.target.value)}
+                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                    />
+                                </div>
+                                <div className="flex justify-between text-[10px] text-gray-400 font-medium px-1 mt-1">
+                                    <span>투명함 (0%)</span>
+                                    <span>진하게 (100%)</span>
                                 </div>
                             </div>
                         </div>

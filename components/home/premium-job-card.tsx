@@ -72,6 +72,7 @@ interface PremiumJobCardProps {
     tier?: string;
     id: string;
     customColor?: string;
+    bgOpacity?: string;
 }
 
 // 테마별 설정을 관리하는 매핑 객체 - 원래의 역동적인(Dynamic) 스타일로 복구
@@ -101,7 +102,7 @@ const THEME_CONFIG: Record<string, any> = {
     none: { label: 'HIT', color: 'text-gray-900', bg: 'bg-purple-700', border: 'border-gray-200', icon: Crown, animClass: '' }
 };
 
-export function PremiumJobCard({ company, title, location, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', hideLogo = false, tier, id, customColor }: PremiumJobCardProps) {
+export function PremiumJobCard({ company, title, location, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', hideLogo = false, tier, id, customColor, bgOpacity }: PremiumJobCardProps) {
     const { t } = useLanguage();
     
     // 1. 업체명 파싱
@@ -137,36 +138,45 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
     const isCrazy = impactType === 'neon_crazy';
     const isCyber = impactType === 'glitch';
 
+    const [intensity, action] = effectIntensity && effectIntensity.includes('::') 
+        ? effectIntensity.split('::') 
+        : [effectIntensity, effectIntensity]; // 하위 호환성
+
     let animClass = config.animClass;
     let opacityClass = 'opacity-50'; // 기본적으로 액션이 더 잘보이게 50%
     
     // 명시적인 액션(애니메이션) 타입 지정 (테마와 액션 분리)
-    if (effectIntensity === 'none') {
+    if (intensity === 'none' || action === 'none') {
         animClass = '';
         opacityClass = 'opacity-10'; // 정적일 땐 은은하게
-    } else if (effectIntensity === 'low') {
+    } else if (intensity === 'low') {
         opacityClass = 'opacity-30';
-        animClass = config.animClass ? `${config.animClass} duration-1000` : '';
-    } else if (effectIntensity === 'medium' || effectIntensity === 'high') {
-        // 기존 하위 호환성 유지: 테마의 기본 애니메이션 사용
-        opacityClass = effectIntensity === 'high' ? 'opacity-80' : 'opacity-50';
-    } else if (effectIntensity) {
-        // 커스텀 액션 (shimmer, pulse, rainbow, fire, glitch, matrix 등)
-        opacityClass = 'opacity-60'; // 액션이 명확히 보이도록
-        animClass = `animate-${effectIntensity}`;
+        animClass = action ? `animate-${action} duration-1000` : (config.animClass ? `${config.animClass} duration-1000` : '');
+    } else if (intensity === 'medium' || intensity === 'high') {
+        opacityClass = intensity === 'high' ? 'opacity-80' : 'opacity-60';
+        animClass = action && action !== 'high' && action !== 'medium' && action !== 'low' ? `animate-${action}` : config.animClass;
+    } else if (action) {
+        // 커스텀 액션 (shimmer, pulse, rainbow-border 등)
+        opacityClass = 'opacity-60';
+        animClass = `animate-${action}`;
     }
+
+    const parsedOpacity = parseInt(bgOpacity || (tier === 'GENERAL' ? '5' : '0'), 10);
+    const validOpacity = isNaN(parsedOpacity) ? 0 : Math.max(0, Math.min(100, parsedOpacity));
+    const hexOpacity = Math.round((validOpacity / 100) * 255).toString(16).padStart(2, '0').toUpperCase();
 
     return (
         <div className={`relative ${isBig ? 'h-full min-h-[292px]' : isSide ? 'aspect-[2/3]' : 'aspect-[3/2]'} w-full min-w-[140px] group p-[3px]`}>
             
             {/* --- [배로 아래 배경 레이어] --- */}
             {isImpact && (
-                <div className={`absolute inset-0 overflow-hidden rounded-xl z-0 ${animClass}`}>
-                    {!isCrazy && !isCyber && (
+                <div className={`absolute inset-0 overflow-hidden rounded-xl z-0 ${action !== 'rainbow-border' ? animClass : ''}`}>
+                    {!isCrazy && !isCyber && action !== 'rainbow-border' && (
                         <div className={`absolute inset-0 ${opacityClass} blur-[1px] ${config.bg}`} />
                     )}
-                    {isCrazy && (
-                        <div className="absolute inset-[-250%] animate-rainbow-border" />
+                    {/* 크레이지 테마이거나 액션이 무지개 테두리일 때 */}
+                    {(isCrazy || action === 'rainbow-border') && (
+                        <div className="absolute inset-[-250%] animate-rainbow-border opacity-100" />
                     )}
                 </div>
             )}
@@ -177,16 +187,31 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                 className={`relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm transition-all duration-300 p-1.5 sm:p-2 lg:p-2.5 flex flex-col justify-between z-10 ${
                     isCyber ? 'bg-black/95 text-white' : 'bg-white'
                 }`}
-                style={tier === 'GENERAL' && customColor ? { boxShadow: `0 0 0 1px ${customColor}40 inset`, backgroundColor: `${customColor}0D` } : {}}
             >
+                {/* --- [내부 배경 투명도 레이어] --- */}
+                {customColor && (
+                    <div 
+                        className="absolute inset-0 pointer-events-none z-[0]" 
+                        style={{ 
+                            backgroundColor: hexOpacity !== '00' ? `${customColor}${hexOpacity}` : 'transparent',
+                            boxShadow: `0 0 0 1px ${customColor}40 inset`
+                        }} 
+                    />
+                )}
                 {/* --- [오버레이 효과 레이어 (글자 뒤)] --- */}
                 {isImpact && !isCrazy && (
-                    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-                        {(impactType === 'gold' || impactType === 'diamond') && (
+                    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[calc(0.75rem-3px)]">
+                        {/* Shimmer 효과는 내부에 별도의 오버레이를 생성 */}
+                        {action === 'shimmer' && (
+                            <div className={`absolute inset-x-[-100%] inset-y-0 bg-gradient-to-r from-transparent via-white to-transparent skew-x-[-25deg] animate-shimmer opacity-70`} />
+                        )}
+                        {/* 기존 하위 호환성용 shimmer */}
+                        {(!action || action === 'high' || action === 'medium' || action === 'low') && (impactType === 'gold' || impactType === 'diamond') && (
                             <div className={`absolute inset-x-[-100%] inset-y-0 bg-gradient-to-r from-transparent via-white to-transparent skew-x-[-25deg] ${animClass}`} />
                         )}
-                        {impactType !== 'gold' && impactType !== 'diamond' && (
-                            <div className={`absolute inset-0 ${animClass} opacity-30`} />
+                        {/* 다른 애니메이션들의 내부 오버레이 (무지개 테두리는 제외) */}
+                        {action !== 'shimmer' && action !== 'rainbow-border' && impactType !== 'gold' && impactType !== 'diamond' && (
+                            <div className={`absolute inset-0 ${animClass} opacity-30 mix-blend-overlay`} />
                         )}
                     </div>
                 )}

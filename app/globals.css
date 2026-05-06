@@ -113,7 +113,7 @@
     100% { transform: translateX(200%); }
   }
   .animate-shimmer {
-    /* animation: shimmer 2s infinite linear; */
+    animation: shimmer 2s infinite linear;
   }
 
   /* ⚛️ Neon Pulse Effect */
@@ -184,7 +184,7 @@
 
   /* ⌨️ Matrix Code */
   @keyframes matrix-code { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
-  .animate-matrix { background: linear-gradient(180deg, transparent, #22c55e, transparent); background-size: 100% 50%; /* animation: matrix-code 1.5s infinite linear; */ }
+  .animate-matrix { background: linear-gradient(180deg, transparent, #22c55e, transparent); background-size: 100% 50%; animation: matrix-code 1.5s infinite linear; }
 
   /* 🕺 Retro Vibe */
   @keyframes retro-pulse { 0%, 100% { border-color: #f472b6; box-shadow: 0 0 10px #f472b6; } 50% { border-color: #22d3ee; box-shadow: 0 0 20px #22d3ee; } }
@@ -192,11 +192,11 @@
 
   /* ✨ Gold Shimmer (L to R) */
   @keyframes shimmer { 0% { transform: translateX(-200%); } 100% { transform: translateX(200%); } }
-  .animate-shimmer { /* animation: shimmer 2s infinite linear; */ }
+  .animate-shimmer { animation: shimmer 2s infinite linear; }
 
   /* 💎 Diamond Glint */
   @keyframes diamond-glint { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
-  .animate-diamond { /* animation: diamond-glint 2s infinite ease-in-out; */ }
+  .animate-diamond { animation: diamond-glint 2s infinite ease-in-out; }
 
   /* ✨ Platinum Shine */
   @keyframes platinum-shine { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
@@ -234,6 +234,6 @@
   @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   .animate-rainbow-border {
     background: conic-gradient(from 0deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8f00ff, #ff0000);
-    /* animation: spin-slow 3s linear infinite; */
+    animation: spin-slow 3s linear infinite;
   }
 }
