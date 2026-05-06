@@ -70,10 +70,11 @@ function OptionCard({ baseOpt, pricingOptions, setPricingOptions }: any) {
             
             <div className="space-y-3">
                 {/* 30일 */}
-                <div className="flex items-center gap-2">
-                    <span className="w-10 text-[13px] font-bold text-gray-600">30일</span>
-                    <input type="number" value={val30} onChange={e => handlePriceChange(30, parseInt(e.target.value) || 0)} className="flex-1 px-3 py-1.5 border-2 border-gray-200 rounded-lg text-right font-black focus:border-primary outline-none transition-colors" />
-                    <span className="text-gray-400 font-black text-sm">P</span>
+                <div className="flex items-center gap-1.5">
+                    <span className="w-9 shrink-0 text-[13px] font-bold text-gray-600">30일</span>
+                    <div className="w-[50px] shrink-0" />
+                    <input type="number" value={val30} onChange={e => handlePriceChange(30, parseInt(e.target.value) || 0)} className="flex-1 min-w-0 px-2 py-1.5 border-2 border-gray-200 rounded-lg text-right font-black focus:border-primary outline-none transition-colors" />
+                    <span className="text-gray-400 shrink-0 font-black text-sm">P</span>
                 </div>
 
                 {/* 60일 */}
