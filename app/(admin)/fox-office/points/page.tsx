@@ -25,6 +25,14 @@ import { PolicyFormModal } from '@/components/admin/points/PolicyFormModal';
 import { TierConfigEditor } from '@/components/admin/points/TierConfigEditor';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
+const TIER_OPTIONS = [
+    { key: 'TIER_PRICE_PREMIUM_MAIN', title: '👑 프리미엄 메인', desc: '최상단 롤링 배너 (AI 배경 생성 제공)' },
+    { key: 'TIER_PRICE_SIDE', title: '🚀 사이드', desc: '우측 사이드 세로 배너' },
+    { key: 'TIER_PRICE_PREMIUM', title: '💎 프리미엄', desc: '본문 최상단 테마 강조 노출' },
+    { key: 'TIER_PRICE_SPECIAL', title: '⭐ 스페셜', desc: '프리미엄 하단 우선 노출' },
+    { key: 'TIER_PRICE_GENERAL', title: '📋 일반', desc: '기본 리스트 노출' },
+];
+
 const BASE_OPTIONS = [
     { key: 'OPTION_PRICE_BASE_PERIOD', title: '기본 패키지', desc: '구인광고 기본 노출 요금입니다.' },
     { key: 'OPTION_PRICE_BOLD', title: '제목 굵게', desc: '제목을 굵게 표시하여 눈에 띄게' },
@@ -69,32 +77,54 @@ function OptionCard({ baseOpt, pricingOptions, setPricingOptions }: any) {
                 </div>
 
                 {/* 60일 */}
-                <div className="flex items-center gap-2">
-                    <span className="w-10 text-[13px] font-bold text-gray-600">60일</span>
+                <div className="flex items-center gap-1.5">
+                    <span className="w-9 shrink-0 text-[13px] font-bold text-gray-600">60일</span>
                     <input type="number" placeholder="%" value={percent60} onChange={e => {
                         setPercent60(e.target.value);
                         if (e.target.value) handlePercentChange(60, parseFloat(e.target.value));
-                    }} className="w-14 px-1 py-1.5 border border-gray-200 rounded-lg text-center text-sm font-bold text-blue-600 focus:border-blue-500 outline-none bg-blue-50" />
+                    }} className="w-[50px] shrink-0 px-1 py-1.5 border border-gray-200 rounded-lg text-center text-sm font-bold text-blue-600 focus:border-blue-500 outline-none bg-blue-50" />
                     <input type="number" value={val60} onChange={e => {
                         setPercent60('');
                         handlePriceChange(60, parseInt(e.target.value) || 0);
-                    }} className="flex-1 px-3 py-1.5 border-2 border-gray-200 rounded-lg text-right font-black focus:border-primary outline-none transition-colors" />
-                    <span className="text-gray-400 font-black text-sm">P</span>
+                    }} className="flex-1 min-w-0 px-2 py-1.5 border-2 border-gray-200 rounded-lg text-right font-black focus:border-primary outline-none transition-colors" />
+                    <span className="text-gray-400 shrink-0 font-black text-sm">P</span>
                 </div>
 
                 {/* 90일 */}
-                <div className="flex items-center gap-2">
-                    <span className="w-10 text-[13px] font-bold text-gray-600">90일</span>
+                <div className="flex items-center gap-1.5">
+                    <span className="w-9 shrink-0 text-[13px] font-bold text-gray-600">90일</span>
                     <input type="number" placeholder="%" value={percent90} onChange={e => {
                         setPercent90(e.target.value);
                         if (e.target.value) handlePercentChange(90, parseFloat(e.target.value));
-                    }} className="w-14 px-1 py-1.5 border border-gray-200 rounded-lg text-center text-sm font-bold text-blue-600 focus:border-blue-500 outline-none bg-blue-50" />
+                    }} className="w-[50px] shrink-0 px-1 py-1.5 border border-gray-200 rounded-lg text-center text-sm font-bold text-blue-600 focus:border-blue-500 outline-none bg-blue-50" />
                     <input type="number" value={val90} onChange={e => {
                         setPercent90('');
                         handlePriceChange(90, parseInt(e.target.value) || 0);
-                    }} className="flex-1 px-3 py-1.5 border-2 border-gray-200 rounded-lg text-right font-black focus:border-primary outline-none transition-colors" />
-                    <span className="text-gray-400 font-black text-sm">P</span>
+                    }} className="flex-1 min-w-0 px-2 py-1.5 border-2 border-gray-200 rounded-lg text-right font-black focus:border-primary outline-none transition-colors" />
+                    <span className="text-gray-400 shrink-0 font-black text-sm">P</span>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function TierCard({ tierOpt, pricingOptions, setPricingOptions }: any) {
+    const val = pricingOptions.find((p: PointPolicyItem) => p.config_key === tierOpt.key)?.config_value || 0;
+
+    const handlePriceChange = (value: number) => {
+        setPricingOptions((prev: PointPolicyItem[]) => prev.map(p => p.config_key === tierOpt.key ? { ...p, config_value: value } : p));
+    };
+
+    return (
+        <div className="p-5 border border-indigo-100 rounded-2xl bg-indigo-50/30 hover:border-indigo-300 transition-all shadow-sm">
+            <div className="text-[12px] font-black text-indigo-500 opacity-80 uppercase tracking-widest">{tierOpt.key}</div>
+            <div className="font-bold text-[16px] text-gray-900 mt-1">{tierOpt.title}</div>
+            <p className="text-[12px] text-gray-500 mt-1 mb-4 h-8">{tierOpt.desc}</p>
+            
+            <div className="flex items-center gap-2">
+                <span className="text-[13px] font-bold text-gray-600 whitespace-nowrap">단일 요금</span>
+                <input type="number" value={val} onChange={e => handlePriceChange(parseInt(e.target.value) || 0)} className="flex-1 min-w-0 px-3 py-2 border-2 border-indigo-200 rounded-lg text-right font-black text-lg focus:border-indigo-500 outline-none transition-colors" />
+                <span className="text-gray-400 font-black text-sm shrink-0">P</span>
             </div>
         </div>
     );
@@ -122,7 +152,7 @@ export default function AdminPointsPolicyPage() {
     const fetchData = async () => {
       const res = await GET_POINT_POLICIES();
       if (res.success && res.data) {
-        setPricingOptions(res.data.filter(p => p.config_key.startsWith('OPTION_PRICE_')));
+        setPricingOptions(res.data.filter(p => p.config_key.startsWith('OPTION_PRICE_') || p.config_key.startsWith('TIER_PRICE_')));
       }
       setIsLoading(false);
     };
@@ -215,6 +245,24 @@ export default function AdminPointsPolicyPage() {
                   setPricingOptions={setPricingOptions} 
                 />
               ))}
+            </div>
+
+            <div className="mt-8 pt-8 border-t border-gray-100">
+              <h3 className="text-lg font-black flex items-center gap-2 mb-1">
+                <Badge variant="outline" className="bg-indigo-50 text-indigo-600 border-indigo-200">New</Badge>
+                광고 등급(Tier) 단일 요금표
+              </h3>
+              <p className="text-[13px] text-gray-500 font-medium mb-5">구인광고 등록 시 등급별로 부과되는 기본 요금을 설정합니다.</p>
+              <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+                {TIER_OPTIONS.map(tierOpt => (
+                  <TierCard 
+                    key={tierOpt.key} 
+                    tierOpt={tierOpt} 
+                    pricingOptions={pricingOptions} 
+                    setPricingOptions={setPricingOptions} 
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </TabsContent>

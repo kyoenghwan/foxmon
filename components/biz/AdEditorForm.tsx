@@ -350,6 +350,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
     const [selectedSido, setSelectedSido] = useState<string>('');
     const [selectedSigungu, setSelectedSigungu] = useState<string>('');
+    
+    // DB에서 동적으로 불러온 등급 가격 상태
+    const [tierGroups, setTierGroups] = useState(TIER_GROUPS);
+    const [tierOptions, setTierOptions] = useState(TIER_OPTIONS);
 
     // 초기 데이터 로딩 시 마스터 데이터 전체 로딩
     useEffect(() => {
@@ -381,8 +385,31 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             }
         };
 
+        const fetchTierPrices = async () => {
+            const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
+            const res = await GET_POINT_POLICIES();
+            if (res.success && res.data) {
+                const getPrice = (key: string, def: number) => res.data.find(p => p.config_key === key)?.config_value ?? def;
+                
+                const updatedGroups = TIER_GROUPS.map(group => ({
+                    ...group,
+                    options: group.options.map(opt => {
+                        const price = getPrice(`TIER_PRICE_${opt.value}`, opt.price);
+                        return {
+                            ...opt,
+                            price,
+                            priceLabel: price.toLocaleString() + 'P'
+                        };
+                    })
+                }));
+                setTierGroups(updatedGroups);
+                setTierOptions(updatedGroups.flatMap(g => g.options));
+            }
+        };
+
         fetchMasterData();
         fetchUserProfile();
+        fetchTierPrices();
     }, [isNew]);
 
     useEffect(() => {
@@ -456,7 +483,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         }
     };
 
-    const currentTier = TIER_OPTIONS.find(t => t.value === form.tier) || TIER_OPTIONS[0];
+    const currentTier = tierOptions.find(t => t.value === form.tier) || tierOptions[0];
     const discountedPrice = Math.floor(currentTier.price * 0.95);
 
     const sidoOptions = regions.filter(r => !r.parent_code_value);
@@ -522,7 +549,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             </h3>
 
                             <div className="space-y-4">
-                                {TIER_GROUPS.map((group, gIdx) => (
+                                {tierGroups.map((group, gIdx) => (
                                     <div key={gIdx} className="space-y-2">
                                         <h4 className="text-[12px] font-bold text-gray-500 bg-gray-50 inline-block px-2 py-0.5 rounded-md">
                                             {group.title}

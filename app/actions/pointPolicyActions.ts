@@ -12,8 +12,16 @@ export interface PointPolicyItem {
     is_override?: boolean;
 }
 
-// 기본 유료 광고 설정값 (최초 삽입용 30/60/90일 개별 기준)
+// 기본 유료 광고 설정값 (최초 삽입용 30/60/90일 개별 기준 및 등급별 기본료)
 const DEFAULT_POLICIES = [
+    // 광고 등급(Tier) 단일 기본료
+    { config_key: 'TIER_PRICE_PREMIUM_MAIN', config_value: 500000 },
+    { config_key: 'TIER_PRICE_SIDE', config_value: 200000 },
+    { config_key: 'TIER_PRICE_PREMIUM', config_value: 300000 },
+    { config_key: 'TIER_PRICE_SPECIAL', config_value: 150000 },
+    { config_key: 'TIER_PRICE_GENERAL', config_value: 50000 },
+    
+    // 기간별 패키지 요금
     { config_key: 'OPTION_PRICE_BASE_PERIOD_30', config_value: 70000 },
     { config_key: 'OPTION_PRICE_BASE_PERIOD_60', config_value: 125000 },
     { config_key: 'OPTION_PRICE_BASE_PERIOD_90', config_value: 170000 },

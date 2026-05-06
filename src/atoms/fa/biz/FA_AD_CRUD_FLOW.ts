@@ -8,26 +8,7 @@ interface AdCrudInput {
     payload?: Partial<AdFormData>;
 }
 
-// 결제 및 옵션 가격 정책 (프론트엔드와 동일)
-const JOB_PRICING = {
-    tier: {
-        PREMIUM_MAIN: 500000,
-        SIDE: 200000,
-        PREMIUM: 300000,
-        SPECIAL: 150000,
-        GENERAL: 50000
-    },
-    period: { 30: 70000, 60: 125000, 90: 170000 },
-    options: {
-        bold: { 30: 30000, 60: 55000, 90: 70000 },
-        color: { 30: 15000, 60: 25000, 90: 35000 },
-        bg: { 30: 15000, 60: 25000, 90: 35000 },
-        highlight: { 30: 15000, 60: 25000, 90: 35000 },
-        icon: { 30: 15000, 60: 25000, 90: 35000 },
-        general_icons: { 30: 10000, 60: 18000, 90: 25000 },
-        jump: { 30: 30000, 60: 55000, 90: 70000 },
-    }
-};
+// 하드코딩된 JOB_PRICING 상수 제거 (이제 DB에서 동적으로 불러옵니다)
 
 export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: AdCrudInput) {
     console.log(`⚛️ [FA_AD_CRUD_FLOW] ${actionType} 요청 - User: ${userId}, JobId: ${jobId}`);
@@ -37,22 +18,27 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             if (!payload) return { success: false, message: 'payload가 필요합니다.' };
 
             // 1. 서버 측에서 최종 결제 포인트 재계산 (보안 검증)
+            const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
+            const policiesRes = await GET_POINT_POLICIES();
+            const policies = policiesRes.success && policiesRes.data ? policiesRes.data : [];
+            const getPrice = (key: string, def: number = 0) => policies.find(p => p.config_key === key)?.config_value || def;
+
             const p = (payload.exposure_period || 30) as 30 | 60 | 90;
             const t = payload.tier || 'GENERAL';
             
             // 티어 기본료 + 기간 기본료 + 옵션
-            let totalPoints = (JOB_PRICING.tier[t as keyof typeof JOB_PRICING.tier] || 0);
+            let totalPoints = getPrice(`TIER_PRICE_${t}`, 0);
             
             // 일반 구인 공고의 경우 기간 요금이 부과될 수 있음 (기획에 따라 다름)
             if (t === 'GENERAL') {
-                totalPoints += (JOB_PRICING.period[p] || 0);
+                totalPoints += getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, 0);
             }
             
-            if (payload.option_bold) totalPoints += JOB_PRICING.options.bold[p] || 0;
-            if (payload.option_color) totalPoints += JOB_PRICING.options.color[p] || 0;
-            if (payload.option_bg) totalPoints += JOB_PRICING.options.bg[p] || 0;
-            if (payload.option_icon) totalPoints += JOB_PRICING.options.icon[p] || 0;
-            if (payload.option_jump) totalPoints += JOB_PRICING.options.jump[p] || 0;
+            if (payload.option_bold) totalPoints += getPrice(`OPTION_PRICE_BOLD_${p}`, 0);
+            if (payload.option_color) totalPoints += getPrice(`OPTION_PRICE_COLOR_${p}`, 0);
+            if (payload.option_bg) totalPoints += getPrice(`OPTION_PRICE_BG_${p}`, 0);
+            if (payload.option_icon) totalPoints += getPrice(`OPTION_PRICE_ICON_${p}`, 0);
+            if (payload.option_jump) totalPoints += getPrice(`OPTION_PRICE_JUMP_${p}`, 0);
 
             // 2. 포인트 차감 진행 (무조건 자동 차감)
             if (totalPoints > 0) {
@@ -168,17 +154,22 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             const isPaymentUpdate = !!payload.exposure_period && payload._isPayment === true;
 
             if (isPaymentUpdate) {
+                const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
+                const policiesRes = await GET_POINT_POLICIES();
+                const policies = policiesRes.success && policiesRes.data ? policiesRes.data : [];
+                const getPrice = (key: string, def: number = 0) => policies.find(p => p.config_key === key)?.config_value || def;
+
                 const p = payload.exposure_period as 30 | 60 | 90;
-                totalPoints = JOB_PRICING.period[p] || 0;
-                if (payload.option_bold) totalPoints += JOB_PRICING.options.bold[payload.option_bold_period || 30] || 0;
-                if (payload.option_color) totalPoints += JOB_PRICING.options.color[payload.option_color_period || 30] || 0;
-                if (payload.option_bg) totalPoints += JOB_PRICING.options.bg[payload.option_bg_period || 30] || 0;
-                if (payload.option_highlight) totalPoints += JOB_PRICING.options.highlight[payload.option_highlight_period || 30] || 0;
-                if (payload.option_icon) totalPoints += JOB_PRICING.options.icon[payload.option_icon_period || 30] || 0;
+                totalPoints = getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, 0);
+                if (payload.option_bold) totalPoints += getPrice(`OPTION_PRICE_BOLD_${payload.option_bold_period || 30}`, 0);
+                if (payload.option_color) totalPoints += getPrice(`OPTION_PRICE_COLOR_${payload.option_color_period || 30}`, 0);
+                if (payload.option_bg) totalPoints += getPrice(`OPTION_PRICE_BG_${payload.option_bg_period || 30}`, 0);
+                if (payload.option_highlight) totalPoints += getPrice(`OPTION_PRICE_HIGHLIGHT_${payload.option_highlight_period || 30}`, 0);
+                if (payload.option_icon) totalPoints += getPrice(`OPTION_PRICE_ICON_${payload.option_icon_period || 30}`, 0);
                 if (payload.option_general_icons && payload.option_general_icons.length > 0) {
-                    totalPoints += (JOB_PRICING.options.general_icons[payload.option_general_icons_period || 30] || 0) * payload.option_general_icons.length;
+                    totalPoints += getPrice(`OPTION_PRICE_GENERAL_ICONS_${payload.option_general_icons_period || 30}`, 0) * payload.option_general_icons.length;
                 }
-                if (payload.option_jump) totalPoints += JOB_PRICING.options.jump[payload.option_jump_period || 30] || 0;
+                if (payload.option_jump) totalPoints += getPrice(`OPTION_PRICE_JUMP_${payload.option_jump_period || 30}`, 0);
 
                 if (totalPoints > 0) {
                     const { FA_DEDUCT_POINT_FOR_AD } = await import('@/src/atoms/fa/points/FA_DEDUCT_POINT_FOR_AD');
