@@ -465,8 +465,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             update('pay_amount', '');
             update('pay', '추후협의');
         } else {
-            update('pay_amount', amount);
-            update('pay', amount ? `${type} ${amount}` : '');
+            const rawValue = amount.replace(/[^0-9]/g, '');
+            const formattedAmount = rawValue ? parseInt(rawValue, 10).toLocaleString() : '';
+            update('pay_amount', formattedAmount);
+            update('pay', formattedAmount ? `${type} ${formattedAmount}` : '');
         }
     };
 
