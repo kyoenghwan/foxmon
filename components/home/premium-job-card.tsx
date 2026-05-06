@@ -110,11 +110,22 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
 
     // 2. 급여 데이터 파싱
     let payType = '';
-    let payAmount = pay;
-    if (pay.includes(']') && pay.startsWith('[')) {
-        const parts = pay.split(']');
+    let payAmount = pay || '';
+    if (payAmount.includes(']') && payAmount.startsWith('[')) {
+        // 구형 데이터 포맷: [월급] 3,000,000
+        const parts = payAmount.split(']');
         payType = parts[0].replace('[', '').trim();
         payAmount = parts[1].trim();
+    } else if (payAmount === '추후협의') {
+        payType = '협의';
+        payAmount = '추후협의';
+    } else {
+        // 신형 데이터 포맷: 월급 3,000,000 또는 건당 1,000,000
+        const parts = payAmount.split(' ');
+        if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0])) {
+            payType = parts[0];
+            payAmount = parts.slice(1).join(' ');
+        }
     }
 
     const config = THEME_CONFIG[impactType] || THEME_CONFIG.none;

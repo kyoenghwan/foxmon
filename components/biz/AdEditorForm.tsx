@@ -646,42 +646,36 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                                 style={{ background: `linear-gradient(135deg, ${themeColor}08 0%, transparent 60%)` }} />
                                                         )}
 
-                                                        <div className="flex gap-1.5 sm:gap-2 mb-1 relative z-10 w-full">
-                                                            <div className="w-[70px] h-[35px] sm:w-[85px] sm:h-[42px] lg:w-[110px] lg:h-[55px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm transition-all"
-                                                                style={{ borderWidth: 1, borderColor: isSpecial ? themeColor + '30' : '#f3f4f6' }}>
-                                                                {(form.logo_url || form.image) && !isGeneral ? (
+                                                        {/* 상단: 지역 + 업소명 */}
+                                                        <div className="flex items-center gap-1.5 sm:gap-2 mb-1 relative z-10 w-full overflow-hidden">
+                                                            {((form.logo_url || form.image) && !isGeneral) ? (
+                                                                <div className="w-[60px] h-[30px] sm:w-[75px] sm:h-[38px] lg:w-[90px] lg:h-[45px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm transition-all"
+                                                                    style={{ borderWidth: 1, borderColor: isSpecial ? themeColor + '30' : '#f3f4f6' }}>
                                                                     <div className="w-full h-full bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${form.logo_url || form.image})` }} />
-                                                                ) : (
-                                                                    <div className="text-gray-300 font-black text-[10px] bg-gray-100 w-full h-full flex items-center justify-center">NO LOGO</div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5 overflow-hidden">
-                                                                <div className="relative w-full overflow-hidden whitespace-nowrap">
-                                                                    <h3 className="font-black text-[12px] sm:text-[13px] lg:text-[15px] tracking-tight inline-block hover:animate-pulse transition-colors"
-                                                                        style={{ color: isSpecial ? themeColor : '#111827' }}>
-                                                                        {form.company || '업체명'}
-                                                                    </h3>
                                                                 </div>
-                                                                <div className="flex items-center text-[10px] sm:text-[11px] lg:text-[12px] text-gray-500 truncate tracking-tight mt-0.5">
-                                                                    <span className="shrink-0 px-1 py-[1px] leading-none mr-1 sm:mr-1.5 font-bold rounded-[2px]"
-                                                                        style={{
-                                                                            color: isSpecial ? themeColor : '#2b6cb0',
-                                                                            borderWidth: 1,
-                                                                            borderColor: isSpecial ? themeColor + '50' : '#2b6cb0',
-                                                                            backgroundColor: isSpecial ? themeColor + '10' : '#ebf8ff'
-                                                                        }}>
-                                                                        {(form.location || '지역').split(' ')[0]}
-                                                                    </span>
-                                                                    <span className="truncate font-medium">
-                                                                        {(form.location || '전지역').split(' ').slice(1).join(' ') || '전지역'}
-                                                                    </span>
-                                                                </div>
+                                                            ) : null}
+
+                                                            <div className="flex items-center gap-1.5 w-full overflow-hidden">
+                                                                <span className="shrink-0 px-1.5 py-[2px] leading-none font-bold rounded-[3px] text-[10px] sm:text-[11px] lg:text-[12px]"
+                                                                    style={{
+                                                                        color: isSpecial ? themeColor : '#2b6cb0',
+                                                                        borderWidth: 1,
+                                                                        borderColor: isSpecial ? themeColor + '50' : '#2b6cb0',
+                                                                        backgroundColor: isSpecial ? themeColor + '10' : '#ebf8ff'
+                                                                    }}>
+                                                                    {(form.location || '지역').split(' ')[0]}
+                                                                </span>
+                                                                <h3 className="font-black text-[13px] sm:text-[14px] lg:text-[16px] tracking-tight truncate flex-1 hover:animate-pulse transition-colors"
+                                                                    style={{ color: isSpecial ? themeColor : '#111827' }}>
+                                                                    {form.company || '업체명'}
+                                                                </h3>
                                                             </div>
                                                         </div>
 
+                                                        {/* 중단: 광고 제목 */}
                                                         <div className="mb-1 flex-1 flex flex-col justify-center relative z-10 w-full overflow-hidden">
                                                             <div className="relative w-full overflow-hidden whitespace-nowrap">
-                                                                <p className="text-[11px] sm:text-[12px] lg:text-[13px] leading-[1.3] font-bold tracking-tight inline-block px-1 rounded-[2px] hover:animate-pulse"
+                                                                <p className="text-[12px] sm:text-[13px] lg:text-[14px] leading-[1.3] font-bold tracking-tight inline-block px-1 rounded-[2px] hover:animate-pulse"
                                                                     style={{
                                                                         color: '#1f2937',
                                                                         backgroundColor: isSpecial ? themeColor + '15' : '#bbf7d050'
@@ -691,15 +685,20 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                             </div>
                                                         </div>
 
+                                                        {/* 하단: 급여 및 등급 뱃지 */}
                                                         <div className="flex items-end justify-between mt-auto relative z-10">
-                                                            <div className="flex items-center text-[12px] sm:text-[13px] lg:text-[15px] font-bold text-gray-900 truncate tracking-tight gap-1 sm:gap-1.5">
-                                                                <span className="shrink-0 text-white text-[9px] sm:text-[10px] lg:text-[11px] px-1 sm:px-1.5 py-[1px] sm:py-0.5 rounded-sm shadow-sm"
-                                                                    style={{ backgroundColor: isSpecial ? themeColor : '#805ad5' }}>
-                                                                    TC
+                                                            <div className="flex items-center text-[13px] sm:text-[14px] lg:text-[16px] font-black text-gray-900 truncate tracking-tight gap-1.5 sm:gap-2">
+                                                                {form.pay_type && (
+                                                                    <span className="shrink-0 text-white text-[10px] sm:text-[11px] lg:text-[12px] px-1.5 sm:px-2 py-[2px] sm:py-[3px] rounded-md shadow-sm"
+                                                                        style={{ backgroundColor: isSpecial ? themeColor : '#805ad5' }}>
+                                                                        {form.pay_type}
+                                                                    </span>
+                                                                )}
+                                                                <span className="text-gray-800">
+                                                                    {form.pay_amount ? `${form.pay_amount}` : (form.pay || '급여 정보')}
                                                                 </span>
-                                                                <span className="text-gray-800">{form.pay || '급여 정보'}</span>
                                                             </div>
-                                                            <div className="shrink-0 flex items-center px-1 sm:px-1.5 py-[1px] sm:py-0.5 rounded-sm text-[9px] sm:text-[10px] lg:text-[11px] font-black shadow-sm bg-gray-100 text-gray-700 border border-gray-300">
+                                                            <div className="shrink-0 flex items-center px-1.5 py-[2px] rounded-sm text-[10px] lg:text-[11px] font-black shadow-sm bg-gray-100 text-gray-700 border border-gray-300">
                                                                 <Crown className="w-[10px] h-[10px] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-gray-500" /> 일반업체
                                                             </div>
                                                         </div>
