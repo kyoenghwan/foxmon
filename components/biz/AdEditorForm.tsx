@@ -610,99 +610,21 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             const isSide = form.tier === 'SIDE';
                                             const isSpecial = form.tier === 'SPECIAL';
                                             const isGeneral = form.tier === 'GENERAL';
-                                            const themeColor = isSpecial ? (form.color || '#FF6B35') : '#6B7280';
-
-                                            if (isPremium || isSide) {
-                                                return (
-                                                    <div className={`${isSide ? 'w-[140px]' : 'w-[240px]'}`}>
-                                                        <PremiumJobCard
-                                                            id="preview"
-                                                            company={form.company || '업체명'}
-                                                            title={form.title || '광고 제목을 입력하세요'}
-                                                            location={form.location || '전지역'}
-                                                            pay={form.pay || '급여 정보'}
-                                                            image={form.logo_url || form.image}
-                                                            impactType={(form.theme as any) || 'gold'}
-                                                            effectIntensity={(form.effect_intensity as any) || 'medium'}
-                                                            isSide={isSide}
-                                                        />
-                                                    </div>
-                                                );
-                                            }
-
                                             return (
-                                                <div className="relative aspect-[2/1] w-[240px] p-[3px] group">
-                                                    {/* 스페셜 배경 글로우 */}
-                                                    {isSpecial && (
-                                                        <div className="absolute inset-0 overflow-hidden rounded-xl z-0"
-                                                            style={{ backgroundColor: themeColor, opacity: 0.5 }} />
-                                                    )}
-
-                                                    <div className="relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm p-1.5 sm:p-2 lg:p-2.5 flex flex-col justify-between z-10 bg-white transition-all duration-300"
-                                                        style={{ borderWidth: 2, borderColor: isSpecial ? themeColor + '80' : '#e5e7eb' }}>
-                                                        
-                                                        {isSpecial && (
-                                                            <div className="absolute inset-0 pointer-events-none z-0"
-                                                                style={{ background: `linear-gradient(135deg, ${themeColor}08 0%, transparent 60%)` }} />
-                                                        )}
-
-                                                        {/* 상단: 지역 + 업소명 */}
-                                                        <div className="flex items-center gap-1.5 sm:gap-2 mb-1 relative z-10 w-full overflow-hidden">
-                                                            {((form.logo_url || form.image) && !isGeneral) ? (
-                                                                <div className="w-[60px] h-[30px] sm:w-[75px] sm:h-[38px] lg:w-[90px] lg:h-[45px] shrink-0 overflow-hidden bg-gray-50 flex items-center justify-center rounded-sm transition-all"
-                                                                    style={{ borderWidth: 1, borderColor: isSpecial ? themeColor + '30' : '#f3f4f6' }}>
-                                                                    <div className="w-full h-full bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${form.logo_url || form.image})` }} />
-                                                                </div>
-                                                            ) : null}
-
-                                                            <div className="flex items-center gap-1.5 w-full overflow-hidden">
-                                                                <span className="shrink-0 px-1.5 py-[2px] leading-none font-bold rounded-[3px] text-[10px] sm:text-[11px] lg:text-[12px]"
-                                                                    style={{
-                                                                        color: isSpecial ? themeColor : '#2b6cb0',
-                                                                        borderWidth: 1,
-                                                                        borderColor: isSpecial ? themeColor + '50' : '#2b6cb0',
-                                                                        backgroundColor: isSpecial ? themeColor + '10' : '#ebf8ff'
-                                                                    }}>
-                                                                    {(form.location || '지역').split(' ')[0]}
-                                                                </span>
-                                                                <h3 className="font-black text-[13px] sm:text-[14px] lg:text-[16px] tracking-tight truncate flex-1 hover:animate-pulse transition-colors"
-                                                                    style={{ color: isSpecial ? themeColor : '#111827' }}>
-                                                                    {form.company || '업체명'}
-                                                                </h3>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* 중단: 광고 제목 */}
-                                                        <div className="mb-1 flex-1 flex flex-col justify-center relative z-10 w-full overflow-hidden">
-                                                            <div className="relative w-full overflow-hidden whitespace-nowrap">
-                                                                <p className="text-[12px] sm:text-[13px] lg:text-[14px] leading-[1.3] font-bold tracking-tight inline-block px-1 rounded-[2px] hover:animate-pulse"
-                                                                    style={{
-                                                                        color: '#1f2937',
-                                                                        backgroundColor: isSpecial ? themeColor + '15' : '#bbf7d050'
-                                                                    }}>
-                                                                    {form.title || '광고 제목을 입력하세요'}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* 하단: 급여 및 등급 뱃지 */}
-                                                        <div className="flex items-end justify-between mt-auto relative z-10">
-                                                            <div className="flex items-center text-[13px] sm:text-[14px] lg:text-[16px] font-black text-gray-900 truncate tracking-tight gap-1.5 sm:gap-2">
-                                                                {form.pay_type && (
-                                                                    <span className="shrink-0 text-white text-[10px] sm:text-[11px] lg:text-[12px] px-1.5 sm:px-2 py-[2px] sm:py-[3px] rounded-md shadow-sm"
-                                                                        style={{ backgroundColor: isSpecial ? themeColor : '#805ad5' }}>
-                                                                        {form.pay_type}
-                                                                    </span>
-                                                                )}
-                                                                <span className="text-gray-800">
-                                                                    {form.pay_amount ? `${form.pay_amount}` : (form.pay || '급여 정보')}
-                                                                </span>
-                                                            </div>
-                                                            <div className="shrink-0 flex items-center px-1.5 py-[2px] rounded-sm text-[10px] lg:text-[11px] font-black shadow-sm bg-gray-100 text-gray-700 border border-gray-300">
-                                                                <Crown className="w-[10px] h-[10px] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-gray-500" /> 일반업체
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                <div className={`${isSide ? 'w-[140px]' : 'w-[240px]'}`}>
+                                                    <PremiumJobCard
+                                                        id="preview"
+                                                        company={form.company || '업체명'}
+                                                        title={form.title || '광고 제목을 입력하세요'}
+                                                        location={form.location || '전지역'}
+                                                        pay={form.pay || '급여 정보'}
+                                                        image={form.logo_url || form.image}
+                                                        impactType={isSpecial || isGeneral ? 'none' : ((form.theme as any) || 'gold')}
+                                                        effectIntensity={isSpecial || isGeneral ? 'none' : ((form.effect_intensity as any) || 'medium')}
+                                                        isSide={isSide}
+                                                        hideLogo={isGeneral}
+                                                        tier={form.tier}
+                                                    />
                                                 </div>
                                             );
                                         })()}

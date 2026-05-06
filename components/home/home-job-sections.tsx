@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronRight, Megaphone, Plus, Zap, Crown, Loader2, HelpCircle, ChevronLeft } from 'lucide-react';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
-import { SpecialJobCard } from '@/components/home/special-job-card';
-import { GeneralJobItem } from '@/components/home/general-job-item';
 import { useLanguage } from '@/components/providers/language-provider';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
 import { AdPriceModal } from '@/components/jobs/AdPriceModal';
@@ -185,6 +183,7 @@ export function HomeJobSections() {
                                 key={job.id}
                                 {...(job as any)} 
                                 impactType={(job as any).impactType}
+                                tier="PREMIUM"
                             />
                         ))}
                     </div>
@@ -220,7 +219,7 @@ export function HomeJobSections() {
                         3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
                     `}>
                         {specialJobs.map((job) => (
-                            <SpecialJobCard key={job.id} {...(job as any)} />
+                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" tier="SPECIAL" />
                         ))}
                     </div>
                 ) : (
@@ -254,7 +253,7 @@ export function HomeJobSections() {
                         3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
                     `}>
                         {lineJobs.map((job) => (
-                            <GeneralJobItem key={job.id} {...(job as any)} />
+                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" hideLogo={true} tier="GENERAL" />
                         ))}
                     </div>
                 ) : (

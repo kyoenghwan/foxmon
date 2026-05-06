@@ -68,6 +68,8 @@ interface PremiumJobCardProps {
     isSide?: boolean;
     impactType?: ImpactType;
     effectIntensity?: 'high' | 'medium' | 'low' | 'none';
+    hideLogo?: boolean;
+    tier?: string;
     id: string;
 }
 
@@ -98,7 +100,7 @@ const THEME_CONFIG: Record<string, any> = {
     none: { label: 'HIT', color: 'text-gray-900', bg: 'bg-purple-700', border: 'border-gray-200', icon: Crown, animClass: '' }
 };
 
-export function PremiumJobCard({ company, title, location, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', id }: PremiumJobCardProps) {
+export function PremiumJobCard({ company, title, location, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', hideLogo = false, tier, id }: PremiumJobCardProps) {
     const { t } = useLanguage();
     
     // 1. 업체명 파싱
@@ -230,8 +232,12 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                                         isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
                                         'bg-gray-100 text-gray-700 border border-gray-300'
                                     }`}>
-                                        {isImpact ? (
+                                        {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
                                             <><Crown className="w-3 h-3 justify-center mr-1 text-amber-500" /> VVIP</>
+                                        ) : tier === 'SPECIAL' ? (
+                                            <><Zap className="w-3 h-3 justify-center mr-1 text-yellow-500" /> 스페셜</>
+                                        ) : tier === 'GENERAL' || tier === 'LINE' ? (
+                                            <><Crown className="w-3 h-3 justify-center mr-1 text-gray-500" /> 일반업체</>
                                         ) : (
                                             <><Star className="w-3 h-3 justify-center mr-1 text-gray-500" /> 우수업체</>
                                         )}
@@ -244,19 +250,21 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                             {/* --- 기존 가로 레이아웃 상단: 로고 50%, 상호명 50% --- */}
                             <div className="flex w-full h-[50%] gap-2 pb-1.5">
                                 {/* 로고 영역 (1.5:1 비율) */}
-                                <div className="flex-1 min-w-0 bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0">
-                                    {image ? (
-                                        <div 
-                                            className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
-                                            style={{ backgroundImage: `url(${image})` }} 
-                                        />
-                                    ) : (
-                                        <div className="text-gray-300 font-black text-[10px] sm:text-[11px] bg-gray-100 w-full h-full flex items-center justify-center tracking-widest text-center leading-[1.1]">NO<br/>LOGO</div>
-                                    )}
-                                </div>
+                                {!hideLogo && (
+                                    <div className="flex-1 min-w-0 bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0">
+                                        {image ? (
+                                            <div 
+                                                className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
+                                                style={{ backgroundImage: `url(${image})` }} 
+                                            />
+                                        ) : (
+                                            <div className="text-gray-300 font-black text-[10px] sm:text-[11px] bg-gray-100 w-full h-full flex items-center justify-center tracking-widest text-center leading-[1.1]">NO<br/>LOGO</div>
+                                        )}
+                                    </div>
+                                )}
                                 
-                                {/* 상호명 영역 (1:1 비율 오른쪽) */}
-                                <div className="flex-1 min-w-0 flex flex-col justify-center py-0.5 mt-[-2px]">
+                                {/* 상호명 영역 (로고 유무에 따라 너비 조절) */}
+                                <div className={`${hideLogo ? 'w-full' : 'flex-1 min-w-0'} flex flex-col justify-center py-0.5 mt-[-2px]`}>
                                     <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] tracking-tight transition-colors line-clamp-2 leading-tight ${
                                         isCyber ? 'text-green-400 font-mono' : config.color
                                     }`}>
