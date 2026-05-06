@@ -10,7 +10,7 @@ import {
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/language-provider';
 
-function MarqueeText({ children, className }: { children: React.ReactNode, className: string }) {
+function MarqueeText({ children, className, style }: { children: React.ReactNode, className: string, style?: React.CSSProperties }) {
     const textRef = React.useRef<HTMLDivElement>(null);
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = React.useState(false);
@@ -30,7 +30,7 @@ function MarqueeText({ children, className }: { children: React.ReactNode, class
     }, [children]);
 
     return (
-        <div ref={containerRef} className="w-full overflow-hidden relative flex items-center">
+        <div ref={containerRef} className="w-full overflow-hidden relative flex items-center" style={style}>
             {isOverflowing ? (
                 <div className={`${className.replace(/truncate|line-clamp-\d/g, '').trim()} whitespace-nowrap inline-block`} style={{ animation: 'marquee-scroll 8s linear infinite' }}>
                     <span className="mr-12">{children}</span>
