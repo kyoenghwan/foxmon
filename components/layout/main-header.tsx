@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Globe, Search, Menu, FileText, Briefcase, LogOut, ShieldCheck, User } from 'lucide-react';
+import { Globe, Search, Menu, FileText, Briefcase, LogOut, ShieldCheck, User, X, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/components/providers/language-provider';
 import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
 
@@ -32,6 +32,8 @@ export function MainHeader({ session }: MainHeaderProps) {
     const { language, setLanguage, t } = useLanguage();
     const pathname = usePathname();
     const [showMegaMenu, setShowMegaMenu] = useState(false);
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const handleMouseEnter = () => {
@@ -170,13 +172,19 @@ export function MainHeader({ session }: MainHeaderProps) {
                         <div className="flex items-center gap-6 md:gap-8 h-full">
                             {/* 햄버거 메뉴 (전체) */}
                             <div 
-                                className="h-full flex items-center pr-6 border-r border-gray-100 cursor-pointer group"
+                                className="h-full flex items-center pr-4 md:pr-6 md:border-r border-gray-100 cursor-pointer group"
                                 onMouseEnter={handleMouseEnter}
                                 onMouseLeave={handleMouseLeave}
-                                onClick={() => setShowMegaMenu(!showMegaMenu)}
+                                onClick={() => {
+                                    if (window.innerWidth < 768) {
+                                        setShowMobileMenu(true);
+                                    } else {
+                                        setShowMegaMenu(!showMegaMenu);
+                                    }
+                                }}
                             >
-                                <Menu className="w-6 h-6 text-gray-800 group-hover:text-primary transition-colors mr-2" />
-                                <span className="font-black text-[15px] sm:text-[16px] text-gray-800 group-hover:text-primary transition-colors whitespace-nowrap">전체메뉴</span>
+                                <Menu className="w-6 h-6 text-gray-800 group-hover:text-primary transition-colors md:mr-2" />
+                                <span className="hidden md:inline font-black text-[15px] sm:text-[16px] text-gray-800 group-hover:text-primary transition-colors whitespace-nowrap">전체메뉴</span>
                             </div>
 
                             {/* 개별 메뉴 리스트 */}
@@ -219,10 +227,10 @@ export function MainHeader({ session }: MainHeaderProps) {
                 </div>
             </div>
 
-            {/* 3단: 메가 메뉴 드롭다운 (마우스 호버 시 표시) */}
+            {/* 3단: 메가 메뉴 드롭다운 (마우스 호버 시 표시, 모바일에서는 숨김) */}
             {showMegaMenu && (
                 <div 
-                    className="absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-xl z-40 animate-in fade-in slide-in-from-top-2 duration-200"
+                    className="absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-xl z-40 animate-in fade-in slide-in-from-top-2 duration-200 hidden md:block"
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
@@ -298,6 +306,111 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     광고상품안내 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span>
                                 </Link>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 4단: 모바일 전용 풀스크린 햄버거 메뉴 */}
+            {showMobileMenu && (
+                <div className="fixed inset-0 z-[100] bg-white flex flex-col md:hidden animate-in slide-in-from-right duration-300">
+                    <div className="flex items-center justify-between h-14 px-4 border-b border-gray-100 bg-white">
+                        <Link href="/" onClick={() => setShowMobileMenu(false)} className="font-black text-xl text-primary tracking-tight">FOXMON</Link>
+                        <button onClick={() => setShowMobileMenu(false)} className="p-2 -mr-2 text-gray-500 hover:text-gray-900">
+                            <X className="w-6 h-6" />
+                        </button>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto">
+                        {/* 빠른 링크 */}
+                        <div className="grid grid-cols-2 gap-4 p-4 border-b border-gray-50 bg-gray-50/50">
+                            <Link href="/jobs" onClick={() => setShowMobileMenu(false)} className="bg-white p-3 rounded-xl border border-gray-100 text-center font-bold text-sm shadow-sm">
+                                🔍 구인정보
+                            </Link>
+                            <Link href="/seekers" onClick={() => setShowMobileMenu(false)} className="bg-white p-3 rounded-xl border border-gray-100 text-center font-bold text-sm shadow-sm">
+                                💼 인재정보
+                            </Link>
+                        </div>
+
+                        {/* 모바일 아코디언 전체 메뉴 */}
+                        <div className="px-4 py-2">
+                            {/* 지역별 구인정보 */}
+                            <div className="border-b border-gray-100">
+                                <button onClick={() => setMobileExpanded(mobileExpanded === 'region' ? null : 'region')} className="w-full flex items-center justify-between py-4 font-black text-gray-900">
+                                    <span>지역별 구인정보</span>
+                                    <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${mobileExpanded === 'region' ? 'rotate-90 text-primary' : ''}`} />
+                                </button>
+                                {mobileExpanded === 'region' && (
+                                    <div className="grid grid-cols-3 gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
+                                        <Link href="#" className="py-1">서울</Link><Link href="#" className="py-1">경기</Link><Link href="#" className="py-1">인천</Link>
+                                        <Link href="#" className="py-1">대전</Link><Link href="#" className="py-1">대구</Link><Link href="#" className="py-1">부산</Link>
+                                        <Link href="#" className="py-1">울산</Link><Link href="#" className="py-1">광주</Link><Link href="#" className="py-1">세종</Link>
+                                        <Link href="#" className="py-1">제주</Link>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 업종별 구인정보 */}
+                            <div className="border-b border-gray-100">
+                                <button onClick={() => setMobileExpanded(mobileExpanded === 'job' ? null : 'job')} className="w-full flex items-center justify-between py-4 font-black text-gray-900">
+                                    <span>업종별 구인정보</span>
+                                    <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${mobileExpanded === 'job' ? 'rotate-90 text-primary' : ''}`} />
+                                </button>
+                                {mobileExpanded === 'job' && (
+                                    <div className="grid grid-cols-2 gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
+                                        <Link href="#" className="py-1">스웨디시</Link><Link href="#" className="py-1">1인샵</Link>
+                                        <Link href="#" className="py-1">왁싱</Link><Link href="#" className="py-1">아로마마사지</Link>
+                                        <Link href="#" className="py-1">스포츠마사지</Link><Link href="#" className="py-1">피부관리</Link>
+                                        <Link href="#" className="py-1">타이마사지</Link>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 커뮤니티 */}
+                            <div className="border-b border-gray-100">
+                                <button onClick={() => setMobileExpanded(mobileExpanded === 'community' ? null : 'community')} className="w-full flex items-center justify-between py-4 font-black text-gray-900">
+                                    <span>커뮤니티</span>
+                                    <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${mobileExpanded === 'community' ? 'rotate-90 text-primary' : ''}`} />
+                                </button>
+                                {mobileExpanded === 'community' && (
+                                    <div className="flex flex-col gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
+                                        <Link href="/community?tab=foxtalk" className="flex items-center gap-2">폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
+                                        <Link href="/community?tab=foxmarket">폭스중고</Link>
+                                        <Link href="/community?tab=business">업소장터</Link>
+                                        <Link href="/community?tab=reviews">알바후기</Link>
+                                        <Link href="/community?tab=secret" className="flex items-center gap-2">비밀게시판 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">N</span></Link>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 고객센터 */}
+                            <div className="border-b border-gray-100">
+                                <button onClick={() => setMobileExpanded(mobileExpanded === 'help' ? null : 'help')} className="w-full flex items-center justify-between py-4 font-black text-gray-900">
+                                    <span>고객센터</span>
+                                    <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${mobileExpanded === 'help' ? 'rotate-90 text-primary' : ''}`} />
+                                </button>
+                                {mobileExpanded === 'help' && (
+                                    <div className="flex flex-col gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
+                                        <Link href="#">질문답변</Link>
+                                        <Link href="#">자주묻는질문</Link>
+                                        <Link href="/notice">공지사항</Link>
+                                        <Link href="/jobs/post" className="flex items-center gap-2">광고상품안내 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* 모바일 하단 액션 버튼 */}
+                        <div className="p-4 mt-4">
+                            {isEmployer ? (
+                                <Link href="/biz" onClick={() => setShowMobileMenu(false)} className="w-full h-12 flex items-center justify-center gap-2 text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-xl transition-all shadow-sm">
+                                    <Briefcase className="w-4 h-4" /> 업체관리 바로가기
+                                </Link>
+                            ) : (
+                                <Link href="/login" onClick={() => setShowMobileMenu(false)} className="w-full h-12 flex items-center justify-center gap-2 text-[14px] font-black text-primary bg-primary/10 rounded-xl transition-all shadow-sm">
+                                    로그인 후 이용하기
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </div>
