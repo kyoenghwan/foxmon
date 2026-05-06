@@ -67,7 +67,7 @@ interface PremiumJobCardProps {
     isBig?: boolean;
     isSide?: boolean;
     impactType?: ImpactType;
-    effectIntensity?: 'high' | 'medium' | 'low' | 'none';
+    effectIntensity?: string; // 기존: 'high' | 'medium' | 'low' | 'none', 확장: 'shimmer', 'pulse' 등 명시적 애니메이션 키
     hideLogo?: boolean;
     tier?: string;
     id: string;
@@ -138,15 +138,22 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
     const isCyber = impactType === 'glitch';
 
     let animClass = config.animClass;
-    let opacityClass = 'opacity-40';
+    let opacityClass = 'opacity-50'; // 기본적으로 액션이 더 잘보이게 50%
+    
+    // 명시적인 액션(애니메이션) 타입 지정 (테마와 액션 분리)
     if (effectIntensity === 'none') {
         animClass = '';
-        opacityClass = 'opacity-10';
+        opacityClass = 'opacity-10'; // 정적일 땐 은은하게
     } else if (effectIntensity === 'low') {
-        opacityClass = 'opacity-20';
+        opacityClass = 'opacity-30';
         animClass = config.animClass ? `${config.animClass} duration-1000` : '';
-    } else if (effectIntensity === 'high') {
-        opacityClass = 'opacity-80';
+    } else if (effectIntensity === 'medium' || effectIntensity === 'high') {
+        // 기존 하위 호환성 유지: 테마의 기본 애니메이션 사용
+        opacityClass = effectIntensity === 'high' ? 'opacity-80' : 'opacity-50';
+    } else if (effectIntensity) {
+        // 커스텀 액션 (shimmer, pulse, rainbow, fire, glitch, matrix 등)
+        opacityClass = 'opacity-60'; // 액션이 명확히 보이도록
+        animClass = `animate-${effectIntensity}`;
     }
 
     return (

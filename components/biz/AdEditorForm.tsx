@@ -152,11 +152,13 @@ const COLOR_PALETTE = [
     '#EC4899', '#14B8A6', '#EF4444', '#6366F1', '#1F2937',
 ];
 
-const EFFECT_OPTIONS = [
-    { value: 'high', label: '강', desc: '최대 애니메이션' },
-    { value: 'medium', label: '중', desc: '적당한 효과' },
-    { value: 'low', label: '약', desc: '은은한 효과' },
-    { value: 'none', label: '없음', desc: '정적 표시' },
+const ACTION_OPTIONS = [
+    { value: 'shimmer', label: '✨ 반짝임', desc: '사선으로 빛이 지나감' },
+    { value: 'pulse', label: '🫀 숨쉬기', desc: '전체적으로 깜빡임' },
+    { value: 'rainbow-border', label: '🌈 무지개', desc: '화려한 테두리 회전' },
+    { value: 'glitch', label: '⚡ 글리치', desc: '사이버펑크 흔들림' },
+    { value: 'fire', label: '🔥 이글거림', desc: '불타는 듯한 효과' },
+    { value: 'none', label: '⛔ 없음', desc: '애니메이션 끄기' },
 ];
 
 interface AdEditorFormProps {
@@ -613,7 +615,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                         pay={form.pay || '급여 정보'}
                                                         image={form.logo_url || form.image}
                                                         impactType={isGeneral ? 'none' : ((form.theme as any) || 'gold')}
-                                                        effectIntensity={isSpecial || isGeneral ? 'none' : ((form.effect_intensity as any) || 'medium')}
+                                                        effectIntensity={isSpecial || isGeneral ? 'none' : ((form.effect_intensity as any) || 'shimmer')}
                                                         isSide={isSide}
                                                         hideLogo={isGeneral}
                                                         tier={form.tier}
@@ -837,16 +839,16 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 </div>
                             </div>
 
-                            {/* 효과 강도 (프리미엄 전용) */}
+                            {/* 액션 (애니메이션) 선택 (프리미엄 전용) */}
                             {form.tier === 'PREMIUM' && (
                                 <div>
-                                    <label className="text-[12px] font-bold text-gray-600 mb-2 block">효과 강도</label>
-                                    <div className="flex gap-2">
-                                    {EFFECT_OPTIONS.map(opt => (
+                                    <label className="text-[12px] font-bold text-gray-600 mb-2 block">액션(애니메이션) 선택</label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    {ACTION_OPTIONS.map(opt => (
                                         <button
                                             key={opt.value}
                                             onClick={() => update('effect_intensity', opt.value)}
-                                            className={`flex-1 py-2.5 rounded-lg border-2 text-center transition-all ${
+                                            className={`py-2.5 px-2 rounded-lg border-2 text-center transition-all ${
                                                 form.effect_intensity === opt.value
                                                     ? 'border-primary bg-orange-50 text-primary'
                                                     : 'border-gray-200 text-gray-500 hover:border-gray-300'
