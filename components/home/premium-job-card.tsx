@@ -190,7 +190,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                     {isSide ? (
                         <>
                             {/* 사이드 배너용 세로 레이아웃 */}
-                            <div className="w-full aspect-square bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0">
+                            <div className="w-full aspect-[3/2] bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0">
                                 {image ? (
                                     <div className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${image})` }} />
                                 ) : (

@@ -743,7 +743,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
                                         <p className="text-[10px] text-gray-400 mt-2 text-center leading-relaxed">
                                             PNG/JPG 지원<br/>
-                                            {form.tier === 'SIDE' ? '정방형(1:1 비율) 권장' : '가로 형태(1.5:1 비율) 권장'}
+                                            가로 형태(1.5:1 비율) 권장
                                         </p>
                                     </div>
                                 )}
