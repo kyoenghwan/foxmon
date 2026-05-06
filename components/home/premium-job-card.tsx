@@ -32,8 +32,8 @@ function MarqueeText({ children, className }: { children: React.ReactNode, class
     return (
         <div ref={containerRef} className="w-full overflow-hidden relative flex items-center">
             {isOverflowing ? (
-                <div className={`${className.replace('truncate', '')} whitespace-nowrap inline-block pr-4`} style={{ animation: 'marquee-scroll 6s linear infinite' }}>
-                    <span className="mr-8">{children}</span>
+                <div className={`${className.replace(/truncate|line-clamp-\d/g, '').trim()} whitespace-nowrap inline-block`} style={{ animation: 'marquee-scroll 8s linear infinite' }}>
+                    <span className="mr-12">{children}</span>
                     <span>{children}</span>
                 </div>
             ) : (
@@ -44,7 +44,7 @@ function MarqueeText({ children, className }: { children: React.ReactNode, class
             <style jsx>{`
                 @keyframes marquee-scroll {
                     0% { transform: translateX(0); }
-                    100% { transform: translateX(calc(-50% - 1rem)); }
+                    100% { transform: translateX(calc(-50% - 1.5rem)); }
                 }
             `}</style>
         </div>
@@ -71,6 +71,7 @@ interface PremiumJobCardProps {
     hideLogo?: boolean;
     tier?: string;
     id: string;
+    customColor?: string;
 }
 
 // 테마별 설정을 관리하는 매핑 객체 - 원래의 역동적인(Dynamic) 스타일로 복구
@@ -100,7 +101,7 @@ const THEME_CONFIG: Record<string, any> = {
     none: { label: 'HIT', color: 'text-gray-900', bg: 'bg-purple-700', border: 'border-gray-200', icon: Crown, animClass: '' }
 };
 
-export function PremiumJobCard({ company, title, location, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', hideLogo = false, tier, id }: PremiumJobCardProps) {
+export function PremiumJobCard({ company, title, location, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', hideLogo = false, tier, id, customColor }: PremiumJobCardProps) {
     const { t } = useLanguage();
     
     // 1. 업체명 파싱
@@ -203,7 +204,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                                 <MarqueeText className={`font-black text-[14px] lg:text-[16px] tracking-tight transition-colors line-clamp-2 leading-tight ${isCyber ? 'text-green-400 font-mono' : config.color}`}>
                                     {displayName}
                                 </MarqueeText>
-                                <div className="flex flex-wrap items-center text-[11px] text-gray-500 truncate tracking-tight mt-1 mb-2">
+                                <div className="flex flex-wrap items-center text-[11px] text-gray-500 truncate tracking-tight mt-1.5 mb-2.5">
                                     <span className={`shrink-0 border px-1 py-[1px] leading-none mr-1.5 font-bold rounded-[2px] ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`}>
                                         {location.split(' ')[0] || '전국'}
                                     </span>
@@ -230,8 +231,9 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                                     <div className={`shrink-0 flex items-center px-1.5 py-[1px] rounded-sm text-[10px] lg:text-[11px] font-black shadow-sm ${
                                         isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
                                         isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
+                                        tier === 'SPECIAL' && customColor ? 'bg-white' :
                                         'bg-gray-100 text-gray-700 border border-gray-300'
-                                    }`}>
+                                    }`} style={tier === 'SPECIAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
                                         {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
                                             <><Crown className="w-3 h-3 justify-center mr-1 text-amber-500" /> VVIP</>
                                         ) : tier === 'SPECIAL' ? (
@@ -264,18 +266,20 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                                 )}
                                 
                                 {/* 상호명 영역 (로고 유무에 따라 너비 조절) */}
-                                <div className={`${hideLogo ? 'w-full' : 'flex-1 min-w-0'} flex flex-col justify-center py-0.5 mt-[-2px]`}>
+                                <div className={`${hideLogo ? 'w-full' : 'flex-1 min-w-0'} flex flex-col justify-center py-0.5 mt-[-2px] space-y-1.5`}>
                                     <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] tracking-tight transition-colors line-clamp-2 leading-tight ${
-                                        isCyber ? 'text-green-400 font-mono' : config.color
-                                    }`}>
+                                        isCyber ? 'text-green-400 font-mono' : 
+                                        tier === 'SPECIAL' && customColor ? '' : config.color
+                                    }`} style={tier === 'SPECIAL' && customColor ? { color: customColor } : {}}>
                                         {displayName}
                                     </MarqueeText>
-                                    <div className="flex flex-wrap items-center text-[10px] sm:text-[11px] text-gray-500 truncate tracking-tight mt-1">
+                                    <div className="flex flex-wrap items-center text-[10px] sm:text-[11px] text-gray-500 truncate tracking-tight">
                                         <span className={`shrink-0 border px-1 py-[1px] leading-none mr-1.5 font-bold rounded-[2px] ${
                                             isCyber ? 'text-black bg-cyan-400 border-none' : 
                                             isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
+                                            tier === 'SPECIAL' && customColor ? 'bg-white' :
                                             'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
-                                        }`}>
+                                        }`} style={tier === 'SPECIAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
                                             {location.split(' ')[0] || '전국'}
                                         </span>
                                         <span className={`truncate font-medium ${isCyber ? 'text-cyan-300' : ''}`}>

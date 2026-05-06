@@ -219,7 +219,7 @@ export function HomeJobSections() {
                         3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
                     `}>
                         {specialJobs.map((job) => (
-                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" tier="SPECIAL" />
+                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" tier="SPECIAL" customColor={(job as any).color} />
                         ))}
                     </div>
                 ) : (

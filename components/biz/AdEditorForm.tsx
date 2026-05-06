@@ -617,6 +617,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                         isSide={isSide}
                                                         hideLogo={isGeneral}
                                                         tier={form.tier}
+                                                        customColor={form.color}
                                                     />
                                                 </div>
                                             );
