@@ -290,15 +290,20 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                         <>
                             {/* --- 로고 없는 컴팩트 레이아웃 (일반 배너 등) --- */}
                             {/* 상단: 지역 + 업체명 */}
-                            <div className="flex items-center gap-1.5 pb-1 w-full">
-                                <span className={`shrink-0 border px-1 py-[1px] leading-none font-bold rounded-[2px] text-[10px] sm:text-[11px] ${
-                                    isCyber ? 'text-black bg-cyan-400 border-none' : 
-                                    isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
-                                    tier === 'GENERAL' && customColor ? 'bg-white' :
-                                    'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
-                                }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                    {location.split(' ')[0] || '전국'}
-                                </span>
+                            <div className="flex items-center gap-1.5 pb-1 w-full overflow-hidden">
+                                <div className="flex items-center text-[10px] sm:text-[11px] text-gray-500 truncate tracking-tight gap-1 shrink-0">
+                                    <span className={`shrink-0 border px-1 py-[1px] leading-none font-bold rounded-[2px] ${
+                                        isCyber ? 'text-black bg-cyan-400 border-none' : 
+                                        isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
+                                        tier === 'GENERAL' && customColor ? 'bg-white' :
+                                        'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
+                                    }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                        {location.split(' ')[0] || '전국'}
+                                    </span>
+                                    <span className={`truncate font-medium ${isCyber ? 'text-cyan-300' : ''}`}>
+                                        {location.split(' ').slice(1).join(' ')}
+                                    </span>
+                                </div>
                                 <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] tracking-tight transition-colors line-clamp-1 leading-tight ${
                                     isCyber ? 'text-green-400 font-mono' : config.color
                                 }`} style={tier === 'GENERAL' && customColor ? { color: customColor } : {}}>
@@ -311,7 +316,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                                 <MarqueeText className={`text-[12px] sm:text-[13px] lg:text-[14px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
                                     isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
                                     isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
-                                    'text-gray-800 bg-green-200/50'
+                                    'text-gray-800'
                                 }`}>
                                     {title}
                                 </MarqueeText>
