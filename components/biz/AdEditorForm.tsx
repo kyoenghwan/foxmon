@@ -688,7 +688,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             const isSpecial = form.tier === 'SPECIAL';
                                             const isGeneral = form.tier === 'GENERAL';
                                             return (
-                                                <div className={`${isSide ? 'w-[140px]' : 'w-[240px]'}`}>
+                                                <div className={`${isSide ? 'w-[160px]' : 'w-[240px]'}`}>
                                                     <PremiumJobCard
                                                         id="preview"
                                                         company={form.company || '업체명'}
