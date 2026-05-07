@@ -243,12 +243,9 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                                 <MarqueeText className={`font-black text-[14px] lg:text-[16px] tracking-tight transition-colors line-clamp-2 leading-tight ${isCyber ? 'text-green-400 font-mono' : config.color}`} style={tier === 'GENERAL' && customColor ? { color: customColor } : {}}>
                                     {displayName}
                                 </MarqueeText>
-                                <div className="flex flex-wrap items-center text-[11px] text-gray-500 truncate tracking-tight mt-1.5 mb-2.5">
-                                    <span className={`shrink-0 border px-1 py-[1px] leading-none mr-1.5 font-bold rounded-[2px] ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                        {location.split(' ')[0] || '전국'}
-                                    </span>
-                                    <span className={`truncate font-medium ${isCyber ? 'text-cyan-300' : ''}`}>
-                                        {location.split(' ').slice(1).join(' ') || location}
+                                <div className="flex items-center text-[11px] text-gray-500 mt-1.5 mb-2.5 w-full">
+                                    <span className={`truncate border px-1.5 py-[1px] leading-[1.1] font-bold rounded-[2px] max-w-[90%] ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                        {location ? location.replace(' ', ' / ') : '전국'}
                                     </span>
                                 </div>
                                 <div className="w-full relative overflow-hidden mt-auto mb-2">
@@ -291,19 +288,14 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                             {/* --- 로고 없는 컴팩트 레이아웃 (일반 배너 등) --- */}
                             {/* 상단: 지역 + 업체명 */}
                             <div className="flex items-center gap-1.5 pb-1 w-full overflow-hidden">
-                                <div className="flex items-center text-[10px] sm:text-[11px] text-gray-500 truncate tracking-tight gap-1 shrink-0">
-                                    <span className={`shrink-0 border px-1 py-[1px] leading-none font-bold rounded-[2px] ${
-                                        isCyber ? 'text-black bg-cyan-400 border-none' : 
-                                        isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
-                                        tier === 'GENERAL' && customColor ? 'bg-white' :
-                                        'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
-                                    }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                        {location.split(' ')[0] || '전국'}
-                                    </span>
-                                    <span className={`truncate font-medium ${isCyber ? 'text-cyan-300' : ''}`}>
-                                        {location.split(' ').slice(1).join(' ')}
-                                    </span>
-                                </div>
+                                <span className={`truncate shrink-0 border px-1.5 py-[1px] leading-[1.1] font-bold rounded-[2px] text-[10px] sm:text-[11px] max-w-[55%] ${
+                                    isCyber ? 'text-black bg-cyan-400 border-none' : 
+                                    isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
+                                    tier === 'GENERAL' && customColor ? 'bg-white' :
+                                    'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
+                                }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                    {location ? location.replace(' ', ' / ') : '전국'}
+                                </span>
                                 <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] tracking-tight transition-colors line-clamp-1 leading-tight ${
                                     isCyber ? 'text-green-400 font-mono' : config.color
                                 }`} style={tier === 'GENERAL' && customColor ? { color: customColor } : {}}>
@@ -376,17 +368,14 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                                     }`}>
                                         {displayName}
                                     </MarqueeText>
-                                    <div className="flex flex-wrap items-center text-[10px] sm:text-[11px] text-gray-500 truncate tracking-tight">
-                                        <span className={`shrink-0 border px-1 py-[1px] leading-none mr-1.5 font-bold rounded-[2px] ${
+                                    <div className="flex items-center text-[10px] sm:text-[11px] text-gray-500 w-full mt-0.5">
+                                        <span className={`truncate border px-1.5 py-[1px] leading-[1.1] font-bold rounded-[2px] max-w-full ${
                                             isCyber ? 'text-black bg-cyan-400 border-none' : 
                                             isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
                                             tier === 'GENERAL' && customColor ? 'bg-white' :
                                             'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
                                         }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                            {location.split(' ')[0] || '전국'}
-                                        </span>
-                                        <span className={`truncate font-medium ${isCyber ? 'text-cyan-300' : ''}`}>
-                                            {location.split(' ').slice(1).join(' ') || location}
+                                            {location ? location.replace(' ', ' / ') : '전국'}
                                         </span>
                                     </div>
                                 </div>
