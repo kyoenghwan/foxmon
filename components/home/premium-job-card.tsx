@@ -252,7 +252,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                                     </span>
                                 </div>
                                 <div className="w-full relative overflow-hidden mt-auto mb-2">
-                                    <MarqueeText className={`text-[12px] lg:text-[13px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' : isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` : 'text-gray-800 bg-green-200/50'}`}>
+                                    <MarqueeText className={`text-[13px] lg:text-[14px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' : isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` : 'text-gray-800 bg-green-200/50'}`}>
                                         {title}
                                     </MarqueeText>
                                 </div>
@@ -308,7 +308,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
 
                             {/* 중간: 광고 제목 */}
                             <div className="w-full relative overflow-hidden py-1 border-t border-dashed border-gray-200">
-                                <MarqueeText className={`text-[11px] sm:text-[12px] lg:text-[13px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
+                                <MarqueeText className={`text-[12px] sm:text-[13px] lg:text-[14px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
                                     isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
                                     isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
                                     'text-gray-800 bg-green-200/50'
@@ -391,7 +391,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                             <div className="flex flex-col w-full h-[50%] pt-1.5 sm:pt-2 border-t border-dashed border-gray-200 justify-between">
                                 {/* 광고글 (멘트) */}
                                 <div className="w-full relative overflow-hidden">
-                                    <MarqueeText className={`text-[11px] sm:text-[12px] lg:text-[13px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
+                                    <MarqueeText className={`text-[12px] sm:text-[13px] lg:text-[14px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
                                         isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
                                         isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
                                         'text-gray-800 bg-green-200/50'
