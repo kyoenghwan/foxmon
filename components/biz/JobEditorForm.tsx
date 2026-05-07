@@ -599,7 +599,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                         배너 미리보기
                                     </h3>
 
-                                    <div className="w-[280px] mx-auto pointer-events-none">
+                                    <div className="w-[200px] mx-auto pointer-events-none">
                                         {(() => {
                                             const isPremium = form.tier === 'PREMIUM';
                                             const isSpecial = form.tier === 'SPECIAL';
@@ -625,7 +625,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
 
                                             return (
                                                 <div className="w-full">
-                                                    <div className="relative aspect-[2/1] p-[3px] group" style={{ width: '280px' }}>
+                                                    <div className="relative aspect-[2/1] p-[3px] group" style={{ width: '200px' }}>
                                                         {/* 스페셜 배경 글로우 */}
                                                     {isSpecial && (
                                                         <div className="absolute inset-0 overflow-hidden rounded-xl z-0"

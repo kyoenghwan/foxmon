@@ -689,7 +689,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             const isGeneral = form.tier === 'GENERAL';
                                             return (
                                                 <div className="w-full flex justify-center">
-                                                    <div style={{ width: isSide ? '160px' : '280px', maxWidth: '100%' }}>
+                                                    <div style={{ width: isSide ? '140px' : '200px', maxWidth: '100%' }}>
                                                     <PremiumJobCard
                                                         id="preview"
                                                         company={form.company || '업체명'}
