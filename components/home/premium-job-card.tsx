@@ -354,6 +354,15 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                             <div className="flex w-full h-[50%] gap-2 pb-1.5">
                                 {/* 로고 영역 (1.5:1 비율) */}
                                 <div className="flex-1 min-w-0 bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0">
+                                    {image ? (
+                                        <div 
+                                            className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
+                                            style={{ backgroundImage: `url(${image})` }} 
+                                        />
+                                    ) : (
+                                        <div className="text-gray-300 font-black text-[10px] sm:text-[11px] bg-gray-100 w-full h-full flex items-center justify-center tracking-widest text-center leading-[1.1]">NO<br/>LOGO</div>
+                                    )}
+                                </div>
                                 
                                 {/* 상호명 영역 (로고 유무에 따라 너비 조절) */}
                                 <div className={`flex-1 min-w-0 flex flex-col justify-center py-0.5 mt-[-2px] space-y-1.5`}>
