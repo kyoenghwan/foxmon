@@ -688,7 +688,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             const isSpecial = form.tier === 'SPECIAL';
                                             const isGeneral = form.tier === 'GENERAL';
                                             return (
-                                                <div className={`${isSide ? 'w-[160px]' : 'w-[240px]'}`}>
+                                                <div className="w-full flex justify-center">
+                                                    <div style={{ width: isSide ? '160px' : '280px', maxWidth: '100%' }}>
                                                     <PremiumJobCard
                                                         id="preview"
                                                         company={form.company || '업체명'}
@@ -704,6 +705,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                         customColor={form.color}
                                                         bgOpacity={form.bg_opacity}
                                                     />
+                                                    </div>
                                                 </div>
                                             );
                                         })()}

@@ -599,7 +599,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                         배너 미리보기
                                     </h3>
 
-                                    <div className="w-full flex justify-center pointer-events-none">
+                                    <div className="w-[280px] mx-auto pointer-events-none">
                                         {(() => {
                                             const isPremium = form.tier === 'PREMIUM';
                                             const isSpecial = form.tier === 'SPECIAL';
@@ -608,7 +608,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
 
                                             if (isPremium) {
                                                 return (
-                                                    <div className="w-[240px]">
+                                                    <div className="w-full">
                                                         <PremiumJobCard
                                                             id="preview"
                                                             company={form.company || '업체명'}
@@ -624,8 +624,9 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                             }
 
                                             return (
-                                                <div className="relative aspect-[2/1] w-[240px] p-[3px] group">
-                                                    {/* 스페셜 배경 글로우 */}
+                                                <div className="w-full">
+                                                    <div className="relative aspect-[2/1] p-[3px] group" style={{ width: '280px' }}>
+                                                        {/* 스페셜 배경 글로우 */}
                                                     {isSpecial && (
                                                         <div className="absolute inset-0 overflow-hidden rounded-xl z-0"
                                                             style={{ backgroundColor: themeColor, opacity: 0.5 }} />
