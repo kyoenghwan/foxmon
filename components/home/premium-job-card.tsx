@@ -232,30 +232,12 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                     {isSide ? (
                         <>
                             {/* 사이드 배너용 세로 레이아웃 */}
-                            <div className="w-full aspect-[3/2] bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0 relative">
+                            <div className="w-full aspect-[3/2] bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0">
                                 {image ? (
                                     <div className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${image})` }} />
                                 ) : (
                                     <div className="text-gray-300 font-black text-[12px] bg-gray-100 w-full h-full flex items-center justify-center tracking-widest text-center leading-[1.1]">NO<br/>LOGO</div>
                                 )}
-                                
-                                {/* 우측 상단 뱃지 */}
-                                <div className={`absolute top-1 right-1 shrink-0 flex items-center px-1.5 py-[1px] rounded-sm text-[10px] font-black shadow-sm z-20 ${
-                                    isCyber ? 'bg-cyan-900/95 text-cyan-200 border border-cyan-700' :
-                                    isImpact ? 'bg-gradient-to-r from-yellow-100/95 to-amber-100/95 text-amber-700 border border-amber-200' : 
-                                    tier === 'GENERAL' && customColor ? 'bg-white/95' :
-                                    'bg-white/95 text-gray-700 border border-gray-300'
-                                }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                    {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
-                                        <><Crown className="w-3 h-3 justify-center mr-1 text-amber-500" /> VVIP</>
-                                    ) : tier === 'SPECIAL' ? (
-                                        <><Zap className="w-3 h-3 justify-center mr-1 text-yellow-500" /> 스페셜</>
-                                    ) : tier === 'GENERAL' || tier === 'LINE' ? (
-                                        <><Crown className="w-3 h-3 justify-center mr-1 text-gray-500" /> 일반업체</>
-                                    ) : (
-                                        <><Star className="w-3 h-3 justify-center mr-1 text-gray-500" /> 우수업체</>
-                                    )}
-                                </div>
                             </div>
                             <div className="flex-1 flex flex-col">
                                 <MarqueeText className={`font-black text-[14px] lg:text-[16px] tracking-tight transition-colors line-clamp-2 leading-tight ${isCyber ? 'text-green-400 font-mono' : config.color}`} style={tier === 'GENERAL' && customColor ? { color: customColor } : {}}>
@@ -282,6 +264,24 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                                             {payAmount}
                                         </span>
                                     </div>
+                                </div>
+                                
+                                {/* 하단 풀위드 뱃지 */}
+                                <div className={`mt-1.5 w-full flex items-center justify-center py-1 rounded-sm text-[10px] lg:text-[11px] font-black shadow-sm ${
+                                    isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
+                                    isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
+                                    tier === 'GENERAL' && customColor ? 'bg-white' :
+                                    'bg-gray-100 text-gray-700 border border-gray-300'
+                                }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                    {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
+                                        <><Crown className="w-3 h-3 justify-center mr-1 text-amber-500" /> VVIP</>
+                                    ) : tier === 'SPECIAL' ? (
+                                        <><Zap className="w-3 h-3 justify-center mr-1 text-yellow-500" /> 스페셜</>
+                                    ) : tier === 'GENERAL' || tier === 'LINE' ? (
+                                        <><Crown className="w-3 h-3 justify-center mr-1 text-gray-500" /> 일반업체</>
+                                    ) : (
+                                        <><Star className="w-3 h-3 justify-center mr-1 text-gray-500" /> 우수업체</>
+                                    )}
                                 </div>
                             </div>
                         </>
