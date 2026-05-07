@@ -172,7 +172,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
     const wrapperAnimClass = (action !== 'rainbow-border' && isSafeForWrapper) ? animClass : '';
 
     return (
-        <div className={`relative ${isBig ? 'h-full min-h-[292px]' : isSide ? 'aspect-[2/3]' : hideLogo ? 'aspect-[5/2]' : 'aspect-[3/2]'} w-full min-w-[140px] group p-[3px]`}>
+        <div className={`relative ${isBig ? 'h-full min-h-[292px]' : isSide ? 'aspect-[2/3]' : hideLogo ? 'aspect-[2/1]' : 'aspect-[3/2]'} w-full min-w-[140px] group p-[3px]`}>
             
             {/* --- [배로 아래 배경 레이어] --- */}
             {isImpact && (
