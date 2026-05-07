@@ -172,7 +172,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
     const wrapperAnimClass = (action !== 'rainbow-border' && isSafeForWrapper) ? animClass : '';
 
     return (
-        <div className={`relative ${isBig ? 'h-full min-h-[292px]' : isSide ? 'aspect-[2/3]' : hideLogo ? 'aspect-[2/1]' : 'aspect-[3/2]'} w-full min-w-[140px] group p-[3px]`}>
+        <div className={`relative ${isBig ? 'h-full min-h-[292px]' : isSide ? 'aspect-[2/3]' : hideLogo ? 'aspect-[9/4]' : 'aspect-[3/2]'} w-full min-w-[140px] group p-[3px]`}>
             
             {/* --- [배로 아래 배경 레이어] --- */}
             {isImpact && (
@@ -307,7 +307,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                             </div>
 
                             {/* 중간: 광고 제목 */}
-                            <div className="w-full relative overflow-hidden py-1 border-t border-dashed border-gray-200">
+                            <div className="flex-1 w-full flex flex-col justify-center relative overflow-hidden py-1 my-1 border-t border-dashed border-gray-200">
                                 <MarqueeText className={`text-[12px] sm:text-[13px] lg:text-[14px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
                                     isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
                                     isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
