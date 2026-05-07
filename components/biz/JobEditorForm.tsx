@@ -697,6 +697,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                                                 <Crown className="w-[10px] h-[10px] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-gray-500" /> 일반업체
                                                             </div>
                                                         </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             );
