@@ -150,7 +150,7 @@ export function MainBanner() {
                             key={`${banner.id}-${idx}`}
                             className={`flex-shrink-0 h-full rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-6'} shadow-md relative overflow-hidden group cursor-pointer`}
                             style={{ 
-                                width: itemsPerView === 2 ? 'calc((100% - 16px) / 2)' : '100%'
+                                width: itemsPerView > 1 ? `calc((100% - ${(itemsPerView - 1) * 16}px) / ${itemsPerView})` : '100%'
                             }}
                             onClick={() => handleAdClick(banner.id)}
                         >
