@@ -55,9 +55,9 @@ export function CommunityClient({ activeTab: initialTab }: { activeTab: string }
 
     return (
         <div className="flex flex-col md:flex-row gap-6 items-start">
-            {/* [Mobile Only] 상단 가로 스크롤 탭 내비게이션 */}
-            <div className="w-full md:hidden overflow-x-auto scrollbar-hide bg-white sticky top-[136px] z-20 py-2 border-b">
-                <div className="flex px-1 gap-1 min-w-max">
+            {/* [Mobile Only] 상단 멀티라인 탭 내비게이션 */}
+            <div className="w-full md:hidden bg-white sticky top-[136px] z-20 py-2 border-b">
+                <div className="flex flex-wrap px-1 gap-1.5">
                     {TABS.map((tab) => (
                         <button
                             key={tab.id}
