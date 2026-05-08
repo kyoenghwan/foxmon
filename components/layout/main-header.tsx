@@ -115,10 +115,6 @@ export function MainHeader({ session }: MainHeaderProps) {
 
                 {/* 우측: 언어 설정 및 로그인 (간소화) */}
                 <div className="flex items-center gap-2 sm:gap-4 text-[12px] sm:text-[13px] font-bold text-gray-500">
-                    <button onClick={toggleLang} className="hover:text-primary transition-colors flex items-center gap-1">
-                        <Globe className="h-3.5 w-3.5" /> <span className="hidden xs:inline">{language}</span>
-                    </button>
-                    <span className="text-gray-300">|</span>
                     {session ? (
                         <div className="flex items-center gap-2 sm:gap-3">
                             <span className="flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-[13px] font-bold text-gray-600">
