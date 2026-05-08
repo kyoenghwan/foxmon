@@ -83,8 +83,8 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
         );
     }
 
-    // 프리미엄, 스페셜, 일반 모두 동일한 카드 사이즈 유지 (250px 고정)
-    const twoRowPremiumSpecialGridClasses = `limit-2-rows grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6 gap-4 w-full`;
+    // 프리미엄, 스페셜, 일반 모두 2줄 고정 
+    const twoRowPremiumSpecialGridClasses = `limit-2-rows grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 4xl:grid-cols-8 gap-2 sm:gap-3 xl:gap-4 w-full`;
 
     // Pagination logic
     const totalPages = Math.ceil(generalJobs.length / ITEMS_PER_PAGE);
