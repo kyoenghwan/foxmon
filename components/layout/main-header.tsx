@@ -164,8 +164,8 @@ export function MainHeader({ session }: MainHeaderProps) {
             {/* 2단: 네비게이션 메뉴 바 */}
             <div className="border-t border-gray-100 bg-white">
                 <div className="container mx-auto px-4 lg:px-8">
-                    <nav className="flex items-center justify-between h-14 relative w-full">
-                        <div className="flex items-center gap-6 md:gap-8 h-full">
+                    <nav className="flex items-center justify-between min-h-[3.5rem] lg:h-14 py-1.5 lg:py-0 relative w-full">
+                        <div className="flex items-center gap-6 md:gap-8 h-full w-full">
                             {/* 햄버거 메뉴 (전체) */}
                             <div 
                                 className="h-full flex items-center pr-4 md:pr-6 md:border-r border-gray-100 cursor-pointer group"
@@ -184,14 +184,14 @@ export function MainHeader({ session }: MainHeaderProps) {
                             </div>
 
                             {/* 개별 메뉴 리스트 */}
-                            <div className="flex items-center gap-6 md:gap-10 h-full overflow-x-auto scrollbar-hide">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 md:gap-x-10 h-auto lg:h-full py-1 lg:py-0 flex-1">
                                 {menuItems.map((item) => {
                                     const isActive = pathname === item.href;
                                     return (
                                         <Link
                                             key={item.href}
                                             href={item.href}
-                                            className={`text-[15px] sm:text-[16px] font-bold border-b-2 transition-all h-full flex items-center whitespace-nowrap px-1 ${isActive
+                                            className={`text-[14px] sm:text-[15px] lg:text-[16px] font-bold border-b-2 transition-all h-auto py-1 lg:py-0 lg:h-full flex items-center whitespace-nowrap px-1 ${isActive
                                                     ? 'text-primary border-primary'
                                                     : 'text-gray-900 border-transparent hover:border-primary hover:text-primary'
                                                 }`}
@@ -202,11 +202,11 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 })}
 
                                 {/* 모바일 전용 맞춤형 관리 메뉴 (스크롤 목록의 맨 끝에 위치) */}
-                                <div className="lg:hidden flex items-center h-full py-2.5 pl-2 pr-4 shrink-0">
+                                <div className="lg:hidden flex items-center py-1 shrink-0">
                                     {isEmployer ? (
                                         <Link 
                                             href="/biz" 
-                                            className="h-full flex items-center gap-1.5 px-4 text-[13px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm"
+                                            className="h-8 flex items-center gap-1.5 px-4 text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm"
                                         >
                                             <Briefcase className="w-4 h-4" />
                                             업체관리
