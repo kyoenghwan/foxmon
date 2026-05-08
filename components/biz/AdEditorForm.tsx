@@ -1032,7 +1032,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     </div>
 
                     {/* ③ 등급별 배너 디자인 설정 */}
-                    {mode === 'AD' && form.tier === 'PREMIUM_MAIN' && (
+                    {mode === 'AD' && form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'template' && (
                         <div className="bg-white rounded-2xl border border-indigo-200 p-6 space-y-5">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
                                 <Crown className="w-4 h-4 text-indigo-500" />
