@@ -103,13 +103,13 @@ export function MainHeader({ session }: MainHeaderProps) {
                             className="block w-full pl-12 pr-4 py-3.5 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
                         />
                     </div>
-                    {/* 추천 키워드 */}
-                    <div className="flex items-center gap-4 mt-2 px-4 text-[12px] font-bold text-gray-500 w-full">
+                    {/* 추천 키워드 (테블릿 md 구간에서는 공간 부족으로 숨김, lg부터 표시) */}
+                    <div className="hidden lg:flex items-center gap-4 mt-2 px-4 text-[12px] font-bold text-gray-500 w-full">
                         <span className="text-primary text-[11px]">추천키워드</span>
-                        <Link href="/jobs?q=서울구인" className="hover:text-gray-900 transition-colors">서울구인</Link>
-                        <Link href="/jobs?q=인천구인" className="hover:text-gray-900 transition-colors">인천구인</Link>
-                        <Link href="/jobs?q=경기구인" className="hover:text-gray-900 transition-colors">경기구인</Link>
-                        <Link href="/jobs?q=스웨디시구인" className="hover:text-gray-900 transition-colors">스웨디시구인</Link>
+                        <Link href="/jobs?q=서울구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">서울구인</Link>
+                        <Link href="/jobs?q=인천구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">인천구인</Link>
+                        <Link href="/jobs?q=경기구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">경기구인</Link>
+                        <Link href="/jobs?q=스웨디시구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">스웨디시구인</Link>
                     </div>
                 </div>
 
