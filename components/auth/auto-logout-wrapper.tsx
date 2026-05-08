@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { signOut, useSession, SessionProvider } from 'next-auth/react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
 
   const resetTimer = useCallback(() => {
     if (showWarning) return; 
@@ -45,7 +46,9 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
         setRemainingSeconds((prev) => {
           if (prev <= 1) {
             clearInterval(countdownRef.current!);
-            signOut({ callbackUrl: '/login' });
+            signOut({ redirect: false }).then(() => {
+                router.push('/login?session_expired=1');
+            });
             return 0;
           }
           return prev - 1;
@@ -108,7 +111,9 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
 
   const handleLogoutNow = () => {
     setShowWarning(false);
-    signOut({ callbackUrl: '/login' });
+    signOut({ redirect: false }).then(() => {
+        router.push('/login');
+    });
   };
 
   if (status !== 'authenticated') {

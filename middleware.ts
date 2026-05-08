@@ -24,7 +24,6 @@ export default auth((req) => {
 
         // 만약 '자동 로그인' 상태가 아닌데, 브라우저 세션(transient)이 죽어있다면 -> 강제 로그아웃
         if (!isAutoLogin && !isTransientActive) {
-            // 무한 리다이렉트 루프 방지: 이미 login 페이지에 도착했다면 다시 redirect 하지 말고 next() 통과시킴
             if (nextUrl.pathname === '/login') {
                 const response = NextResponse.next();
                 response.cookies.delete('authjs.session-token');
@@ -33,7 +32,9 @@ export default auth((req) => {
                 return response;
             }
 
-            const response = NextResponse.redirect(new URL('/login?session_expired=1', nextUrl));
+            const url = new URL(nextUrl.pathname, nextUrl);
+            url.searchParams.set('session_expired', '1');
+            const response = NextResponse.redirect(url);
             response.cookies.delete('authjs.session-token');
             response.cookies.delete('__Secure-authjs.session-token');
             response.cookies.delete('next-auth.session-token');
