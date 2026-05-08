@@ -817,11 +817,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
                         {/* 설정 버튼 그룹 */}
                         {mode === 'AD' && (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                <button type="button" onClick={() => setActiveModal('basic')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-primary hover:bg-orange-50 transition-all group">
-                                    <Info className="w-6 h-6 text-gray-400 group-hover:text-primary transition-colors" />
-                                    <span className="text-[13px] font-bold text-gray-700 group-hover:text-primary">기본 정보 설정</span>
-                                </button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 
                                 {/* 테마, 애니메이션, 배경색 설정은 직접 업로드 모드에서는 숨김 */}
                                 {!(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
@@ -849,20 +845,13 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 )}
                             </div>
                         )}
-                        {mode === 'JOB' && (
-                            <button type="button" onClick={() => setActiveModal('basic')} className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-primary hover:bg-orange-50 transition-all group">
-                                <Info className="w-6 h-6 text-gray-400 group-hover:text-primary transition-colors" />
-                                <span className="text-[14px] font-bold text-gray-700 group-hover:text-primary">기본 정보 입력 (채용공고/급여 등)</span>
-                            </button>
-                        )}
 
-                        {/* 하단 팝업: 기본 정보 */}
-                        <Dialog open={activeModal === 'basic'} onOpenChange={(open) => !open && setActiveModal(null)}>
-                            <DialogContent className="max-w-xl bg-white p-6 border-0 shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
-                                <div className="space-y-4">
+
+                        {/* 기본 정보 입력 폼 (인라인) */}
+                        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
                                 <Info className="w-4 h-4 text-primary" />
-                                기본 정보 입력 (배너용)
+                                {mode === 'JOB' ? '공고 기본 정보' : '기본 정보 입력 (배너용)'}
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
@@ -948,14 +937,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 </div>
                                 </div>
-                                    <div className="pt-4 flex justify-end">
-                                        <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-lg hover:bg-black transition-colors">
-                                            확인
-                                        </button>
-                                    </div>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
+                        </div>
                     </div>
 
                     {/* ③ 등급별 배너 디자인 설정 */}
