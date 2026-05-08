@@ -201,22 +201,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     );
                                 })}
 
-                                {/* 모바일 전용 맞춤형 관리 메뉴 (스크롤 목록의 맨 끝에 위치) */}
-                                <div className="lg:hidden flex items-center py-1 shrink-0">
-                                    {isEmployer ? (
-                                        <Link 
-                                            href="/biz" 
-                                            className="h-8 flex items-center gap-1.5 px-4 text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm"
-                                        >
-                                            <Briefcase className="w-4 h-4" />
-                                            업체관리
-                                        </Link>
-                                    ) : (
-                                        <div className="h-full flex items-center scale-[0.85] origin-left">
-                                            <ResumeManagementModal />
-                                        </div>
-                                    )}
-                                </div>
+
                             </div>
                         </div>
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { User, FileText, Heart, Eye, Clock, LogIn, Mail, Settings, LogOut } from 'lucide-react';
+import { User, FileText, Heart, Eye, Clock, LogIn, Mail, Settings, LogOut, Briefcase } from 'lucide-react';
 import { useLanguage } from '@/components/providers/language-provider';
 import { SettingsModal } from '@/components/mypage/SettingsModal';
 import { userSettingsAction } from '@/lib/actions';
@@ -49,6 +49,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         if (session && session.user) {
         // Logged In State
         const displayName = (session.user as any).nickname || session.user.name || (session.user.email ? session.user.email.split('@')[0] : '회원');
+        const isEmployer = session.user.role === 'EMPLOYER' || session.user.role === 'ADMIN' || session.user.role === 'SUPER_ADMIN';
         
         return (
             <div className="h-full bg-white rounded-2xl border p-5 flex flex-col shadow-sm">
@@ -72,8 +73,19 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                         <p className="text-[11px] text-gray-500 font-bold tracking-tight mt-0.5">반갑습니다!</p>
                     </div>
 
-                    {/* 회원 설정 - 톱니 아이콘만 */}
-                    <SettingsModal />
+                    {/* 우측 상단 액션 버튼들 */}
+                    <div className="flex items-center gap-2">
+                        {isEmployer && (
+                            <Link 
+                                href="/biz" 
+                                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm"
+                            >
+                                <Briefcase className="w-3.5 h-3.5" />
+                                <span>업체관리</span>
+                            </Link>
+                        )}
+                        <SettingsModal />
+                    </div>
                 </div>
 
                 {/* Bottom Icons - Flex spaced */}
