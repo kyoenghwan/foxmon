@@ -333,6 +333,7 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (html: s
 export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD' }: AdEditorFormProps) {
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
+    const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | null>(null);
     
     // HTML 모드 전용 상태
     const [htmlEditorHeight, setHtmlEditorHeight] = useState(450);
@@ -672,7 +673,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         
                         {/* 상단: 미리보기 + 로고 (mode === 'AD'일 때만) */}
                         {mode === 'AD' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="flex flex-wrap justify-center gap-6">
                                 
                                 {/* 배너 미리보기 */}
                                 <div className="bg-white rounded-2xl border border-gray-100 p-5">
@@ -753,8 +754,44 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             </div>
                         )}
 
-                        {/* 하단 컬럼 (기본 정보) */}
-                        <div className="w-full bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+                        {/* 설정 버튼 그룹 */}
+                        {mode === 'AD' && (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <button type="button" onClick={() => setActiveModal('basic')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-primary hover:bg-orange-50 transition-all group">
+                                    <Info className="w-6 h-6 text-gray-400 group-hover:text-primary transition-colors" />
+                                    <span className="text-[13px] font-bold text-gray-700 group-hover:text-primary">기본 정보 설정</span>
+                                </button>
+                                {(form.tier === 'PREMIUM' || form.tier === 'SPECIAL') && (
+                                    <button type="button" onClick={() => setActiveModal('theme')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-yellow-500 hover:bg-yellow-50 transition-all group">
+                                        <Crown className="w-6 h-6 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                                        <span className="text-[13px] font-bold text-gray-700 group-hover:text-yellow-600">테마 설정</span>
+                                    </button>
+                                )}
+                                {form.tier === 'PREMIUM' && (
+                                    <button type="button" onClick={() => setActiveModal('animation')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-purple-500 hover:bg-purple-50 transition-all group">
+                                        <span className="text-[24px]">✨</span>
+                                        <span className="text-[13px] font-bold text-gray-700 group-hover:text-purple-600">애니메이션 설정</span>
+                                    </button>
+                                )}
+                                {form.tier !== 'PREMIUM_MAIN' && (
+                                    <button type="button" onClick={() => setActiveModal('color')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                                        <Palette className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                                        <span className="text-[13px] font-bold text-gray-700 group-hover:text-blue-600">배경색 설정</span>
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                        {mode === 'JOB' && (
+                            <button type="button" onClick={() => setActiveModal('basic')} className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-primary hover:bg-orange-50 transition-all group">
+                                <Info className="w-6 h-6 text-gray-400 group-hover:text-primary transition-colors" />
+                                <span className="text-[14px] font-bold text-gray-700 group-hover:text-primary">기본 정보 입력 (채용공고/급여 등)</span>
+                            </button>
+                        )}
+
+                        {/* 하단 팝업: 기본 정보 */}
+                        <Dialog open={activeModal === 'basic'} onOpenChange={(open) => !open && setActiveModal(null)}>
+                            <DialogContent className="max-w-xl bg-white p-6 border-0 shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
+                                <div className="space-y-4">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
                                 <Info className="w-4 h-4 text-primary" />
                                 기본 정보 입력 (배너용)
@@ -843,7 +880,14 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 </div>
                                 </div>
-                        </div>
+                                    <div className="pt-4 flex justify-end">
+                                        <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-lg hover:bg-black transition-colors">
+                                            확인
+                                        </button>
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     </div>
 
                     {/* ③ 등급별 배너 디자인 설정 */}
@@ -898,130 +942,139 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         </div>
                     )}
 
-                    {mode === 'AD' && (form.tier === 'PREMIUM' || form.tier === 'SPECIAL') && (
-                        <div className="bg-white rounded-2xl border border-yellow-200 p-6 space-y-5">
-                            <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                                <Crown className={`w-4 h-4 ${form.tier === 'PREMIUM' ? 'text-yellow-500' : 'text-purple-500'}`} />
+                    <Dialog open={activeModal === 'theme'} onOpenChange={(open) => !open && setActiveModal(null)}>
+                        <DialogContent className="max-w-xl bg-white p-6 border-0 shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
+                            <h3 className="font-black text-[18px] text-gray-800 flex items-center gap-2 mb-4">
+                                <Crown className={`w-5 h-5 ${form.tier === 'PREMIUM' ? 'text-yellow-500' : 'text-purple-500'}`} />
                                 {form.tier === 'PREMIUM' ? '프리미엄' : '스페셜'} 테마 설정
                             </h3>
-
-                            {/* 테마 선택 */}
                             <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-2 block">테마 선택</label>
-                                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-11 gap-1.5">
+                                <label className="text-[13px] font-bold text-gray-600 mb-3 block">테마 선택</label>
+                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                                     {PREMIUM_THEMES.map(theme => (
                                         <button
                                             key={theme.key}
+                                            type="button"
                                             onClick={() => update('theme', theme.key)}
-                                            className={`flex flex-col items-center gap-1 py-2 px-1 rounded-lg border-2 transition-all text-center ${
-                                                form.theme === theme.key ? 'border-gray-900 bg-gray-100 ring-1 ring-gray-400' : 'border-gray-100 hover:border-gray-300'
+                                            className={`flex flex-col items-center gap-2 py-3 px-1 rounded-xl border-2 transition-all text-center ${
+                                                form.theme === theme.key ? 'border-gray-900 bg-gray-100 ring-2 ring-gray-400' : 'border-gray-100 hover:border-gray-300'
                                             }`}
                                         >
-                                            <div className="w-5 h-5 rounded-full" style={{ backgroundColor: theme.color }} />
-                                            <span className="text-[9px] font-black text-gray-600 leading-none">{theme.label}</span>
+                                            <div className="w-6 h-6 rounded-full" style={{ backgroundColor: theme.color }} />
+                                            <span className="text-[10px] font-black text-gray-600 leading-none">{theme.label}</span>
                                         </button>
                                     ))}
                                 </div>
                             </div>
+                            <div className="pt-4 flex justify-end">
+                                <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-lg hover:bg-black transition-colors">확인</button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
 
-                            {/* 액션 (애니메이션) 선택 (프리미엄 전용) */}
-                            {form.tier === 'PREMIUM' && (
-                                <div className="space-y-4">
+                    <Dialog open={activeModal === 'animation'} onOpenChange={(open) => !open && setActiveModal(null)}>
+                        <DialogContent className="max-w-xl bg-white p-6 border-0 shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
+                            <h3 className="font-black text-[18px] text-gray-800 flex items-center gap-2 mb-4">
+                                <span className="text-[20px]">✨</span> 애니메이션 설정
+                            </h3>
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="text-[13px] font-bold text-gray-600 mb-3 block">액션(애니메이션) 선택</label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                    {ACTION_OPTIONS.map(opt => (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() => update('action_type', opt.value)}
+                                            className={`py-3 px-2 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center ${
+                                                form.action_type === opt.value
+                                                    ? 'border-primary bg-orange-50 text-primary ring-1 ring-primary/30'
+                                                    : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            <p className="font-black text-[13px] whitespace-nowrap">{opt.label}</p>
+                                            <p className="text-[10px] mt-1 text-gray-400 leading-tight">{opt.desc}</p>
+                                        </button>
+                                    ))}
+                                    </div>
+                                </div>
+
+                                {form.action_type !== 'none' && (
                                     <div>
-                                        <label className="text-[12px] font-bold text-gray-600 mb-2 block">액션(애니메이션) 선택</label>
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                                        {ACTION_OPTIONS.map(opt => (
+                                        <label className="text-[13px] font-bold text-gray-600 mb-3 block">액션 강도</label>
+                                        <div className="flex gap-3">
+                                        {EFFECT_OPTIONS.map(opt => (
                                             <button
                                                 key={opt.value}
                                                 type="button"
-                                                onClick={() => update('action_type', opt.value)}
-                                                className={`py-2 px-1.5 rounded-lg border-2 text-center transition-all flex flex-col items-center justify-center ${
-                                                    form.action_type === opt.value
-                                                        ? 'border-primary bg-orange-50 text-primary'
+                                                onClick={() => update('effect_intensity', opt.value)}
+                                                className={`flex-1 py-3 rounded-xl border-2 text-center transition-all ${
+                                                    form.effect_intensity === opt.value
+                                                        ? 'border-primary bg-orange-50 text-primary ring-1 ring-primary/30'
                                                         : 'border-gray-200 text-gray-500 hover:border-gray-300'
                                                 }`}
                                             >
-                                                <p className="font-black text-[12px] whitespace-nowrap">{opt.label}</p>
-                                                <p className="text-[9px] mt-0.5 text-gray-400 leading-tight">{opt.desc}</p>
+                                                <p className="font-black text-[14px]">{opt.label}</p>
+                                                <p className="text-[11px] mt-1 text-gray-400">{opt.desc}</p>
                                             </button>
                                         ))}
                                         </div>
                                     </div>
+                                )}
+                            </div>
+                            <div className="pt-4 flex justify-end">
+                                <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-lg hover:bg-black transition-colors">확인</button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
 
-                                    {form.action_type !== 'none' && (
-                                        <div>
-                                            <label className="text-[12px] font-bold text-gray-600 mb-2 block">액션 강도</label>
-                                            <div className="flex gap-2">
-                                            {EFFECT_OPTIONS.map(opt => (
-                                                <button
-                                                    key={opt.value}
-                                                    type="button"
-                                                    onClick={() => update('effect_intensity', opt.value)}
-                                                    className={`flex-1 py-2 rounded-lg border-2 text-center transition-all ${
-                                                        form.effect_intensity === opt.value
-                                                            ? 'border-primary bg-orange-50 text-primary'
-                                                            : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                                                    }`}
-                                                >
-                                                    <p className="font-black text-[13px]">{opt.label}</p>
-                                                    <p className="text-[10px] mt-0.5">{opt.desc}</p>
-                                                </button>
-                                            ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {mode === 'AD' && form.tier !== 'PREMIUM_MAIN' && (
-                        <div className="bg-white rounded-2xl border border-blue-200 p-6 space-y-5 mt-4">
-                            <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                                <span className="text-[16px]">🎨</span>
-                                배너 내부 배경색 설정
+                    <Dialog open={activeModal === 'color'} onOpenChange={(open) => !open && setActiveModal(null)}>
+                        <DialogContent className="max-w-xl bg-white p-6 border-0 shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
+                            <h3 className="font-black text-[18px] text-gray-800 flex items-center gap-2 mb-4">
+                                <span className="text-[20px]">🎨</span> 배너 내부 배경색 설정
                             </h3>
-
-                            {/* 색상 선택 */}
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-2 block">색상 선택</label>
-                                <div className="flex gap-2 flex-wrap">
-                                    {COLOR_PALETTE.map(color => (
-                                        <button
-                                            key={color}
-                                            type="button"
-                                            onClick={() => update('color', color)}
-                                            className={`w-9 h-9 rounded-full transition-all ${form.color === color ? 'ring-4 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-110'}`}
-                                            style={{ backgroundColor: color }}
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="text-[13px] font-bold text-gray-600 mb-3 block">색상 선택</label>
+                                    <div className="flex gap-3 flex-wrap">
+                                        {COLOR_PALETTE.map(color => (
+                                            <button
+                                                key={color}
+                                                type="button"
+                                                onClick={() => update('color', color)}
+                                                className={`w-12 h-12 rounded-full transition-all ${form.color === color ? 'ring-4 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-110'}`}
+                                                style={{ backgroundColor: color }}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="pt-2">
+                                    <label className="text-[13px] font-bold text-gray-600 mb-3 flex justify-between">
+                                        <span>배경 투명도 (적용 농도)</span>
+                                        <span className="text-blue-600 font-black text-[15px]">{form.bg_opacity || '10'}%</span>
+                                    </label>
+                                    <div className="flex items-center gap-4 py-2 px-1">
+                                        <input 
+                                            type="range" 
+                                            min="0" 
+                                            max="100" 
+                                            step="1"
+                                            value={form.bg_opacity || '10'} 
+                                            onChange={(e) => update('bg_opacity', e.target.value)}
+                                            className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                                         />
-                                    ))}
+                                    </div>
+                                    <div className="flex justify-between text-[11px] text-gray-400 font-medium px-1 mt-2">
+                                        <span>투명함 (0%)</span>
+                                        <span>진하게 (100%)</span>
+                                    </div>
                                 </div>
                             </div>
-
-                            {/* 배경 투명도 선택 */}
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-2 flex justify-between">
-                                    <span>배경 투명도 (적용 농도)</span>
-                                    <span className="text-blue-600 font-black">{form.bg_opacity || '10'}%</span>
-                                </label>
-                                <div className="flex items-center gap-4 py-2 px-1">
-                                    <input 
-                                        type="range" 
-                                        min="0" 
-                                        max="100" 
-                                        step="1"
-                                        value={form.bg_opacity || '10'} 
-                                        onChange={(e) => update('bg_opacity', e.target.value)}
-                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                    />
-                                </div>
-                                <div className="flex justify-between text-[10px] text-gray-400 font-medium px-1 mt-1">
-                                    <span>투명함 (0%)</span>
-                                    <span>진하게 (100%)</span>
-                                </div>
+                            <div className="pt-4 flex justify-end">
+                                <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-lg hover:bg-black transition-colors">확인</button>
                             </div>
-                        </div>
-                    )}
+                        </DialogContent>
+                    </Dialog>
 
                 </div>
             )}
