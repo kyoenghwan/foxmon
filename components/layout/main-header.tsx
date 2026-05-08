@@ -214,7 +214,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                             {isEmployer && (
                                 <Link 
                                     href="/biz" 
-                                    className="h-full flex items-center gap-1.5 px-5 text-[13px] sm:text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95"
+                                    className="h-full flex items-center gap-1.5 px-5 text-[13px] sm:text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap shrink-0"
                                 >
                                     <Briefcase className="w-4 h-4" />
                                     업체관리

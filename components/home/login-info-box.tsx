@@ -78,14 +78,14 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                     {/* 우측 상단 액션 버튼들 */}
                     <div className="flex items-center gap-2">
                         {showResumeMenu && (
-                            <div className="flex items-center">
+                            <div className="flex items-center lg:hidden">
                                 <ResumeManagementModal />
                             </div>
                         )}
                         {isEmployer && (
                             <Link 
                                 href="/biz" 
-                                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm"
+                                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm lg:hidden"
                             >
                                 <Briefcase className="w-3.5 h-3.5" />
                                 <span>업체관리</span>
