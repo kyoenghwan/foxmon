@@ -695,21 +695,21 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     <div className="bg-gray-50 rounded-xl p-2 flex gap-1 w-full sm:w-fit mb-2 border border-gray-100 shadow-sm mx-auto">
                                         <button
                                             type="button"
-                                            onClick={() => update('premium_banner_mode', 'upload')}
-                                            className={`flex-1 sm:flex-none px-6 py-2.5 rounded-lg text-[13px] font-bold transition-all ${
-                                                form.premium_banner_mode === 'upload' ? 'bg-white text-primary shadow-sm ring-1 ring-primary/20' : 'text-gray-500 hover:text-gray-800'
-                                            }`}
-                                        >
-                                            🖼️ 배너 직접 업로드
-                                        </button>
-                                        <button
-                                            type="button"
                                             onClick={() => update('premium_banner_mode', 'template')}
                                             className={`flex-1 sm:flex-none px-6 py-2.5 rounded-lg text-[13px] font-bold transition-all ${
                                                 form.premium_banner_mode !== 'upload' ? 'bg-white text-primary shadow-sm ring-1 ring-primary/20' : 'text-gray-500 hover:text-gray-800'
                                             }`}
                                         >
                                             ✨ 템플릿으로 만들기
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => update('premium_banner_mode', 'upload')}
+                                            className={`flex-1 sm:flex-none px-6 py-2.5 rounded-lg text-[13px] font-bold transition-all ${
+                                                form.premium_banner_mode === 'upload' ? 'bg-white text-primary shadow-sm ring-1 ring-primary/20' : 'text-gray-500 hover:text-gray-800'
+                                            }`}
+                                        >
+                                            🖼️ 배너 직접 업로드
                                         </button>
                                     </div>
                                 )}
@@ -892,7 +892,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             </>
                         )}
 
-                        {/* 설정 버튼 그룹 */}
+                        {/* 설정 버튼 그룹 및 아코디언 (PREMIUM_MAIN 업로드 모드에서는 숨김) */}
+                        {!(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
+                            <>
+                                {/* 설정 버튼 그룹 */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             <button 
                                 type="button" 
@@ -1029,6 +1032,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             </div>
                             </div>
                         )}
+                        </>
+                    )}
                     </div>
 
                     {/* ③ 등급별 배너 디자인 설정 */}
