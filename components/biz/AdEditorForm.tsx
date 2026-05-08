@@ -689,8 +689,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         
                         {/* 상단: 미리보기 + 로고 (mode === 'AD'일 때만) */}
                         {mode === 'AD' && (
-                            <div className={`flex flex-wrap ${form.tier === 'PREMIUM_MAIN' ? 'flex-col' : 'justify-center'} gap-6`}>
-                                
+                            <>
                                 {/* PREMIUM_MAIN 전용: 배너 제작 방식 선택 토글 */}
                                 {form.tier === 'PREMIUM_MAIN' && (
                                     <div className="bg-gray-50 rounded-xl p-2 flex gap-1 w-full sm:w-fit mb-2 border border-gray-100 shadow-sm mx-auto">
@@ -715,8 +714,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 )}
 
-                                {/* 배너 미리보기 영역 */}
-                                <div className={`bg-white rounded-2xl border border-gray-100 p-5 ${form.tier === 'PREMIUM_MAIN' ? 'w-full max-w-4xl mx-auto' : ''}`}>
+                                <div className={`flex flex-wrap ${form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload' ? 'flex-col' : 'justify-center'} gap-6`}>
+                                    
+                                    {/* 배너 미리보기 영역 */}
+                                    <div className={`bg-white rounded-2xl border border-gray-100 p-5 ${form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload' ? 'w-full max-w-4xl mx-auto' : ''}`}>
                                     <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center">
                                         <Image className="w-4 h-4 text-primary" />
                                         배너 미리보기
@@ -750,7 +751,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             // 기존 템플릿 모드 및 다른 등급 배너
                                             return (
                                                 <div className="w-full flex justify-center">
-                                                    <div style={{ width: form.tier === 'PREMIUM_MAIN' ? '100%' : (isSide ? '140px' : '200px'), maxWidth: form.tier === 'PREMIUM_MAIN' ? '800px' : '100%' }}>
+                                                    <div style={{ width: (form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') ? '100%' : (isSide ? '140px' : '200px'), maxWidth: (form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') ? '800px' : '100%' }}>
                                                     <PremiumJobCard
                                                         id="preview"
                                                         company={form.company || '업체명'}
@@ -813,6 +814,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 )}
                             </div>
+                            </>
                         )}
 
                         {/* 설정 버튼 그룹 */}
