@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { User, FileText, Heart, Eye, Clock, LogIn, Mail, Settings, LogOut, Briefcase } from 'lucide-react';
 import { useLanguage } from '@/components/providers/language-provider';
 import { SettingsModal } from '@/components/mypage/SettingsModal';
+import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
 import { userSettingsAction } from '@/lib/actions';
 
 interface SessionUser {
@@ -50,6 +51,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         // Logged In State
         const displayName = (session.user as any).nickname || session.user.name || (session.user.email ? session.user.email.split('@')[0] : '회원');
         const isEmployer = session.user.role === 'EMPLOYER' || session.user.role === 'ADMIN' || session.user.role === 'SUPER_ADMIN';
+        const showResumeMenu = session.user.role !== 'EMPLOYER';
         
         return (
             <div className="h-full bg-white rounded-2xl border p-5 flex flex-col shadow-sm">
@@ -75,6 +77,11 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
 
                     {/* 우측 상단 액션 버튼들 */}
                     <div className="flex items-center gap-2">
+                        {showResumeMenu && (
+                            <div className="flex items-center">
+                                <ResumeManagementModal />
+                            </div>
+                        )}
                         {isEmployer && (
                             <Link 
                                 href="/biz" 

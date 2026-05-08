@@ -51,7 +51,8 @@ export function MainHeader({ session }: MainHeaderProps) {
         setLanguage(language === 'KO' ? 'EN' : 'KO');
     };
 
-    const isEmployer = session?.user?.role === 'EMPLOYER';
+    const isEmployer = session?.user?.role === 'EMPLOYER' || session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN';
+    const showResumeMenu = session?.user?.role !== 'EMPLOYER';
     const isBusinessVerified = (session?.user as any)?.business_number ? true : false;
 
     // 요청하신 순서대로 메뉴 재배치
@@ -207,18 +208,17 @@ export function MainHeader({ session }: MainHeaderProps) {
 
                         {/* 우측 끝 맞춤형 관리 메뉴 */}
                         <div className="hidden lg:flex items-center h-full py-2.5 gap-2">
-                            {isEmployer ? (
-                                <>
-                                    <Link 
-                                        href="/biz" 
-                                        className="h-full flex items-center gap-1.5 px-5 text-[13px] sm:text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95"
-                                    >
-                                        <Briefcase className="w-4 h-4" />
-                                        업체관리
-                                    </Link>
-                                </>
-                            ) : (
+                            {showResumeMenu && (
                                 <ResumeManagementModal />
+                            )}
+                            {isEmployer && (
+                                <Link 
+                                    href="/biz" 
+                                    className="h-full flex items-center gap-1.5 px-5 text-[13px] sm:text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95"
+                                >
+                                    <Briefcase className="w-4 h-4" />
+                                    업체관리
+                                </Link>
                             )}
                         </div>
                     </nav>
