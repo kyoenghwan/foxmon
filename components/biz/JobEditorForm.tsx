@@ -269,7 +269,8 @@ const JOB_PRICING = {
 export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditorFormProps) {
     const mode = 'JOB' as string;
     const [saving, setSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
+    const [activeTab, setActiveTab] = useState<'job' | 'detail'>('job');
+    const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | null>(null);
     
     // HTML 모드 전용 상태
     const [htmlEditorHeight, setHtmlEditorHeight] = useState(450);
@@ -515,7 +516,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
 
 
             {/* ═══════ 배너 정보 탭 ═══════ */}
-            {(mode === 'JOB' || activeTab === 'banner') && (
+            {(mode === 'JOB' || activeTab === 'job') && (
                 <div className="space-y-6">
 
                     {/* ① 광고 등급 선택 (UI 간소화) */}

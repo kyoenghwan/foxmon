@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Megaphone, Coins, Users, Building2, Briefcase } from 'lucide-react';
 import { SidebarNav, SidebarSection } from '@/components/layout/SidebarNav';
+import Link from 'next/link';
 
 const sections: SidebarSection[] = [
     {
@@ -17,12 +18,38 @@ const sections: SidebarSection[] = [
     },
 ];
 
-export function BizSidebar() {
+export function BizSidebar({ isMobile = false }: { isMobile?: boolean }) {
     const pathname = usePathname();
 
     const activeId = pathname === '/biz'
         ? '/biz'
         : sections[0].items.find(item => item.href && item.href !== '/biz' && pathname.startsWith(item.href))?.id || '/biz';
+
+    
+    if (isMobile) {
+        return (
+            <div className="w-full bg-white py-2">
+                <div className="flex flex-wrap gap-1.5">
+                    {sections[0].items.map((item) => {
+                        const isActive = activeId === item.id || activeId === item.href;
+                        return (
+                            <Link
+                                key={item.id}
+                                href={item.href || '#'}
+                                className={`px-4 py-2 rounded-full text-[13px] font-bold transition-all whitespace-nowrap ${
+                                    isActive
+                                        ? 'bg-primary text-white shadow-md'
+                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                }`}
+                            >
+                                {item.label}
+                            </Link>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <SidebarNav
