@@ -172,7 +172,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 onMouseEnter={handleMouseEnter}
                                 onMouseLeave={handleMouseLeave}
                                 onClick={() => {
-                                    if (window.innerWidth < 768) {
+                                    if (window.innerWidth < 1024) {
                                         setShowMobileMenu(true);
                                     } else {
                                         setShowMegaMenu(!showMegaMenu);
@@ -180,7 +180,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 }}
                             >
                                 <Menu className="w-6 h-6 text-gray-800 group-hover:text-primary transition-colors md:mr-2" />
-                                <span className="hidden md:inline font-black text-[15px] sm:text-[16px] text-gray-800 group-hover:text-primary transition-colors whitespace-nowrap">전체메뉴</span>
+                                <span className="hidden lg:inline font-black text-[15px] sm:text-[16px] text-gray-800 group-hover:text-primary transition-colors whitespace-nowrap">전체메뉴</span>
                             </div>
 
                             {/* 개별 메뉴 리스트 */}
@@ -202,7 +202,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 })}
 
                                 {/* 모바일 전용 맞춤형 관리 메뉴 (스크롤 목록의 맨 끝에 위치) */}
-                                <div className="md:hidden flex items-center h-full py-2.5 pl-2 pr-4 shrink-0">
+                                <div className="lg:hidden flex items-center h-full py-2.5 pl-2 pr-4 shrink-0">
                                     {isEmployer ? (
                                         <Link 
                                             href="/biz" 
@@ -221,7 +221,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                         </div>
 
                         {/* 우측 끝 맞춤형 관리 메뉴 */}
-                        <div className="hidden md:flex items-center h-full py-2.5 gap-2">
+                        <div className="hidden lg:flex items-center h-full py-2.5 gap-2">
                             {isEmployer ? (
                                 <>
                                     <Link 
@@ -243,7 +243,7 @@ export function MainHeader({ session }: MainHeaderProps) {
             {/* 3단: 메가 메뉴 드롭다운 (마우스 호버 시 표시, 모바일에서는 숨김) */}
             {showMegaMenu && (
                 <div 
-                    className="absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-xl z-40 animate-in fade-in slide-in-from-top-2 duration-200 hidden md:block"
+                    className="absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-xl z-40 animate-in fade-in slide-in-from-top-2 duration-200 hidden lg:block"
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
