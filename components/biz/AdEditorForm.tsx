@@ -714,10 +714,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 )}
 
-                                <div className={`flex flex-wrap ${form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload' ? 'flex-col' : 'justify-center'} gap-6`}>
+                                <div className={`flex flex-wrap ${form.tier === 'PREMIUM_MAIN' ? 'flex-col' : 'justify-center'} gap-6`}>
                                     
                                     {/* 배너 미리보기 영역 */}
-                                    <div className={`bg-white rounded-2xl border border-gray-100 p-5 ${form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload' ? 'w-full max-w-4xl mx-auto' : ''}`}>
+                                    <div className={`bg-white rounded-2xl border border-gray-100 p-5 ${form.tier === 'PREMIUM_MAIN' ? 'w-full max-w-4xl mx-auto' : ''}`}>
                                     <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center">
                                         <Image className="w-4 h-4 text-primary" />
                                         배너 미리보기
@@ -749,9 +749,84 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             }
 
                                             // 기존 템플릿 모드 및 다른 등급 배너
+                                            if (form.tier === 'PREMIUM_MAIN') {
+                                                const hasImage = !!(form.logo_url || form.image);
+                                                const bgUrl = form.logo_url || form.image;
+                                                
+                                                let payType = '';
+                                                let payAmount = form.pay || '급여 정보';
+                                                if (payAmount.includes(']') && payAmount.startsWith('[')) {
+                                                    const splitIndex = payAmount.indexOf(']');
+                                                    payType = payAmount.substring(1, splitIndex).trim();
+                                                    payAmount = payAmount.substring(splitIndex + 1).trim();
+                                                } else if (payAmount === '추후협의') {
+                                                    payType = '협의';
+                                                    payAmount = '추후협의';
+                                                } else {
+                                                    const parts = payAmount.split(' ');
+                                                    if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0])) {
+                                                        payType = parts[0];
+                                                        payAmount = parts.slice(1).join(' ');
+                                                    }
+                                                }
+
+                                                // fallback 그라데이션 대신 선택한 테마에 맞춰 매핑 (선택되지 않으면 기본 인디고)
+                                                const themeMap: Record<string, string> = {
+                                                    gold: 'from-yellow-900 via-orange-900 to-black',
+                                                    platinum: 'from-slate-700 via-gray-900 to-black',
+                                                    diamond: 'from-cyan-900 via-blue-900 to-black',
+                                                    ruby: 'from-rose-900 via-red-900 to-black',
+                                                    sapphire: 'from-blue-900 via-indigo-900 to-black',
+                                                    emerald: 'from-emerald-900 via-green-900 to-black',
+                                                    amethyst: 'from-purple-900 via-fuchsia-900 to-black',
+                                                    obsidian: 'from-gray-900 via-black to-black'
+                                                };
+                                                const bgGradient = form.theme && form.theme !== 'none' && themeMap[form.theme] 
+                                                    ? `bg-gradient-to-br ${themeMap[form.theme]}` 
+                                                    : 'bg-gradient-to-br from-indigo-900 via-purple-900 to-black';
+
+                                                return (
+                                                    <div className="w-full flex justify-center">
+                                                        <div className={`flex-shrink-0 w-full max-w-[400px] h-[180px] rounded-2xl ${bgGradient} p-6 shadow-md relative overflow-hidden group`}>
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
+                                                            <div className="relative z-20 h-full flex flex-col justify-between pointer-events-auto">
+                                                                <div className="space-y-3">
+                                                                    <div className="flex items-center gap-3 mb-1">
+                                                                        {hasImage && (
+                                                                            <div className="w-[60px] h-[40px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
+                                                                                <div className="w-full h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${bgUrl})` }} />
+                                                                            </div>
+                                                                        )}
+                                                                        <h3 className="text-white font-black text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                                                                            {form.company || '업체명'}
+                                                                        </h3>
+                                                                    </div>
+                                                                    <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
+                                                                        {form.title || '광고 제목을 입력하세요'}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="flex flex-col gap-1.5 mt-auto">
+                                                                    <p className="text-white/70 text-[11px] font-bold tracking-wider">{form.location || '전지역'}</p>
+                                                                    <div className="flex items-center gap-2">
+                                                                        {payType && (
+                                                                            <span className="px-2 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[11px] font-black tracking-wide border border-white/10 shadow-sm">
+                                                                                {payType}
+                                                                            </span>
+                                                                        )}
+                                                                        <span className="text-white font-black text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                                                            {payAmount}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+
                                             return (
                                                 <div className="w-full flex justify-center">
-                                                    <div style={{ width: (form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') ? '100%' : (isSide ? '140px' : '200px'), maxWidth: (form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') ? '800px' : '100%' }}>
+                                                    <div style={{ width: (isSide ? '140px' : '200px'), maxWidth: '100%' }}>
                                                     <PremiumJobCard
                                                         id="preview"
                                                         company={form.company || '업체명'}

@@ -1,7 +1,7 @@
 'use client';
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
-import { LoginForm } from "./LoginForm";
+import { LoginForm } from "@/src/components/auth/LoginForm";
 import { X } from "lucide-react";
 
 export function LoginModalWrapper() {
