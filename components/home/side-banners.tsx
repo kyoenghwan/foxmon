@@ -31,48 +31,12 @@ export function SideBanners() {
         fetchSideAds();
     }, []);
 
-    // 화면 크기 변화를 실시간으로 감지하여 배너 크기를 조절하는 로직
+    // 화면 크기 변화를 감지 (하지만 스케일링은 하지 않고, CSS 렌더링에 맡김)
     useEffect(() => {
-        const handleResize = () => {
-            if (!containerRef.current) return;
-            
-            const width = window.innerWidth;
-            const containerWidth = containerRef.current.offsetWidth;
-            
-            if (width < 1280) {
-                setBannerScale(1);
-                return; // 1280 미만에서는 CSS에 의해 hidden 됨
-            }
-
-            const availableSpace = (width - containerWidth) / 2;
-            
-            let bannerWidth = 140;
-            if (width >= 2560) bannerWidth = 158;
-            else if (width >= 1920) bannerWidth = 154;
-            else if (width >= 1440) bannerWidth = 134;
-
-            const requiredSpace = bannerWidth + 16; // 배너 넓이 + margin(16px)
-
-            // 공간이 부족할 경우 비율에 맞춰 축소
-            if (availableSpace < requiredSpace) {
-                // 여백이 아예 없거나 음수일 수 있으므로 Math.max로 최소 0.3배까지만 축소 허용
-                const newScale = Math.max(0.3, availableSpace / requiredSpace);
-                setBannerScale(newScale);
-            } else {
-                setBannerScale(1);
-            }
-        };
-
-        window.addEventListener('resize', handleResize);
-        
-        // 렌더링 직후 컨테이너 크기가 잡힐 시간을 주기 위해 약간 지연 실행
-        const timer = setTimeout(handleResize, 50);
-        
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            clearTimeout(timer);
-        };
-    }, [leftAds]); // 광고가 로드되어 DOM이 완성될 때 다시 한 번 체크
+        // 사이드 배너가 항상 원래 크기(scale 1)를 유지하도록 고정합니다.
+        // 사용자의 요청: "자꾸 조금씩 해상도가 바뀔때마다 해상도 따라서 자동으로 변경이 되고 있자나 ... 딱 1에서 봤던 크기 그대로 유지해달라"
+        setBannerScale(1);
+    }, [leftAds]); // 광고가 로드되어 DOM이 완성될 때 한 번만 세팅
 
     const handleAdClick = (adId: string) => {
         recordAdExposure(adId);

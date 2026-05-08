@@ -62,6 +62,7 @@ export interface AdFormData {
     business_registration_url?: string;
     is_address_same?: boolean;
     business_name?: string;
+    premium_banner_mode?: 'upload' | 'template';
     
     // 결제 및 부가 옵션 (팝업)
     exposure_period?: 30 | 60 | 90;
@@ -596,6 +597,21 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         }
     };
 
+    const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        try {
+            // 풀사이즈 배너 이미지는 가로 800px 정도 권장, JPEG 포맷으로 용량 최적화
+            const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 800, quality: 0.85, format: 'image/jpeg' });
+            // image 필드를 풀사이즈 배너 이미지 용도로 사용
+            update('image', compressedBase64);
+        } catch (error) {
+            console.error('배너 이미지 압축 실패:', error);
+            alert('이미지 처리 중 오류가 발생했습니다.');
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* 탭 메뉴 */}
@@ -673,24 +689,68 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         
                         {/* 상단: 미리보기 + 로고 (mode === 'AD'일 때만) */}
                         {mode === 'AD' && (
-                            <div className="flex flex-wrap justify-center gap-6">
+                            <div className={`flex flex-wrap ${form.tier === 'PREMIUM_MAIN' ? 'flex-col' : 'justify-center'} gap-6`}>
                                 
-                                {/* 배너 미리보기 */}
-                                <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                                    <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2">
+                                {/* PREMIUM_MAIN 전용: 배너 제작 방식 선택 토글 */}
+                                {form.tier === 'PREMIUM_MAIN' && (
+                                    <div className="bg-gray-50 rounded-xl p-2 flex gap-1 w-full sm:w-fit mb-2 border border-gray-100 shadow-sm mx-auto">
+                                        <button
+                                            type="button"
+                                            onClick={() => update('premium_banner_mode', 'upload')}
+                                            className={`flex-1 sm:flex-none px-6 py-2.5 rounded-lg text-[13px] font-bold transition-all ${
+                                                form.premium_banner_mode === 'upload' ? 'bg-white text-primary shadow-sm ring-1 ring-primary/20' : 'text-gray-500 hover:text-gray-800'
+                                            }`}
+                                        >
+                                            🖼️ 배너 직접 업로드
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => update('premium_banner_mode', 'template')}
+                                            className={`flex-1 sm:flex-none px-6 py-2.5 rounded-lg text-[13px] font-bold transition-all ${
+                                                form.premium_banner_mode !== 'upload' ? 'bg-white text-primary shadow-sm ring-1 ring-primary/20' : 'text-gray-500 hover:text-gray-800'
+                                            }`}
+                                        >
+                                            ✨ 템플릿으로 만들기
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* 배너 미리보기 영역 */}
+                                <div className={`bg-white rounded-2xl border border-gray-100 p-5 ${form.tier === 'PREMIUM_MAIN' ? 'w-full max-w-4xl mx-auto' : ''}`}>
+                                    <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center">
                                         <Image className="w-4 h-4 text-primary" />
                                         배너 미리보기
                                     </h3>
 
                                     <div className="w-full flex justify-center pointer-events-none">
                                         {(() => {
-                                            const isPremium = form.tier === 'PREMIUM';
+                                            const isPremium = form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN';
                                             const isSide = form.tier === 'SIDE';
                                             const isSpecial = form.tier === 'SPECIAL';
                                             const isGeneral = form.tier === 'GENERAL';
+                                            
+                                            // PREMIUM_MAIN 이면서 직접 업로드 모드일 때
+                                            if (form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') {
+                                                return (
+                                                    <label className="w-full max-w-[800px] aspect-[2/1] rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary hover:bg-blue-50/50 transition-all pointer-events-auto">
+                                                        {form.image ? (
+                                                            <img src={form.image} alt="배너 이미지" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="flex flex-col items-center gap-2 p-6 text-center">
+                                                                <Upload className="w-10 h-10 text-gray-400 group-hover:text-primary transition-colors" />
+                                                                <span className="text-gray-500 font-bold">여기를 클릭하여 메인 배너를 업로드하세요</span>
+                                                                <span className="text-[12px] text-gray-400">권장 사이즈: 가로 800px, 세로 400px (2:1 비율)</span>
+                                                            </div>
+                                                        )}
+                                                        <input type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
+                                                    </label>
+                                                );
+                                            }
+
+                                            // 기존 템플릿 모드 및 다른 등급 배너
                                             return (
                                                 <div className="w-full flex justify-center">
-                                                    <div style={{ width: isSide ? '140px' : '200px', maxWidth: '100%' }}>
+                                                    <div style={{ width: form.tier === 'PREMIUM_MAIN' ? '100%' : (isSide ? '140px' : '200px'), maxWidth: form.tier === 'PREMIUM_MAIN' ? '800px' : '100%' }}>
                                                     <PremiumJobCard
                                                         id="preview"
                                                         company={form.company || '업체명'}
@@ -713,13 +773,14 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 </div>
 
-                                {/* 로고 업로드 및 제작 요청 통합 */}
-                                {form.tier !== 'GENERAL' && (
-                                    <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center">
+                                {/* 로고 업로드 (PREMIUM_MAIN 이고 upload 모드일 때는 로고 업로드 숨김) */}
+                                {form.tier !== 'GENERAL' && !(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
+                                    <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center mx-auto sm:mx-0">
                                         <div className="flex flex-col gap-2 w-full mb-3">
                                             <div className="flex items-center justify-between">
                                                 <h3 className="font-black text-[14px] text-gray-800">업체 로고</h3>
                                                 <button 
+                                                    type="button"
                                                     onClick={handleLogoRequest}
                                                     className="px-2 py-1.5 rounded-lg bg-gray-900 hover:bg-black text-white text-[10px] items-center gap-1 flex shadow-sm transition-all"
                                                 >
@@ -761,23 +822,30 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     <Info className="w-6 h-6 text-gray-400 group-hover:text-primary transition-colors" />
                                     <span className="text-[13px] font-bold text-gray-700 group-hover:text-primary">기본 정보 설정</span>
                                 </button>
-                                {(form.tier === 'PREMIUM' || form.tier === 'SPECIAL') && (
-                                    <button type="button" onClick={() => setActiveModal('theme')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-yellow-500 hover:bg-yellow-50 transition-all group">
-                                        <Crown className="w-6 h-6 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-                                        <span className="text-[13px] font-bold text-gray-700 group-hover:text-yellow-600">테마 설정</span>
-                                    </button>
-                                )}
-                                {form.tier === 'PREMIUM' && (
-                                    <button type="button" onClick={() => setActiveModal('animation')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-purple-500 hover:bg-purple-50 transition-all group">
-                                        <span className="text-[24px]">✨</span>
-                                        <span className="text-[13px] font-bold text-gray-700 group-hover:text-purple-600">애니메이션 설정</span>
-                                    </button>
-                                )}
-                                {form.tier !== 'PREMIUM_MAIN' && (
-                                    <button type="button" onClick={() => setActiveModal('color')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all group">
-                                        <Palette className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                                        <span className="text-[13px] font-bold text-gray-700 group-hover:text-blue-600">배경색 설정</span>
-                                    </button>
+                                
+                                {/* 테마, 애니메이션, 배경색 설정은 직접 업로드 모드에서는 숨김 */}
+                                {!(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
+                                    <>
+                                        {(form.tier === 'PREMIUM' || form.tier === 'SPECIAL' || form.tier === 'PREMIUM_MAIN') && (
+                                            <button type="button" onClick={() => setActiveModal('theme')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-yellow-500 hover:bg-yellow-50 transition-all group">
+                                                <Crown className="w-6 h-6 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                                                <span className="text-[13px] font-bold text-gray-700 group-hover:text-yellow-600">테마 설정</span>
+                                            </button>
+                                        )}
+                                        {(form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN') && (
+                                            <button type="button" onClick={() => setActiveModal('animation')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-purple-500 hover:bg-purple-50 transition-all group">
+                                                <span className="text-[24px]">✨</span>
+                                                <span className="text-[13px] font-bold text-gray-700 group-hover:text-purple-600">애니메이션 설정</span>
+                                            </button>
+                                        )}
+                                        {/* PREMIUM_MAIN 은 배경색 설정 대신 테마를 사용 (기존 로직 유지) */}
+                                        {form.tier !== 'PREMIUM_MAIN' && (
+                                            <button type="button" onClick={() => setActiveModal('color')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                                                <Palette className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                                                <span className="text-[13px] font-bold text-gray-700 group-hover:text-blue-600">배경색 설정</span>
+                                            </button>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         )}

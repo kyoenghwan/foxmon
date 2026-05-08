@@ -124,61 +124,78 @@ export function MainBanner() {
                         }
                     }
 
+                    const isUploadMode = banner.theme === 'UPLOAD';
+
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 h-full rounded-2xl ${bgClass} p-6 shadow-md relative overflow-hidden group cursor-pointer`}
+                            className={`flex-shrink-0 h-full rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-6'} shadow-md relative overflow-hidden group cursor-pointer`}
                             style={{ 
                                 width: 'calc((100% - 16px) / 2)'
                             }}
                             onClick={() => handleAdClick(banner.id)}
                         >
-                            {/* 가독성을 위한 어두운 그라데이션 오버레이 (강화) */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
+                            {isUploadMode && hasImage ? (
+                                /* 업로드 모드: 이미지만 100% 꽉 채워서 노출 (텍스트 숨김) */
+                                <div className="w-full h-full relative">
+                                    <div 
+                                        className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                                        style={{ backgroundImage: `url(${bgUrl})` }}
+                                    />
+                                    {/* 호버 시 밝기 조절 */}
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-15" />
+                                </div>
+                            ) : (
+                                /* 기존 템플릿 모드 */
+                                <>
+                                    {/* 가독성을 위한 어두운 그라데이션 오버레이 (강화) */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
 
-                            {/* 호버 시 밝기 조절 */}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors z-15" />
+                                    {/* 호버 시 밝기 조절 */}
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors z-15" />
 
-                            <div className="relative z-20 h-full flex flex-col justify-between">
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-3 mb-1">
-                                        {hasImage && (
-                                            <div className="w-12 h-8 sm:w-[60px] sm:h-[40px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
-                                                <div 
-                                                    className="w-full h-full bg-contain bg-center bg-no-repeat" 
-                                                    style={{ backgroundImage: `url(${bgUrl})` }} 
-                                                />
+                                    <div className="relative z-20 h-full flex flex-col justify-between">
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-3 mb-1">
+                                                {hasImage && (
+                                                    <div className="w-12 h-8 sm:w-[60px] sm:h-[40px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
+                                                        <div 
+                                                            className="w-full h-full bg-contain bg-center bg-no-repeat" 
+                                                            style={{ backgroundImage: `url(${bgUrl})` }} 
+                                                        />
+                                                    </div>
+                                                )}
+                                                <h3 className="text-white font-black text-xl sm:text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform origin-left duration-300">
+                                                    {banner.company}
+                                                </h3>
                                             </div>
-                                        )}
-                                        <h3 className="text-white font-black text-xl sm:text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform origin-left duration-300">
-                                            {banner.company}
-                                        </h3>
-                                    </div>
-                                    <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
-                                        {banner.title}
-                                    </p>
-                                </div>
+                                            <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
+                                                {banner.title}
+                                            </p>
+                                        </div>
 
-                                <div className="flex flex-col gap-1.5 mt-auto">
-                                    <p className="text-white/70 text-[11px] font-bold tracking-wider">{banner.location}</p>
-                                    <div className="flex items-center gap-2">
-                                        {payType && (
-                                            <span className="px-2 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[11px] font-black tracking-wide border border-white/10 shadow-sm">
-                                                {payType}
-                                            </span>
-                                        )}
-                                        <span className="text-white font-black text-lg sm:text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                                            {payAmount}
-                                        </span>
+                                        <div className="flex flex-col gap-1.5 mt-auto">
+                                            <p className="text-white/70 text-[11px] font-bold tracking-wider">{banner.location}</p>
+                                            <div className="flex items-center gap-2">
+                                                {payType && (
+                                                    <span className="px-2 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[11px] font-black tracking-wide border border-white/10 shadow-sm">
+                                                        {payType}
+                                                    </span>
+                                                )}
+                                                <span className="text-white font-black text-lg sm:text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                                    {payAmount}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
 
-                            {/* 장식용 요소 */}
-                            <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-                            <div className="absolute right-5 top-4 text-white/10 font-black text-4xl italic select-none z-10">
-                                {((idx % originalLength) + 1).toString().padStart(2, '0')}
-                            </div>
+                                    {/* 장식용 요소 */}
+                                    <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                                    <div className="absolute right-5 top-4 text-white/10 font-black text-4xl italic select-none z-10">
+                                        {((idx % originalLength) + 1).toString().padStart(2, '0')}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     );
                 })}

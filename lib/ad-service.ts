@@ -7,7 +7,9 @@ export interface AdItem {
     location: string;
     pay: string;
     image?: string;
+    logo_url?: string;
     color?: string;
+    theme?: string;
     time?: string;
     is_big: boolean; // Supabase 스네이크 케이스 대응
     tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL';

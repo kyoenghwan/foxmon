@@ -86,7 +86,7 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 detail_bg_image: payload.detail_bg_image,
                 
                 tier: payload.tier || 'GENERAL',
-                theme: payload.theme || null,
+                theme: payload.premium_banner_mode === 'upload' ? 'UPLOAD' : (payload.theme || null),
                 effect_intensity: payload.effect_intensity || null,
                 color: payload.color || null,
                 
@@ -210,7 +210,7 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 detail_bg_color: payload.color,
                 detail_bg_image: payload.detail_bg_image,
                 tier: payload.tier || 'GENERAL',
-                theme: payload.theme || null,
+                theme: payload.premium_banner_mode === 'upload' ? 'UPLOAD' : (payload.theme || null),
                 effect_intensity: payload.effect_intensity || null,
                 color: payload.color || null,
                 updated_at: new Date().toISOString()
