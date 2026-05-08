@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, Building2 } from 'lucide-react';
+import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, Building2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
@@ -816,44 +816,57 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         )}
 
                         {/* 설정 버튼 그룹 */}
-                        {mode === 'AD' && (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                
-                                {/* 테마, 애니메이션, 배경색 설정은 직접 업로드 모드에서는 숨김 */}
-                                {!(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
-                                    <>
-                                        {(form.tier === 'PREMIUM' || form.tier === 'SPECIAL' || form.tier === 'PREMIUM_MAIN') && (
-                                            <button type="button" onClick={() => setActiveModal('theme')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-yellow-500 hover:bg-yellow-50 transition-all group">
-                                                <Crown className="w-6 h-6 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-                                                <span className="text-[13px] font-bold text-gray-700 group-hover:text-yellow-600">테마 설정</span>
-                                            </button>
-                                        )}
-                                        {(form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN') && (
-                                            <button type="button" onClick={() => setActiveModal('animation')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-purple-500 hover:bg-purple-50 transition-all group">
-                                                <span className="text-[24px]">✨</span>
-                                                <span className="text-[13px] font-bold text-gray-700 group-hover:text-purple-600">애니메이션 설정</span>
-                                            </button>
-                                        )}
-                                        {/* PREMIUM_MAIN 은 배경색 설정 대신 테마를 사용 (기존 로직 유지) */}
-                                        {form.tier !== 'PREMIUM_MAIN' && (
-                                            <button type="button" onClick={() => setActiveModal('color')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all group">
-                                                <Palette className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                                                <span className="text-[13px] font-bold text-gray-700 group-hover:text-blue-600">배경색 설정</span>
-                                            </button>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        )}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <button 
+                                type="button" 
+                                onClick={() => setActiveModal(activeModal === 'basic' ? null : 'basic')} 
+                                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${activeModal === 'basic' ? 'border-primary bg-orange-50' : 'border-gray-100 bg-white hover:border-primary hover:bg-orange-50'}`}
+                            >
+                                <Info className={`w-6 h-6 transition-colors ${activeModal === 'basic' ? 'text-primary' : 'text-gray-400 group-hover:text-primary'}`} />
+                                <span className={`text-[13px] font-bold ${activeModal === 'basic' ? 'text-primary' : 'text-gray-700 group-hover:text-primary'}`}>
+                                    {mode === 'JOB' ? '기본 정보 입력' : '기본 정보 설정'}
+                                </span>
+                            </button>
+                            
+                            {mode === 'AD' && !(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
+                                <>
+                                    {(form.tier === 'PREMIUM' || form.tier === 'SPECIAL' || form.tier === 'PREMIUM_MAIN') && (
+                                        <button type="button" onClick={() => setActiveModal('theme')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-yellow-500 hover:bg-yellow-50 transition-all group">
+                                            <Crown className="w-6 h-6 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                                            <span className="text-[13px] font-bold text-gray-700 group-hover:text-yellow-600">테마 설정</span>
+                                        </button>
+                                    )}
+                                    {(form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN') && (
+                                        <button type="button" onClick={() => setActiveModal('animation')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-purple-500 hover:bg-purple-50 transition-all group">
+                                            <span className="text-[24px]">✨</span>
+                                            <span className="text-[13px] font-bold text-gray-700 group-hover:text-purple-600">애니메이션 설정</span>
+                                        </button>
+                                    )}
+                                    {/* PREMIUM_MAIN 은 배경색 설정 대신 테마를 사용 (기존 로직 유지) */}
+                                    {form.tier !== 'PREMIUM_MAIN' && (
+                                        <button type="button" onClick={() => setActiveModal('color')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                                            <Palette className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                                            <span className="text-[13px] font-bold text-gray-700 group-hover:text-blue-600">배경색 설정</span>
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                        </div>
 
 
-                        {/* 기본 정보 입력 폼 (인라인) */}
-                        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-                            <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                                <Info className="w-4 h-4 text-primary" />
-                                {mode === 'JOB' ? '공고 기본 정보' : '기본 정보 입력 (배너용)'}
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {/* 기본 정보 입력 폼 (인라인 아코디언) */}
+                        {activeModal === 'basic' && (
+                            <div className="bg-white rounded-2xl border border-primary/50 p-6 space-y-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
+                                        <Info className="w-4 h-4 text-primary" />
+                                        {mode === 'JOB' ? '공고 기본 정보' : '기본 정보 입력 (배너용)'}
+                                    </h3>
+                                    <button type="button" onClick={() => setActiveModal(null)} className="text-gray-400 hover:text-gray-600">
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">닉네임 (업체명) <span className="text-red-500">*</span></label>
                                     <input
@@ -936,8 +949,9 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         </div>
                                     </div>
                                 </div>
-                                </div>
-                        </div>
+                            </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* ③ 등급별 배너 디자인 설정 */}
