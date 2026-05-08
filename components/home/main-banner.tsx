@@ -13,6 +13,21 @@ export function MainBanner() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isTransitioning, setIsTransitioning] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
+    const [itemsPerView, setItemsPerView] = useState(1);
+
+    // 반응형 배너 갯수 조절 (1280px 미만은 1개, 1280px 이상은 2개)
+    useEffect(() => {
+        const updateView = () => {
+            if (window.innerWidth >= 1280) {
+                setItemsPerView(2);
+            } else {
+                setItemsPerView(1);
+            }
+        };
+        updateView();
+        window.addEventListener('resize', updateView);
+        return () => window.removeEventListener('resize', updateView);
+    }, []);
 
     // 1. Firestore에서 공정한 알고리즘이 적용된 광고 가져오기
     useEffect(() => {
@@ -90,7 +105,7 @@ export function MainBanner() {
             <div
                 className={`flex gap-4 h-full ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
                 style={{
-                    transform: `translateX(calc(-${currentIndex * 50}% - ${currentIndex * 8}px))`,
+                    transform: `translateX(calc(-${currentIndex * (100 / itemsPerView)}% - ${currentIndex * (16 / itemsPerView)}px))`,
                 }}
             >
                 {extendedBanners.map((banner, idx) => {
@@ -131,7 +146,7 @@ export function MainBanner() {
                             key={`${banner.id}-${idx}`}
                             className={`flex-shrink-0 h-full rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-6'} shadow-md relative overflow-hidden group cursor-pointer`}
                             style={{ 
-                                width: 'calc((100% - 16px) / 2)'
+                                width: itemsPerView === 2 ? 'calc((100% - 16px) / 2)' : '100%'
                             }}
                             onClick={() => handleAdClick(banner.id)}
                         >
