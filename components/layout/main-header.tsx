@@ -165,7 +165,7 @@ export function MainHeader({ session }: MainHeaderProps) {
             <div className="border-t border-gray-100 bg-white">
                 <div className="container mx-auto px-4 lg:px-8">
                     <nav className="flex items-center justify-between min-h-[3.5rem] lg:h-14 py-1.5 lg:py-0 relative w-full">
-                        <div className="flex items-center gap-6 md:gap-8 h-full w-full">
+                        <div className="flex items-center gap-6 md:gap-8 h-full w-full min-w-0">
                             {/* 햄버거 메뉴 (전체) */}
                             <div 
                                 className="h-full flex items-center pr-4 md:pr-6 md:border-r border-gray-100 cursor-pointer group"
@@ -184,7 +184,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                             </div>
 
                             {/* 개별 메뉴 리스트 */}
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 md:gap-x-10 h-auto lg:h-full py-1 lg:py-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 md:gap-x-10 h-auto lg:h-full py-1 lg:py-0 flex-1 min-w-0">
                                 {menuItems.map((item) => {
                                     const isActive = pathname === item.href;
                                     return (
