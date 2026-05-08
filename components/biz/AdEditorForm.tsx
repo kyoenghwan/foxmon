@@ -831,22 +831,22 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             {mode === 'AD' && !(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
                                 <>
                                     {(form.tier === 'PREMIUM' || form.tier === 'SPECIAL' || form.tier === 'PREMIUM_MAIN') && (
-                                        <button type="button" onClick={() => setActiveModal('theme')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-yellow-500 hover:bg-yellow-50 transition-all group">
-                                            <Crown className="w-6 h-6 text-gray-400 group-hover:text-yellow-500 transition-colors" />
-                                            <span className="text-[13px] font-bold text-gray-700 group-hover:text-yellow-600">테마 설정</span>
+                                        <button type="button" onClick={() => setActiveModal(activeModal === 'theme' ? null : 'theme')} className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${activeModal === 'theme' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-100 bg-white hover:border-yellow-500 hover:bg-yellow-50'}`}>
+                                            <Crown className={`w-6 h-6 transition-colors ${activeModal === 'theme' ? 'text-yellow-500' : 'text-gray-400 group-hover:text-yellow-500'}`} />
+                                            <span className={`text-[13px] font-bold ${activeModal === 'theme' ? 'text-yellow-600' : 'text-gray-700 group-hover:text-yellow-600'}`}>테마 설정</span>
                                         </button>
                                     )}
                                     {(form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN') && (
-                                        <button type="button" onClick={() => setActiveModal('animation')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-purple-500 hover:bg-purple-50 transition-all group">
+                                        <button type="button" onClick={() => setActiveModal(activeModal === 'animation' ? null : 'animation')} className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${activeModal === 'animation' ? 'border-purple-500 bg-purple-50' : 'border-gray-100 bg-white hover:border-purple-500 hover:bg-purple-50'}`}>
                                             <span className="text-[24px]">✨</span>
-                                            <span className="text-[13px] font-bold text-gray-700 group-hover:text-purple-600">애니메이션 설정</span>
+                                            <span className={`text-[13px] font-bold ${activeModal === 'animation' ? 'text-purple-600' : 'text-gray-700 group-hover:text-purple-600'}`}>애니메이션 설정</span>
                                         </button>
                                     )}
                                     {/* PREMIUM_MAIN 은 배경색 설정 대신 테마를 사용 (기존 로직 유지) */}
                                     {form.tier !== 'PREMIUM_MAIN' && (
-                                        <button type="button" onClick={() => setActiveModal('color')} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all group">
-                                            <Palette className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                                            <span className="text-[13px] font-bold text-gray-700 group-hover:text-blue-600">배경색 설정</span>
+                                        <button type="button" onClick={() => setActiveModal(activeModal === 'color' ? null : 'color')} className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${activeModal === 'color' ? 'border-blue-500 bg-blue-50' : 'border-gray-100 bg-white hover:border-blue-500 hover:bg-blue-50'}`}>
+                                            <Palette className={`w-6 h-6 transition-colors ${activeModal === 'color' ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500'}`} />
+                                            <span className={`text-[13px] font-bold ${activeModal === 'color' ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>배경색 설정</span>
                                         </button>
                                     )}
                                 </>
@@ -1006,12 +1006,18 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         </div>
                     )}
 
-                    <Dialog open={activeModal === 'theme'} onOpenChange={(open) => !open && setActiveModal(null)}>
-                        <DialogContent className="max-w-xl bg-white p-6 border-0 shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
-                            <h3 className="font-black text-[18px] text-gray-800 flex items-center gap-2 mb-4">
-                                <Crown className={`w-5 h-5 ${form.tier === 'PREMIUM' ? 'text-yellow-500' : 'text-purple-500'}`} />
-                                {form.tier === 'PREMIUM' ? '프리미엄' : '스페셜'} 테마 설정
-                            </h3>
+                    {/* 테마 설정 인라인 아코디언 */}
+                    {activeModal === 'theme' && (
+                        <div className="bg-white rounded-2xl border border-yellow-500/50 p-6 space-y-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-black text-[18px] text-gray-800 flex items-center gap-2">
+                                    <Crown className={`w-5 h-5 ${form.tier === 'PREMIUM' ? 'text-yellow-500' : 'text-purple-500'}`} />
+                                    {form.tier === 'PREMIUM' ? '프리미엄' : '스페셜'} 테마 설정
+                                </h3>
+                                <button type="button" onClick={() => setActiveModal(null)} className="text-gray-400 hover:text-gray-600">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
                             <div>
                                 <label className="text-[13px] font-bold text-gray-600 mb-3 block">테마 선택</label>
                                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
@@ -1030,17 +1036,20 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     ))}
                                 </div>
                             </div>
-                            <div className="pt-4 flex justify-end">
-                                <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-lg hover:bg-black transition-colors">확인</button>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
+                        </div>
+                    )}
 
-                    <Dialog open={activeModal === 'animation'} onOpenChange={(open) => !open && setActiveModal(null)}>
-                        <DialogContent className="max-w-xl bg-white p-6 border-0 shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
-                            <h3 className="font-black text-[18px] text-gray-800 flex items-center gap-2 mb-4">
-                                <span className="text-[20px]">✨</span> 애니메이션 설정
-                            </h3>
+                    {/* 애니메이션 설정 인라인 아코디언 */}
+                    {activeModal === 'animation' && (
+                        <div className="bg-white rounded-2xl border border-purple-500/50 p-6 space-y-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-black text-[18px] text-gray-800 flex items-center gap-2">
+                                    <span className="text-[20px]">✨</span> 애니메이션 설정
+                                </h3>
+                                <button type="button" onClick={() => setActiveModal(null)} className="text-gray-400 hover:text-gray-600">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
                             <div className="space-y-6">
                                 <div>
                                     <label className="text-[13px] font-bold text-gray-600 mb-3 block">액션(애니메이션) 선택</label>
@@ -1086,17 +1095,20 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 )}
                             </div>
-                            <div className="pt-4 flex justify-end">
-                                <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-lg hover:bg-black transition-colors">확인</button>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
+                        </div>
+                    )}
 
-                    <Dialog open={activeModal === 'color'} onOpenChange={(open) => !open && setActiveModal(null)}>
-                        <DialogContent className="max-w-xl bg-white p-6 border-0 shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
-                            <h3 className="font-black text-[18px] text-gray-800 flex items-center gap-2 mb-4">
-                                <span className="text-[20px]">🎨</span> 배너 내부 배경색 설정
-                            </h3>
+                    {/* 배경색 설정 인라인 아코디언 */}
+                    {activeModal === 'color' && (
+                        <div className="bg-white rounded-2xl border border-blue-500/50 p-6 space-y-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-black text-[18px] text-gray-800 flex items-center gap-2">
+                                    <span className="text-[20px]">🎨</span> 배너 내부 배경색 설정
+                                </h3>
+                                <button type="button" onClick={() => setActiveModal(null)} className="text-gray-400 hover:text-gray-600">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
                             <div className="space-y-6">
                                 <div>
                                     <label className="text-[13px] font-bold text-gray-600 mb-3 block">색상 선택</label>
@@ -1134,11 +1146,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 </div>
                             </div>
-                            <div className="pt-4 flex justify-end">
-                                <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-lg hover:bg-black transition-colors">확인</button>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
+                        </div>
+                    )}
 
                 </div>
             )}
