@@ -326,7 +326,7 @@ export function MainHeader({ session }: MainHeaderProps) {
 
             {/* 4단: 모바일 전용 풀스크린 햄버거 메뉴 */}
             {showMobileMenu && (
-                <div className="fixed inset-0 z-[100] bg-white flex flex-col md:hidden animate-in slide-in-from-right duration-300">
+                <div className="fixed inset-0 z-[100] bg-white flex flex-col lg:hidden animate-in slide-in-from-right duration-300">
                     <div className="flex items-center justify-between h-14 px-4 border-b border-gray-100 bg-white">
                         <Link href="/" onClick={() => setShowMobileMenu(false)} className="font-black text-xl text-primary tracking-tight">FOXMON</Link>
                         <button onClick={() => setShowMobileMenu(false)} className="p-2 -mr-2 text-gray-500 hover:text-gray-900">
