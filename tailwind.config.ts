@@ -23,15 +23,6 @@ const config = {
         container: {
             center: true,
             padding: "1rem", 
-            screens: {
-                "sm": "448px",   // 2cols * 200 + 16 + 32
-                "md": "664px",   // 3cols * 200 + 32 + 32
-                "lg": "880px",   // 4cols * 200 + 48 + 32
-                "xl": "880px",   // 4cols * 200 + 48 + 32 (사이드바 공간 확보)
-                "2xl": "1096px", // 5cols * 200 + 64 + 32
-                "3xl": "1312px", // 6cols * 200 + 80 + 32
-                "4xl": "1744px", // 8cols * 200 + 112 + 32
-            },
         },
         extend: {
             colors: {
