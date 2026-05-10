@@ -922,7 +922,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             <span className={`text-[13px] font-bold ${activeModal === 'animation' ? 'text-purple-600' : 'text-gray-700 group-hover:text-purple-600'}`}>애니메이션 설정</span>
                                         </button>
                                     )}
-                                    {mode === 'AD' && form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'template' && (
+                                    {mode === 'AD' && form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode !== 'upload' && (
                                         <button type="button" onClick={() => setActiveModal(activeModal === 'mainDesign' ? null : 'mainDesign')} className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${activeModal === 'mainDesign' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-100 bg-white hover:border-indigo-500 hover:bg-indigo-50'}`}>
                                             <Crown className={`w-6 h-6 transition-colors ${activeModal === 'mainDesign' ? 'text-indigo-500' : 'text-gray-400 group-hover:text-indigo-500'}`} />
                                             <span className={`text-[13px] font-bold ${activeModal === 'mainDesign' ? 'text-indigo-600' : 'text-gray-700 group-hover:text-indigo-600'}`}>메인 디자인 설정</span>
@@ -1043,7 +1043,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     </div>
 
                     {/* ③ 등급별 배너 디자인 설정 */}
-                    {activeModal === 'mainDesign' && mode === 'AD' && form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'template' && (
+                    {activeModal === 'mainDesign' && mode === 'AD' && form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode !== 'upload' && (
                         <div className="bg-white rounded-2xl border border-indigo-500/50 p-6 space-y-5 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
