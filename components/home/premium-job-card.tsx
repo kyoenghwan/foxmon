@@ -283,7 +283,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                                     ) : tier === 'GENERAL' || tier === 'LINE' ? (
                                         <><Crown className="w-3 h-3 justify-center mr-1 text-gray-500" /> 일반업체</>
                                     ) : (
-                                        <><Star className="w-3 h-3 justify-center mr-1 text-gray-500" /> 우수업체</>
+                                        <>우수업체</>
                                     )}
                                 </div>
                             </div>
