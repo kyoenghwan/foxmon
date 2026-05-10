@@ -714,10 +714,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 )}
 
-                                <div className="flex flex-wrap justify-center gap-6">
+                                <div className={`flex flex-wrap justify-center gap-6 ${form.tier === 'PREMIUM_MAIN' ? 'w-full max-w-5xl mx-auto' : ''}`}>
                                     
                                     {/* 배너 미리보기 영역 */}
-                                    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                                    <div className={`bg-white rounded-2xl border border-gray-100 p-5 ${form.tier === 'PREMIUM_MAIN' ? 'flex-1 min-w-[320px]' : ''}`}>
                                     <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center">
                                         <Image className="w-4 h-4 text-primary" />
                                         배너 미리보기
