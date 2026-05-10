@@ -210,9 +210,6 @@ export function MainBanner() {
 
                                     {/* 장식용 요소 */}
                                     <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-                                    <div className="absolute right-5 top-4 text-white/10 font-black text-4xl italic select-none z-10">
-                                        {((idx % originalLength) + 1).toString().padStart(2, '0')}
-                                    </div>
                                 </>
                             )}
                         </div>
