@@ -714,10 +714,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 )}
 
-                                <div className={`flex flex-wrap ${form.tier === 'PREMIUM_MAIN' ? 'flex-col' : 'justify-center'} gap-6`}>
+                                <div className="flex flex-wrap justify-center gap-6">
                                     
                                     {/* 배너 미리보기 영역 */}
-                                    <div className={`bg-white rounded-2xl border border-gray-100 p-5 ${form.tier === 'PREMIUM_MAIN' ? 'w-full max-w-4xl mx-auto' : ''}`}>
+                                    <div className="bg-white rounded-2xl border border-gray-100 p-5">
                                     <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center">
                                         <Image className="w-4 h-4 text-primary" />
                                         배너 미리보기
@@ -750,8 +750,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
                                             // 기존 템플릿 모드 및 다른 등급 배너
                                             if (form.tier === 'PREMIUM_MAIN') {
-                                                const hasImage = !!(form.logo_url || form.image);
-                                                const bgUrl = form.logo_url || form.image;
+                                                const hasLogo = !!form.logo_url;
+                                                const logoUrl = form.logo_url;
                                                 
                                                 let payType = '';
                                                 let payAmount = form.pay || '급여 정보';
@@ -788,13 +788,20 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                 return (
                                                     <div className="w-full flex justify-center">
                                                         <div className={`flex-shrink-0 w-full max-w-[400px] h-[180px] rounded-2xl ${bgGradient} p-6 shadow-md relative overflow-hidden group`}>
+                                                            {/* 템플릿 모드 배경 이미지 */}
+                                                            {form.image && (
+                                                                <div 
+                                                                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 mix-blend-overlay opacity-60"
+                                                                    style={{ backgroundImage: `url(${form.image})` }}
+                                                                />
+                                                            )}
                                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
                                                             <div className="relative z-20 h-full flex flex-col justify-between pointer-events-auto">
                                                                 <div className="space-y-3">
                                                                     <div className="flex items-center gap-3 mb-1">
-                                                                        {hasImage && (
+                                                                        {hasLogo && (
                                                                             <div className="w-[60px] h-[40px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
-                                                                                <div className="w-full h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${bgUrl})` }} />
+                                                                                <div className="w-full h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoUrl})` }} />
                                                                             </div>
                                                                         )}
                                                                         <h3 className="text-white font-black text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
@@ -1095,6 +1102,20 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 <p className="text-[11px] text-purple-600/70 mt-2 font-medium">
                                     * 입력하신 텍스트를 바탕으로 AI가 최적의 고품질 배경 이미지를 즉시 그려줍니다. (현재는 데모용 샘플 이미지로 대체됩니다)
                                 </p>
+                            </div>
+
+                            {/* 배경 직접 업로드 */}
+                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                <h4 className="font-bold text-[13px] text-gray-800 mb-2 flex items-center gap-1.5">
+                                    <span className="text-base">🖼️</span> 배경 이미지 직접 업로드
+                                </h4>
+                                <div className="flex items-center gap-3">
+                                    <label className="cursor-pointer px-4 py-2.5 bg-white border border-gray-300 hover:border-primary text-gray-700 hover:text-primary font-bold text-[13px] rounded-lg transition-all shadow-sm">
+                                        내 PC에서 파일 선택
+                                        <input type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
+                                    </label>
+                                    <p className="text-[11px] text-gray-500">권장 사이즈: 가로 800px, 세로 400px (JPG/PNG)</p>
+                                </div>
                             </div>
                         </div>
                     )}

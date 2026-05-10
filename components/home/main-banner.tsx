@@ -113,8 +113,8 @@ export function MainBanner() {
                 }}
             >
                 {extendedBanners.map((banner, idx) => {
-                    const hasImage = !!(banner.image || (banner as any).logo_url);
-                    const bgUrl = hasImage ? (banner.image || (banner as any).logo_url) : null;
+                    const hasLogo = !!(banner as any).logo_url;
+                    const logoUrl = (banner as any).logo_url;
                     
                     // 이미지가 없을 때 사용할 프리미엄 AI 느낌의 fallback 그라데이션 배열
                     const fallbackGradients = [
@@ -154,12 +154,12 @@ export function MainBanner() {
                             }}
                             onClick={() => handleAdClick(banner.id)}
                         >
-                            {isUploadMode && hasImage ? (
+                            {isUploadMode && banner.image ? (
                                 /* 업로드 모드: 이미지만 100% 꽉 채워서 노출 (텍스트 숨김) */
                                 <div className="w-full h-full relative">
                                     <div 
                                         className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                                        style={{ backgroundImage: `url(${bgUrl})` }}
+                                        style={{ backgroundImage: `url(${banner.image})` }}
                                     />
                                     {/* 호버 시 밝기 조절 */}
                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-15" />
@@ -167,6 +167,13 @@ export function MainBanner() {
                             ) : (
                                 /* 기존 템플릿 모드 */
                                 <>
+                                    {/* 템플릿 모드 배경 이미지 */}
+                                    {banner.image && (
+                                        <div 
+                                            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 mix-blend-overlay opacity-60"
+                                            style={{ backgroundImage: `url(${banner.image})` }}
+                                        />
+                                    )}
                                     {/* 가독성을 위한 어두운 그라데이션 오버레이 (강화) */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
 
@@ -176,11 +183,11 @@ export function MainBanner() {
                                     <div className="relative z-20 h-full flex flex-col justify-between">
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-3 mb-1">
-                                                {hasImage && (
+                                                {hasLogo && (
                                                     <div className="w-12 h-8 sm:w-[60px] sm:h-[40px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
                                                         <div 
                                                             className="w-full h-full bg-contain bg-center bg-no-repeat" 
-                                                            style={{ backgroundImage: `url(${bgUrl})` }} 
+                                                            style={{ backgroundImage: `url(${logoUrl})` }} 
                                                         />
                                                     </div>
                                                 )}
