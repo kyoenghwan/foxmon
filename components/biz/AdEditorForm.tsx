@@ -859,22 +859,13 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
                                 {/* 로고 업로드 (PREMIUM_MAIN 이고 upload 모드일 때는 로고 업로드 숨김) */}
                                 {form.tier !== 'GENERAL' && !(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
-                                    <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center mx-auto sm:mx-0">
-                                        <div className="flex flex-col gap-2 w-full mb-3">
-                                            <div className="flex items-center justify-between">
-                                                <h3 className="font-black text-[14px] text-gray-800">업체 로고</h3>
-                                                <button 
-                                                    type="button"
-                                                    onClick={handleLogoRequest}
-                                                    className="px-2 py-1.5 rounded-lg bg-gray-900 hover:bg-black text-white text-[10px] items-center gap-1 flex shadow-sm transition-all"
-                                                >
-                                                    <Paintbrush className="w-3.5 h-3.5 text-blue-200" />
-                                                    <span className="font-bold">제작문의</span>
-                                                </button>
-                                            </div>
-                                        </div>
+                                    <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center mx-auto sm:mx-0 h-full">
+                                        <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center w-full">
+                                            <Image className="w-4 h-4 text-primary" />
+                                            업체 로고
+                                        </h3>
                                         
-                                        <label className="relative group cursor-pointer w-full flex justify-center">
+                                        <label className="relative group cursor-pointer w-full flex justify-center mt-auto">
                                             <div className="w-[100px] h-[100px] rounded-2xl border-2 border-dashed overflow-hidden bg-gray-50 flex items-center justify-center transition-all border-gray-300 group-hover:border-primary group-hover:bg-blue-50/50">
                                                 {form.logo_url ? (
                                                     <img src={form.logo_url} alt="로고" className="w-full h-full object-contain" />
@@ -890,10 +881,19 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                                         </label>
 
-                                        <p className="text-[10px] text-gray-400 mt-2 text-center leading-relaxed">
+                                        <p className="text-[10px] text-gray-400 mt-2 text-center leading-relaxed mb-auto">
                                             PNG/JPG 지원<br/>
                                             가로 형태(1.5:1 비율) 권장
                                         </p>
+
+                                        <button 
+                                            type="button"
+                                            onClick={handleLogoRequest}
+                                            className="mt-3 w-full py-2 rounded-lg bg-gray-900 hover:bg-black text-white text-[12px] flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                                        >
+                                            <Paintbrush className="w-4 h-4 text-blue-200" />
+                                            <span className="font-bold">제작문의</span>
+                                        </button>
                                     </div>
                                 )}
                             </div>
