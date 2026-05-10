@@ -243,50 +243,52 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                     <div className="text-gray-300 font-black text-[12px] bg-gray-100 w-full h-full flex items-center justify-center tracking-widest text-center leading-[1.1]">NO<br/>LOGO</div>
                                 )}
                             </div>
-                            <div className="flex-1 flex flex-col justify-between">
-                                <div className="flex items-center gap-1.5 w-full">
-                                    <div className={`shrink-0 flex items-center justify-center px-1.5 py-[2px] rounded-sm text-[9px] font-black shadow-sm ${
-                                        isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
-                                        isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
-                                        tier === 'GENERAL' && customColor ? 'bg-white' :
-                                        'bg-gray-100 text-gray-700 border border-gray-300'
-                                    }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                        {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
-                                            <>VVIP</>
-                                        ) : tier === 'SPECIAL' ? (
-                                            <>스페셜</>
-                                        ) : tier === 'GENERAL' || tier === 'LINE' ? (
-                                            <>일반업체</>
-                                        ) : (
-                                            <>우수업체</>
+                            <div className="flex-1 flex flex-col pt-1">
+                                <div className="flex flex-col space-y-1 mb-1.5">
+                                    <div className="flex items-center gap-1.5 w-full">
+                                        <div className={`shrink-0 flex items-center justify-center px-1.5 py-[2px] rounded-sm text-[9px] font-black shadow-sm ${
+                                            isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
+                                            isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
+                                            tier === 'GENERAL' && customColor ? 'bg-white' :
+                                            'bg-gray-100 text-gray-700 border border-gray-300'
+                                        }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                            {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
+                                                <>VVIP</>
+                                            ) : tier === 'SPECIAL' ? (
+                                                <>스페셜</>
+                                            ) : tier === 'GENERAL' || tier === 'LINE' ? (
+                                                <>일반업체</>
+                                            ) : (
+                                                <>우수업체</>
+                                            )}
+                                        </div>
+                                        <MarqueeText className={`font-black text-[14px] lg:text-[15px] tracking-tight transition-colors line-clamp-2 leading-tight ${isCyber ? 'text-green-400 font-mono' : config.color}`} style={tier === 'GENERAL' && customColor ? { color: customColor } : {}}>
+                                            {displayName}
+                                        </MarqueeText>
+                                    </div>
+                                    <div className="flex items-center text-[10px] sm:text-[11px] text-gray-500 w-full">
+                                        <span className={`truncate border px-1.5 py-[1px] leading-[1.1] font-bold rounded-[2px] max-w-[90%] ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                            {location ? location.replace(' ', ' / ') : '전국'}
+                                        </span>
+                                        {category && (
+                                            <span className="truncate ml-1.5 font-bold">{category}</span>
                                         )}
                                     </div>
-                                    <MarqueeText className={`font-black text-[14px] lg:text-[15px] tracking-tight transition-colors line-clamp-2 leading-tight ${isCyber ? 'text-green-400 font-mono' : config.color}`} style={tier === 'GENERAL' && customColor ? { color: customColor } : {}}>
-                                        {displayName}
-                                    </MarqueeText>
                                 </div>
-                                <div className="flex items-center text-[10px] sm:text-[11px] text-gray-500 w-full">
-                                    <span className={`truncate border px-1.5 py-[1px] leading-[1.1] font-bold rounded-[2px] max-w-[90%] ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                        {location ? location.replace(' ', ' / ') : '전국'}
-                                    </span>
-                                    {category && (
-                                        <span className="truncate ml-1.5 font-bold">{category}</span>
-                                    )}
-                                </div>
-                                <div className="w-full relative overflow-hidden">
+                                <div className="w-full relative overflow-hidden mb-2 flex-1">
                                     <MarqueeText className={`text-[12px] sm:text-[13px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' : isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` : 'text-gray-800 bg-green-200/50'}`}>
                                         {title}
                                     </MarqueeText>
                                 </div>
-                                <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center justify-between w-full pb-0.5 mt-auto pt-1.5 border-t border-dashed border-gray-200">
                                     <div className="flex items-center text-[14px] lg:text-[15px] font-bold text-gray-900 truncate tracking-tight gap-1.5 flex-1 min-w-0">
                                         {payType && (
                                             <span className={`shrink-0 text-white text-[10px] lg:text-[11px] px-1.5 py-[1px] rounded-sm shadow-sm ${isImpact ? config.bg : 'bg-[#805ad5]'}`}>
                                                 {payType}
                                             </span>
                                         )}
-                                        <span className={`text-gray-800 truncate ${isCyber ? 'text-white' : ''}`}>
-                                            {payAmount}
+                                        <span className={`text-[#e53e3e] truncate font-black ${isCyber ? 'text-[#ff5555]' : ''}`}>
+                                            {payAmount} <span className="text-[10px] ml-0.5 mt-auto pb-[1px]">↑</span>
                                         </span>
                                     </div>
                                 </div>
