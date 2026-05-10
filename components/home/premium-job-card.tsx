@@ -265,7 +265,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         {displayName}
                                     </MarqueeText>
                                 </div>
-                                <div className="flex items-center text-[10px] sm:text-[11px] text-gray-500 mt-1 mb-1.5 w-full">
+                                <div className="flex items-center text-[10px] sm:text-[11px] text-gray-500 w-full">
                                     <span className={`truncate border px-1.5 py-[1px] leading-[1.1] font-bold rounded-[2px] max-w-[90%] ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
                                         {location ? location.replace(' ', ' / ') : '전국'}
                                     </span>
@@ -273,12 +273,12 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         <span className="truncate ml-1.5 font-bold">{category}</span>
                                     )}
                                 </div>
-                                <div className="w-full relative overflow-hidden mt-0 mb-1">
+                                <div className="w-full relative overflow-hidden">
                                     <MarqueeText className={`text-[12px] sm:text-[13px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' : isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` : 'text-gray-800 bg-green-200/50'}`}>
                                         {title}
                                     </MarqueeText>
                                 </div>
-                                <div className="flex items-end justify-between w-full pb-0.5 mt-auto">
+                                <div className="flex items-center justify-between w-full">
                                     <div className="flex items-center text-[14px] lg:text-[15px] font-bold text-gray-900 truncate tracking-tight gap-1.5 flex-1 min-w-0">
                                         {payType && (
                                             <span className={`shrink-0 text-white text-[10px] lg:text-[11px] px-1.5 py-[1px] rounded-sm shadow-sm ${isImpact ? config.bg : 'bg-[#805ad5]'}`}>
