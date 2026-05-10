@@ -165,11 +165,17 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
     const validOpacity = isNaN(parsedOpacity) ? 0 : Math.max(0, Math.min(100, parsedOpacity));
     const hexOpacity = Math.round((validOpacity / 100) * 255).toString(16).padStart(2, '0').toUpperCase();
 
-    // 테두리(Wrapper) 자체를 애니메이션하면 밖으로 튀어나가는(Translate/Scale) 효과 필터링
-    const safeWrapperAnims = ['storm', 'ghost', 'sun', 'lava', 'retro', 'platinum', 'aura', 'royal', 'autumn', 'toxic'];
-    const currentAction = action || (config.animClass ? config.animClass.replace('animate-', '') : '');
-    const isSafeForWrapper = safeWrapperAnims.includes(currentAction);
-    const wrapperAnimClass = (action !== 'rainbow-border' && isSafeForWrapper) ? animClass : '';
+    // 정확한 액션 이름 추출 (intensity 키워드 제외)
+    const actualAction = (action && !['high', 'medium', 'low', 'none'].includes(action)) 
+        ? action 
+        : (config.animClass ? config.animClass.replace('animate-', '') : '');
+
+    // 오버레이 형태의 애니메이션 (내부를 스윕하거나 지나가는 효과)
+    const overlayAnims = ['shimmer', 'diamond', 'emerald', 'matrix', 'ocean', 'platinum', 'rainbow-border'];
+    const isOverlayAnim = overlayAnims.includes(actualAction);
+
+    // 래퍼에 애니메이션 클래스를 적용할지 여부 (오버레이 전용이 아니면 래퍼에 적용)
+    const wrapperAnimClass = (!isOverlayAnim && actualAction !== 'rainbow-border') ? animClass : '';
 
     return (
         <div className={`relative ${isBig ? 'h-full min-h-[292px]' : isSide ? 'aspect-[2/3]' : hideLogo ? 'aspect-[17/8]' : 'aspect-[3/2]'} w-full min-w-[140px] group p-[3px]`}>
@@ -205,18 +211,15 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                     />
                 )}
                 {/* --- [오버레이 효과 레이어 (글자 뒤)] --- */}
-                {isImpact && !isCrazy && (
+                {isImpact && !isCrazy && isOverlayAnim && (
                     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[calc(0.75rem-3px)]">
-                        {/* Shimmer 효과는 내부에 별도의 오버레이를 생성 */}
-                        {action === 'shimmer' && (
-                            <div className={`absolute inset-x-[-100%] inset-y-0 bg-gradient-to-r from-transparent via-white to-transparent skew-x-[-25deg] animate-shimmer opacity-70`} />
+                        {/* Shimmer / Diamond 효과는 별도의 백그라운드 그라디언트가 필요함 */}
+                        {(actualAction === 'shimmer' || actualAction === 'diamond') && (
+                            <div className={`absolute inset-x-[-100%] inset-y-0 bg-gradient-to-r from-transparent via-white to-transparent skew-x-[-25deg] ${animClass} opacity-70`} />
                         )}
-                        {/* 기존 하위 호환성용 shimmer */}
-                        {(!action || action === 'high' || action === 'medium' || action === 'low') && (impactType === 'gold' || impactType === 'diamond') && (
-                            <div className={`absolute inset-x-[-100%] inset-y-0 bg-gradient-to-r from-transparent via-white to-transparent skew-x-[-25deg] ${animClass}`} />
-                        )}
-                        {/* 다른 애니메이션들의 내부 오버레이 (무지개 테두리는 제외) */}
-                        {action !== 'shimmer' && action !== 'rainbow-border' && impactType !== 'gold' && impactType !== 'diamond' && (
+                        
+                        {/* 자체 배경이 있는 오버레이 애니메이션 (emerald, matrix, ocean, platinum 등) */}
+                        {actualAction !== 'shimmer' && actualAction !== 'diamond' && actualAction !== 'rainbow-border' && (
                             <div className={`absolute inset-0 ${animClass} opacity-30 mix-blend-overlay`} />
                         )}
                     </div>
