@@ -334,7 +334,7 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (html: s
 export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD' }: AdEditorFormProps) {
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
-    const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | null>(null);
+    const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | 'mainDesign' | null>(null);
     
     // HTML 모드 전용 상태
     const [htmlEditorHeight, setHtmlEditorHeight] = useState(450);
@@ -922,6 +922,12 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             <span className={`text-[13px] font-bold ${activeModal === 'animation' ? 'text-purple-600' : 'text-gray-700 group-hover:text-purple-600'}`}>애니메이션 설정</span>
                                         </button>
                                     )}
+                                    {mode === 'AD' && form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'template' && (
+                                        <button type="button" onClick={() => setActiveModal(activeModal === 'mainDesign' ? null : 'mainDesign')} className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${activeModal === 'mainDesign' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-100 bg-white hover:border-indigo-500 hover:bg-indigo-50'}`}>
+                                            <Crown className={`w-6 h-6 transition-colors ${activeModal === 'mainDesign' ? 'text-indigo-500' : 'text-gray-400 group-hover:text-indigo-500'}`} />
+                                            <span className={`text-[13px] font-bold ${activeModal === 'mainDesign' ? 'text-indigo-600' : 'text-gray-700 group-hover:text-indigo-600'}`}>메인 디자인 설정</span>
+                                        </button>
+                                    )}
                                     {/* PREMIUM_MAIN 은 배경색 설정 대신 테마를 사용 (기존 로직 유지) */}
                                     {form.tier !== 'PREMIUM_MAIN' && (
                                         <button type="button" onClick={() => setActiveModal(activeModal === 'color' ? null : 'color')} className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${activeModal === 'color' ? 'border-blue-500 bg-blue-50' : 'border-gray-100 bg-white hover:border-blue-500 hover:bg-blue-50'}`}>
@@ -1037,12 +1043,17 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     </div>
 
                     {/* ③ 등급별 배너 디자인 설정 */}
-                    {mode === 'AD' && form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'template' && (
-                        <div className="bg-white rounded-2xl border border-indigo-200 p-6 space-y-5">
-                            <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                                <Crown className="w-4 h-4 text-indigo-500" />
-                                프리미엄 메인 디자인 설정
-                            </h3>
+                    {activeModal === 'mainDesign' && mode === 'AD' && form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'template' && (
+                        <div className="bg-white rounded-2xl border border-indigo-500/50 p-6 space-y-5 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+                            <div className="flex items-center justify-between">
+                                <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
+                                    <Crown className="w-4 h-4 text-indigo-500" />
+                                    프리미엄 메인 디자인 설정
+                                </h3>
+                                <button type="button" onClick={() => setActiveModal(null)} className="text-gray-400 hover:text-gray-600">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
 
                             {/* AI 배경 생성기 */}
                             <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 border border-purple-100">
