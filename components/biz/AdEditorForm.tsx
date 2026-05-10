@@ -869,7 +869,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                     className="px-2 py-1.5 rounded-lg bg-gray-900 hover:bg-black text-white text-[10px] items-center gap-1 flex shadow-sm transition-all"
                                                 >
                                                     <Paintbrush className="w-3.5 h-3.5 text-blue-200" />
-                                                    <span className="font-bold">로고 제작 문의</span>
+                                                    <span className="font-bold">제작문의</span>
                                                 </button>
                                             </div>
                                         </div>
