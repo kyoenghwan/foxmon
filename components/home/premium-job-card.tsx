@@ -178,7 +178,7 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
     const wrapperAnimClass = (!isOverlayAnim && actualAction !== 'rainbow-border') ? animClass : '';
 
     return (
-        <div className={`relative ${isBig ? 'h-full min-h-[292px]' : isSide ? 'aspect-[2/3]' : hideLogo ? 'aspect-[17/8]' : 'aspect-[3/2]'} w-full min-w-[140px] group p-[3px]`}>
+        <div className={`relative ${isBig ? 'h-full min-h-[292px]' : isSide ? 'aspect-[2/3]' : hideLogo ? 'aspect-[17/8]' : 'aspect-[3/2]'} w-full min-w-[150px] group p-[3px]`}>
             
             {/* --- [배로 아래 배경 레이어] --- */}
             {isImpact && (
@@ -256,35 +256,33 @@ export function PremiumJobCard({ company, title, location, pay, image, tags, isB
                                         {title}
                                     </MarqueeText>
                                 </div>
-                                <div className="flex items-end justify-between w-full pb-0.5">
-                                    <div className="flex items-center text-[14px] lg:text-[15px] font-bold text-gray-900 truncate tracking-tight gap-1.5 w-full">
+                                <div className="flex items-end justify-between w-full pb-0.5 mt-1">
+                                    <div className="flex items-center text-[14px] lg:text-[15px] font-bold text-gray-900 truncate tracking-tight gap-1.5 flex-1 min-w-0">
                                         {payType && (
                                             <span className={`shrink-0 text-white text-[10px] lg:text-[11px] px-1.5 py-[1px] rounded-sm shadow-sm ${isImpact ? config.bg : 'bg-[#805ad5]'}`}>
                                                 {payType}
                                             </span>
                                         )}
-                                        <span className={`text-gray-800 truncate w-full ${isCyber ? 'text-white' : ''}`}>
+                                        <span className={`text-gray-800 truncate ${isCyber ? 'text-white' : ''}`}>
                                             {payAmount}
                                         </span>
                                     </div>
-                                </div>
-                                
-                                {/* 하단 풀위드 뱃지 */}
-                                <div className={`mt-1 w-full flex items-center justify-center py-[3px] rounded-sm text-[9px] sm:text-[10px] font-black shadow-sm ${
-                                    isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
-                                    isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
-                                    tier === 'GENERAL' && customColor ? 'bg-white' :
-                                    'bg-gray-100 text-gray-700 border border-gray-300'
-                                }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                    {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
-                                        <><Crown className="w-3 h-3 justify-center mr-1 text-amber-500" /> VVIP</>
-                                    ) : tier === 'SPECIAL' ? (
-                                        <><Zap className="w-3 h-3 justify-center mr-1 text-yellow-500" /> 스페셜</>
-                                    ) : tier === 'GENERAL' || tier === 'LINE' ? (
-                                        <><Crown className="w-3 h-3 justify-center mr-1 text-gray-500" /> 일반업체</>
-                                    ) : (
-                                        <>우수업체</>
-                                    )}
+                                    <div className={`ml-1 shrink-0 flex items-center justify-center px-1.5 py-[2px] rounded-sm text-[9px] font-black shadow-sm ${
+                                        isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
+                                        isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
+                                        tier === 'GENERAL' && customColor ? 'bg-white' :
+                                        'bg-gray-100 text-gray-700 border border-gray-300'
+                                    }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                        {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
+                                            <>VVIP</>
+                                        ) : tier === 'SPECIAL' ? (
+                                            <>스페셜</>
+                                        ) : tier === 'GENERAL' || tier === 'LINE' ? (
+                                            <>일반업체</>
+                                        ) : (
+                                            <>우수업체</>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </>

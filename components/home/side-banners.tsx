@@ -122,7 +122,7 @@ export function SideBanners() {
                 <div 
                     className={`
                         hidden xl:flex flex-col gap-3 absolute top-0 right-full mr-4 pointer-events-auto transition-all duration-300
-                        w-[140px] 2xl:w-[134px] 3xl:w-[154px] 4xl:w-[158px]
+                        w-[150px]
                     `}
                     style={{ transform: `scale(${bannerScale})`, transformOrigin: 'top right' }}
                 >
@@ -142,7 +142,7 @@ export function SideBanners() {
                 <div 
                     className={`
                         hidden xl:flex flex-col gap-3 absolute top-0 left-full ml-4 pointer-events-auto transition-all duration-300
-                        w-[140px] 2xl:w-[134px] 3xl:w-[154px] 4xl:w-[158px]
+                        w-[150px]
                     `}
                     style={{ transform: `scale(${bannerScale})`, transformOrigin: 'top left' }}
                 >

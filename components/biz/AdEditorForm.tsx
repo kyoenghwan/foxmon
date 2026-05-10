@@ -833,7 +833,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
                                             return (
                                                 <div className="w-full flex justify-center">
-                                                    <div style={{ width: (isSide ? '140px' : '200px'), maxWidth: '100%' }}>
+                                                    <div style={{ width: (isSide ? '150px' : '200px'), maxWidth: '100%' }}>
                                                     <PremiumJobCard
                                                         id="preview"
                                                         company={form.company || '업체명'}
