@@ -714,10 +714,10 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 )}
 
-                                <div className={`flex flex-wrap justify-center gap-6 ${form.tier === 'PREMIUM_MAIN' ? 'w-full max-w-5xl mx-auto' : ''}`}>
+                                <div className="flex flex-wrap justify-center gap-6">
                                     
                                     {/* 배너 미리보기 영역 */}
-                                    <div className={`bg-white rounded-2xl border border-gray-100 p-5 ${form.tier === 'PREMIUM_MAIN' ? 'flex-1 min-w-[320px]' : ''}`}>
+                                    <div className="bg-white rounded-2xl border border-gray-100 p-5">
                                     <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center">
                                         <Image className="w-4 h-4 text-primary" />
                                         배너 미리보기
@@ -733,7 +733,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             // PREMIUM_MAIN 이면서 직접 업로드 모드일 때
                                             if (form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') {
                                                 return (
-                                                    <label className="w-full max-w-[800px] aspect-[2/1] rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary hover:bg-blue-50/50 transition-all pointer-events-auto">
+                                                    <label className="w-[800px] max-w-full aspect-[2/1] rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary hover:bg-blue-50/50 transition-all pointer-events-auto">
                                                         {form.image ? (
                                                             <img src={form.image} alt="배너 이미지" className="w-full h-full object-cover" />
                                                         ) : (
@@ -786,8 +786,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                     : 'bg-gradient-to-br from-indigo-900 via-purple-900 to-black';
 
                                                 return (
-                                                    <div className="w-full flex justify-center">
-                                                        <div className={`flex-shrink-0 w-full max-w-[400px] h-[180px] rounded-2xl ${bgGradient} p-6 shadow-md relative overflow-hidden group`}>
+                                                    <div className="flex justify-center">
+                                                        <div className={`flex-shrink-0 w-[400px] max-w-full h-[180px] rounded-2xl ${bgGradient} p-6 shadow-md relative overflow-hidden group`}>
                                                             {/* 템플릿 모드 배경 이미지 */}
                                                             {form.image && (
                                                                 <div 
