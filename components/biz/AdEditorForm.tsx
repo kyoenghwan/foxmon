@@ -839,6 +839,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                         company={form.company || '업체명'}
                                                         title={form.title || '광고 제목을 입력하세요'}
                                                         location={form.location || '전지역'}
+                                                        category={form.category_1}
                                                         pay={form.pay || '급여 정보'}
                                                         image={form.logo_url || form.image}
                                                         impactType={isGeneral ? 'none' : ((form.theme as any) || 'gold')}
@@ -959,8 +960,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                                <div className="md:col-span-1">
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">닉네임 (업체명) <span className="text-red-500">*</span></label>
                                     <input
                                         type="text" value={form.company} onChange={e => update('company', e.target.value)}
@@ -968,7 +969,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         placeholder="예: 강남 스웨디시"
                                     />
                                 </div>
-                                <div>
+                                <div className="md:col-span-1">
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
                                         <MapPin className="w-3 h-3" /> 지역 <span className="text-red-500">*</span>
                                     </label>
@@ -999,7 +1000,22 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         </select>
                                     </div>
                                 </div>
-                                <div className="md:col-span-2">
+                                <div className="md:col-span-1">
+                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
+                                        <Briefcase className="w-3 h-3" /> 업종 (선택)
+                                    </label>
+                                    <select
+                                        value={form.category_1 || ''}
+                                        onChange={e => update('category_1', e.target.value)}
+                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                    >
+                                        <option value="">선택 안함</option>
+                                        {categories1.map(cat => (
+                                            <option key={cat.code_value} value={cat.code_name}>{cat.code_name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="md:col-span-3">
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
                                         <Type className="w-3 h-3" /> 채용(공고) 제목 <span className="text-red-500">*</span>
                                     </label>
@@ -1010,7 +1026,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         maxLength={40}
                                     />
                                 </div>
-                                <div className="md:col-span-2">
+                                <div className="md:col-span-3">
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
                                         <DollarSign className="w-3 h-3" /> 급여조건 <span className="text-red-500">*</span>
                                     </label>
