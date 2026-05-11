@@ -266,18 +266,24 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         {displayName}
                                     </MarqueeText>
                                 </div>
-                                <div className="flex items-center text-[10px] sm:text-[11px] text-gray-500 w-full">
-                                    <span className={`truncate border px-1.5 py-[1px] leading-[1.1] font-bold rounded-[2px] max-w-[90%] ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                        {location ? location.replace(' ', ' / ') : '전국'}
+                                <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-gray-500 w-full min-w-0">
+                                    <span className={`truncate shrink border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                        {location || '전국'}
                                     </span>
-                                    {category && (
-                                        <span className="truncate ml-1.5 font-bold">{category}</span>
-                                    )}
                                 </div>
-                                <div className="w-full relative overflow-hidden">
-                                    <MarqueeText className={`text-[12px] sm:text-[13px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' : isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` : 'text-gray-800 bg-green-200/50'}`}>
-                                        {title}
-                                    </MarqueeText>
+                                <div className="w-full relative overflow-hidden flex items-center gap-1">
+                                    {category && (
+                                        <span className={`shrink-0 border px-1 py-[1px] rounded-[2px] text-[9px] sm:text-[10px] font-black ${
+                                            isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
+                                        }`}>
+                                            {category}
+                                        </span>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <MarqueeText className={`text-[12px] sm:text-[13px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' : isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` : 'text-gray-800 bg-green-200/50'}`}>
+                                            {title}
+                                        </MarqueeText>
+                                    </div>
                                 </div>
                                 <div className="flex items-center justify-between w-full pt-1 border-t border-dashed border-gray-200">
                                     <div className="flex items-center text-[14px] lg:text-[15px] font-bold text-gray-900 truncate tracking-tight gap-1.5 flex-1 min-w-0">
@@ -298,13 +304,13 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                             {/* --- 로고 없는 컴팩트 레이아웃 (일반 배너 등) --- */}
                             {/* 상단: 지역 + 업체명 */}
                             <div className="flex items-center gap-1.5 pb-1 w-full overflow-hidden">
-                                <span className={`truncate shrink-0 border px-1.5 py-[1px] leading-[1.1] font-bold rounded-[2px] text-[10px] sm:text-[11px] max-w-[55%] ${
+                                <span className={`truncate shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] text-[9px] sm:text-[10px] max-w-[45%] ${
                                     isCyber ? 'text-black bg-cyan-400 border-none' : 
                                     isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
                                     tier === 'GENERAL' && customColor ? 'bg-white' :
                                     'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
                                 }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                    {location ? location.replace(' ', ' / ') : '전국'}
+                                    {location || '전국'}
                                 </span>
                                 <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] tracking-tight transition-colors line-clamp-1 leading-tight ${
                                     isCyber ? 'text-green-400 font-mono' : config.color
@@ -315,13 +321,24 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
 
                             {/* 중간: 광고 제목 */}
                             <div className="flex-1 w-full flex flex-col justify-center relative overflow-hidden py-0.5 my-0.5">
-                                <MarqueeText className={`text-[12px] sm:text-[13px] lg:text-[14px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
-                                    isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
-                                    isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
-                                    'text-gray-800'
-                                }`}>
-                                    {title}
-                                </MarqueeText>
+                                <div className="w-full flex items-center gap-1.5">
+                                    {category && (
+                                        <span className={`shrink-0 border px-1 py-[1px] rounded-[2px] text-[10px] sm:text-[11px] font-black ${
+                                            isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
+                                        }`}>
+                                            {category}
+                                        </span>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <MarqueeText className={`text-[12px] sm:text-[13px] lg:text-[14px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
+                                            isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
+                                            isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
+                                            'text-gray-800'
+                                        }`}>
+                                            {title}
+                                        </MarqueeText>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* 하단: 급여 및 뱃지 */}
@@ -378,18 +395,15 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                     }`}>
                                         {displayName}
                                     </MarqueeText>
-                                    <div className="flex items-center text-[10px] sm:text-[11px] text-gray-500 w-full mt-0.5">
-                                        <span className={`truncate border px-1.5 py-[1px] leading-[1.1] font-bold rounded-[2px] max-w-full ${
+                                    <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-gray-500 w-full mt-0.5 min-w-0">
+                                        <span className={`truncate shrink px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] ${
                                             isCyber ? 'text-black bg-cyan-400 border-none' : 
                                             isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
                                             tier === 'GENERAL' && customColor ? 'bg-white' :
                                             'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
                                         }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                            {location ? location.replace(' ', ' / ') : '전국'}
+                                            {location || '전국'}
                                         </span>
-                                        {category && (
-                                            <span className="truncate ml-1.5 font-bold text-[11px] sm:text-[12px] text-gray-500">{category}</span>
-                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -397,14 +411,23 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                             {/* --- 기존 가로 레이아웃 하단: 제목 및 급여 --- */}
                             <div className="flex flex-col w-full h-[50%] pt-1.5 sm:pt-2 justify-between">
                                 {/* 광고글 (멘트) */}
-                                <div className="w-full relative overflow-hidden">
-                                    <MarqueeText className={`text-[12px] sm:text-[13px] lg:text-[14px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
-                                        isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
-                                        isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
-                                        'text-gray-800 bg-green-200/50'
-                                    }`}>
-                                        {title}
-                                    </MarqueeText>
+                                <div className="w-full relative overflow-hidden flex items-center gap-1.5">
+                                    {category && (
+                                        <span className={`shrink-0 border px-1 py-[1px] rounded-[2px] text-[10px] sm:text-[11px] font-black ${
+                                            isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
+                                        }`}>
+                                            {category}
+                                        </span>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <MarqueeText className={`text-[12px] sm:text-[13px] lg:text-[14px] leading-[1.3] font-bold tracking-tight px-1 rounded-[2px] ${
+                                            isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
+                                            isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
+                                            'text-gray-800 bg-green-200/50'
+                                        }`}>
+                                            {title}
+                                        </MarqueeText>
+                                    </div>
                                 </div>
 
                                 {/* 급여 및 뱃지 */}
