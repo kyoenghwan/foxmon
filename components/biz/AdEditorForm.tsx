@@ -427,6 +427,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
     const [selectedSido, setSelectedSido] = useState<string>('');
     const [selectedSigungus, setSelectedSigungus] = useState<string[]>([]);
+    const [isSigunguOpen, setIsSigunguOpen] = useState(false);
     const [isLoadDataModalOpen, setIsLoadDataModalOpen] = useState(false);
     
     // DB에서 동적으로 불러온 등급 가격 상태
@@ -1058,21 +1059,36 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary mt-2"
                                             />
                                         ) : selectedSido ? (
-                                            <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg max-h-[160px] overflow-y-auto grid grid-cols-2 gap-2">
-                                                {regions.filter(r => {
-                                                    const sido = regions.find(s => s.code_name === selectedSido && s.list_type === 'JOB_REGION_1');
-                                                    return r.list_type === 'JOB_REGION_2' && r.parent_code_value === sido?.code_value;
-                                                }).map(sigungu => (
-                                                    <label key={sigungu.code_value} className="flex items-center gap-2 cursor-pointer text-[13px] text-gray-700 hover:text-primary">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedSigungus.includes(sigungu.code_name)}
-                                                            onChange={() => handleSigunguChange(sigungu.code_name)}
-                                                            className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300"
-                                                        />
-                                                        <span className="truncate">{sigungu.code_name}</span>
-                                                    </label>
-                                                ))}
+                                            <div className="relative mt-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsSigunguOpen(!isSigunguOpen)}
+                                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none text-left bg-white focus:border-primary flex justify-between items-center"
+                                                >
+                                                    <span className={selectedSigungus.length > 0 ? "text-gray-900" : "text-gray-400"}>
+                                                        {selectedSigungus.length > 0 ? selectedSigungus.join(', ') : '시/군/구 선택 (여러 개 가능)'}
+                                                    </span>
+                                                    <span className="text-gray-400 text-[10px]">▼</span>
+                                                </button>
+                                                
+                                                {isSigunguOpen && (
+                                                    <div className="absolute z-10 w-full mt-1 p-3 bg-white border border-gray-200 shadow-xl rounded-lg max-h-[220px] overflow-y-auto grid grid-cols-2 gap-2">
+                                                        {regions.filter(r => {
+                                                            const sido = regions.find(s => s.code_name === selectedSido && s.list_type === 'JOB_REGION_1');
+                                                            return r.list_type === 'JOB_REGION_2' && r.parent_code_value === sido?.code_value;
+                                                        }).map(sigungu => (
+                                                            <label key={sigungu.code_value} className="flex items-center gap-2 cursor-pointer text-[13px] text-gray-700 hover:text-primary">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={selectedSigungus.includes(sigungu.code_name)}
+                                                                    onChange={() => handleSigunguChange(sigungu.code_name)}
+                                                                    className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300"
+                                                                />
+                                                                <span className="truncate">{sigungu.code_name}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                         ) : null}
                                     </div>
