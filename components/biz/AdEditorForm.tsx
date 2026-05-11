@@ -363,11 +363,11 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const initialIntensityData = initialData?.effect_intensity || 'medium';
     let initIntensity = 'medium';
     let initAction = 'shimmer';
-    if (initialIntensityData.includes('::')) {
+    if (typeof initialIntensityData === 'string' && initialIntensityData.includes('::')) {
         const parts = initialIntensityData.split('::');
         initIntensity = parts[0] || 'medium';
         initAction = parts[1] || 'shimmer';
-    } else if (['high', 'medium', 'low', 'none'].includes(initialIntensityData)) {
+    } else if (typeof initialIntensityData === 'string' && ['high', 'medium', 'low', 'none'].includes(initialIntensityData)) {
         initIntensity = initialIntensityData;
         initAction = 'shimmer';
     } else {
@@ -379,7 +379,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const initialColorData = initialData?.color || '#FF6B35';
     let initColor = '#FF6B35';
     let initBgOpacity = '10'; // 기본값 10%
-    if (initialColorData.includes('::')) {
+    if (typeof initialColorData === 'string' && initialColorData.includes('::')) {
         const parts = initialColorData.split('::');
         initColor = parts[0] || '#FF6B35';
         initBgOpacity = parts[1] || '10';
@@ -519,7 +519,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
     const handleSigunguChange = (sigungu: string) => {
         let newSigungus = [...selectedSigungus];
-        if (newSigungus.includes(sigungu)) {
+        if (newSigungus?.includes(sigungu)) {
             newSigungus = newSigungus.filter(s => s !== sigungu);
         } else {
             newSigungus.push(sigungu);
@@ -707,7 +707,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                     onClick={() => update('tier', t.value)}
                                                     className={`flex-1 min-w-[140px] py-2.5 px-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 ${
                                                         form.tier === t.value
-                                                            ? t.value.includes('PREMIUM') ? 'border-yellow-500 bg-yellow-50 ring-1 ring-yellow-200'
+                                                            ? t.value?.includes('PREMIUM') ? 'border-yellow-500 bg-yellow-50 ring-1 ring-yellow-200'
                                                             : t.value === 'SPECIAL' ? 'border-purple-500 bg-purple-50 ring-1 ring-purple-200'
                                                             : 'border-gray-500 bg-gray-50 ring-1 ring-gray-200'
                                                             : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100'
@@ -805,7 +805,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                 
                                                 let payType = '';
                                                 let payAmount = form.pay || '급여 정보';
-                                                if (payAmount.includes(']') && payAmount.startsWith('[')) {
+                                                if (typeof payAmount === 'string' && payAmount.includes(']') && payAmount.startsWith('[')) {
                                                     const splitIndex = payAmount.indexOf(']');
                                                     payType = payAmount.substring(1, splitIndex).trim();
                                                     payAmount = payAmount.substring(splitIndex + 1).trim();
@@ -1080,7 +1080,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                             <label key={sigungu.code_value} className="flex items-center gap-2 cursor-pointer text-[13px] text-gray-700 hover:text-primary">
                                                                 <input
                                                                     type="checkbox"
-                                                                    checked={selectedSigungus.includes(sigungu.code_name)}
+                                                                    checked={selectedSigungus?.includes(sigungu.code_name)}
                                                                     onChange={() => handleSigunguChange(sigungu.code_name)}
                                                                     className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300"
                                                                 />

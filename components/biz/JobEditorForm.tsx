@@ -415,7 +415,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
 
     const handleSigunguChange = (sigungu: string) => {
         let newSigungus = [...selectedSigungus];
-        if (newSigungus.includes(sigungu)) {
+        if (newSigungus?.includes(sigungu)) {
             newSigungus = newSigungus.filter(s => s !== sigungu);
         } else {
             newSigungus.push(sigungu);
@@ -865,7 +865,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                                             <label key={sigungu.code_value} className="flex items-center gap-2 cursor-pointer text-[13px] text-gray-700 hover:text-primary">
                                                                 <input
                                                                     type="checkbox"
-                                                                    checked={selectedSigungus.includes(sigungu.code_name)}
+                                                                    checked={selectedSigungus?.includes(sigungu.code_name)}
                                                                     onChange={() => handleSigunguChange(sigungu.code_name)}
                                                                     className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300"
                                                                 />
