@@ -47,7 +47,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
           if (prev <= 1) {
             clearInterval(countdownRef.current!);
             signOut({ redirect: false }).then(() => {
-                router.push('/login?session_expired=1');
+                router.push('/');
             });
             return 0;
           }
@@ -112,7 +112,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   const handleLogoutNow = () => {
     setShowWarning(false);
     signOut({ redirect: false }).then(() => {
-        router.push('/login');
+        router.push('/');
     });
   };
 
