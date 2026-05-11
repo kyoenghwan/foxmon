@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const WARNING_TIME_MS = 4 * 60 * 1000; // 4분 경과 시 경고창
-const LOGOUT_TIME_MS = 5 * 60 * 1000; // 5분 경과 시 자동 로그아웃 (경고창 후 1분)
+const WARNING_TIME_MS = 59 * 60 * 1000; // 59분 경과 시 경고창
+const LOGOUT_TIME_MS = 60 * 60 * 1000; // 60분 경과 시 자동 로그아웃
 
 function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
