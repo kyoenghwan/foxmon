@@ -16,6 +16,7 @@ export async function QA_GET_PUBLIC_SEEKER_ADS(): Promise<{ success: boolean; da
         resumes (
             title,
             gender,
+            birth_year,
             desired_location,
             nickname,
             photo_url,

@@ -589,14 +589,20 @@ export function ResumeManagementModal() {
                       <input type="text" value={formData.nickname || ''} onChange={e => setFormData({...formData, nickname: e.target.value})} className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" />
                     </div>
                     <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-1.5">성별</label>
-                      <div className="flex gap-4 p-2.5">
-                        <label className="flex items-center gap-2 cursor-pointer font-medium text-sm">
-                          <input type="radio" value="F" checked={formData.gender === 'F'} onChange={e => setFormData({...formData, gender: 'F'})} className="accent-primary w-4 h-4" /> 여성
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer font-medium text-sm">
-                          <input type="radio" value="M" checked={formData.gender === 'M'} onChange={e => setFormData({...formData, gender: 'M'})} className="accent-primary w-4 h-4" /> 남성
-                        </label>
+                      <label className="text-sm font-bold text-gray-700 block mb-1.5">성별 / 출생연도</label>
+                      <div className="flex gap-2 items-center">
+                        <div className="flex gap-3 px-1">
+                          <label className="flex items-center gap-1.5 cursor-pointer font-medium text-sm">
+                            <input type="radio" value="F" checked={formData.gender === 'F'} onChange={e => setFormData({...formData, gender: 'F'})} className="accent-primary w-4 h-4" /> 여성
+                          </label>
+                          <label className="flex items-center gap-1.5 cursor-pointer font-medium text-sm">
+                            <input type="radio" value="M" checked={formData.gender === 'M'} onChange={e => setFormData({...formData, gender: 'M'})} className="accent-primary w-4 h-4" /> 남성
+                          </label>
+                        </div>
+                        <div className="flex items-center gap-1 ml-auto">
+                           <input type="number" value={formData.birth_year || ''} onChange={e => setFormData({...formData, birth_year: parseInt(e.target.value) || undefined})} placeholder="예: 1995" className="w-20 p-2 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium text-center" />
+                           <span className="text-sm text-gray-500 font-medium">년생</span>
+                        </div>
                       </div>
                     </div>
                     <div>

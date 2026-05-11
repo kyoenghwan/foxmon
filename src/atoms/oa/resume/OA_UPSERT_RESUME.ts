@@ -8,6 +8,7 @@ export interface ResumeData {
   ad_title?: string;
   nickname?: string;
   gender?: 'M' | 'F';
+  birth_year?: number;
   contact_number?: string;
   is_contact_public?: boolean;
   sns_type?: string;

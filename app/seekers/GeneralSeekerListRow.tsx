@@ -14,9 +14,12 @@ export function GeneralSeekerListRow({ job }: { job: any }) {
     // 2. 성별/나이
     const genderKr = gender === 'F' ? '여' : gender === 'M' ? '남' : '무관';
     let ageStr = '';
-    if (users?.birth_date && users.birth_date.length >= 4) {
+    const currentYear = new Date().getFullYear();
+    
+    if (resumes?.birth_year) {
+        ageStr = `,${currentYear - resumes.birth_year + 1}`;
+    } else if (users?.birth_date && users.birth_date.length >= 4) {
         const birthYear = parseInt(users.birth_date.substring(0, 4));
-        const currentYear = new Date().getFullYear();
         ageStr = `,${currentYear - birthYear + 1}`;
     }
     const genderAge = `${genderKr}${ageStr}`;
@@ -44,7 +47,7 @@ export function GeneralSeekerListRow({ job }: { job: any }) {
     return (
         <tr 
             onClick={() => {
-                // router.push(`/seekers/${job.id}`); // 나중에 상세페이지 연결 시 주석 해제
+                router.push(`/seekers/${job.id}`);
             }}
             className="hover:bg-gray-50/50 transition-colors group cursor-pointer"
         >
