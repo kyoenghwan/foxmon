@@ -628,12 +628,12 @@ export function ResumeManagementModal() {
               <section>
                 <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">연락처 및 SNS</h3>
                 <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-5 flex flex-col gap-6">
-                    <div>
+                     <div>
                       <label className="text-sm font-bold text-gray-700 block mb-2">연락처</label>
                       <div className="flex gap-3 items-center">
                          <input type="text" value={formData.contact_number || ''} onChange={e => setFormData({...formData, contact_number: e.target.value})} placeholder="010-0000-0000" className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium bg-white" />
                          <label className="flex items-center gap-2 whitespace-nowrap text-sm font-bold text-gray-700 cursor-pointer hover:text-primary transition-colors bg-white border border-gray-200 p-3 rounded-lg">
-                           <input type="checkbox" checked={formData.is_contact_public} onChange={e => setFormData({...formData, is_contact_public: e.target.checked})} className="accent-primary w-4 h-4 rounded" /> 안심번호 공개
+                           <input type="checkbox" checked={formData.is_contact_public} onChange={e => setFormData({...formData, is_contact_public: e.target.checked})} className="accent-primary w-4 h-4 rounded" /> 연락처 공개
                          </label>
                       </div>
                     </div>
