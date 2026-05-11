@@ -16,7 +16,7 @@ import { ResumeData } from '@/src/atoms/oa/resume/OA_UPSERT_RESUME';
 import { SeekerAdData } from '@/src/atoms/qa/resume/QA_GET_USER_SEEKER_ADS';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { nvLog } from '@/lib/logger';
-
+import { cn } from '@/lib/utils';
 export function ResumeManagementModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'RESUME' | 'AD'>('RESUME');
