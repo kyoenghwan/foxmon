@@ -42,6 +42,9 @@ export async function authenticate(
             }
         }
         throw error;
+    }
+}
+
 import { FA_MANAGE_SEEKER_AD_FLOW } from '@/src/atoms/fa/resume/FA_MANAGE_SEEKER_AD_FLOW';
 import { SeekerAdInput } from '@/src/atoms/oa/resume/OA_UPSERT_SEEKER_AD';
 import { QA_GET_PUBLIC_SEEKER_ADS } from '@/src/atoms/qa/resume/QA_GET_PUBLIC_SEEKER_ADS';
