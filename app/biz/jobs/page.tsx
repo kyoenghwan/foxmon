@@ -13,12 +13,14 @@ const TierBadge = ({ tier }: { tier: string }) => {
         SIDE: 'bg-blue-100 text-blue-800 border-blue-200',
         SPECIAL: 'bg-purple-100 text-purple-800 border-purple-200',
         GENERAL: 'bg-gray-100 text-gray-600 border-gray-200',
+        AD_GENERAL: 'bg-orange-100 text-orange-800 border-orange-200',
     };
     const labels: Record<string, string> = {
         PREMIUM: '🔥 프리미엄',
         SIDE: '🚀 사이드',
         SPECIAL: '⚡ 스페셜',
         GENERAL: '일반',
+        AD_GENERAL: '배너(일반)',
     };
     return (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black border ${styles[tier] || styles.GENERAL}`}>

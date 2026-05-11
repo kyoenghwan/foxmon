@@ -25,12 +25,13 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
 
             const p = (payload.exposure_period || 30) as 30 | 60 | 90;
             const t = payload.tier || 'GENERAL';
+            const priceTier = t === 'AD_GENERAL' ? 'GENERAL' : t;
             
             // 티어 기본료 + 기간 기본료 + 옵션
-            let totalPoints = getPrice(`TIER_PRICE_${t}`, 0);
+            let totalPoints = getPrice(`TIER_PRICE_${priceTier}`, 0);
             
             // 일반 구인 공고의 경우 기간 요금이 부과될 수 있음 (기획에 따라 다름)
-            if (t === 'GENERAL') {
+            if (priceTier === 'GENERAL') {
                 totalPoints += getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, 0);
             }
             
