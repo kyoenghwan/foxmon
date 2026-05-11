@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, X } from 'lucide-react';
+import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, X, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
@@ -19,7 +19,6 @@ const SunEditor = dynamic(() => import('suneditor-react'), {
     loading: () => <div className="min-h-[400px] flex items-center justify-center bg-gray-50 border rounded-xl"><Loader2 className="w-6 h-6 animate-spin text-gray-400"/></div> 
 });
 import 'suneditor/dist/css/suneditor.min.css';
-import { BizPremiumOptionModal } from './BizPremiumOptionModal';
 import { LoadMyDataModal } from './LoadMyDataModal';
 
 export interface AdFormData {
@@ -32,6 +31,7 @@ export interface AdFormData {
     pay_amount?: string;
     image: string;
     color: string;
+    bg_opacity?: string;
     tier: 'PREMIUM' | 'SPECIAL' | 'GENERAL';
     auto_renew: boolean;
     theme?: string;
