@@ -249,12 +249,25 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     )}
                 </div>
                 {generalJobs.length > 0 ? (
-                    <div className="bg-white border-t-2 border-gray-900 shadow-sm rounded-b-xl overflow-hidden">
-                        <div className="flex flex-col">
-                            {paginatedTableJobs.map((job) => (
-                                <GeneralSeekerListRow key={job.id} job={job} />
-                            ))}
-                        </div>
+                    <div className="bg-white border-t-2 border-gray-900 shadow-sm rounded-b-xl overflow-x-auto">
+                        <table className="w-full min-w-[800px] text-center text-[13px] md:text-[14px]">
+                            <thead className="border-b border-gray-200 text-gray-700 font-bold bg-white">
+                                <tr>
+                                    <th className="py-3 px-2 w-[10%] font-semibold">이름</th>
+                                    <th className="py-3 px-2 w-[10%] font-semibold">성별/나이</th>
+                                    <th className="py-3 px-4 w-[35%] text-left font-semibold">제목</th>
+                                    <th className="py-3 px-2 w-[15%] font-semibold text-gray-500">희망지역</th>
+                                    <th className="py-3 px-2 w-[10%] font-semibold text-gray-500">희망업종</th>
+                                    <th className="py-3 px-2 w-[12%] font-semibold text-gray-500">희망급여</th>
+                                    <th className="py-3 px-2 w-[8%] font-semibold text-gray-500">작성일</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {paginatedTableJobs.map((job) => (
+                                    <GeneralSeekerListRow key={job.id} job={job} />
+                                ))}
+                            </tbody>
+                        </table>
                         
                         {/* Pagination Controls */}
                         {totalPages > 1 && (

@@ -18,7 +18,13 @@ export async function QA_GET_PUBLIC_SEEKER_ADS(): Promise<{ success: boolean; da
             gender,
             desired_location,
             nickname,
-            photo_url
+            photo_url,
+            desired_industry,
+            desired_pay_type,
+            desired_pay_amount
+        ),
+        users:user_id (
+            birth_date
         )
       `)
       .eq('status', 'ACTIVE')
