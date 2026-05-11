@@ -205,6 +205,30 @@ export function ResumeManagementModal() {
     }
   };
 
+  const handleToggleAdStatus = async (ad: any) => {
+    setDeleting(ad.id); // Reusing deleting state as loading
+    try {
+      const newStatus = ad.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      const res = await manageSeekerAdAction('SAVE', {
+        id: ad.id,
+        user_id: session?.user?.id || '',
+        resume_id: ad.resume_id || (ad.resumes as any)?.id,
+        ad_title: ad.ad_title,
+        status: newStatus
+      });
+      if (res.success) {
+        setSeekerAds(prev => prev.map(a => a.id === ad.id ? { ...a, status: newStatus } : a));
+      } else {
+        alert(res.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('상태 변경 중 오류가 발생했습니다.');
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   const handleTogglePublic = async (e: React.MouseEvent, resume: ResumeData) => {
     e.stopPropagation();
     if (!resume.id) return;
@@ -409,25 +433,72 @@ export function ResumeManagementModal() {
                   </div>
                 ) : (
                   <>
-                    {seekerAds.map(ad => (
-                      <div key={ad.id} className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-primary hover:shadow-md transition-all group">
-                        <div className="flex justify-between items-center gap-4">
-                          <div className="flex flex-col min-w-0 flex-1">
-                            <h4 className="font-black text-lg text-gray-900 group-hover:text-primary transition-colors truncate">{ad.ad_title}</h4>
-                            <p className="text-sm text-gray-500 font-medium mt-1">
-                               상태: <span className="text-green-600 font-bold">노출 중</span> | 연결된 이력서: {(ad.resumes as any)?.title || '알 수 없음'}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            {/* 삭제 */}
-                            <Button variant="destructive" className="rounded-full shadow-sm text-xs h-8 whitespace-nowrap" onClick={(e) => handleAdDelete(e, ad)}>
-                              내리기
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <Button onClick={() => setAdFormView(true)} variant="ghost" className="border-2 border-dashed border-gray-300 rounded-2xl py-8 font-black text-gray-500 hover:text-primary hover:border-primary transition-all hover:bg-primary/5">
+                    <div className="bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden w-full overflow-x-auto">
+                        <table className="w-full min-w-[600px] text-center text-sm">
+                            <thead className="bg-gray-50 border-b border-gray-200 text-gray-600 font-bold">
+                                <tr>
+                                    <th className="py-3.5 px-4 w-[30%] text-left">제목</th>
+                                    <th className="py-3.5 px-2 w-[12%]">상태</th>
+                                    <th className="py-3.5 px-2 w-[23%]">연결된 이력서</th>
+                                    <th className="py-3.5 px-2 w-[15%]">작성일</th>
+                                    <th className="py-3.5 px-2 w-[20%]">구직상태 변경</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {seekerAds.map(ad => {
+                                    const dateObj = new Date(ad.created_at || new Date());
+                                    const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+                                    const isStatusActive = ad.status === 'ACTIVE';
+                                    
+                                    return (
+                                        <tr key={ad.id} className="hover:bg-gray-50 transition-colors group">
+                                            <td className="py-4 px-4 text-left">
+                                                <div className="font-extrabold text-gray-900 truncate max-w-[200px]">{ad.ad_title}</div>
+                                            </td>
+                                            <td className="py-4 px-2">
+                                                <span className={cn(
+                                                    "px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight",
+                                                    isStatusActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                                                )}>
+                                                    {isStatusActive ? '노출 중' : '노출 중지'}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-2 text-gray-600 font-medium truncate max-w-[150px]">
+                                                {(ad.resumes as any)?.title || '알 수 없음'}
+                                            </td>
+                                            <td className="py-4 px-2 text-gray-400 font-medium text-[13px]">
+                                                {dateStr}
+                                            </td>
+                                            <td className="py-4 px-2 flex justify-center gap-2">
+                                                <Button 
+                                                    onClick={() => handleToggleAdStatus(ad)}
+                                                    disabled={deleting === ad.id}
+                                                    className={cn(
+                                                        "h-8 px-4 text-xs rounded-full font-bold transition-all whitespace-nowrap shadow-sm", 
+                                                        isStatusActive 
+                                                            ? "bg-red-500 hover:bg-red-600 text-white" 
+                                                            : "bg-primary hover:bg-orange-600 text-white"
+                                                    )}
+                                                >
+                                                    {deleting === ad.id ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : (isStatusActive ? '구직 완료' : '다시 구직하기')}
+                                                </Button>
+                                                <Button 
+                                                    variant="ghost"
+                                                    onClick={(e) => handleAdDelete(e, ad)}
+                                                    disabled={deleting === ad.id}
+                                                    className="w-8 h-8 p-0 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 shrink-0"
+                                                    title="구직글 삭제"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                    <Button onClick={() => setAdFormView(true)} variant="ghost" className="border-2 border-dashed border-gray-300 rounded-2xl py-8 font-black text-gray-500 hover:text-primary hover:border-primary transition-all hover:bg-primary/5 mt-4">
                       <Plus className="w-5 h-5 mr-2" /> 새 구직글 추가 등록
                     </Button>
                   </>
