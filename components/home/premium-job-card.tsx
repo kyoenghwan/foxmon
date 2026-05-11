@@ -195,10 +195,9 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                 </div>
             )}
 
-            {/* --- [메인 카드 바디] --- */}
             <Link 
                 href={`/jobs/${id}`} 
-                className={`relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm transition-all duration-300 ${isSide ? 'p-1.5' : 'p-1.5 sm:p-2 lg:p-2.5'} flex flex-col justify-between z-10 ${
+                className={`relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm transition-all duration-300 ${isSide ? 'p-1' : 'p-1 sm:p-1.5 lg:p-1.5'} flex flex-col justify-between z-10 ${
                     isCyber ? 'bg-black/95 text-white' : 'bg-white'
                 }`}
             >
