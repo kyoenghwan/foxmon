@@ -63,7 +63,7 @@ const AdStatusBadge = ({ status }: { status: string }) => {
 
 export default async function BizJobsPage() {
     const res = await manageAdAction('GET');
-    const mockAds = (res.success && res.data ? res.data : []).filter((ad: any) => ad.tier === 'GENERAL');
+    const mockAds = (res.success && res.data ? res.data : []).filter((ad: any) => !ad.tier || ad.tier === 'GENERAL');
 
     return (
         <div className="space-y-6">

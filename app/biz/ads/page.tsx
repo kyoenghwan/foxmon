@@ -47,7 +47,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 export default async function BizAdsPage() {
     const res = await manageAdAction('GET');
-    const ads = (res.success && res.data ? res.data : []).filter((ad: any) => ad.tier !== 'GENERAL');
+    const ads = (res.success && res.data ? res.data : []).filter((ad: any) => ad.tier && ad.tier !== 'GENERAL');
 
     return (
         <div className="space-y-6">
