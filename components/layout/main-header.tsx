@@ -207,7 +207,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                         </div>
 
                         {/* 우측 끝 맞춤형 관리 메뉴 */}
-                        <div className="hidden lg:flex items-center h-full py-2.5 gap-2">
+                        <div className="hidden lg:flex items-center h-full py-2.5 gap-2 shrink-0">
                             {showResumeMenu && (
                                 <ResumeManagementModal />
                             )}
@@ -215,9 +215,10 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 <Link 
                                     href="/biz" 
                                     className="h-full flex items-center gap-1.5 px-5 text-[13px] sm:text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap shrink-0"
+                                    style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
                                 >
-                                    <Briefcase className="w-4 h-4" />
-                                    업체관리
+                                    <Briefcase className="w-4 h-4 shrink-0" />
+                                    <span style={{ whiteSpace: 'nowrap', wordBreak: 'keep-all' }}>업체관리</span>
                                 </Link>
                             )}
                         </div>

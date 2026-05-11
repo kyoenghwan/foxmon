@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Save, FileText, MapPin, Briefcase } from 'lucide-react';
+import { Loader2, Save, FileText, MapPin, Briefcase, CheckCircle2 } from 'lucide-react';
+import { getPolicy } from '@/actions/admin/policies';
 
 interface ResumeEditorProps {
   userId: string;
@@ -24,12 +25,32 @@ export function ResumeEditor({ userId, initialData, onSaveSuccess }: ResumeEdito
     regionProvince: initialData?.region_province || '',
     regionCity: initialData?.region_city || '',
     isActive: initialData?.is_active ?? true,
+    agreedToPrivacy: false,
   });
+  const [privacyPolicy, setPrivacyPolicy] = useState<string>('');
+
+  useEffect(() => {
+    async function fetchPolicy() {
+      try {
+        const data = await getPolicy('resume_privacy');
+        if (data) {
+          setPrivacyPolicy(data.content);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    fetchPolicy();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.regionProvince || !formData.regionCity) {
       alert('필수 정보를 모두 입력해주세요.');
+      return;
+    }
+    if (!formData.agreedToPrivacy) {
+      alert('개인정보 수집 및 이용에 동의해야 이력서를 등록할 수 있습니다.');
       return;
     }
 
@@ -163,7 +184,29 @@ export function ResumeEditor({ userId, initialData, onSaveSuccess }: ResumeEdito
             />
             <div className="flex flex-col">
               <Label htmlFor="isActive" className="text-purple-900 font-black text-sm cursor-pointer select-none">구직 활동 중</Label>
-              <p className="text-gray-500 text-[11px] font-medium">체크 시 업체 검색 결과에 노출됩니다.</p>
+              <p className="text-gray-500 text-[11px] font-medium">체크 해제 시 "구직완료" 상태로 표시됩니다.</p>
+            </div>
+          </div>
+
+          {/* Privacy Policy */}
+          <div className="space-y-3 pt-4 border-t border-purple-100">
+            <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider flex items-center gap-2">
+              개인정보 수집 및 이용 동의
+            </Label>
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 h-32 overflow-y-auto text-[12px] text-gray-600 leading-relaxed whitespace-pre-wrap">
+              {privacyPolicy || '로딩 중...'}
+            </div>
+            <div className="flex items-center gap-3 px-1">
+              <input 
+                type="checkbox" 
+                id="agreedToPrivacy"
+                checked={formData.agreedToPrivacy}
+                onChange={(e) => setFormData({...formData, agreedToPrivacy: e.target.checked})}
+                className="w-5 h-5 rounded border-gray-300 bg-white text-purple-600 focus:ring-purple-500 cursor-pointer"
+              />
+              <Label htmlFor="agreedToPrivacy" className="text-gray-800 font-bold text-sm cursor-pointer select-none">
+                개인정보 수집 및 이용에 동의합니다. <span className="text-purple-600">(필수)</span>
+              </Label>
             </div>
           </div>
 

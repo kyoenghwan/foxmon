@@ -5,6 +5,7 @@ import { Plus, Briefcase, Eye, Pencil, Clock, CreditCard } from 'lucide-react';
 import { manageAdAction } from '@/lib/actions';
 
 import { PaymentModalTrigger } from '@/components/biz/PaymentModalTrigger';
+import { ToggleJobStatusButton } from '@/src/components/biz/ToggleJobStatusButton';
 
 const TierBadge = ({ tier }: { tier: string }) => {
     const styles: Record<string, string> = {
@@ -43,6 +44,21 @@ const StatusBadge = ({ expiresAt }: { expiresAt: string | null | undefined }) =>
             </span>
         );
     }
+};
+
+const AdStatusBadge = ({ status }: { status: string }) => {
+    if (status === 'COMPLETED') {
+        return (
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-black bg-gray-800 text-white border border-gray-900">
+                채용마감
+            </span>
+        );
+    }
+    return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-black bg-green-50 text-green-600 border border-green-200">
+            구인중
+        </span>
+    );
 };
 
 export default async function BizJobsPage() {
@@ -98,7 +114,8 @@ export default async function BizJobsPage() {
                             <tr className="border-b border-gray-100 bg-gray-50">
                                 <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500">광고명</th>
                                 <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">등급</th>
-                                <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">상태</th>
+                                <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">결제상태</th>
+                                <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">구인상태</th>
                                 <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">조회수</th>
                                 <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">만료일</th>
                                 <th className="text-right px-6 py-4 text-[12px] font-black text-gray-500">관리</th>
@@ -125,6 +142,9 @@ export default async function BizJobsPage() {
                                         <StatusBadge expiresAt={ad.expires_at} />
                                     </td>
                                     <td className="px-4 py-4">
+                                        <AdStatusBadge status={ad.status} />
+                                    </td>
+                                    <td className="px-4 py-4">
                                         <span className="flex items-center gap-1 text-[13px] font-bold text-gray-700">
                                             <Eye className="w-3.5 h-3.5 text-gray-400" />
                                             {ad.view_count?.toLocaleString() || 0}
@@ -138,6 +158,7 @@ export default async function BizJobsPage() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
+                                            <ToggleJobStatusButton adId={ad.id} initialStatus={ad.status || 'ACTIVE'} />
                                             <PaymentModalTrigger ad={ad} />
                                             <Link href={`/biz/jobs/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
                                                 <Pencil className="w-4 h-4 text-gray-500" />

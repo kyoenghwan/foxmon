@@ -5,7 +5,7 @@ import {
   Flame, Snowflake, Sparkles, Zap, Ghost, Monitor, 
   Trees, Waves, Cherry, Stars, Sun, Thermometer, 
   Terminal, Music, Gem, ShieldAlert, Heart, Skull,
-  Crown, Lightbulb, Star
+  Crown, Lightbulb, Star, CheckCircle2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/language-provider';
@@ -74,6 +74,7 @@ interface PremiumJobCardProps {
     id: string;
     customColor?: string;
     bgOpacity?: string;
+    status?: string;
 }
 
 // 테마별 설정을 관리하는 매핑 객체 - 원래의 역동적인(Dynamic) 스타일로 복구
@@ -103,7 +104,7 @@ const THEME_CONFIG: Record<string, any> = {
     none: { label: 'HIT', color: 'text-gray-900', bg: 'bg-purple-700', border: 'border-gray-200', icon: Crown, animClass: '' }
 };
 
-export function PremiumJobCard({ company, title, location, category, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', hideLogo = false, tier, id, customColor, bgOpacity }: PremiumJobCardProps) {
+export function PremiumJobCard({ company, title, location, category, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', hideLogo = false, tier, id, customColor, bgOpacity, status }: PremiumJobCardProps) {
     const { t } = useLanguage();
     
     // 1. 업체명 파싱
@@ -441,7 +442,17 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                     )}
                 </div>
                 
-                <div className={`absolute inset-0 border rounded-lg pointer-events-none transition-colors z-30 ${
+                {/* --- [COMPLETED Status Overlay] --- */}
+                {status === 'COMPLETED' && (
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-gray-900/60 backdrop-blur-[1px] rounded-[calc(0.75rem-3px)]">
+                        <div className="bg-white/10 border border-white/20 text-white font-black px-4 py-1.5 rounded-full backdrop-blur-md shadow-2xl flex items-center gap-1.5 text-sm sm:text-base transform rotate-[-5deg]">
+                            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                            채용마감
+                        </div>
+                    </div>
+                )}
+                
+                <div className={`absolute inset-0 border rounded-[calc(0.75rem-3px)] pointer-events-none transition-colors z-30 ${
                     isImpact ? config.border : 'border-gray-200 group-hover:border-purple-700'
                 }`} />
             </Link>
