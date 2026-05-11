@@ -580,7 +580,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const sigunguOptions = sidoCode ? regions.filter(r => r.parent_code_value === sidoCode) : [];
 
     const handleLogoRequest = () => {
-        alert('로고 제작 대행 문의는 카카오톡 고객센터(@foxmon)로 상호명과 함께 연락해 주세요.\n전문 디자이너가 원장님만의 맞춤형 타이포그래피 로고를 제작해 드립니다!');
+        alert('로고 제작 문의는 고객센터의 1:1 문의 게시판에 글을 남겨주세요.');
     };
 
     const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
