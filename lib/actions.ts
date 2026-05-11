@@ -45,6 +45,9 @@ export async function authenticate(
     }
 }
 
+import { FA_MANAGE_SEEKER_AD_FLOW } from '@/src/atoms/fa/resume/FA_MANAGE_SEEKER_AD_FLOW';
+import { SeekerAdInput } from '@/src/atoms/oa/resume/OA_UPSERT_SEEKER_AD';
+
 export async function manageResumeAction(
   actionType: 'GET' | 'SAVE' | 'GET_DEFAULTS' | 'DELETE' | 'TOGGLE_PUBLIC',
   resumeData?: ResumeData
@@ -55,6 +58,18 @@ export async function manageResumeAction(
     }
     
     return FA_MANAGE_RESUME_FLOW(actionType, session.user.id, resumeData);
+}
+
+export async function manageSeekerAdAction(
+  actionType: 'GET' | 'SAVE' | 'DELETE',
+  adData?: Partial<SeekerAdInput>
+) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { success: false, message: '로그인이 필요합니다.' };
+    }
+    
+    return FA_MANAGE_SEEKER_AD_FLOW(actionType, session.user.id, adData);
 }
 
 export async function userSettingsAction(actionType: UserSettingsFlowInput['actionType'], payloads?: any) {

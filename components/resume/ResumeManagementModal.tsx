@@ -11,21 +11,26 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { FileText, Plus, ArrowLeft, Loader2, Save, Upload, User2, Trash2, Eye, EyeOff } from 'lucide-react';
-import { manageResumeAction } from '@/lib/actions';
+import { manageResumeAction, manageSeekerAdAction } from '@/lib/actions';
 import { ResumeData } from '@/src/atoms/oa/resume/OA_UPSERT_RESUME';
+import { SeekerAdData } from '@/src/atoms/qa/resume/QA_GET_USER_SEEKER_ADS';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { nvLog } from '@/lib/logger';
 
 export function ResumeManagementModal() {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'RESUME' | 'AD'>('RESUME');
   const [viewMode, setViewMode] = useState<'LIST' | 'FORM'>('LIST');
   const [resumes, setResumes] = useState<ResumeData[]>([]);
+  const [seekerAds, setSeekerAds] = useState<SeekerAdData[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   
   // Form state
   const [formData, setFormData] = useState<Partial<ResumeData>>({});
+  const [adFormView, setAdFormView] = useState<boolean>(false);
+  const [adFormData, setAdFormData] = useState<Partial<SeekerAdData>>({});
 
   // Master Data
   const [regions, setRegions] = useState<CodeItem[]>([]);
@@ -77,12 +82,14 @@ export function ResumeManagementModal() {
   useEffect(() => {
     if (isOpen) {
       fetchResumes();
+      fetchAds();
     } else {
       // reset state when closed
       setViewMode('LIST');
       setFormData({});
       setSelectedSido('');
       setSelectedSigungu('');
+      setActiveTab('RESUME');
     }
   }, [isOpen]);
 
@@ -98,6 +105,17 @@ export function ResumeManagementModal() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAds = async () => {
+    try {
+      const res = await manageSeekerAdAction('GET');
+      if (res.success && (res as any).data) {
+        setSeekerAds((res as any).data);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -191,29 +209,69 @@ export function ResumeManagementModal() {
     e.stopPropagation();
     if (!resume.id) return;
     
-    let newAdTitle: string | null | undefined = resume.ad_title;
-    if (!resume.is_public) {
-      const inputTitle = window.prompt("구직 리스트에 노출될 제목을 입력해주세요.\n(빈칸으로 두시면 이력서 원래 제목이 사용됩니다.)", resume.ad_title || resume.title);
-      if (inputTitle === null) return;
-      newAdTitle = inputTitle.trim() === '' ? null : inputTitle.trim();
-    }
-    
     try {
       const res = await manageResumeAction('TOGGLE_PUBLIC', {
         ...resume,
         is_public: !resume.is_public,
-        ad_title: newAdTitle
+        ad_title: null // 더 이상 이력서 테이블에서 관리하지 않음
       });
       if (res.success) {
         // 로컬 상태 즉시 업데이트
         setResumes(prev => prev.map(r => 
-          r.id === resume.id ? { ...r, is_public: !r.is_public, ad_title: newAdTitle } : r
+          r.id === resume.id ? { ...r, is_public: !r.is_public, ad_title: null } : r
         ));
       } else {
         alert(res.message);
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleAdSave = async () => {
+    if (!adFormData.resume_id) {
+        alert('이력서를 선택해주세요.');
+        return;
+    }
+    if (!adFormData.ad_title) {
+        alert('구직글 제목을 입력해주세요.');
+        return;
+    }
+    setSaving(true);
+    try {
+      const res = await manageSeekerAdAction('SAVE', adFormData);
+      if (res.success) {
+        alert('구직글이 등록되었습니다.');
+        setAdFormView(false);
+        setAdFormData({});
+        fetchAds(); // refresh list
+      } else {
+        alert(res.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('오류가 발생했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAdDelete = async (e: React.MouseEvent, ad: SeekerAdData) => {
+    e.stopPropagation();
+    if (!window.confirm('정말 구직글을 내리시겠습니까? (이력서는 삭제되지 않습니다)')) return;
+    setDeleting(ad.id);
+    try {
+      const res = await manageSeekerAdAction('DELETE', { id: ad.id } as any);
+      if (res.success) {
+        fetchAds();
+      } else {
+        alert(res.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('삭제 중 오류가 발생했습니다.');
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -229,21 +287,31 @@ export function ResumeManagementModal() {
       <DialogContent className="sm:max-w-[700px] max-h-[85vh] flex flex-col bg-white overflow-hidden p-0">
         <DialogHeader className="px-6 py-5 border-b flex-shrink-0">
           <DialogTitle className="font-black text-xl flex items-center gap-2">
-            {viewMode === 'FORM' && (
-               <button onClick={() => setViewMode('LIST')} className="hover:bg-gray-100 p-1 rounded-full transition">
+            {(viewMode === 'FORM' || adFormView) && (
+               <button onClick={() => { setViewMode('LIST'); setAdFormView(false); }} className="hover:bg-gray-100 p-1 rounded-full transition">
                  <ArrowLeft className="w-5 h-5" />
                </button>
             )}
-            📝 {viewMode === 'LIST' ? '이력서 보관함' : '이력서 작성/수정'}
+            {viewMode === 'FORM' ? '📝 이력서 작성/수정' : adFormView ? '📢 구직글 등록' : activeTab === 'RESUME' ? '📝 이력서 관리' : '📢 구직글 관리'}
           </DialogTitle>
-          <DialogDescription className="font-medium text-gray-500">
-            {viewMode === 'LIST' 
-               ? '기존에 등록된 이력서를 선택하거나 새로 등록하세요.' 
-               : '빈틈없이 꼼꼼하게 채워 지원율을 높이세요!'}
+          {viewMode === 'LIST' && !adFormView && (
+            <div className="flex border-b border-gray-100 mt-4 gap-4">
+              <button onClick={() => setActiveTab('RESUME')} className={`pb-3 font-bold text-sm transition-all border-b-2 ${activeTab === 'RESUME' ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>내 이력서 보관함</button>
+              <button onClick={() => setActiveTab('AD')} className={`pb-3 font-bold text-sm transition-all border-b-2 ${activeTab === 'AD' ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>인재정보 구직글</button>
+            </div>
+          )}
+          <DialogDescription className="font-medium text-gray-500 mt-3">
+            {viewMode === 'LIST' && !adFormView
+               ? activeTab === 'RESUME' 
+                  ? '기존에 등록된 이력서를 선택하거나 새로 등록하세요.' 
+                  : '작성된 이력서를 바탕으로 인재정보 게시판에 구직 광고를 올릴 수 있습니다.'
+               : viewMode === 'FORM'
+                  ? '빈틈없이 꼼꼼하게 채워 지원율을 높이세요!'
+                  : '원하는 이력서를 선택하고 구직 게시판에 올릴 제목을 입력하세요.'}
           </DialogDescription>
-          {viewMode === 'LIST' && (
+          {viewMode === 'LIST' && !adFormView && activeTab === 'RESUME' && (
             <p className="text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg mt-2 font-medium">
-              💡 이력서를 <strong>공개</strong>하면 업체에서 인재 검색 시 노출되어 스카우트 제안을 받을 수 있습니다.
+              💡 이력서를 <strong>공개</strong>로 설정하면, 업체에서 사장님을 열람했을 때 이력서를 볼 수 있게 됩니다.
             </p>
           )}
         </DialogHeader>
@@ -254,76 +322,159 @@ export function ResumeManagementModal() {
                <Loader2 className="w-8 h-8 animate-spin" />
                <p className="font-bold text-sm">이력서를 불러오는 중입니다...</p>
              </div>
-          ) : viewMode === 'LIST' ? (
+          ) : viewMode === 'LIST' && !adFormView ? (
             <div className="flex flex-col gap-4">
-              {resumes.length === 0 ? (
-                <div className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-10 flex flex-col items-center justify-center text-center gap-4">
-                  <div className="bg-primary/10 p-4 rounded-full">
-                    <FileText className="w-8 h-8 text-primary" />
+              {activeTab === 'RESUME' ? (
+                resumes.length === 0 ? (
+                  <div className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-10 flex flex-col items-center justify-center text-center gap-4">
+                    <div className="bg-primary/10 p-4 rounded-full">
+                      <FileText className="w-8 h-8 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-lg text-gray-800">아직 등록된 이력서가 없어요</h3>
+                      <p className="text-sm font-medium text-gray-500 mt-1">강력한 이력서를 등록하고 알바 합격률을 2배로 올려보세요!</p>
+                    </div>
+                    <Button onClick={() => handleOpenForm()} className="rounded-xl px-8 font-black mt-2">
+                      <Plus className="w-4 h-4 mr-1" /> 새 이력서 등록하기
+                    </Button>
                   </div>
-                  <div>
-                    <h3 className="font-black text-lg text-gray-800">아직 등록된 이력서가 없어요</h3>
-                    <p className="text-sm font-medium text-gray-500 mt-1">강력한 이력서를 등록하고 알바 합격률을 2배로 올려보세요!</p>
-                  </div>
-                  <Button onClick={() => handleOpenForm()} className="rounded-xl px-8 font-black mt-2">
-                    <Plus className="w-4 h-4 mr-1" /> 새 이력서 등록하기
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  {resumes.map(r => (
-                    <div key={r.id || r.title} className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-primary hover:shadow-md transition-all group">
-                      <div className="flex justify-between items-center gap-4">
-                        <div className="flex items-center gap-4 cursor-pointer flex-1 min-w-0" onClick={() => handleOpenForm(r)}>
-                          {r.photo_url ? (
-                            <img src={r.photo_url} alt="Profile" className="w-12 h-12 object-cover rounded-full border bg-gray-50 flex-shrink-0" />
-                          ) : (
-                            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center border text-gray-400 flex-shrink-0">
-                              <User2 className="w-6 h-6" />
+                ) : (
+                  <>
+                    {resumes.map(r => (
+                      <div key={r.id || r.title} className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-primary hover:shadow-md transition-all group">
+                        <div className="flex justify-between items-center gap-4">
+                          <div className="flex items-center gap-4 cursor-pointer flex-1 min-w-0" onClick={() => handleOpenForm(r)}>
+                            {r.photo_url ? (
+                              <img src={r.photo_url} alt="Profile" className="w-12 h-12 object-cover rounded-full border bg-gray-50 flex-shrink-0" />
+                            ) : (
+                              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center border text-gray-400 flex-shrink-0">
+                                <User2 className="w-6 h-6" />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <h4 className="font-black text-lg text-gray-900 group-hover:text-primary transition-colors truncate">{r.title}</h4>
+                              <p className="text-sm text-gray-500 font-medium mt-1">
+                                 업데이트: {r.updated_at ? new Date(r.updated_at).toLocaleDateString() : '방금'} | {r.desired_location || '희망지역 미기재'}
+                              </p>
                             </div>
-                          )}
-                          <div className="min-w-0">
-                            <h4 className="font-black text-lg text-gray-900 group-hover:text-primary transition-colors truncate">{r.title}</h4>
-                            <p className="text-sm text-gray-500 font-medium mt-1">
-                               업데이트: {r.updated_at ? new Date(r.updated_at).toLocaleDateString() : '방금'} | {r.desired_location || '희망지역 미기재'}
-                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {/* 공개/비공개 토글 */}
+                            <button
+                              onClick={(e) => handleTogglePublic(e, r)}
+                              className={`flex items-center gap-1.5 px-3 h-8 rounded-full text-xs font-bold border transition-all ${
+                                r.is_public
+                                  ? 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
+                                  : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
+                              }`}
+                              title={r.is_public ? '공개 중 (클릭하여 비공개)' : '비공개 (클릭하여 공개)'}
+                            >
+                              {r.is_public ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                              {r.is_public ? '공개' : '비공개'}
+                            </button>
+                            {/* 수정하기 */}
+                            <Button variant="outline" className="rounded-full shadow-sm text-xs h-8 whitespace-nowrap" onClick={() => handleOpenForm(r)}>수정하기</Button>
+                            {/* 삭제 */}
+                            <button
+                              onClick={(e) => handleDelete(e, r)}
+                              disabled={deleting === r.id}
+                              className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-50"
+                              title="이력서 삭제"
+                            >
+                              {deleting === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {/* 공개/비공개 토글 */}
-                          <button
-                            onClick={(e) => handleTogglePublic(e, r)}
-                            className={`flex items-center gap-1.5 px-3 h-8 rounded-full text-xs font-bold border transition-all ${
-                              r.is_public
-                                ? 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
-                                : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
-                            }`}
-                            title={r.is_public ? '공개 중 (클릭하여 비공개)' : '비공개 (클릭하여 공개)'}
-                          >
-                            {r.is_public ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                            {r.is_public ? '공개' : '비공개'}
-                          </button>
-                          {/* 수정하기 */}
-                          <Button variant="outline" className="rounded-full shadow-sm text-xs h-8 whitespace-nowrap" onClick={() => handleOpenForm(r)}>수정하기</Button>
-                          {/* 삭제 */}
-                          <button
-                            onClick={(e) => handleDelete(e, r)}
-                            disabled={deleting === r.id}
-                            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-50"
-                            title="이력서 삭제"
-                          >
-                            {deleting === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                          </button>
+                      </div>
+                    ))}
+                    <Button onClick={() => handleOpenForm()} variant="ghost" className="border-2 border-dashed border-gray-300 rounded-2xl py-8 font-black text-gray-500 hover:text-primary hover:border-primary transition-all hover:bg-primary/5">
+                      <Plus className="w-5 h-5 mr-2" /> 추가 이력서 등록 (새로 작성)
+                    </Button>
+                  </>
+                )
+              ) : (
+                // AD TAB CONTENT
+                seekerAds.length === 0 ? (
+                  <div className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-10 flex flex-col items-center justify-center text-center gap-4">
+                    <div className="bg-primary/10 p-4 rounded-full">
+                      <FileText className="w-8 h-8 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-lg text-gray-800">등록된 구직글이 없어요</h3>
+                      <p className="text-sm font-medium text-gray-500 mt-1">인재정보 게시판에 나를 알리고 스카우트 제안을 받아보세요!</p>
+                    </div>
+                    <Button onClick={() => { if(resumes.length === 0) { alert('먼저 이력서를 작성해주세요!'); setActiveTab('RESUME'); } else { setAdFormView(true); } }} className="rounded-xl px-8 font-black mt-2">
+                      <Plus className="w-4 h-4 mr-1" /> 새 구직글 등록하기
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {seekerAds.map(ad => (
+                      <div key={ad.id} className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-primary hover:shadow-md transition-all group">
+                        <div className="flex justify-between items-center gap-4">
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <h4 className="font-black text-lg text-gray-900 group-hover:text-primary transition-colors truncate">{ad.ad_title}</h4>
+                            <p className="text-sm text-gray-500 font-medium mt-1">
+                               상태: <span className="text-green-600 font-bold">노출 중</span> | 연결된 이력서: {(ad.resumes as any)?.title || '알 수 없음'}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {/* 삭제 */}
+                            <Button variant="destructive" className="rounded-full shadow-sm text-xs h-8 whitespace-nowrap" onClick={(e) => handleAdDelete(e, ad)}>
+                              내리기
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                  <Button onClick={() => handleOpenForm()} variant="ghost" className="border-2 border-dashed border-gray-300 rounded-2xl py-8 font-black text-gray-500 hover:text-primary hover:border-primary transition-all hover:bg-primary/5">
-                    <Plus className="w-5 h-5 mr-2" /> 추가 이력서 등록 (새로 작성)
-                  </Button>
-                </>
+                    ))}
+                    <Button onClick={() => setAdFormView(true)} variant="ghost" className="border-2 border-dashed border-gray-300 rounded-2xl py-8 font-black text-gray-500 hover:text-primary hover:border-primary transition-all hover:bg-primary/5">
+                      <Plus className="w-5 h-5 mr-2" /> 새 구직글 추가 등록
+                    </Button>
+                  </>
+                )
               )}
             </div>
+          ) : adFormView ? (
+             <div className="bg-white border rounded-xl shadow-sm p-6 flex flex-col gap-6">
+                <section>
+                  <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">구직글 올리기</h3>
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">어떤 이력서를 사용할까요?</label>
+                      <select
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 bg-white font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                        value={adFormData.resume_id || ''}
+                        onChange={(e) => setAdFormData(prev => ({ ...prev, resume_id: e.target.value }))}
+                      >
+                        <option value="" disabled>이력서를 선택해주세요</option>
+                        {resumes.map(r => (
+                          <option key={r.id} value={r.id}>{r.title}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">구직 게시판에 노출될 제목</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 bg-white font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                        placeholder="예) 성실하게 열심히 일하겠습니다!"
+                        value={adFormData.ad_title || ''}
+                        onChange={(e) => setAdFormData(prev => ({ ...prev, ad_title: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                </section>
+                <div className="mt-4 flex gap-3">
+                  <Button variant="outline" className="flex-1 py-6 rounded-xl font-bold text-base" onClick={() => setAdFormView(false)}>
+                    취소
+                  </Button>
+                  <Button className="flex-1 py-6 rounded-xl font-black text-base" onClick={handleAdSave} disabled={saving}>
+                    {saving ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : (
+                      <><Save className="w-5 h-5 mr-2" /> 인재정보 등록하기</>
+                    )}
+                  </Button>
+                </div>
+             </div>
           ) : (
             <div className="bg-white border rounded-xl shadow-sm p-6 flex flex-col gap-6">
               {/* 사진 및 기본정보 Section */}
