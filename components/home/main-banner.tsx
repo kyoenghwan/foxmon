@@ -128,7 +128,7 @@ export function MainBanner() {
                     // 급여 파싱 로직
                     let payType = '';
                     let payAmount = banner.pay || '';
-                    if (payAmount.includes(']') && payAmount.startsWith('[')) {
+                    if (payAmount?.includes(']') && payAmount?.startsWith('[')) {
                         const splitIndex = payAmount.indexOf(']');
                         payType = payAmount.substring(1, splitIndex).trim();
                         payAmount = payAmount.substring(splitIndex + 1).trim();
@@ -137,7 +137,7 @@ export function MainBanner() {
                         payAmount = '추후협의';
                     } else {
                         const parts = payAmount.split(' ');
-                        if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0])) {
+                        if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0] || '')) {
                             payType = parts[0];
                             payAmount = parts.slice(1).join(' ');
                         }

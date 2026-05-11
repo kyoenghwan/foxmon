@@ -175,7 +175,11 @@ export async function getRotatedAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 
             return getMockAds(tier, limitCount);
         }
 
-        let ads: AdItem[] = data as AdItem[];
+        let ads: AdItem[] = data.map((item: any) => ({
+            ...item,
+            company: item.company || item.company_name || '업체명 없음',
+            pay: item.pay || (item.salary_type ? `[${item.salary_type}] ${item.salary_amount}` : item.salary_amount) || '급여협의'
+        })) as AdItem[];
         return applyRollingLogic(ads, limitCount);
     } catch (error) {
         return getMockAds(tier, limitCount);

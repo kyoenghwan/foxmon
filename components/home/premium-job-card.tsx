@@ -109,7 +109,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
     
     // 1. 업체명 파싱
     let displayName = company;
-    if (displayName.includes('(') && displayName.includes(')')) {
+    if (displayName?.includes('(') && displayName?.includes(')')) {
         const match = displayName.match(/(.*)\((.*)\)/);
         if (match) displayName = match[1].trim();
     }
@@ -117,7 +117,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
     // 2. 급여 데이터 파싱
     let payType = '';
     let payAmount = pay || '';
-    if (payAmount.includes(']') && payAmount.startsWith('[')) {
+    if (payAmount?.includes(']') && payAmount?.startsWith('[')) {
         // 구형 데이터 포맷: [월급] 3,000,000
         const parts = payAmount.split(']');
         payType = parts[0].replace('[', '').trim();
@@ -127,7 +127,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
         payAmount = '추후협의';
     } else {
         const parts = payAmount.split(' ');
-        if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0])) {
+        if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0] || '')) {
             payType = parts[0];
             payAmount = parts.slice(1).join(' ');
         }
@@ -143,7 +143,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
         if (parts.length >= 2) {
             sido = parts[0];
             sigungus = parts.slice(1).join(' ');
-            isMultiSigungu = sigungus.includes(',');
+            isMultiSigungu = sigungus?.includes(',');
         } else {
             sido = parts[0];
         }
@@ -155,7 +155,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
     const isCrazy = impactType === 'neon_crazy';
     const isCyber = impactType === 'glitch';
 
-    const [intensity, action] = effectIntensity && effectIntensity.includes('::') 
+    const [intensity, action] = effectIntensity && effectIntensity?.includes('::') 
         ? effectIntensity.split('::') 
         : [effectIntensity, effectIntensity]; // 하위 호환성
 
@@ -183,13 +183,13 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
     const hexOpacity = Math.round((validOpacity / 100) * 255).toString(16).padStart(2, '0').toUpperCase();
 
     // 정확한 액션 이름 추출 (intensity 키워드 제외)
-    const actualAction = (action && !['high', 'medium', 'low', 'none'].includes(action)) 
+    const actualAction = (action && !['high', 'medium', 'low', 'none'].includes(action || '')) 
         ? action 
         : (config.animClass ? config.animClass.replace('animate-', '') : '');
 
     // 오버레이 형태의 애니메이션 (내부를 스윕하거나 지나가는 효과)
     const overlayAnims = ['shimmer', 'diamond', 'emerald', 'matrix', 'ocean', 'platinum', 'rainbow-border'];
-    const isOverlayAnim = overlayAnims.includes(actualAction);
+    const isOverlayAnim = overlayAnims?.includes(actualAction || '');
 
     // 래퍼에 애니메이션 클래스를 적용할지 여부 (오버레이 전용이 아니면 래퍼에 적용)
     const wrapperAnimClass = (!isOverlayAnim && actualAction !== 'rainbow-border') ? animClass : '';

@@ -48,7 +48,7 @@ export function SideBanners() {
         // 업체명 및 업종 파싱
         let displayName = ad.company;
         let category = '유흥';
-        if (ad.company.includes('(') && ad.company.includes(')')) {
+        if (ad.company?.includes('(') && ad.company?.includes(')')) {
             const match = ad.company.match(/(.*)\((.*)\)/);
             if (match) {
                 displayName = match[1].trim();
@@ -58,7 +58,7 @@ export function SideBanners() {
         
         // 급여 파싱
         let payAmount = ad.pay;
-        if (ad.pay.includes(']')) {
+        if (ad.pay?.includes(']')) {
             const parts = ad.pay.split(']');
             payAmount = parts[1].trim();
         }
