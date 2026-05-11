@@ -11,6 +11,9 @@ import { Button } from '@/components/ui/button';
 import { RegionSelector } from '@/components/home/region-selector';
 import { IndustrySelector } from '@/components/home/industry-selector';
 
+import { GeneralSeekerListRow } from './GeneralSeekerListRow';
+import { getPublicSeekerAdsAction } from '@/lib/actions';
+
 interface SeekersListContentProps {
     isEmployer?: boolean;
 }
@@ -19,7 +22,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
     const [specialJobs, setSpecialJobs] = useState<AdItem[]>([]);
     const [lineJobs, setLineJobs] = useState<AdItem[]>([]);
-    const [generalJobs, setGeneralJobs] = useState<AdItem[]>([]);
+    const [generalJobs, setGeneralJobs] = useState<any[]>([]); // Any for now, represents SeekerAd
     const [loading, setLoading] = useState(true);
 
     // Pagination state for the list table
@@ -30,16 +33,20 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
         async function fetchJobs() {
             setLoading(true);
             try {
-                const [p, s, l, g] = await Promise.all([
+                const [p, s, l, gRes] = await Promise.all([
                     getRotatedAds('PREMIUM', 50),
                     getRotatedAds('SPECIAL', 50),
                     getRotatedAds('LINE', 50),
-                    getRotatedAds('GENERAL', 50)
+                    getPublicSeekerAdsAction()
                 ]);
                 setPremiumJobs(p);
                 setSpecialJobs(s);
                 setLineJobs(l);
-                setGeneralJobs(g);
+                if (gRes && gRes.success && gRes.data) {
+                    setGeneralJobs(gRes.data);
+                } else {
+                    setGeneralJobs([]);
+                }
             } catch (error) {
                 console.error("Failed to fetch jobs:", error);
             }
@@ -245,7 +252,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     <div className="bg-white border-t-2 border-gray-900 shadow-sm rounded-b-xl overflow-hidden">
                         <div className="flex flex-col">
                             {paginatedTableJobs.map((job) => (
-                                <GeneralJobListRow key={job.id} {...(job as any)} />
+                                <GeneralSeekerListRow key={job.id} job={job} />
                             ))}
                         </div>
                         
