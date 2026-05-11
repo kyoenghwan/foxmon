@@ -67,13 +67,12 @@ export default function BizAdsList({ initialAds }: { initialAds: any[] }) {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <table className="w-full">
                     <thead>
-                        <tr className="border-b border-gray-100 bg-gray-50">
+                        <tr className="border-b border-gray-100 bg-gray-50 whitespace-nowrap">
                             <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500">광고명</th>
-                            <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">등급</th>
-                            <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">상태</th>
-                            <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">조회수</th>
-                            <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">만료일</th>
-                            <th className="text-right px-6 py-4 text-[12px] font-black text-gray-500">관리</th>
+                            <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">등급</th>
+                            <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">상태</th>
+                            <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">만료일</th>
+                            <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500">관리</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,43 +92,34 @@ export default function BizAdsList({ initialAds }: { initialAds: any[] }) {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-4">
+                                    <td className="px-4 py-4 text-center whitespace-nowrap">
                                         <TierBadge tier={ad.tier} />
                                     </td>
-                                    <td className="px-4 py-4">
+                                    <td className="px-4 py-4 text-center whitespace-nowrap">
                                         <StatusBadge ad={ad} />
-                                        {isPendingOrExpired && (
-                                            <button 
-                                                onClick={() => setPaymentAd(ad)}
-                                                className="mt-2 text-[11px] font-black bg-gray-900 text-white px-2 py-1 rounded flex items-center gap-1 hover:bg-black transition-colors"
-                                            >
-                                                <CreditCard className="w-3 h-3" /> 결제 및 노출
-                                            </button>
-                                        )}
                                     </td>
-                                    <td className="px-4 py-4">
-                                        <span className="flex items-center gap-1 text-[13px] font-bold text-gray-700">
-                                            <Eye className="w-3.5 h-3.5 text-gray-400" />
-                                            {ad.view_count?.toLocaleString() || 0}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-4">
-                                        <span className="flex items-center gap-1 text-[13px] font-medium text-gray-500">
+                                    <td className="px-4 py-4 text-center whitespace-nowrap">
+                                        <span className="flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500">
                                             <Clock className="w-3.5 h-3.5" />
                                             {ad.expires_at && new Date(ad.expires_at).getFullYear() !== 2000 ? new Date(ad.expires_at).toLocaleDateString() : '결제 대기'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Link href={`/jobs/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="미리보기">
+                                    <td className="px-6 py-4 text-center whitespace-nowrap">
+                                        <div className="flex items-center justify-center gap-2">
+                                            {isPendingOrExpired && (
+                                                <button 
+                                                    onClick={() => setPaymentAd(ad)}
+                                                    className="text-[11px] font-black bg-gray-900 text-white px-2.5 py-1.5 rounded flex items-center gap-1 hover:bg-black transition-colors"
+                                                >
+                                                    <CreditCard className="w-3 h-3" /> 결제 및 노출
+                                                </button>
+                                            )}
+                                            <Link href={`/jobs/${ad.id}`} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="미리보기">
                                                 <Eye className="w-4 h-4 text-primary" />
                                             </Link>
-                                            <Link href={`/biz/ads/${ad.id}/edit`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
+                                            <Link href={`/biz/ads/${ad.id}/edit`} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
                                                 <Pencil className="w-4 h-4 text-gray-500" />
                                             </Link>
-                                            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="일시정지/재개 (구현 예정)">
-                                                <Pause className="w-4 h-4 text-gray-500" />
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
