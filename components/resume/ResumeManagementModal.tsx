@@ -459,7 +459,7 @@ export function ResumeManagementModal() {
                                                     "px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight",
                                                     isStatusActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
                                                 )}>
-                                                    {isStatusActive ? '노출 중' : '노출 중지'}
+                                                    {isStatusActive ? '구직 중' : '구직 완료'}
                                                 </span>
                                             </td>
                                             <td className="py-4 px-2 text-gray-600 font-medium truncate max-w-[150px]">

@@ -28,7 +28,6 @@ export async function QA_GET_PUBLIC_SEEKER_ADS(): Promise<{ success: boolean; da
             birth_date
         )
       `)
-      .eq('status', 'ACTIVE')
       .order('created_at', { ascending: false });
 
     if (error) {

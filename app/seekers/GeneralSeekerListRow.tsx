@@ -44,15 +44,22 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
     const dateObj = new Date(created_at);
     const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
 
+    const isInactive = job.status === 'INACTIVE';
+
     return (
         <tr 
             onClick={() => {
                 if (onClick) onClick();
                 else router.push(`/seekers/${job.id}`);
             }}
-            className="hover:bg-gray-50/50 transition-colors group cursor-pointer"
+            className={`hover:bg-gray-50/50 transition-colors group cursor-pointer ${isInactive ? 'opacity-50 grayscale' : ''}`}
         >
-            <td className="py-3 px-2 font-bold text-gray-800">{maskedName}</td>
+            <td className="py-3 px-2 font-bold text-gray-800 flex items-center justify-center gap-1">
+                {isInactive && (
+                    <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-black whitespace-nowrap">구직 완료</span>
+                )}
+                {maskedName}
+            </td>
             <td className="py-3 px-2 text-gray-600">{genderAge}</td>
             <td className="py-3 px-4 text-left font-bold text-gray-800 group-hover:text-primary transition-colors truncate max-w-[250px] md:max-w-[400px]">
                 {displayTitle}
