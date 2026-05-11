@@ -13,7 +13,7 @@ export default function EditAdForm({ initialData, adId }: { initialData: any, ad
         try {
             // 수정 시에는 기존 _isDraft나 _isPayment 플래그 등은 유지하되, 내용만 업데이트
             // 이미 결제가 된 광고라도 수정 창에서는 내용만 수정함.
-            const res = await manageBizAdAction('UPDATE', { ...data, _isDraft: true, jobId: adId });
+            const res = await manageBizAdAction('UPDATE', { ...data, _isDraft: true }, adId);
             if (res.success) {
                 alert('광고가 성공적으로 수정되었습니다.');
                 router.push('/biz/ads');
