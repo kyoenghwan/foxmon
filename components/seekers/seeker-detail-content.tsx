@@ -38,18 +38,8 @@ export function SeekerDetailContent({ job, isModal = false, onClose }: { job: an
   return (
     <div className="flex flex-col h-full bg-white text-gray-900 w-full relative">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 h-14">
         <h2 className="text-lg font-bold text-gray-800">이력서 상세</h2>
-        {isModal && onClose && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={onClose} 
-            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"
-          >
-            <X className="w-5 h-5" />
-          </Button>
-        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 scrollbar-hide">
