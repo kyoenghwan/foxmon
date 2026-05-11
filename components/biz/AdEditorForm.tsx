@@ -2,12 +2,15 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, Building2, X } from 'lucide-react';
+import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, Building2, X, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { userSettingsAction } from '@/lib/actions';
 import { compressImageFile } from '@/lib/image-utils';
+import { JobPaymentModal } from './JobPaymentModal';
+import { LoadMyDataModal } from './LoadMyDataModal';
 import dynamic from 'next/dynamic';
 
 // Fabric.js는 브라우저 전용이므로 SSR 비활성화
@@ -425,6 +428,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
     const [selectedSido, setSelectedSido] = useState<string>('');
     const [selectedSigungu, setSelectedSigungu] = useState<string>('');
+    const [isLoadDataModalOpen, setIsLoadDataModalOpen] = useState(false);
     
     // DB에서 동적으로 불러온 등급 가격 상태
     const [tierGroups, setTierGroups] = useState(TIER_GROUPS);
@@ -598,7 +602,22 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const sigunguOptions = sidoCode ? regions.filter(r => r.parent_code_value === sidoCode) : [];
 
     const handleLogoRequest = () => {
-        alert('로고 제작 문의는 고객센터의 1:1 문의 게시판에 글을 남겨주세요.');
+        alert('로고 제작 대행 문의는 카카오톡 고객센터(@foxmon)로 상호명과 함께 연락해 주세요.\n전문 디자이너가 원장님만의 맞춤형 타이포그래피 로고를 제작해 드립니다!');
+    };
+
+    const handleLoadJobData = (jobData: any) => {
+        setForm(prev => ({
+            ...prev,
+            title: jobData.title || prev.title,
+            company: jobData.company_name || prev.company,
+            detail_content: jobData.detail_content || prev.detail_content,
+            design_mode: jobData.design_mode || prev.design_mode,
+            logo_url: jobData.logo_url || prev.logo_url,
+        }));
+        setIsLoadDataModalOpen(false);
+        if (jobData.design_mode) {
+            handleDesignModeSwitch(jobData.design_mode as any);
+        }
     };
 
     const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -632,6 +651,13 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
     return (
         <div className="space-y-6">
+            <LoadMyDataModal
+                isOpen={isLoadDataModalOpen}
+                onClose={() => setIsLoadDataModalOpen(false)}
+                onSelect={handleLoadJobData}
+                sourceType="JOB"
+            />
+            
             {/* 탭 메뉴 */}
             {mode === 'AD' && (
                 <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
@@ -974,9 +1000,19 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         <Info className="w-4 h-4 text-primary" />
                                         {mode === 'JOB' ? '공고 기본 정보' : '기본 정보 입력 (배너용)'}
                                     </h3>
-                                    <button type="button" onClick={() => setActiveModal(null)} className="text-gray-400 hover:text-gray-600">
-                                        <X className="w-5 h-5" />
-                                    </button>
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsLoadDataModalOpen(true)}
+                                            className="text-[12px] font-bold text-white bg-primary px-3 py-1.5 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-1.5 shadow-sm"
+                                        >
+                                            <FileText className="w-3.5 h-3.5" />
+                                            기존 구인 공고 불러오기
+                                        </button>
+                                        <button type="button" onClick={() => setActiveModal(null)} className="text-gray-400 hover:text-gray-600">
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                                 <div className="md:col-span-1">

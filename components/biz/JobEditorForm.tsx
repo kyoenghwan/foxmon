@@ -19,6 +19,8 @@ const SunEditor = dynamic(() => import('suneditor-react'), {
     loading: () => <div className="min-h-[400px] flex items-center justify-center bg-gray-50 border rounded-xl"><Loader2 className="w-6 h-6 animate-spin text-gray-400"/></div> 
 });
 import 'suneditor/dist/css/suneditor.min.css';
+import { BizPremiumOptionModal } from './BizPremiumOptionModal';
+import { LoadMyDataModal } from './LoadMyDataModal';
 
 export interface AdFormData {
     id?: string;
@@ -272,10 +274,10 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
     const [activeTab, setActiveTab] = useState<'job' | 'detail'>('job');
     const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | null>(null);
     
-    // HTML 모드 전용 상태
     const [htmlEditorHeight, setHtmlEditorHeight] = useState(450);
     const [previewHtml, setPreviewHtml] = useState(false);
     const [showLoadModal, setShowLoadModal] = useState(false);
+    const [isLoadDataModalOpen, setIsLoadDataModalOpen] = useState(false);
     
     // 사업자 인증 상태
     const [isBizVerified, setIsBizVerified] = useState(false);
@@ -429,6 +431,25 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
         update('detail_content', mode === 'canvas' ? canvasContentRef.current : htmlContentRef.current);
     };
 
+    const handleLoadAdData = (adData: any) => {
+        setForm(prev => ({
+            ...prev,
+            title: adData.title || prev.title,
+            company: adData.company_name || prev.company,
+            detail_content: adData.detail_content || prev.detail_content,
+            design_mode: adData.design_mode || prev.design_mode,
+            logo_url: adData.logo_url || prev.logo_url,
+            image: adData.image_url || prev.image,
+            theme: adData.theme || prev.theme,
+            color: adData.detail_bg_color || adData.color || prev.color,
+            bg_opacity: adData.bg_opacity || prev.bg_opacity,
+        }));
+        setIsLoadDataModalOpen(false);
+        if (adData.design_mode) {
+            handleDesignModeSwitch(adData.design_mode as any);
+        }
+    };
+
     // 급여 업데이트 핸들러
     const handlePayChange = (type: string, amount: string) => {
         update('pay_type', type);
@@ -524,6 +545,12 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
 
     return (
         <div className="space-y-6">
+            <LoadMyDataModal
+                isOpen={isLoadDataModalOpen}
+                onClose={() => setIsLoadDataModalOpen(false)}
+                onSelect={handleLoadAdData}
+                sourceType="AD"
+            />
 
 
             {/* ═══════ 배너 정보 탭 ═══════ */}
@@ -717,7 +744,6 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                     </div>
                                 </div>
 
-                                {/* 로고 업로드 및 제작 요청 통합 */}
                                 {form.tier !== 'GENERAL' && (
                                     <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center">
                                         <div className="flex flex-col gap-2 w-full mb-3">
@@ -757,10 +783,20 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
 
                         {/* 오른쪽 컬럼 (기본 정보) */}
                         <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-                            <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                                <Info className="w-4 h-4 text-primary" />
-                                {mode === 'JOB' ? '공고 기본 정보' : '기본 정보 입력 (배너용)'}
-                            </h3>
+                            <h3 className="text-[14px] font-black text-gray-900 pb-3 border-b mb-5 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                구인 공고 기본 정보
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsLoadDataModalOpen(true)}
+                                className="text-[12px] font-bold text-white bg-primary px-3 py-1.5 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-1.5 shadow-sm"
+                            >
+                                <Megaphone className="w-3.5 h-3.5" />
+                                내 광고 본문 불러오기
+                            </button>
+                        </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">닉네임 (업체명) <span className="text-red-500">*</span></label>

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { auth } from '@/auth';
 import { Plus, Megaphone, Eye, Pause, Play, Pencil, Clock } from 'lucide-react';
 
-import { manageAdAction } from '@/lib/actions';
+import { manageBizAdAction } from '@/lib/actions';
 
 // DB에서 사용자 광고 목록 가져오기
 
@@ -48,8 +48,8 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export default async function BizAdsPage() {
-    const res = await manageAdAction('GET');
-    const ads = (res.success && res.data ? res.data : []).filter((ad: any) => ad.tier && ad.tier !== 'GENERAL');
+    const res = await manageBizAdAction('GET');
+    const ads = (res.success && res.data ? res.data : []);
 
     return (
         <div className="space-y-6">

@@ -12,7 +12,7 @@ export interface AdItem {
     theme?: string;
     time?: string;
     is_big: boolean; // Supabase 스네이크 케이스 대응
-    tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL';
+    tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL';
     weight: number;
     exposure_count: number; // Supabase 스네이크 케이스 대응
     last_exposed_at: string; // Supabase ISO String
@@ -63,7 +63,7 @@ const CATEGORIES = ['(노래주점)', '(룸싸롱)', '(단란주점)', '(마사�
 const PAY_LIST = ['[TC] 120,000원', '[TC] 150,000원', '[시급] 65,000원', '[TC] 110,000원', '[협의]면접후결정', '[TC] 180,000원'];
 
 let MOCK_ADS: AdItem[] = Array.from({ length: 150 }).map((_, i) => {
-    let tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'GENERAL' = 'GENERAL';
+    let tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'GENERAL' | 'AD_GENERAL' = 'AD_GENERAL';
     if (i < 10) tier = 'PREMIUM_MAIN';
     else if (i < 20) tier = 'SIDE';
     else if (i < 50) tier = 'PREMIUM';
@@ -155,15 +155,19 @@ function applyRollingLogic(ads: AdItem[], count: number): AdItem[] {
 /**
  * Fair Ad Rotation Service (Supabase)
  */
-export async function getRotatedAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL', limitCount: number = 20): Promise<AdItem[]> {
+export async function getRotatedAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL', limitCount: number = 20): Promise<AdItem[]> {
     if (!IS_SUPABASE_ENABLED) {
         const filtered = MOCK_ADS.filter(ad => ad.tier === tier);
         return applyRollingLogic(filtered, limitCount);
     }
 
     try {
+        // tier가 GENERAL이면 순수 구인 공고이므로 jobs, 아니면 배너 광고이므로 biz_ads를 조회합니다.
+        // 참고: AD_GENERAL은 일반 배너 광고입니다.
+        const targetTable = tier === 'GENERAL' ? 'jobs' : 'biz_ads';
+
         const { data, error } = await supabase
-            .from('jobs')
+            .from(targetTable)
             .select('*')
             .eq('tier', tier);
 
@@ -181,7 +185,7 @@ export async function getRotatedAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 
 /**
  * Internal Helper for Fallback Mocking
  */
-function getMockAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL', count: number): AdItem[] {
+function getMockAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL', count: number): AdItem[] {
     const filtered = MOCK_ADS.filter(ad => ad.tier === tier);
     return applyRollingLogic(filtered, count);
 }
@@ -205,14 +209,22 @@ export async function recordAdExposure(adId: string) {
 
         if (error) {
             // RPC가 없는 경우 대비 수동 업데이트 (원자성 보장 안됨)
-            const { data: current } = await supabase.from('jobs').select('exposure_count').eq('id', adId).single();
-            await supabase
-                .from('jobs')
-                .update({
-                    exposure_count: (current?.exposure_count || 0) + 1,
+            // RPC가 없는 경우 수동 업데이트 (ad_id로 테이블 식별이 어려우므로 두 테이블 모두 시도)
+            const { data: currentBiz } = await supabase.from('biz_ads').select('exposure_count').eq('id', adId).single();
+            if (currentBiz) {
+                await supabase.from('biz_ads').update({
+                    exposure_count: (currentBiz.exposure_count || 0) + 1,
                     last_exposed_at: new Date().toISOString()
-                })
-                .eq('id', adId);
+                }).eq('id', adId);
+            } else {
+                const { data: currentJob } = await supabase.from('jobs').select('exposure_count').eq('id', adId).single();
+                if (currentJob) {
+                    await supabase.from('jobs').update({
+                        exposure_count: (currentJob.exposure_count || 0) + 1,
+                        last_exposed_at: new Date().toISOString()
+                    }).eq('id', adId);
+                }
+            }
         }
     } catch (error) {
         console.error("Supabase Error (recordAdExposure):", error);

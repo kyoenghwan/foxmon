@@ -4,14 +4,14 @@ import { useRouter } from 'next/navigation';
 import { AdEditorForm, AdFormData } from '@/components/biz/AdEditorForm';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { manageAdAction } from '@/lib/actions';
+import { manageBizAdAction } from '@/lib/actions';
 
 export default function NewAdPage() {
     const router = useRouter();
 
     const handleSubmit = async (data: AdFormData) => {
         try {
-            const res = await manageAdAction('CREATE', data);
+            const res = await manageBizAdAction('CREATE', data);
             if (res.success) {
                 alert('광고가 등록되었습니다!');
                 router.push('/biz/ads');

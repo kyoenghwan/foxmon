@@ -44,7 +44,7 @@ export function HomeJobSections() {
                 const [p, s, l, g] = await Promise.all([
                     getRotatedAds('PREMIUM', 50),
                     getRotatedAds('SPECIAL', 50),
-                    getRotatedAds('LINE', 50),
+                    getRotatedAds('AD_GENERAL', 50),
                     getRotatedAds('GENERAL', 50)
                 ]);
                 setPremiumJobs(p);
