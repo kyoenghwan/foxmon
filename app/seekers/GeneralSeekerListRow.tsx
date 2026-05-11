@@ -49,6 +49,10 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
     return (
         <tr 
             onClick={() => {
+                if (isInactive) {
+                    alert('구직 완료된 구직글입니다.');
+                    return;
+                }
                 if (onClick) onClick();
                 else router.push(`/seekers/${job.id}`);
             }}
