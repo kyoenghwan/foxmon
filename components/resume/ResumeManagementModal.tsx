@@ -547,13 +547,25 @@ export function ResumeManagementModal() {
              </div>
           ) : (
             <div className="bg-white border rounded-xl shadow-sm p-6 flex flex-col gap-6">
+              {/* 이력서 제목 (최상단) */}
+              <section className="mb-2">
+                <label className="text-base font-black text-gray-800 block mb-2"><span className="text-primary">*</span> 이력서 제목</label>
+                <input 
+                   type="text" 
+                   value={formData.title || ''} 
+                   onChange={e => setFormData({...formData, title: e.target.value})} 
+                   className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-lg font-bold placeholder-gray-400" 
+                   placeholder="예: 성실하고 책임감 있는 20대 지원자입니다!" 
+                />
+              </section>
+
               {/* 사진 및 기본정보 Section */}
               <section>
                 <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">기본 정보</h3>
                 <div className="flex flex-col md:flex-row gap-8">
                   {/* 왼쪽: 사진 첨부 */}
                   <div className="flex flex-col items-center gap-3 flex-shrink-0">
-                    <div className="relative group cursor-pointer w-32 h-40 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center">
+                    <div className="relative group cursor-pointer w-32 h-40 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-primary transition-colors">
                        {formData.photo_url ? (
                           <img src={formData.photo_url} alt="Uploaded Photo" className="w-full h-full object-cover" />
                        ) : (
@@ -579,43 +591,54 @@ export function ResumeManagementModal() {
                   </div>
 
                   {/* 오른쪽: 기본정보 폼 */}
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-1.5"><span className="text-primary">*</span> 이력서 제목</label>
-                      <input type="text" value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" placeholder="예: 성실한 20대 지원자" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-1.5"><span className="text-primary">*</span> 별명</label>
-                      <input type="text" value={formData.nickname || ''} onChange={e => setFormData({...formData, nickname: e.target.value})} className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" />
+                      <label className="text-sm font-bold text-gray-700 block mb-1.5"><span className="text-primary">*</span> 이름/닉네임</label>
+                      <input type="text" value={formData.nickname || ''} onChange={e => setFormData({...formData, nickname: e.target.value})} className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium bg-gray-50/50" placeholder="활동할 이름이나 닉네임" />
                     </div>
                     <div>
                       <label className="text-sm font-bold text-gray-700 block mb-1.5">성별 / 출생연도</label>
-                      <div className="flex gap-2 items-center">
-                        <div className="flex gap-3 px-1">
-                          <label className="flex items-center gap-1.5 cursor-pointer font-medium text-sm">
+                      <div className="flex gap-2 items-center bg-gray-50/50 border border-gray-200 p-2 rounded-lg">
+                        <div className="flex gap-3 px-2 border-r border-gray-200">
+                          <label className="flex items-center gap-1.5 cursor-pointer font-medium text-sm text-gray-700 hover:text-primary transition-colors">
                             <input type="radio" value="F" checked={formData.gender === 'F'} onChange={e => setFormData({...formData, gender: 'F'})} className="accent-primary w-4 h-4" /> 여성
                           </label>
-                          <label className="flex items-center gap-1.5 cursor-pointer font-medium text-sm">
+                          <label className="flex items-center gap-1.5 cursor-pointer font-medium text-sm text-gray-700 hover:text-primary transition-colors">
                             <input type="radio" value="M" checked={formData.gender === 'M'} onChange={e => setFormData({...formData, gender: 'M'})} className="accent-primary w-4 h-4" /> 남성
                           </label>
                         </div>
-                        <div className="flex items-center gap-1 ml-auto">
-                           <input type="number" value={formData.birth_year || ''} onChange={e => setFormData({...formData, birth_year: parseInt(e.target.value) || undefined})} placeholder="예: 1995" className="w-20 p-2 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium text-center" />
-                           <span className="text-sm text-gray-500 font-medium">년생</span>
+                        <div className="flex items-center gap-1.5 flex-1 px-1">
+                           <input 
+                               type="number" 
+                               value={formData.birth_year || ''} 
+                               onChange={e => setFormData({...formData, birth_year: parseInt(e.target.value) || undefined})} 
+                               placeholder="예: 1995" 
+                               className="w-full p-1.5 bg-white border border-gray-200 rounded focus:border-primary outline-none transition-colors text-sm font-bold text-center" 
+                           />
+                           <span className="text-xs text-gray-500 font-medium whitespace-nowrap">년생</span>
                         </div>
                       </div>
+                      <p className="text-[11px] text-gray-400 mt-1.5 font-medium ml-1">※ 작성 후 목록에서는 나이로 자동 변환되어 노출됩니다.</p>
                     </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* 연락처 및 SNS Section */}
+              <section>
+                <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">연락처 및 SNS</h3>
+                <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-1.5">연락처</label>
-                      <div className="flex gap-2 items-center">
-                         <input type="text" value={formData.contact_number || ''} onChange={e => setFormData({...formData, contact_number: e.target.value})} placeholder="010-0000-0000" className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" />
-                         <label className="flex items-center gap-1.5 whitespace-nowrap text-sm font-bold text-gray-600">
-                           <input type="checkbox" checked={formData.is_contact_public} onChange={e => setFormData({...formData, is_contact_public: e.target.checked})} className="accent-primary w-4 h-4" /> 공개
+                      <label className="text-sm font-bold text-gray-700 block mb-2">연락처</label>
+                      <div className="flex gap-3 items-center">
+                         <input type="text" value={formData.contact_number || ''} onChange={e => setFormData({...formData, contact_number: e.target.value})} placeholder="010-0000-0000" className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium bg-white" />
+                         <label className="flex items-center gap-2 whitespace-nowrap text-sm font-bold text-gray-700 cursor-pointer hover:text-primary transition-colors bg-white border border-gray-200 p-3 rounded-lg">
+                           <input type="checkbox" checked={formData.is_contact_public} onChange={e => setFormData({...formData, is_contact_public: e.target.checked})} className="accent-primary w-4 h-4 rounded" /> 안심번호 공개
                          </label>
                       </div>
                     </div>
-                    <div className="sm:col-span-2">
-                      <label className="text-sm font-bold text-gray-700 block mb-1.5">SNS 계정</label>
+                    <div>
+                      <label className="text-sm font-bold text-gray-700 block mb-2">SNS 계정 (선택)</label>
                       <div className="flex gap-2">
                         <select 
                           value={isCustomSns ? '기타' : (formData.sns_type || '')} 
@@ -628,48 +651,47 @@ export function ResumeManagementModal() {
                               setFormData({...formData, sns_type: e.target.value});
                             }
                           }}
-                          className="w-1/3 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium bg-white"
+                          className="w-[120px] p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer"
                         >
-                          <option value="">SNS 선택</option>
+                          <option value="">선택</option>
                           <option value="카카오톡">카카오톡</option>
                           <option value="라인">라인</option>
                           <option value="텔레그램">텔레그램</option>
                           <option value="인스타그램">인스타그램</option>
-                          <option value="기타">기타 (직접입력)</option>
+                          <option value="기타">직접입력</option>
                         </select>
                         {isCustomSns && (
                            <input 
                              type="text" 
-                             placeholder="SNS 종류" 
+                             placeholder="종류" 
                              value={formData.sns_type || ''} 
                              onChange={e => setFormData({...formData, sns_type: e.target.value})} 
-                             className="w-1/3 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium" 
+                             className="w-[100px] p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white" 
                            />
                         )}
                         <input 
                           type="text" 
                           value={formData.sns_id || ''} 
                           onChange={e => setFormData({...formData, sns_id: e.target.value})} 
-                          placeholder="아이디를 입력해주세요" 
-                          className="flex-1 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium" 
+                          placeholder="아이디 입력" 
+                          className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white" 
                         />
                       </div>
                     </div>
-                  </div>
                 </div>
               </section>
 
-              {/* 희망정보 Section */}
+              {/* 희망 근무 조건 Section */}
               <section>
                 <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">희망 근무 조건</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
                   <div>
-                    <label className="text-sm font-bold text-gray-700 block mb-1.5">희망 지역</label>
+                    <label className="text-sm font-bold text-gray-700 block mb-2">희망 지역</label>
                     <div className="flex gap-2">
                         <select
                             value={selectedSido}
                             onChange={handleSidoChange}
-                            className="w-1/2 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium bg-white"
+                            className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer"
                         >
                             <option value="">시/도 선택</option>
                             {regions.filter(r => !r.parent_code_value).map(sido => (
@@ -680,7 +702,7 @@ export function ResumeManagementModal() {
                             value={selectedSigungu}
                             onChange={handleSigunguChange}
                             disabled={!selectedSido}
-                            className="w-1/2 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50"
+                            className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 cursor-pointer disabled:cursor-not-allowed"
                         >
                             <option value="">시/군/구 선택</option>
                             {regions.filter(r => {
@@ -693,11 +715,11 @@ export function ResumeManagementModal() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-bold text-gray-700 block mb-1.5">희망 업종</label>
+                    <label className="text-sm font-bold text-gray-700 block mb-2">희망 업종</label>
                     <select
                         value={formData.desired_industry || ''}
                         onChange={e => setFormData({...formData, desired_industry: e.target.value})}
-                        className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium bg-white"
+                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer"
                     >
                         <option value="">업종 선택</option>
                         {categories.map(cat => (
@@ -705,12 +727,60 @@ export function ResumeManagementModal() {
                         ))}
                     </select>
                   </div>
+
+                  {/* 원하는 급여 */}
                   <div className="sm:col-span-2">
-                    <label className="text-sm font-bold text-gray-700 block mb-1.5">연락 가능 시간</label>
-                    <div className="flex items-center gap-4">
-                      <input type="text" value={formData.contact_time || ''} disabled={formData.is_anytime_contact} onChange={e => setFormData({...formData, contact_time: e.target.value})} placeholder="오후 2시 ~ 오후 8시" className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none disabled:bg-gray-100 disabled:text-gray-400 text-sm font-medium" />
-                      <label className="flex items-center gap-1.5 whitespace-nowrap text-sm font-bold text-gray-600 cursor-pointer">
-                        <input type="checkbox" checked={formData.is_anytime_contact} onChange={e => setFormData({...formData, is_anytime_contact: e.target.checked})} className="accent-primary w-4 h-4" /> 상관없음
+                    <label className="text-sm font-bold text-gray-700 block mb-2">원하는 급여</label>
+                    <div className="flex gap-2">
+                        <select
+                            value={formData.desired_pay_type || '협의'}
+                            onChange={e => {
+                                setFormData({...formData, desired_pay_type: e.target.value});
+                                if (e.target.value === '협의') {
+                                    setFormData(prev => ({...prev, desired_pay_amount: undefined}));
+                                }
+                            }}
+                            className="w-[120px] p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer"
+                        >
+                            <option value="시급">시급</option>
+                            <option value="일급">일급</option>
+                            <option value="주급">주급</option>
+                            <option value="월급">월급</option>
+                            <option value="협의">추후 협의</option>
+                        </select>
+                        <div className="flex flex-1 items-center gap-2">
+                            <input 
+                                type="number" 
+                                value={formData.desired_pay_amount || ''} 
+                                onChange={e => setFormData({...formData, desired_pay_amount: parseInt(e.target.value) || undefined})} 
+                                disabled={formData.desired_pay_type === '협의'}
+                                placeholder={formData.desired_pay_type === '협의' ? "추후 협의합니다" : "원하는 금액 입력 (숫자만)"} 
+                                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 disabled:text-gray-400" 
+                            />
+                            {formData.desired_pay_type !== '협의' && <span className="text-sm font-bold text-gray-700 flex-shrink-0">원</span>}
+                        </div>
+                    </div>
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="text-sm font-bold text-gray-700 block mb-2">연락 가능 시간</label>
+                    <div className="flex items-center gap-4 bg-gray-50/50 border border-gray-200 p-2 pl-3 rounded-lg">
+                      <input 
+                         type="text" 
+                         value={formData.contact_time || ''} 
+                         disabled={formData.is_anytime_contact} 
+                         onChange={e => setFormData({...formData, contact_time: e.target.value})} 
+                         placeholder="예: 오후 2시 ~ 오후 8시" 
+                         className="flex-1 p-2 bg-transparent outline-none disabled:text-gray-400 text-sm font-medium" 
+                      />
+                      <label className="flex items-center gap-2 whitespace-nowrap text-sm font-bold text-gray-600 cursor-pointer bg-white border border-gray-200 p-2 rounded-lg hover:text-primary transition-colors">
+                        <input 
+                           type="checkbox" 
+                           checked={formData.is_anytime_contact} 
+                           onChange={e => setFormData({...formData, is_anytime_contact: e.target.checked})} 
+                           className="accent-primary w-4 h-4 rounded" 
+                        /> 
+                        상관없음
                       </label>
                     </div>
                   </div>
