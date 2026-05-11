@@ -12,7 +12,8 @@ import { RegionSelector } from '@/components/home/region-selector';
 import { IndustrySelector } from '@/components/home/industry-selector';
 
 import { GeneralSeekerListRow } from './GeneralSeekerListRow';
-import { getPublicSeekerAdsAction } from '@/lib/actions';
+import { getPublicSeekerAdsAction, getSeekerAdByIdAction } from '@/lib/actions';
+import { SeekerModalWrapper } from '@/components/seekers/seeker-modal-wrapper';
 
 interface SeekersListContentProps {
     isEmployer?: boolean;
@@ -25,9 +26,26 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
     const [generalJobs, setGeneralJobs] = useState<any[]>([]); // Any for now, represents SeekerAd
     const [loading, setLoading] = useState(true);
 
+    const [selectedSeekerId, setSelectedSeekerId] = useState<string | null>(null);
+    const [selectedSeekerData, setSelectedSeekerData] = useState<any | null>(null);
+    const [isSeekerLoading, setIsSeekerLoading] = useState(false);
+
     // Pagination state for the list table
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 20;
+
+    const handleOpenSeeker = async (id: string) => {
+        setSelectedSeekerId(id);
+        setIsSeekerLoading(true);
+        const res = await getSeekerAdByIdAction(id);
+        if (res.success && res.data) {
+            setSelectedSeekerData(res.data);
+        } else {
+            alert('이력서 정보를 불러오는데 실패했습니다.');
+            setSelectedSeekerId(null);
+        }
+        setIsSeekerLoading(false);
+    };
 
     useEffect(() => {
         async function fetchJobs() {
@@ -264,7 +282,11 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {paginatedTableJobs.map((job) => (
-                                    <GeneralSeekerListRow key={job.id} job={job} />
+                                    <GeneralSeekerListRow 
+                                        key={job.id} 
+                                        job={job} 
+                                        onClick={() => handleOpenSeeker(job.id)} 
+                                    />
                                 ))}
                             </tbody>
                         </table>
@@ -308,6 +330,13 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     </div>
                 )}
             </section>
+
+            {/* Seeker Detail Modal */}
+            <SeekerModalWrapper 
+                isOpen={!!selectedSeekerId} 
+                onClose={() => setSelectedSeekerId(null)} 
+                job={selectedSeekerData} 
+            />
         </div>
     );
 }

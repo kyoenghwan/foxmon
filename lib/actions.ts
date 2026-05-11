@@ -77,6 +77,12 @@ export async function getPublicSeekerAdsAction() {
     return QA_GET_PUBLIC_SEEKER_ADS();
 }
 
+import { QA_GET_SEEKER_AD_BY_ID } from '@/src/atoms/qa/resume/QA_GET_SEEKER_AD_BY_ID';
+
+export async function getSeekerAdByIdAction(id: string) {
+    return QA_GET_SEEKER_AD_BY_ID(id);
+}
+
 export async function userSettingsAction(actionType: UserSettingsFlowInput['actionType'], payloads?: any) {
     const session = await auth();
     if (!session?.user?.id) {

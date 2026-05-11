@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
-export function GeneralSeekerListRow({ job }: { job: any }) {
+export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () => void }) {
     const router = useRouter();
     const { ad_title, created_at, resumes, users } = job;
     const { desired_location, nickname, gender, title, desired_industry, desired_pay_amount, desired_pay_type } = resumes || {};
@@ -47,7 +47,8 @@ export function GeneralSeekerListRow({ job }: { job: any }) {
     return (
         <tr 
             onClick={() => {
-                router.push(`/seekers/${job.id}`);
+                if (onClick) onClick();
+                else router.push(`/seekers/${job.id}`);
             }}
             className="hover:bg-gray-50/50 transition-colors group cursor-pointer"
         >
