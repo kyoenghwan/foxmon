@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { auth } from '@/auth';
 import { Plus, Megaphone, Eye, Pause, Play, Pencil, Clock } from 'lucide-react';
 
-// 추후 QA_GET_MY_ADS 연동 예정
-const mockAds: any[] = [];
+import { manageAdAction } from '@/lib/actions';
+
+// DB에서 사용자 광고 목록 가져오기
 
 const TierBadge = ({ tier }: { tier: string }) => {
     const styles: Record<string, string> = {
@@ -45,6 +46,9 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export default async function BizAdsPage() {
+    const res = await manageAdAction('GET');
+    const ads = res.success && res.data ? res.data : [];
+
     return (
         <div className="space-y-6">
             {/* 페이지 헤더 */}
@@ -68,7 +72,7 @@ export default async function BizAdsPage() {
             </div>
 
             {/* 광고 목록 */}
-            {mockAds.length === 0 ? (
+            {ads.length === 0 ? (
                 <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-16 flex flex-col items-center justify-center text-center gap-4">
                     <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center">
                         <Megaphone className="w-8 h-8 text-primary/60" />
@@ -101,12 +105,12 @@ export default async function BizAdsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {mockAds.map((ad) => (
+                            {ads.map((ad: any) => (
                                 <tr key={ad.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            {ad.image && (
-                                                <img src={ad.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                                            {(ad.logo_url || ad.image) && (
+                                                <img src={ad.logo_url || ad.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
                                             )}
                                             <div>
                                                 <p className="font-bold text-[14px] text-gray-900">{ad.title}</p>
@@ -118,7 +122,7 @@ export default async function BizAdsPage() {
                                         <TierBadge tier={ad.tier} />
                                     </td>
                                     <td className="px-4 py-4">
-                                        <StatusBadge status={ad.status} />
+                                        <StatusBadge status={new Date(ad.expires_at) < new Date() ? 'EXPIRED' : 'ACTIVE'} />
                                     </td>
                                     <td className="px-4 py-4">
                                         <span className="flex items-center gap-1 text-[13px] font-bold text-gray-700">
@@ -140,11 +144,8 @@ export default async function BizAdsPage() {
                                             <Link href={`/biz/ads/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
                                                 <Pencil className="w-4 h-4 text-gray-500" />
                                             </Link>
-                                            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="일시정지">
-                                                {ad.status === 'ACTIVE' 
-                                                    ? <Pause className="w-4 h-4 text-gray-500" />
-                                                    : <Play className="w-4 h-4 text-green-500" />
-                                                }
+                                            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="일시정지/재개 (구현 예정)">
+                                                <Pause className="w-4 h-4 text-gray-500" />
                                             </button>
                                         </div>
                                     </td>

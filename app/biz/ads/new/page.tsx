@@ -4,15 +4,24 @@ import { useRouter } from 'next/navigation';
 import { AdEditorForm, AdFormData } from '@/components/biz/AdEditorForm';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { manageAdAction } from '@/lib/actions';
 
 export default function NewAdPage() {
     const router = useRouter();
 
     const handleSubmit = async (data: AdFormData) => {
-        // 추후 FA_AD_CRUD_FLOW 연동 예정
-        console.log('광고 등록 데이터:', data);
-        alert('광고가 등록되었습니다!');
-        router.push('/biz/ads');
+        try {
+            const res = await manageAdAction('CREATE', data);
+            if (res.success) {
+                alert('광고가 등록되었습니다!');
+                router.push('/biz/ads');
+            } else {
+                alert('등록에 실패했습니다: ' + res.message);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('서버 오류가 발생했습니다.');
+        }
     };
 
     return (
