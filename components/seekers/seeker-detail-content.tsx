@@ -36,69 +36,79 @@ export function SeekerDetailContent({ job, isModal = false, onClose }: { job: an
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 text-gray-900 w-full relative pb-20">
-      {/* Header Image or Solid Background */}
-      <div className="h-32 bg-primary relative shrink-0">
+    <div className="flex flex-col h-full bg-white text-gray-900 w-full relative">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <h2 className="text-lg font-bold text-gray-800">이력서 상세</h2>
         {isModal && onClose && (
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={onClose} 
-            className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full z-10"
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </Button>
         )}
       </div>
 
-      <div className="px-6 sm:px-10 -mt-16 relative z-10 shrink-0">
-        <div className="flex items-end gap-6">
-          <div className="w-32 h-32 rounded-2xl border-4 border-white overflow-hidden bg-white shadow-lg flex-shrink-0 relative">
+      <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 scrollbar-hide">
+        {/* Profile Info */}
+        <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden flex-shrink-0 relative">
             {photo_url ? (
               <Image src={photo_url} alt="Profile" fill className="object-cover" />
             ) : (
-              <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
-                <User2 className="w-16 h-16" />
+              <div className="w-full h-full flex items-center justify-center text-gray-300">
+                <User2 className="w-12 h-12" />
               </div>
             )}
           </div>
-          <div className="pb-2">
-            <h1 className="text-2xl font-black">{ad_title || title || '구직 중입니다.'}</h1>
-            <p className="text-gray-600 font-bold mt-1 text-lg">
-              {maskedName} <span className="text-gray-400 font-normal text-base ml-1">({genderKr}{age ? `, ${age}` : ''})</span>
-            </p>
+          <div className="flex-1">
+            <h1 className="text-2xl font-black text-gray-900 mb-2">{ad_title || title || '구직 중입니다.'}</h1>
+            <div className="flex items-center gap-3 text-gray-600">
+              <span className="font-bold text-lg text-gray-800">{maskedName}</span>
+              <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+              <span className="font-medium">{genderKr}</span>
+              {age && (
+                <>
+                  <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                  <span className="font-medium">{age}</span>
+                </>
+              )}
+            </div>
+            
+            {/* Keywords */}
+            {keywords && keywords.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-4">
+                {keywords.map((kw: string, i: number) => (
+                  <span key={i} className="px-2.5 py-1 bg-gray-100 text-gray-600 font-medium rounded-md text-xs">
+                    #{kw}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
-      <div className="flex-1 px-6 sm:px-10 py-8 space-y-8 overflow-y-auto mt-4">
-        {/* Keywords */}
-        {keywords && keywords.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {keywords.map((kw: string, i: number) => (
-              <span key={i} className="px-3 py-1.5 bg-primary/10 text-primary font-bold rounded-full text-sm">
-                #{kw}
-              </span>
-            ))}
-          </div>
-        )}
+        <div className="w-full h-px bg-gray-100" />
 
         {/* Desired Conditions */}
         <section>
-          <h3 className="text-lg font-black border-b pb-2 mb-4 flex items-center gap-2">
-             <Briefcase className="w-5 h-5 text-primary" /> 희망 근무조건
+          <h3 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+             <Briefcase className="w-4 h-4 text-gray-400" /> 희망 근무조건
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-              <div className="text-sm text-gray-500 font-medium mb-1">희망 지역</div>
-              <div className="font-bold">{desired_location || '무관'}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+              <div className="text-xs text-gray-500 font-medium mb-1">희망 지역</div>
+              <div className="font-bold text-gray-900">{desired_location || '무관'}</div>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-              <div className="text-sm text-gray-500 font-medium mb-1">희망 업종</div>
-              <div className="font-bold">{desired_industry || '무관'}</div>
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+              <div className="text-xs text-gray-500 font-medium mb-1">희망 업종</div>
+              <div className="font-bold text-gray-900">{desired_industry || '무관'}</div>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-              <div className="text-sm text-gray-500 font-medium mb-1">희망 급여</div>
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+              <div className="text-xs text-gray-500 font-medium mb-1">희망 급여</div>
               <div className="font-bold text-primary">{payText}</div>
             </div>
           </div>
@@ -106,48 +116,44 @@ export function SeekerDetailContent({ job, isModal = false, onClose }: { job: an
 
         {/* Self Intro */}
         <section>
-          <h3 className="text-lg font-black border-b pb-2 mb-4">자기소개</h3>
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 whitespace-pre-wrap text-gray-700 leading-relaxed min-h-[150px]">
+          <h3 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+             <User2 className="w-4 h-4 text-gray-400" /> 자기소개
+          </h3>
+          <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 whitespace-pre-wrap text-gray-700 text-sm leading-relaxed min-h-[120px]">
             {self_introduction || '등록된 자기소개가 없습니다.'}
           </div>
         </section>
 
         {/* Contact Info */}
         <section>
-          <h3 className="text-lg font-black border-b pb-2 mb-4 flex items-center gap-2">
-             <Phone className="w-5 h-5 text-primary" /> 연락처 및 SNS
+          <h3 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+             <Phone className="w-4 h-4 text-gray-400" /> 연락처 및 SNS
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-              <div className="text-sm text-gray-500 font-medium mb-1">연락처</div>
-              <div className="font-bold">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+              <div className="text-xs text-gray-500 font-medium mb-1">연락처</div>
+              <div className="font-bold text-gray-900">
                 {is_contact_public ? (contact_number || '미등록') : '비공개 (업소 연락 시 공개)'}
               </div>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-              <div className="text-sm text-gray-500 font-medium mb-1">연락 가능 시간</div>
-              <div className="font-bold flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-gray-400" />
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+              <div className="text-xs text-gray-500 font-medium mb-1">연락 가능 시간</div>
+              <div className="font-bold text-gray-900 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-gray-400" />
                 {is_anytime_contact ? '언제든지 가능' : (contact_time || '무관')}
               </div>
             </div>
             {sns_id && (
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 sm:col-span-2 flex items-center gap-3">
-                <MessageCircle className="w-6 h-6 text-green-500" />
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 sm:col-span-2 flex items-center gap-3">
+                <MessageCircle className="w-5 h-5 text-green-500" />
                 <div>
-                  <div className="text-sm text-gray-500 font-medium mb-0.5">{sns_type || 'SNS'} ID</div>
-                  <div className="font-bold">{sns_id}</div>
+                  <div className="text-xs text-gray-500 font-medium mb-0.5">{sns_type || 'SNS'} ID</div>
+                  <div className="font-bold text-gray-900">{sns_id}</div>
                 </div>
               </div>
             )}
           </div>
         </section>
-      </div>
-
-      <div className="fixed sm:absolute bottom-0 left-0 right-0 p-4 bg-white border-t sm:rounded-b-[32px] flex gap-3 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-         <Button className="flex-1 h-14 rounded-2xl text-lg font-black shadow-lg">
-           이력서 열람 제안하기
-         </Button>
       </div>
     </div>
   );
