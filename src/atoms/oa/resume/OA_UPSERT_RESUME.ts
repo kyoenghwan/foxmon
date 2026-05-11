@@ -21,6 +21,7 @@ export interface ResumeData {
   photo_url?: string;
   self_introduction?: string;
   is_public?: boolean;
+  keywords?: string[];
   created_at?: string;
   updated_at?: string;
 }

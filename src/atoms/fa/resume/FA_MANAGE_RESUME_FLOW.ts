@@ -38,6 +38,9 @@ export async function FA_MANAGE_RESUME_FLOW(
     if (!resumeData.title || resumeData.title.trim() === '') {
       return { success: false, message: '이력서 제목을 입력해주세요.' };
     }
+    if (!resumeData.nickname || resumeData.nickname.trim() === '') {
+      return { success: false, message: '별명을 입력해주세요.' };
+    }
     
     const saveResult = await OA_UPSERT_RESUME({
         ...resumeData,

@@ -32,6 +32,7 @@ export function ResumeManagementModal() {
   const [categories, setCategories] = useState<CodeItem[]>([]);
   const [selectedSido, setSelectedSido] = useState<string>('');
   const [selectedSigungu, setSelectedSigungu] = useState<string>('');
+  const [isCustomSns, setIsCustomSns] = useState(false);
 
   useEffect(() => {
     const fetchMasterData = async () => {
@@ -103,16 +104,18 @@ export function ResumeManagementModal() {
   const handleOpenForm = async (resume?: ResumeData) => {
     if (resume) {
       setFormData({ ...resume });
+      setIsCustomSns(!!resume.sns_type && !['카카오톡', '라인', '텔레그램'].includes(resume.sns_type));
       setViewMode('FORM');
     } else {
       setLoading(true);
+      setIsCustomSns(false);
       try {
         const res = await manageResumeAction('GET_DEFAULTS');
         setFormData({
           title: '',
           is_contact_public: false,
           is_anytime_contact: false,
-          gender: (res as any).defaults?.gender || 'M',
+          gender: (res as any).defaults?.gender || 'F',
           contact_number: (res as any).defaults?.phone_number || ''
         });
       } catch (err) {
@@ -343,7 +346,7 @@ export function ResumeManagementModal() {
                    />
                 </div>
                 <div>
-                   <h3 className="font-black text-gray-800 text-lg">증명사진 등록</h3>
+                   <h3 className="font-black text-gray-800 text-lg">사진 또는 이미지 등록</h3>
                    <p className="text-xs text-gray-500 font-medium mt-1">단정하고 신뢰감을 주는 사진을 등록하면 채용 확률이 크게 높아집니다.<br/>(5MB 이하의 썸네일 이미지 파일 지원)</p>
                    {formData.photo_url && (
                      <Button variant="ghost" className="h-6 px-3 text-xs mt-2 text-red-500 hover:text-red-600 hover:bg-red-50 p-0" onClick={() => setFormData({...formData, photo_url: undefined})}>사진 삭제</Button>
@@ -360,17 +363,17 @@ export function ResumeManagementModal() {
                     <input type="text" value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" placeholder="예: 성실한 20대 지원자" />
                   </div>
                   <div>
-                    <label className="text-sm font-bold text-gray-700 block mb-1.5">별명</label>
+                    <label className="text-sm font-bold text-gray-700 block mb-1.5"><span className="text-primary">*</span> 별명</label>
                     <input type="text" value={formData.nickname || ''} onChange={e => setFormData({...formData, nickname: e.target.value})} className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" />
                   </div>
                   <div>
                     <label className="text-sm font-bold text-gray-700 block mb-1.5">성별</label>
                     <div className="flex gap-4 p-2.5">
                       <label className="flex items-center gap-2 cursor-pointer font-medium text-sm">
-                        <input type="radio" value="M" checked={formData.gender === 'M'} onChange={e => setFormData({...formData, gender: 'M'})} className="accent-primary w-4 h-4" /> 남성
+                        <input type="radio" value="F" checked={formData.gender === 'F'} onChange={e => setFormData({...formData, gender: 'F'})} className="accent-primary w-4 h-4" /> 여성
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer font-medium text-sm">
-                        <input type="radio" value="F" checked={formData.gender === 'F'} onChange={e => setFormData({...formData, gender: 'F'})} className="accent-primary w-4 h-4" /> 여성
+                        <input type="radio" value="M" checked={formData.gender === 'M'} onChange={e => setFormData({...formData, gender: 'M'})} className="accent-primary w-4 h-4" /> 남성
                       </label>
                     </div>
                   </div>
@@ -381,6 +384,47 @@ export function ResumeManagementModal() {
                        <label className="flex items-center gap-1.5 whitespace-nowrap text-sm font-bold text-gray-600">
                          <input type="checkbox" checked={formData.is_contact_public} onChange={e => setFormData({...formData, is_contact_public: e.target.checked})} className="accent-primary w-4 h-4" /> 공개
                        </label>
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-sm font-bold text-gray-700 block mb-1.5">SNS 계정</label>
+                    <div className="flex gap-2">
+                      <select 
+                        value={isCustomSns ? '기타' : (formData.sns_type || '')} 
+                        onChange={e => {
+                          if (e.target.value === '기타') {
+                            setIsCustomSns(true);
+                            setFormData({...formData, sns_type: ''});
+                          } else {
+                            setIsCustomSns(false);
+                            setFormData({...formData, sns_type: e.target.value});
+                          }
+                        }}
+                        className="w-1/3 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium bg-white"
+                      >
+                        <option value="">SNS 선택</option>
+                        <option value="카카오톡">카카오톡</option>
+                        <option value="라인">라인</option>
+                        <option value="텔레그램">텔레그램</option>
+                        <option value="인스타그램">인스타그램</option>
+                        <option value="기타">기타 (직접입력)</option>
+                      </select>
+                      {isCustomSns && (
+                         <input 
+                           type="text" 
+                           placeholder="SNS 종류" 
+                           value={formData.sns_type || ''} 
+                           onChange={e => setFormData({...formData, sns_type: e.target.value})} 
+                           className="w-1/3 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium" 
+                         />
+                      )}
+                      <input 
+                        type="text" 
+                        value={formData.sns_id || ''} 
+                        onChange={e => setFormData({...formData, sns_id: e.target.value})} 
+                        placeholder="아이디를 입력해주세요" 
+                        className="flex-1 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium" 
+                      />
                     </div>
                   </div>
                 </div>
@@ -441,6 +485,38 @@ export function ResumeManagementModal() {
                       </label>
                     </div>
                   </div>
+                </div>
+              </section>
+
+              {/* 키워드 Section */}
+              <section>
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="font-black border-l-4 border-primary pl-3 text-gray-800 text-lg">키워드</h3>
+                  <span className="text-xs text-gray-500 font-medium">(키워드는 3개까지 선택 가능합니다.)</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  {['선불가능', '성형지원', '숙식제공', '경력우대', '당일지급', '초보가능', '파트타임', '주말알바', '당일알바', '주간알바', '투잡알바', '평일알바'].map((kw) => (
+                    <label key={kw} className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={(formData.keywords || []).includes(kw)}
+                        onChange={(e) => {
+                           const current = formData.keywords || [];
+                           if (e.target.checked) {
+                             if (current.length >= 3) {
+                               alert('키워드는 최대 3개까지만 선택할 수 있습니다.');
+                               return;
+                             }
+                             setFormData({...formData, keywords: [...current, kw]});
+                           } else {
+                             setFormData({...formData, keywords: current.filter(k => k !== kw)});
+                           }
+                        }}
+                        className="accent-primary w-4 h-4 rounded" 
+                      />
+                      <span className="text-sm font-medium text-gray-700">{kw}</span>
+                    </label>
+                  ))}
                 </div>
               </section>
 
