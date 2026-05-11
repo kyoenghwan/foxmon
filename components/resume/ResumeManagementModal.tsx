@@ -326,105 +326,107 @@ export function ResumeManagementModal() {
             </div>
           ) : (
             <div className="bg-white border rounded-xl shadow-sm p-6 flex flex-col gap-6">
-              {/* 사진 첨부 Section (New) */}
-              <section className="flex items-center gap-6 pb-2 border-b border-gray-100">
-                <div className="relative group flex-shrink-0 cursor-pointer w-24 h-32 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center">
-                   {formData.photo_url ? (
-                      <img src={formData.photo_url} alt="Uploaded Photo" className="w-full h-full object-cover" />
-                   ) : (
-                      <div className="flex flex-col items-center gap-2 text-gray-400 group-hover:text-primary transition-colors">
-                         <Upload className="w-6 h-6" />
-                         <span className="text-[10px] font-bold">사진 등록</span>
-                      </div>
-                   )}
-                   <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handlePhotoUpload} 
-                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" 
-                      title="사진 변경하기"
-                   />
-                </div>
-                <div>
-                   <h3 className="font-black text-gray-800 text-lg">사진 또는 이미지 등록</h3>
-                   <p className="text-xs text-gray-500 font-medium mt-1">단정하고 신뢰감을 주는 사진을 등록하면 채용 확률이 크게 높아집니다.<br/>(5MB 이하의 썸네일 이미지 파일 지원)</p>
-                   {formData.photo_url && (
-                     <Button variant="ghost" className="h-6 px-3 text-xs mt-2 text-red-500 hover:text-red-600 hover:bg-red-50 p-0" onClick={() => setFormData({...formData, photo_url: undefined})}>사진 삭제</Button>
-                   )}
-                </div>
-              </section>
-
-              {/* 개인정보 Section */}
+              {/* 사진 및 기본정보 Section */}
               <section>
                 <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">기본 정보</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-bold text-gray-700 block mb-1.5"><span className="text-primary">*</span> 이력서 제목</label>
-                    <input type="text" value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" placeholder="예: 성실한 20대 지원자" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-bold text-gray-700 block mb-1.5"><span className="text-primary">*</span> 별명</label>
-                    <input type="text" value={formData.nickname || ''} onChange={e => setFormData({...formData, nickname: e.target.value})} className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-bold text-gray-700 block mb-1.5">성별</label>
-                    <div className="flex gap-4 p-2.5">
-                      <label className="flex items-center gap-2 cursor-pointer font-medium text-sm">
-                        <input type="radio" value="F" checked={formData.gender === 'F'} onChange={e => setFormData({...formData, gender: 'F'})} className="accent-primary w-4 h-4" /> 여성
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer font-medium text-sm">
-                        <input type="radio" value="M" checked={formData.gender === 'M'} onChange={e => setFormData({...formData, gender: 'M'})} className="accent-primary w-4 h-4" /> 남성
-                      </label>
+                <div className="flex flex-col md:flex-row gap-8">
+                  {/* 왼쪽: 사진 첨부 */}
+                  <div className="flex flex-col items-center gap-3 flex-shrink-0">
+                    <div className="relative group cursor-pointer w-32 h-40 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center">
+                       {formData.photo_url ? (
+                          <img src={formData.photo_url} alt="Uploaded Photo" className="w-full h-full object-cover" />
+                       ) : (
+                          <div className="flex flex-col items-center gap-2 text-gray-400 group-hover:text-primary transition-colors">
+                             <Upload className="w-6 h-6" />
+                             <span className="text-[11px] font-bold">사진 등록</span>
+                          </div>
+                       )}
+                       <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={handlePhotoUpload} 
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" 
+                          title="사진 변경하기"
+                       />
+                    </div>
+                    <div className="text-center">
+                       <p className="text-[11px] text-gray-500 font-medium leading-tight">단정하고 신뢰감을 주는 사진을<br/>등록하면 채용 확률이<br/>크게 높아집니다.</p>
+                       {formData.photo_url && (
+                         <Button variant="ghost" className="h-6 px-3 text-xs mt-2 text-red-500 hover:text-red-600 hover:bg-red-50 p-0" onClick={() => setFormData({...formData, photo_url: undefined})}>사진 삭제</Button>
+                       )}
                     </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-bold text-gray-700 block mb-1.5">연락처</label>
-                    <div className="flex gap-2 items-center">
-                       <input type="text" value={formData.contact_number || ''} onChange={e => setFormData({...formData, contact_number: e.target.value})} placeholder="010-0000-0000" className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" />
-                       <label className="flex items-center gap-1.5 whitespace-nowrap text-sm font-bold text-gray-600">
-                         <input type="checkbox" checked={formData.is_contact_public} onChange={e => setFormData({...formData, is_contact_public: e.target.checked})} className="accent-primary w-4 h-4" /> 공개
-                       </label>
+
+                  {/* 오른쪽: 기본정보 폼 */}
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-bold text-gray-700 block mb-1.5"><span className="text-primary">*</span> 이력서 제목</label>
+                      <input type="text" value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" placeholder="예: 성실한 20대 지원자" />
                     </div>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="text-sm font-bold text-gray-700 block mb-1.5">SNS 계정</label>
-                    <div className="flex gap-2">
-                      <select 
-                        value={isCustomSns ? '기타' : (formData.sns_type || '')} 
-                        onChange={e => {
-                          if (e.target.value === '기타') {
-                            setIsCustomSns(true);
-                            setFormData({...formData, sns_type: ''});
-                          } else {
-                            setIsCustomSns(false);
-                            setFormData({...formData, sns_type: e.target.value});
-                          }
-                        }}
-                        className="w-1/3 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium bg-white"
-                      >
-                        <option value="">SNS 선택</option>
-                        <option value="카카오톡">카카오톡</option>
-                        <option value="라인">라인</option>
-                        <option value="텔레그램">텔레그램</option>
-                        <option value="인스타그램">인스타그램</option>
-                        <option value="기타">기타 (직접입력)</option>
-                      </select>
-                      {isCustomSns && (
-                         <input 
-                           type="text" 
-                           placeholder="SNS 종류" 
-                           value={formData.sns_type || ''} 
-                           onChange={e => setFormData({...formData, sns_type: e.target.value})} 
-                           className="w-1/3 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium" 
-                         />
-                      )}
-                      <input 
-                        type="text" 
-                        value={formData.sns_id || ''} 
-                        onChange={e => setFormData({...formData, sns_id: e.target.value})} 
-                        placeholder="아이디를 입력해주세요" 
-                        className="flex-1 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium" 
-                      />
+                    <div>
+                      <label className="text-sm font-bold text-gray-700 block mb-1.5"><span className="text-primary">*</span> 별명</label>
+                      <input type="text" value={formData.nickname || ''} onChange={e => setFormData({...formData, nickname: e.target.value})} className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-bold text-gray-700 block mb-1.5">성별</label>
+                      <div className="flex gap-4 p-2.5">
+                        <label className="flex items-center gap-2 cursor-pointer font-medium text-sm">
+                          <input type="radio" value="F" checked={formData.gender === 'F'} onChange={e => setFormData({...formData, gender: 'F'})} className="accent-primary w-4 h-4" /> 여성
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer font-medium text-sm">
+                          <input type="radio" value="M" checked={formData.gender === 'M'} onChange={e => setFormData({...formData, gender: 'M'})} className="accent-primary w-4 h-4" /> 남성
+                        </label>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-bold text-gray-700 block mb-1.5">연락처</label>
+                      <div className="flex gap-2 items-center">
+                         <input type="text" value={formData.contact_number || ''} onChange={e => setFormData({...formData, contact_number: e.target.value})} placeholder="010-0000-0000" className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium" />
+                         <label className="flex items-center gap-1.5 whitespace-nowrap text-sm font-bold text-gray-600">
+                           <input type="checkbox" checked={formData.is_contact_public} onChange={e => setFormData({...formData, is_contact_public: e.target.checked})} className="accent-primary w-4 h-4" /> 공개
+                         </label>
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="text-sm font-bold text-gray-700 block mb-1.5">SNS 계정</label>
+                      <div className="flex gap-2">
+                        <select 
+                          value={isCustomSns ? '기타' : (formData.sns_type || '')} 
+                          onChange={e => {
+                            if (e.target.value === '기타') {
+                              setIsCustomSns(true);
+                              setFormData({...formData, sns_type: ''});
+                            } else {
+                              setIsCustomSns(false);
+                              setFormData({...formData, sns_type: e.target.value});
+                            }
+                          }}
+                          className="w-1/3 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium bg-white"
+                        >
+                          <option value="">SNS 선택</option>
+                          <option value="카카오톡">카카오톡</option>
+                          <option value="라인">라인</option>
+                          <option value="텔레그램">텔레그램</option>
+                          <option value="인스타그램">인스타그램</option>
+                          <option value="기타">기타 (직접입력)</option>
+                        </select>
+                        {isCustomSns && (
+                           <input 
+                             type="text" 
+                             placeholder="SNS 종류" 
+                             value={formData.sns_type || ''} 
+                             onChange={e => setFormData({...formData, sns_type: e.target.value})} 
+                             className="w-1/3 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium" 
+                           />
+                        )}
+                        <input 
+                          type="text" 
+                          value={formData.sns_id || ''} 
+                          onChange={e => setFormData({...formData, sns_id: e.target.value})} 
+                          placeholder="아이디를 입력해주세요" 
+                          className="flex-1 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium" 
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
