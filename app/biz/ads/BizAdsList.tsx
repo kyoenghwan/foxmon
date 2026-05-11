@@ -121,7 +121,7 @@ export default function BizAdsList({ initialAds }: { initialAds: any[] }) {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <Link href={`/jobs/${ad.id}`} target="_blank" className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="미리보기">
+                                            <Link href={`/jobs/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="미리보기">
                                                 <Eye className="w-4 h-4 text-primary" />
                                             </Link>
                                             <Link href={`/biz/ads/${ad.id}/edit`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="수정">

@@ -32,15 +32,25 @@ export async function QA_GET_JOB_BY_ID(jobId: string) {
       };
     }
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('jobs')
       .select('*')
       .eq('id', jobId)
       .single();
 
-    if (error) {
-       nvLog('AT', '❌ QA_GET_JOB_BY_ID 에러', error.message);
-       return { success: false, error: error.message };
+    if (error || !data) {
+      // jobs에서 못 찾으면 biz_ads에서 검색
+      const { data: bizData, error: bizError } = await supabase
+        .from('biz_ads')
+        .select('*')
+        .eq('id', jobId)
+        .single();
+        
+      if (bizError || !bizData) {
+         nvLog('AT', '❌ QA_GET_JOB_BY_ID 에러', error?.message || bizError?.message);
+         return { success: false, error: error?.message || bizError?.message };
+      }
+      data = bizData;
     }
 
     return { success: true, data };
