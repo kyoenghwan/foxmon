@@ -445,10 +445,13 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
             alert('공고 제목, 위치, 급여는 필수 입력 항목입니다.');
             return;
         }
-        if (!form.image) {
-            alert('배너 이미지를 등록해주세요. (배너 정보 탭)');
-            return;
+        if (form.tier !== 'GENERAL') {
+            if (!form.logo_url && !form.image) {
+                alert('업체 로고를 등록해주세요. (배너 정보 탭)');
+                return;
+            }
         }
+        
         if (!form.detail_content || form.detail_content === '<p><br></p>') {
             alert('광고 상세 내용을 작성하거나 이미지를 첨부해주세요.');
             return;
@@ -1334,7 +1337,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                                                 let addedHtml = '';
                                                                 for (const file of files) {
                                                                     const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 1200, quality: 0.85, format: 'image/webp' });
-                                                                    addedHtml += `<img src="${compressedBase64}" style="max-width: 100%; display: block; margin: 0 auto;" /><br/>`;
+                                                                    addedHtml += `<img src="${compressedBase64}" style="max-width: 100%; height: auto !important; display: block; margin: 0 auto;" /><br/>`;
                                                                 }
                                                                 update('detail_content', currentContent + addedHtml);
                                                                 alert(`${files.length}장의 이미지가 에디터 본문에 삽입되었습니다.`);
