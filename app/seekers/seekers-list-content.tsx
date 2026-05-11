@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Loader2, Plus, Crown, Zap, ChevronRight } from 'lucide-react';
+import { Loader2, Plus, Crown, Zap, ChevronRight, Filter } from 'lucide-react';
 import Link from 'next/link';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
@@ -19,6 +19,39 @@ interface SeekersListContentProps {
     isEmployer?: boolean;
 }
 
+const REGIONS = [
+    { id: 'all', nameKo: '전체 지역' },
+    { id: 'seoul', nameKo: '서울' },
+    { id: 'gyeonggi', nameKo: '경기' },
+    { id: 'incheon', nameKo: '인천' },
+    { id: 'busan', nameKo: '부산' },
+    { id: 'daegu', nameKo: '대구' },
+    { id: 'daejeon', nameKo: '대전' },
+    { id: 'gwangju', nameKo: '광주' },
+    { id: 'ulsan', nameKo: '울산' },
+    { id: 'sejong', nameKo: '세종' },
+    { id: 'gangwon', nameKo: '강원' },
+    { id: 'chungbuk', nameKo: '충북' },
+    { id: 'chungnam', nameKo: '충남' },
+    { id: 'jeonbuk', nameKo: '전북' },
+    { id: 'jeonnam', nameKo: '전남' },
+    { id: 'gyeongbuk', nameKo: '경북' },
+    { id: 'gyeongnam', nameKo: '경남' },
+    { id: 'jeju', nameKo: '제주' },
+];
+
+const INDUSTRIES = [
+    { id: 'all', nameKo: '전체 업종' },
+    { id: 'karaoke', nameKo: '노래주점' },
+    { id: 'danran', nameKo: '단란주점' },
+    { id: 'cafe-bar', nameKo: '카페/BAR' },
+    { id: 'room-salon', nameKo: '룸싸롱' },
+    { id: 'tenpro', nameKo: '텐프로/쩜오' },
+    { id: 'dabang', nameKo: '다방' },
+    { id: 'yojung', nameKo: '요정' },
+    { id: 'etc', nameKo: '기타' },
+];
+
 export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
     const [specialJobs, setSpecialJobs] = useState<AdItem[]>([]);
@@ -29,6 +62,11 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
     const [selectedSeekerId, setSelectedSeekerId] = useState<string | null>(null);
     const [selectedSeekerData, setSelectedSeekerData] = useState<any | null>(null);
     const [isSeekerLoading, setIsSeekerLoading] = useState(false);
+
+    // Filter states
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [selectedRegion, setSelectedRegion] = useState('all');
+    const [selectedIndustry, setSelectedIndustry] = useState('all');
 
     // Pagination state for the list table
     const [currentPage, setCurrentPage] = useState(1);
@@ -111,9 +149,34 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
     // 프리미엄, 스페셜, 일반 모두 2줄 고정 
     const twoRowPremiumSpecialGridClasses = `limit-2-rows grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 4xl:grid-cols-8 gap-2 sm:gap-3 xl:gap-4 w-full`;
 
+    // Filtering logic
+    const filteredGeneralJobs = React.useMemo(() => {
+        return generalJobs.filter(job => {
+            const resumes = job.resumes || {};
+            
+            // Filter by region
+            if (selectedRegion !== 'all') {
+                const regionName = REGIONS.find(r => r.id === selectedRegion)?.nameKo;
+                if (regionName && !resumes.desired_location?.includes(regionName)) {
+                    return false;
+                }
+            }
+            
+            // Filter by industry
+            if (selectedIndustry !== 'all') {
+                const industryName = INDUSTRIES.find(i => i.id === selectedIndustry)?.nameKo;
+                if (industryName && resumes.desired_industry !== industryName) {
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+    }, [generalJobs, selectedRegion, selectedIndustry]);
+
     // Pagination logic
-    const totalPages = Math.ceil(generalJobs.length / ITEMS_PER_PAGE);
-    const paginatedTableJobs = generalJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(filteredGeneralJobs.length / ITEMS_PER_PAGE);
+    const paginatedTableJobs = filteredGeneralJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     return (
         <div className="space-y-12">
@@ -224,32 +287,59 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                 )}
             </section>
 
-            {/* Search Condition Card */}
-            <section className="bg-white rounded-xl p-4 border shadow-sm space-y-4">
-                {/* Region Selection */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                    <h2 className="text-[13px] font-extrabold flex items-center gap-2 text-gray-800 w-full sm:w-24 shrink-0 mt-1 sm:mt-2">
-                        <span className="w-1.5 h-3.5 bg-primary rounded-full" />
-                        지역 선택
-                    </h2>
-                    <div className="flex-1 overflow-x-auto pb-1">
-                        <RegionSelector />
-                    </div>
-                </div>
+            {/* Filter Toggle Button */}
+            <div className="flex justify-end mt-4 mb-2">
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                    className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-200 text-gray-700 shadow-sm"
+                >
+                    <Filter className="w-4 h-4" />
+                    상세 필터 {isFilterOpen ? '닫기' : '열기'}
+                </Button>
+            </div>
 
-                <div className="border-t border-gray-100" />
-
-                {/* Industry Selection */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                    <h2 className="text-[13px] font-extrabold flex items-center gap-2 text-gray-800 w-full sm:w-24 shrink-0 mt-1 sm:mt-2">
-                        <span className="w-1.5 h-3.5 bg-orange-400 rounded-full" />
-                        업종 선택
-                    </h2>
-                    <div className="flex-1 overflow-x-auto pb-1">
-                        <IndustrySelector />
+            {/* Collapsible Filter Content */}
+            {isFilterOpen && (
+                <section className="bg-white rounded-xl p-5 border shadow-sm space-y-4 mb-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                    <div className="flex flex-col sm:flex-row gap-6">
+                        {/* Region Selection */}
+                        <div className="flex-1">
+                            <label className="text-[14px] font-bold flex items-center gap-2 text-gray-800 mb-3">
+                                <span className="w-1.5 h-3.5 bg-primary rounded-full" />
+                                지역 선택
+                            </label>
+                            <select 
+                                value={selectedRegion}
+                                onChange={(e) => setSelectedRegion(e.target.value)}
+                                className="w-full border border-gray-200 rounded-lg p-3 text-sm text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer bg-gray-50/50"
+                            >
+                                {REGIONS.map(r => (
+                                    <option key={r.id} value={r.id}>{r.nameKo}</option>
+                                ))}
+                            </select>
+                        </div>
+                        
+                        {/* Industry Selection */}
+                        <div className="flex-1">
+                            <label className="text-[14px] font-bold flex items-center gap-2 text-gray-800 mb-3">
+                                <span className="w-1.5 h-3.5 bg-orange-400 rounded-full" />
+                                업종 선택
+                            </label>
+                            <select 
+                                value={selectedIndustry}
+                                onChange={(e) => setSelectedIndustry(e.target.value)}
+                                className="w-full border border-gray-200 rounded-lg p-3 text-sm text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer bg-gray-50/50"
+                            >
+                                {INDUSTRIES.map(i => (
+                                    <option key={i.id} value={i.id}>{i.nameKo}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
             {/* General Jobs List */}
             <section>
