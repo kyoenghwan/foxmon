@@ -1,4 +1,4 @@
-import { supabase } from '../../../../lib/supabase';
+import { supabaseAdmin } from '../../../../lib/supabase';
 import { nvLog } from '../../../../lib/logger';
 
 export interface SeekerAdInput {
@@ -28,7 +28,7 @@ export async function OA_UPSERT_SEEKER_AD(input: SeekerAdInput): Promise<{ succe
        payload.created_at = new Date().toISOString();
     }
 
-    const query = supabase.from('seeker_ads');
+    const query = supabaseAdmin.from('seeker_ads');
     let dbResponse;
     
     if (input.id) {

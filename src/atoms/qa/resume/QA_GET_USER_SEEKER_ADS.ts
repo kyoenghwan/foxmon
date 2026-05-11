@@ -1,4 +1,4 @@
-import { supabase } from '../../../../lib/supabase';
+import { supabaseAdmin } from '../../../../lib/supabase';
 import { nvLog } from '../../../../lib/logger';
 
 export interface SeekerAdData {
@@ -16,7 +16,7 @@ export interface SeekerAdData {
 export async function QA_GET_USER_SEEKER_ADS(userId: string): Promise<{ success: boolean; data: SeekerAdData[] | null; error: string | null }> {
   nvLog('AT', '▶️ QA_GET_USER_SEEKER_ADS 시작', { userId });
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('seeker_ads')
       .select('*, resumes(title, gender)')
       .eq('user_id', userId)

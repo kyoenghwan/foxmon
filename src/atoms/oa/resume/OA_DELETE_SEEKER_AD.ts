@@ -1,11 +1,11 @@
-import { supabase } from '../../../../lib/supabase';
+import { supabaseAdmin } from '../../../../lib/supabase';
 import { nvLog } from '../../../../lib/logger';
 
 export async function OA_DELETE_SEEKER_AD(input: { adId: string; userId: string }): Promise<{ success: boolean; error?: string }> {
   nvLog('AT', '▶️ OA_DELETE_SEEKER_AD 시작', input);
 
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('seeker_ads')
       .delete()
       .eq('id', input.adId)
