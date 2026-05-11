@@ -137,19 +137,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
         };
     });
 
-    if (loading) {
-        return (
-            <div className="py-24 flex flex-col items-center justify-center gap-4">
-                <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                <p className="font-bold text-gray-400">인재 정보를 불러오고 있습니다...</p>
-            </div>
-        );
-    }
-
-    // 프리미엄, 스페셜, 일반 모두 2줄 고정 
-    const twoRowPremiumSpecialGridClasses = `limit-2-rows grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 4xl:grid-cols-8 gap-2 sm:gap-3 xl:gap-4 w-full`;
-
-    // Filtering logic
+    // Filtering logic (MUST be before any conditional returns)
     const filteredGeneralJobs = React.useMemo(() => {
         return generalJobs.filter(job => {
             const resumes = job.resumes || {};
@@ -173,6 +161,18 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
             return true;
         });
     }, [generalJobs, selectedRegion, selectedIndustry]);
+
+    if (loading) {
+        return (
+            <div className="py-24 flex flex-col items-center justify-center gap-4">
+                <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                <p className="font-bold text-gray-400">인재 정보를 불러오고 있습니다...</p>
+            </div>
+        );
+    }
+
+    // 프리미엄, 스페셜, 일반 모두 2줄 고정 
+    const twoRowPremiumSpecialGridClasses = `limit-2-rows grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 4xl:grid-cols-8 gap-2 sm:gap-3 xl:gap-4 w-full`;
 
     // Pagination logic
     const totalPages = Math.ceil(filteredGeneralJobs.length / ITEMS_PER_PAGE);
