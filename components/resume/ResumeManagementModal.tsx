@@ -13,6 +13,7 @@ import {
 import { FileText, Plus, ArrowLeft, Loader2, Save, Upload, User2, Trash2, Eye, EyeOff } from 'lucide-react';
 import { manageResumeAction } from '@/lib/actions';
 import { ResumeData } from '@/src/atoms/oa/resume/OA_UPSERT_RESUME';
+import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { nvLog } from '@/lib/logger';
 
 export function ResumeManagementModal() {
@@ -26,6 +27,52 @@ export function ResumeManagementModal() {
   // Form state
   const [formData, setFormData] = useState<Partial<ResumeData>>({});
 
+  // Master Data
+  const [regions, setRegions] = useState<CodeItem[]>([]);
+  const [categories, setCategories] = useState<CodeItem[]>([]);
+  const [selectedSido, setSelectedSido] = useState<string>('');
+  const [selectedSigungu, setSelectedSigungu] = useState<string>('');
+
+  useEffect(() => {
+    const fetchMasterData = async () => {
+      const res = await QA_GET_COMMON_CODES(undefined, true);
+      if (res.success && res.data) {
+        setRegions(res.data.filter(c => c.list_type === 'JOB_REGION_1' || c.list_type === 'JOB_REGION_2'));
+        setCategories(res.data.filter(c => c.list_type === 'CATEGORY_1'));
+      }
+    };
+    fetchMasterData();
+  }, []);
+
+  useEffect(() => {
+    if (formData.desired_location) {
+      const parts = formData.desired_location.split(' ');
+      if (parts.length >= 2) {
+        setSelectedSido(parts[0]);
+        setSelectedSigungu(parts.slice(1).join(' '));
+      } else {
+        setSelectedSido(parts[0]);
+        setSelectedSigungu('');
+      }
+    } else {
+      setSelectedSido('');
+      setSelectedSigungu('');
+    }
+  }, [formData.desired_location]);
+
+  const handleSidoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const sido = e.target.value;
+    setSelectedSido(sido);
+    setSelectedSigungu('');
+    setFormData(prev => ({ ...prev, desired_location: sido }));
+  };
+
+  const handleSigunguChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const sigungu = e.target.value;
+    setSelectedSigungu(sigungu);
+    setFormData(prev => ({ ...prev, desired_location: `${selectedSido} ${sigungu}`.trim() }));
+  };
+
   useEffect(() => {
     if (isOpen) {
       fetchResumes();
@@ -33,6 +80,8 @@ export function ResumeManagementModal() {
       // reset state when closed
       setViewMode('LIST');
       setFormData({});
+      setSelectedSido('');
+      setSelectedSigungu('');
     }
   }, [isOpen]);
 
@@ -139,15 +188,23 @@ export function ResumeManagementModal() {
     e.stopPropagation();
     if (!resume.id) return;
     
+    let newAdTitle: string | null | undefined = resume.ad_title;
+    if (!resume.is_public) {
+      const inputTitle = window.prompt("구직 리스트에 노출될 제목을 입력해주세요.\n(빈칸으로 두시면 이력서 원래 제목이 사용됩니다.)", resume.ad_title || resume.title);
+      if (inputTitle === null) return;
+      newAdTitle = inputTitle.trim() === '' ? null : inputTitle.trim();
+    }
+    
     try {
       const res = await manageResumeAction('TOGGLE_PUBLIC', {
         ...resume,
         is_public: !resume.is_public,
+        ad_title: newAdTitle
       });
       if (res.success) {
         // 로컬 상태 즉시 업데이트
         setResumes(prev => prev.map(r => 
-          r.id === resume.id ? { ...r, is_public: !r.is_public } : r
+          r.id === resume.id ? { ...r, is_public: !r.is_public, ad_title: newAdTitle } : r
         ));
       } else {
         alert(res.message);
@@ -335,11 +392,45 @@ export function ResumeManagementModal() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-bold text-gray-700 block mb-1.5">희망 지역</label>
-                    <input type="text" value={formData.desired_location || ''} onChange={e => setFormData({...formData, desired_location: e.target.value})} placeholder="예) 서울/경기" className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium" />
+                    <div className="flex gap-2">
+                        <select
+                            value={selectedSido}
+                            onChange={handleSidoChange}
+                            className="w-1/2 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium bg-white"
+                        >
+                            <option value="">시/도 선택</option>
+                            {regions.filter(r => !r.parent_code_value).map(sido => (
+                                <option key={sido.code_value} value={sido.code_name}>{sido.code_name}</option>
+                            ))}
+                        </select>
+                        <select
+                            value={selectedSigungu}
+                            onChange={handleSigunguChange}
+                            disabled={!selectedSido}
+                            className="w-1/2 p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50"
+                        >
+                            <option value="">시/군/구 선택</option>
+                            {regions.filter(r => {
+                                const sido = regions.find(s => s.code_name === selectedSido && !s.parent_code_value);
+                                return r.parent_code_value === sido?.code_value;
+                            }).map(sigungu => (
+                                <option key={sigungu.code_value} value={sigungu.code_name}>{sigungu.code_name}</option>
+                            ))}
+                        </select>
+                    </div>
                   </div>
                   <div>
                     <label className="text-sm font-bold text-gray-700 block mb-1.5">희망 업종</label>
-                    <input type="text" value={formData.desired_industry || ''} onChange={e => setFormData({...formData, desired_industry: e.target.value})} placeholder="예) 스웨디시, 마사지" className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium" />
+                    <select
+                        value={formData.desired_industry || ''}
+                        onChange={e => setFormData({...formData, desired_industry: e.target.value})}
+                        className="w-full p-2.5 border-2 border-gray-100 rounded-lg focus:border-primary outline-none text-sm font-medium bg-white"
+                    >
+                        <option value="">업종 선택</option>
+                        {categories.map(cat => (
+                            <option key={cat.code_value} value={cat.code_name}>{cat.code_name}</option>
+                        ))}
+                    </select>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="text-sm font-bold text-gray-700 block mb-1.5">연락 가능 시간</label>

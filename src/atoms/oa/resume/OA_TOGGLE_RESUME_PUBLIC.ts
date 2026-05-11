@@ -10,6 +10,7 @@ export async function OA_TOGGLE_RESUME_PUBLIC(input: {
   resumeId: string; 
   userId: string; 
   is_public: boolean; 
+  ad_title?: string | null;
 }): Promise<{ success: boolean; data?: any; error?: string; rollbackData?: any }> {
   nvLog('AT', '▶️ OA_TOGGLE_RESUME_PUBLIC 시작', input);
 
@@ -18,6 +19,7 @@ export async function OA_TOGGLE_RESUME_PUBLIC(input: {
       .from('resumes')
       .update({ 
         is_public: input.is_public, 
+        ...(input.ad_title !== undefined ? { ad_title: input.ad_title } : {}),
         updated_at: new Date().toISOString() 
       })
       .eq('id', input.resumeId)

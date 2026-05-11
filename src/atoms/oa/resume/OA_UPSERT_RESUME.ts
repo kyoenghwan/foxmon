@@ -5,6 +5,7 @@ export interface ResumeData {
   id?: string;
   user_id: string;
   title: string;
+  ad_title?: string;
   nickname?: string;
   gender?: 'M' | 'F';
   contact_number?: string;

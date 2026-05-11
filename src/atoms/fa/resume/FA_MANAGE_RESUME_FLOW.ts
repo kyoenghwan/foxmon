@@ -67,6 +67,7 @@ export async function FA_MANAGE_RESUME_FLOW(
       resumeId: resumeData.id,
       userId,
       is_public: !!resumeData.is_public,
+      ad_title: resumeData.ad_title,
     });
     return {
       success: toggleResult.success,
