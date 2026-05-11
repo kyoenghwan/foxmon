@@ -29,7 +29,7 @@ export interface AdFormData {
     image: string;
     color: string;
     bg_opacity?: string;
-    tier: 'PREMIUM_MAIN' | 'PREMIUM' | 'SPECIAL' | 'GENERAL' | 'SIDE';
+    tier: 'PREMIUM_MAIN' | 'PREMIUM' | 'SPECIAL' | 'GENERAL' | 'SIDE' | 'AD_GENERAL';
     auto_renew: boolean;
     theme?: string;
     effect_intensity?: string;
@@ -122,7 +122,7 @@ const PREMIUM_THEMES = [
 ];
 
 interface TierOption {
-    value: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'GENERAL';
+    value: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'GENERAL' | 'AD_GENERAL';
     label: string;
     price: number;
     priceLabel: string;
