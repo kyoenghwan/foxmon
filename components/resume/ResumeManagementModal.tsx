@@ -350,7 +350,7 @@ export function ResumeManagementModal() {
                        />
                     </div>
                     <div className="text-center">
-                       <p className="text-[11px] text-gray-500 font-medium leading-tight">단정하고 신뢰감을 주는 사진을<br/>등록하면 채용 확률이<br/>크게 높아집니다.</p>
+                       <p className="text-[11px] text-gray-500 font-medium leading-tight">(5MB 이하 이미지 권장)</p>
                        {formData.photo_url && (
                          <Button variant="ghost" className="h-6 px-3 text-xs mt-2 text-red-500 hover:text-red-600 hover:bg-red-50 p-0" onClick={() => setFormData({...formData, photo_url: undefined})}>사진 삭제</Button>
                        )}
