@@ -126,11 +126,26 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
         payType = '협의';
         payAmount = '추후협의';
     } else {
-        // 신형 데이터 포맷: 월급 3,000,000 또는 건당 1,000,000
         const parts = payAmount.split(' ');
         if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0])) {
             payType = parts[0];
             payAmount = parts.slice(1).join(' ');
+        }
+    }
+
+    // 3. 지역 데이터 파싱 (다중 선택 시 마키 효과 적용)
+    let sido = '전국';
+    let sigungus = '';
+    let isMultiSigungu = false;
+    
+    if (location) {
+        const parts = location.split(' ');
+        if (parts.length >= 2) {
+            sido = parts[0];
+            sigungus = parts.slice(1).join(' ');
+            isMultiSigungu = sigungus.includes(',');
+        } else {
+            sido = parts[0];
         }
     }
 
@@ -266,9 +281,24 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                     </MarqueeText>
                                 </div>
                                 <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-gray-500 w-full min-w-0">
-                                    <span className={`truncate shrink border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                        {location || '전국'}
-                                    </span>
+                                    <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] overflow-hidden max-w-[60%] ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                        <span className="shrink-0">{sido}</span>
+                                        {sigungus && (
+                                            <>
+                                                <span className="shrink-0 opacity-50">|</span>
+                                                {isMultiSigungu ? (
+                                                    <div className="flex-1 overflow-hidden relative flex items-center h-full">
+                                                        <div className="whitespace-nowrap inline-block animate-[marquee-scroll_6s_linear_infinite]">
+                                                            <span className="mr-6">{sigungus}</span>
+                                                            <span className="mr-6">{sigungus}</span>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="truncate">{sigungus}</span>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="w-full relative overflow-hidden flex items-center gap-1">
                                     {category && (
@@ -303,14 +333,29 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                             {/* --- 로고 없는 컴팩트 레이아웃 (일반 배너 등) --- */}
                             {/* 상단: 지역 + 업체명 */}
                             <div className="flex items-center gap-1.5 pb-1 w-full overflow-hidden">
-                                <span className={`truncate shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] text-[9px] sm:text-[10px] max-w-[45%] ${
+                                <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] text-[9px] sm:text-[10px] max-w-[45%] overflow-hidden ${
                                     isCyber ? 'text-black bg-cyan-400 border-none' : 
                                     isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
                                     tier === 'GENERAL' && customColor ? 'bg-white' :
                                     'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
                                 }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                    {location || '전국'}
-                                </span>
+                                    <span className="shrink-0">{sido}</span>
+                                    {sigungus && (
+                                        <>
+                                            <span className="shrink-0 opacity-50">|</span>
+                                            {isMultiSigungu ? (
+                                                <div className="flex-1 overflow-hidden relative flex items-center h-full">
+                                                    <div className="whitespace-nowrap inline-block animate-[marquee-scroll_6s_linear_infinite]">
+                                                        <span className="mr-6">{sigungus}</span>
+                                                        <span className="mr-6">{sigungus}</span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <span className="truncate">{sigungus}</span>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
                                 <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] tracking-tight transition-colors line-clamp-1 leading-tight ${
                                     isCyber ? 'text-green-400 font-mono' : config.color
                                 }`} style={tier === 'GENERAL' && customColor ? { color: customColor } : {}}>
@@ -390,11 +435,26 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                 {/* 상호명 영역 (지역명 위, 상호명 아래) */}
                                 <div className={`flex-1 min-w-0 flex flex-col justify-center space-y-1`}>
                                     <div className="flex items-center w-full min-w-0">
-                                        <span className={`shrink-0 border px-1.5 py-[1.5px] leading-[1.1] font-black rounded-[4px] text-[9px] sm:text-[10px] ${
+                                        <div className={`flex items-center gap-1 shrink-0 border px-1.5 py-[1.5px] leading-[1.1] font-black rounded-[4px] text-[9px] sm:text-[10px] max-w-[80%] overflow-hidden ${
                                             isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
                                         }`}>
-                                            {location || '전국'}
-                                        </span>
+                                            <span className="shrink-0">{sido}</span>
+                                            {sigungus && (
+                                                <>
+                                                    <span className="shrink-0 opacity-50">|</span>
+                                                    {isMultiSigungu ? (
+                                                        <div className="flex-1 overflow-hidden relative flex items-center h-full">
+                                                            <div className="whitespace-nowrap inline-block animate-[marquee-scroll_6s_linear_infinite]">
+                                                                <span className="mr-6">{sigungus}</span>
+                                                                <span className="mr-6">{sigungus}</span>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="truncate">{sigungus}</span>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                     <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] tracking-tight transition-colors line-clamp-2 leading-tight ${
                                         isCyber ? 'text-green-400 font-mono' : config.color

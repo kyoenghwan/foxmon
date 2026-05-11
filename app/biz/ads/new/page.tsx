@@ -11,9 +11,9 @@ export default function NewAdPage() {
 
     const handleSubmit = async (data: AdFormData) => {
         try {
-            const res = await manageBizAdAction('CREATE', data);
+            const res = await manageBizAdAction('CREATE', { ...data, _isDraft: true });
             if (res.success) {
-                alert('광고가 등록되었습니다!');
+                alert('광고가 등록되었습니다! 리스트에서 노출 기간 및 옵션을 선택하여 게시해주세요.');
                 router.push('/biz/ads');
             } else {
                 alert('등록에 실패했습니다: ' + res.message);

@@ -5,7 +5,7 @@ interface AdCrudInput {
     actionType: 'CREATE' | 'UPDATE' | 'DELETE' | 'GET' | 'GET_ONE';
     userId: string;
     jobId?: string;
-    payload?: Partial<AdFormData>;
+    payload?: Partial<AdFormData> & { _isDraft?: boolean; _isPayment?: boolean };
 }
 
 // 하드코딩된 JOB_PRICING 상수 제거 (이제 DB에서 동적으로 불러옵니다)
@@ -18,6 +18,8 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             if (!payload) return { success: false, message: 'payload가 필요합니다.' };
 
             // 1. 서버 측에서 최종 결제 포인트 재계산 (보안 검증)
+            const isDraft = payload._isDraft === true;
+            
             const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
             const policiesRes = await GET_POINT_POLICIES();
             const policies = policiesRes.success && policiesRes.data ? policiesRes.data : [];
@@ -41,8 +43,8 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             if (payload.option_icon) totalPoints += getPrice(`OPTION_PRICE_ICON_${p}`, 0);
             if (payload.option_jump) totalPoints += getPrice(`OPTION_PRICE_JUMP_${p}`, 0);
 
-            // 2. 포인트 차감 진행 (무조건 자동 차감)
-            if (totalPoints > 0) {
+            // 2. 포인트 차감 진행 (무조건 자동 차감, 단 isDraft면 생략)
+            if (!isDraft && totalPoints > 0) {
                 const { FA_DEDUCT_POINT_FOR_AD } = await import('@/src/atoms/fa/points/FA_DEDUCT_POINT_FOR_AD');
                 const deductResult = await FA_DEDUCT_POINT_FOR_AD({
                     userId,
@@ -57,7 +59,12 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
 
             // 3. 만료일 계산
             const expiresAt = new Date();
-            expiresAt.setDate(expiresAt.getDate() + p);
+            if (!isDraft) {
+                expiresAt.setDate(expiresAt.getDate() + p);
+            } else {
+                // Draft 모드면 즉시 만료 (노출 안됨)
+                expiresAt.setFullYear(2000);
+            }
 
             const dbPayload = {
                 user_id: userId,

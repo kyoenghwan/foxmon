@@ -427,7 +427,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const [employmentTypes, setEmploymentTypes] = useState<CodeItem[]>([]);
 
     const [selectedSido, setSelectedSido] = useState<string>('');
-    const [selectedSigungu, setSelectedSigungu] = useState<string>('');
+    const [selectedSigungus, setSelectedSigungus] = useState<string[]>([]);
     const [isLoadDataModalOpen, setIsLoadDataModalOpen] = useState(false);
     
     // DB에서 동적으로 불러온 등급 가격 상태
@@ -492,14 +492,15 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     }, [isNew]);
 
     useEffect(() => {
-        // location이 "서울 강남구" 형태일 때 분리
+        // location이 "서울 강남구,서초구" 형태일 때 분리
         if (form.location) {
             const parts = form.location.split(' ');
             if (parts.length >= 2) {
                 setSelectedSido(parts[0]);
-                setSelectedSigungu(parts.slice(1).join(' '));
+                setSelectedSigungus(parts.slice(1).join(' ').split(',').filter(Boolean));
             } else {
                 setSelectedSido(parts[0]);
+                setSelectedSigungus([]);
             }
         }
     }, [initialData?.location]);
@@ -512,14 +513,19 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const handleSidoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const sido = e.target.value;
         setSelectedSido(sido);
-        setSelectedSigungu('');
+        setSelectedSigungus([]);
         update('location', sido);
     };
 
-    const handleSigunguChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const sigungu = e.target.value;
-        setSelectedSigungu(sigungu);
-        update('location', `${selectedSido} ${sigungu}`.trim());
+    const handleSigunguChange = (sigungu: string) => {
+        let newSigungus = [...selectedSigungus];
+        if (newSigungus.includes(sigungu)) {
+            newSigungus = newSigungus.filter(s => s !== sigungu);
+        } else {
+            newSigungus.push(sigungu);
+        }
+        setSelectedSigungus(newSigungus);
+        update('location', `${selectedSido} ${newSigungus.join(',')}`.trim());
     };
 
     const handleDesignModeSwitch = (mode: 'canvas' | 'html') => {
@@ -1027,44 +1033,49 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
                                         <MapPin className="w-3 h-3" /> 지역 <span className="text-red-500">*</span>
                                     </label>
-                                    <div className="flex gap-2">
-                                        <select
-                                            value={selectedSido}
-                                            onChange={handleSidoChange}
-                                            className="w-1/2 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                        >
-                                            <option value="">시/도 선택</option>
-                                            {regions.filter(r => r.list_type === 'JOB_REGION_1').map(sido => (
-                                                <option key={sido.code_value} value={sido.code_name}>{sido.code_name}</option>
-                                            ))}
-                                        </select>
+                                    <div className="flex flex-col gap-2 relative">
+                                        <div className="flex gap-2">
+                                            <select
+                                                value={selectedSido}
+                                                onChange={handleSidoChange}
+                                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                            >
+                                                <option value="">시/도 선택</option>
+                                                {regions.filter(r => r.list_type === 'JOB_REGION_1').map(sido => (
+                                                    <option key={sido.code_value} value={sido.code_name}>{sido.code_name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
                                         {selectedSido === '해외' ? (
                                             <input
                                                 type="text"
-                                                value={selectedSigungu}
+                                                value={selectedSigungus[0] || ''}
                                                 onChange={(e) => {
-                                                    setSelectedSigungu(e.target.value);
-                                                    update('location', `${selectedSido} ${e.target.value}`.trim());
+                                                    const val = e.target.value;
+                                                    setSelectedSigungus(val ? [val] : []);
+                                                    update('location', `${selectedSido} ${val}`.trim());
                                                 }}
                                                 placeholder="국가 및 지역 입력 (예: 미국)"
-                                                className="w-1/2 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary mt-2"
                                             />
-                                        ) : (
-                                            <select
-                                                value={selectedSigungu}
-                                                onChange={handleSigunguChange}
-                                                disabled={!selectedSido}
-                                                className="w-1/2 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary disabled:bg-gray-50"
-                                            >
-                                                <option value="">시/군/구 선택</option>
+                                        ) : selectedSido ? (
+                                            <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg max-h-[160px] overflow-y-auto grid grid-cols-2 gap-2">
                                                 {regions.filter(r => {
                                                     const sido = regions.find(s => s.code_name === selectedSido && s.list_type === 'JOB_REGION_1');
                                                     return r.list_type === 'JOB_REGION_2' && r.parent_code_value === sido?.code_value;
                                                 }).map(sigungu => (
-                                                    <option key={sigungu.code_value} value={sigungu.code_name}>{sigungu.code_name}</option>
+                                                    <label key={sigungu.code_value} className="flex items-center gap-2 cursor-pointer text-[13px] text-gray-700 hover:text-primary">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedSigungus.includes(sigungu.code_name)}
+                                                            onChange={() => handleSigunguChange(sigungu.code_name)}
+                                                            className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300"
+                                                        />
+                                                        <span className="truncate">{sigungu.code_name}</span>
+                                                    </label>
                                                 ))}
-                                            </select>
-                                        )}
+                                            </div>
+                                        ) : null}
                                     </div>
                                 </div>
                                 <div className="md:col-span-1">
