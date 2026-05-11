@@ -436,11 +436,11 @@ export function ResumeManagementModal() {
                         <table className="w-full min-w-[600px] text-center text-sm">
                             <thead className="bg-gray-50 border-b border-gray-200 text-gray-600 font-bold">
                                 <tr>
-                                    <th className="py-3.5 px-4 w-[30%] text-left">제목</th>
-                                    <th className="py-3.5 px-2 w-[12%]">상태</th>
-                                    <th className="py-3.5 px-2 w-[23%]">연결된 이력서</th>
+                                    <th className="py-3.5 px-4 w-[40%] text-left">제목</th>
+                                    <th className="py-3.5 px-2 w-[15%]">상태</th>
+                                    <th className="py-3.5 px-2 w-[25%]">연결된 이력서</th>
                                     <th className="py-3.5 px-2 w-[15%]">작성일</th>
-                                    <th className="py-3.5 px-2 w-[20%]">구직상태 변경</th>
+                                    <th className="py-3.5 px-2 w-[5%]">삭제</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -455,12 +455,19 @@ export function ResumeManagementModal() {
                                                 <div className="font-extrabold text-gray-900 truncate max-w-[200px]">{ad.ad_title}</div>
                                             </td>
                                             <td className="py-4 px-2">
-                                                <span className={cn(
-                                                    "px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight",
-                                                    isStatusActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                                                )}>
-                                                    {isStatusActive ? '구직 중' : '구직 완료'}
-                                                </span>
+                                                <button 
+                                                    onClick={() => handleToggleAdStatus(ad)}
+                                                    disabled={deleting === ad.id}
+                                                    className={cn(
+                                                        "px-3 py-1.5 rounded-full text-[12px] font-bold tracking-tight transition-colors focus:outline-none cursor-pointer",
+                                                        isStatusActive 
+                                                            ? "bg-green-100 text-green-700 hover:bg-green-200 hover:scale-105 active:scale-95" 
+                                                            : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:scale-105 active:scale-95"
+                                                    )}
+                                                    title={isStatusActive ? "클릭 시 구직 완료로 변경" : "클릭 시 다시 구직 중으로 변경"}
+                                                >
+                                                    {deleting === ad.id ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : (isStatusActive ? '구직 중' : '구직 완료')}
+                                                </button>
                                             </td>
                                             <td className="py-4 px-2 text-gray-600 font-medium truncate max-w-[150px]">
                                                 {(ad.resumes as any)?.title || '알 수 없음'}
@@ -468,19 +475,7 @@ export function ResumeManagementModal() {
                                             <td className="py-4 px-2 text-gray-400 font-medium text-[13px]">
                                                 {dateStr}
                                             </td>
-                                            <td className="py-4 px-2 flex justify-center gap-2">
-                                                <Button 
-                                                    onClick={() => handleToggleAdStatus(ad)}
-                                                    disabled={deleting === ad.id}
-                                                    className={cn(
-                                                        "h-8 px-4 text-xs rounded-full font-bold transition-all whitespace-nowrap shadow-sm", 
-                                                        isStatusActive 
-                                                            ? "bg-red-500 hover:bg-red-600 text-white" 
-                                                            : "bg-primary hover:bg-orange-600 text-white"
-                                                    )}
-                                                >
-                                                    {deleting === ad.id ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : (isStatusActive ? '구직 완료' : '다시 구직하기')}
-                                                </Button>
+                                            <td className="py-4 px-2 flex justify-center items-center">
                                                 <Button 
                                                     variant="ghost"
                                                     onClick={(e) => handleAdDelete(e, ad)}
