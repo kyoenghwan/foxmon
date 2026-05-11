@@ -1673,7 +1673,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                                 let addedHtml = '';
                                                                 for (const file of files) {
                                                                     const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 1200, quality: 0.85, format: 'image/webp' });
-                                                                    addedHtml += `<img src="${compressedBase64}" style="max-width: 100%; height: auto !important; display: block; margin: 0 auto;" /><br/>`;
+                                                                    addedHtml += `<img src="${compressedBase64}" style="width: 100%; height: auto !important; display: block; margin: 0 auto;" /><br/>`;
                                                                 }
                                                                 update('detail_content', currentContent + addedHtml);
                                                                 alert(`${files.length}장의 이미지가 에디터 본문에 삽입되었습니다.`);
