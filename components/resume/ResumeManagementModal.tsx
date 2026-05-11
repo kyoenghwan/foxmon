@@ -211,7 +211,6 @@ export function ResumeManagementModal() {
       const newStatus = ad.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
       const res = await manageSeekerAdAction('SAVE', {
         id: ad.id,
-        user_id: session?.user?.id || '',
         resume_id: ad.resume_id || (ad.resumes as any)?.id,
         ad_title: ad.ad_title,
         status: newStatus
