@@ -41,14 +41,14 @@ export async function QA_GET_SEEKER_AD_BY_ID(id: string): Promise<{ success: boo
       .single();
 
     if (error) {
-      nvLog('ER', 'QA_GET_SEEKER_AD_BY_ID 에러:', error);
+      nvLog('FW', 'QA_GET_SEEKER_AD_BY_ID 에러:', error);
       return { success: false, data: null, error: error.message };
     }
 
     nvLog('AT', `✅ QA_GET_SEEKER_AD_BY_ID 성공: ${id}`);
     return { success: true, data, error: null };
   } catch (error: any) {
-    nvLog('ER', 'QA_GET_SEEKER_AD_BY_ID 예외 발생:', error);
+    nvLog('FW', 'QA_GET_SEEKER_AD_BY_ID 예외 발생:', error);
     return { success: false, data: null, error: error.message };
   }
 }
