@@ -91,8 +91,8 @@ export function ResumeManagementModal() {
     try {
       nvLog('FW', '이력서 목록 호출 시작');
       const res = await manageResumeAction('GET');
-      if (res.success && (res as any).resumes) {
-        setResumes((res as any).resumes);
+      if (res.success && (res as any).data) {
+        setResumes((res as any).data);
       }
     } catch (err) {
       console.error(err);
@@ -115,8 +115,8 @@ export function ResumeManagementModal() {
           title: '',
           is_contact_public: false,
           is_anytime_contact: false,
-          gender: (res as any).defaults?.gender || 'F',
-          contact_number: (res as any).defaults?.phone_number || ''
+          gender: (res as any).data?.gender || 'F',
+          contact_number: (res as any).data?.phone_number || ''
         });
       } catch (err) {
         console.error(err);
