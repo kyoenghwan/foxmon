@@ -591,7 +591,7 @@ export function ResumeManagementModal() {
                   </div>
 
                   {/* 오른쪽: 기본정보 폼 */}
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="flex-1 flex flex-col gap-5">
                     <div>
                       <label className="text-sm font-bold text-gray-700 block mb-1.5"><span className="text-primary">*</span> 이름/닉네임</label>
                       <input type="text" value={formData.nickname || ''} onChange={e => setFormData({...formData, nickname: e.target.value})} className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium bg-gray-50/50" placeholder="활동할 이름이나 닉네임" />
@@ -627,7 +627,7 @@ export function ResumeManagementModal() {
               {/* 연락처 및 SNS Section */}
               <section>
                 <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">연락처 및 SNS</h3>
-                <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-5 flex flex-col gap-6">
                     <div>
                       <label className="text-sm font-bold text-gray-700 block mb-2">연락처</label>
                       <div className="flex gap-3 items-center">
