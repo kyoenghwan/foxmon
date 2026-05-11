@@ -45,6 +45,7 @@ export interface AdFormData {
     detail_content: string;
     detail_bg_image?: string;
     design_mode?: 'canvas' | 'html';
+    _isDraft?: boolean;
     ai_prompt?: string;
     
     // 신규 추가 항목 (경쟁사 벤치마킹)
