@@ -26,11 +26,24 @@ async function seedMasterData() {
         { list_type: 'EMPLOYMENT_TYPE', code_value: 'EMP_03', code_name: '도급', sort_order: 3, is_active: true },
         { list_type: 'EMPLOYMENT_TYPE', code_value: 'EMP_04', code_name: '위임', sort_order: 4, is_active: true },
 
+        // --- JOB_REGION_1 ---
+        { list_type: 'JOB_REGION_1', code_value: 'OVERSEAS', code_name: '해외', sort_order: 18, is_active: true },
+
         // --- CATEGORY_1 ---
         { list_type: 'CATEGORY_1', code_value: 'CAT1_ROOM', code_name: '룸싸롱', sort_order: 1, is_active: true },
         { list_type: 'CATEGORY_1', code_value: 'CAT1_KARAOKE', code_name: '노래주점', sort_order: 2, is_active: true },
-        { list_type: 'CATEGORY_1', code_value: 'CAT1_MASSAGE', code_name: '마사지', sort_order: 3, is_active: true },
-        { list_type: 'CATEGORY_1', code_value: 'CAT1_OTHER', code_name: '기타', sort_order: 4, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_DANRAN', code_name: '단란주점', sort_order: 3, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_MASSAGE', code_name: '마사지', sort_order: 4, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_SWEDISH', code_name: '스웨디시', sort_order: 5, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_1INSHOP', code_name: '1인샵', sort_order: 6, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_WAXING', code_name: '왁싱', sort_order: 7, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_BAR', code_name: 'BAR', sort_order: 8, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_ROOMCAFE', code_name: '룸카페', sort_order: 9, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_DABANG', code_name: '다방', sort_order: 10, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_YOJUNG', code_name: '요정', sort_order: 11, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_CAFE', code_name: '카페', sort_order: 12, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_BJ', code_name: 'BJ', sort_order: 13, is_active: true },
+        { list_type: 'CATEGORY_1', code_value: 'CAT1_OTHER', code_name: '기타', sort_order: 14, is_active: true },
 
         // --- CATEGORY_2 (ROOM) ---
         { list_type: 'CATEGORY_2', parent_code_value: 'CAT1_ROOM', code_value: 'CAT2_R_01', code_name: '텐프로', sort_order: 1, is_active: true },

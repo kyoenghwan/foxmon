@@ -27,17 +27,20 @@ export async function compressImageFile(file: File, options: CompressOptions = {
                 let width = img.width;
                 let height = img.height;
 
-                // 비율 유지하며 사이즈 줄이기
-                if (width > height) {
-                    if (width > maxWidthOrHeight) {
-                        height = Math.round((height * maxWidthOrHeight) / width);
-                        width = maxWidthOrHeight;
-                    }
-                } else {
-                    if (height > maxWidthOrHeight) {
-                        width = Math.round((width * maxWidthOrHeight) / height);
-                        height = maxWidthOrHeight;
-                    }
+                // 세로로 매우 긴 이미지(전단지/배너)의 경우 높이 기준으로 압축하면 가로 폭이 너무 작아져 글씨가 깨집니다.
+                // 따라서 기본적으로 가로(Width)를 기준으로 압축하되, 너무 큰 이미지만 제한합니다.
+                const maxWidth = options.maxWidthOrHeight || 1200;
+
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+
+                // 캔버스 최대 세로 길이 제한 (브라우저 메모리 한계 및 렌더링 버그 방지)
+                const MAX_CANVAS_HEIGHT = 8000;
+                if (height > MAX_CANVAS_HEIGHT) {
+                    width = Math.round((width * MAX_CANVAS_HEIGHT) / height);
+                    height = MAX_CANVAS_HEIGHT;
                 }
 
                 const canvas = document.createElement('canvas');

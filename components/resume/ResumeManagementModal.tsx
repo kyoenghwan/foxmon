@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -18,6 +19,7 @@ import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMM
 import { nvLog } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 export function ResumeManagementModal() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'RESUME' | 'AD'>('RESUME');
   const [viewMode, setViewMode] = useState<'LIST' | 'FORM'>('LIST');
@@ -452,7 +454,15 @@ export function ResumeManagementModal() {
                                     return (
                                         <tr key={ad.id} className="hover:bg-gray-50 transition-colors group">
                                             <td className="py-4 px-4 text-left">
-                                                <div className="font-extrabold text-gray-900 truncate max-w-[200px]">{ad.ad_title}</div>
+                                                <button 
+                                                    onClick={() => {
+                                                        setIsOpen(false);
+                                                        router.push(`/seekers/${ad.id}`);
+                                                    }}
+                                                    className="font-extrabold text-gray-900 truncate max-w-[200px] hover:text-primary hover:underline transition-colors text-left focus:outline-none cursor-pointer"
+                                                >
+                                                    {ad.ad_title}
+                                                </button>
                                             </td>
                                             <td className="py-4 px-2">
                                                 <button 
@@ -693,20 +703,33 @@ export function ResumeManagementModal() {
                                 <option key={sido.code_value} value={sido.code_name}>{sido.code_name}</option>
                             ))}
                         </select>
-                        <select
-                            value={selectedSigungu}
-                            onChange={handleSigunguChange}
-                            disabled={!selectedSido}
-                            className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 cursor-pointer disabled:cursor-not-allowed"
-                        >
-                            <option value="">시/군/구 선택</option>
-                            {regions.filter(r => {
-                                const sido = regions.find(s => s.code_name === selectedSido && !s.parent_code_value);
-                                return r.parent_code_value === sido?.code_value;
-                            }).map(sigungu => (
-                                <option key={sigungu.code_value} value={sigungu.code_name}>{sigungu.code_name}</option>
-                            ))}
-                        </select>
+                        {selectedSido === '해외' ? (
+                            <input
+                                type="text"
+                                value={selectedSigungu}
+                                onChange={(e) => {
+                                    setSelectedSigungu(e.target.value);
+                                    setFormData({...formData, desired_location: `${selectedSido} ${e.target.value}`.trim()});
+                                }}
+                                placeholder="국가 및 지역 입력 (예: 미국)"
+                                className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white"
+                            />
+                        ) : (
+                            <select
+                                value={selectedSigungu}
+                                onChange={handleSigunguChange}
+                                disabled={!selectedSido}
+                                className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 cursor-pointer disabled:cursor-not-allowed"
+                            >
+                                <option value="">시/군/구 선택</option>
+                                {regions.filter(r => {
+                                    const sido = regions.find(s => s.code_name === selectedSido && !s.parent_code_value);
+                                    return r.parent_code_value === sido?.code_value;
+                                }).map(sigungu => (
+                                    <option key={sigungu.code_value} value={sigungu.code_name}>{sigungu.code_name}</option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                   </div>
                   <div>

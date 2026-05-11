@@ -552,6 +552,14 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             alert('업체명, 공고 제목, 위치, 급여는 필수 입력 항목입니다.');
             return;
         }
+        if (!form.image) {
+            alert('배너 이미지를 등록해주세요. (배너 정보 탭)');
+            return;
+        }
+        if (!form.detail_content || form.detail_content === '<p><br></p>') {
+            alert('광고 상세 내용을 작성하거나 이미지를 첨부해주세요.');
+            return;
+        }
         setSaving(true);
         try {
             const payload = { ...form };
@@ -984,20 +992,33 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                 <option key={sido.code_value} value={sido.code_name}>{sido.code_name}</option>
                                             ))}
                                         </select>
-                                        <select
-                                            value={selectedSigungu}
-                                            onChange={handleSigunguChange}
-                                            disabled={!selectedSido}
-                                            className="w-1/2 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary disabled:bg-gray-50"
-                                        >
-                                            <option value="">시/군/구 선택</option>
-                                            {regions.filter(r => {
-                                                const sido = regions.find(s => s.code_name === selectedSido && s.list_type === 'JOB_REGION_1');
-                                                return r.list_type === 'JOB_REGION_2' && r.parent_code_value === sido?.code_value;
-                                            }).map(sigungu => (
-                                                <option key={sigungu.code_value} value={sigungu.code_name}>{sigungu.code_name}</option>
-                                            ))}
-                                        </select>
+                                        {selectedSido === '해외' ? (
+                                            <input
+                                                type="text"
+                                                value={selectedSigungu}
+                                                onChange={(e) => {
+                                                    setSelectedSigungu(e.target.value);
+                                                    update('location', `${selectedSido} ${e.target.value}`.trim());
+                                                }}
+                                                placeholder="국가 및 지역 입력 (예: 미국)"
+                                                className="w-1/2 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                            />
+                                        ) : (
+                                            <select
+                                                value={selectedSigungu}
+                                                onChange={handleSigunguChange}
+                                                disabled={!selectedSido}
+                                                className="w-1/2 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary disabled:bg-gray-50"
+                                            >
+                                                <option value="">시/군/구 선택</option>
+                                                {regions.filter(r => {
+                                                    const sido = regions.find(s => s.code_name === selectedSido && s.list_type === 'JOB_REGION_1');
+                                                    return r.list_type === 'JOB_REGION_2' && r.parent_code_value === sido?.code_value;
+                                                }).map(sigungu => (
+                                                    <option key={sigungu.code_value} value={sigungu.code_name}>{sigungu.code_name}</option>
+                                                ))}
+                                            </select>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="md:col-span-1">
@@ -1542,6 +1563,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 </div>
                                 
                                 {/* ─── 공통 배경 이미지 설정 ─── */}
+                                {form.design_mode === 'canvas' && (
                                 <div className="flex flex-col gap-1.5 mb-4 bg-indigo-50/50 p-3 rounded-lg border border-indigo-100">
                                     <label className="text-[12px] font-bold text-gray-700 flex items-center gap-1.5">
                                         <ImageIcon className="w-3.5 h-3.5 text-indigo-500" /> 공통 배경 이미지 (포스터/전단지 배경 깔기)
@@ -1604,10 +1626,11 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             </>
                                         )}
                                     </div>
-                                    <p className="text-[11px] text-gray-500 ml-5">
-                                        💡 템플릿(캔버스) 모드와 직접 작성 모드 모두 이 배경 이미지가 밑바탕으로 깔리게 됩니다.
-                                    </p>
-                                </div>
+                                        <p className="text-[11px] text-gray-500 ml-5">
+                                            💡 템플릿(캔버스) 모드 배경 이미지가 밑바탕으로 깔리게 됩니다.
+                                        </p>
+                                    </div>
+                                )}
                                 
                                 {form.design_mode === 'canvas' ? (
                                     <div className="animate-in fade-in zoom-in-95 duration-300">
@@ -1619,14 +1642,44 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         />
                                     </div>
                                 ) : (
-                                    <div className="space-y-2">
+                                    <div className="space-y-4">
+                                        {/* 📸 전단지 간편 삽입 버튼 */}
+                                        <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 flex flex-col items-center justify-center gap-3">
+                                            <p className="text-[14px] font-bold text-orange-800">전단지나 포스터(통이미지)를 본문에 삽입하시려면 아래 버튼을 눌러주세요!</p>
+                                            <label className="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white px-8 py-3.5 rounded-xl font-black transition-all flex items-center gap-2 shadow-md">
+                                                <ImageIcon className="w-5 h-5" /> 📸 전단지 / 사진 간편 삽입 (여러장 가능)
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    multiple
+                                                    className="hidden" 
+                                                    onChange={async (e) => {
+                                                        const files = Array.from(e.target.files || []);
+                                                        if(files.length > 0) {
+                                                            try {
+                                                                let currentContent = form.detail_content || '';
+                                                                if (currentContent === '<p><br></p>') currentContent = '';
+                                                                
+                                                                let addedHtml = '';
+                                                                for (const file of files) {
+                                                                    const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 1200, quality: 0.85, format: 'image/webp' });
+                                                                    addedHtml += `<img src="${compressedBase64}" style="max-width: 100%; display: block; margin: 0 auto;" /><br/>`;
+                                                                }
+                                                                update('detail_content', currentContent + addedHtml);
+                                                                alert(`${files.length}장의 이미지가 에디터 본문에 삽입되었습니다.`);
+                                                            } catch (error) {
+                                                                console.error('이미지 압축 실패:', error);
+                                                                alert('이미지 처리 중 오류가 발생했습니다.');
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                        </div>
+
                                         <div className="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-t-xl border border-gray-200">
-                                            <span className="text-[12px] font-bold text-gray-600">직접 작성 에디터 도구</span>
+                                            <span className="text-[12px] font-bold text-gray-600">본문 텍스트 에디터</span>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[11px] text-gray-500 mr-1">에디터 길이: {htmlEditorHeight}px</span>
-                                                <button onClick={() => setHtmlEditorHeight(h => Math.max(200, h - 200))} className="px-2 py-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded text-[11px]">-200px</button>
-                                                <button onClick={() => setHtmlEditorHeight(h => h + 200)} className="px-2 py-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded text-[11px]">+200px</button>
-                                                <div className="w-px h-4 bg-gray-300 mx-1" />
                                                 <button onClick={() => setPreviewHtml(true)} title="미리보기"
                                                     className="flex items-center gap-1.5 px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[11px] font-bold transition-all shadow-sm">
                                                     <Eye className="w-3.5 h-3.5" /> 미리보기
@@ -1635,59 +1688,18 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         </div>
                                         <div 
                                         className="animate-in fade-in zoom-in-95 duration-300 border border-gray-200 rounded-xl overflow-hidden relative"
-                                        style={{
-                                            backgroundImage: form.detail_bg_image ? `url(${form.detail_bg_image.replace('PATTERN|', '')})` : 'none',
-                                            backgroundSize: form.detail_bg_image?.startsWith('PATTERN|') ? 'auto' : 'cover',
-                                            backgroundRepeat: form.detail_bg_image?.startsWith('PATTERN|') ? 'repeat' : 'no-repeat',
-                                            backgroundPosition: 'top center'
-                                        }}
+                                        style={{ backgroundColor: '#fff' }}
                                     >
-                                        {/* HTML 에디터 배경을 투명하게 만들어 바깥 div의 배경이 보이게 함 */}
-                                        <style dangerouslySetInnerHTML={{ __html: `
-                                            .sun-editor { background-color: transparent !important; border: none !important; }
-                                            .sun-editor .se-wrapper { background-color: transparent !important; }
-                                            .sun-editor .se-wrapper .se-wrapper-inner { background-color: transparent !important; }
-                                            .sun-editor .se-container { background-color: transparent !important; }
-                                            .sun-editor-editable { background-color: rgba(255, 255, 255, 0.6) !important; color: #000 !important; min-height: 450px; }
-                                            .sun-editor .se-toolbar { background-color: rgba(255, 255, 255, 0.95) !important; outline: 1px solid #e5e7eb !important; }
-                                        `}} />
                                         <SunEditor
                                             setContents={form.detail_content}
                                             onChange={(val) => update('detail_content', val)}
                                             setOptions={{
                                                 height: `${htmlEditorHeight}px`,
-                                                defaultStyle: 'background-color: transparent;',
-                                                font: [
-                                                    'Pretendard',
-                                                    'Noto Sans KR',
-                                                    '나눔고딕',
-                                                    '나눔명조',
-                                                    '맑은 고딕',
-                                                    '굴림',
-                                                    '돋움',
-                                                    '바탕',
-                                                    'Arial',
-                                                    'Comic Sans MS',
-                                                    'Courier New',
-                                                    'Impact',
-                                                    'Georgia',
-                                                    'Tahoma',
-                                                    'Verdana'
-                                                ],
+                                                font: ['Pretendard', 'Noto Sans KR', '맑은 고딕', '돋움', 'Arial'],
                                                 buttonList: [
-                                                    ['undo', 'redo'],
-                                                    ['font', 'fontSize', 'formatBlock'],
-                                                    ['paragraphStyle', 'blockquote'],
-                                                    ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
-                                                    ['fontColor', 'hiliteColor', 'textStyle'],
-                                                    ['removeFormat'],
-                                                    '/', // Line break
-                                                    ['outdent', 'indent'],
-                                                    ['align', 'horizontalRule', 'list', 'lineHeight'],
-                                                    ['table', 'link', 'image', 'video'],
-                                                    ['fullScreen', 'showBlocks', 'codeView']
+                                                    ['fontSize', 'bold', 'underline', 'fontColor', 'align', 'image']
                                                 ],
-                                                placeholder: "원하시는 통이미지 팜플렛, 움직이는 GIF 애니메이션, 영상 등을 자유롭게 삽입하거나 구인 상세 내용을 작성해 주세요."
+                                                placeholder: "전단지 외에 추가 텍스트 설명을 적으시려면 여기에 자유롭게 작성해 주세요."
                                             }}
                                         />
                                         </div>
