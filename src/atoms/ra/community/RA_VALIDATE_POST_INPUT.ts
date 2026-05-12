@@ -35,8 +35,8 @@ export function RA_VALIDATE_POST_INPUT(input: PostInput): ValidationOutput {
         return { isValid: false, error: '내용을 5자 이상 입력해주세요.' };
     }
 
-    if (content.trim().length > 10000) {
-        return { isValid: false, error: '내용은 10,000자 이내로 작성해주세요.' };
+    if (content.trim().length > 5000000) {
+        return { isValid: false, error: '내용(이미지 포함) 용량이 너무 큽니다. (최대 5MB)' };
     }
 
     // foxmarket 게시판은 가격 입력 권장 (필수는 아님)
