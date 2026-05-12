@@ -14,17 +14,38 @@ export interface PointPolicyItem {
 
 // 기본 유료 광고 설정값 (최초 삽입용 30/60/90일 개별 기준 및 등급별 기본료)
 const DEFAULT_POLICIES = [
-    // 광고 등급(Tier) 단일 기본료
+    // 광고 등급(Tier) 단일 기본료 (레거시, 필요시 유지)
     { config_key: 'TIER_PRICE_PREMIUM_MAIN', config_value: 500000 },
     { config_key: 'TIER_PRICE_SIDE', config_value: 200000 },
     { config_key: 'TIER_PRICE_PREMIUM', config_value: 300000 },
     { config_key: 'TIER_PRICE_SPECIAL', config_value: 150000 },
     { config_key: 'TIER_PRICE_GENERAL', config_value: 50000 },
     
-    // 기간별 패키지 요금
+    // 기간별 패키지 요금 (구인 공고용)
     { config_key: 'OPTION_PRICE_BASE_PERIOD_30', config_value: 70000 },
     { config_key: 'OPTION_PRICE_BASE_PERIOD_60', config_value: 125000 },
     { config_key: 'OPTION_PRICE_BASE_PERIOD_90', config_value: 170000 },
+
+    // 광고(배너) 등급별 기간 패키지 요금 (30일 원가 기준 60일 10%할인, 90일 20%할인)
+    { config_key: 'TIER_PRICE_PREMIUM_30', config_value: 300000 },
+    { config_key: 'TIER_PRICE_PREMIUM_60', config_value: 540000 },
+    { config_key: 'TIER_PRICE_PREMIUM_90', config_value: 720000 },
+    
+    { config_key: 'TIER_PRICE_SIDE_30', config_value: 200000 },
+    { config_key: 'TIER_PRICE_SIDE_60', config_value: 360000 },
+    { config_key: 'TIER_PRICE_SIDE_90', config_value: 480000 },
+    
+    { config_key: 'TIER_PRICE_SPECIAL_30', config_value: 150000 },
+    { config_key: 'TIER_PRICE_SPECIAL_60', config_value: 270000 },
+    { config_key: 'TIER_PRICE_SPECIAL_90', config_value: 360000 },
+    
+    { config_key: 'TIER_PRICE_GENERAL_30', config_value: 50000 },
+    { config_key: 'TIER_PRICE_GENERAL_60', config_value: 90000 },
+    { config_key: 'TIER_PRICE_GENERAL_90', config_value: 120000 },
+
+    { config_key: 'TIER_PRICE_AD_GENERAL_30', config_value: 30000 },
+    { config_key: 'TIER_PRICE_AD_GENERAL_60', config_value: 54000 },
+    { config_key: 'TIER_PRICE_AD_GENERAL_90', config_value: 72000 },
     
     { config_key: 'OPTION_PRICE_BOLD_30', config_value: 30000 },
     { config_key: 'OPTION_PRICE_BOLD_60', config_value: 55000 },

@@ -93,6 +93,9 @@ export interface AdFormData {
     option_jump?: boolean;
     option_jump_period?: 30 | 60 | 90;
     
+    is_subscription?: boolean;
+    option_double_slot?: boolean;
+    
     // 결제 업데이트 플래그
     _isPayment?: boolean;
 }
