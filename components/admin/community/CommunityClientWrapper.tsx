@@ -6,9 +6,14 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { adminCommunityAction } from '@/lib/actions';
 import Link from 'next/link';
+import { WritePostModal } from '@/components/community/WritePostModal';
+import { useRouter } from 'next/navigation';
 
 export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }) {
     const [posts, setPosts] = useState(initialPosts);
+    const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
+    const [writeBoardId, setWriteBoardId] = useState<'notice' | 'event'>('notice');
+    const router = useRouter();
 
     const handleDelete = async (id: string) => {
         if (!confirm('이 게시글을 정말 삭제하시겠습니까? (복구 불가)')) return;
@@ -42,22 +47,20 @@ export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }
                 </div>
                 
                 <div className="flex gap-2">
-                    <Link 
-                        href="/community?tab=notice"
-                        target="_blank"
+                    <button 
+                        onClick={() => { setWriteBoardId('notice'); setIsWriteModalOpen(true); }}
                         className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white font-black text-[13px] rounded-xl hover:bg-gray-800 transition-all shadow-sm active:scale-95"
                     >
                         <AlertCircle className="w-4 h-4" />
                         공지사항 작성
-                    </Link>
-                    <Link 
-                        href="/community?tab=event"
-                        target="_blank"
+                    </button>
+                    <button 
+                        onClick={() => { setWriteBoardId('event'); setIsWriteModalOpen(true); }}
                         className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white font-black text-[13px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95"
                     >
                         <Star className="w-4 h-4" />
                         이벤트 작성
-                    </Link>
+                    </button>
                 </div>
             </div>
 
@@ -142,6 +145,17 @@ export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }
                     </table>
                 </div>
             </div>
+
+            <WritePostModal 
+                boardId={writeBoardId}
+                boardLabel={getBoardName(writeBoardId)}
+                isOpen={isWriteModalOpen}
+                onClose={() => setIsWriteModalOpen(false)}
+                onSuccess={() => {
+                    setIsWriteModalOpen(false);
+                    router.refresh();
+                }}
+            />
         </div>
     );
 }
