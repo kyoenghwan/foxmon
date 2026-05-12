@@ -74,6 +74,9 @@ export async function FA_USER_SETTINGS_FLOW(input: UserSettingsFlowInput) {
                     verified_ceo_name: input.profileData.verified_ceo_name,
                     verified_business_name: input.profileData.verified_business_name,
                     business_cert_image_url: input.profileData.business_cert_image_url,
+                    business_name: input.profileData.business_name,
+                    representative_name: input.profileData.representative_name,
+                    business_category: input.profileData.business_category,
                 };
 
                 const updateResult = await OA_UPDATE_USER_PROFILE(updatePayload);

@@ -16,6 +16,9 @@ export interface UpdateUserProfileInput {
   verified_ceo_name?: string;
   verified_business_name?: string;
   business_cert_image_url?: string;
+  business_name?: string;
+  representative_name?: string;
+  business_category?: string;
 }
 
 export async function OA_UPDATE_USER_PROFILE(input: UpdateUserProfileInput) {
@@ -37,6 +40,9 @@ export async function OA_UPDATE_USER_PROFILE(input: UpdateUserProfileInput) {
     if (input.verified_ceo_name !== undefined) updates.verified_ceo_name = input.verified_ceo_name;
     if (input.verified_business_name !== undefined) updates.verified_business_name = input.verified_business_name;
     if (input.business_cert_image_url !== undefined) updates.business_cert_image_url = input.business_cert_image_url;
+    if (input.business_name !== undefined) updates.business_name = input.business_name;
+    if (input.representative_name !== undefined) updates.representative_name = input.representative_name;
+    if (input.business_category !== undefined) updates.business_category = input.business_category;
 
     // 업데이트할 내용이 없는 경우
     if (Object.keys(updates).length === 0) { 
