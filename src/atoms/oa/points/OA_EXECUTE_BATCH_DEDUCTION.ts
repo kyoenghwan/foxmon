@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '@/lib/logger';
 
 interface DeductionPlan {
@@ -34,7 +35,7 @@ export const OA_EXECUTE_BATCH_DEDUCTION = async (input: BatchDeductionInput): Pr
 
     // 💡 1. 사용자 마스터 잔액 업데이트 (전체 차감액 반영)
     // 💡 Note: 실제 서비스에서는 RPC를 통한 원자적 Decrement 권장
-    const { data: userBefore, error: userError } = await supabase
+    const { data: userBefore, error: userError } = await supabaseAdmin
       .from('users')
       .select('paid_points, bonus_points')
       .eq('id', userId)
@@ -44,7 +45,7 @@ export const OA_EXECUTE_BATCH_DEDUCTION = async (input: BatchDeductionInput): Pr
 
     const paidTotalDeduction = totalDeduction - bonusDeduction;
 
-    const { error: balanceUpdateError } = await supabase
+    const { error: balanceUpdateError } = await supabaseAdmin
       .from('users')
       .update({
         paid_points: Number(userBefore.paid_points) - paidTotalDeduction,
@@ -56,7 +57,7 @@ export const OA_EXECUTE_BATCH_DEDUCTION = async (input: BatchDeductionInput): Pr
 
     // 💡 2. 개별 충전 이력(Point Recharge History) 상의 잔액 삭감 (Batch)
     for (const plan of paidDeductionList) {
-      const { data: rechargeItem, error: fetchError } = await supabase
+      const { data: rechargeItem, error: fetchError } = await supabaseAdmin
         .from('point_recharge_history')
         .select('remained_point')
         .eq('id', plan.historyId)
@@ -64,7 +65,7 @@ export const OA_EXECUTE_BATCH_DEDUCTION = async (input: BatchDeductionInput): Pr
       
       if (fetchError) throw new Error(`충전 이력 항목 조회 실패: ${fetchError.message}`);
 
-      const { error: rechargeUpdateError } = await supabase
+      const { error: rechargeUpdateError } = await supabaseAdmin
         .from('point_recharge_history')
         .update({
           remained_point: Number(rechargeItem.remained_point) - plan.deductAmount
@@ -75,11 +76,11 @@ export const OA_EXECUTE_BATCH_DEDUCTION = async (input: BatchDeductionInput): Pr
     }
 
     // 💡 3. 거래 로그(Point Transactions) 기록
-    const { error: logError } = await supabase
+    const { error: logError } = await supabaseAdmin
       .from('point_transactions')
       .insert({
         user_id: userId,
-        type: 'SPEND',
+        type: 'DEDUCTION',
         amount: totalDeduction,
         balance_after: Number(userBefore.paid_points) + Number(userBefore.bonus_points) - totalDeduction,
         description: description
