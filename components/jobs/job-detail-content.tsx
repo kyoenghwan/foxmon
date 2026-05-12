@@ -4,12 +4,12 @@ import { Heart, MessageCircle, ThumbsUp, ThumbsDown, X } from 'lucide-react';
 import Link from 'next/link';
 
 export function JobDetailContent({ job, isModal = false, onClose }: { job: any, isModal?: boolean, onClose?: () => void }) {
-  // DB에 없는 부가 정보들 하드코딩
-  const mockContact = {
-    nickname: '■ 20대 노래방알바 ■',
-    phone: '010-5444-3600',
-    kakao: 'foxmon123',
-    manager: '양승진 매니저'
+  // DB에 없는 부가 정보들 하드코딩 대체 (실제 job 데이터 사용, 없으면 비공개/기본값)
+  const contact = {
+    nickname: job.nickname || '비공개',
+    phone: job.contact_phone || '비공개',
+    kakao: job.kakao_id || '비공개',
+    manager: job.contact_name || job.company_name || job.company || '담당자'
   };
 
   return (
@@ -64,10 +64,10 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
             <div className="flex-1 flex flex-col justify-center">
                 <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[100px_1fr] gap-y-4 md:gap-y-5 text-[14px]">
                     <div className="text-gray-400 font-medium flex items-center">닉네임</div>
-                    <div className="font-bold text-gray-900">{mockContact.nickname}</div>
+                    <div className="font-bold text-gray-900">{contact.nickname}</div>
                     
                     <div className="text-gray-400 font-medium flex items-center">전화번호</div>
-                    <div className="font-black text-primary text-[20px] md:text-[24px] tracking-tight">{mockContact.phone}</div>
+                    <div className="font-black text-primary text-[20px] md:text-[24px] tracking-tight">{contact.phone}</div>
                     
                     <div className="col-span-2 my-1">
                         <div className="bg-pink-50/80 text-pink-600 border border-pink-100 rounded-lg p-2.5 text-center text-[12px] sm:text-[13px] font-medium shadow-sm">
@@ -78,14 +78,14 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     <div className="text-gray-400 font-medium flex items-center">카카오톡</div>
                     <div className="font-bold text-gray-900 flex items-center gap-2">
                         <span className="bg-[#fee500] text-[#000000] text-[10px] px-2 py-0.5 rounded shadow-sm font-black tracking-tighter">TALK</span> 
-                        {mockContact.kakao}
+                        {contact.kakao}
                     </div>
 
                     <div className="text-gray-400 font-medium flex items-center">상호명</div>
                     <div className="font-bold text-gray-900">{job.company_name || job.company}</div>
 
                     <div className="text-gray-400 font-medium flex items-center">담당자</div>
-                    <div className="font-bold text-gray-900">{mockContact.manager}</div>
+                    <div className="font-bold text-gray-900">{contact.manager}</div>
 
                     <div className="text-gray-400 font-medium flex items-center">근무지역</div>
                     <div className="font-bold text-gray-900">{job.location}</div>
@@ -140,8 +140,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                         <div className="flex items-center p-3 border-b border-gray-50">
                            <div className="w-24 shrink-0 text-gray-400 font-medium text-[13px]">마감일자</div>
                            <div className="flex-1 font-bold text-gray-900 flex items-center gap-2">
-                               2026-04-20
-                               <span className="text-[11px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-black border border-red-100">D-13</span>
+                               {job.deadline || '상시 모집'}
                            </div>
                         </div>
                         
@@ -152,16 +151,16 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                        <div className="grid grid-cols-[80px_1fr] md:grid-cols-[104px_1fr] gap-3">
                            <div className="text-gray-400 font-medium text-[13px] pt-1">편의사항</div>
                            <div className="flex flex-wrap gap-1.5">
-                               {['선불가능', '팁별도', '초이스없음', '모셔다드림', '숙식제공'].map(tag => (
+                               {Array.isArray(job.amenities) && job.amenities.length > 0 ? job.amenities.map((tag: string) => (
                                  <span key={tag} className="text-[12px] bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-full shadow-sm font-medium">{tag}</span>
-                               ))}
+                               )) : <span className="text-[12px] text-gray-400">등록된 편의사항이 없습니다.</span>}
                            </div>
                            
                            <div className="text-gray-400 font-medium text-[13px] pt-1 border-t border-dashed border-gray-200 mt-2 pt-3">키워드</div>
                            <div className="flex flex-wrap gap-1.5 border-t border-dashed border-gray-200 mt-2 pt-3">
-                               {['투잡알바', '당일지급', '주말알바', '초보환영'].map(tag => (
+                               {Array.isArray(job.keywords) && job.keywords.length > 0 ? job.keywords.map((tag: string) => (
                                  <span key={tag} className="text-[12px] bg-blue-50/80 border border-blue-100 text-blue-600 px-2.5 py-1 rounded-full font-bold">{tag}</span>
-                               ))}
+                               )) : <span className="text-[12px] text-gray-400">등록된 키워드가 없습니다.</span>}
                            </div>
                        </div>
                     </div>
