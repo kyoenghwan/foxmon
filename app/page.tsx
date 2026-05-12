@@ -4,12 +4,16 @@ import { MainHeader } from '@/components/layout/main-header';
 import { HomeJobSections } from '@/components/home/home-job-sections';
 import { auth } from '@/auth';
 import Link from 'next/link';
+import { QA_GET_ACTIVE_BANNERS } from '@/src/atoms/qa/public/QA_GET_ACTIVE_BANNERS';
+import { SiteBannerPopup } from '@/components/common/SiteBannerPopup';
 
 export default async function Home() {
   const session = await auth();
+  const activePopups = await QA_GET_ACTIVE_BANNERS('POPUP');
 
   return (
     <div className="flex flex-col min-h-screen bg-white relative">
+      <SiteBannerPopup banners={activePopups} />
       <SideBanners />
       <MainHeader session={session} />
 
