@@ -96,77 +96,87 @@ export function SiteBannerPopup({ banners }: BannerPopupProps) {
             </div>
 
             {/* Mobile View (below md) - 캐러셀 슬라이더 */}
-            <div className="md:hidden relative w-full max-w-sm bg-white rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300 z-10 pointer-events-auto">
-                <div className="relative w-full bg-gray-100 flex items-center justify-center group">
-                    {visibleBanners.length > 1 && (
-                        <>
-                            <button 
-                                onClick={(e) => { e.preventDefault(); setCurrentIndex(prev => prev === 0 ? visibleBanners.length - 1 : prev - 1); }}
-                                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/30 text-white rounded-full z-10 transition-colors opacity-100"
-                            >
-                                <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button 
-                                onClick={(e) => { e.preventDefault(); setCurrentIndex(prev => prev === visibleBanners.length - 1 ? 0 : prev + 1); }}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/30 text-white rounded-full z-10 transition-colors opacity-100"
-                            >
-                                <ChevronRight className="w-5 h-5" />
-                            </button>
-                            
-                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
-                                {visibleBanners.map((_, idx) => (
-                                    <div 
-                                        key={idx} 
-                                        className={`w-2 h-2 rounded-full transition-all ${idx === currentIndex ? 'bg-white w-4' : 'bg-white/50'}`}
-                                    />
-                                ))}
-                            </div>
-                        </>
-                    )}
+            <div className="md:hidden relative w-full max-w-sm animate-in fade-in zoom-in duration-300 z-10 pointer-events-auto">
+                {/* 겹친 카드 시각 효과 */}
+                {visibleBanners.length > 1 && (
+                    <div className="absolute -bottom-2.5 left-2 right-2 h-10 bg-white/80 rounded-b-2xl -z-10 shadow-sm border border-gray-100" />
+                )}
+                {visibleBanners.length > 2 && (
+                    <div className="absolute -bottom-5 left-4 right-4 h-10 bg-white/50 rounded-b-2xl -z-20 shadow-sm border border-gray-100/50" />
+                )}
 
-                    {banner.link_url ? (
-                        <Link href={banner.link_url} onClick={() => handleCloseSpecific(banner.id)} className="block w-full">
+                <div className="relative bg-white rounded-2xl overflow-hidden shadow-2xl">
+                    <div className="relative w-full bg-gray-100 flex items-center justify-center group">
+                        {visibleBanners.length > 1 && (
+                            <>
+                                <button 
+                                    onClick={(e) => { e.preventDefault(); setCurrentIndex(prev => prev === 0 ? visibleBanners.length - 1 : prev - 1); }}
+                                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/30 text-white rounded-full z-10 transition-colors opacity-100"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+                                <button 
+                                    onClick={(e) => { e.preventDefault(); setCurrentIndex(prev => prev === visibleBanners.length - 1 ? 0 : prev + 1); }}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/30 text-white rounded-full z-10 transition-colors opacity-100"
+                                >
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                                
+                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+                                    {visibleBanners.map((_, idx) => (
+                                        <div 
+                                            key={idx} 
+                                            className={`w-2 h-2 rounded-full transition-all ${idx === currentIndex ? 'bg-white w-4' : 'bg-white/50'}`}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+
+                        {banner.link_url ? (
+                            <Link href={banner.link_url} onClick={() => handleCloseSpecific(banner.id)} className="block w-full">
+                                <img 
+                                    src={banner.image_url} 
+                                    alt={banner.title} 
+                                    className="w-full h-auto max-h-[70vh] object-contain"
+                                />
+                            </Link>
+                        ) : (
                             <img 
                                 src={banner.image_url} 
                                 alt={banner.title} 
                                 className="w-full h-auto max-h-[70vh] object-contain"
                             />
-                        </Link>
-                    ) : (
-                        <img 
-                            src={banner.image_url} 
-                            alt={banner.title} 
-                            className="w-full h-auto max-h-[70vh] object-contain"
-                        />
-                    )}
-                </div>
-
-                <div className="flex items-center justify-between px-4 py-3 bg-white border-t">
-                    <label className="flex items-center gap-2 cursor-pointer group">
-                        <input 
-                            type="checkbox" 
-                            onChange={() => handleHideTodaySpecific(banner.id)}
-                            className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300 cursor-pointer"
-                        />
-                        <span className="text-[13px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors">
-                            오늘 하루 보지 않기
-                        </span>
-                    </label>
-                    <div className="flex items-center gap-4">
-                        {visibleBanners.length > 1 && (
-                            <button 
-                                onClick={handleCloseAll}
-                                className="text-[13px] font-black text-gray-400 hover:text-gray-700 transition-colors"
-                            >
-                                모두 닫기
-                            </button>
                         )}
-                        <button 
-                            onClick={() => handleCloseSpecific(banner.id)}
-                            className="text-[13px] font-black text-gray-800 hover:text-primary transition-colors"
-                        >
-                            닫기
-                        </button>
+                    </div>
+
+                    <div className="flex items-center justify-between px-4 py-3 bg-white border-t">
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                            <input 
+                                type="checkbox" 
+                                onChange={() => handleHideTodaySpecific(banner.id)}
+                                className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300 cursor-pointer"
+                            />
+                            <span className="text-[13px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors">
+                                오늘 하루 보지 않기
+                            </span>
+                        </label>
+                        <div className="flex items-center gap-4">
+                            {visibleBanners.length > 1 && (
+                                <button 
+                                    onClick={handleCloseAll}
+                                    className="text-[13px] font-black text-gray-400 hover:text-gray-700 transition-colors"
+                                >
+                                    모두 닫기
+                                </button>
+                            )}
+                            <button 
+                                onClick={() => handleCloseSpecific(banner.id)}
+                                className="text-[13px] font-black text-gray-800 hover:text-primary transition-colors"
+                            >
+                                닫기
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
