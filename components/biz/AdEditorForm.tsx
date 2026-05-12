@@ -398,8 +398,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         pay: initialData?.pay || ((initialData as any)?.salary_type && (initialData as any)?.salary_amount ? `[${(initialData as any)?.salary_type}] ${(initialData as any)?.salary_amount}원` : ''),
         pay_type: initialData?.pay_type || (initialData as any)?.salary_type || '월급',
         pay_amount: initialData?.pay_amount?.toString() || (initialData as any)?.salary_amount?.toString() || '',
-        category_1: initialData?.category_1 || (initialData as any)?.category || '',
-        category_2: initialData?.category_2 || '',
+        category_1: initialData?.category_1 || (initialData as any)?.category1 || (initialData as any)?.category || '',
+        category_2: initialData?.category_2 || (initialData as any)?.category2 || '',
         image: initialData?.image || '',
         color: initColor,
         bg_opacity: initBgOpacity,
@@ -410,9 +410,16 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         action_type: initAction,
         logo_url: initialData?.logo_url || '',
         work_type: initialData?.work_type || '',
-        work_hours: initialData?.work_hours || '',
+        employment_type: initialData?.employment_type || '',
+        work_hours: initialData?.work_hours || (initialData as any)?.work_time || '',
         benefits: initialData?.benefits || '',
         contact_info: initialData?.contact_info || '',
+        manager_name: initialData?.manager_name || (initialData as any)?.contact_name || '',
+        contact_phone: initialData?.contact_phone || '',
+        kakao_id: initialData?.kakao_id || '',
+        line_id: initialData?.line_id || '',
+        telegram_id: initialData?.telegram_id || '',
+        wechat_id: initialData?.wechat_id || '',
         address: initialData?.address || '',
         detail_content: initialData?.detail_content || '',
         design_mode: initialDesignMode,
@@ -570,7 +577,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             return;
         }
 
-        if (!form.work_type) {
+        if (!form.employment_type) {
             alert('고용 형태는 필수 입력 항목입니다. (광고 상세 내용 탭)');
             return;
         }
