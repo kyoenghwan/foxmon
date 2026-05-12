@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Crown, X, Eye, DollarSign, Loader2, Clock, Zap, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdFormData } from '@/components/biz/AdEditorForm';
+import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { getUserPointsAction } from '@/app/actions/pointActions';
 import { manageBizAdAction } from '@/lib/actions';
 import { GET_POINT_POLICIES } from '@/app/actions/pointPolicyActions';
@@ -131,26 +132,42 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                         <h4 className="font-bold text-gray-700 flex items-center gap-2"><Eye className="w-4 h-4 text-primary" /> 라이브 프리뷰 (배너 노출 화면)</h4>
                         
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative p-6 flex flex-col items-center justify-center min-h-[180px] bg-slate-50">
-                            <span className="absolute top-3 left-3 bg-gray-900 text-white text-[11px] px-2 py-0.5 rounded shadow-sm font-black">{getTierName()}</span>
+                            <span className="absolute top-3 left-3 bg-gray-900 text-white text-[11px] px-2 py-0.5 rounded shadow-sm font-black z-10">{getTierName()}</span>
                             
-                            <div className={`w-full max-w-[400px] flex ${form.option_double_slot ? 'flex-col gap-1' : ''}`}>
-                                {(form.logo_url || form.image) ? (
-                                    <img src={(form.logo_url || form.image) as string} alt="광고 배너" className="w-full h-auto object-contain rounded-lg shadow border border-gray-200 bg-white" />
-                                ) : (
-                                    <div className="w-full h-[120px] rounded-lg border-2 border-dashed border-gray-300 bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-sm">
-                                        등록된 배너 이미지가 없습니다.
-                                    </div>
-                                )}
-                                {form.option_double_slot && (form.logo_url || form.image) && (
-                                    <img src={(form.logo_url || form.image) as string} alt="광고 배너 (연속 노출)" className="w-full h-auto object-contain rounded-lg shadow border border-gray-200 bg-white opacity-90" />
-                                )}
-                            </div>
-                            
-                            <div className="mt-4 text-[14px] font-black text-gray-800 text-center">
-                                {form.title || '광고 제목'}
-                            </div>
-                            <div className="text-[12px] text-gray-500 font-medium mt-0.5">
-                                {form.company || form.business_name}
+                            <div className={`w-full flex justify-center items-center ${form.option_double_slot ? 'flex-col gap-2' : ''}`}>
+                                {(() => {
+                                    const isSide = form.tier === 'SIDE';
+                                    const isGeneral = form.tier === 'GENERAL' || form.tier === 'AD_GENERAL';
+                                    const isSpecial = form.tier === 'SPECIAL';
+
+                                    const renderCard = (keyPostfix: string) => (
+                                        <div key={`preview-${keyPostfix}`} style={{ width: (isSide ? '150px' : '200px'), maxWidth: '100%', opacity: keyPostfix === 'double' ? 0.9 : 1 }}>
+                                            <PremiumJobCard
+                                                id={`preview-${keyPostfix}`}
+                                                company={form.company || form.business_name || '테스트상호'}
+                                                title={form.title || '배너 제목이 표시됩니다'}
+                                                location={form.location || '지역'}
+                                                category={form.category_1}
+                                                pay={form.pay || (form.pay_amount ? `${form.pay_type} ${form.pay_amount}` : '급여 협의')}
+                                                image={form.logo_url || form.image}
+                                                impactType={isGeneral ? 'none' : ((form.theme as any) || 'gold')}
+                                                effectIntensity={isSpecial || isGeneral || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'shimmer'}`}
+                                                isSide={isSide}
+                                                hideLogo={isGeneral}
+                                                tier={form.tier as any}
+                                                customColor={form.color}
+                                                bgOpacity={form.bg_opacity}
+                                            />
+                                        </div>
+                                    );
+
+                                    return (
+                                        <>
+                                            {renderCard('main')}
+                                            {form.option_double_slot && renderCard('double')}
+                                        </>
+                                    );
+                                })()}
                             </div>
                         </div>
                         
