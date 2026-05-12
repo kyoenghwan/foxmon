@@ -35,6 +35,10 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 totalPoints += getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, 0);
             }
             
+            if (payload.is_subscription) {
+                totalPoints = Math.floor(totalPoints * 0.95);
+            }
+            
             if (payload.option_bold) totalPoints += getPrice(`OPTION_PRICE_BOLD_${p}`, 0);
             if (payload.option_color) totalPoints += getPrice(`OPTION_PRICE_COLOR_${p}`, 0);
             if (payload.option_bg) totalPoints += getPrice(`OPTION_PRICE_BG_${p}`, 0);
@@ -93,6 +97,7 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 
                 // 결제 및 옵션 추가 컬럼
                 exposure_period: p,
+                is_subscription: !!payload.is_subscription,
                 option_bold: !!payload.option_bold,
                 option_color: !!payload.option_color,
                 option_color_value: payload.option_color_value || null,
@@ -162,6 +167,11 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
 
                 const p = payload.exposure_period as 30 | 60 | 90;
                 totalPoints = getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, 0);
+                
+                if (payload.is_subscription) {
+                    totalPoints = Math.floor(totalPoints * 0.95);
+                }
+                
                 if (payload.option_bold) totalPoints += getPrice(`OPTION_PRICE_BOLD_${payload.option_bold_period || 30}`, 0);
                 if (payload.option_color) totalPoints += getPrice(`OPTION_PRICE_COLOR_${payload.option_color_period || 30}`, 0);
                 if (payload.option_bg) totalPoints += getPrice(`OPTION_PRICE_BG_${payload.option_bg_period || 30}`, 0);
@@ -234,6 +244,9 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 };
 
                 updatePayload.exposure_period = p;
+                if (payload.is_subscription !== undefined) {
+                    updatePayload.is_subscription = !!payload.is_subscription;
+                }
                 
                 if (payload.option_bold !== undefined) {
                     updatePayload.option_bold = !!payload.option_bold;

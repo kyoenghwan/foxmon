@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Crown, X, Eye, CheckCircle2, DollarSign, Loader2 } from 'lucide-react';
+import { Crown, X, Eye, CheckCircle2, DollarSign, Loader2, Clock, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdFormData } from '@/components/biz/AdEditorForm';
 import { getUserPointsAction } from '@/app/actions/pointActions';
@@ -80,6 +80,10 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
     const calculateTotalPoints = () => {
         const p = form.exposure_period || 30;
         let total = getPrice('OPTION_PRICE_BASE_PERIOD', p);
+        
+        if (form.is_subscription) {
+            total = Math.floor(total * 0.95);
+        }
         
         if (form.option_bold) total += getPrice('OPTION_PRICE_BOLD', p);
         if (form.option_color) total += getPrice('OPTION_PRICE_COLOR', p);
@@ -190,25 +194,74 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                         <section>
                             <h4 className="text-[15px] font-black text-gray-800 mb-3 flex items-center justify-between">
                                 <span>1. 노출 기간 패키지 (필수)</span>
-                                <span className="text-[12px] font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">장기 결제 시 최대 20% 할인!</span>
+                                <span className="text-[12px] font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">장기 결제 시 최대 20% 할인!</span>
                             </h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                {[30, 60, 90].map(days => (
-                                    <button 
-                                        key={days}
-                                        type="button"
-                                        onClick={() => update('exposure_period', days as 30|60|90)}
-                                        className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${form.exposure_period === days ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                                    >
-                                        <div className="flex items-center justify-center gap-1.5">
-                                            <span className={`text-lg font-black ${form.exposure_period === days ? 'text-primary' : 'text-gray-700'}`}>{days}일</span>
-                                            {days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
-                                            {days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
-                                        </div>
-                                        <span className="text-[13px] font-bold text-gray-500 mt-1">{getPrice('OPTION_PRICE_BASE_PERIOD', days).toLocaleString()} P</span>
-                                    </button>
-                                ))}
+                            <div className="grid grid-cols-2 gap-3">
+                                {[
+                                    { id: 30, label: '30일', sub: false },
+                                    { id: 60, label: '60일', sub: false },
+                                    { id: 90, label: '90일', sub: false },
+                                    { id: 'sub', label: '매월 자동 연장 (구독)', sub: true },
+                                ].map(opt => {
+                                    const isSelected = opt.sub ? form.is_subscription : (!form.is_subscription && form.exposure_period === opt.id);
+                                    const days = opt.sub ? 30 : opt.id as number;
+                                    let price = getPrice('OPTION_PRICE_BASE_PERIOD', days);
+                                    if (opt.sub) price = Math.floor(price * 0.95);
+
+                                    return (
+                                        <button 
+                                            key={opt.id}
+                                            type="button"
+                                            onClick={() => {
+                                                if (opt.sub) {
+                                                    update('is_subscription', true);
+                                                    update('exposure_period', 30);
+                                                } else {
+                                                    update('is_subscription', false);
+                                                    update('exposure_period', opt.id as 30|60|90);
+                                                }
+                                            }}
+                                            className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${isSelected ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                                        >
+                                            <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                                                {opt.sub && <Clock className={`w-4 h-4 ${isSelected ? 'text-primary' : 'text-gray-400'}`} />}
+                                                <span className={`text-[15px] font-black ${isSelected ? 'text-primary' : 'text-gray-700'}`}>{opt.label}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                {opt.sub && <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">첫 달 5% 할인</span>}
+                                                {!opt.sub && days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
+                                                {!opt.sub && days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
+                                                <span className="text-[14px] font-bold text-gray-500">{price.toLocaleString()} P</span>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
                             </div>
+
+                            {form.is_subscription && (
+                                <div className="mt-3 p-4 bg-blue-50/50 border border-blue-100 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2">
+                                    <p className="text-[13px] font-bold text-blue-800 mb-3 flex items-center gap-2">
+                                        <Zap className="w-4 h-4 text-blue-500" />
+                                        구독 유지 기간에 따른 놀라운 추가 할인 혜택!
+                                    </p>
+                                    <div className="grid grid-cols-6 gap-1.5 text-center">
+                                        {[
+                                            { m: '1개월', d: '5%' },
+                                            { m: '2개월', d: '10%' },
+                                            { m: '3개월', d: '15%' },
+                                            { m: '4개월', d: '20%' },
+                                            { m: '5개월', d: '25%' },
+                                            { m: '6개월~', d: '30%' },
+                                        ].map((item, idx) => (
+                                            <div key={idx} className="flex flex-col bg-white border border-blue-100 rounded py-2">
+                                                <span className="text-[10px] text-gray-500">{item.m}</span>
+                                                <span className="text-[12px] font-black text-blue-600">{item.d}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="text-[11px] text-gray-400 mt-2 text-center">* 위 할인은 결제 연장(갱신) 시점부터 자동으로 순차 적용됩니다.</p>
+                                </div>
+                            )}
                         </section>
 
                         {/* 부가 옵션 선택 */}

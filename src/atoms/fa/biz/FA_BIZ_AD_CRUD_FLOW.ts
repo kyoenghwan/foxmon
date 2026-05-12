@@ -173,6 +173,10 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 
                 totalPoints = getPrice(`TIER_PRICE_${priceTier}_${p}`, 0);
                 
+                if (payload.is_subscription) {
+                    totalPoints = Math.floor(totalPoints * 0.95);
+                }
+                
                 if (payload.option_double_slot) {
                     totalPoints *= 2;
                 }

@@ -68,6 +68,10 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
         const p = form.exposure_period || 30;
         let total = getBasePrice(p);
         
+        if (form.is_subscription) {
+            total = Math.floor(total * 0.95);
+        }
+
         if (form.option_double_slot) {
             total *= 2;
         }
@@ -183,46 +187,55 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                 <span>1. 노출 기간 선택 (필수)</span>
                                 <span className="text-[12px] font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">장기 결제 시 최대 20% 할인!</span>
                             </h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                {[30, 60, 90].map(days => (
-                                    <button 
-                                        key={days}
-                                        type="button"
-                                        onClick={() => update('exposure_period', days as 30|60|90)}
-                                        className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${form.exposure_period === days ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                                    >
-                                        <div className="flex items-center justify-center gap-1.5">
-                                            <span className={`text-lg font-black ${form.exposure_period === days ? 'text-primary' : 'text-gray-700'}`}>{days}일</span>
-                                            {days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
-                                            {days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
-                                        </div>
-                                        <span className="text-[13px] font-bold text-gray-500 mt-1">{getBasePrice(days).toLocaleString()} P</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </section>
+                            <div className="grid grid-cols-2 gap-3">
+                                {[
+                                    { id: 30, label: '30일', sub: false },
+                                    { id: 60, label: '60일', sub: false },
+                                    { id: 90, label: '90일', sub: false },
+                                    { id: 'sub', label: '매월 자동 연장 (구독)', sub: true },
+                                ].map(opt => {
+                                    const isSelected = opt.sub ? form.is_subscription : (!form.is_subscription && form.exposure_period === opt.id);
+                                    const days = opt.sub ? 30 : opt.id as number;
+                                    let price = getBasePrice(days);
+                                    if (opt.sub) price = Math.floor(price * 0.95);
 
-                        {/* 자동 연장 (구독) 스위치 */}
-                        <div className={`border-2 rounded-xl p-4 transition-all cursor-pointer select-none flex flex-col gap-3 ${form.is_subscription ? 'border-blue-500 bg-blue-50/30' : 'border-gray-200 bg-white hover:bg-gray-50'}`} onClick={() => update('is_subscription', !form.is_subscription)}>
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${form.is_subscription ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
-                                        <Clock className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-black text-[15px] text-gray-900">매월 자동 연장 (구독) 신청</h4>
-                                        <p className="text-[12px] font-medium text-gray-500">매번 결제할 필요 없이 할인가로 자동 노출</p>
-                                    </div>
-                                </div>
-                                <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.is_subscription ? 'bg-blue-600' : 'bg-gray-200'}`}>
-                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.is_subscription ? 'translate-x-6' : 'translate-x-1'}`} />
-                                </div>
+                                    return (
+                                        <button 
+                                            key={opt.id}
+                                            type="button"
+                                            onClick={() => {
+                                                if (opt.sub) {
+                                                    update('is_subscription', true);
+                                                    update('exposure_period', 30);
+                                                } else {
+                                                    update('is_subscription', false);
+                                                    update('exposure_period', opt.id as 30|60|90);
+                                                }
+                                            }}
+                                            className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${isSelected ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                                        >
+                                            <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                                                {opt.sub && <Clock className={`w-4 h-4 ${isSelected ? 'text-primary' : 'text-gray-400'}`} />}
+                                                <span className={`text-[15px] font-black ${isSelected ? 'text-primary' : 'text-gray-700'}`}>{opt.label}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                {opt.sub && <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">첫 달 5% 할인</span>}
+                                                {!opt.sub && days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
+                                                {!opt.sub && days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
+                                                <span className="text-[14px] font-bold text-gray-500">{price.toLocaleString()} P</span>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
                             </div>
-                            
+
                             {form.is_subscription && (
-                                <div className="mt-2 p-3 bg-white border border-blue-100 rounded-lg shadow-sm">
-                                    <p className="text-[12px] font-bold text-blue-800 mb-2">🎁 구독 유지 기간에 따른 놀라운 추가 할인 혜택!</p>
-                                    <div className="grid grid-cols-6 gap-1 text-center">
+                                <div className="mt-3 p-4 bg-blue-50/50 border border-blue-100 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2">
+                                    <p className="text-[13px] font-bold text-blue-800 mb-3 flex items-center gap-2">
+                                        <Zap className="w-4 h-4 text-blue-500" />
+                                        구독 유지 기간에 따른 놀라운 추가 할인 혜택!
+                                    </p>
+                                    <div className="grid grid-cols-6 gap-1.5 text-center">
                                         {[
                                             { m: '1개월', d: '5%' },
                                             { m: '2개월', d: '10%' },
@@ -231,16 +244,16 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                             { m: '5개월', d: '25%' },
                                             { m: '6개월~', d: '30%' },
                                         ].map((item, idx) => (
-                                            <div key={idx} className="flex flex-col bg-blue-50 rounded py-1.5">
+                                            <div key={idx} className="flex flex-col bg-white border border-blue-100 rounded py-2">
                                                 <span className="text-[10px] text-gray-500">{item.m}</span>
-                                                <span className="text-[11px] font-black text-blue-700">{item.d}</span>
+                                                <span className="text-[12px] font-black text-blue-600">{item.d}</span>
                                             </div>
                                         ))}
                                     </div>
-                                    <p className="text-[10px] text-gray-400 mt-2 text-center">* 할인은 다음 갱신 결제부터 자동으로 적용됩니다.</p>
+                                    <p className="text-[11px] text-gray-400 mt-2 text-center">* 위 할인은 결제 연장(갱신) 시점부터 자동으로 순차 적용됩니다.</p>
                                 </div>
                             )}
-                        </div>
+                        </section>
                         
                         {/* 부가 옵션 선택 */}
                         <section className="mt-4">
