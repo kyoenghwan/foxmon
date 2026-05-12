@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@/auth';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '@/lib/logger';
 import { RA_CHECK_BOARD_PERMISSION } from '@/src/atoms/ra/community/RA_CHECK_BOARD_PERMISSION';
 import { RA_VALIDATE_POST_INPUT } from '@/src/atoms/ra/community/RA_VALIDATE_POST_INPUT';
@@ -91,7 +91,7 @@ export async function createCommunityPost(input: {
         const isAnonymous = permResult.data?.forceAnonymous || false;
         const authorName = isAnonymous ? '익명' : nickname;
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from('community_posts')
             .insert({
                 board_id: input.board_id,
@@ -108,14 +108,14 @@ export async function createCommunityPost(input: {
 
         if (error) {
             nvLog('AT', '❌ OA_INSERT_COMMUNITY_POST 에러', error);
-            return { success: false, message: '게시글 저장에 실패했습니다.' };
+            return { success: false, message: `게시글 저장에 실패했습니다. (${error.message || JSON.stringify(error)})` };
         }
 
         nvLog('AT', '✅ FA_CREATE_COMMUNITY_POST 완료', { postId: data.id });
         return { success: true, data, message: '게시글이 등록되었습니다.' };
 
-    } catch (err) {
+    } catch (err: any) {
         nvLog('AT', '❌ FA_CREATE_COMMUNITY_POST 예외', err);
-        return { success: false, message: '시스템 오류가 발생했습니다.' };
+        return { success: false, message: `시스템 오류가 발생했습니다. (${err?.message || ''})` };
     }
 }
