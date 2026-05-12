@@ -395,7 +395,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         company: initialData?.company || (initialData as any)?.company_name || '',
         title: initialData?.title || (initialData as any)?.job_title || '',
         location: initialData?.location || '',
-        pay: initialData?.pay || '',
+        pay: initialData?.pay || ((initialData as any)?.salary_type && (initialData as any)?.salary_amount ? `[${(initialData as any)?.salary_type}] ${(initialData as any)?.salary_amount}원` : ''),
         pay_type: initialData?.pay_type || (initialData as any)?.salary_type || '월급',
         pay_amount: initialData?.pay_amount?.toString() || (initialData as any)?.salary_amount?.toString() || '',
         category_1: initialData?.category_1 || (initialData as any)?.category || '',
