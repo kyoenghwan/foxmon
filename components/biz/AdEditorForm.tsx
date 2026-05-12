@@ -564,6 +564,21 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             alert('업체명, 공고 제목, 위치, 급여는 필수 입력 항목입니다.');
             return;
         }
+
+        if (!form.manager_name || !form.contact_phone) {
+            alert('담당자 이름과 연락처는 필수 입력 항목입니다. (광고 상세 내용 탭)');
+            return;
+        }
+
+        if (!form.work_type) {
+            alert('고용 형태는 필수 입력 항목입니다. (광고 상세 내용 탭)');
+            return;
+        }
+
+        if (!form.category_1) {
+            alert('직종은 필수 입력 항목입니다. (광고 상세 내용 탭)');
+            return;
+        }
         const isPremiumMainUpload = form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload';
         
         if (isPremiumMainUpload) {
