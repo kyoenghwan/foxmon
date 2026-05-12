@@ -28,22 +28,26 @@ const TierBadge = ({ tier }: { tier: string }) => {
     );
 };
 
-const StatusBadge = ({ ad }: { ad: any }) => {
+const StatusBadge = ({ ad, isVerified }: { ad: any, isVerified: boolean }) => {
     const isPending = new Date(ad.expires_at).getFullYear() === 2000;
     const isExpired = new Date(ad.expires_at) < new Date() && !isPending;
-    const status = isPending ? 'PENDING' : isExpired ? 'EXPIRED' : 'ACTIVE';
+    
+    // 사업자 검증이 안 되었으면서 결제 대기 상태인 경우
+    const status = (isPending || isExpired) && !isVerified ? 'UNVERIFIED' : isPending ? 'PENDING' : isExpired ? 'EXPIRED' : 'ACTIVE';
 
     const styles: Record<string, string> = {
         ACTIVE: 'bg-green-100 text-green-700',
         PAUSED: 'bg-gray-100 text-gray-500',
         EXPIRED: 'bg-red-100 text-red-600',
         PENDING: 'bg-yellow-100 text-yellow-700 border border-yellow-300',
+        UNVERIFIED: 'bg-red-50 text-red-600 border border-red-200',
     };
     const labels: Record<string, string> = {
         ACTIVE: '진행 중',
         PAUSED: '일시정지',
         EXPIRED: '만료',
         PENDING: '결제 대기중',
+        UNVERIFIED: '사업자 검증 중',
     };
     return (
         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${styles[status] || ''}`}>
@@ -53,7 +57,7 @@ const StatusBadge = ({ ad }: { ad: any }) => {
     );
 };
 
-export default function BizAdsList({ initialAds }: { initialAds: any[] }) {
+export default function BizAdsList({ initialAds, isVerified }: { initialAds: any[], isVerified?: boolean }) {
     const router = useRouter();
     const [ads, setAds] = useState(initialAds);
     const [paymentAd, setPaymentAd] = useState<any | null>(null);
@@ -103,7 +107,7 @@ export default function BizAdsList({ initialAds }: { initialAds: any[] }) {
                                         <TierBadge tier={ad.tier} />
                                     </td>
                                     <td className="px-4 py-4 text-center whitespace-nowrap">
-                                        <StatusBadge ad={ad} />
+                                        <StatusBadge ad={ad} isVerified={!!isVerified} />
                                     </td>
                                     <td className="px-4 py-4 text-center whitespace-nowrap">
                                         <span className="flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500">
@@ -115,8 +119,19 @@ export default function BizAdsList({ initialAds }: { initialAds: any[] }) {
                                         <div className="flex items-center justify-center gap-2">
                                             {isPendingOrExpired && (
                                                 <button 
-                                                    onClick={(e) => { e.stopPropagation(); setPaymentAd(ad); }}
-                                                    className="text-[11px] font-black bg-gray-900 text-white px-2.5 py-1.5 rounded flex items-center gap-1 hover:bg-black transition-colors"
+                                                    onClick={(e) => { 
+                                                        e.stopPropagation(); 
+                                                        if (!isVerified) {
+                                                            alert("사업자 정보 검증이 완료된 업체만 결제 및 광고 노출이 가능합니다.\n진행 중인 검증이 끝날 때까지 잠시만 기다려주세요.");
+                                                            return;
+                                                        }
+                                                        setPaymentAd(ad); 
+                                                    }}
+                                                    className={`text-[11px] font-black px-2.5 py-1.5 rounded flex items-center gap-1 transition-colors ${
+                                                        !isVerified 
+                                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                                                            : 'bg-gray-900 text-white hover:bg-black'
+                                                    }`}
                                                 >
                                                     <CreditCard className="w-3 h-3" /> 결제 및 노출
                                                 </button>

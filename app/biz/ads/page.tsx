@@ -2,11 +2,20 @@ import Link from 'next/link';
 import { Megaphone, Plus } from 'lucide-react';
 
 import { manageBizAdAction } from '@/lib/actions';
+import { createClient } from '@/utils/supabase/server';
 import BizAdsList from './BizAdsList';
 
 export default async function BizAdsPage() {
     const res = await manageBizAdAction('GET');
     const ads = (res.success && res.data ? res.data : []);
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    let isVerified = false;
+    if (user) {
+        const { data: profile } = await supabase.from('users').select('is_business_verified').eq('id', user.id).single();
+        isVerified = !!profile?.is_business_verified;
+    }
 
     return (
         <div className="space-y-6">
@@ -51,7 +60,7 @@ export default async function BizAdsPage() {
                     </Link>
                 </div>
             ) : (
-                <BizAdsList initialAds={ads} />
+                <BizAdsList initialAds={ads} isVerified={isVerified} />
             )}
         </div>
     );
