@@ -55,19 +55,19 @@ export function SiteBannerPopup({ banners }: BannerPopupProps) {
 
                 {/* 이미지 및 링크 영역 */}
                 {banner.link_url ? (
-                    <Link href={banner.link_url} onClick={handleClose} className="block relative w-full aspect-[4/5] sm:aspect-square bg-gray-100">
+                    <Link href={banner.link_url} onClick={handleClose} className="block w-full bg-gray-100">
                         <img 
                             src={banner.image_url} 
                             alt={banner.title} 
-                            className="w-full h-full object-cover"
+                            className="w-full h-auto object-contain"
                         />
                     </Link>
                 ) : (
-                    <div className="relative w-full aspect-[4/5] sm:aspect-square bg-gray-100">
+                    <div className="w-full bg-gray-100 flex items-center justify-center">
                         <img 
                             src={banner.image_url} 
                             alt={banner.title} 
-                            className="w-full h-full object-cover"
+                            className="w-full h-auto object-contain"
                         />
                     </div>
                 )}
