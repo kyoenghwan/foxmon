@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Eye, Pause, Play, Pencil, Clock, CreditCard } from 'lucide-react';
 import { BizAdPaymentModal } from '@/components/biz/BizAdPaymentModal';
 
@@ -53,6 +54,7 @@ const StatusBadge = ({ ad }: { ad: any }) => {
 };
 
 export default function BizAdsList({ initialAds }: { initialAds: any[] }) {
+    const router = useRouter();
     const [ads, setAds] = useState(initialAds);
     const [paymentAd, setPaymentAd] = useState<any | null>(null);
 
@@ -80,15 +82,20 @@ export default function BizAdsList({ initialAds }: { initialAds: any[] }) {
                             const isPendingOrExpired = new Date(ad.expires_at) < new Date();
                             
                             return (
-                                <tr key={ad.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                                <tr 
+                                    key={ad.id} 
+                                    onClick={() => router.push(`/biz/ads/${ad.id}/edit`)}
+                                    className="border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer"
+                                >
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             {(ad.logo_url || ad.image) && (
                                                 <img src={ad.logo_url || ad.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
                                             )}
-                                            <div>
-                                                <p className="font-bold text-[14px] text-gray-900">{ad.title}</p>
-                                                <p className="text-[12px] text-gray-500">{ad.company} · {ad.location}</p>
+                                            <div className="max-w-[150px] sm:max-w-[250px]">
+                                                {/* @ts-ignore */}
+                                                <marquee scrollamount="3" className="font-bold text-[14px] text-gray-900 block">{ad.title}</marquee>
+                                                <p className="text-[12px] text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">{ad.company} · {ad.location}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -108,18 +115,15 @@ export default function BizAdsList({ initialAds }: { initialAds: any[] }) {
                                         <div className="flex items-center justify-center gap-2">
                                             {isPendingOrExpired && (
                                                 <button 
-                                                    onClick={() => setPaymentAd(ad)}
+                                                    onClick={(e) => { e.stopPropagation(); setPaymentAd(ad); }}
                                                     className="text-[11px] font-black bg-gray-900 text-white px-2.5 py-1.5 rounded flex items-center gap-1 hover:bg-black transition-colors"
                                                 >
                                                     <CreditCard className="w-3 h-3" /> 결제 및 노출
                                                 </button>
                                             )}
-                                            <Link href={`/jobs/${ad.id}`} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="미리보기">
-                                                <Eye className="w-4 h-4 text-primary" />
-                                            </Link>
-                                            <Link href={`/biz/ads/${ad.id}/edit`} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
+                                            <div className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
                                                 <Pencil className="w-4 h-4 text-gray-500" />
-                                            </Link>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
