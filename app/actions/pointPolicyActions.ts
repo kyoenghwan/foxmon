@@ -74,6 +74,10 @@ const DEFAULT_POLICIES = [
     { config_key: 'OPTION_PRICE_JUMP_30', config_value: 30000 },
     { config_key: 'OPTION_PRICE_JUMP_60', config_value: 55000 },
     { config_key: 'OPTION_PRICE_JUMP_90', config_value: 70000 },
+    
+    { config_key: 'OPTION_PRICE_BIZ_JUMP_30', config_value: 30000 },
+    { config_key: 'OPTION_PRICE_BIZ_JUMP_60', config_value: 55000 },
+    { config_key: 'OPTION_PRICE_BIZ_JUMP_90', config_value: 70000 },
 ];
 
 export async function GET_POINT_POLICIES() {

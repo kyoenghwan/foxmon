@@ -77,7 +77,7 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
         }
 
         if (form.option_jump) {
-            total += policies[`OPTION_PRICE_JUMP_${p}`] || 0;
+            total += policies[`OPTION_PRICE_BIZ_JUMP_${p}`] || 0;
         }
 
         if (form.option_double_slot) {
@@ -295,7 +295,7 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                         </div>
                                         <div className="text-right">
                                             <div className="text-[14px] font-black text-indigo-600">
-                                                +{policies[`OPTION_PRICE_JUMP_${form.exposure_period || 30}`]?.toLocaleString() || 0} P
+                                                +{policies[`OPTION_PRICE_BIZ_JUMP_${form.exposure_period || 30}`]?.toLocaleString() || 0} P
                                             </div>
                                         </div>
                                     </div>

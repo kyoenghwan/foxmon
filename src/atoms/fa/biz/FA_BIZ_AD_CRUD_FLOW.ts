@@ -38,7 +38,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             }
 
             if (payload.option_jump) {
-                totalPoints += getPrice(`OPTION_PRICE_JUMP_${p}`, 0);
+                totalPoints += getPrice(`OPTION_PRICE_BIZ_JUMP_${p}`, 0);
             }
 
             // 더블 슬롯 시 총액 5% 추가 할인
@@ -182,7 +182,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 }
 
                 if (payload.option_jump) {
-                    totalPoints += getPrice(`OPTION_PRICE_JUMP_${p}`, 0);
+                    totalPoints += getPrice(`OPTION_PRICE_BIZ_JUMP_${p}`, 0);
                 }
 
                 if (payload.option_double_slot) {
