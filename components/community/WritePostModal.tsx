@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Send, ImagePlus, ImageIcon } from 'lucide-react';
-import { createCommunityPost } from '@/lib/actions/community';
+import { createCommunityPost, updateCommunityPost } from '@/lib/actions/community';
 import { nvLog } from '@/lib/logger';
 import dynamic from 'next/dynamic';
 import { compressImageFile } from '@/lib/image-utils';
@@ -19,9 +19,10 @@ interface WritePostModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    editPost?: any | null;
 }
 
-export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess }: WritePostModalProps) {
+export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess, editPost }: WritePostModalProps) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [thumbnail, setThumbnail] = useState('');
@@ -32,19 +33,40 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
     const isFoxmarket = boardId === 'foxmarket';
     const isReport = boardId === 'report';
 
+    useEffect(() => {
+        if (isOpen && editPost) {
+            setTitle(editPost.title || '');
+            setContent(editPost.content || '');
+            setThumbnail(editPost.thumbnail || '');
+            setPrice(editPost.price || '');
+        } else if (isOpen && !editPost) {
+            setTitle('');
+            setContent('');
+            setThumbnail('');
+            setPrice('');
+        }
+    }, [isOpen, editPost]);
+
     const handleSubmit = async () => {
         setError('');
         setLoading(true);
-        nvLog('FW', `${boardLabel} 글쓰기 제출`, { boardId, title });
+        nvLog('FW', `${boardLabel} ${editPost ? '글수정' : '글쓰기'} 제출`, { boardId, title });
 
         try {
-            const result = await createCommunityPost({
-                board_id: boardId,
-                title,
-                content,
-                thumbnail: isFoxmarket ? thumbnail : null,
-                price: isFoxmarket ? price : null,
-            });
+            const result = editPost 
+                ? await updateCommunityPost(editPost.id, {
+                    title,
+                    content,
+                    thumbnail: isFoxmarket ? thumbnail : null,
+                    price: isFoxmarket ? price : null,
+                })
+                : await createCommunityPost({
+                    board_id: boardId,
+                    title,
+                    content,
+                    thumbnail: isFoxmarket ? thumbnail : null,
+                    price: isFoxmarket ? price : null,
+                });
 
             if (result.success) {
                 setTitle('');
@@ -54,7 +76,7 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
                 onSuccess();
                 onClose();
             } else {
-                setError(result.message || '등록에 실패했습니다.');
+                setError(result.message || '저장에 실패했습니다.');
             }
         } catch (err) {
             setError('시스템 오류가 발생했습니다.');
@@ -75,10 +97,10 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <div>
-                        <h3 className="text-lg font-black text-gray-900">글쓰기</h3>
+                        <h3 className="text-lg font-black text-gray-900">{editPost ? '글수정' : '글쓰기'}</h3>
                         <p className="text-[12px] text-gray-500 font-medium mt-0.5">
                             {boardLabel}
-                            {isReport && ' · 작성자명이 익명으로 표시됩니다'}
+                            {isReport && !editPost && ' · 작성자명이 익명으로 표시됩니다'}
                         </p>
                     </div>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -217,7 +239,7 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
                         className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Send className="w-4 h-4" />
-                        {loading ? '등록 중...' : '등록하기'}
+                        {loading ? '저장 중...' : (editPost ? '수정하기' : '등록하기')}
                     </button>
                 </div>
             </div>

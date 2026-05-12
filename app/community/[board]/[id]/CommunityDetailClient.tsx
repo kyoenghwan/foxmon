@@ -31,14 +31,14 @@ export function CommunityDetailClient({
 
     return (
         <div className="flex flex-col md:flex-row gap-6 items-start">
-            {/* [Mobile Only] 상단 멀티라인 탭 내비게이션 (모바일에서는 상세 페이지에서도 탭을 통해 다른 게시판으로 이동 가능하도록) */}
-            <div className="w-full md:hidden bg-white sticky top-[136px] z-20 py-2 border-b">
-                <div className="flex flex-wrap px-1 gap-1.5">
+            {/* [Mobile Only] 상단 가로 스크롤 탭 내비게이션 (모바일에서는 상세 페이지에서도 탭을 통해 다른 게시판으로 이동 가능하도록) */}
+            <div className="w-full md:hidden bg-white sticky top-[130px] z-20 border-b border-gray-100 overflow-x-auto scrollbar-hide shadow-sm">
+                <div className="flex px-4 py-2.5 gap-2 w-max">
                     {TABS.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => handleTabChange(tab.id)}
-                            className={`px-4 py-2 rounded-full text-[13px] font-bold transition-all whitespace-nowrap ${
+                            className={`px-3.5 py-1.5 rounded-full text-[12px] font-bold transition-all whitespace-nowrap ${
                                 activeTab === tab.id
                                     ? 'bg-primary text-white shadow-md'
                                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'

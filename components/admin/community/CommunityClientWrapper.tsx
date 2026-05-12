@@ -8,11 +8,13 @@ import { adminCommunityAction } from '@/lib/actions';
 import Link from 'next/link';
 import { WritePostModal } from '@/components/community/WritePostModal';
 import { useRouter } from 'next/navigation';
+import { Pencil } from 'lucide-react';
 
 export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }) {
     const [posts, setPosts] = useState(initialPosts);
     const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
-    const [writeBoardId, setWriteBoardId] = useState<'notice' | 'event'>('notice');
+    const [writeBoardId, setWriteBoardId] = useState<'notice' | 'event' | string>('notice');
+    const [editingPost, setEditingPost] = useState<any | null>(null);
     const router = useRouter();
 
     const handleDelete = async (id: string) => {
@@ -119,6 +121,17 @@ export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }
                                                 <ExternalLink className="w-4 h-4" />
                                             </Link>
                                             <button 
+                                                onClick={() => {
+                                                    setEditingPost(post);
+                                                    setWriteBoardId(post.board_id);
+                                                    setIsWriteModalOpen(true);
+                                                }}
+                                                className="p-1.5 border border-blue-200 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                                                title="수정"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button 
                                                 onClick={() => handleDelete(post.id)}
                                                 className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition-colors"
                                                 title="강제 삭제"
@@ -150,9 +163,14 @@ export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }
                 boardId={writeBoardId}
                 boardLabel={getBoardName(writeBoardId)}
                 isOpen={isWriteModalOpen}
-                onClose={() => setIsWriteModalOpen(false)}
+                editPost={editingPost}
+                onClose={() => {
+                    setIsWriteModalOpen(false);
+                    setEditingPost(null);
+                }}
                 onSuccess={() => {
                     setIsWriteModalOpen(false);
+                    setEditingPost(null);
                     router.refresh();
                 }}
             />

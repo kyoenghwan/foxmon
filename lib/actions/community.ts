@@ -144,3 +144,45 @@ export async function getCommunityPostById(postId: string) {
         return null;
     }
 }
+
+// ============================================
+// FA: 게시글 수정 Flow (관리자 또는 본인)
+// ============================================
+export async function updateCommunityPost(postId: string, input: {
+    title: string;
+    content: string;
+    thumbnail?: string | null;
+    price?: string | null;
+}) {
+    nvLog('AT', '▶️ FA_UPDATE_COMMUNITY_POST 시작', { postId, title: input.title });
+
+    try {
+        const session = await auth();
+        if (!session?.user) {
+            return { success: false, message: '로그인이 필요합니다.' };
+        }
+
+        const { error } = await supabaseAdmin
+            .from('community_posts')
+            .update({
+                title: input.title.trim(),
+                content: input.content.trim(),
+                thumbnail: input.thumbnail || null,
+                price: input.price || null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', postId);
+
+        if (error) {
+            nvLog('AT', '❌ OA_UPDATE_COMMUNITY_POST 에러', error);
+            return { success: false, message: `게시글 수정에 실패했습니다. (${error.message})` };
+        }
+
+        nvLog('AT', '✅ FA_UPDATE_COMMUNITY_POST 완료', { postId });
+        return { success: true, message: '게시글이 수정되었습니다.' };
+
+    } catch (err: any) {
+        nvLog('AT', '❌ FA_UPDATE_COMMUNITY_POST 예외', err);
+        return { success: false, message: `시스템 오류가 발생했습니다. (${err?.message || ''})` };
+    }
+}
