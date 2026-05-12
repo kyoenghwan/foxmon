@@ -79,12 +79,12 @@ export default function NoticePage() {
             {/* 테이블 */}
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 {/* 헤더 */}
-                <div className="grid grid-cols-[60px_1fr_80px_100px_80px] bg-gray-50 border-b border-gray-200 text-[12px] font-black text-gray-500">
-                    <div className="px-3 py-3 text-center">번호</div>
+                <div className="grid grid-cols-[50px_1fr_80px] md:grid-cols-[60px_1fr_80px_100px_80px] bg-gray-50 border-b border-gray-200 text-[12px] font-black text-gray-500">
+                    <div className="px-2 md:px-3 py-3 text-center">번호</div>
                     <div className="px-3 py-3">제목</div>
-                    <div className="px-3 py-3 text-center">이름</div>
-                    <div className="px-3 py-3 text-center">날짜</div>
-                    <div className="px-3 py-3 text-center">조회</div>
+                    <div className="px-3 py-3 text-center hidden md:block">이름</div>
+                    <div className="px-2 md:px-3 py-3 text-center">날짜</div>
+                    <div className="px-3 py-3 text-center hidden md:block">조회</div>
                 </div>
 
                 {/* 고정 항목 (알림) */}
@@ -92,19 +92,19 @@ export default function NoticePage() {
                     <React.Fragment key={notice.id}>
                         <div
                             onClick={() => setExpandedId(expandedId === notice.id ? null : notice.id)}
-                            className="grid grid-cols-[60px_1fr_80px_100px_80px] border-b border-gray-100 bg-orange-50/30 hover:bg-orange-50 transition-colors cursor-pointer"
+                            className="grid grid-cols-[50px_1fr_80px] md:grid-cols-[60px_1fr_80px_100px_80px] border-b border-gray-100 bg-orange-50/30 hover:bg-orange-50 transition-colors cursor-pointer"
                         >
-                            <div className="px-3 py-3 text-center">
-                                <span className="inline-block px-2 py-0.5 bg-red-500 text-white text-[10px] font-black rounded">알림</span>
+                            <div className="px-2 md:px-3 py-3 text-center flex items-center justify-center">
+                                <span className="inline-block px-1.5 md:px-2 py-0.5 bg-red-500 text-white text-[9px] md:text-[10px] font-black rounded">알림</span>
                             </div>
-                            <div className="px-3 py-3 text-[14px] font-bold text-gray-900 flex items-center gap-2">
-                                <span className="text-yellow-500">📌</span>
-                                <span className="text-primary font-black text-[12px]">{notice.category}</span>
-                                {notice.title}
+                            <div className="px-3 py-3 text-[13px] md:text-[14px] font-bold text-gray-900 flex items-center gap-2">
+                                <span className="text-yellow-500 hidden sm:inline-block">📌</span>
+                                <span className="text-primary font-black text-[11px] md:text-[12px] shrink-0">{notice.category}</span>
+                                <span className="truncate">{notice.title}</span>
                             </div>
-                            <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.author_name}</div>
-                            <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.created_at}</div>
-                            <div className="px-3 py-3 text-center text-[13px] text-gray-700 font-bold">{notice.view_count.toLocaleString()}</div>
+                            <div className="px-3 py-3 text-center text-[13px] text-gray-500 hidden md:flex items-center justify-center">{notice.author_name}</div>
+                            <div className="px-2 md:px-3 py-3 text-center text-[11px] md:text-[13px] text-gray-500 flex items-center justify-center whitespace-nowrap">{notice.created_at}</div>
+                            <div className="px-3 py-3 text-center text-[13px] text-gray-700 font-bold hidden md:flex items-center justify-center">{notice.view_count.toLocaleString()}</div>
                         </div>
                         {expandedId === notice.id && (
                             <div className="bg-orange-50/10 p-6 border-b border-gray-200 text-[14px] text-gray-800 leading-relaxed font-medium whitespace-pre-wrap animate-in fade-in slide-in-from-top-2">
@@ -119,16 +119,16 @@ export default function NoticePage() {
                     <React.Fragment key={notice.id}>
                         <div
                             onClick={() => setExpandedId(expandedId === notice.id ? null : notice.id)}
-                            className="grid grid-cols-[60px_1fr_80px_100px_80px] border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer"
+                            className="grid grid-cols-[50px_1fr_80px] md:grid-cols-[60px_1fr_80px_100px_80px] border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer"
                         >
-                            <div className="px-3 py-3 text-center text-[13px] text-gray-500 font-medium">{normal.length - idx}</div>
-                            <div className="px-3 py-3 text-[14px] text-gray-800 flex items-center gap-2">
-                                <span className="text-gray-400 text-[12px] font-bold">{notice.category}</span>
-                                <span className={expandedId === notice.id ? 'font-bold text-primary' : ''}>{notice.title}</span>
+                            <div className="px-2 md:px-3 py-3 text-center text-[12px] md:text-[13px] text-gray-500 font-medium flex items-center justify-center">{normal.length - idx}</div>
+                            <div className="px-3 py-3 text-[13px] md:text-[14px] text-gray-800 flex items-center gap-2">
+                                <span className="text-gray-400 text-[11px] md:text-[12px] font-bold shrink-0">{notice.category}</span>
+                                <span className={`truncate ${expandedId === notice.id ? 'font-bold text-primary' : ''}`}>{notice.title}</span>
                             </div>
-                            <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.author_name}</div>
-                            <div className="px-3 py-3 text-center text-[13px] text-gray-500">{notice.created_at}</div>
-                            <div className="px-3 py-3 text-center text-[13px] text-gray-700 font-bold">{notice.view_count.toLocaleString()}</div>
+                            <div className="px-3 py-3 text-center text-[13px] text-gray-500 hidden md:flex items-center justify-center">{notice.author_name}</div>
+                            <div className="px-2 md:px-3 py-3 text-center text-[11px] md:text-[13px] text-gray-500 flex items-center justify-center whitespace-nowrap">{notice.created_at}</div>
+                            <div className="px-3 py-3 text-center text-[13px] text-gray-700 font-bold hidden md:flex items-center justify-center">{notice.view_count.toLocaleString()}</div>
                         </div>
                         {expandedId === notice.id && (
                             <div className="bg-gray-50/50 p-6 border-b border-gray-200 text-[14px] text-gray-800 leading-relaxed font-medium whitespace-pre-wrap animate-in fade-in slide-in-from-top-2">
