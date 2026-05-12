@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 interface BannerPopupProps {
@@ -10,6 +10,7 @@ interface BannerPopupProps {
 
 export function SiteBannerPopup({ banners }: BannerPopupProps) {
     const [visibleBanners, setVisibleBanners] = useState<any[]>([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         if (!banners || banners.length === 0) return;
@@ -28,11 +29,17 @@ export function SiteBannerPopup({ banners }: BannerPopupProps) {
 
     if (visibleBanners.length === 0) return null;
 
-    // Show only the first active banner as a popup to avoid spamming the user
-    const banner = visibleBanners[0];
+    // 현재 선택된 배너
+    const banner = visibleBanners[currentIndex] || visibleBanners[0];
 
     const handleClose = () => {
-        setVisibleBanners(prev => prev.filter(b => b.id !== banner.id));
+        setVisibleBanners(prev => {
+            const next = prev.filter(b => b.id !== banner.id);
+            if (currentIndex >= next.length) {
+                setCurrentIndex(Math.max(0, next.length - 1));
+            }
+            return next;
+        });
     };
 
     const handleHideToday = () => {
@@ -48,24 +55,51 @@ export function SiteBannerPopup({ banners }: BannerPopupProps) {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div className="relative w-full max-w-sm bg-white rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
-                {/* 이미지 및 링크 영역 */}
-                {banner.link_url ? (
-                    <Link href={banner.link_url} onClick={handleClose} className="block w-full bg-gray-100">
+                {/* 이미지 및 링크 영역 (캐러셀) */}
+                <div className="relative w-full bg-gray-100 flex items-center justify-center group">
+                    {visibleBanners.length > 1 && (
+                        <>
+                            <button 
+                                onClick={(e) => { e.preventDefault(); setCurrentIndex(prev => prev === 0 ? visibleBanners.length - 1 : prev - 1); }}
+                                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/30 hover:bg-black/50 text-white rounded-full z-10 transition-colors opacity-0 group-hover:opacity-100"
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            <button 
+                                onClick={(e) => { e.preventDefault(); setCurrentIndex(prev => prev === visibleBanners.length - 1 ? 0 : prev + 1); }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/30 hover:bg-black/50 text-white rounded-full z-10 transition-colors opacity-0 group-hover:opacity-100"
+                            >
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                            
+                            {/* 페이지 인디케이터 */}
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+                                {visibleBanners.map((_, idx) => (
+                                    <div 
+                                        key={idx} 
+                                        className={`w-2 h-2 rounded-full transition-all ${idx === currentIndex ? 'bg-white w-4' : 'bg-white/50'}`}
+                                    />
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {banner.link_url ? (
+                        <Link href={banner.link_url} onClick={handleClose} className="block w-full">
+                            <img 
+                                src={banner.image_url} 
+                                alt={banner.title} 
+                                className="w-full h-auto max-h-[75vh] object-contain"
+                            />
+                        </Link>
+                    ) : (
                         <img 
                             src={banner.image_url} 
                             alt={banner.title} 
-                            className="w-full h-auto object-contain"
+                            className="w-full h-auto max-h-[75vh] object-contain"
                         />
-                    </Link>
-                ) : (
-                    <div className="w-full bg-gray-100 flex items-center justify-center">
-                        <img 
-                            src={banner.image_url} 
-                            alt={banner.title} 
-                            className="w-full h-auto object-contain"
-                        />
-                    </div>
-                )}
+                    )}
+                </div>
 
                 {/* 하단 컨트롤 영역 */}
                 <div className="flex items-center justify-between px-4 py-3 bg-white border-t">
