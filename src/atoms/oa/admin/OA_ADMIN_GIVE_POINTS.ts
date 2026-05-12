@@ -60,10 +60,11 @@ export async function OA_ADMIN_GIVE_POINTS(input: GivePointsInput) {
         .from('point_recharge_history')
         .insert({
           user_id: userId,
-          amount: paidPointsDiff,
+          cash_amount: paidPointsDiff,
+          point_amount: paidPointsDiff,
           remained_point: paidPointsDiff,
-          recharge_method: 'ADMIN_MANUAL',
-          status: 'COMPLETED'
+          bonus_ratio: 0,
+          is_first_charge: false
         });
       if (historyError) {
         nvLog('AT', `⚠️ 유료포인트 영수증 발행 실패`, historyError.message);

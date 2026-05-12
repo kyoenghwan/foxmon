@@ -116,7 +116,7 @@ export function AdminPointHistoryModal({ isOpen, onClose, employer }: any) {
                                                 <th className="p-3 font-semibold">생성일</th>
                                                 <th className="p-3 font-semibold text-right">최초 충전액</th>
                                                 <th className="p-3 font-semibold text-right">남은 잔액 (결제가능)</th>
-                                                <th className="p-3 font-semibold text-center">수단</th>
+                                                <th className="p-3 font-semibold text-center">보너스 비율</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -125,10 +125,10 @@ export function AdminPointHistoryModal({ isOpen, onClose, employer }: any) {
                                             ) : history?.recharges?.map((rc: any) => (
                                                 <tr key={rc.id} className={`border-b last:border-0 hover:bg-gray-50/50 ${Number(rc.remained_point) === 0 ? 'opacity-50' : ''}`}>
                                                     <td className="p-3 text-gray-500">{format(new Date(rc.created_at), 'yy-MM-dd HH:mm')}</td>
-                                                    <td className="p-3 text-right text-gray-500">{Number(rc.amount).toLocaleString()}</td>
+                                                    <td className="p-3 text-right text-gray-500">{Number(rc.point_amount || 0).toLocaleString()}</td>
                                                     <td className="p-3 text-right font-black text-gray-900">{Number(rc.remained_point).toLocaleString()}</td>
                                                     <td className="p-3 text-center">
-                                                        <Badge variant="secondary" className="text-[11px]">{rc.recharge_method}</Badge>
+                                                        <Badge variant="secondary" className="text-[11px]">{(rc.bonus_ratio || 0) * 100}%</Badge>
                                                     </td>
                                                 </tr>
                                             ))}
