@@ -392,13 +392,13 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
     const [form, setForm] = useState<AdFormData>({
         ...restInitialData,
-        company: initialData?.company || initialData?.company_name || '',
-        title: initialData?.title || initialData?.job_title || '',
+        company: initialData?.company || (initialData as any)?.company_name || '',
+        title: initialData?.title || (initialData as any)?.job_title || '',
         location: initialData?.location || '',
         pay: initialData?.pay || '',
-        pay_type: initialData?.pay_type || initialData?.salary_type || '월급',
-        pay_amount: initialData?.pay_amount?.toString() || initialData?.salary_amount?.toString() || '',
-        category_1: initialData?.category_1 || initialData?.category || '',
+        pay_type: initialData?.pay_type || (initialData as any)?.salary_type || '월급',
+        pay_amount: initialData?.pay_amount?.toString() || (initialData as any)?.salary_amount?.toString() || '',
+        category_1: initialData?.category_1 || (initialData as any)?.category || '',
         category_2: initialData?.category_2 || '',
         image: initialData?.image || '',
         color: initColor,
