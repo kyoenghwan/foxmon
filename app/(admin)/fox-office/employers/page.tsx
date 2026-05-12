@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function EmployersManagementPage() {
     const [employers, setEmployers] = useState<EmployerListItem[]>([]);
@@ -211,9 +212,23 @@ export default function EmployersManagementPage() {
                                             </div>
                                             <div className="text-[12px] text-gray-400">{emp.email}</div>
                                         </td>
-                                        <td className="py-4 px-6 text-center">
+                                        <td className="py-4 px-6 text-center align-top">
                                             <div className="font-black text-blue-600">{Number(emp.paid_points || 0).toLocaleString()}P</div>
-                                            <div className="text-[11px] text-green-600 font-bold">+{Number(emp.bonus_points || 0).toLocaleString()}P</div>
+                                            <div className="text-[11px] text-green-600 font-bold mb-1">+{Number(emp.bonus_points || 0).toLocaleString()}P</div>
+                                            {emp.admin_memo && (
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <div className="inline-block mt-1">
+                                                                <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200 text-[10px] cursor-help px-1.5 py-0">⚠️ 데이터 이상</Badge>
+                                                            </div>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className="max-w-[300px] text-[12px] bg-red-600 text-white border-red-700">
+                                                            {emp.admin_memo}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            )}
                                         </td>
                                         <td className="py-4 px-6 text-center">
                                             {emp.business_cert_image_url ? (

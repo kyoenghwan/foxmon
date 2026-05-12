@@ -54,6 +54,22 @@ export async function OA_ADMIN_GIVE_POINTS(input: GivePointsInput) {
       nvLog('AT', `⚠️ 포인트 로그 기록 실패 (단, 잔액은 변경됨)`, logError.message);
     }
 
+    // 4. (버그 픽스) 유료 포인트 추가 지급 시 반드시 영수증(point_recharge_history) 발행
+    if (paidPointsDiff > 0) {
+      const { error: historyError } = await supabaseAdmin
+        .from('point_recharge_history')
+        .insert({
+          user_id: userId,
+          amount: paidPointsDiff,
+          remained_point: paidPointsDiff,
+          recharge_method: 'ADMIN_MANUAL',
+          status: 'COMPLETED'
+        });
+      if (historyError) {
+        nvLog('AT', `⚠️ 유료포인트 영수증 발행 실패`, historyError.message);
+      }
+    }
+
     nvLog('AT', `✅ OA_ADMIN_GIVE_POINTS 완료`);
     return { success: true };
   } catch (error: any) {
