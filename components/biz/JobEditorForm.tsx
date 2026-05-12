@@ -1134,53 +1134,35 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                             채용 조건
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div className="md:col-span-2">
-                                <label className="text-[12px] font-bold text-gray-600 mb-2 block">고용 형태</label>
-                                <div className="flex flex-wrap gap-3">
-                                    {employmentTypes.map(emp => (
-                                        <label key={emp.code_value} className="flex items-center gap-1.5 cursor-pointer">
-                                            <input 
-                                                type="radio" 
-                                                name="employment_type" 
-                                                value={emp.code_value}
-                                                checked={form.employment_type === emp.code_value}
-                                                onChange={e => update('employment_type', e.target.value)}
-                                                className="w-4 h-4 text-primary focus:ring-primary"
-                                            />
-                                            <span className="text-[14px] font-medium text-gray-700">{emp.code_name}</span>
-                                        </label>
-                                    ))}
-                                    {!employmentTypes.length && <span className="text-[13px] text-gray-400">데이터 로딩 중...</span>}
-                                </div>
-                            </div>
                             <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
                                         <Briefcase className="w-3 h-3" /> 직종 <span className="text-red-500">*</span>
                                     </label>
-                                    <div className="flex gap-2">
-                                        <select
-                                            value={form.category_1 || ''}
-                                            onChange={e => { update('category_1', e.target.value); update('category_2', ''); }}
-                                            className="w-1/2 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                        >
-                                            <option value="">1차 직종</option>
-                                            {categories1.map(c1 => (
-                                                <option key={c1.code_value} value={c1.code_value}>{c1.code_name}</option>
-                                            ))}
-                                        </select>
-                                        <select
-                                            value={form.category_2 || ''}
-                                            onChange={e => update('category_2', e.target.value)}
-                                            disabled={!form.category_1}
-                                            className="w-1/2 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary disabled:bg-gray-50"
-                                        >
-                                            <option value="">2차 직종</option>
-                                            {categories2.filter(c2 => c2.parent_code_value === form.category_1).map(c2 => (
-                                                <option key={c2.code_value} value={c2.code_value}>{c2.code_name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                    <select
+                                        value={form.category_2 || form.category_1 || ''}
+                                        onChange={e => {
+                                            const val = e.target.value;
+                                            const selectedC2 = categories2.find(c => c.code_value === val);
+                                            if (selectedC2) {
+                                                update('category_1', selectedC2.parent_code_value);
+                                                update('category_2', selectedC2.code_value);
+                                            } else {
+                                                update('category_1', val);
+                                                update('category_2', '');
+                                            }
+                                        }}
+                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                    >
+                                        <option value="">직종 선택</option>
+                                        {categories1.map(c1 => (
+                                            <optgroup key={c1.code_value} label={c1.code_name}>
+                                                {categories2.filter(c2 => c2.parent_code_value === c1.code_value).map(c2 => (
+                                                    <option key={c2.code_value} value={c2.code_value}>{c2.code_name}</option>
+                                                ))}
+                                            </optgroup>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div>
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">근무 시간</label>

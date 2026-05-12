@@ -70,6 +70,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 user_id: userId,
                 title: payload.title,
                 location: payload.location,
+                address: payload.address,
                 
                 // 상세 컬럼 (DB 스키마에 추가된 컬럼들)
                 company_name: payload.company || payload.business_name,
@@ -197,6 +198,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             const updatePayload: any = {
                 title: payload.title,
                 location: payload.location,
+                address: payload.address,
                 company_name: payload.company || payload.business_name,
                 salary_type: payload.pay_type,
                 salary_amount: payload.pay_amount,

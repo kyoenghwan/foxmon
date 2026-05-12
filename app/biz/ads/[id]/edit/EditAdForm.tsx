@@ -16,7 +16,6 @@ export default function EditAdForm({ initialData, adId }: { initialData: any, ad
             const res = await manageBizAdAction('UPDATE', { ...data, _isDraft: true }, adId);
             if (res.success) {
                 alert('광고가 성공적으로 수정되었습니다.');
-                router.push('/biz/ads');
                 router.refresh();
             } else {
                 alert('수정에 실패했습니다: ' + res.message);
