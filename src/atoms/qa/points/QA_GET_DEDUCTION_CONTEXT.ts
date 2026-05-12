@@ -50,11 +50,16 @@ export const QA_GET_DEDUCTION_CONTEXT = async (userId: string): Promise<{ succes
     
     if (paidPoints > 0 && totalHistoryAmount !== paidPoints) {
         // 백그라운드 비동기로 관리자 메모(admin_memo) 업데이트 (실패해도 결제 흐름 방해 안 함)
-        supabaseAdmin.from('users').update({
-            admin_memo: `[🚨포인트 불일치 경고] 유저의 잔여 유료포인트(${paidPoints}P)와 실제 충전 영수증 총합(${totalHistoryAmount}P)이 일치하지 않습니다. 관리자가 수동으로 유료 포인트를 지급할 때 영수증 처리가 누락되었거나, 보너스로 주어야 할 포인트를 유료 포인트로 잘못 입력했을 수 있습니다.`
-        }).eq('id', userId)
-        .then(() => nvLog('AT', '⚠️ 관리자 메모(admin_memo) 비동기 기록 완료'))
-        .catch(err => nvLog('AT', '⚠️ 관리자 메모 기록 중 에러 발생 (무시됨)', err));
+        (async () => {
+            try {
+                await supabaseAdmin.from('users').update({
+                    admin_memo: `[🚨포인트 불일치 경고] 유저의 잔여 유료포인트(${paidPoints}P)와 실제 충전 영수증 총합(${totalHistoryAmount}P)이 일치하지 않습니다. 관리자가 수동으로 유료 포인트를 지급할 때 영수증 처리가 누락되었거나, 보너스로 주어야 할 포인트를 유료 포인트로 잘못 입력했을 수 있습니다.`
+                }).eq('id', userId);
+                nvLog('AT', '⚠️ 관리자 메모(admin_memo) 비동기 기록 완료');
+            } catch (err) {
+                nvLog('AT', '⚠️ 관리자 메모 기록 중 에러 발생 (무시됨)', err);
+            }
+        })();
     }
 
     const result = {
