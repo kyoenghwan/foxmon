@@ -6,7 +6,8 @@ import { CommunityClientWrapper } from '@/components/admin/community/CommunityCl
 export const dynamic = 'force-dynamic';
 
 export default async function AdminCommunityPage() {
-    const posts = await QA_GET_ALL_COMMUNITY_POSTS();
+    const res = await QA_GET_ALL_COMMUNITY_POSTS();
+    const posts = res.success && res.data ? res.data : [];
 
     return (
         <div className="space-y-2">
