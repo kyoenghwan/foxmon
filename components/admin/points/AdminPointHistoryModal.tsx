@@ -13,7 +13,7 @@ export function AdminPointHistoryModal({ isOpen, onClose, employer }: any) {
     useEffect(() => {
         if (isOpen && employer) {
             setLoading(true);
-            adminEmployerAction({ actionType: 'GET_POINT_HISTORY', targetUserId: employer.id, adminId: 'dummy' })
+            adminEmployerAction({ actionType: 'GET_POINT_HISTORY', targetUserId: employer.id })
                 .then(res => {
                     if (res.success && 'data' in res) setHistory((res as any).data);
                     setLoading(false);
