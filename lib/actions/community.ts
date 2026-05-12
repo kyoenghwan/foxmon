@@ -119,3 +119,28 @@ export async function createCommunityPost(input: {
         return { success: false, message: `시스템 오류가 발생했습니다. (${err?.message || ''})` };
     }
 }
+
+// ============================================
+// QA: 게시글 상세 조회
+// ============================================
+export async function getCommunityPostById(postId: string) {
+    nvLog('AT', '▶️ QA_GET_COMMUNITY_POST_BY_ID', { postId });
+
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('community_posts')
+            .select('*')
+            .eq('id', postId)
+            .single();
+
+        if (error) {
+            nvLog('AT', '❌ QA_GET_COMMUNITY_POST_BY_ID 에러', error);
+            return null;
+        }
+
+        return data;
+    } catch (err) {
+        nvLog('AT', '❌ QA_GET_COMMUNITY_POST_BY_ID 예외', err);
+        return null;
+    }
+}
