@@ -126,7 +126,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
         // 사용자가 외부 클릭으로 모달을 닫는 것을 방지
         if (!open) return; 
       }}>
-        <DialogContent className="sm:max-w-md" aria-describedby="auto-logout-desc">
+        <DialogContent className="sm:max-w-md !z-[99999]" overlayClassName="!z-[99999]" aria-describedby="auto-logout-desc">
           <DialogHeader>
             <DialogTitle>자동 로그아웃 안내</DialogTitle>
             <DialogDescription id="auto-logout-desc">
