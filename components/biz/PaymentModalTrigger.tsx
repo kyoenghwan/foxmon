@@ -13,10 +13,10 @@ export function PaymentModalTrigger({ ad }: { ad: any }) {
         <>
             <button 
                 onClick={() => setOpen(true)} 
-                className="p-2 hover:bg-orange-50 rounded-lg transition-colors group" 
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white rounded-lg text-[12px] font-black hover:bg-black transition-colors"
                 title="연장 및 옵션 결제"
             >
-                <CreditCard className="w-4 h-4 text-orange-400 group-hover:text-orange-600" />
+                <CreditCard className="w-3.5 h-3.5" /> 결제 및 노출
             </button>
             
             {open && (

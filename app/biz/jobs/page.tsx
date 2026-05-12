@@ -114,13 +114,12 @@ export default async function BizJobsPage() {
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-gray-100 bg-gray-50">
-                                <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500">광고명</th>
-                                <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">등급</th>
-                                <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">결제상태</th>
-                                <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">구인상태</th>
-                                <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">조회수</th>
-                                <th className="text-left px-4 py-4 text-[12px] font-black text-gray-500">만료일</th>
-                                <th className="text-right px-6 py-4 text-[12px] font-black text-gray-500">관리</th>
+                                <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500">광고명</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">결제상태</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">구인상태</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">조회수</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">만료일</th>
+                                <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -137,30 +136,26 @@ export default async function BizJobsPage() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-4">
-                                        <TierBadge tier={ad.tier} />
-                                    </td>
-                                    <td className="px-4 py-4">
+                                    <td className="px-4 py-4 text-center">
                                         <StatusBadge expiresAt={ad.expires_at} />
                                     </td>
-                                    <td className="px-4 py-4">
+                                    <td className="px-4 py-4 text-center">
                                         <AdStatusBadge status={ad.status} />
                                     </td>
-                                    <td className="px-4 py-4">
-                                        <span className="flex items-center gap-1 text-[13px] font-bold text-gray-700">
+                                    <td className="px-4 py-4 text-center">
+                                        <span className="inline-flex items-center justify-center gap-1 text-[13px] font-bold text-gray-700">
                                             <Eye className="w-3.5 h-3.5 text-gray-400" />
                                             {ad.view_count?.toLocaleString() || 0}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-4">
-                                        <span className="flex items-center gap-1 text-[13px] font-medium text-gray-500">
+                                    <td className="px-4 py-4 text-center">
+                                        <span className="inline-flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500">
                                             <Clock className="w-3.5 h-3.5" />
                                             {ad.expires_at ? new Date(ad.expires_at).toLocaleDateString() : '무기한'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <ToggleJobStatusButton adId={ad.id} initialStatus={ad.status || 'ACTIVE'} />
+                                    <td className="px-6 py-4 text-center">
+                                        <div className="flex items-center justify-center gap-2">
                                             <PaymentModalTrigger ad={ad} />
                                             <Link href={`/biz/jobs/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
                                                 <Pencil className="w-4 h-4 text-gray-500" />
