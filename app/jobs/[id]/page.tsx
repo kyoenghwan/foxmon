@@ -3,6 +3,33 @@ import { QA_GET_JOB_BY_ID } from '@/src/atoms/qa/auth/QA_GET_JOB_BY_ID';
 import { JobDetailContent } from '@/components/jobs/job-detail-content';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const result = await QA_GET_JOB_BY_ID(id);
+  
+  if (!result.success || !result.data) {
+    return {
+      title: '공고를 찾을 수 없습니다 | 폭스몬',
+      description: '해당 채용공고는 삭제되었거나 찾을 수 없습니다.',
+    };
+  }
+
+  const job = result.data;
+  // HTML 태그 제거 및 텍스트만 추출하여 description으로 사용 (최대 160자)
+  const plainTextDescription = job.content?.replace(/<[^>]*>?/gm, '').substring(0, 160) || '폭스몬 채용공고입니다.';
+
+  return {
+    title: `${job.title} | ${job.employer_name || '폭스몬'}`,
+    description: plainTextDescription,
+    openGraph: {
+      title: `${job.title}`,
+      description: plainTextDescription,
+      images: job.image_url ? [job.image_url] : undefined,
+    }
+  };
+}
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
