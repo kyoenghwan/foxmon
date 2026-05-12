@@ -68,30 +68,38 @@ export function HomeJobSections() {
         return () => clearInterval(interval);
     }, [isPaused, notices.length]);
 
+    // 1분(60초)마다 광고 리스트를 한 칸씩 시프트하여 위치 변경 (새로고침 없이 실시간 반영)
+    useEffect(() => {
+        const adInterval = setInterval(() => {
+            const shiftArray = (arr: AdItem[]) => {
+                if (!arr || arr.length <= 1) return arr;
+                return [...arr.slice(1), arr[0]]; // 첫 번째 항목을 맨 뒤로 보냅니다
+            };
+            setPremiumJobs(prev => shiftArray(prev));
+            setSpecialJobs(prev => shiftArray(prev));
+            setLineJobs(prev => shiftArray(prev));
+            setGeneralJobs(prev => shiftArray(prev));
+        }, 60000); // 60초 주기
+        return () => clearInterval(adInterval);
+    }, []);
+
     // 🎨 [IMPACT DEMO] 22종 테마 전체 적용 (50개 카드)
     const impacts: any[] = [
         'gold', 'neon', 'neon_crazy', 'fire', 'ice', 'emerald', 'glitch', 'storm', 'ghost',
         'forest', 'ocean', 'sakura', 'galaxy', 'sun', 'lava', 'matrix', 'retro',
         'diamond', 'platinum', 'aura', 'candy', 'toxic'
     ];
-    const demoJobs = Array.from({ length: 50 }, (_, i) => {
-        // 실제 데이터가 있으면 그것을 쓰고, 없으면 기본 목업 데이터 사용
-        const baseJob = premiumJobs.length > 0 
-            ? premiumJobs[i % premiumJobs.length] 
-            : {
-                id: `mock-${i}`,
-                company: `프리미엄 광고 ${i + 1}`,
-                title: `최고의 대우 보장합니다 (${i + 1})`,
-                location: '서울 강남구',
-                pay: '[시급] 70,000원',
-                image: '',
-                impactType: 'none'
-            };
+    
+    const demoJobs = premiumJobs.map((job, i) => {
+        // 실제 유저가 선택한 테마가 있다면 적용하고, 가상 광고(또는 UPLOAD)일 경우 데모 효과를 순차적으로 입힘
+        const finalImpact = (job.isRealAd && job.theme && job.theme !== 'UPLOAD') 
+            ? job.theme 
+            : impacts[i % impacts.length];
 
         return {
-            ...baseJob,
-            id: `demo-${i}`,
-            impactType: impacts[i % impacts.length] // 효과를 순차적으로 배분
+            ...job,
+            id: job.isRealAd ? job.id : `demo-${i}-${job.id}`,
+            impactType: finalImpact
         };
     });
 

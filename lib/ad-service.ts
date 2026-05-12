@@ -23,6 +23,7 @@ export interface AdItem {
     option_bg_value?: string;
     option_highlight_value?: string;
     option_general_icons?: string[];
+    isRealAd?: boolean; // 실제 DB 연동 광고 여부
 }
 
 const IS_SUPABASE_ENABLED = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -178,8 +179,16 @@ export async function getRotatedAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 
         let ads: AdItem[] = data.map((item: any) => ({
             ...item,
             company: item.company || item.company_name || '업체명 없음',
-            pay: item.pay || (item.salary_type ? `[${item.salary_type}] ${item.salary_amount}` : item.salary_amount) || '급여협의'
+            pay: item.pay || (item.salary_type ? `[${item.salary_type}] ${item.salary_amount}` : item.salary_amount) || '급여협의',
+            isRealAd: true
         })) as AdItem[];
+        
+        // 실제 광고가 모자랄 경우 가상의 광고로 나머지 영역을 채워줍니다 (항상 limitCount만큼 유지)
+        if (ads.length < limitCount) {
+            const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
+            ads = [...ads, ...mockAdsForTier.slice(0, limitCount - ads.length)];
+        }
+
         return applyRollingLogic(ads, limitCount);
     } catch (error) {
         return getMockAds(tier, limitCount);
