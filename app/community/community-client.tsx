@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { CommunitySidebar } from '@/components/community/CommunitySidebar';
-import { Pencil } from 'lucide-react';
+import { Pencil, MessageSquare } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface BoardTab {
     id: string;
@@ -21,37 +23,13 @@ const TABS: BoardTab[] = [
     { id: 'business', label: '업소장터', prefix: '🏪업소장터' },
 ];
 
-export function CommunityClient({ activeTab: initialTab }: { activeTab: string }) {
-    const [currentTab, setCurrentTab] = useState(initialTab);
+export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0 }: { activeTab: string, initialPosts?: any[], totalPosts?: number }) {
+    const router = useRouter();
+    const currentBoard = TABS.find(t => t.id === activeTab) || TABS[0];
 
-    const currentBoard = TABS.find(t => t.id === currentTab) || TABS[0];
-
-    // Dummy data generator
-    const dummyImages = [
-        'https://picsum.photos/seed/fox1/80/80',
-        'https://picsum.photos/seed/fox2/80/80',
-        'https://picsum.photos/seed/fox3/80/80',
-        'https://picsum.photos/seed/fox4/80/80',
-        'https://picsum.photos/seed/fox5/80/80',
-    ];
-
-    const generateDummyPosts = (boardId: string) => {
-        const board = TABS.find(t => t.id === boardId);
-        const prefix = board?.prefix || '💬';
-        
-        return Array.from({ length: 15 }).map((_, i) => ({
-            id: i,
-            title: `[${prefix}] 여우몬 커뮤니티 게시글 테스트 제목입니다 ${i + 1}`,
-            author: boardId === 'report' ? '익명' : `익명의 여우${i + 1}`,
-            date: '2024-03-24',
-            views: 120 + i * 15,
-            comments: (i * 7 + 3) % 20,
-            isHot: i < 3,
-            thumbnail: boardId === 'foxmarket' ? dummyImages[i % dummyImages.length] : null,
-        }));
+    const handleTabChange = (tabId: string) => {
+        router.push(`/community?tab=${tabId}`);
     };
-
-    const posts = generateDummyPosts(currentTab);
 
     return (
         <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -61,9 +39,9 @@ export function CommunityClient({ activeTab: initialTab }: { activeTab: string }
                     {TABS.map((tab) => (
                         <button
                             key={tab.id}
-                            onClick={() => setCurrentTab(tab.id)}
+                            onClick={() => handleTabChange(tab.id)}
                             className={`px-4 py-2 rounded-full text-[13px] font-bold transition-all whitespace-nowrap ${
-                                currentTab === tab.id
+                                activeTab === tab.id
                                     ? 'bg-primary text-white shadow-md'
                                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                             }`}
@@ -76,7 +54,7 @@ export function CommunityClient({ activeTab: initialTab }: { activeTab: string }
 
             {/* [Desktop Only] 좌측 사이드바 */}
             <div className="w-52 shrink-0 sticky top-[130px] hidden md:block">
-                <CommunitySidebar currentTab={currentTab} onTabChange={setCurrentTab} />
+                <CommunitySidebar currentTab={activeTab} onTabChange={handleTabChange} />
             </div>
 
             {/* 우측 게시판 콘텐츠 */}
@@ -91,7 +69,7 @@ export function CommunityClient({ activeTab: initialTab }: { activeTab: string }
                 </div>
 
                 {/* 업소제보 안내 */}
-                {currentTab === 'report' && (
+                {activeTab === 'report' && (
                     <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-start gap-3 mx-1 sm:mx-0">
                         <span className="text-red-500 text-xl">🚨</span>
                         <div className="text-[13px] text-red-700 leading-relaxed">
@@ -114,13 +92,13 @@ export function CommunityClient({ activeTab: initialTab }: { activeTab: string }
                             </tr>
                         </thead>
                         <tbody>
-                            {posts.map((post, i) => (
+                            {initialPosts.map((post, i) => (
                                 <tr key={post.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors bg-white">
                                     <td className="py-3 md:py-3.5 px-1 md:px-4 text-center text-[11px] md:text-[12px] text-gray-400 font-bold">
-                                        {post.isHot ? <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-sm shadow-sm inline-block">HOT</span> : 100 - i}
+                                        {post.is_hot ? <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-sm shadow-sm inline-block">HOT</span> : (totalPosts - i)}
                                     </td>
                                     <td className="py-3 md:py-3.5 px-2 md:px-4">
-                                        <Link href="#" className="flex items-center gap-2 md:gap-2.5 group">
+                                        <Link href={`/community/${activeTab}/${post.id}`} className="flex items-center gap-2 md:gap-2.5 group">
                                             {post.thumbnail && (
                                                 <img src={post.thumbnail} alt="" className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover shrink-0 border border-gray-100" />
                                             )}
@@ -129,28 +107,38 @@ export function CommunityClient({ activeTab: initialTab }: { activeTab: string }
                                                     <span className="text-[13px] md:text-[14px] font-medium text-gray-900 group-hover:text-primary transition-colors block truncate">
                                                         {post.title}
                                                     </span>
-                                                    {post.comments > 0 && <span className="text-[11px] md:text-[12px] font-black text-purple-600 shrink-0">[{post.comments}]</span>}
-                                                    <span className="bg-orange-100 text-orange-600 text-[8px] font-black px-1 rounded-sm shrink-0">N</span>
+                                                    {post.comment_count > 0 && <span className="text-[11px] md:text-[12px] font-black text-purple-600 shrink-0">[{post.comment_count}]</span>}
+                                                    {Date.now() - new Date(post.created_at).getTime() < 86400000 && <span className="bg-orange-100 text-orange-600 text-[8px] font-black px-1 rounded-sm shrink-0">N</span>}
                                                 </div>
-                                                {currentTab === 'foxmarket' && (
-                                                    <span className="text-[11px] text-gray-400 mt-0.5 block">중고 거래 · 가격 협의</span>
+                                                {activeTab === 'foxmarket' && post.price && (
+                                                    <span className="text-[11px] text-gray-500 mt-0.5 block font-bold">{post.price}</span>
                                                 )}
                                             </div>
                                         </Link>
                                     </td>
                                     <td className="py-3 md:py-3.5 px-1 md:px-4 text-center">
                                         <div className="text-[12px] md:text-[13px] text-gray-600 font-medium truncate max-w-[80px] md:max-w-[120px] mx-auto">
-                                            {post.author}
+                                            {post.is_anonymous ? '익명' : post.author_name}
                                         </div>
                                     </td>
                                     <td className="py-3.5 px-4 text-center text-[12px] text-gray-400 font-medium hidden lg:table-cell">
-                                        {post.date}
+                                        {format(new Date(post.created_at), 'yyyy-MM-dd')}
                                     </td>
                                     <td className="py-3.5 px-4 text-center text-[12px] text-gray-500 font-bold hidden sm:table-cell">
-                                        {post.views}
+                                        {post.view_count || 0}
                                     </td>
                                 </tr>
                             ))}
+                            {initialPosts.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="py-16 text-center text-gray-500">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <MessageSquare className="w-8 h-8 text-gray-300" />
+                                            <p className="text-[14px] font-medium">아직 등록된 게시글이 없습니다.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
