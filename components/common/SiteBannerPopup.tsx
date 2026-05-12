@@ -36,23 +36,18 @@ export function SiteBannerPopup({ banners }: BannerPopupProps) {
     };
 
     const handleHideToday = () => {
-        // Set expiration to 24 hours from now
         const expireTime = new Date().getTime() + 24 * 60 * 60 * 1000;
         localStorage.setItem(`hide_banner_${banner.id}`, expireTime.toString());
         handleClose();
     };
 
+    const handleCloseAll = () => {
+        setVisibleBanners([]);
+    };
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div className="relative w-full max-w-sm bg-white rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
-                {/* 닫기 버튼 */}
-                <button 
-                    onClick={handleClose}
-                    className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-black/30 hover:bg-black/50 text-white rounded-full z-10 transition-colors backdrop-blur-md"
-                >
-                    <X className="w-5 h-5" />
-                </button>
-
                 {/* 이미지 및 링크 영역 */}
                 {banner.link_url ? (
                     <Link href={banner.link_url} onClick={handleClose} className="block w-full bg-gray-100">
@@ -84,12 +79,22 @@ export function SiteBannerPopup({ banners }: BannerPopupProps) {
                             오늘 하루 보지 않기
                         </span>
                     </label>
-                    <button 
-                        onClick={handleClose}
-                        className="text-[13px] font-black text-gray-800 hover:text-primary transition-colors"
-                    >
-                        닫기
-                    </button>
+                    <div className="flex items-center gap-4">
+                        {visibleBanners.length > 1 && (
+                            <button 
+                                onClick={handleCloseAll}
+                                className="text-[13px] font-black text-gray-400 hover:text-gray-700 transition-colors"
+                            >
+                                모두 닫기
+                            </button>
+                        )}
+                        <button 
+                            onClick={handleClose}
+                            className="text-[13px] font-black text-gray-800 hover:text-primary transition-colors"
+                        >
+                            닫기
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
