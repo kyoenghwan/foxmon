@@ -3,7 +3,7 @@ import { QA_GET_EMPLOYER_LIST } from '../../qa/admin/QA_GET_EMPLOYER_LIST';
 import { OA_TOGGLE_BUSINESS_VERIFY } from '../../oa/admin/OA_TOGGLE_BUSINESS_VERIFY';
 
 export interface AdminEmployerFlowInput {
-    actionType: 'GET_LIST' | 'TOGGLE_VERIFY' | 'GIVE_POINTS';
+    actionType: 'GET_LIST' | 'TOGGLE_VERIFY' | 'GIVE_POINTS' | 'GET_POINT_HISTORY';
     adminId: string;
     targetUserId?: string;
     isVerified?: boolean;
@@ -20,6 +20,11 @@ export async function FA_ADMIN_EMPLOYER_FLOW(input: AdminEmployerFlowInput) {
             case 'GET_LIST': {
                 const result = await QA_GET_EMPLOYER_LIST();
                 return result;
+            }
+            case 'GET_POINT_HISTORY': {
+                if (!input.targetUserId) return { success: false, message: '유저 ID 누락' };
+                const { QA_GET_USER_POINT_HISTORY } = await import('../../qa/admin/QA_GET_USER_POINT_HISTORY');
+                return await QA_GET_USER_POINT_HISTORY(input.targetUserId);
             }
             case 'TOGGLE_VERIFY': {
                 if (!input.targetUserId || input.isVerified === undefined) {

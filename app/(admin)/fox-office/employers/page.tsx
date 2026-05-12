@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AdminPointHistoryModal } from '@/components/admin/points/AdminPointHistoryModal';
 
 export default function EmployersManagementPage() {
     const [employers, setEmployers] = useState<EmployerListItem[]>([]);
@@ -22,6 +23,9 @@ export default function EmployersManagementPage() {
     const [pointType, setPointType] = useState<'PAID' | 'BONUS'>('PAID');
     const [pointDesc, setPointDesc] = useState('');
     const [isSubmittingPoint, setIsSubmittingPoint] = useState(false);
+
+    // 포인트 내역 모달 상태
+    const [historyModalEmployer, setHistoryModalEmployer] = useState<EmployerListItem | null>(null);
 
     const fetchEmployers = async () => {
         setLoading(true);
@@ -229,6 +233,16 @@ export default function EmployersManagementPage() {
                                                     </Tooltip>
                                                 </TooltipProvider>
                                             )}
+                                            <div className="mt-2">
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm" 
+                                                    className="h-6 text-[11px] text-gray-500 hover:text-blue-600 border border-gray-200"
+                                                    onClick={() => setHistoryModalEmployer(emp)}
+                                                >
+                                                    내역 보기
+                                                </Button>
+                                            </div>
                                         </td>
                                         <td className="py-4 px-6 text-center">
                                             {emp.business_cert_image_url ? (
@@ -361,6 +375,13 @@ export default function EmployersManagementPage() {
                     </table>
                 </div>
             </div>
+
+            {/* 포인트 내역 및 검증 모달 */}
+            <AdminPointHistoryModal 
+                isOpen={!!historyModalEmployer} 
+                onClose={() => setHistoryModalEmployer(null)} 
+                employer={historyModalEmployer} 
+            />
         </div>
     );
 }
