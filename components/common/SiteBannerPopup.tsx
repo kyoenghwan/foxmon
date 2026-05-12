@@ -97,12 +97,12 @@ export function SiteBannerPopup({ banners }: BannerPopupProps) {
 
             {/* Mobile View (below md) - 캐러셀 슬라이더 */}
             <div className="md:hidden relative w-full max-w-sm animate-in fade-in zoom-in duration-300 z-10 pointer-events-auto">
-                {/* 겹친 카드 시각 효과 */}
+                {/* 겹친 카드 시각 효과 (오른쪽 아래로 약간 틀어지게) */}
                 {visibleBanners.length > 1 && (
-                    <div className="absolute -bottom-2.5 left-2 right-2 h-10 bg-white/80 rounded-b-2xl -z-10 shadow-sm border border-gray-100" />
+                    <div className="absolute inset-0 bg-white/90 rounded-2xl -z-10 shadow-md border border-gray-200 translate-x-2 translate-y-2 rotate-1" />
                 )}
                 {visibleBanners.length > 2 && (
-                    <div className="absolute -bottom-5 left-4 right-4 h-10 bg-white/50 rounded-b-2xl -z-20 shadow-sm border border-gray-100/50" />
+                    <div className="absolute inset-0 bg-white/60 rounded-2xl -z-20 shadow-md border border-gray-200 translate-x-4 translate-y-4 rotate-2" />
                 )}
 
                 <div className="relative bg-white rounded-2xl overflow-hidden shadow-2xl">
