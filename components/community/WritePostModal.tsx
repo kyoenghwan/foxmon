@@ -1,9 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Send, ImagePlus } from 'lucide-react';
+import { X, Send, ImagePlus, ImageIcon } from 'lucide-react';
 import { createCommunityPost } from '@/lib/actions/community';
 import { nvLog } from '@/lib/logger';
+import dynamic from 'next/dynamic';
+import { compressImageFile } from '@/lib/image-utils';
+
+const SunEditor = dynamic(() => import('suneditor-react'), { 
+    ssr: false, 
+    loading: () => <div className="min-h-[350px] flex items-center justify-center bg-gray-50 border rounded-xl text-sm font-medium text-gray-400">에디터 로딩중...</div> 
+});
+import 'suneditor/dist/css/suneditor.min.css';
 
 interface WritePostModalProps {
     boardId: string;
@@ -136,18 +144,54 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
 
                     {/* 내용 */}
                     <div>
-                        <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">
-                            내용 <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
-                            value={content}
-                            onChange={e => setContent(e.target.value)}
-                            placeholder="내용을 입력해주세요"
-                            rows={10}
-                            maxLength={10000}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[14px] outline-none focus:border-primary resize-none leading-relaxed"
-                        />
-                        <p className="text-[11px] text-gray-400 mt-1 text-right">{content.length}/10,000</p>
+                        <div className="flex items-center justify-between mb-1.5">
+                            <label className="text-[12px] font-bold text-gray-600 block">
+                                내용 <span className="text-red-500">*</span>
+                            </label>
+                            <label className="cursor-pointer bg-orange-50 hover:bg-orange-100 text-orange-600 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all flex items-center gap-1.5 border border-orange-200">
+                                <ImageIcon className="w-3.5 h-3.5" /> 📸 사진 간편 삽입
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    multiple
+                                    className="hidden" 
+                                    onChange={async (e) => {
+                                        const files = Array.from(e.target.files || []);
+                                        if(files.length > 0) {
+                                            try {
+                                                let currentContent = content || '';
+                                                if (currentContent === '<p><br></p>') currentContent = '';
+                                                
+                                                let addedHtml = '';
+                                                for (const file of files) {
+                                                    const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 1200, quality: 0.85, format: 'image/webp' });
+                                                    addedHtml += `<img src="${compressedBase64}" style="width: 100%; height: auto !important; display: block; margin: 0 auto;" /><br/>`;
+                                                }
+                                                setContent(currentContent + addedHtml);
+                                                alert(`${files.length}장의 이미지가 본문에 삽입되었습니다.`);
+                                            } catch (error) {
+                                                console.error('이미지 압축 실패:', error);
+                                                alert('이미지 처리 중 오류가 발생했습니다.');
+                                            }
+                                        }
+                                    }}
+                                />
+                            </label>
+                        </div>
+                        <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                            <SunEditor
+                                setContents={content}
+                                onChange={(val) => setContent(val)}
+                                setOptions={{
+                                    height: '350px',
+                                    font: ['Pretendard', 'Noto Sans KR', '맑은 고딕', '돋움', 'Arial'],
+                                    buttonList: [
+                                        ['fontSize', 'bold', 'underline', 'fontColor', 'align', 'image']
+                                    ],
+                                    placeholder: "내용을 자유롭게 작성해 주세요. (이미지 첨부 지원)"
+                                }}
+                            />
+                        </div>
                     </div>
 
                     {/* 익명 안내 */}

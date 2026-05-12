@@ -93,7 +93,7 @@ export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }
                                                 <span className="truncate">{post.title}</span>
                                             </div>
                                             <div className="text-[12px] text-gray-400 mt-1 truncate">
-                                                {post.content}
+                                                {post.content?.replace(/<[^>]*>?/gm, '')}
                                             </div>
                                         </div>
                                     </td>
