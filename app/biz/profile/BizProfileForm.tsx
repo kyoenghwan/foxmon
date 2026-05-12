@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { userSettingsAction } from '@/lib/actions';
-import { toast } from 'react-hot-toast';
 
 export default function BizProfileForm({ user }: { user: any }) {
     const [formData, setFormData] = useState({
@@ -24,20 +23,20 @@ export default function BizProfileForm({ user }: { user: any }) {
             const res = await userSettingsAction('UPDATE_PROFILE', {
                 profileData: {
                     business_registration_number: formData.business_registration_number,
-                    // If you want to update other fields, you need to map them properly to UpdateUserProfileInput.
-                    // Note: 'business_name' or 'representative_name' might not be in the UpdateUserProfileInput directly, 
-                    // but we can pass what is supported.
+                    business_name: formData.business_name,
+                    representative_name: formData.representative_name,
+                    business_category: formData.business_category,
                 }
             });
             if (res.success) {
-                toast.success('업체 정보가 저장되었습니다.');
+                alert('업체 정보가 저장되었습니다.');
                 window.location.reload();
             } else {
-                toast.error(res.message || '저장에 실패했습니다.');
+                alert(res.message || '저장에 실패했습니다.');
             }
         } catch (error) {
             console.error(error);
-            toast.error('오류가 발생했습니다.');
+            alert('오류가 발생했습니다.');
         } finally {
             setLoading(false);
         }
