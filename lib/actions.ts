@@ -204,3 +204,21 @@ export async function adminSiteBannerAction(actionType: 'UPSERT' | 'DELETE', pay
 
     return { success: false, message: '잘못된 액션입니다.' };
 }
+
+import { OA_DELETE_COMMUNITY_POST } from '@/src/atoms/oa/admin/OA_DELETE_COMMUNITY_POST';
+
+export async function adminCommunityAction(actionType: 'DELETE', payload: string) {
+    const session = await auth();
+    if (!session?.user?.id || ((session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'SUPER_ADMIN')) {
+        return { success: false, message: '관리자 권한이 없습니다.' };
+    }
+
+    if (actionType === 'DELETE') {
+        const result = await OA_DELETE_COMMUNITY_POST(payload);
+        revalidatePath('/fox-office/community');
+        revalidatePath('/community'); // Update the main community page as well
+        return result;
+    }
+
+    return { success: false, message: '잘못된 액션입니다.' };
+}

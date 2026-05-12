@@ -7,12 +7,14 @@ import { nvLog } from '@/lib/logger';
  */
 
 const BOARD_PERMISSIONS: Record<string, string[]> = {
+    notice:    ['ADMIN', 'SUPER_ADMIN'],
     free:      ['USER', 'EMPLOYER', 'ADMIN', 'SUPER_ADMIN'],
     foxtalk:   ['USER'],
     foxmarket: ['USER'],
     reviews:   ['USER'],
     tips:      ['USER'],
     report:    ['USER'],
+    secret:    ['USER'],
     business:  ['EMPLOYER'],
 };
 
@@ -51,8 +53,8 @@ export function RA_CHECK_BOARD_PERMISSION(input: PermissionInput): PermissionOut
     // 3. 일반 권한 체크
     if (!allowedRoles.includes(user_role)) {
         const boardLabels: Record<string, string> = {
-            foxtalk: '폭스수다', foxmarket: '폭스중고', reviews: '업소후기',
-            tips: '꿀팁·노하우', report: '업소제보', business: '업소장터',
+            notice: '공지사항', foxtalk: '폭스수다', foxmarket: '폭스중고', reviews: '업소후기',
+            tips: '꿀팁·노하우', report: '업소제보', business: '업소장터', secret: '비밀게시판', free: '자유게시판'
         };
         const label = boardLabels[board_id] || board_id;
 

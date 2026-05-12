@@ -12,6 +12,7 @@ const sections: SidebarSection[] = [
     {
         title: '전체 공개',
         items: [
+            { id: 'notice', label: '공지사항', icon: AlertTriangle },
             { id: 'free', label: '자유게시판', icon: Users },
         ],
     },
@@ -22,6 +23,7 @@ const sections: SidebarSection[] = [
             { id: 'foxmarket', label: '폭스중고', icon: ShoppingBag },
             { id: 'reviews', label: '업소후기', icon: Star },
             { id: 'tips', label: '꿀팁·노하우', icon: Lightbulb },
+            { id: 'secret', label: '비밀게시판', icon: MessageSquare },
             { id: 'report', label: '업소제보', icon: AlertTriangle },
         ],
     },
