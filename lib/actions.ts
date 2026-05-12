@@ -182,3 +182,25 @@ export async function requestPointRecharge(payload: { amount: number, depositor_
         return { success: false, message: e.message || '충전 신청 중 오류가 발생했습니다.' };
     }
 }
+
+import { SiteBannerInput, OA_UPSERT_SITE_BANNER } from '@/src/atoms/oa/admin/OA_UPSERT_SITE_BANNER';
+import { OA_DELETE_SITE_BANNER } from '@/src/atoms/oa/admin/OA_DELETE_SITE_BANNER';
+
+export async function adminSiteBannerAction(actionType: 'UPSERT' | 'DELETE', payload?: SiteBannerInput | string) {
+    const session = await auth();
+    if (!session?.user?.id || ((session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'SUPER_ADMIN')) {
+        return { success: false, message: '관리자 권한이 없습니다.' };
+    }
+
+    if (actionType === 'UPSERT') {
+        const result = await OA_UPSERT_SITE_BANNER(payload as SiteBannerInput);
+        revalidatePath('/fox-office/ads');
+        return result;
+    } else if (actionType === 'DELETE') {
+        const result = await OA_DELETE_SITE_BANNER(payload as string);
+        revalidatePath('/fox-office/ads');
+        return result;
+    }
+
+    return { success: false, message: '잘못된 액션입니다.' };
+}
