@@ -134,7 +134,7 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative p-6 flex flex-col items-center justify-center min-h-[180px] bg-slate-50">
                             <span className="absolute top-3 left-3 bg-gray-900 text-white text-[11px] px-2 py-0.5 rounded shadow-sm font-black z-10">{getTierName()}</span>
                             
-                            <div className={`w-full flex justify-center items-center ${form.option_double_slot ? 'flex-col gap-2' : ''}`}>
+                            <div className={`w-full flex justify-center items-center ${form.option_double_slot ? 'flex-row flex-wrap gap-4' : ''}`}>
                                 {(() => {
                                     const isSide = form.tier === 'SIDE';
                                     const isGeneral = form.tier === 'GENERAL' || form.tier === 'AD_GENERAL';
