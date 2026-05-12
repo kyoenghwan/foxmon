@@ -47,13 +47,13 @@ export async function OA_UPSERT_SITE_BANNER(input: SiteBannerInput) {
 
         if (error) {
             nvLog('AT', '❌ OA_UPSERT_SITE_BANNER 에러', error.message);
-            return { success: false, data: null, error: error.message };
+            return { success: false, data: null, message: error.message };
         }
 
         nvLog('AT', '✅ OA_UPSERT_SITE_BANNER 성공');
-        return { success: true, data, error: null };
+        return { success: true, data, message: null };
     } catch (err: any) {
         nvLog('AT', '❌ OA_UPSERT_SITE_BANNER 시스템 에러', err.message);
-        return { success: false, data: null, error: err.message };
+        return { success: false, data: null, message: err.message };
     }
 }
