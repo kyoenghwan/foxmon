@@ -5,6 +5,8 @@ import { manageBizAdAction } from '@/lib/actions';
 import { createClient } from '@/utils/supabase/server';
 import BizAdsList from './BizAdsList';
 
+export const dynamic = 'force-dynamic';
+
 export default async function BizAdsPage() {
     const res = await manageBizAdAction('GET');
     const ads = (res.success && res.data ? res.data : []);

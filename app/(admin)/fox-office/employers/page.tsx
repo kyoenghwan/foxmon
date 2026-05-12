@@ -178,7 +178,7 @@ export default function EmployersManagementPage() {
                             <tr className="bg-gray-50/50 border-b border-gray-100 text-[12px] text-gray-500 font-bold">
                                 <th className="py-4 px-6 font-medium">가입/인증일</th>
                                 <th className="py-4 px-6 font-medium">상호명 / 대표자명</th>
-                                <th className="py-4 px-6 font-medium">사업자/이메일</th>
+                                <th className="py-4 px-6 font-medium">사업자/아이디</th>
                                 <th className="py-4 px-6 font-medium text-center">보유 포인트</th>
                                 <th className="py-4 px-6 font-medium text-center">등록증 (2차 검수)</th>
                                 <th className="py-4 px-6 font-medium text-center">인증 상태</th>
@@ -214,7 +214,8 @@ export default function EmployersManagementPage() {
                                                     ? emp.business_registration_number.replace(/(\d{3})(\d{2})(\d{5})/, '$1-$2-$3')
                                                     : '미기재'}
                                             </div>
-                                            <div className="text-[12px] text-gray-400">{emp.email}</div>
+                                            <div className="text-[12px] text-gray-400 font-bold mt-1">ID: {emp.login_id || '알 수 없음'}</div>
+                                            {emp.email && <div className="text-[11px] text-gray-400">{emp.email}</div>}
                                         </td>
                                         <td className="py-4 px-6 text-center align-top">
                                             <div className="font-black text-blue-600">{Number(emp.paid_points || 0).toLocaleString()}P</div>
