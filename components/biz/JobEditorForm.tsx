@@ -1135,7 +1135,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div className="md:col-span-2">
-                                <label className="text-[12px] font-bold text-gray-600 mb-2 block">고용 형태 <span className="text-red-500">*</span></label>
+                                <label className="text-[12px] font-bold text-gray-600 mb-2 block">고용 형태</label>
                                 <div className="flex flex-wrap gap-3">
                                     {employmentTypes.map(emp => (
                                         <label key={emp.code_value} className="flex items-center gap-1.5 cursor-pointer">

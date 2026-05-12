@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Foxmon | 여우들의 쉼터",
+  title: "Foxmon | 여우들의 은밀한 알바",
   description: "여우몬 커뮤니티 및 구인구직 플랫폼",
 };
 
