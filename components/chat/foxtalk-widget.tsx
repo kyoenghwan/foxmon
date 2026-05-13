@@ -306,7 +306,7 @@ export function FoxTalkWidget() {
                             <div className="flex flex-col">
                                 <span className="font-black text-[15px] text-gray-900 leading-tight mb-0.5">폭스톡 <span className="bg-primary/10 text-primary text-[9px] px-1.5 py-0.5 rounded-full ml-1">Beta</span></span>
                                 <span className="text-[11px] font-medium text-gray-500">
-                                    {!userRole ? '로그인 후 시작하기' : userRole === 'EMPLOYER' ? '지원자와 실시간 대화하기' : '사장님과 실시간 대화하기'}
+                                    {!userRole ? '로그인 후 시작하기' : userRole === 'EMPLOYER' ? '지원자와 실시간 대화하기' : '1:1 구직 대화 및 여우 오픈채팅'}
                                 </span>
                             </div>
                         </button>
