@@ -25,9 +25,9 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
     const [form, setForm] = useState<Partial<AdFormData>>({
         ...initialData,
         exposure_period: initialData.exposure_period || 30,
-        is_subscription: false,
-        option_double_slot: false,
-        option_jump: false
+        is_subscription: initialData.is_subscription || false,
+        option_double_slot: initialData.option_double_slot || false,
+        option_jump: initialData.option_jump || false
     });
 
     const update = (field: keyof AdFormData, value: any) => {
