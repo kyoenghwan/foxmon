@@ -24,6 +24,9 @@ export function applyRollingLogic(ads: AdItem[], count: number, customNowMs?: nu
             } else {
                 oldAds.push(ad);
             }
+        }
+    }
+
     // 오토 점프 배너들을 상단에, 일반 배너들을 하단에 둔 하나의 거대한 롤링 그룹 생성
     const combinedGroup = [...jumpAds, ...oldAds];
     let rolledGroup = combinedGroup;
