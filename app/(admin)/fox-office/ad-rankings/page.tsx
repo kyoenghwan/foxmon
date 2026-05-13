@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Crown, ArrowUp, ArrowDown, Minus, RefreshCw, Timer } from 'lucide-react';
-import { getAdRankingSimulation, RankingSimResult } from '@/lib/ad-ranking-service';
+import { getAdRankingSimulation, RankingSimResult, getAdHistoryLogs, AdHistoryLog } from '@/lib/ad-ranking-service';
 
 const TIER_LABELS: Record<string, string> = {
     PREMIUM_MAIN: '메인',
@@ -19,11 +19,18 @@ export default function AdRankingsPage() {
     const [loading, setLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState(60);
 
+    const [historyLogs, setHistoryLogs] = useState<AdHistoryLog[]>([]);
+
     const loadRankings = async () => {
         setLoading(true);
         try {
-            const data = await getAdRankingSimulation(tier);
-            setRankings(data);
+            if (activeTab === 'monitoring') {
+                const data = await getAdRankingSimulation(tier);
+                setRankings(data);
+            } else {
+                const logs = await getAdHistoryLogs(tier);
+                setHistoryLogs(logs);
+            }
         } catch (e) {
             console.error(e);
         } finally {
@@ -33,8 +40,9 @@ export default function AdRankingsPage() {
 
     useEffect(() => {
         loadRankings();
+        if (activeTab === 'history') return; // 히스토리 탭은 자동 갱신 중지
+
         setTimeLeft(60);
-        
         const timerId = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
@@ -43,10 +51,10 @@ export default function AdRankingsPage() {
                 }
                 return prev - 1;
             });
-        }, 1000); // 1초마다 카운트다운 다운
+        }, 1000);
         
         return () => clearInterval(timerId);
-    }, [tier]);
+    }, [tier, activeTab]);
 
     const getRankChange = (current: number, prev: number | null) => {
         if (prev === null) return <span className="text-[11px] font-black bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full flex items-center gap-1 w-fit mx-auto">NEW 진입</span>;
@@ -93,11 +101,11 @@ export default function AdRankingsPage() {
                 </button>
             </div>
 
-            {activeTab === 'monitoring' ? (
+            {/* Common Header / Tier Selection */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">
                 <div className="flex justify-between items-end border-b border-gray-100 pb-4">
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">노출 순위 현황</h2>
+                        <h2 className="text-lg font-bold text-gray-900 mb-4">{activeTab === 'monitoring' ? '노출 순위 현황' : '옵션/변경 내역'}</h2>
                         <div className="flex gap-2">
                             {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'SPECIAL', 'GENERAL'].map(t => (
                                 <button 
@@ -112,10 +120,12 @@ export default function AdRankingsPage() {
                     </div>
                     
                     <div className="flex flex-col items-end gap-2">
+                        {activeTab === 'monitoring' && (
                         <div className="flex items-center gap-1.5 text-[13px] font-bold text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
                             <Timer className="w-4 h-4 text-primary" />
                             다음 순위 갱신까지 <span className="text-primary tabular-nums min-w-[2ch] text-right">{timeLeft}</span>초
                         </div>
+                        )}
                         <button onClick={() => { setTimeLeft(60); loadRankings(); }} disabled={loading} className="flex items-center gap-1.5 text-[12px] font-bold text-gray-400 hover:text-gray-900 transition-colors">
                             <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
                             즉시 갱신
@@ -123,6 +133,7 @@ export default function AdRankingsPage() {
                     </div>
                 </div>
 
+            {activeTab === 'monitoring' ? (
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse min-w-[700px]">
                         <thead>
@@ -187,18 +198,56 @@ export default function AdRankingsPage() {
                         </tbody>
                     </table>
                 </div>
-            </div>
             ) : (
-            <div className="bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 p-12 flex flex-col items-center justify-center text-center gap-4">
-                <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center border border-gray-100">
-                    <Crown className="w-6 h-6 text-gray-400" />
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr className="border-b-2 border-gray-100">
+                                <th className="p-4 text-[13px] font-black text-gray-400 w-40">발생 일시</th>
+                                <th className="p-4 text-[13px] font-black text-gray-400">광고/업체 정보</th>
+                                <th className="p-4 text-[13px] font-black text-gray-400 w-32">이벤트 유형</th>
+                                <th className="p-4 text-[13px] font-black text-gray-400">상세 내용</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {historyLogs.map((log) => (
+                                <tr key={log.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                    <td className="p-4 text-[13px] text-gray-600 font-mono">
+                                        {new Date(log.created_at).toLocaleString('ko-KR')}
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="font-bold text-[14px] text-gray-900">{log.company}</div>
+                                        <div className="text-[12px] text-gray-500 mt-0.5">{log.title}</div>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className={`text-[11px] font-bold px-2 py-1 rounded w-fit ${
+                                            log.event_type === 'NEW_ENTRY' ? 'bg-purple-100 text-purple-700' :
+                                            log.event_type === 'OPTION_JUMP' ? 'bg-blue-100 text-blue-700' :
+                                            log.event_type === 'OPTION_DOUBLE' ? 'bg-indigo-100 text-indigo-700' :
+                                            'bg-gray-100 text-gray-700'
+                                        }`}>
+                                            {log.event_type === 'NEW_ENTRY' ? '신규 진입' :
+                                             log.event_type === 'OPTION_JUMP' ? '오토 점프' :
+                                             log.event_type === 'OPTION_DOUBLE' ? '더블 슬롯' : log.event_type}
+                                        </span>
+                                    </td>
+                                    <td className="p-4 text-[13px] text-gray-700">
+                                        {log.message}
+                                    </td>
+                                </tr>
+                            ))}
+                            {historyLogs.length === 0 && !loading && (
+                                <tr>
+                                    <td colSpan={4} className="p-8 text-center text-gray-500 text-[14px]">
+                                        최근 변경 내역이 없습니다.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
-                <div>
-                    <h3 className="text-lg font-bold text-gray-900">옵션/변경 내역 준비 중</h3>
-                    <p className="text-[14px] text-gray-500 mt-1">추후 광고가 강제로 내려가거나 더블 슬롯 옵션이 적용/해제된 기록을 열람할 수 있는 공간입니다.</p>
-                </div>
-            </div>
             )}
+            </div>
         </div>
     );
 }

@@ -72,3 +72,46 @@ export async function getAdRankingSimulation(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PR
 
     return results;
 }
+
+export interface AdHistoryLog {
+    id: string;
+    ad_id: string;
+    company: string;
+    title: string;
+    tier: string;
+    event_type: string;
+    message: string;
+    created_at: string;
+}
+
+export async function logAdEvent(adId: string, company: string, title: string, tier: string, eventType: string, message: string) {
+    try {
+        await supabaseAdmin.from('ad_history_logs').insert([{
+            ad_id: adId,
+            company,
+            title,
+            tier,
+            event_type: eventType,
+            message
+        }]);
+    } catch (e) {
+        console.error('Failed to log ad event:', e);
+    }
+}
+
+export async function getAdHistoryLogs(tier: string): Promise<AdHistoryLog[]> {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('ad_history_logs')
+            .select('*')
+            .eq('tier', tier)
+            .order('created_at', { ascending: false })
+            .limit(100);
+
+        if (error) throw error;
+        return data || [];
+    } catch (e) {
+        console.error('Failed to fetch ad history logs:', e);
+        return [];
+    }
+}
