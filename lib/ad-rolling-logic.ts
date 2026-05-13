@@ -27,6 +27,13 @@ export function applyRollingLogic(ads: AdItem[], count: number, customNowMs?: nu
         }
     }
 
+    let rolledJumpAds = jumpAds;
+    if (jumpAds.length > 0) {
+        const currentMinute = Math.floor(nowMs / 60000);
+        const offset = currentMinute % jumpAds.length;
+        rolledJumpAds = [...jumpAds.slice(offset), ...jumpAds.slice(0, offset)];
+    }
+
     let rolledOldAds = oldAds;
     if (oldAds.length > 0) {
         const currentMinute = Math.floor(nowMs / 60000);
@@ -34,8 +41,10 @@ export function applyRollingLogic(ads: AdItem[], count: number, customNowMs?: nu
         rolledOldAds = [...oldAds.slice(offset), ...oldAds.slice(0, offset)];
     }
 
+    const combinedBase = [...rolledJumpAds, ...rolledOldAds];
+
     const baseSlots: AdItem[] = [];
-    for (const ad of rolledOldAds) {
+    for (const ad of combinedBase) {
         baseSlots.push(ad);
         if (ad.option_double_slot) {
             baseSlots.push({ ...ad, id: ad.id + '_dup' });
@@ -49,10 +58,6 @@ export function applyRollingLogic(ads: AdItem[], count: number, customNowMs?: nu
         const ageMins = Math.floor((nowMs - adTime) / 60000);
         const targetIndex = Math.max(0, 9 - ageMins);
         anchors.push({ ad, targetIndex });
-    }
-
-    for (const ad of jumpAds) {
-        anchors.push({ ad, targetIndex: 19 });
     }
 
     anchors.sort((a, b) => a.targetIndex - b.targetIndex);
