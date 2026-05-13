@@ -91,9 +91,14 @@ export function HomeJobSections() {
             : impacts[i % impacts.length];
             
         // effectIntensity 변환 로직 (BizAdPaymentModal과 동일하게 처리)
-        const finalEffectIntensity = (job.isRealAd && job.action_type && job.action_type !== 'none')
-            ? `${job.effect_intensity || 'medium'}::${job.action_type}`
-            : 'none';
+        let finalEffectIntensity = 'medium';
+        if (job.isRealAd) {
+            if (job.action_type === 'none') {
+                finalEffectIntensity = 'none';
+            } else {
+                finalEffectIntensity = `${job.effect_intensity || 'medium'}::${job.action_type || 'shimmer'}`;
+            }
+        }
 
         return {
             ...job,
