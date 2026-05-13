@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart, MessageCircle, ThumbsUp, ThumbsDown, X } from 'lucide-react';
@@ -259,12 +261,39 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 
                 <div className="w-full space-y-2.5">
                     {/* 카카오톡 지원 */}
-                    <Button className="w-full h-12 rounded-xl bg-[#FEE500] hover:bg-[#F4DC00] text-[#000000] font-black text-[15px] shadow-sm flex items-center justify-center gap-2 transition-transform active:scale-95">
+                    <Button 
+                        onClick={() => {
+                            if (!contact.kakao || contact.kakao === '비공개') {
+                                alert('카카오톡 아이디가 비공개 상태입니다.');
+                                return;
+                            }
+                            if (contact.kakao.startsWith('http')) {
+                                window.open(contact.kakao, '_blank');
+                            } else {
+                                navigator.clipboard.writeText(contact.kakao).then(() => {
+                                    alert(`카카오톡 아이디 '${contact.kakao}' 가 복사되었습니다!\n\n카카오톡 우측 상단 🔍(검색) ➔ '아이디로 추가'에서 검색해 주세요.`);
+                                });
+                            }
+                        }}
+                        className="w-full h-12 rounded-xl bg-[#FEE500] hover:bg-[#F4DC00] text-[#000000] font-black text-[15px] shadow-sm flex items-center justify-center gap-2 transition-transform active:scale-95"
+                    >
                         <span className="text-lg">💬</span> 카카오톡으로 지원하기
                     </Button>
                     
                     {/* 전화번호 복사 */}
-                    <Button variant="outline" className="w-full h-12 rounded-xl border-gray-200 text-gray-700 hover:bg-gray-50 font-bold text-[14px] shadow-sm flex items-center justify-center gap-2 transition-transform active:scale-95">
+                    <Button 
+                        onClick={() => {
+                            if (!contact.phone || contact.phone === '비공개') {
+                                alert('전화번호가 비공개 상태입니다.');
+                                return;
+                            }
+                            navigator.clipboard.writeText(contact.phone).then(() => {
+                                alert(`전화번호 '${contact.phone}' 가 복사되었습니다!`);
+                            });
+                        }}
+                        variant="outline" 
+                        className="w-full h-12 rounded-xl border-gray-200 text-gray-700 hover:bg-gray-50 font-bold text-[14px] shadow-sm flex items-center justify-center gap-2 transition-transform active:scale-95"
+                    >
                         <span className="text-gray-400">📞</span> {contact.phone} 복사
                     </Button>
                 </div>
