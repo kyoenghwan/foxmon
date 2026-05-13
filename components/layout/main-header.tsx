@@ -143,8 +143,17 @@ export function MainHeader({ session }: MainHeaderProps) {
                             <span className="text-gray-300">|</span>
                             <button 
                                 onClick={async () => {
-                                    const { handleSignOut } = await import('@/lib/actions');
-                                    await handleSignOut();
+                                    // 1. 즉시 UI를 흐리게 하거나 로딩 상태로 보이게 할 수도 있습니다.
+                                    document.body.style.opacity = '0.5';
+                                    try {
+                                        const { handleSignOut } = await import('@/lib/actions');
+                                        await handleSignOut();
+                                    } catch (e) {
+                                        // NEXT_REDIRECT 에러가 던져지므로 여기서 잡힐 수 있습니다.
+                                    } finally {
+                                        // 2. 무조건 즉각적으로 메인 페이지로 강제 이동 및 새로고침
+                                        window.location.href = '/';
+                                    }
                                 }} 
                                 className="flex items-center gap-1 font-black text-red-500 hover:text-red-700 transition-colors"
                             >

@@ -68,7 +68,19 @@ export function UserNav() {
                     )}
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer text-red-500 focus:bg-red-50 focus:text-red-600">
+                <DropdownMenuItem 
+                    onClick={async () => {
+                        document.body.style.opacity = '0.5';
+                        try {
+                            const { handleSignOut } = await import('@/lib/actions');
+                            await handleSignOut();
+                        } catch(e) {
+                        } finally {
+                            window.location.href = '/';
+                        }
+                    }} 
+                    className="cursor-pointer text-red-500 focus:bg-red-50 focus:text-red-600"
+                >
                     로그아웃
                     <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
                 </DropdownMenuItem>
