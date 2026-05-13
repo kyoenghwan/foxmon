@@ -72,11 +72,11 @@ export function UserNav() {
                     onClick={async () => {
                         document.body.style.opacity = '0.5';
                         try {
-                            const { handleSignOut } = await import('@/lib/actions');
-                            await handleSignOut();
-                        } catch(e) {
-                        } finally {
-                            window.location.href = '/login';
+                            document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                            document.cookie = "foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                            await signOut({ callbackUrl: '/login' });
+                        } catch (e) {
+                            console.error(e);
                         }
                     }} 
                     className="cursor-pointer text-red-500 focus:bg-red-50 focus:text-red-600"

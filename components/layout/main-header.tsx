@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Globe, Search, Menu, FileText, Briefcase, LogOut, ShieldCheck, User, X, ChevronRight } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 import { useLanguage } from '@/components/providers/language-provider';
 import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
 
@@ -146,13 +147,11 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     // 1. 즉시 UI를 흐리게 하거나 로딩 상태로 보이게 할 수도 있습니다.
                                     document.body.style.opacity = '0.5';
                                     try {
-                                        const { handleSignOut } = await import('@/lib/actions');
-                                        await handleSignOut();
+                                        document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                                        document.cookie = "foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                                        await signOut({ callbackUrl: '/login' });
                                     } catch (e) {
-                                        // NEXT_REDIRECT 에러가 던져지므로 여기서 잡힐 수 있습니다.
-                                    } finally {
-                                        // 2. 무조건 즉각적으로 로그인 페이지로 강제 이동 및 새로고침
-                                        window.location.href = '/login';
+                                        console.error(e);
                                     }
                                 }} 
                                 className="flex items-center gap-1 font-black text-red-500 hover:text-red-700 transition-colors"
