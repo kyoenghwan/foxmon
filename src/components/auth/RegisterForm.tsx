@@ -111,8 +111,8 @@ export function RegisterForm() {
     if (!validateStep4()) return;
     
     if (step === 5 && role === 'EMPLOYER') {
-      if (!formData.business_name || !formData.business_number || !formData.representative_name) {
-        setError('필수 사업자 정보를 입력해주세요.');
+      if (!formData.business_category) {
+        setError('필수 사업자 정보(업종)를 선택해주세요.');
         return;
       }
     }
@@ -286,7 +286,7 @@ export function RegisterForm() {
                           {item.label}
                         </Label>
                       </div>
-                      <button type="button" className="text-[10px] text-gray-400 underline underline-offset-2 hover:text-purple-600">보기</button>
+                      <button type="button" onClick={() => alert(`${item.label} 내용입니다.`)} className="text-[10px] text-gray-400 underline underline-offset-2 hover:text-purple-600">보기</button>
                     </div>
                   ))}
                 </div>
@@ -327,6 +327,7 @@ export function RegisterForm() {
                         setFormData({...formData, loginId: e.target.value});
                         setDuplicateChecked(prev => ({ ...prev, id: false }));
                       }}
+                      autoComplete="off"
                       className="bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11 rounded-xl flex-1 focus-visible:ring-purple-500/50 text-sm font-bold"
                     />
                     <Button 
@@ -350,6 +351,7 @@ export function RegisterForm() {
                     placeholder="4~12자 입력"
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    autoComplete="new-password"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
                 </div>
@@ -360,6 +362,7 @@ export function RegisterForm() {
                     placeholder="비밀번호 다시 입력"
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                    autoComplete="new-password"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
                 </div>
@@ -374,6 +377,7 @@ export function RegisterForm() {
                         setFormData({...formData, nickname: e.target.value});
                         setDuplicateChecked(prev => ({ ...prev, nickname: false }));
                       }}
+                      autoComplete="off"
                       className="bg-gray-50/50 border-gray-200 h-11 rounded-xl flex-1 text-sm font-bold"
                     />
                     <Button 
@@ -396,6 +400,7 @@ export function RegisterForm() {
                     placeholder="email@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    autoComplete="off"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
                 </div>
@@ -477,6 +482,7 @@ export function RegisterForm() {
                     placeholder="예: (주)폭스몬"
                     value={formData.business_name}
                     onChange={(e) => setFormData({...formData, business_name: e.target.value})}
+                    autoComplete="off"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
                 </div>
@@ -486,6 +492,7 @@ export function RegisterForm() {
                     placeholder="사업자 등록증 기준"
                     value={formData.representative_name}
                     onChange={(e) => setFormData({...formData, representative_name: e.target.value})}
+                    autoComplete="off"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
                 </div>
@@ -495,6 +502,7 @@ export function RegisterForm() {
                     placeholder="숫자 10자리"
                     value={formData.business_number}
                     onChange={(e) => setFormData({...formData, business_number: e.target.value})}
+                    autoComplete="off"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
                 </div>
@@ -504,6 +512,7 @@ export function RegisterForm() {
                     placeholder="YYYYMMDD"
                     value={formData.opening_date}
                     onChange={(e) => setFormData({...formData, opening_date: e.target.value})}
+                    autoComplete="off"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
                 </div>
