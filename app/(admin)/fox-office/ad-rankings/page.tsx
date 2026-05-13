@@ -13,6 +13,7 @@ const TIER_LABELS: Record<string, string> = {
 };
 
 export default function AdRankingsPage() {
+    const [activeTab, setActiveTab] = useState<'monitoring' | 'history'>('monitoring');
     const [tier, setTier] = useState<any>('PREMIUM_MAIN');
     const [rankings, setRankings] = useState<RankingSimResult[]>([]);
     const [loading, setLoading] = useState(true);
@@ -59,15 +60,40 @@ export default function AdRankingsPage() {
     };
 
     return (
-        <div className="w-full max-w-[1200px] mx-auto p-4 sm:p-8 flex flex-col gap-8">
+        <div className="w-full max-w-[1200px] mx-auto p-4 sm:p-8 flex flex-col gap-6">
             <div className="flex flex-col gap-2">
                 <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
                     <Crown className="w-7 h-7 text-yellow-500" />
-                    광고 노출 순위 모니터링
+                    광고/배너 관리
                 </h1>
-                <p className="text-sm text-gray-500">플랫폼 내 노출 중인 프리미엄 배너들의 실시간 롤링 노출 순위 및 변동 내역을 모니터링합니다.</p>
+                <p className="text-sm text-gray-500">플랫폼 내 노출 중인 배너들의 순위와 변경 내역을 통합 관리합니다.</p>
             </div>
 
+            {/* Sub Navigation Tabs */}
+            <div className="flex gap-1 border-b border-gray-200">
+                <button
+                    onClick={() => setActiveTab('monitoring')}
+                    className={`px-6 py-3 text-[14px] font-bold border-b-2 transition-colors ${
+                        activeTab === 'monitoring' 
+                            ? 'border-gray-900 text-gray-900' 
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                >
+                    노출 순위 모니터링
+                </button>
+                <button
+                    onClick={() => setActiveTab('history')}
+                    className={`px-6 py-3 text-[14px] font-bold border-b-2 transition-colors ${
+                        activeTab === 'history' 
+                            ? 'border-gray-900 text-gray-900' 
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                >
+                    옵션/변경 내역
+                </button>
+            </div>
+
+            {activeTab === 'monitoring' ? (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">
                 <div className="flex justify-between items-end border-b border-gray-100 pb-4">
                     <div>
@@ -162,6 +188,17 @@ export default function AdRankingsPage() {
                     </table>
                 </div>
             </div>
+            ) : (
+            <div className="bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 p-12 flex flex-col items-center justify-center text-center gap-4">
+                <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center border border-gray-100">
+                    <Crown className="w-6 h-6 text-gray-400" />
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold text-gray-900">옵션/변경 내역 준비 중</h3>
+                    <p className="text-[14px] text-gray-500 mt-1">추후 광고가 강제로 내려가거나 더블 슬롯 옵션이 적용/해제된 기록을 열람할 수 있는 공간입니다.</p>
+                </div>
+            </div>
+            )}
         </div>
     );
 }
