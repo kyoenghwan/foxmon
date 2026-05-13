@@ -182,6 +182,7 @@ export async function getRotatedAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 
             ...item,
             company: item.company || item.company_name || '업체명 없음',
             pay: item.pay || (item.salary_type ? `[${item.salary_type}] ${item.salary_amount}` : item.salary_amount) || '급여협의',
+            image: item.image || item.logo_url || '',
             isRealAd: true
         })) as AdItem[];
         

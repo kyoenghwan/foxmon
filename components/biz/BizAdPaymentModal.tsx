@@ -204,6 +204,7 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                             key={opt.id}
                                             type="button"
                                             onClick={() => {
+                                                if (initialData.isPaid) return;
                                                 if (opt.sub) {
                                                     update('is_subscription', true);
                                                     update('exposure_period', 30);
@@ -212,7 +213,7 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                                     update('exposure_period', opt.id as 30|60|90);
                                                 }
                                             }}
-                                            className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${isSelected ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                                            className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${isSelected ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' : 'border-gray-200 bg-white'} ${initialData.isPaid ? 'opacity-70 cursor-default' : 'hover:border-gray-300 cursor-pointer'}`}
                                         >
                                             <div className="flex items-center justify-center gap-1.5 mb-1.5">
                                                 {opt.sub && <Clock className={`w-4 h-4 ${isSelected ? 'text-primary' : 'text-gray-400'}`} />}
@@ -263,7 +264,7 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                             </h4>
                             <div className="flex flex-col gap-3">
                                 {/* 연속 노출 (더블 슬롯) */}
-                                <div className={`flex flex-col p-4 rounded-xl border-2 transition-all cursor-pointer select-none ${form.option_double_slot ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'}`} onClick={() => update('option_double_slot', !form.option_double_slot)}>
+                                <div className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${form.option_double_slot ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'} ${initialData.isPaid ? 'opacity-70 cursor-default' : 'cursor-pointer hover:border-gray-300'}`} onClick={() => { if (!initialData.isPaid) update('option_double_slot', !form.option_double_slot); }}>
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${form.option_double_slot ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
@@ -282,7 +283,7 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                 </div>
                                 
                                 {/* 자동 점프 */}
-                                <div className={`flex flex-col p-4 rounded-xl border-2 transition-all cursor-pointer select-none ${form.option_jump ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'}`} onClick={() => update('option_jump', !form.option_jump)}>
+                                <div className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${form.option_jump ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'} ${initialData.isPaid ? 'opacity-70 cursor-default' : 'cursor-pointer hover:border-gray-300'}`} onClick={() => { if (!initialData.isPaid) update('option_jump', !form.option_jump); }}>
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${form.option_jump ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
@@ -320,18 +321,31 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                         </div>
                     </div>
                     <div className="flex gap-2 w-full sm:w-auto">
-                        <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-14 px-6 rounded-xl font-bold text-[15px] border-gray-300">
-                            취소
-                        </Button>
-                        {calculateTotalPoints() > userPoints && !loadingPoints ? (
-                            <Button onClick={() => alert('포인트 충전 페이지로 이동합니다. (구현 예정)')} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-orange-500 hover:bg-orange-600 text-white">
-                                포인트 충전하기
-                            </Button>
+                        {initialData.isPaid ? (
+                            <>
+                                <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-14 px-6 rounded-xl font-bold text-[15px] border-gray-300">
+                                    닫기
+                                </Button>
+                                <Button onClick={() => alert('관리자에게 취소/철회 문의를 접수했습니다. (구현 예정)')} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[15px] shadow-sm bg-red-50 text-red-600 hover:bg-red-100 border border-red-200">
+                                    결제 취소/철회 문의
+                                </Button>
+                            </>
                         ) : (
-                            <Button onClick={handleFinalSubmit} disabled={saving || loadingPoints} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-gray-900 hover:bg-black text-white">
-                                {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <DollarSign className="w-5 h-5 mr-2" />}
-                                결제 및 최종 등록하기
-                            </Button>
+                            <>
+                                <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-14 px-6 rounded-xl font-bold text-[15px] border-gray-300">
+                                    취소
+                                </Button>
+                                {calculateTotalPoints() > userPoints && !loadingPoints ? (
+                                    <Button onClick={() => alert('포인트 충전 페이지로 이동합니다. (구현 예정)')} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-orange-500 hover:bg-orange-600 text-white">
+                                        포인트 충전하기
+                                    </Button>
+                                ) : (
+                                    <Button onClick={handleFinalSubmit} disabled={saving || loadingPoints} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-gray-900 hover:bg-black text-white">
+                                        {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <DollarSign className="w-5 h-5 mr-2" />}
+                                        결제 및 최종 등록하기
+                                    </Button>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>

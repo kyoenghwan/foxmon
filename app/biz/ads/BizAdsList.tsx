@@ -117,7 +117,7 @@ export default function BizAdsList({ initialAds, isVerified }: { initialAds: any
                                     </td>
                                     <td className="px-6 py-4 text-center whitespace-nowrap">
                                         <div className="flex items-center justify-center gap-2">
-                                            {isPendingOrExpired && (
+                                            {isPendingOrExpired ? (
                                                 <button 
                                                     onClick={(e) => { 
                                                         e.stopPropagation(); 
@@ -134,6 +134,16 @@ export default function BizAdsList({ initialAds, isVerified }: { initialAds: any
                                                     }`}
                                                 >
                                                     <CreditCard className="w-3 h-3" /> 결제 및 노출
+                                                </button>
+                                            ) : (
+                                                <button 
+                                                    onClick={(e) => { 
+                                                        e.stopPropagation(); 
+                                                        setPaymentAd({ ...ad, isPaid: true }); 
+                                                    }}
+                                                    className="text-[11px] font-black px-2.5 py-1.5 rounded flex items-center gap-1 transition-colors bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100"
+                                                >
+                                                    <CreditCard className="w-3 h-3" /> 결제 옵션 확인
                                                 </button>
                                             )}
                                             <div className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
