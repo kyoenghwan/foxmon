@@ -1,7 +1,7 @@
 'use server';
 
 import { supabaseAdmin } from './supabase';
-import { AdItem } from './ad-service';
+import { AdItem, MOCK_ADS } from './ad-service';
 import { applyRollingLogic } from './ad-rolling-logic';
 
 export interface RankingSimResult {
@@ -28,6 +28,12 @@ export async function getAdRankingSimulation(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PR
             image: item.image || item.logo_url || '',
             isRealAd: true
         })) as AdItem[];
+    }
+
+    // 실제 홈페이지 화면과 동일하게 가상 배너(Mock Data)로 50개 슬롯을 채움
+    if (rawAds.length < 50) {
+        const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
+        rawAds = [...rawAds, ...mockAdsForTier.slice(0, 50 - rawAds.length)];
     }
 
     // 시뮬레이션을 위한 기준 시간

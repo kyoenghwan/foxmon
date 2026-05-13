@@ -24,9 +24,9 @@ CREATE POLICY "Admins can view all accounting records"
     FOR SELECT
     USING (
         EXISTS (
-            SELECT 1 FROM user_roles
-            WHERE user_roles.user_id = auth.uid()
-            AND user_roles.role = 'admin'
+            SELECT 1 FROM public.users
+            WHERE users.id = auth.uid()
+            AND users.role = 'ADMIN'
         )
     );
 
@@ -35,9 +35,9 @@ CREATE POLICY "Admins can insert accounting records"
     FOR INSERT
     WITH CHECK (
         EXISTS (
-            SELECT 1 FROM user_roles
-            WHERE user_roles.user_id = auth.uid()
-            AND user_roles.role = 'admin'
+            SELECT 1 FROM public.users
+            WHERE users.id = auth.uid()
+            AND users.role = 'ADMIN'
         )
     );
 
@@ -46,9 +46,9 @@ CREATE POLICY "Admins can update accounting records"
     FOR UPDATE
     USING (
         EXISTS (
-            SELECT 1 FROM user_roles
-            WHERE user_roles.user_id = auth.uid()
-            AND user_roles.role = 'admin'
+            SELECT 1 FROM public.users
+            WHERE users.id = auth.uid()
+            AND users.role = 'ADMIN'
         )
     );
 
@@ -57,8 +57,8 @@ CREATE POLICY "Admins can delete accounting records"
     FOR DELETE
     USING (
         EXISTS (
-            SELECT 1 FROM user_roles
-            WHERE user_roles.user_id = auth.uid()
-            AND user_roles.role = 'admin'
+            SELECT 1 FROM public.users
+            WHERE users.id = auth.uid()
+            AND users.role = 'ADMIN'
         )
     );

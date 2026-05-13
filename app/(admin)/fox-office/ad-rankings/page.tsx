@@ -63,15 +63,15 @@ export default function AdRankingsPage() {
             <div className="flex flex-col gap-2">
                 <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
                     <Crown className="w-7 h-7 text-yellow-500" />
-                    광고/배너 관리
+                    광고 노출 순위 모니터링
                 </h1>
-                <p className="text-sm text-gray-500">플랫폼 내 노출 중인 프리미엄 배너들의 실시간 롤링 순위 및 변동 내역을 모니터링합니다.</p>
+                <p className="text-sm text-gray-500">플랫폼 내 노출 중인 프리미엄 배너들의 실시간 롤링 노출 순위 및 변동 내역을 모니터링합니다.</p>
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">
                 <div className="flex justify-between items-end border-b border-gray-100 pb-4">
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">랭킹 현황</h2>
+                        <h2 className="text-lg font-bold text-gray-900 mb-4">노출 순위 현황</h2>
                         <div className="flex gap-2">
                             {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'SPECIAL', 'GENERAL'].map(t => (
                                 <button 
@@ -88,7 +88,7 @@ export default function AdRankingsPage() {
                     <div className="flex flex-col items-end gap-2">
                         <div className="flex items-center gap-1.5 text-[13px] font-bold text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
                             <Timer className="w-4 h-4 text-primary" />
-                            다음 랭킹 갱신까지 <span className="text-primary tabular-nums min-w-[2ch] text-right">{timeLeft}</span>초
+                            다음 순위 갱신까지 <span className="text-primary tabular-nums min-w-[2ch] text-right">{timeLeft}</span>초
                         </div>
                         <button onClick={() => { setTimeLeft(60); loadRankings(); }} disabled={loading} className="flex items-center gap-1.5 text-[12px] font-bold text-gray-400 hover:text-gray-900 transition-colors">
                             <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
@@ -101,10 +101,10 @@ export default function AdRankingsPage() {
                     <table className="w-full text-left border-collapse min-w-[700px]">
                         <thead>
                             <tr className="border-b-2 border-gray-100">
-                                <th className="p-4 text-[13px] font-black text-gray-400 w-24 text-center">랭킹 순위</th>
+                                <th className="p-4 text-[13px] font-black text-gray-400 w-24 text-center">노출 순위</th>
                                 <th className="p-4 text-[13px] font-black text-gray-400">광고 정보</th>
                                 <th className="p-4 text-[13px] font-black text-gray-400 w-32">옵션 현황</th>
-                                <th className="p-4 text-[13px] font-black text-gray-400 w-48 text-center" colSpan={2}>랭킹 순위 이력</th>
+                                <th className="p-4 text-[13px] font-black text-gray-400 w-48 text-center" colSpan={2}>노출 순위 이력</th>
                             </tr>
                             <tr className="border-b border-gray-100 bg-gray-50/50">
                                 <th colSpan={3}></th>
@@ -128,7 +128,10 @@ export default function AdRankingsPage() {
                                                 <div className="w-12 h-12 rounded-lg bg-gray-100 shrink-0 border border-gray-100" />
                                             )}
                                             <div>
-                                                <div className="font-bold text-[14px] text-gray-900 line-clamp-1">{item.ad.title}</div>
+                                                <div className="font-bold text-[14px] text-gray-900 line-clamp-1 flex items-center gap-1.5">
+                                                    {!item.ad.isRealAd && <span className="text-[10px] font-black bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-sm whitespace-nowrap">가상 배너</span>}
+                                                    {item.ad.title}
+                                                </div>
                                                 <div className="text-[12px] text-gray-500 mt-0.5">{item.ad.company}</div>
                                             </div>
                                         </div>
