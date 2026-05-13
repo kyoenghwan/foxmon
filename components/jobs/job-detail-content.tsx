@@ -179,12 +179,6 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     </h3>
 
                     <div className="w-full bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden p-6 md:p-10 flex flex-col items-center">
-                        <div className="w-full text-center text-[15px] sm:text-[16px] leading-[1.8] text-gray-700 font-medium max-w-2xl px-4 mb-10">
-                            안녕하세요! <b className="text-primary font-black text-[17px]">{job.company_name || job.company}</b>에서 열정과 꿈을 가진 분들을 모십니다.<br/>
-                            동종 업계 최고의 대우를 약속드리며, 가족처럼 편안하고 즐겁게 일할 수 있는 환경을 제공합니다.<br/>
-                            망설이지 마시고 언제든 편하게 연락 주세요!
-                        </div>
-                        
                         {/* 에디터 본문 내용 또는 웅장한 전단지 이미지 */}
                         {job.detail_content ? (
                             <div 
