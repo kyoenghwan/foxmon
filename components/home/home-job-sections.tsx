@@ -89,11 +89,19 @@ export function HomeJobSections() {
         const finalImpact = (job.isRealAd && job.theme && job.theme !== 'UPLOAD') 
             ? job.theme 
             : impacts[i % impacts.length];
+            
+        // effectIntensity 변환 로직 (BizAdPaymentModal과 동일하게 처리)
+        const finalEffectIntensity = (job.isRealAd && job.action_type && job.action_type !== 'none')
+            ? `${job.effect_intensity || 'medium'}::${job.action_type}`
+            : 'none';
 
         return {
             ...job,
             id: job.isRealAd ? job.id : `demo-${i}-${job.id}`,
-            impactType: finalImpact
+            impactType: finalImpact,
+            effectIntensity: finalEffectIntensity,
+            customColor: job.color,
+            bgOpacity: job.bg_opacity
         };
     });
 
@@ -185,6 +193,9 @@ export function HomeJobSections() {
                                 key={job.id}
                                 {...(job as any)} 
                                 impactType={(job as any).impactType}
+                                effectIntensity={(job as any).effectIntensity}
+                                customColor={(job as any).customColor}
+                                bgOpacity={(job as any).bgOpacity}
                                 tier="PREMIUM"
                             />
                         ))}
@@ -221,7 +232,15 @@ export function HomeJobSections() {
                         3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
                     `}>
                         {specialJobs.map((job) => (
-                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" tier="SPECIAL" customColor={(job as any).color} />
+                            <PremiumJobCard 
+                                key={job.id} 
+                                {...(job as any)} 
+                                impactType="none" 
+                                effectIntensity="none" 
+                                tier="SPECIAL" 
+                                customColor={(job as any).color} 
+                                bgOpacity={(job as any).bg_opacity}
+                            />
                         ))}
                     </div>
                 ) : (
@@ -255,7 +274,16 @@ export function HomeJobSections() {
                         3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
                     `}>
                         {lineJobs.map((job) => (
-                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" hideLogo={true} tier="GENERAL" customColor={(job as any).color} />
+                            <PremiumJobCard 
+                                key={job.id} 
+                                {...(job as any)} 
+                                impactType="none" 
+                                effectIntensity="none" 
+                                hideLogo={true} 
+                                tier="GENERAL" 
+                                customColor={(job as any).color} 
+                                bgOpacity={(job as any).bg_opacity}
+                            />
                         ))}
                     </div>
                 ) : (

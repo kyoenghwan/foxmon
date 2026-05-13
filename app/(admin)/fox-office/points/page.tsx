@@ -41,7 +41,11 @@ const BASE_OPTIONS = [
     { key: 'OPTION_PRICE_BG', title: '배경색 변경', desc: '공고 영역 전체 배경색을 은은하게 강조' },
     { key: 'OPTION_PRICE_ICON', title: '급구/특수 아이콘', desc: '시선을 사로잡는 급구 마크' },
     { key: 'OPTION_PRICE_GENERAL_ICONS', title: '일반 아이콘', desc: '최대 2개 중복 선택 가능한 예쁜 뱃지' },
-    { key: 'OPTION_PRICE_JUMP', title: '상단 끌어올리기', desc: '매일 6회 자동으로 리스트 최상단 끌어올림' },
+    { key: 'OPTION_PRICE_JUMP', title: '스마트 자동 점프 (Auto Jump)', desc: '구인공고가 밀려나면 자동으로 리스트 최상단 끌어올림' },
+];
+
+const BIZ_OPTIONS = [
+    { key: 'OPTION_PRICE_BIZ_JUMP', title: '스마트 자동 점프 (Auto Jump)', desc: '배너가 100위 밖으로 밀려나면 자동으로 상위권 끌어올림' },
 ];
 
 function OptionCard({ baseOpt, pricingOptions, setPricingOptions }: any) {
@@ -230,9 +234,9 @@ export default function AdminPointsPolicyPage() {
               <div>
                 <h2 className="text-xl font-black flex items-center gap-2">
                   <Coins className="text-primary h-6 w-6" />
-                  유료 광고 옵션 가격표
+                  일반 구인공고 부가 옵션 요금표
                 </h2>
-                <p className="text-[13px] text-gray-500 font-medium mt-1">구인광고 등록 시 차감되는 옵션별 기본 포인트를 설정합니다.</p>
+                <p className="text-[13px] text-gray-500 font-medium mt-1">구인공고 등록 시 차감되는 옵션별 기본 포인트를 설정합니다.</p>
               </div>
               <Button onClick={handleSavePricing} disabled={isLoading} className="font-bold gap-2"><Save className="w-4 h-4" /> 일괄 저장</Button>
             </div>
@@ -250,11 +254,12 @@ export default function AdminPointsPolicyPage() {
 
             <div className="mt-8 pt-8 border-t border-gray-100">
               <h3 className="text-lg font-black flex items-center gap-2 mb-1">
-                <Badge variant="outline" className="bg-indigo-50 text-indigo-600 border-indigo-200">New</Badge>
-                광고 등급(Tier) 단일 요금표
+                <Badge variant="outline" className="bg-indigo-50 text-indigo-600 border-indigo-200">배너</Badge>
+                유료 배너 광고 요금표
               </h3>
-              <p className="text-[13px] text-gray-500 font-medium mb-5">구인광고 등록 시 등급별로 부과되는 기본 요금을 설정합니다.</p>
-              <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+              <p className="text-[13px] text-gray-500 font-medium mb-5">유료 배너(광고) 등록 시 등급(Tier)별 및 부가 옵션별로 부과되는 기본 요금을 설정합니다.</p>
+              
+              <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 mb-6">
                 {TIER_OPTIONS.map(tierOpt => (
                   <TierCard 
                     key={tierOpt.key} 
@@ -263,6 +268,24 @@ export default function AdminPointsPolicyPage() {
                     setPricingOptions={setPricingOptions} 
                   />
                 ))}
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+                {BIZ_OPTIONS.map(bizOpt => (
+                  <OptionCard 
+                    key={bizOpt.key} 
+                    baseOpt={bizOpt} 
+                    pricingOptions={pricingOptions} 
+                    setPricingOptions={setPricingOptions} 
+                  />
+                ))}
+                
+                {/* 더블 슬롯 할인율 카드는 정책 쪽에 두거나 별도로 관리할 수 있지만, 현재는 요금표에 하드코딩된 것을 설명으로 추가 */}
+                <div className="p-5 border border-indigo-100 rounded-2xl bg-indigo-50/30 hover:border-indigo-300 transition-all shadow-sm flex flex-col justify-center">
+                    <div className="text-[12px] font-black text-indigo-500 opacity-80 uppercase tracking-widest">DISCOUNT_RATIO_BIZ_DOUBLE_SLOT</div>
+                    <div className="font-bold text-[16px] text-gray-900 mt-1">연속 노출 (더블 슬롯) 할인율</div>
+                    <p className="text-[12px] text-gray-500 mt-1 mb-4">현재 더블 슬롯은 기본 요금 2배에서 <strong className="text-indigo-600">5% 할인</strong>으로 고정 적용되어 있습니다. (추후 정책 탭에서 제어 가능하도록 확장 예정)</p>
+                </div>
               </div>
             </div>
           </div>
