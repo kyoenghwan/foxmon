@@ -1,4 +1,6 @@
-import { supabase } from './supabase';
+'use server';
+
+import { supabase, supabaseAdmin } from './supabase';
 
 export interface AdItem {
     id: string;
@@ -164,10 +166,10 @@ export async function getRotatedAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 
 
     try {
         // tier가 GENERAL이면 순수 구인 공고이므로 jobs, 아니면 배너 광고이므로 biz_ads를 조회합니다.
-        // 참고: AD_GENERAL은 일반 배너 광고입니다.
+        // 데모 목적으로, 아직 결제하지 않은(PENDING) 광고도 모두 표시하기 위해 supabaseAdmin(RLS 무시)을 사용합니다.
         const targetTable = tier === 'GENERAL' ? 'jobs' : 'biz_ads';
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from(targetTable)
             .select('*')
             .eq('tier', tier);
@@ -218,21 +220,21 @@ export async function recordAdExposure(adId: string) {
 
     try {
         // PostgreSQL의 단일 컬럼 업데이트 로직 (RPC 추천되나 우선 직접 호출 시도)
-        const { error } = await supabase.rpc('increment_exposure', { ad_id: adId });
+        const { error } = await supabaseAdmin.rpc('increment_exposure', { ad_id: adId });
 
         if (error) {
             // RPC가 없는 경우 대비 수동 업데이트 (원자성 보장 안됨)
             // RPC가 없는 경우 수동 업데이트 (ad_id로 테이블 식별이 어려우므로 두 테이블 모두 시도)
-            const { data: currentBiz } = await supabase.from('biz_ads').select('exposure_count').eq('id', adId).single();
+            const { data: currentBiz } = await supabaseAdmin.from('biz_ads').select('exposure_count').eq('id', adId).single();
             if (currentBiz) {
-                await supabase.from('biz_ads').update({
+                await supabaseAdmin.from('biz_ads').update({
                     exposure_count: (currentBiz.exposure_count || 0) + 1,
                     last_exposed_at: new Date().toISOString()
                 }).eq('id', adId);
             } else {
-                const { data: currentJob } = await supabase.from('jobs').select('exposure_count').eq('id', adId).single();
+                const { data: currentJob } = await supabaseAdmin.from('jobs').select('exposure_count').eq('id', adId).single();
                 if (currentJob) {
-                    await supabase.from('jobs').update({
+                    await supabaseAdmin.from('jobs').update({
                         exposure_count: (currentJob.exposure_count || 0) + 1,
                         last_exposed_at: new Date().toISOString()
                     }).eq('id', adId);
