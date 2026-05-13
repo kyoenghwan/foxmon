@@ -10,7 +10,7 @@ import { manageBizAdAction } from '@/lib/actions';
 import { GET_POINT_POLICIES } from '@/app/actions/pointPolicyActions';
 
 interface BizAdPaymentModalProps {
-    initialData: Partial<AdFormData>;
+    initialData: Partial<AdFormData> & { isPaid?: boolean };
     jobId: string;
     onClose: () => void;
     onSuccess: () => void;
