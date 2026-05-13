@@ -32,7 +32,7 @@ export function HomeJobSections() {
     // 공지사항 데이터
     const notices: Notice[] = [
         { id: 1, title: '[공지] 설 연휴 고객센터 운영 시간 안내', date: '2024-02-14', isNew: true },
-        { id: 2, title: '[안내] 여우몬 웹 서비스 디자인 고도화 업데이트', date: '2024-02-13' },
+        { id: 2, title: '[안내] 폭스몬 웹 서비스 디자인 고도화 업데이트', date: '2024-02-13' },
         { id: 3, title: '[이벤트] 친구 초대하고 포인트 받자! (기간 연장)', date: '2024-02-12', isHot: true },
     ];
 

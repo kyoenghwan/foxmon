@@ -79,7 +79,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     
                     <div className="col-span-2 my-1">
                         <div className="bg-pink-50/80 text-pink-600 border border-pink-100 rounded-lg p-2.5 text-center text-[12px] sm:text-[13px] font-medium shadow-sm">
-                            <b className="font-bold">'여우몬에서 보고 연락드립니다'</b> 라고 하시면 정확한 상담을 받으실 수 있습니다.
+                            <b className="font-bold">'폭스몬에서 보고 연락드립니다'</b> 라고 하시면 정확한 상담을 받으실 수 있습니다.
                         </div>
                     </div>
 
@@ -174,11 +174,11 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 </div>
             </section>
 
-            {/* 지원 팁 (여우몬 멘트) */}
+            {/* 지원 팁 (폭스몬 멘트) */}
             <div className="w-full bg-pink-50/50 border border-pink-100 rounded-2xl p-4 sm:p-5 flex items-center justify-center gap-3 text-center shadow-sm">
                 <span className="text-2xl hidden sm:block">🦊</span>
                 <div className="text-[14px] sm:text-[15px] font-medium text-gray-700">
-                    <b className="text-pink-600 font-black">"여우몬에서 보고 연락드립니다."</b> 라고 하시면 상담이 더욱 편하게 진행됩니다!
+                    <b className="text-pink-600 font-black">"폭스몬에서 보고 연락드립니다."</b> 라고 하시면 상담이 더욱 편하게 진행됩니다!
                 </div>
             </div>
 
@@ -232,8 +232,8 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
 
             {/* 5. 법적 고지 (면책 조항) */}
             <div className="mt-12 pt-6 border-t border-gray-100 text-center text-[11px] text-gray-400 leading-relaxed font-medium pb-4 px-4">
-                본 정보는 <b className="text-gray-500">{job.company_name || job.company || '해당 업체'}</b>에서 제공한 자료이며, 여우몬은 기재된 내용에 대한 오류와 사용자가 이를 신뢰하여 취한 조치에 대해 책임을 지지 않습니다.<br className="hidden sm:block"/>
-                또한 누구든 본 정보를 여우몬의 사전 동의 없이 무단 전재 및 크롤링, 재배포 할 수 없습니다.
+                본 정보는 <b className="text-gray-500">{job.company_name || job.company || '해당 업체'}</b>에서 제공한 자료이며, 폭스몬은 기재된 내용에 대한 오류와 사용자가 이를 신뢰하여 취한 조치에 대해 책임을 지지 않습니다.<br className="hidden sm:block"/>
+                또한 누구든 본 정보를 폭스몬의 사전 동의 없이 무단 전재 및 크롤링, 재배포 할 수 없습니다.
             </div>
         </div>
       </div>
