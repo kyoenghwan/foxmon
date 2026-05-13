@@ -151,8 +151,8 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     } catch (e) {
                                         // NEXT_REDIRECT 에러가 던져지므로 여기서 잡힐 수 있습니다.
                                     } finally {
-                                        // 2. 무조건 즉각적으로 메인 페이지로 강제 이동 및 새로고침
-                                        window.location.href = '/';
+                                        // 2. 무조건 즉각적으로 로그인 페이지로 강제 이동 및 새로고침
+                                        window.location.href = '/login';
                                     }
                                 }} 
                                 className="flex items-center gap-1 font-black text-red-500 hover:text-red-700 transition-colors"

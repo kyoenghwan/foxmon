@@ -76,7 +76,7 @@ export function UserNav() {
                             await handleSignOut();
                         } catch(e) {
                         } finally {
-                            window.location.href = '/';
+                            window.location.href = '/login';
                         }
                     }} 
                     className="cursor-pointer text-red-500 focus:bg-red-50 focus:text-red-600"
