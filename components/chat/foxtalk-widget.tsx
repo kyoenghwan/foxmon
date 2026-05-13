@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, MessageCircle, Send, Plus, Users, Shield, ArrowLeft } from 'lucide-react';
+import { X, MessageCircle, Send, Plus, Users, Shield, ArrowLeft, Headset } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM';
 import { OA_INSERT_CHAT_PARTICIPANT } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_PARTICIPANT';
@@ -9,7 +9,7 @@ import { OA_INSERT_CHAT_MESSAGE } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ME
 import { QA_GET_CHAT_ROOMS } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_ROOMS';
 import { QA_GET_CHAT_MESSAGES } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_MESSAGES';
 
-type AppState = 'CLOSED' | 'SETUP' | 'LOBBY' | 'CREATE_ROOM' | 'ROOM';
+type AppState = 'CLOSED' | 'MENU' | 'SETUP' | 'LOBBY' | 'CREATE_ROOM' | 'ROOM';
 
 interface Profile {
     sessionId: string;
@@ -25,6 +25,21 @@ export function FoxTalkWidget() {
     const [messages, setMessages] = useState<any[]>([]);
     const [msgInput, setMsgInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Auth Role State
+    const [userRole, setUserRole] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Fetch session once to determine user role for menu display
+        fetch('/api/auth/session')
+            .then(res => res.json())
+            .then(session => {
+                if (session?.user?.role) {
+                    setUserRole(session.user.role);
+                }
+            })
+            .catch(() => {});
+    }, []);
 
     // Setup Form State
     const [setupNick, setSetupNick] = useState('');
@@ -239,23 +254,84 @@ export function FoxTalkWidget() {
             isDragMoved.current = false;
             return;
         }
-        handleOpen();
+        if (appState === 'CLOSED') {
+            setAppState('MENU');
+        } else if (appState === 'MENU') {
+            setAppState('CLOSED');
+        }
     };
 
-    if (appState === 'CLOSED') {
+    if (appState === 'CLOSED' || appState === 'MENU') {
         return (
-            <button 
-                onClick={onWidgetClick}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-                className="fixed w-16 h-16 bg-gradient-to-tr from-primary to-orange-400 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-[9999] group border-2 border-white touch-none"
+            <div 
+                className="fixed z-[9999] flex flex-col items-end gap-3 pointer-events-none"
                 style={{ right: `${pos.right}px`, bottom: `${pos.bottom}px` }}
             >
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse border border-white"></div>
-                <MessageCircle className="w-8 h-8 text-white group-hover:rotate-12 transition-transform" />
-            </button>
+                {/* Menu Popup */}
+                {appState === 'MENU' && (
+                    <div className="bg-white rounded-[24px] shadow-2xl border border-gray-100 p-2 w-[260px] animate-in slide-in-from-bottom-2 fade-in duration-200 mb-2 pointer-events-auto">
+                        <div className="px-3 py-2 border-b border-gray-50 mb-1">
+                            <span className="text-[12px] font-black text-gray-400">무엇을 도와드릴까요?</span>
+                        </div>
+                        
+                        {/* FoxTalk Button */}
+                        <button 
+                            onClick={() => {
+                                handleOpen();
+                            }}
+                            className="w-full text-left flex items-center gap-3.5 px-3 py-3.5 hover:bg-orange-50/50 rounded-2xl transition-colors group"
+                        >
+                            <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 group-hover:bg-primary group-hover:text-white transition-colors shrink-0">
+                                <MessageCircle className="w-5 h-5" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-black text-[15px] text-gray-900 leading-tight mb-0.5">폭스톡 <span className="bg-primary/10 text-primary text-[9px] px-1.5 py-0.5 rounded-full ml-1">Beta</span></span>
+                                <span className="text-[11px] font-medium text-gray-500">
+                                    {!userRole ? '로그인 후 시작하기' : userRole === 'EMPLOYER' ? '지원자와 실시간 대화하기' : '사장님과 실시간 대화하기'}
+                                </span>
+                            </div>
+                        </button>
+
+                        {/* Customer Service Button */}
+                        <button 
+                            onClick={() => {
+                                alert('채널톡 고객센터가 곧 연동됩니다!\n(현재는 고객센터 게시판을 이용해주세요.)');
+                                setAppState('CLOSED');
+                            }}
+                            className="w-full text-left flex items-center gap-3.5 px-3 py-3.5 hover:bg-blue-50/50 rounded-2xl transition-colors group mt-1"
+                        >
+                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors shrink-0">
+                                <Headset className="w-5 h-5" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-black text-[15px] text-gray-900 leading-tight mb-0.5">폭스몬 고객센터</span>
+                                <span className="text-[11px] font-medium text-gray-500">
+                                    {!userRole ? '비회원 이용 문의' : userRole === 'EMPLOYER' ? '광고/결제 및 이용 문의' : '일반 이용 문의'}
+                                </span>
+                            </div>
+                        </button>
+                    </div>
+                )}
+
+                {/* FAB Button */}
+                <button 
+                    onClick={onWidgetClick}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                    onPointerCancel={handlePointerUp}
+                    className={`w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all group border-2 border-white touch-none pointer-events-auto ${appState === 'MENU' ? 'bg-gray-800 rotate-90 scale-95' : 'bg-gradient-to-tr from-primary to-orange-400 hover:scale-110'}`}
+                >
+                    {appState === 'CLOSED' ? (
+                        <>
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse border border-white"></div>
+                            <MessageCircle className="w-8 h-8 text-white group-hover:rotate-12 transition-transform" />
+                        </>
+                    ) : (
+                        <X className="w-7 h-7 text-white -rotate-90" />
+                    )}
+                </button>
+            </div>
         );
     }
 
