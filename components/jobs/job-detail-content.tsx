@@ -332,7 +332,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                             // 폭스톡 위젯 열기 트리거
                             window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
                         } else {
-                            alert('채팅방을 생성하지 못했습니다.');
+                            alert('채팅방을 생성하지 못했습니다.\n원인: ' + (createRes.error || '알 수 없는 오류'));
                         }
                     } catch (err) {
                         alert('오류가 발생했습니다.');
