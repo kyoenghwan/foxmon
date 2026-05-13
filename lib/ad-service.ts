@@ -68,7 +68,7 @@ const CATCHPHRASES = [
 const CATEGORIES = ['(노래주점)', '(룸싸롱)', '(단란주점)', '(마사지)', '(텐프로)', '(하이퍼)'];
 const PAY_LIST = ['[TC] 120,000원', '[TC] 150,000원', '[시급] 65,000원', '[TC] 110,000원', '[협의]면접후결정', '[TC] 180,000원'];
 
-export let MOCK_ADS: AdItem[] = Array.from({ length: 150 }).map((_, i) => {
+let MOCK_ADS: AdItem[] = Array.from({ length: 150 }).map((_, i) => {
     let tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'GENERAL' | 'AD_GENERAL' = 'AD_GENERAL';
     if (i < 10) tier = 'PREMIUM_MAIN';
     else if (i < 20) tier = 'SIDE';
@@ -148,6 +148,13 @@ export async function getRotatedAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 
 function getMockAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL', count: number): AdItem[] {
     const filtered = MOCK_ADS.filter(ad => ad.tier === tier);
     return applyRollingLogic(filtered, count);
+}
+
+/**
+ * 외부 모듈(서버 액션)에서 Mock 데이터를 직접 가져오기 위한 async 헬퍼
+ */
+export async function getRawMockAds(tier: string): Promise<AdItem[]> {
+    return MOCK_ADS.filter(ad => ad.tier === tier);
 }
 
 /**
