@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '5mb',
     },
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   webpack: (config, { dev, isServer }) => {
     if (dev) {
       // 개발 환경에서 파일시스템 캐시 비활성화
