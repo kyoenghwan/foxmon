@@ -1,6 +1,7 @@
 'use server';
 
 import { supabase, supabaseAdmin } from './supabase';
+import { applyRollingLogic } from './ad-rolling-logic';
 
 export interface AdItem {
     id: string;
@@ -25,6 +26,8 @@ export interface AdItem {
     option_bg_value?: string;
     option_highlight_value?: string;
     option_general_icons?: string[];
+    option_double_slot?: boolean;
+    option_jump?: boolean;
     isRealAd?: boolean; // 실제 DB 연동 광고 여부
 }
 
@@ -94,66 +97,7 @@ let MOCK_ADS: AdItem[] = Array.from({ length: 150 }).map((_, i) => {
     };
 });
 
-/**
- * 핵심 공정 롤링 + 신규 등반 주입 로직
- */
-function applyRollingLogic(ads: AdItem[], count: number): AdItem[] {
-    const nowMs = Date.now();
-    const tenMinsMs = 10 * 60 * 1000;
 
-    // 1. 등록일(created_at) 최신순으로 전체 정렬 (base order)
-    ads.sort((a, b) => {
-        const timeA = new Date(a.created_at || a.last_exposed_at || 0).getTime();
-        const timeB = new Date(b.created_at || b.last_exposed_at || 0).getTime();
-        return timeB - timeA;
-    });
-
-    const newAds: AdItem[] = [];
-    const oldAds: AdItem[] = [];
-
-    // 2. 그룹 분리 (신규 광고 vs 기존 롤링 광고)
-    for (const ad of ads) {
-        const adTime = new Date(ad.created_at || ad.last_exposed_at || 0).getTime();
-        if (nowMs - adTime <= tenMinsMs) {
-            newAds.push(ad);
-        } else {
-            oldAds.push(ad);
-        }
-    }
-
-    // 3. 기존 광고 그룹 1분 단위 순환 롤링 (Cyclic Rolling)
-    let rolledOldAds = oldAds;
-    if (oldAds.length > 0) {
-        const currentMinute = Math.floor(nowMs / 60000);
-        // % 연산으로 offset 구하기 (오래된 순번일수록 위로 올라가는 롤링 효과)
-        const offset = currentMinute % oldAds.length;
-        rolledOldAds = [...oldAds.slice(offset), ...oldAds.slice(0, offset)];
-    }
-
-    // 4. 신규 광고 10위 진입 후 1분마다 등반 (강제 주입 로직)
-    const resultAds = [...rolledOldAds];
-
-    // 신규 광고들은 이미 최신순(newAds)이므로 뒤에서부터(가장 먼저 등록한 것부터)
-    // 현재 시간에 맞춰 순위치기 시킵니다.
-    for (let i = newAds.length - 1; i >= 0; i--) {
-        const ad = newAds[i];
-        const adTime = new Date(ad.created_at || ad.last_exposed_at || 0).getTime();
-        const ageMins = Math.floor((nowMs - adTime) / 60000);
-        
-        // ageMins: 0분 -> 9번 인덱스 (10위 진입)
-        // ageMins: 9분 -> 0번 인덱스 (1위 등반 성공)
-        const targetIndex = Math.max(0, 9 - ageMins);
-        
-        if (targetIndex >= resultAds.length) {
-            resultAds.push(ad);
-        } else {
-            resultAds.splice(targetIndex, 0, ad);
-        }
-    }
-
-    // 최종 산출된 리스트에서 count 만큼 노출
-    return resultAds.slice(0, count);
-}
 
 /**
  * Fair Ad Rotation Service (Supabase)

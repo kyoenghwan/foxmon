@@ -17,7 +17,7 @@ export default async function AdminAdsPage() {
                 <div>
                     <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
                         <CreditCard className="w-6 h-6 text-primary" />
-                        광고 및 배너
+                        공지 및 이벤트
                     </h2>
                     <p className="text-[13px] text-gray-500 font-medium mt-1">
                         플랫폼 전체에 노출되는 이벤트 팝업 및 메인 배너를 관리합니다.
