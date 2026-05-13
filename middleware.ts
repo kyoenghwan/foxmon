@@ -26,18 +26,20 @@ export default auth((req) => {
         if (!isAutoLogin && !isTransientActive) {
             if (nextUrl.pathname === '/login') {
                 const response = NextResponse.next();
-                response.cookies.delete('authjs.session-token');
-                response.cookies.delete('__Secure-authjs.session-token');
-                response.cookies.delete('next-auth.session-token');
+                response.cookies.set({ name: 'authjs.session-token', value: '', maxAge: 0, path: '/' });
+                response.cookies.set({ name: '__Secure-authjs.session-token', value: '', maxAge: 0, path: '/', secure: true });
+                response.cookies.set({ name: 'next-auth.session-token', value: '', maxAge: 0, path: '/' });
+                response.cookies.set({ name: '__Secure-next-auth.session-token', value: '', maxAge: 0, path: '/', secure: true });
                 return response;
             }
 
-            const url = new URL(nextUrl.pathname, nextUrl);
+            const url = new URL('/login', nextUrl);
             url.searchParams.set('session_expired', '1');
             const response = NextResponse.redirect(url);
-            response.cookies.delete('authjs.session-token');
-            response.cookies.delete('__Secure-authjs.session-token');
-            response.cookies.delete('next-auth.session-token');
+            response.cookies.set({ name: 'authjs.session-token', value: '', maxAge: 0, path: '/' });
+            response.cookies.set({ name: '__Secure-authjs.session-token', value: '', maxAge: 0, path: '/', secure: true });
+            response.cookies.set({ name: 'next-auth.session-token', value: '', maxAge: 0, path: '/' });
+            response.cookies.set({ name: '__Secure-next-auth.session-token', value: '', maxAge: 0, path: '/', secure: true });
             return response;
         }
     }
