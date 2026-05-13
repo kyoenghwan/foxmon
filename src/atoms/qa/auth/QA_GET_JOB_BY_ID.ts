@@ -53,6 +53,29 @@ export async function QA_GET_JOB_BY_ID(jobId: string) {
       data = bizData;
     }
 
+    // 공통 코드 치환 (편의사항 및 키워드)
+    try {
+      const { QA_GET_COMMON_CODES } = await import('../master/QA_GET_COMMON_CODES');
+      const { data: commonCodes } = await QA_GET_COMMON_CODES(undefined, true);
+      
+      if (commonCodes && Array.isArray(commonCodes)) {
+        if (Array.isArray(data.amenities)) {
+          data.amenities = data.amenities.map((code: string) => {
+            const match = commonCodes.find(c => c.code_value === code && c.list_type === 'AMENITY');
+            return match ? match.code_name : code;
+          });
+        }
+        if (Array.isArray(data.keywords)) {
+          data.keywords = data.keywords.map((code: string) => {
+            const match = commonCodes.find(c => c.code_value === code && c.list_type === 'KEYWORD');
+            return match ? match.code_name : code;
+          });
+        }
+      }
+    } catch (codeError) {
+      nvLog('AT', '⚠️ 공통 코드 치환 실패 (무시됨)', codeError);
+    }
+
     return { success: true, data };
   } catch (error: any) {
     nvLog('AT', '❌ QA_GET_JOB_BY_ID 실패', error.message);

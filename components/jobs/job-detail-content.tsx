@@ -33,10 +33,14 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
         <div className="p-4 md:p-8 flex flex-col md:flex-row gap-6 md:gap-8 border-b border-gray-100">
             {/* 1-1. 좌측 로고 및 통계 */}
             <div className="w-full md:w-[280px] shrink-0 flex flex-col items-center">
-                <div className="w-full aspect-[3/2] bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border border-gray-200/50 p-6 flex flex-col items-center justify-center mb-5 shadow-sm relative overflow-hidden group">
-                    <div className="text-gray-800 text-center font-black leading-tight text-xl tracking-tighter drop-shadow-sm group-hover:scale-105 transition-transform duration-500">
-                        {(job.company_name || job.company || '').split(' ').map((line: string, i: number) => <div key={i}>{line}</div>)}
-                    </div>
+                <div className="w-full aspect-[3/2] bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border border-gray-200/50 flex flex-col items-center justify-center mb-5 shadow-sm relative overflow-hidden group">
+                    {(job.logo_url || job.image) ? (
+                        <img src={job.logo_url || job.image} alt={job.company_name || job.company} className="w-full h-full object-contain bg-white" />
+                    ) : (
+                        <div className="text-gray-800 text-center font-black leading-tight text-xl tracking-tighter drop-shadow-sm group-hover:scale-105 transition-transform duration-500 p-6">
+                            {(job.company_name || job.company || '').split(' ').map((line: string, i: number) => <div key={i}>{line}</div>)}
+                        </div>
+                    )}
                     {/* Glassmorphism 빛 반사 효과 */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/50 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%]"></div>
                 </div>
@@ -94,22 +98,21 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
         </div>
 
         <div className="p-4 md:p-8 space-y-12">
-            {/* 2. 업소 이미지 (Squarcles) */}
+            {/* 2. 업소 이미지 (Squarcles) - 이미지가 있을 때만 노출 */}
+            {Array.isArray(job.gallery_images || job.images) && (job.gallery_images || job.images).length > 0 && (
             <section>
                 <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
                    <span className="w-1 h-5 bg-primary rounded-full"></span> 업소 이미지
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[1,2,3,4].map(idx => (
-                    <div key={idx} className="aspect-[4/3] bg-gray-50/80 border border-gray-100 rounded-2xl flex flex-col items-center justify-center text-center text-gray-300 transition-all hover:bg-gray-100 hover:shadow-sm group">
-                        <div className="w-10 h-10 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                           <span className="text-xs font-black">IMG</span>
-                        </div>
-                        <span className="text-[11px] font-medium text-gray-400">등록된 이미지가<br/>없습니다</span>
+                    {(job.gallery_images || job.images).map((imgUrl: string, idx: number) => (
+                    <div key={idx} className="aspect-[4/3] bg-gray-50/80 border border-gray-100 rounded-2xl flex flex-col items-center justify-center overflow-hidden transition-all hover:shadow-sm group">
+                        <img src={imgUrl} alt="업소 이미지" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     </div>
                     ))}
                 </div>
             </section>
+            )}
 
             {/* 3. 기본 채용정보 (Modern Rows) */}
             <section>
