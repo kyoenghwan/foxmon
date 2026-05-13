@@ -36,26 +36,27 @@ export function HomeJobSections() {
         { id: 3, title: '[이벤트] 친구 초대하고 포인트 받자! (기간 연장)', date: '2024-02-12', isHot: true },
     ];
 
+    const fetchAllJobs = async () => {
+        setLoading(true);
+        try {
+            const [p, s, l, g] = await Promise.all([
+                getRotatedAds('PREMIUM', 50),
+                getRotatedAds('SPECIAL', 50),
+                getRotatedAds('AD_GENERAL', 50),
+                getRotatedAds('GENERAL', 50)
+            ]);
+            setPremiumJobs(p);
+            setSpecialJobs(s);
+            setLineJobs(l);
+            setGeneralJobs(g);
+        } catch (error) {
+            console.error("Failed to fetch jobs:", error);
+        }
+        setLoading(false);
+    };
+
     // Firestore에서 티어별 광고 실시간 페치
     useEffect(() => {
-        async function fetchAllJobs() {
-            setLoading(true);
-            try {
-                const [p, s, l, g] = await Promise.all([
-                    getRotatedAds('PREMIUM', 50),
-                    getRotatedAds('SPECIAL', 50),
-                    getRotatedAds('AD_GENERAL', 50),
-                    getRotatedAds('GENERAL', 50)
-                ]);
-                setPremiumJobs(p);
-                setSpecialJobs(s);
-                setLineJobs(l);
-                setGeneralJobs(g);
-            } catch (error) {
-                console.error("Failed to fetch jobs:", error);
-            }
-            setLoading(false);
-        }
         fetchAllJobs();
     }, []);
 
@@ -68,17 +69,10 @@ export function HomeJobSections() {
         return () => clearInterval(interval);
     }, [isPaused, notices.length]);
 
-    // 1분(60초)마다 광고 리스트를 한 칸씩 시프트하여 위치 변경 (새로고침 없이 실시간 반영)
+    // 1분(60초)마다 서버에 요청하여 모든 유저가 동일한 순위를 보도록 강제 동기화
     useEffect(() => {
         const adInterval = setInterval(() => {
-            const shiftArray = (arr: AdItem[]) => {
-                if (!arr || arr.length <= 1) return arr;
-                return [...arr.slice(1), arr[0]]; // 첫 번째 항목을 맨 뒤로 보냅니다
-            };
-            setPremiumJobs(prev => shiftArray(prev));
-            setSpecialJobs(prev => shiftArray(prev));
-            setLineJobs(prev => shiftArray(prev));
-            setGeneralJobs(prev => shiftArray(prev));
+            fetchAllJobs();
         }, 60000); // 60초 주기
         return () => clearInterval(adInterval);
     }, []);
