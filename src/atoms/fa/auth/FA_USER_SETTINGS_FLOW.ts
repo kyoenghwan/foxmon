@@ -4,6 +4,7 @@ import { QA_GET_USER_AUTH_BY_ID } from '../../qa/auth/QA_GET_USER_AUTH_BY_ID';
 import { QA_GET_USER_PROFILE } from '../../qa/auth/QA_GET_USER_PROFILE';
 import { QA_CHECK_ID_NICKNAME_EXISTS } from '../../qa/auth/QA_CHECK_ID_NICKNAME_EXISTS';
 import { RA_COMPARE_AND_HASH } from '../../ra/auth/RA_COMPARE_AND_HASH';
+import { getSiteSettings } from '@/actions/admin/siteSettings';
 import { OA_UPDATE_USER_PROFILE, UpdateUserProfileInput } from '../../oa/auth/OA_UPDATE_USER_PROFILE';
 import { OA_CHANGE_PASSWORD } from '../../oa/auth/OA_CHANGE_PASSWORD';
 
@@ -30,9 +31,23 @@ export async function FA_USER_SETTINGS_FLOW(input: UserSettingsFlowInput) {
         switch (input.actionType) {
             case 'GET_PROFILE': {
                 const profileResult = await QA_GET_USER_PROFILE(input.userId);
+                
+                // 텔레그램 연동 버튼을 위해 시스템 설정의 봇 아이디도 함께 가져옴
+                let botUsername = '';
+                try {
+                    const { data: settings } = await getSiteSettings();
+                    botUsername = settings?.telegram_bot_username || '';
+                } catch (e) {
+                    console.error("Failed to fetch site settings:", e);
+                }
+
                 return { 
                     success: profileResult.success, 
-                    data: profileResult.data,
+                    data: {
+                        ...profileResult.data,
+                        botUsername,
+                        userId: input.userId
+                    },
                     message: profileResult.success ? '조회 성공' : '조회 실패' 
                 };
             }

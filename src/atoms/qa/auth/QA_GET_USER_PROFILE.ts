@@ -28,7 +28,7 @@ export async function QA_GET_USER_PROFILE(userId: string) {
 
     const { data, error } = await supabase
       .from('users')
-      .select('nickname, email, phone_number, gender, sns_kakao, sns_instagram, sns_telegram, sns_x, profile_image_url, role, business_name, business_number, business_registration_number, is_business_verified, verified_ceo_name, verified_business_name, business_cert_image_url')
+      .select('nickname, email, phone_number, gender, sns_kakao, sns_instagram, sns_telegram, sns_x, profile_image_url, role, business_name, business_number, business_registration_number, is_business_verified, verified_ceo_name, verified_business_name, business_cert_image_url, telegram_chat_id')
       .eq('id', userId)
       .single();
 

@@ -11,7 +11,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { userSettingsAction } from '@/lib/actions';
-import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2 } from 'lucide-react';
+import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell } from 'lucide-react';
+import { TelegramConnectButton } from '@/components/employer/telegram-connect-button';
 
 export function SettingsModal() {
     const [isOpen, setIsOpen] = useState(false);
@@ -37,6 +38,11 @@ export function SettingsModal() {
     const [isBizVerified, setIsBizVerified] = useState(false);
     const [verifiedBizName, setVerifiedBizName] = useState('');
     const [bizCertUrl, setBizCertUrl] = useState('');
+    
+    // Telegram Push Notification State
+    const [userId, setUserId] = useState('');
+    const [telegramChatId, setTelegramChatId] = useState('');
+    const [botUsername, setBotUsername] = useState('');
     
     // Password State
     const [currentPassword, setCurrentPassword] = useState('');
@@ -109,6 +115,11 @@ export function SettingsModal() {
                 setIsBizVerified(data.is_business_verified || false);
                 setVerifiedBizName(data.verified_business_name || '');
                 setBizCertUrl(data.business_cert_image_url || '');
+                
+                // Telegram Push
+                setUserId(data.userId || '');
+                setTelegramChatId(data.telegram_chat_id || '');
+                setBotUsername(data.botUsername || '');
             } else {
                 setError('사용자 정보를 불러올 수 없습니다.');
             }
@@ -534,7 +545,23 @@ export function SettingsModal() {
 
                         </div>
 
-                        {/* SECTION 4: 환경 표시 및 부가설정 */}
+                        {/* SECTION 4: 실시간 푸시 알림 (텔레그램) */}
+                        <div className="py-4 border-b border-gray-100 mb-6">
+                            <h3 className="font-extrabold text-[#333333] text-[14px] flex items-center gap-1.5 mb-3">
+                                <Bell className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 실시간 푸시 알림 설정
+                            </h3>
+                            {userId ? (
+                                <TelegramConnectButton 
+                                    userId={userId} 
+                                    botUsername={botUsername} 
+                                    isLinked={!!telegramChatId} 
+                                />
+                            ) : (
+                                <div className="text-xs text-gray-500">데이터를 불러오는 중입니다...</div>
+                            )}
+                        </div>
+
+                        {/* SECTION 5: 환경 표시 및 부가설정 */}
                         <div className="py-4 border-b border-gray-100 mb-6">
                             <h3 className="font-extrabold text-[#333333] text-[14px] flex items-center gap-1.5 mb-2">
                                 <Settings className="w-4 h-4 text-gray-400 stroke-[2]" /> 환경 설정
@@ -670,7 +697,7 @@ export function SettingsModal() {
                             </div>
                         )}
 
-                        {/* SECTION 6: 회원 탈퇴 링크 */}
+                        {/* SECTION 7: 회원 탈퇴 링크 */}
                         <div className="pt-2 pb-6 text-center">
                             <button className="text-[11px] font-bold text-gray-400 hover:text-[#F26E22] transition-colors underline underline-offset-4 flex items-center justify-center gap-1 mx-auto">
                                 회원 탈퇴를 생각하시나요?
