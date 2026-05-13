@@ -178,7 +178,17 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
         animClass = `animate-${action}`;
     }
 
-    const parsedOpacity = parseInt(bgOpacity || (tier === 'GENERAL' ? '5' : '0'), 10);
+    // color 파싱 (DB에서 '색상::투명도' 형태로 저장된 경우 대응)
+    let finalCustomColor = customColor;
+    let finalBgOpacity = bgOpacity;
+
+    if (customColor && customColor.includes('::')) {
+        const parts = customColor.split('::');
+        finalCustomColor = parts[0];
+        finalBgOpacity = parts[1] || bgOpacity;
+    }
+
+    const parsedOpacity = parseInt(finalBgOpacity || (tier === 'GENERAL' ? '5' : '0'), 10);
     const validOpacity = isNaN(parsedOpacity) ? 0 : Math.max(0, Math.min(100, parsedOpacity));
     const hexOpacity = Math.round((validOpacity / 100) * 255).toString(16).padStart(2, '0').toUpperCase();
 
@@ -217,12 +227,12 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                 }`}
             >
                 {/* --- [내부 배경 투명도 레이어] --- */}
-                {customColor && (
+                {finalCustomColor && (
                     <div 
                         className="absolute inset-0 pointer-events-none z-[0]" 
                         style={{ 
-                            backgroundColor: hexOpacity !== '00' ? `${customColor}${hexOpacity}` : 'transparent',
-                            boxShadow: `0 0 0 1px ${customColor}40 inset`
+                            backgroundColor: hexOpacity !== '00' ? `${finalCustomColor}${hexOpacity}` : 'transparent',
+                            boxShadow: `0 0 0 1px ${finalCustomColor}40 inset`
                         }} 
                     />
                 )}
