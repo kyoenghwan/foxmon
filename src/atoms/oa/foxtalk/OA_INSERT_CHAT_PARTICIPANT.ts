@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 interface ParticipantData {
     room_id: string;
@@ -9,7 +9,7 @@ interface ParticipantData {
 
 export const OA_INSERT_CHAT_PARTICIPANT = async (data: ParticipantData) => {
     try {
-        const { data: participant, error } = await supabase
+        const { data: participant, error } = await supabaseAdmin
             .from('foxtalk_participants')
             .upsert([{
                 room_id: data.room_id,

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { sendTelegramAlert } from '@/lib/telegram';
 
 export interface ChatRoomData {
@@ -15,7 +15,7 @@ export interface ChatRoomData {
 
 export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
     try {
-        const { data: room, error } = await supabase
+        const { data: room, error } = await supabaseAdmin
             .from('foxtalk_rooms')
             .insert([{
                 title: data.title,
@@ -44,7 +44,7 @@ export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
 
         return { success: true, data: room };
     } catch (error: any) {
-        console.error('OA_INSERT_CHAT_ROOM Error:', error);
-        return { success: false, error: '채팅방 생성에 실패했습니다.' };
+        console.error('OA_INSERT_CHAT_ROOM Error (Detailed):', error?.message || error);
+        return { success: false, error: error?.message || '채팅방 생성에 실패했습니다.' };
     }
 };

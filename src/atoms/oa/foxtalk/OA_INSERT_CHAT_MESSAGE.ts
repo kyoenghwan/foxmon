@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 interface MessageData {
     room_id: string;
@@ -9,7 +9,7 @@ interface MessageData {
 
 export const OA_INSERT_CHAT_MESSAGE = async (data: MessageData) => {
     try {
-        const { data: message, error } = await supabase
+        const { data: message, error } = await supabaseAdmin
             .from('foxtalk_messages')
             .insert([{
                 room_id: data.room_id,
