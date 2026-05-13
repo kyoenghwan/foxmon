@@ -24,6 +24,7 @@ export function FoxTalkWidget() {
     const [currentRoom, setCurrentRoom] = useState<any | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
     const [msgInput, setMsgInput] = useState('');
+    const [lobbyTab, setLobbyTab] = useState<'1ON1' | 'OPEN'>('1ON1');
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Auth Role State
@@ -68,6 +69,19 @@ export function FoxTalkWidget() {
         }
     }, [messages, appState]);
 
+    useEffect(() => {
+        // 커스텀 이벤트 수신 (다른 컴포넌트에서 폭스톡 열기)
+        const handleOpenEvent = (e: any) => {
+            const { roomId } = e.detail || {};
+            setAppState('LOBBY');
+            setLobbyTab('1ON1');
+            loadRooms();
+            // 향후 특정 roomId로 바로 입장하는 로직 추가 가능
+        };
+        window.addEventListener('open_foxtalk', handleOpenEvent);
+        return () => window.removeEventListener('open_foxtalk', handleOpenEvent);
+    }, [userRole, userId]);
+
     // Handle Open Widget
     const handleOpen = () => {
         if (!profile) setAppState('SETUP');
@@ -78,7 +92,8 @@ export function FoxTalkWidget() {
     };
 
     const loadRooms = async () => {
-        const res = await QA_GET_CHAT_ROOMS();
+        // userRole과 userId는 state에서 캡처됨
+        const res = await QA_GET_CHAT_ROOMS(userId || undefined, userRole || undefined);
         if (res.success) setRooms(res.data || []);
     };
 
@@ -413,40 +428,70 @@ export function FoxTalkWidget() {
                 )}
 
                 {appState === 'LOBBY' && (
-                    <div className="flex flex-col h-full">
-                        <div className="p-4 bg-white border-b sticky top-0 z-10 flex justify-between items-center shadow-sm">
-                            <h3 className="font-black text-gray-800 flex items-center gap-1.5">
-                                <Users className="w-4 h-4 text-primary" /> 대화방 목록
+                    <div className="flex flex-col h-full bg-white">
+                        {/* 탭 헤더 */}
+                        {userRole !== 'EMPLOYER' && (
+                            <div className="flex border-b bg-white shrink-0">
+                                <button 
+                                    onClick={() => setLobbyTab('1ON1')}
+                                    className={`flex-1 py-3.5 text-[13px] font-black transition-colors ${lobbyTab === '1ON1' ? 'text-primary border-b-2 border-primary' : 'text-gray-400 hover:bg-gray-50'}`}
+                                >
+                                    💬 1:1 구인구직
+                                </button>
+                                <button 
+                                    onClick={() => setLobbyTab('OPEN')}
+                                    className={`flex-1 py-3.5 text-[13px] font-black transition-colors ${lobbyTab === 'OPEN' ? 'text-primary border-b-2 border-primary' : 'text-gray-400 hover:bg-gray-50'}`}
+                                >
+                                    👥 여우 오픈채팅
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="p-3 bg-gray-50 border-b sticky top-0 z-10 flex justify-between items-center shadow-sm">
+                            <h3 className="font-black text-[12px] text-gray-500 flex items-center gap-1.5">
+                                {lobbyTab === '1ON1' ? '내 다이렉트 대화방' : '참여 가능한 오픈채팅방'}
                             </h3>
-                            <button 
-                                onClick={() => setAppState('CREATE_ROOM')}
-                                className="bg-gray-900 hover:bg-gray-800 text-white text-[11px] font-black px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition-colors"
-                            >
-                                <Plus className="w-3.5 h-3.5" /> 방 만들기
-                            </button>
+                            {lobbyTab === 'OPEN' && (
+                                <button 
+                                    onClick={() => setAppState('CREATE_ROOM')}
+                                    className="bg-gray-900 hover:bg-black text-white text-[11px] font-black px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition-colors"
+                                >
+                                    <Plus className="w-3.5 h-3.5" /> 방 만들기
+                                </button>
+                            )}
                         </div>
-                        <ul className="divide-y divide-gray-100 flex-1 p-2">
-                            {rooms.length === 0 ? (
-                                <li className="text-center text-sm font-bold text-gray-400 py-12 flex flex-col items-center gap-3">
-                                    <MessageCircle className="w-8 h-8 opacity-20" />
-                                    개설된 방이 없습니다.<br/>첫 대화방을 만들어 보세요!
+                        <ul className="divide-y divide-gray-100 flex-1 overflow-y-auto">
+                            {rooms.filter(r => lobbyTab === '1ON1' ? r.type === '1ON1' : (r.type === 'OPEN' || r.type === 'SECRET')).length === 0 ? (
+                                <li className="text-center text-sm font-bold text-gray-400 py-16 flex flex-col items-center gap-3">
+                                    <MessageCircle className="w-10 h-10 opacity-20" />
+                                    {lobbyTab === '1ON1' ? '지원 내역이나 대화가 없습니다.' : '개설된 방이 없습니다.'}
                                 </li>
-                            ) : rooms.map(room => (
+                            ) : rooms.filter(r => lobbyTab === '1ON1' ? r.type === '1ON1' : (r.type === 'OPEN' || r.type === 'SECRET')).map(room => (
                                 <li key={room.id}>
                                     <button 
                                         onClick={() => joinRoom(room)}
-                                        className="w-full text-left p-4 hover:bg-orange-50/50 transition-colors group rounded-xl"
+                                        className="w-full text-left p-4 hover:bg-orange-50/50 transition-colors group flex items-center gap-3"
                                     >
-                                        <div className="flex justify-between items-start mb-1">
-                                            <h4 className="font-black text-[14px] text-gray-900 group-hover:text-primary transition-colors flex items-center gap-1.5">
-                                                {room.type === 'SECRET' && <Shield className="w-3.5 h-3.5 text-red-500" />}
-                                                {room.title}
-                                            </h4>
-                                            <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                                                N명 참여
-                                            </span>
+                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                            {room.type === '1ON1' ? <Users className="w-5 h-5 text-gray-400" /> : <MessageCircle className="w-5 h-5 text-orange-400" />}
                                         </div>
-                                        {room.type === 'SECRET' && <span className="text-[11px] text-red-500 font-bold block mt-1">비밀방</span>}
+                                        <div className="flex-1 overflow-hidden">
+                                            <div className="flex justify-between items-start mb-0.5">
+                                                <h4 className="font-black text-[14px] text-gray-900 group-hover:text-primary transition-colors flex items-center gap-1.5 truncate">
+                                                    {room.type === 'SECRET' && <Shield className="w-3.5 h-3.5 text-red-500 shrink-0" />}
+                                                    {room.title}
+                                                </h4>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {room.type !== '1ON1' && (
+                                                    <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                                                        N명 참여
+                                                    </span>
+                                                )}
+                                                {room.type === 'SECRET' && <span className="text-[10px] text-red-500 font-bold bg-red-50 px-1.5 py-0.5 rounded-full">비밀방</span>}
+                                                {room.type === '1ON1' && <span className="text-[11px] text-gray-500 font-medium truncate">최근 대화내용이 여기에 표시됩니다...</span>}
+                                            </div>
+                                        </div>
                                     </button>
                                 </li>
                             ))}

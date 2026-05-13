@@ -4,6 +4,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart, MessageCircle, ThumbsUp, ThumbsDown, X } from 'lucide-react';
 import Link from 'next/link';
+import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM';
 
 export function JobDetailContent({ job, isModal = false, onClose }: { job: any, isModal?: boolean, onClose?: () => void }) {
   // DB에 없는 부가 정보들 하드코딩 대체 (실제 job 데이터 사용, 없으면 비공개/기본값)
@@ -299,12 +300,50 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 </div>
             </div>
 
-            {/* 2. FoxTalk 안내 배너 (향후 메신저 도입 대비) */}
-            <div className="bg-gradient-to-br from-gray-900 to-black rounded-[24px] p-5 text-white shadow-xl flex items-center justify-between group cursor-pointer hover:scale-[1.02] transition-transform">
+            {/* 2. FoxTalk 안내 배너 및 지원 버튼 */}
+            <div 
+                onClick={async () => {
+                    try {
+                        const res = await fetch('/api/auth/session');
+                        const session = await res.json();
+                        if (!session?.user?.id) {
+                            alert('폭스톡을 이용하려면 로그인이 필요합니다.');
+                            window.location.href = '/login';
+                            return;
+                        }
+                        
+                        if (session.user.role === 'EMPLOYER') {
+                            alert('업체회원은 지원자만 대화를 걸 수 있습니다.');
+                            return;
+                        }
+
+                        // 채팅방 생성 (이미 존재하면 해당 방으로 들어가도록 추후 고도화 가능, 현재는 insert)
+                        const createRes = await OA_INSERT_CHAT_ROOM({
+                            title: job.title || job.company_name || '구인구직 대화방',
+                            type: '1ON1',
+                            max_participants: 2,
+                            created_by: session.user.id,
+                            job_id: job.id,
+                            employer_id: job.user_id, // 구인글 작성자
+                            seeker_id: session.user.id
+                        });
+
+                        if (createRes.success) {
+                            // 폭스톡 위젯 열기 트리거
+                            window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
+                        } else {
+                            alert('채팅방을 생성하지 못했습니다.');
+                        }
+                    } catch (err) {
+                        alert('오류가 발생했습니다.');
+                    }
+                }}
+                className="bg-gradient-to-br from-gray-900 to-black rounded-[24px] p-5 text-white shadow-xl flex items-center justify-between group cursor-pointer hover:scale-[1.02] transition-transform"
+            >
                 <div className="flex flex-col">
                     <div className="flex items-center gap-1.5 mb-1">
                         <span className="text-primary text-[18px]">⚡</span>
-                        <span className="font-black text-[15px] tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-pink-500">FoxTalk</span>
+                        <span className="font-black text-[15px] tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-pink-500">FoxTalk 지원하기</span>
                     </div>
                     <span className="text-[12px] text-gray-400 font-medium leading-tight">번호 노출 없이 안전하게<br/>1:1 익명 채팅을 시작하세요.</span>
                 </div>

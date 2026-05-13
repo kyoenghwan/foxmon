@@ -2,11 +2,14 @@ import { supabase } from '@/lib/supabase';
 
 export interface ChatRoomData {
     title: string;
-    type: 'OPEN' | 'SECRET';
+    type: 'OPEN' | 'SECRET' | '1ON1';
     room_code?: string;
     password_hash?: string;
     max_participants: number;
     created_by: string;
+    job_id?: string;
+    employer_id?: string;
+    seeker_id?: string;
 }
 
 export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
@@ -20,7 +23,10 @@ export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
                 password_hash: data.password_hash || null,
                 max_participants: data.max_participants,
                 created_by: data.created_by,
-                is_active: true
+                is_active: true,
+                job_id: data.job_id || null,
+                employer_id: data.employer_id || null,
+                seeker_id: data.seeker_id || null
             }])
             .select()
             .single();

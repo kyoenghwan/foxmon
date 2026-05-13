@@ -1,20 +1,30 @@
 import { supabase } from '@/lib/supabase';
 
-export const QA_GET_CHAT_ROOMS = async () => {
+export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
     try {
-        const { data: rooms, error } = await supabase
+        let query = supabase
             .from('foxtalk_rooms')
             .select('*')
             .eq('is_active', true)
-            // .eq('type', 'OPEN') // 비밀방도 리스트에는 띄울 수 있음 (자물쇠 표시 아이콘)
             .order('created_at', { ascending: false })
-            .limit(50); // 최신 50개 로드
+            .limit(100);
+
+        if (userRole === 'EMPLOYER') {
+            // 사장님은 본인이 연관된 1ON1 방만 보임
+            query = query.eq('type', '1ON1').eq('employer_id', userId);
+        } else {
+            // 일반 구직자는 본인이 연관된 1ON1 방이거나, OPEN/SECRET 방을 봄
+            // Supabase 쿼리의 or 구문을 활용
+            if (userId) {
+                query = query.or(`type.in.(OPEN,SECRET),and(type.eq.1ON1,seeker_id.eq.${userId})`);
+            } else {
+                query = query.in('type', ['OPEN', 'SECRET']);
+            }
+        }
+
+        const { data: rooms, error } = await query;
 
         if (error) throw error;
-
-        // participants 카운트 조인 (Supabase count 쿼리 활용)
-        // 복잡한 조인이 필요한 경우, 간단하게 각 룸별 카운트만 따로 뷰/RPC로 만들 수도 있음
-        // 일단 기본 버전은 룸 리스트만 가져옵니다.
         
         return { success: true, data: rooms || [] };
     } catch (error: any) {
