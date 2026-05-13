@@ -36,8 +36,8 @@ export function HomeJobSections() {
         { id: 3, title: '[이벤트] 친구 초대하고 포인트 받자! (기간 연장)', date: '2024-02-12', isHot: true },
     ];
 
-    const fetchAllJobs = async () => {
-        setLoading(true);
+    const fetchAllJobs = async (isInitial = false) => {
+        if (isInitial) setLoading(true);
         try {
             const [p, s, l, g] = await Promise.all([
                 getRotatedAds('PREMIUM', 50),
@@ -52,12 +52,12 @@ export function HomeJobSections() {
         } catch (error) {
             console.error("Failed to fetch jobs:", error);
         }
-        setLoading(false);
+        if (isInitial) setLoading(false);
     };
 
-    // Firestore에서 티어별 광고 실시간 페치
+    // Firestore에서 티어별 광고 실시간 페치 (최초 로드 시)
     useEffect(() => {
-        fetchAllJobs();
+        fetchAllJobs(true);
     }, []);
 
     // 자동 롤링 효과 (공지사항)

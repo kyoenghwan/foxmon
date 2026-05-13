@@ -24,27 +24,19 @@ export function applyRollingLogic(ads: AdItem[], count: number, customNowMs?: nu
             } else {
                 oldAds.push(ad);
             }
-        }
-    }
+    // 오토 점프 배너들을 상단에, 일반 배너들을 하단에 둔 하나의 거대한 롤링 그룹 생성
+    const combinedGroup = [...jumpAds, ...oldAds];
+    let rolledGroup = combinedGroup;
 
-    let rolledJumpAds = jumpAds;
-    if (jumpAds.length > 0) {
+    if (combinedGroup.length > 0) {
         const currentMinute = Math.floor(nowMs / 60000);
-        const offset = currentMinute % jumpAds.length;
-        rolledJumpAds = [...jumpAds.slice(offset), ...jumpAds.slice(0, offset)];
+        const offset = currentMinute % combinedGroup.length;
+        // offset만큼 배열을 잘라서 뒤로 보냄 (1위가 꼴등으로 감)
+        rolledGroup = [...combinedGroup.slice(offset), ...combinedGroup.slice(0, offset)];
     }
-
-    let rolledOldAds = oldAds;
-    if (oldAds.length > 0) {
-        const currentMinute = Math.floor(nowMs / 60000);
-        const offset = currentMinute % oldAds.length;
-        rolledOldAds = [...oldAds.slice(offset), ...oldAds.slice(0, offset)];
-    }
-
-    const combinedBase = [...rolledJumpAds, ...rolledOldAds];
 
     const baseSlots: AdItem[] = [];
-    for (const ad of combinedBase) {
+    for (const ad of rolledGroup) {
         baseSlots.push(ad);
         if (ad.option_double_slot) {
             baseSlots.push({ ...ad, id: ad.id + '_dup' });
