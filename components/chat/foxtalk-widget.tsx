@@ -29,6 +29,7 @@ export function FoxTalkWidget() {
 
     // Auth Role State
     const [userRole, setUserRole] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
         // Fetch session once to determine user role for menu display
@@ -37,6 +38,9 @@ export function FoxTalkWidget() {
             .then(session => {
                 if (session?.user?.role) {
                     setUserRole(session.user.role);
+                }
+                if (session?.user?.id) {
+                    setUserId(session.user.id);
                 }
             })
             .catch(() => {});
