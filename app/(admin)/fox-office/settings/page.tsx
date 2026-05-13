@@ -9,7 +9,9 @@ export default function AdminSettingsPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [settings, setSettings] = useState({
-        openai_api_key: ''
+        openai_api_key: '',
+        telegram_bot_token: '',
+        telegram_bot_username: ''
     });
 
     useEffect(() => {
@@ -17,7 +19,9 @@ export default function AdminSettingsPage() {
             const { data, success } = await getSiteSettings();
             if (success && data) {
                 setSettings({
-                    openai_api_key: data.openai_api_key || ''
+                    openai_api_key: data.openai_api_key || '',
+                    telegram_bot_token: data.telegram_bot_token || '',
+                    telegram_bot_username: data.telegram_bot_username || ''
                 });
             }
             setLoading(false);
@@ -70,6 +74,33 @@ export default function AdminSettingsPage() {
                         <p className="text-[12px] text-gray-500 flex items-start gap-1">
                             <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                             AI 로고 자동 생성 및 이미지 생성을 위한 API 키를 입력하세요. 이 키는 클라이언트에 절대 노출되지 않으며 서버 엑션에서만 안전하게 사용됩니다.
+                        </p>
+                    </div>
+
+                    <hr className="border-gray-100" />
+
+                    {/* Telegram Bot Token 설정 */}
+                    <div>
+                        <label className="block text-[14px] font-bold text-gray-800 mb-2">Telegram Bot Token & Username</label>
+                        <div className="flex flex-col gap-3">
+                            <input
+                                type="text"
+                                value={settings.telegram_bot_username}
+                                onChange={(e) => setSettings({ ...settings, telegram_bot_username: e.target.value })}
+                                placeholder="봇 아이디 (예: @foxmon_alert_bot)"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight"
+                            />
+                            <input
+                                type="password"
+                                value={settings.telegram_bot_token}
+                                onChange={(e) => setSettings({ ...settings, telegram_bot_token: e.target.value })}
+                                placeholder="HTTP API Token (예: 123456789:ABCdefGHI...)"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight"
+                            />
+                        </div>
+                        <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
+                            <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                            텔레그램 BotFather에서 발급받은 봇 아이디와 토큰을 입력하세요. 사장님 푸시 알림 전송에 사용됩니다.
                         </p>
                     </div>
 

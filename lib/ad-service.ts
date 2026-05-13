@@ -13,6 +13,9 @@ export interface AdItem {
     logo_url?: string;
     color?: string;
     theme?: string;
+    action_type?: string;
+    effect_intensity?: string;
+    bg_opacity?: string;
     time?: string;
     is_big: boolean; // Supabase 스네이크 케이스 대응
     tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL';

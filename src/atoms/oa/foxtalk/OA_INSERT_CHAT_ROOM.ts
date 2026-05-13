@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { sendTelegramAlert } from '@/lib/telegram';
 
 export interface ChatRoomData {
     title: string;
@@ -32,6 +33,14 @@ export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
             .single();
 
         if (error) throw error;
+
+        // 1:1 방 생성 시 사장님에게 텔레그램 알림 전송 (비동기로 실행)
+        if (data.type === '1ON1' && data.employer_id) {
+            sendTelegramAlert(
+                data.employer_id, 
+                `🔔 <b>[폭스몬] 새로운 지원자가 연락했습니다!</b>\n\n💬 지원자 분이 <b>[${data.title}]</b> 구인글을 통해 FoxTalk 메시지를 시작했습니다.\n\n👉 폭스몬 사이트에 접속해서 답변해주세요!`
+            ).catch(err => console.error("텔레그램 알림 발송 중 오류:", err));
+        }
 
         return { success: true, data: room };
     } catch (error: any) {
