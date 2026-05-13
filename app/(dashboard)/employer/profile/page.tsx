@@ -2,7 +2,6 @@ import EmployerProfileForm from '@/components/employer/profile-form';
 import { Separator } from '@/components/ui/separator';
 import { auth } from '@/auth';
 import { supabaseAdmin } from '@/lib/supabase';
-import { getSiteSettings } from '@/actions/admin/siteSettings';
 import { TelegramConnectButton } from '@/components/employer/telegram-connect-button';
 
 export default async function EmployerProfilePage() {
@@ -15,8 +14,10 @@ export default async function EmployerProfilePage() {
         if (data?.telegram_chat_id) isLinked = true;
     }
 
-    const { data: settings } = await getSiteSettings();
-    const botUsername = settings?.telegram_bot_username || '';
+    let botUsername = '';
+    const { data: setting } = await supabaseAdmin.from('site_settings').select('key_value').eq('key_name', 'telegram_bot_username').single();
+    if (setting) botUsername = setting.key_value;
+
     return (
         <div className="space-y-6">
             <div>

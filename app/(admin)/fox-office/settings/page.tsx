@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Save, Key, AlertCircle, Loader2 } from 'lucide-react';
+import { Save, Key, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getSiteSettings, updateSiteSettings } from '@/actions/admin/siteSettings';
 
@@ -13,6 +13,10 @@ export default function AdminSettingsPage() {
         telegram_bot_token: '',
         telegram_bot_username: ''
     });
+    
+    // Toggle States for passwords
+    const [showApiKey, setShowApiKey] = useState(false);
+    const [showTelegramToken, setShowTelegramToken] = useState(false);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -62,16 +66,23 @@ export default function AdminSettingsPage() {
                     {/* OpenAI API Key 설정 */}
                     <div>
                         <label className="block text-[14px] font-bold text-gray-800 mb-2">OpenAI (DALL-E 3) API Key</label>
-                        <div className="flex gap-3">
+                        <div className="relative">
                             <input
-                                type="password"
+                                type={showApiKey ? "text" : "password"}
                                 value={settings.openai_api_key}
                                 onChange={(e) => setSettings({ ...settings, openai_api_key: e.target.value })}
                                 placeholder="sk-..."
-                                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none mb-1 focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight pr-10"
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowApiKey(!showApiKey)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
                         </div>
-                        <p className="text-[12px] text-gray-500 flex items-start gap-1">
+                        <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
                             <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                             AI 로고 자동 생성 및 이미지 생성을 위한 API 키를 입력하세요. 이 키는 클라이언트에 절대 노출되지 않으며 서버 엑션에서만 안전하게 사용됩니다.
                         </p>
@@ -90,13 +101,22 @@ export default function AdminSettingsPage() {
                                 placeholder="봇 아이디 (예: @foxmon_alert_bot)"
                                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight"
                             />
-                            <input
-                                type="password"
-                                value={settings.telegram_bot_token}
-                                onChange={(e) => setSettings({ ...settings, telegram_bot_token: e.target.value })}
-                                placeholder="HTTP API Token (예: 123456789:ABCdefGHI...)"
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight"
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showTelegramToken ? "text" : "password"}
+                                    value={settings.telegram_bot_token}
+                                    onChange={(e) => setSettings({ ...settings, telegram_bot_token: e.target.value })}
+                                    placeholder="HTTP API Token (예: 123456789:ABCdefGHI...)"
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTelegramToken(!showTelegramToken)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    {showTelegramToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
                         </div>
                         <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
                             <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />

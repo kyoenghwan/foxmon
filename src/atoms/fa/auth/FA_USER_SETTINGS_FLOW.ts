@@ -4,7 +4,7 @@ import { QA_GET_USER_AUTH_BY_ID } from '../../qa/auth/QA_GET_USER_AUTH_BY_ID';
 import { QA_GET_USER_PROFILE } from '../../qa/auth/QA_GET_USER_PROFILE';
 import { QA_CHECK_ID_NICKNAME_EXISTS } from '../../qa/auth/QA_CHECK_ID_NICKNAME_EXISTS';
 import { RA_COMPARE_AND_HASH } from '../../ra/auth/RA_COMPARE_AND_HASH';
-import { getSiteSettings } from '@/actions/admin/siteSettings';
+import { supabaseAdmin } from '@/lib/supabase';
 import { OA_UPDATE_USER_PROFILE, UpdateUserProfileInput } from '../../oa/auth/OA_UPDATE_USER_PROFILE';
 import { OA_CHANGE_PASSWORD } from '../../oa/auth/OA_CHANGE_PASSWORD';
 
@@ -35,10 +35,14 @@ export async function FA_USER_SETTINGS_FLOW(input: UserSettingsFlowInput) {
                 // 텔레그램 연동 버튼을 위해 시스템 설정의 봇 아이디도 함께 가져옴
                 let botUsername = '';
                 try {
-                    const { data: settings } = await getSiteSettings();
-                    botUsername = settings?.telegram_bot_username || '';
+                    const { data: setting } = await supabaseAdmin
+                        .from('site_settings')
+                        .select('key_value')
+                        .eq('key_name', 'telegram_bot_username')
+                        .single();
+                    if (setting) botUsername = setting.key_value;
                 } catch (e) {
-                    console.error("Failed to fetch site settings:", e);
+                    console.error("Failed to fetch bot username:", e);
                 }
 
                 return { 
