@@ -46,9 +46,14 @@ export async function POST(req: NextRequest) {
 // 텔레그램 회신용 내부 헬퍼 함수
 async function sendTelegramReply(chatId: number | string, text: string) {
     try {
-        // 설정에서 토큰 가져오기
-        const { data: settings } = await getSiteSettings();
-        const token = settings?.telegram_bot_token;
+        // 설정에서 토큰 직접 조회 (웹훅은 세션이 없으므로 getSiteSettings 사용 불가)
+        const { data: settingRow } = await supabaseAdmin
+            .from('site_settings')
+            .select('key_value')
+            .eq('key_name', 'telegram_bot_token')
+            .single();
+            
+        const token = settingRow?.key_value;
         
         if (!token) return false;
         
