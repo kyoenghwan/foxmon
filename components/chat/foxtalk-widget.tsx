@@ -75,16 +75,61 @@ export function FoxTalkWidget() {
 
     useEffect(() => {
         // 커스텀 이벤트 수신 (다른 컴포넌트에서 폭스톡 열기)
-        const handleOpenEvent = (e: any) => {
+        const handleOpenEvent = async (e: any) => {
             const { roomId } = e.detail || {};
+            
+            if (roomId) {
+                // 특정 방으로 바로 입장 (이미 생성된 방이거나 새로 만든 방)
+                const { data: room } = await supabase.from('foxtalk_rooms').select('*').eq('id', roomId).single();
+                if (room) {
+                    // 프로필이 설정되어 있지 않다면 SETUP 화면으로
+                    const currentProfile = profile || (localStorage.getItem('foxtalk_profile') ? JSON.parse(localStorage.getItem('foxtalk_profile')!) : null);
+                    
+                    if (!currentProfile) {
+                        setAppState('SETUP');
+                        return;
+                    }
+                    
+                    // 최신 프로필 정보로 joinRoom 로직 직접 실행 (Stale Closure 방지)
+                    if (room.type === 'SECRET' && room.created_by !== currentProfile.sessionId) {
+                        const pass = prompt('비밀방입니다. 비밀번호를 입력해주세요.');
+                        if (pass !== room.password_hash) {
+                            alert('비밀번호가 틀렸습니다.');
+                            return;
+                        }
+                    }
+                    
+                    await OA_INSERT_CHAT_PARTICIPANT({
+                        room_id: room.id,
+                        session_id: currentProfile.sessionId,
+                        nickname: currentProfile.nickname,
+                        avatar_type: currentProfile.avatarType
+                    });
+
+                    setCurrentRoom(room);
+                    setAppState('ROOM');
+                    loadMessages(room.id);
+                    
+                    // 1:1 방의 경우 "입장하셨습니다" 도배를 방지 (첫 채팅으로 시작 유도)
+                    if (room.type !== '1ON1') {
+                        await OA_INSERT_CHAT_MESSAGE({
+                            room_id: room.id,
+                            content: `${currentProfile.nickname}님이 입장하셨습니다.`,
+                            message_type: 'SYSTEM_JOIN'
+                        });
+                    }
+                    return;
+                }
+            }
+
+            // roomId가 없으면 로비 열기
             setAppState('LOBBY');
             setLobbyTab('1ON1');
             loadRooms();
-            // 향후 특정 roomId로 바로 입장하는 로직 추가 가능
         };
         window.addEventListener('open_foxtalk', handleOpenEvent);
         return () => window.removeEventListener('open_foxtalk', handleOpenEvent);
-    }, [userRole, userId]);
+    }, [userRole, userId, profile]);
 
     // Handle Open Widget
     const handleOpen = () => {
@@ -158,12 +203,14 @@ export function FoxTalkWidget() {
         setAppState('ROOM');
         loadMessages(room.id);
 
-        // 시스템 메시지 발송 (입장)
-        await OA_INSERT_CHAT_MESSAGE({
-            room_id: room.id,
-            content: `${profile.nickname}님이 입장하셨습니다.`,
-            message_type: 'SYSTEM_JOIN'
-        });
+        // 시스템 메시지 발송 (입장) - 1ON1은 제외하여 채팅창 도배 방지
+        if (room.type !== '1ON1') {
+            await OA_INSERT_CHAT_MESSAGE({
+                room_id: room.id,
+                content: `${profile.nickname}님이 입장하셨습니다.`,
+                message_type: 'SYSTEM_JOIN'
+            });
+        }
     };
 
     const loadMessages = async (roomId: string) => {
