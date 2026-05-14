@@ -11,6 +11,7 @@ export interface UpdateUserProfileInput {
   sns_instagram?: string;
   sns_telegram?: string;
   sns_x?: string;
+  sns_links?: { type: string; value: string }[];
   business_registration_number?: string;
   is_business_verified?: boolean;
   verified_ceo_name?: string;
@@ -35,6 +36,7 @@ export async function OA_UPDATE_USER_PROFILE(input: UpdateUserProfileInput) {
     if (input.sns_instagram !== undefined) updates.sns_instagram = input.sns_instagram;
     if (input.sns_telegram !== undefined) updates.sns_telegram = input.sns_telegram;
     if (input.sns_x !== undefined) updates.sns_x = input.sns_x;
+    if (input.sns_links !== undefined) updates.sns_links = input.sns_links;
     if (input.business_registration_number !== undefined) updates.business_registration_number = input.business_registration_number;
     if (input.is_business_verified !== undefined) updates.is_business_verified = input.is_business_verified;
     if (input.verified_ceo_name !== undefined) updates.verified_ceo_name = input.verified_ceo_name;

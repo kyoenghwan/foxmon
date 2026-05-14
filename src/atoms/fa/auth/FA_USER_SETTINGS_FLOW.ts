@@ -88,6 +88,7 @@ export async function FA_USER_SETTINGS_FLOW(input: UserSettingsFlowInput) {
                     sns_instagram: input.profileData.sns_instagram,
                     sns_telegram: input.profileData.sns_telegram,
                     sns_x: input.profileData.sns_x,
+                    sns_links: input.profileData.sns_links,
                     business_registration_number: input.profileData.business_registration_number,
                     is_business_verified: input.profileData.is_business_verified,
                     verified_ceo_name: input.profileData.verified_ceo_name,

@@ -11,12 +11,12 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { userSettingsAction } from '@/lib/actions';
-import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell } from 'lucide-react';
+import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2 } from 'lucide-react';
 import { TelegramConnectButton } from '@/components/employer/telegram-connect-button';
 
 export function SettingsModal() {
     const [isOpen, setIsOpen] = useState(false);
-    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<'profile' | 'settings'>('profile');
     
     // Profile State
     const [initialNickname, setInitialNickname] = useState('');
@@ -26,15 +26,15 @@ export function SettingsModal() {
     const [profileUrl, setProfileUrl] = useState('');
     const [autoLogin, setAutoLogin] = useState(false);
     
-    // SNS State
-    const [snsKakao, setSnsKakao] = useState('');
-    const [snsInsta, setSnsInsta] = useState('');
-    const [snsTelegram, setSnsTelegram] = useState('');
+    // Dynamic SNS State
+    const [snsLinks, setSnsLinks] = useState<{type: string; value: string}[]>([]);
+    const [newSnsType, setNewSnsType] = useState('kakao');
+    const [newSnsValue, setNewSnsValue] = useState('');
     
     // Business Verification State
     const [role, setRole] = useState('');
     const [bizNumber, setBizNumber] = useState('');
-    const [ceoName, setCeoName] = useState(''); // 대표자명 추가
+    const [ceoName, setCeoName] = useState('');
     const [isBizVerified, setIsBizVerified] = useState(false);
     const [verifiedBizName, setVerifiedBizName] = useState('');
     const [bizCertUrl, setBizCertUrl] = useState('');
@@ -55,7 +55,6 @@ export function SettingsModal() {
     const [savingPassword, setSavingPassword] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    
     const [pwMessage, setPwMessage] = useState('');
     const [pwError, setPwError] = useState('');
 
@@ -74,7 +73,7 @@ export function SettingsModal() {
             document.cookie = "foxmon_auto_login=1; path=/; max-age=2592000";
         } else {
             document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "foxmon_transient=1; path=/;"; // Ensure session token exists
+            document.cookie = "foxmon_transient=1; path=/;";
         }
     };
 
@@ -83,9 +82,9 @@ export function SettingsModal() {
         setEmail('');
         setPhoneNumber('');
         setProfileUrl('');
-        setSnsKakao('');
-        setSnsInsta('');
-        setSnsTelegram('');
+        setSnsLinks([]);
+        setNewSnsType('kakao');
+        setNewSnsValue('');
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
@@ -93,6 +92,7 @@ export function SettingsModal() {
         setError('');
         setPwMessage('');
         setPwError('');
+        setActiveTab('profile');
     }
 
     const fetchUserData = async () => {
@@ -106,20 +106,27 @@ export function SettingsModal() {
                 setEmail(data.email || '');
                 setPhoneNumber(data.phone_number || '');
                 setProfileUrl(data.profile_image_url || '');
-                setSnsKakao(data.sns_kakao || '');
-                setSnsInsta(data.sns_instagram || '');
-                setSnsTelegram(data.sns_telegram || '');
                 setRole(data.role || 'GENERAL');
                 setBizNumber(data.business_registration_number || '');
                 setCeoName(data.verified_ceo_name || '');
                 setIsBizVerified(data.is_business_verified || false);
                 setVerifiedBizName(data.verified_business_name || '');
                 setBizCertUrl(data.business_cert_image_url || '');
-                
-                // Telegram Push
                 setUserId(data.userId || '');
                 setTelegramChatId(data.telegram_chat_id || '');
                 setBotUsername(data.botUsername || '');
+
+                // Parse SNS Links (JSONB array or fallback to legacy columns)
+                if (data.sns_links && Array.isArray(data.sns_links)) {
+                    setSnsLinks(data.sns_links);
+                } else {
+                    const legacySns = [];
+                    if (data.sns_kakao) legacySns.push({ type: 'kakao', value: data.sns_kakao });
+                    if (data.sns_instagram) legacySns.push({ type: 'instagram', value: data.sns_instagram });
+                    if (data.sns_telegram) legacySns.push({ type: 'telegram', value: data.sns_telegram });
+                    if (data.sns_x) legacySns.push({ type: 'x', value: data.sns_x });
+                    setSnsLinks(legacySns);
+                }
             } else {
                 setError('사용자 정보를 불러올 수 없습니다.');
             }
@@ -128,6 +135,16 @@ export function SettingsModal() {
         } finally {
             setLoadingData(false);
         }
+    };
+
+    const handleAddSns = () => {
+        if (!newSnsValue.trim()) return;
+        setSnsLinks([...snsLinks, { type: newSnsType, value: newSnsValue.trim() }]);
+        setNewSnsValue('');
+    };
+
+    const handleRemoveSns = (index: number) => {
+        setSnsLinks(snsLinks.filter((_, i) => i !== index));
     };
 
     const handleSaveProfile = async () => {
@@ -142,9 +159,7 @@ export function SettingsModal() {
                     email,
                     phoneNumber,
                     profile_image_url: profileUrl,
-                    sns_kakao: snsKakao,
-                    sns_instagram: snsInsta,
-                    sns_telegram: snsTelegram,
+                    sns_links: snsLinks,
                     currentNickname: initialNickname,
                     business_registration_number: bizNumber,
                     is_business_verified: isBizVerified,
@@ -155,13 +170,9 @@ export function SettingsModal() {
             });
 
             if (result.success) {
-                setMessage('설정이 저장되었습니다.');
+                setMessage('기본 정보가 저장되었습니다.');
                 setInitialNickname(nickname);
-                
-                // 메인 화면의 프로필 이미지도 즉시 갱신되도록 이벤트 발행
                 window.dispatchEvent(new Event('profile-updated'));
-                
-                // 3초 후 메시지 제거
                 setTimeout(() => setMessage(''), 3000);
             } else {
                 setError(result.message);
@@ -189,10 +200,7 @@ export function SettingsModal() {
 
         try {
             const result = await userSettingsAction('CHANGE_PASSWORD', {
-                passwordData: {
-                    currentPassword,
-                    newPassword
-                }
+                passwordData: { currentPassword, newPassword }
             });
 
             if (result.success) {
@@ -200,11 +208,6 @@ export function SettingsModal() {
                 setCurrentPassword('');
                 setNewPassword('');
                 setConfirmPassword('');
-                
-                setTimeout(() => {
-                    setPwMessage('');
-                    setIsPasswordModalOpen(false);
-                }, 1500);
             } else {
                 setPwError(result.message);
             }
@@ -218,47 +221,22 @@ export function SettingsModal() {
     const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
-        // 브라우저 뻗음 방지 (10MB 이상 컷)
-        if (file.size > 10 * 1024 * 1024) {
-            alert('사진은 10MB 이하로 업로드해주세요.');
-            return;
-        }
+        if (file.size > 10 * 1024 * 1024) return alert('사진은 10MB 이하로 업로드해주세요.');
 
         const reader = new FileReader();
         reader.onloadend = (event) => {
             const img = new Image();
             img.onload = () => {
-                // 프로필 사진용으로 충분한 최대 300px 너비/높이
-                const MAX_WIDTH = 300;
-                const MAX_HEIGHT = 300;
-                let width = img.width;
-                let height = img.height;
-
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
-                }
-
+                const MAX_WIDTH = 300; const MAX_HEIGHT = 300;
+                let width = img.width; let height = img.height;
+                if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
+                else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
                 const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-
+                canvas.width = width; canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
-                    // 캔버스에 이미지 그리기 (리사이즈)
                     ctx.drawImage(img, 0, 0, width, height);
-                    
-                    // 이렇게 하면 5MB 짜리가 20~30KB 내외로 줄어듭니다.
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    setProfileUrl(compressedDataUrl);
+                    setProfileUrl(canvas.toDataURL('image/jpeg', 0.8));
                 }
             };
             img.src = event.target?.result as string;
@@ -269,42 +247,22 @@ export function SettingsModal() {
     const handleBizCertUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
-        if (file.size > 10 * 1024 * 1024) {
-            alert('사진은 10MB 이하로 업로드해주세요.');
-            return;
-        }
+        if (file.size > 10 * 1024 * 1024) return alert('사진은 10MB 이하로 업로드해주세요.');
 
         const reader = new FileReader();
         reader.onloadend = (event) => {
             const img = new Image();
             img.onload = () => {
-                const MAX_WIDTH = 800; // 텍스트를 읽을 수 있도록 좀 더 크게 유지
-                const MAX_HEIGHT = 800;
-                let width = img.width;
-                let height = img.height;
-
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
-                }
-
+                const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
+                let width = img.width; let height = img.height;
+                if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
+                else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
                 const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-
+                canvas.width = width; canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
                     ctx.drawImage(img, 0, 0, width, height);
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    setBizCertUrl(compressedDataUrl);
+                    setBizCertUrl(canvas.toDataURL('image/jpeg', 0.8));
                 }
             };
             img.src = event.target?.result as string;
@@ -312,39 +270,72 @@ export function SettingsModal() {
         reader.readAsDataURL(file);
     };
 
+    const getSnsIcon = (type: string) => {
+        switch (type) {
+            case 'kakao': return <span className="bg-[#FBE54D] text-black text-[10px] px-1.5 py-0.5 rounded font-black">TALK</span>;
+            case 'instagram': return <Instagram className="w-3.5 h-3.5 text-pink-500" />;
+            case 'telegram': return <Send className="w-3.5 h-3.5 text-blue-500" />;
+            case 'line': return <span className="bg-[#00B900] text-white text-[10px] px-1.5 py-0.5 rounded font-black">LINE</span>;
+            case 'x': return <span className="bg-black text-white text-[10px] px-1.5 py-0.5 rounded font-black">𝕏</span>;
+            default: return <Link2 className="w-3.5 h-3.5 text-gray-500" />;
+        }
+    };
+
+    const snsOptions = [
+        { value: 'kakao', label: '카카오톡' },
+        { value: 'instagram', label: '인스타그램' },
+        { value: 'telegram', label: '텔레그램' },
+        { value: 'line', label: '라인' },
+        { value: 'x', label: 'X(트위터)' },
+        { value: 'other', label: '기타/URL' }
+    ];
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <button 
                     className="flex items-center justify-center w-9 h-9 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl text-gray-500 hover:text-gray-900 transition-all shadow-sm active:scale-95"
-                    title="회원 설정"
+                    title="설정"
                 >
                     <Settings className="w-[18px] h-[18px]" />
                 </button>
             </DialogTrigger>
             
-            <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden bg-white flex flex-col max-h-[90vh] border-none rounded-2xl shadow-xl">
-                {/* Header (Top Right Save Button included) */}
-                <DialogHeader className="px-5 py-4 flex-shrink-0 bg-white z-10 border-b flex flex-row items-center justify-between">
+            <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden bg-white flex flex-col max-h-[90vh] border-none rounded-2xl shadow-xl">
+                {/* Header */}
+                <DialogHeader className="px-5 py-4 flex-shrink-0 bg-white z-10 flex flex-row items-center justify-between">
                     <div>
                         <DialogTitle className="font-extrabold text-lg flex items-center gap-2 text-gray-900">
-                            <User className="w-4 h-4 text-[#F26E22]" /> 회원 상세 설정
+                            <User className="w-4 h-4 text-[#F26E22]" /> 회원 설정
                         </DialogTitle>
-                        <DialogDescription className="font-medium text-[12px] text-gray-500 mt-0.5">
-                            SNS 프로필과 계정 보안 정보를 관리하세요.
-                        </DialogDescription>
                     </div>
-                    
-                    {/* Top Right Save Button */}
-                    <Button 
-                        onClick={handleSaveProfile} 
-                        disabled={savingProfile || loadingData} 
-                        className="bg-[#1A1F2C] hover:bg-black text-white px-5 font-bold rounded-lg h-9 shadow-sm shrink-0"
-                    >
-                        {savingProfile ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : null}
-                        저장
-                    </Button>
+                    {activeTab === 'profile' && (
+                        <Button 
+                            onClick={handleSaveProfile} 
+                            disabled={savingProfile || loadingData} 
+                            className="bg-[#1A1F2C] hover:bg-black text-white px-5 font-bold rounded-lg h-9 shadow-sm shrink-0"
+                        >
+                            {savingProfile && <Loader2 className="w-3 h-3 animate-spin mr-1.5" />}
+                            기본 정보 저장
+                        </Button>
+                    )}
                 </DialogHeader>
+
+                {/* Tabs */}
+                <div className="flex border-b border-gray-200">
+                    <button 
+                        onClick={() => setActiveTab('profile')} 
+                        className={`flex-1 py-3 text-[13px] font-bold transition-colors ${activeTab === 'profile' ? 'border-b-2 border-primary text-primary bg-primary/5' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
+                        기본 정보
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('settings')} 
+                        className={`flex-1 py-3 text-[13px] font-bold transition-colors ${activeTab === 'settings' ? 'border-b-2 border-primary text-primary bg-primary/5' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
+                        환경 및 보안 설정
+                    </button>
+                </div>
 
                 {loadingData ? (
                     <div className="flex flex-col items-center justify-center flex-1 text-gray-400 gap-2 py-20">
@@ -352,357 +343,233 @@ export function SettingsModal() {
                         <p className="font-bold text-sm">정보를 불러오는 중입니다...</p>
                     </div>
                 ) : (
-                    <div className="flex-1 overflow-y-auto px-5 py-2">
-                        {message && <div className="bg-green-100 text-green-800 p-2 rounded-lg text-xs font-bold my-2 shadow-sm">{message}</div>}
-                        {error && <div className="bg-red-100 text-red-800 p-2 rounded-lg text-xs font-bold my-2 shadow-sm">{error}</div>}
+                    <div className="flex-1 overflow-y-auto bg-gray-50/30">
+                        
+                        {/* 탭 1: 기본 정보 */}
+                        {activeTab === 'profile' && (
+                            <div className="p-5 space-y-6">
+                                {message && <div className="bg-green-100 text-green-800 p-2.5 rounded-lg text-xs font-bold shadow-sm flex items-center gap-2"><Check className="w-4 h-4"/>{message}</div>}
+                                {error && <div className="bg-red-100 text-red-800 p-2.5 rounded-lg text-xs font-bold shadow-sm">{error}</div>}
 
-                        {/* SECTION 1: 회원 기본 정보 */}
-                        <div className="py-4 border-b border-gray-100 relative">
-                             <div className="absolute top-4 right-0 opacity-[0.15] w-14 h-4 pointer-events-none">
-                                <img src="/logo.png" alt="" className="w-full h-full object-contain" />
-                            </div>
-                            
-                            <h3 className="font-extrabold text-[#333333] text-[14px] mb-4 flex items-center gap-1.5">
-                                <User className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 회원 기본 정보
-                            </h3>
-                            
-                            <div className="flex flex-col sm:flex-row gap-6 items-center">
-                                {/* Left Side: Profile Image Upload */}
-                                <div className="flex flex-col items-center shrink-0 sm:w-[110px]">
-                                    <div className="relative group flex-shrink-0 cursor-pointer w-[100px] h-[100px] bg-[#F8F9FA] rounded-2xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center transition-colors hover:border-[#F26E22]">
-                                        {profileUrl ? (
-                                            <img src={profileUrl} alt="Profile" className="w-full h-full object-contain" />
-                                        ) : (
-                                            <div className="flex flex-col items-center gap-1.5 text-gray-400 group-hover:text-[#F26E22] transition-colors p-1 text-center">
-                                                <Upload className="w-6 h-6 stroke-[2]" />
-                                                <span className="text-[10px] font-bold leading-tight">프로필 이미지<br/>등록</span>
-                                            </div>
-                                        )}
-                                        <input 
-                                            id="profile-upload-input"
-                                            type="file" 
-                                            accept="image/*" 
-                                            onChange={handlePhotoUpload} 
-                                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" 
-                                            title="사진 추가/변경"
-                                        />
-                                    </div>
-                                </div>
-                                
-                                {/* Right Side: Basic info inputs */}
-                                <div className="flex-1 space-y-2 w-full">
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">닉네임</label>
-                                        <div className="relative flex-1">
-                                            <input 
-                                                type="text" value={nickname} onChange={e => setNickname(e.target.value)}
-                                                className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] font-bold text-gray-800 py-1.5 focus:border-[#F26E22]" 
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">이메일</label>
-                                        <input 
-                                            type="email" value={email} onChange={e => setEmail(e.target.value)}
-                                            className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] font-medium text-gray-800 focus:border-[#F26E22] flex-1" 
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">전화번호</label>
-                                        <div className="flex items-center gap-1.5 flex-1 w-full">
-                                            <input 
-                                                type="text" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)}
-                                                className="w-full px-2.5 py-1.5 border border-[#DBE9F4] rounded-md outline-none text-[13px] font-bold text-gray-700 bg-[#EBF2F8]" 
-                                                placeholder="01000000000"
-                                                readOnly
-                                            />
-                                            <button 
-                                                type="button" 
-                                                onClick={() => alert("전화번호 변경은 본인인증(PASS/SMS)이 필요합니다.\n현재 준비 중인 기능입니다.")}
-                                                className="shrink-0 px-2 py-1.5 bg-gray-100 border border-gray-200 text-gray-600 rounded-md text-[11px] font-bold hover:bg-gray-200 transition-colors"
-                                            >
-                                                휴대폰 재인증
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* SECTION 2: SNS 계정 연결 */}
-                        <div className="py-4 border-b border-gray-100 relative">
-                             <div className="absolute top-4 right-0 opacity-[0.15] w-5 h-5 pointer-events-none">
-                                <img src="/logo.png" alt="" className="w-full h-full object-contain" />
-                            </div>
-                            <h3 className="font-extrabold text-[#333333] text-[14px] mb-3 flex items-center gap-1.5">
-                                <Link2 className="w-4 h-4 text-gray-400 stroke-[2.5]" /> SNS 계정 연결
-                            </h3>
-                            
-                            <div className="space-y-2">
-                                {/* 카카오톡 */}
-                                <div className="flex items-center gap-2">
-                                    <div className="flex items-center gap-1.5 w-24 shrink-0">
-                                        <div className="w-5 h-5 rounded bg-[#FBE54D] flex items-center justify-center text-black">
-                                            <MessageCircle className="w-3 h-3 fill-black stroke-black" />
-                                        </div>
-                                        <span className="text-[12px] font-bold text-gray-600">카카오톡</span>
-                                    </div>
-                                    <input 
-                                        type="text" value={snsKakao} onChange={e => setSnsKakao(e.target.value)}
-                                        className="flex-1 px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] font-medium text-gray-800 bg-white focus:border-[#F26E22]" 
-                                    />
-                                </div>
-                                {/* 인스타그램 */}
-                                <div className="flex items-center gap-2">
-                                    <div className="flex items-center gap-1.5 w-24 shrink-0">
-                                        <div className="w-5 h-5 rounded bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center text-white">
-                                            <Instagram className="w-3 h-3" />
-                                        </div>
-                                        <span className="text-[12px] font-bold text-gray-600">인스타그램</span>
-                                    </div>
-                                    <input 
-                                        type="text" value={snsInsta} onChange={e => setSnsInsta(e.target.value)}
-                                        className="flex-1 px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] font-medium text-gray-800 bg-white focus:border-[#F26E22]" 
-                                    />
-                                </div>
-                                {/* 텔레그램 */}
-                                <div className="flex items-center gap-2">
-                                    <div className="flex items-center gap-1.5 w-24 shrink-0">
-                                        <div className="w-5 h-5 rounded bg-[#34AADF] flex items-center justify-center text-white">
-                                            <Send className="w-2.5 h-2.5 ml-0.5" />
-                                        </div>
-                                        <span className="text-[12px] font-bold text-gray-600">텔레그램</span>
-                                    </div>
-                                    <input 
-                                        type="text" value={snsTelegram} onChange={e => setSnsTelegram(e.target.value)}
-                                        className="flex-1 px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] font-medium text-gray-800 bg-white focus:border-[#F26E22]" 
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* SECTION 3: 보안 & 비밀번호 변경 버튼화 */}
-                        <div className="py-4 flex items-center justify-between">
-                            <div className="flex flex-col gap-0.5">
-                                <h3 className="font-extrabold text-[#333333] text-[14px] flex items-center gap-1.5">
-                                    <Lock className="w-4 h-4 text-gray-400 stroke-[2]" /> 계정 보안 관리
-                                </h3>
-                                <p className="text-[11px] font-medium text-gray-500 pl-5">
-                                    비밀번호를 새롭게 설정합니다.
-                                </p>
-                            </div>
-                            
-                            <Dialog open={isPasswordModalOpen} onOpenChange={setIsPasswordModalOpen}>
-                                <DialogTrigger asChild>
-                                    <Button variant="outline" className="border-gray-200 text-[#333] font-bold h-7 px-3 text-[11px] rounded">
-                                        비밀번호 변경
-                                    </Button>
-                                </DialogTrigger>
-                                
-                                {/* Nested Password Modal */}
-                                <DialogContent className="sm:max-w-[360px] p-0 overflow-hidden bg-white border-none rounded-xl shadow-xl">
-                                     <DialogHeader className="px-4 py-3 border-b flex-shrink-0 bg-gray-50">
-                                        <DialogTitle className="font-extrabold text-[15px] flex items-center gap-2">
-                                            <Lock className="w-4 h-4 text-[#F26E22]" /> 비밀번호 변경
-                                        </DialogTitle>
-                                    </DialogHeader>
-                                    
-                                    <div className="p-4 space-y-3">
-                                        {pwMessage && <div className="bg-green-50 text-green-700 p-2 rounded text-[11px] font-bold">{pwMessage}</div>}
-                                        {pwError && <div className="bg-red-50 text-red-700 p-2 rounded text-[11px] font-bold">{pwError}</div>}
-                                        
-                                        <div>
-                                            <label className="text-[11px] font-bold text-[#333] mb-1 block">기존 비밀번호</label>
-                                            <input 
-                                                type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
-                                                className="w-full px-2.5 py-1.5 border border-gray-200 rounded outline-none text-xs focus:border-[#F26E22]" 
-                                                placeholder="현재 비밀번호력"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-[11px] font-bold text-[#333] mb-1 block">새 비밀번호 (6자 이상)</label>
-                                            <input 
-                                                type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
-                                                className="w-full px-2.5 py-1.5 border border-gray-200 rounded outline-none text-xs focus:border-[#F26E22]" 
-                                                placeholder="새 비밀번호 입력"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-[11px] font-bold text-[#333] mb-1 block">새 비밀번호 확인</label>
-                                            <input 
-                                                type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                                                className="w-full px-2.5 py-1.5 border border-gray-200 rounded outline-none text-xs focus:border-[#F26E22]" 
-                                                placeholder="다시 입력"
-                                            />
-                                        </div>
-                                        
-                                        <Button onClick={handleSavePassword} disabled={savingPassword} className="w-full bg-[#1A1F2C] hover:bg-black text-white text-[12px] font-bold rounded h-8 mt-2">
-                                            {savingPassword ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Check className="w-3 h-3 mr-1.5" />} 변경 저장
-                                        </Button>
-                                    </div>
-                                </DialogContent>
-                            </Dialog>
-
-                        </div>
-
-                        {/* SECTION 4: 실시간 푸시 알림 (텔레그램) */}
-                        <div className="py-4 border-b border-gray-100 mb-6">
-                            <h3 className="font-extrabold text-[#333333] text-[14px] flex items-center gap-1.5 mb-3">
-                                <Bell className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 실시간 푸시 알림 설정
-                            </h3>
-                            {userId ? (
-                                <TelegramConnectButton 
-                                    userId={userId} 
-                                    botUsername={botUsername} 
-                                    isLinked={!!telegramChatId} 
-                                />
-                            ) : (
-                                <div className="text-xs text-gray-500">데이터를 불러오는 중입니다...</div>
-                            )}
-                        </div>
-
-                        {/* SECTION 5: 환경 표시 및 부가설정 */}
-                        <div className="py-4 border-b border-gray-100 mb-6">
-                            <h3 className="font-extrabold text-[#333333] text-[14px] flex items-center gap-1.5 mb-2">
-                                <Settings className="w-4 h-4 text-gray-400 stroke-[2]" /> 환경 설정
-                            </h3>
-                            <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                                <div className="flex flex-col">
-                                    <span className="text-[12px] font-bold text-gray-800">자동 로그인</span>
-                                    <span className="text-[10px] text-gray-500 font-medium">브라우저를 닫아도 로그인이 유지됩니다. (PC방 등에서는 해제 권장)</span>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                  <input 
-                                    type="checkbox" 
-                                    className="sr-only peer" 
-                                    checked={autoLogin}
-                                    onChange={(e) => handleAutoLoginToggle(e.target.checked)}
-                                  />
-                                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* SECTION 5: 사업자 정보 관리 (업체회원 이상) */}
-                        {(role === 'EMPLOYER' || role === 'ADMIN') && (
-                            <div className="py-4 border-b border-gray-100 mb-6 bg-orange-50/30 -mx-5 px-5 rounded-lg border border-orange-100/50">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="font-extrabold text-[#333333] text-[14px] flex items-center gap-1.5">
-                                        <Building2 className="w-4 h-4 text-primary stroke-[2]" /> 사업자 정보 관리
+                                {/* 프로필 및 기본 정보 */}
+                                <section>
+                                    <h3 className="font-extrabold text-[#333] text-[13px] mb-3 flex items-center gap-1.5">
+                                        <User className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 프로필 기본 정보
                                     </h3>
-                                    {isBizVerified ? (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-green-100 text-green-700">
-                                            <Check className="w-3 h-3 stroke-[3]" /> 인증 완료
-                                        </span>
-                                    ) : (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500">
-                                            미인증 상태
-                                        </span>
-                                    )}
-                                </div>
-                                
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">대표자명</label>
-                                        <input 
-                                            type="text" value={ceoName} onChange={e => setCeoName(e.target.value)}
-                                            className={`w-full px-2.5 py-1.5 border rounded-md outline-none text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 text-gray-800 focus:border-primary'}`} 
-                                            placeholder="사업자등록증상 대표자 성명"
-                                            readOnly={isBizVerified}
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">상호명</label>
-                                        <input 
-                                            type="text" value={verifiedBizName} onChange={e => setVerifiedBizName(e.target.value)}
-                                            className={`w-full px-2.5 py-1.5 border rounded-md outline-none text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 text-gray-800 focus:border-primary'}`} 
-                                            placeholder="사업자등록증 상호명"
-                                            readOnly={isBizVerified}
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">사업자번호</label>
-                                        <div className="flex items-center gap-1.5 flex-1 w-full">
-                                            <input 
-                                                type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)}
-                                                className={`w-full px-2.5 py-1.5 border rounded-md outline-none text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 text-gray-800 focus:border-primary'}`} 
-                                                placeholder="숫자 10자리"
-                                                readOnly={isBizVerified}
-                                                maxLength={10}
-                                            />
-                                            {!isBizVerified && (
-                                                <Button 
-                                                    type="button" 
-                                                    onClick={() => {
-                                                        if (!ceoName) return alert('대표자 성명을 입력해주세요.');
-                                                        if (!bizNumber || bizNumber.length < 10) return alert('올바른 사업자등록번호를 입력해주세요.');
-                                                        if (!verifiedBizName) return alert('상호명을 입력해주세요.');
-                                                        if (!bizCertUrl) return alert('유흥업종 2차 검수용 사업자등록증 이미지를 업로드해주세요.');
-                                                        
-                                                        // Mock 인증 로직
-                                                        alert(`[MOCK] 국세청 조회 결과: 정상 사업자로 1차 인증되었습니다!\n(대표자: ${ceoName})\n\n이제 광고를 등록하실 수 있으며, 관리자의 사업자등록증 2차 검수 후 허위 업종으로 판명될 경우 광고가 중단될 수 있습니다.`);
-                                                        setIsBizVerified(true);
-                                                    }}
-                                                    className="shrink-0 px-3 h-8 bg-primary hover:bg-primary/90 text-white rounded-md text-[11px] font-bold"
-                                                >
-                                                    인증하기
-                                                </Button>
-                                            )}
-                                            {isBizVerified && (
-                                                <Button 
-                                                    type="button" 
-                                                    onClick={() => {
-                                                        if (confirm('사업자 인증을 해제하시겠습니까? (기존 광고가 중단될 수 있습니다)')) {
-                                                            setIsBizVerified(false);
-                                                        }
-                                                    }}
-                                                    variant="outline"
-                                                    className="shrink-0 px-3 h-8 border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-md text-[11px] font-bold"
-                                                >
-                                                    해제
-                                                </Button>
-                                            )}
+                                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col sm:flex-row gap-5">
+                                        <div className="flex flex-col items-center shrink-0">
+                                            <div className="relative group cursor-pointer w-[90px] h-[90px] bg-gray-50 rounded-2xl overflow-hidden border border-gray-200 flex flex-col items-center justify-center transition-all hover:border-primary">
+                                                {profileUrl ? (
+                                                    <img src={profileUrl} alt="Profile" className="w-full h-full object-contain" />
+                                                ) : (
+                                                    <div className="flex flex-col items-center gap-1 text-gray-400 group-hover:text-primary p-1 text-center">
+                                                        <Upload className="w-5 h-5" />
+                                                        <span className="text-[10px] font-bold">이미지 등록</span>
+                                                    </div>
+                                                )}
+                                                <input type="file" accept="image/*" onChange={handlePhotoUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                                            </div>
                                         </div>
-                                    </div>
-                                    
-                                    <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-orange-100">
-                                        <label className="text-[12px] font-bold text-gray-500 flex items-center justify-between">
-                                            사업자등록증 업로드 (2차 검수용)
-                                        </label>
-                                        <div className="relative group cursor-pointer w-full h-[120px] bg-white rounded-lg overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center transition-colors hover:border-primary">
-                                            {bizCertUrl ? (
-                                                <img src={bizCertUrl} alt="Business Certificate" className="w-full h-full object-contain" />
-                                            ) : (
-                                                <div className="flex flex-col items-center gap-1.5 text-gray-400 group-hover:text-primary transition-colors p-2 text-center">
-                                                    <Upload className="w-5 h-5 stroke-[2]" />
-                                                    <span className="text-[11px] font-bold leading-tight">유흥업종 여부 확인용<br/>등록증 이미지 업로드</span>
+                                        
+                                        <div className="flex-1 space-y-2.5 w-full">
+                                            <div className="flex flex-col gap-1">
+                                                <label className="text-[11px] font-bold text-gray-500">닉네임</label>
+                                                <input type="text" value={nickname} onChange={e => setNickname(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] font-bold focus:border-primary transition-colors" />
+                                            </div>
+                                            <div className="flex flex-col gap-1">
+                                                <label className="text-[11px] font-bold text-gray-500">이메일</label>
+                                                <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] font-medium focus:border-primary transition-colors" />
+                                            </div>
+                                            <div className="flex flex-col gap-1">
+                                                <label className="text-[11px] font-bold text-gray-500">휴대폰 번호 (본인인증)</label>
+                                                <div className="flex gap-2">
+                                                    <input type="text" value={phoneNumber} readOnly className="w-full px-2.5 py-1.5 border border-gray-200 bg-gray-50 text-gray-500 rounded-md outline-none text-[13px] font-bold" />
+                                                    <button type="button" onClick={() => alert("준비 중인 기능입니다.")} className="shrink-0 px-2.5 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-md text-[11px] font-bold hover:bg-gray-50">재인증</button>
                                                 </div>
-                                            )}
-                                            <input 
-                                                type="file" 
-                                                accept="image/*" 
-                                                onChange={handleBizCertUpload} 
-                                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" 
-                                                title="사업자등록증 업로드"
-                                            />
+                                            </div>
                                         </div>
-                                        <p className="text-[10px] text-gray-400 font-medium leading-tight">
-                                            * 국세청 인증 후, 관리자가 등록증을 통해 '유흥업종' 여부를 2차 확인합니다. 허위 업종일 경우 광고가 중단될 수 있습니다.
-                                        </p>
                                     </div>
-                                </div>
-                                <p className="text-[10px] text-gray-400 font-medium mt-3 leading-tight text-center bg-white py-1.5 rounded text-orange-600/80">
-                                    인증된 업체는 광고 등록 시 상호명이 자동으로 입력되며 임의로 변경할 수 없습니다.
-                                </p>
+                                </section>
+
+                                {/* 동적 SNS 연결 */}
+                                <section>
+                                    <h3 className="font-extrabold text-[#333] text-[13px] mb-3 flex items-center gap-1.5">
+                                        <Link2 className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 연락처 / SNS 계정
+                                    </h3>
+                                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-3">
+                                        {snsLinks.map((sns, index) => (
+                                            <div key={index} className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100">
+                                                <div className="w-[85px] flex items-center gap-1.5 shrink-0 pl-1">
+                                                    {getSnsIcon(sns.type)}
+                                                    <span className="text-[11px] font-bold text-gray-600">
+                                                        {snsOptions.find(o => o.value === sns.type)?.label || '기타'}
+                                                    </span>
+                                                </div>
+                                                <input 
+                                                    type="text" 
+                                                    value={sns.value} 
+                                                    onChange={e => {
+                                                        const newLinks = [...snsLinks];
+                                                        newLinks[index].value = e.target.value;
+                                                        setSnsLinks(newLinks);
+                                                    }}
+                                                    className="flex-1 bg-transparent border-none outline-none text-[13px] font-medium text-gray-800"
+                                                    placeholder="아이디 또는 URL"
+                                                />
+                                                <button onClick={() => handleRemoveSns(index)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        
+                                        {/* SNS 추가 폼 */}
+                                        <div className="flex items-center gap-2 pt-2 border-t border-dashed border-gray-200">
+                                            <select 
+                                                value={newSnsType} 
+                                                onChange={e => setNewSnsType(e.target.value)}
+                                                className="w-[95px] px-2 py-2 border border-gray-200 rounded-lg text-[12px] font-bold outline-none focus:border-primary bg-white"
+                                            >
+                                                {snsOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                                            </select>
+                                            <input 
+                                                type="text" 
+                                                value={newSnsValue} 
+                                                onChange={e => setNewSnsValue(e.target.value)}
+                                                onKeyDown={e => e.key === 'Enter' && handleAddSns()}
+                                                placeholder="아이디 또는 URL 입력"
+                                                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none focus:border-primary"
+                                            />
+                                            <Button onClick={handleAddSns} variant="secondary" className="px-3 h-9 rounded-lg font-bold">
+                                                <Plus className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* 사업자 정보 (업체 전용) */}
+                                {role === 'EMPLOYER' && (
+                                    <section>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="font-extrabold text-primary text-[13px] flex items-center gap-1.5">
+                                                <Building2 className="w-4 h-4 stroke-[2]" /> 업체 (사업자) 정보
+                                            </h3>
+                                            {isBizVerified ? (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-green-100 text-green-700">인증 완료</span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500">미인증</span>
+                                            )}
+                                        </div>
+                                        <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100/50 space-y-3">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="flex flex-col gap-1">
+                                                    <label className="text-[11px] font-bold text-gray-500">상호명</label>
+                                                    <input type="text" value={verifiedBizName} onChange={e => setVerifiedBizName(e.target.value)} readOnly={isBizVerified} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold ${isBizVerified ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} />
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    <label className="text-[11px] font-bold text-gray-500">대표자명</label>
+                                                    <input type="text" value={ceoName} onChange={e => setCeoName(e.target.value)} readOnly={isBizVerified} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold ${isBizVerified ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} />
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col gap-1">
+                                                <label className="text-[11px] font-bold text-gray-500">사업자등록번호</label>
+                                                <div className="flex gap-2">
+                                                    <input type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)} readOnly={isBizVerified} maxLength={10} className={`flex-1 px-2.5 py-1.5 border rounded-md text-[13px] font-bold ${isBizVerified ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} placeholder="숫자 10자리" />
+                                                    {!isBizVerified && (
+                                                        <Button type="button" onClick={() => { setIsBizVerified(true); alert('가승인되었습니다.'); }} className="h-8 px-3 text-[11px] font-bold">인증하기</Button>
+                                                    )}
+                                                    {isBizVerified && (
+                                                        <Button type="button" variant="outline" onClick={() => setIsBizVerified(false)} className="h-8 px-3 text-[11px] font-bold text-red-500">해제</Button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="pt-2 border-t border-orange-100">
+                                                <label className="text-[11px] font-bold text-gray-500 mb-1 block">사업자등록증 업로드 (유흥업종 2차 검수용)</label>
+                                                <div className="relative cursor-pointer w-full h-[80px] bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                                                    {bizCertUrl ? <img src={bizCertUrl} className="h-full object-contain" /> : <span className="text-[11px] font-bold text-gray-400">클릭하여 업로드</span>}
+                                                    <input type="file" onChange={handleBizCertUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                )}
                             </div>
                         )}
 
-                        {/* SECTION 7: 회원 탈퇴 링크 */}
-                        <div className="pt-2 pb-6 text-center">
-                            <button className="text-[11px] font-bold text-gray-400 hover:text-[#F26E22] transition-colors underline underline-offset-4 flex items-center justify-center gap-1 mx-auto">
-                                회원 탈퇴를 생각하시나요?
-                            </button>
-                        </div>
+                        {/* 탭 2: 보안 및 환경 설정 */}
+                        {activeTab === 'settings' && (
+                            <div className="p-5 space-y-6">
+                                
+                                {/* 텔레그램 푸시 알림 (업체 전용) */}
+                                {role === 'EMPLOYER' && (
+                                    <section>
+                                        <h3 className="font-extrabold text-[#333] text-[13px] mb-3 flex items-center gap-1.5">
+                                            <Bell className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 알림 설정
+                                        </h3>
+                                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                                            <div className="flex flex-col mb-3">
+                                                <span className="text-[13px] font-bold text-gray-800">텔레그램 실시간 알림 연동</span>
+                                                <span className="text-[11px] text-gray-500">지원자 알림 등을 텔레그램으로 즉시 받습니다.</span>
+                                            </div>
+                                            {userId ? (
+                                                <TelegramConnectButton userId={userId} botUsername={botUsername} isLinked={!!telegramChatId} />
+                                            ) : (
+                                                <div className="text-xs text-gray-400">로딩 중...</div>
+                                            )}
+                                        </div>
+                                    </section>
+                                )}
+
+                                {/* 비밀번호 변경 */}
+                                <section>
+                                    <h3 className="font-extrabold text-[#333] text-[13px] mb-3 flex items-center gap-1.5">
+                                        <Lock className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 계정 보안
+                                    </h3>
+                                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-3">
+                                        {pwMessage && <div className="bg-green-50 text-green-700 p-2 rounded text-[11px] font-bold">{pwMessage}</div>}
+                                        {pwError && <div className="bg-red-50 text-red-700 p-2 rounded text-[11px] font-bold">{pwError}</div>}
+                                        
+                                        <div className="flex flex-col gap-1">
+                                            <label className="text-[11px] font-bold text-gray-500">현재 비밀번호</label>
+                                            <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-2.5 py-2 border border-gray-200 rounded-md outline-none text-[13px]" />
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            <label className="text-[11px] font-bold text-gray-500">새 비밀번호</label>
+                                            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full px-2.5 py-2 border border-gray-200 rounded-md outline-none text-[13px]" />
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            <label className="text-[11px] font-bold text-gray-500">새 비밀번호 확인</label>
+                                            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full px-2.5 py-2 border border-gray-200 rounded-md outline-none text-[13px]" />
+                                        </div>
+                                        <Button onClick={handleSavePassword} disabled={savingPassword} variant="outline" className="w-full mt-2 font-bold h-9">
+                                            {savingPassword ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Check className="w-3 h-3 mr-1.5" />} 비밀번호 변경하기
+                                        </Button>
+                                    </div>
+                                </section>
+
+                                {/* 브라우저 환경 설정 */}
+                                <section>
+                                    <h3 className="font-extrabold text-[#333] text-[13px] mb-3 flex items-center gap-1.5">
+                                        <Settings className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 접속 환경
+                                    </h3>
+                                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+                                        <div className="flex flex-col">
+                                            <span className="text-[13px] font-bold text-gray-800">자동 로그인 유지</span>
+                                            <span className="text-[11px] text-gray-500">브라우저를 닫아도 로그인이 유지됩니다.</span>
+                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" className="sr-only peer" checked={autoLogin} onChange={(e) => handleAutoLoginToggle(e.target.checked)} />
+                                            <div className="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+                                        </label>
+                                    </div>
+                                </section>
+
+                                <div className="pt-4 text-center">
+                                    <button className="text-[11px] font-bold text-gray-400 hover:text-red-500 transition-colors underline underline-offset-4">
+                                        회원 탈퇴를 생각하시나요?
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </DialogContent>

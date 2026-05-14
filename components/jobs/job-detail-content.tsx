@@ -71,32 +71,55 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 {/* 오른쪽: 상호명, 연락처/SNS, 폭스토크 지원 */}
                 <div className="flex-1 w-full flex flex-col gap-3 md:gap-4 md:py-1">
                     
-                    {/* 상단: 상호명 및 간단 요약 */}
+                    {/* 상단: 상호명 및 업체 정보 상세 */}
                     <div className="flex flex-col border-b border-gray-100 pb-3">
-                        <div className="flex items-center gap-2 mb-1.5">
+                        <div className="flex items-center gap-2 mb-3">
                             <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full">업체명</span>
                             <h3 className="font-black text-gray-900 text-lg md:text-xl truncate">{job.company_name || job.company || '업체명 미상'}</h3>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2 text-[12px] text-gray-500 font-medium">
-                            <span>매니저: <b className="text-gray-700">{contact.manager}</b></span>
-                            <span className="text-gray-300">|</span>
-                            <span className="text-gray-700 flex items-center gap-0.5"><span className="text-[11px]">📍</span> {job.location || '지역 미상'}</span>
-                            <span className="text-gray-300">|</span>
-                            <span className="text-pink-600 font-bold flex items-center gap-0.5"><span className="text-[11px]">💰</span> {job.pay || (job.salary_type ? `[${job.salary_type}] ${job.salary_amount}원` : '협의')}</span>
+                        
+                        <div className="grid grid-cols-[80px_1fr] gap-y-2 text-[13px] md:text-[14px] mb-2">
+                            <div className="text-gray-400 font-bold flex items-center">닉네임</div>
+                            <div className="font-bold text-gray-900">{contact.nickname}</div>
+                            
+                            <div className="text-gray-400 font-bold flex items-center">담당자</div>
+                            <div className="font-bold text-gray-900">{contact.manager}</div>
+
+                            <div className="text-gray-400 font-bold flex items-center">근무지역</div>
+                            <div className="font-bold text-gray-900 flex items-center gap-1">
+                                <span className="text-[11px] opacity-70">📍</span> {job.location || '지역 미상'}
+                            </div>
+                            
+                            <div className="text-gray-400 font-bold flex items-center">급여조건</div>
+                            <div className="font-black text-pink-600 flex items-center gap-1">
+                                <span className="text-[11px] opacity-70">💰</span> {job.pay || (job.salary_type ? `[${job.salary_type}] ${job.salary_amount}원` : '협의')}
+                            </div>
                         </div>
                     </div>
 
-                    {/* 중단: 콤팩트 연락처/SNS 버튼 */}
-                    <div className="grid grid-cols-2 gap-2">
+                    {/* 중단: 연락처 상세 텍스트 */}
+                    <div className="grid grid-cols-[80px_1fr] gap-y-2 text-[13px] md:text-[14px] pb-3 border-b border-gray-100">
+                        <div className="text-gray-400 font-bold flex items-center">전화번호</div>
+                        <div className="font-black text-primary text-[18px] tracking-tight">{contact.phone}</div>
+                        
+                        <div className="text-gray-400 font-bold flex items-center">카카오톡</div>
+                        <div className="font-bold text-gray-900 flex items-center gap-2">
+                            <span className="bg-[#fee500] text-[#000000] text-[10px] px-2 py-0.5 rounded shadow-sm font-black tracking-tighter">TALK</span> 
+                            {contact.kakao}
+                        </div>
+                    </div>
+
+                    {/* 액션 버튼 그룹 */}
+                    <div className="grid grid-cols-2 gap-2 mt-1">
                         <Button 
                             onClick={() => {
                                 if (!contact.phone || contact.phone === '비공개') return alert('비공개 상태입니다.');
                                 navigator.clipboard.writeText(contact.phone).then(() => alert(`전화번호 '${contact.phone}' 가 복사되었습니다!`));
                             }}
                             variant="outline" 
-                            className="h-10 rounded-xl border-gray-200 hover:bg-gray-50 text-[12px] font-bold shadow-sm flex items-center justify-center gap-1.5 transition-transform active:scale-95 text-gray-700"
+                            className="h-11 rounded-xl border-gray-200 hover:bg-gray-50 text-[12px] font-bold shadow-sm flex items-center justify-center gap-1.5 transition-transform active:scale-95 text-gray-700"
                         >
-                            <span className="text-gray-400">📞</span> {contact.phone} 복사
+                            <span className="text-gray-400">📞</span> 전화번호 복사
                         </Button>
                         <Button 
                             onClick={() => {
@@ -104,7 +127,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                                 if (contact.kakao.startsWith('http')) window.open(contact.kakao, '_blank');
                                 else navigator.clipboard.writeText(contact.kakao).then(() => alert(`카카오톡 아이디 '${contact.kakao}' 가 복사되었습니다!`));
                             }}
-                            className="h-10 rounded-xl bg-[#FEE500] hover:bg-[#F4DC00] text-[#000000] font-bold text-[12px] shadow-sm flex items-center justify-center gap-1.5 transition-transform active:scale-95"
+                            className="h-11 rounded-xl bg-[#FEE500] hover:bg-[#F4DC00] text-[#000000] font-bold text-[12px] shadow-sm flex items-center justify-center gap-1.5 transition-transform active:scale-95"
                         >
                             <span className="text-[14px]">💬</span> 카카오톡 복사
                         </Button>
@@ -215,39 +238,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     </div>
                 </div>
 
-                {/* ================= 업체 정보 (Area 1 -> Area 3) ================= */}
-                <section>
-                    <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-                       <span className="w-1 h-5 bg-primary rounded-full"></span> 업체 정보
-                    </h3>
-                    <div className="bg-gray-50/50 border border-gray-100 rounded-3xl p-6 md:p-8 shadow-inner relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1.5 h-full bg-primary/80"></div>
-                        <div className="grid grid-cols-[90px_1fr] sm:grid-cols-[120px_1fr] gap-y-5 text-[14px]">
-                            <div className="text-gray-500 font-bold flex items-center">닉네임</div>
-                            <div className="font-bold text-gray-900">{contact.nickname}</div>
-                            
-                            <div className="text-gray-500 font-bold flex items-center">상호명</div>
-                            <div className="font-bold text-gray-900">{job.company_name || job.company}</div>
 
-                            <div className="text-gray-500 font-bold flex items-center">담당자</div>
-                            <div className="font-bold text-gray-900">{contact.manager}</div>
-
-                            <div className="text-gray-500 font-bold flex items-center">근무지역</div>
-                            <div className="font-bold text-gray-900">{job.location}</div>
-                            
-                            <div className="col-span-2 my-2 border-t border-gray-200"></div>
-
-                            <div className="text-gray-500 font-bold flex items-center mt-2">전화번호</div>
-                            <div className="font-black text-primary text-[22px] md:text-[26px] tracking-tight mt-2">{contact.phone}</div>
-                            
-                            <div className="text-gray-500 font-bold flex items-center">카카오톡</div>
-                            <div className="font-bold text-gray-900 flex items-center gap-2">
-                                <span className="bg-[#fee500] text-[#000000] text-[10px] px-2 py-0.5 rounded shadow-sm font-black tracking-tighter">TALK</span> 
-                                {contact.kakao}
-                            </div>
-                        </div>
-                    </div>
-                </section>
 
                 {/* 4. 상세 채용 정보 및 포스터 */}
                 <section className="pt-8 border-t border-gray-100 mt-8">
