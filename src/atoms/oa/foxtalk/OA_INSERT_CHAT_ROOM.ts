@@ -17,6 +17,23 @@ export interface ChatRoomData {
 
 export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
     try {
+        // 1:1 방의 경우, 이미 존재하는 방이 있는지 먼저 확인하여 중복 생성을 방지합니다.
+        if (data.type === '1ON1' && data.seeker_id && data.employer_id) {
+            const { data: existingRoom } = await supabaseAdmin
+                .from('foxtalk_rooms')
+                .select('*')
+                .eq('type', '1ON1')
+                .eq('seeker_id', data.seeker_id)
+                .eq('employer_id', data.employer_id)
+                .eq('title', data.title)
+                .single();
+
+            if (existingRoom) {
+                // 이미 존재하는 방이 있으면 기존 방을 반환 (이 경우 텔레그램 알림은 중복 발송하지 않음)
+                return { success: true, data: existingRoom };
+            }
+        }
+
         let result = await supabaseAdmin
             .from('foxtalk_rooms')
             .insert([{
