@@ -126,53 +126,42 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
                    <span className="w-1 h-5 bg-primary rounded-full"></span> 채용 정보
                 </h3>
-                <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden text-[14px]">
-                    <div className="grid md:grid-cols-2 gap-x-8 gap-y-0 p-1 md:p-2">
+                <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden p-4 md:p-6">
+                    <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[100px_1fr] gap-y-3 sm:gap-y-4 text-[13px] sm:text-[14px]">
                         
-                        <div className="flex items-center p-3 border-b border-gray-50">
-                           <div className="w-24 shrink-0 text-gray-400 font-medium text-[13px]">업무내용</div>
-                           <div className="flex-1 font-bold text-gray-900">{job.title || '노래주점 - TC'}</div>
+                        <div className="text-gray-400 font-medium flex items-center">업무내용</div>
+                        <div className="font-bold text-gray-900">{job.title || '노래주점 - TC'}</div>
+                        
+                        <div className="text-gray-400 font-medium flex items-center">고용형태</div>
+                        <div className="font-bold text-gray-900">단기 / 정규직</div>
+                        
+                        <div className="text-gray-400 font-medium flex items-center">급여조건</div>
+                        <div className="font-black text-pink-600 flex items-center gap-2">
+                            {job.pay || (job.salary_type ? `[${job.salary_type}] ${job.salary_amount}원` : '협의')}
+                            <span className="bg-pink-50 text-pink-500 px-1.5 py-0.5 rounded text-[10px] uppercase font-black border border-pink-100">당일 지급</span>
                         </div>
                         
-                        <div className="flex items-center p-3 border-b border-gray-50">
-                           <div className="w-24 shrink-0 text-gray-400 font-medium text-[13px]">고용형태</div>
-                           <div className="flex-1 font-bold text-gray-900">단기 / 정규직</div>
+                        <div className="text-gray-400 font-medium flex items-center">마감일자</div>
+                        <div className="font-bold text-gray-900">
+                            {job.deadline || '상시 모집'}
                         </div>
                         
-                        <div className="flex items-center p-3 border-b border-gray-50">
-                           <div className="w-24 shrink-0 text-gray-400 font-medium text-[13px]">급여조건</div>
-                           <div className="flex-1 font-black text-pink-600 flex items-center gap-2">
-                               {job.pay || (job.salary_type ? `[${job.salary_type}] ${job.salary_amount}원` : '협의')}
-                               <span className="bg-pink-50 text-pink-500 px-1.5 py-0.5 rounded text-[10px] uppercase font-black border border-pink-100">당일 지급</span>
-                           </div>
+                        <div className="col-span-2 my-1 border-t border-dashed border-gray-100"></div>
+
+                        <div className="text-gray-400 font-medium flex items-center">편의사항</div>
+                        <div className="flex flex-wrap gap-1.5">
+                            {Array.isArray(job.amenities) && job.amenities.length > 0 ? job.amenities.map((tag: string) => (
+                                <span key={tag} className="text-[12px] bg-gray-50 border border-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-medium">{tag}</span>
+                            )) : <span className="text-[12px] text-gray-400">등록된 편의사항이 없습니다.</span>}
                         </div>
                         
-                        <div className="flex items-center p-3 border-b border-gray-50">
-                           <div className="w-24 shrink-0 text-gray-400 font-medium text-[13px]">마감일자</div>
-                           <div className="flex-1 font-bold text-gray-900 flex items-center gap-2">
-                               {job.deadline || '상시 모집'}
-                           </div>
+                        <div className="text-gray-400 font-medium flex items-center">키워드</div>
+                        <div className="flex flex-wrap gap-1.5">
+                            {Array.isArray(job.keywords) && job.keywords.length > 0 ? job.keywords.map((tag: string) => (
+                                <span key={tag} className="text-[12px] bg-blue-50/80 border border-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold">{tag}</span>
+                            )) : <span className="text-[12px] text-gray-400">등록된 키워드가 없습니다.</span>}
                         </div>
                         
-                    </div>
-                    
-                    {/* 풀 위드스(Full-width) 속성들 */}
-                    <div className="p-4 border-t border-gray-50 bg-gray-50/50">
-                       <div className="grid grid-cols-[80px_1fr] md:grid-cols-[104px_1fr] gap-3">
-                           <div className="text-gray-400 font-medium text-[13px] pt-1">편의사항</div>
-                           <div className="flex flex-wrap gap-1.5">
-                               {Array.isArray(job.amenities) && job.amenities.length > 0 ? job.amenities.map((tag: string) => (
-                                 <span key={tag} className="text-[12px] bg-white border border-gray-200 text-gray-600 px-2.5 py-1 rounded-full shadow-sm font-medium">{tag}</span>
-                               )) : <span className="text-[12px] text-gray-400">등록된 편의사항이 없습니다.</span>}
-                           </div>
-                           
-                           <div className="text-gray-400 font-medium text-[13px] pt-1 border-t border-dashed border-gray-200 mt-2 pt-3">키워드</div>
-                           <div className="flex flex-wrap gap-1.5 border-t border-dashed border-gray-200 mt-2 pt-3">
-                               {Array.isArray(job.keywords) && job.keywords.length > 0 ? job.keywords.map((tag: string) => (
-                                 <span key={tag} className="text-[12px] bg-blue-50/80 border border-blue-100 text-blue-600 px-2.5 py-1 rounded-full font-bold">{tag}</span>
-                               )) : <span className="text-[12px] text-gray-400">등록된 키워드가 없습니다.</span>}
-                           </div>
-                       </div>
                     </div>
                 </div>
             </section>
