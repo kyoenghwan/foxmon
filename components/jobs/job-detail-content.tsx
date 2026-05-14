@@ -7,6 +7,17 @@ import Link from 'next/link';
 import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM';
 
 export function JobDetailContent({ job, isModal = false, onClose }: { job: any, isModal?: boolean, onClose?: () => void }) {
+  const getSnsBadge = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'kakao': return <span className="bg-[#fee500] text-[#000000] text-[10px] px-1.5 py-0.5 rounded shadow-sm font-black tracking-tighter">TALK</span>;
+      case 'instagram': return <span className="bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white text-[10px] px-1.5 py-0.5 rounded shadow-sm font-black tracking-tighter">INSTA</span>;
+      case 'telegram': return <span className="bg-[#0088cc] text-white text-[10px] px-1.5 py-0.5 rounded shadow-sm font-black tracking-tighter">TELE</span>;
+      case 'line': return <span className="bg-[#00B900] text-white text-[10px] px-1.5 py-0.5 rounded shadow-sm font-black tracking-tighter">LINE</span>;
+      case 'x': return <span className="bg-black text-white text-[10px] px-1.5 py-0.5 rounded shadow-sm font-black tracking-tighter">𝕏</span>;
+      default: return <span className="bg-gray-100 text-gray-500 text-[10px] px-1.5 py-0.5 rounded shadow-sm font-black tracking-tighter">LINK</span>;
+    }
+  };
+
   // DB에 없는 부가 정보들 하드코딩 대체 (실제 job 데이터 사용, 없으면 비공개/기본값)
   const contact = {
     nickname: job.nickname || '비공개',
@@ -22,12 +33,12 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
       <div className="sticky top-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100 px-4 h-14 flex items-center justify-between shrink-0">
          <h1 className="text-[15px] font-black text-gray-900 truncate">업체 정보 안내</h1>
          {isModal ? (
-           <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100">
+           <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 shrink-0">
              <X className="w-5 h-5" />
            </Button>
          ) : (
-           <Link href="/jobs" className="text-[13px] font-bold text-gray-500 hover:text-gray-900">
-             닫기
+           <Link href="/jobs" className="w-9 h-9 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 shrink-0">
+             <X className="w-5 h-5" />
            </Link>
          )}
       </div>
@@ -71,66 +82,90 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 {/* 오른쪽: 상호명, 연락처/SNS, 폭스토크 지원 */}
                 <div className="flex-1 w-full flex flex-col gap-3 md:gap-4 md:py-1">
                     
-                    {/* 상단: 상호명 및 업체 정보 상세 */}
-                    <div className="flex flex-col border-b border-gray-100 pb-3">
-                        <div className="flex items-center gap-2 mb-3">
+                    {/* 상단: 상호명 및 업체 정보 박스 */}
+                    <div className="flex flex-col mb-4">
+                        <div className="flex items-center gap-2 mb-2">
                             <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full">업체명</span>
                             <h3 className="font-black text-gray-900 text-lg md:text-xl truncate">{job.company_name || job.company || '업체명 미상'}</h3>
                         </div>
                         
-                        <div className="grid grid-cols-[80px_1fr] gap-y-2 text-[13px] md:text-[14px] mb-2">
-                            <div className="text-gray-400 font-bold flex items-center">닉네임</div>
-                            <div className="font-bold text-gray-900">{contact.nickname}</div>
-                            
-                            <div className="text-gray-400 font-bold flex items-center">담당자</div>
-                            <div className="font-bold text-gray-900">{contact.manager}</div>
+                        <h3 className="text-[14px] font-black text-gray-900 mb-2 mt-2 flex items-center gap-1.5">
+                           <span className="w-1 h-3.5 bg-primary rounded-full"></span> 업체 정보
+                        </h3>
+                        <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 shadow-sm relative overflow-hidden mb-3">
+                            <div className="grid grid-cols-[70px_1fr] gap-y-3 text-[13px] md:text-[14px]">
+                                <div className="text-gray-500 font-bold flex items-center">닉네임</div>
+                                <div className="font-bold text-gray-900">{contact.nickname}</div>
+                                
+                                <div className="text-gray-500 font-bold flex items-center">담당자</div>
+                                <div className="font-bold text-gray-900">{contact.manager}</div>
 
-                            <div className="text-gray-400 font-bold flex items-center">근무지역</div>
-                            <div className="font-bold text-gray-900 flex items-center gap-1">
-                                <span className="text-[11px] opacity-70">📍</span> {job.location || '지역 미상'}
-                            </div>
-                            
-                            <div className="text-gray-400 font-bold flex items-center">급여조건</div>
-                            <div className="font-black text-pink-600 flex items-center gap-1">
-                                <span className="text-[11px] opacity-70">💰</span> {job.pay || (job.salary_type ? `[${job.salary_type}] ${job.salary_amount}원` : '협의')}
+                                <div className="text-gray-500 font-bold flex items-center">업체주소</div>
+                                <div className="font-bold text-gray-900 flex items-center gap-1">
+                                    <span className="text-[11px] opacity-70">📍</span> {job.address || job.location || '주소 미상'}
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* 중단: 연락처 상세 텍스트 */}
-                    <div className="grid grid-cols-[80px_1fr] gap-y-2 text-[13px] md:text-[14px] pb-3 border-b border-gray-100">
-                        <div className="text-gray-400 font-bold flex items-center">전화번호</div>
-                        <div className="font-black text-primary text-[18px] tracking-tight">{contact.phone}</div>
-                        
-                        <div className="text-gray-400 font-bold flex items-center">카카오톡</div>
-                        <div className="font-bold text-gray-900 flex items-center gap-2">
-                            <span className="bg-[#fee500] text-[#000000] text-[10px] px-2 py-0.5 rounded shadow-sm font-black tracking-tighter">TALK</span> 
-                            {contact.kakao}
+                        <h3 className="text-[14px] font-black text-gray-900 mb-2 mt-1 flex items-center gap-1.5">
+                           <span className="w-1 h-3.5 bg-primary rounded-full"></span> 연락처
+                        </h3>
+                        <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+                            <div className="grid grid-cols-[70px_1fr] gap-y-3 text-[13px] md:text-[14px]">
+                                <div className="text-gray-500 font-bold flex items-center">전화번호</div>
+                                <div className="font-black text-primary text-[16px] md:text-[18px] tracking-tight flex items-center justify-between group">
+                                    <span>{contact.phone}</span>
+                                    {contact.phone !== '비공개' && (
+                                        <button 
+                                            onClick={() => navigator.clipboard.writeText(contact.phone).then(() => alert(`전화번호 '${contact.phone}' 가 복사되었습니다!`))}
+                                            className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform"
+                                        >
+                                            복사
+                                        </button>
+                                    )}
+                                </div>
+                                
+                                {/* SNS Links: Map over array */}
+                                {Array.isArray(job.sns_links) && job.sns_links.length > 0 ? (
+                                    job.sns_links.map((sns: any, idx: number) => (
+                                        <React.Fragment key={idx}>
+                                            <div className="text-gray-500 font-bold flex items-center capitalize">{sns.type}</div>
+                                            <div className="font-bold text-gray-900 flex items-center justify-between group">
+                                                <span className="truncate mr-2 flex items-center gap-1.5 text-[13px]">
+                                                    {getSnsBadge(sns.type)} {sns.value}
+                                                </span>
+                                                <button 
+                                                    onClick={() => {
+                                                        if (sns.value.startsWith('http')) window.open(sns.value, '_blank');
+                                                        else navigator.clipboard.writeText(sns.value).then(() => alert(`'${sns.value}' 가 복사되었습니다!`));
+                                                    }}
+                                                    className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform shrink-0"
+                                                >
+                                                    복사
+                                                </button>
+                                            </div>
+                                        </React.Fragment>
+                                    ))
+                                ) : (
+                                    <>
+                                        <div className="text-gray-500 font-bold flex items-center">카카오톡</div>
+                                        <div className="font-bold text-gray-900 flex items-center justify-between group">
+                                            <span className="flex items-center gap-1.5 text-[13px]">
+                                                {getSnsBadge('kakao')} {contact.kakao}
+                                            </span>
+                                            {contact.kakao !== '비공개' && (
+                                                <button 
+                                                    onClick={() => navigator.clipboard.writeText(contact.kakao).then(() => alert(`카카오톡 아이디 '${contact.kakao}' 가 복사되었습니다!`))}
+                                                    className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform"
+                                                >
+                                                    복사
+                                                </button>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                    </div>
-
-                    {/* 액션 버튼 그룹 */}
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                        <Button 
-                            onClick={() => {
-                                if (!contact.phone || contact.phone === '비공개') return alert('비공개 상태입니다.');
-                                navigator.clipboard.writeText(contact.phone).then(() => alert(`전화번호 '${contact.phone}' 가 복사되었습니다!`));
-                            }}
-                            variant="outline" 
-                            className="h-11 rounded-xl border-gray-200 hover:bg-gray-50 text-[12px] font-bold shadow-sm flex items-center justify-center gap-1.5 transition-transform active:scale-95 text-gray-700"
-                        >
-                            <span className="text-gray-400">📞</span> 전화번호 복사
-                        </Button>
-                        <Button 
-                            onClick={() => {
-                                if (!contact.kakao || contact.kakao === '비공개') return alert('비공개 상태입니다.');
-                                if (contact.kakao.startsWith('http')) window.open(contact.kakao, '_blank');
-                                else navigator.clipboard.writeText(contact.kakao).then(() => alert(`카카오톡 아이디 '${contact.kakao}' 가 복사되었습니다!`));
-                            }}
-                            className="h-11 rounded-xl bg-[#FEE500] hover:bg-[#F4DC00] text-[#000000] font-bold text-[12px] shadow-sm flex items-center justify-center gap-1.5 transition-transform active:scale-95"
-                        >
-                            <span className="text-[14px]">💬</span> 카카오톡 복사
-                        </Button>
                     </div>
                     
                     {/* 하단: FoxTalk 지원 (풀사이즈) */}
@@ -210,6 +245,11 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                             
                             <div className="text-gray-400 font-medium flex items-center">마감일자</div>
                             <div className="font-bold text-gray-900">{job.deadline || '상시 모집'}</div>
+                            
+                            <div className="text-gray-400 font-medium flex items-center">근무지역</div>
+                            <div className="font-bold text-gray-900 flex items-center gap-1">
+                                <span className="text-[11px] opacity-70">📍</span> {job.location || '지역 미상'}
+                            </div>
                             
                             <div className="col-span-2 my-2 border-t border-dashed border-gray-100"></div>
 

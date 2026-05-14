@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { X, User2, MapPin, Briefcase, Clock, Phone, MessageCircle } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export function SeekerDetailContent({ job, isModal = false, onClose }: { job: any, isModal?: boolean, onClose?: () => void }) {
   const { ad_title, resumes, users } = job;
@@ -38,8 +39,17 @@ export function SeekerDetailContent({ job, isModal = false, onClose }: { job: an
   return (
     <div className="flex flex-col h-full bg-white text-gray-900 w-full relative">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 h-14">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 h-14 shrink-0">
         <h2 className="text-lg font-bold text-gray-800">이력서 상세</h2>
+        {isModal ? (
+          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 shrink-0">
+            <X className="w-5 h-5" />
+          </Button>
+        ) : (
+          <Link href="/seekers" className="w-9 h-9 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 shrink-0">
+            <X className="w-5 h-5" />
+          </Link>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 scrollbar-hide">

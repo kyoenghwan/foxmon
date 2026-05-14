@@ -20,9 +20,9 @@ export default async function SeekerDetailPage({ params }: { params: Promise<{ i
   }
 
   return (
-    <div className="min-h-[100dvh] pt-[60px] pb-20">
-       <div className="max-w-3xl mx-auto w-full bg-white rounded-none sm:rounded-[32px] overflow-hidden sm:shadow-lg sm:mt-10 border border-gray-100">
-         <SeekerDetailContent job={result.data} isModal={false} />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-2 sm:p-4 md:p-6">
+       <div className="relative w-full max-w-[1000px] w-[95vw] sm:w-[90vw] max-h-[90vh] overflow-hidden bg-white sm:rounded-[32px] shadow-[0_0_50px_rgba(0,0,0,0.2)] flex flex-col rounded-2xl">
+          <SeekerDetailContent job={result.data} isModal={false} />
        </div>
     </div>
   );
