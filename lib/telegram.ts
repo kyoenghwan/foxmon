@@ -21,9 +21,14 @@ export async function sendTelegramAlert(userId: string, message: string): Promis
             return false;
         }
 
-        // 2. 어드민 설정에서 텔레그램 봇 토큰 조회
-        const { data: settings } = await getSiteSettings();
-        const token = settings?.telegram_bot_token;
+        // 2. 어드민 설정에서 텔레그램 봇 토큰 조회 (시스템 권한으로 직접 DB 조회)
+        const { data: settingRow } = await supabaseAdmin
+            .from('site_settings')
+            .select('key_value')
+            .eq('key_name', 'telegram_bot_token')
+            .single();
+
+        const token = settingRow?.key_value;
 
         if (!token) {
             console.error("Telegram Bot Token is not set in admin settings.");

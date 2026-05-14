@@ -306,9 +306,12 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                             return;
                         }
 
+                        const companyStr = job.company_name || job.company || '업소명 미상';
+                        const titleStr = job.title || '구인구직 대화방';
+                        
                         // 채팅방 생성 (이미 존재하면 해당 방으로 들어가도록 추후 고도화 가능, 현재는 insert)
                         const createRes = await OA_INSERT_CHAT_ROOM({
-                            title: job.title || job.company_name || '구인구직 대화방',
+                            title: `${companyStr} - ${titleStr}`,
                             type: '1ON1',
                             max_participants: 2,
                             created_by: session.user.id,
