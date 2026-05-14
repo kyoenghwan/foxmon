@@ -79,12 +79,42 @@ export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
         const room = result.data;
 
         // 1:1 방 생성 시 사장님에게 텔레그램 알림 전송
-        if (data.type === '1ON1' && data.employer_id) {
+        if (data.type === '1ON1' && data.employer_id && data.seeker_id) {
             try {
-                await sendTelegramAlert(
-                    data.employer_id, 
-                    `🔔 <b>[폭스몬] 새로운 지원자가 연락했습니다!</b>\n\n💬 지원자 분이 <b>[${data.title}]</b> 구인글을 통해 FoxTalk 메시지를 시작했습니다.\n\n👉 폭스몬 사이트에 접속해서 답변해주세요!`
-                );
+                // 지원자 기본 정보 조회
+                const { data: seeker } = await supabaseAdmin
+                    .from('users')
+                    .select('nickname, birth_year, gender')
+                    .eq('id', data.seeker_id)
+                    .single();
+
+                // 이력서 기본 정보 조회 (가장 최근 1개)
+                const { data: resume } = await supabaseAdmin
+                    .from('resumes')
+                    .select('desired_location, desired_job_type, height, weight')
+                    .eq('user_id', data.seeker_id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                const nickname = seeker?.nickname || '익명 지원자';
+                let basicInfo = '';
+                
+                if (seeker) {
+                    const currentYear = new Date().getFullYear();
+                    const age = seeker.birth_year ? currentYear - parseInt(seeker.birth_year) : '나이 미상';
+                    const genderStr = seeker.gender === 'F' ? '여' : (seeker.gender === 'M' ? '남' : '');
+                    basicInfo += `\n👤 <b>지원자:</b> ${nickname} ${genderStr ? `(${genderStr}, ${age}세)` : `(${age}세)`}`;
+                }
+                if (resume) {
+                    if (resume.desired_location) basicInfo += `\n📍 <b>희망지역:</b> ${resume.desired_location}`;
+                    if (resume.desired_job_type) basicInfo += `\n💼 <b>희망업종:</b> ${resume.desired_job_type}`;
+                    if (resume.height || resume.weight) basicInfo += `\n📏 <b>체형:</b> ${resume.height ? resume.height + 'cm' : '?'} / ${resume.weight ? resume.weight + 'kg' : '?'}`;
+                }
+
+                const tgMsg = `🔔 <b>[폭스몬] 새로운 지원자가 연락했습니다!</b>\n\n💬 <b>${nickname}</b> 님이 <b>[${data.title}]</b> 구인글을 통해 FoxTalk 메시지를 시작했습니다.\n${basicInfo ? '\n--- 지원자 요약 ---' + basicInfo + '\n------------------\n' : '\n'}👉 폭스몬 사이트에서 대화를 확인해주세요!`;
+
+                await sendTelegramAlert(data.employer_id, tgMsg);
             } catch (err) {
                 console.error("텔레그램 알림 발송 중 오류:", err);
             }
