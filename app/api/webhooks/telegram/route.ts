@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSiteSettings } from "@/actions/admin/siteSettings";
+import { OA_INSERT_CHAT_MESSAGE } from "@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_MESSAGE";
 
 export async function POST(req: NextRequest) {
     try {
@@ -32,6 +33,46 @@ export async function POST(req: NextRequest) {
                 }
             } else if (text === '/start') {
                  await sendTelegramReply(chatId, "폭스몬 알림 봇입니다. 폭스몬 마이페이지의 '텔레그램 연동하기' 버튼을 통해 접속해주세요.");
+            } else {
+                // 일반 메시지(답장) 처리 (양방향 연동)
+                if (body.message.reply_to_message) {
+                    const entities = body.message.reply_to_message.entities || [];
+                    let roomId = null;
+
+                    // 원본 메시지의 entities에서 숨겨진 text_link 찾기
+                    for (const entity of entities) {
+                        if (entity.type === 'text_link' && entity.url && entity.url.includes('/room/')) {
+                            const urlParts = entity.url.split('/room/');
+                            if (urlParts.length > 1) {
+                                roomId = urlParts[1].split('?')[0].split('#')[0]; // 클린업
+                                break;
+                            }
+                        }
+                    }
+
+                    if (roomId) {
+                        // 1. 발신자의 telegram_chat_id로 Foxmon DB user_id 찾기
+                        const { data: user } = await supabaseAdmin
+                            .from('users')
+                            .select('id')
+                            .eq('telegram_chat_id', String(chatId))
+                            .single();
+
+                        if (user) {
+                            // 2. 채팅방에 메시지 삽입 (이 과정에서 OA_INSERT_CHAT_MESSAGE 내부적으로 상대방에게 다시 텔레그램 푸시도 전송됨)
+                            // 주의: OA_INSERT_CHAT_MESSAGE는 서버 액션이므로 직접 호출 가능
+                            await OA_INSERT_CHAT_MESSAGE({
+                                room_id: roomId,
+                                participant_id: user.id,
+                                content: text,
+                                message_type: 'TEXT'
+                            });
+                        }
+                    } else {
+                        // roomId를 못 찾았을 때 안내
+                        await sendTelegramReply(chatId, "⚠️ 알림 메시지에 [답장(Reply)] 기능을 사용하여 보내주셔야 대화가 연결됩니다.");
+                    }
+                }
             }
         }
         

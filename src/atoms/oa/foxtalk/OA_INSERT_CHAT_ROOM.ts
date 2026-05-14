@@ -112,7 +112,8 @@ export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
                     if (resume.height || resume.weight) basicInfo += `\n📏 <b>체형:</b> ${resume.height ? resume.height + 'cm' : '?'} / ${resume.weight ? resume.weight + 'kg' : '?'}`;
                 }
 
-                const tgMsg = `🔔 <b>[폭스몬] 새로운 지원자가 연락했습니다!</b>\n\n💬 <b>${nickname}</b> 님이 <b>[${data.title}]</b> 구인글을 통해 FoxTalk 메시지를 시작했습니다.\n${basicInfo ? '\n--- 지원자 요약 ---' + basicInfo + '\n------------------\n' : '\n'}👉 폭스몬 사이트에서 대화를 확인해주세요!`;
+                const hiddenLink = `<a href="https://foxmon.co.kr/room/${room.id}">&#8203;</a>`;
+                const tgMsg = `🔔 <b>[폭스몬] 새로운 지원자가 연락했습니다!</b>\n\n💬 <b>${nickname}</b> 님이 <b>[${data.title}]</b> 구인글을 통해 FoxTalk 메시지를 시작했습니다.\n${basicInfo ? '\n--- 지원자 요약 ---' + basicInfo + '\n------------------\n' : '\n'}💡 이 메시지에 <b>[답장(Reply)]</b> 기능을 사용하여 메시지를 작성하면 상대방에게 바로 전달됩니다!${hiddenLink}`;
 
                 await sendTelegramAlert(data.employer_id, tgMsg);
             } catch (err) {
