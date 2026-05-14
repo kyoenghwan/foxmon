@@ -34,9 +34,12 @@ export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
             .select()
             .single();
 
-        // 1차 시도에서 외래키 오류(job_id, employer_id 등 존재하지 않는 값) 발생 시, 연관 데이터를 null로 처리 후 재시도
+        // 1차 시도에서 외래키 오류 발생 시 처리
         if (result.error && result.error.message.includes('violates foreign key constraint')) {
-            console.warn('Foreign key violation detected in foxtalk_rooms. Retrying with null job_id and employer_id...', result.error.message);
+            const isJobIdError = result.error.message.includes('job_id');
+            const isEmployerIdError = result.error.message.includes('employer_id');
+            
+            console.warn('Foreign key violation detected in foxtalk_rooms. Retrying...', result.error.message);
             result = await supabaseAdmin
                 .from('foxtalk_rooms')
                 .insert([{
@@ -47,8 +50,8 @@ export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
                     max_participants: data.max_participants,
                     created_by: data.created_by,
                     is_active: true,
-                    job_id: null, // 강제 null 처리
-                    employer_id: null, // 강제 null 처리
+                    job_id: isJobIdError ? null : (data.job_id || null),
+                    employer_id: isEmployerIdError ? null : (data.employer_id || null),
                     seeker_id: data.seeker_id || null
                 }])
                 .select()
