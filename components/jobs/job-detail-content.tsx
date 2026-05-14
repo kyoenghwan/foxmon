@@ -30,8 +30,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
     <div className="flex flex-col min-h-full bg-white relative">
       
       {/* 상단 닫기/뒤로가기 헤더 */}
-      <div className="sticky top-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100 px-4 h-14 flex items-center justify-between shrink-0">
-         <h1 className="text-[15px] font-black text-gray-900 truncate">업체 정보 안내</h1>
+      <div className="sticky top-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100 px-4 h-14 flex items-center justify-end shrink-0">
          {isModal ? (
            <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 shrink-0">
              <X className="w-5 h-5" />
@@ -45,158 +44,155 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
 
       <div className="flex-1 overflow-y-auto pb-32 md:pb-12 bg-gray-50/50">
         
-        {/* ================= 상단 고정 영역 (레이아웃 개선) ================= */}
-        <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm shrink-0">
-            <div className="max-w-[1000px] mx-auto p-4 md:p-5 flex flex-col gap-4">
-                
-                {/* 상단 묶음: 로고(왼쪽) + 업체정보 통합박스(오른쪽) */}
-                <div className="flex flex-col md:flex-row gap-5 md:gap-6 items-start">
-                    
-                    {/* 왼쪽: 배너(로고) 및 통계 */}
-                    <div className="w-full md:w-[260px] shrink-0 flex flex-col items-center">
-                        <div className="w-full aspect-[3/2] bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border border-gray-200/50 flex flex-col items-center justify-center mb-2.5 shadow-sm relative overflow-hidden group">
-                            {(job.logo_url || job.image) ? (
-                                <img src={job.logo_url || job.image} alt={job.company_name || job.company} className="w-full h-full object-contain bg-white" />
-                            ) : (
-                                <div className="text-gray-800 text-center font-black leading-tight text-lg tracking-tighter drop-shadow-sm group-hover:scale-105 transition-transform duration-500 p-4">
-                                    {(job.company_name || job.company || '').split(' ').map((line: string, i: number) => <div key={i}>{line}</div>)}
-                                </div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/50 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%]"></div>
-                        </div>
-                        
-                        <div className="w-full flex justify-between items-center px-1 mb-2">
-                            <span className="px-2.5 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-bold border border-amber-100/50 flex items-center gap-1">
-                                👑 프리미엄
-                            </span>
-                            <span className="text-[10px] text-gray-400 font-medium">조회 {Math.floor(Math.random() * 5000)}</span>
-                        </div>
-
-                        <div className="w-full grid grid-cols-2 gap-1.5">
-                            <Button variant="outline" className="h-7 rounded-lg border-blue-100 text-blue-600 bg-blue-50/50 hover:bg-blue-50 text-[11px] font-bold shadow-sm transition-all active:scale-95 px-0">
-                                <ThumbsUp className="w-3 h-3 mr-1" /> <span className="text-blue-800">42</span>
-                            </Button>
-                            <Button variant="outline" className="h-7 rounded-lg border-red-100 text-red-600 bg-red-50/50 hover:bg-red-50 text-[11px] font-bold shadow-sm transition-all active:scale-95 px-0">
-                                <ThumbsDown className="w-3 h-3 mr-1" /> <span className="text-red-800">1</span>
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* 오른쪽: 업체 정보 및 연락처 통합 박스 */}
-                    <div className="flex-1 w-full flex flex-col">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full">업체명</span>
-                            <h3 className="font-black text-gray-900 text-lg md:text-xl truncate">{job.company_name || job.company || '업체명 미상'}</h3>
-                        </div>
-                        
-                        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden p-5 md:p-6">
-                            <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[100px_1fr] gap-y-4 text-[13px] sm:text-[14px]">
-                                <div className="text-gray-400 font-medium flex items-center">닉네임</div>
-                                <div className="font-bold text-gray-900">{contact.nickname}</div>
-                                
-                                <div className="text-gray-400 font-medium flex items-center">담당자</div>
-                                <div className="font-bold text-gray-900">{contact.manager}</div>
-
-                                <div className="text-gray-400 font-medium flex items-center">업체주소</div>
-                                <div className="font-bold text-gray-900 flex items-center gap-1">
-                                    <span className="text-[11px] opacity-70">📍</span> {job.address || job.location || '주소 미상'}
-                                </div>
-                                
-                                <div className="col-span-2 my-1 border-t border-dashed border-gray-100"></div>
-
-                                <div className="text-gray-400 font-medium flex items-center">전화번호</div>
-                                <div className="font-black text-primary text-[16px] tracking-tight flex items-center justify-between group">
-                                    <span>{contact.phone}</span>
-                                    {contact.phone !== '비공개' && (
-                                        <button 
-                                            onClick={() => navigator.clipboard.writeText(contact.phone).then(() => alert(`전화번호 '${contact.phone}' 가 복사되었습니다!`))}
-                                            className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform"
-                                        >
-                                            복사
-                                        </button>
-                                    )}
-                                </div>
-                                
-                                {Array.isArray(job.sns_links) && job.sns_links.length > 0 ? (
-                                    job.sns_links.map((sns: any, idx: number) => (
-                                        <React.Fragment key={idx}>
-                                            <div className="text-gray-400 font-medium flex items-center capitalize">{sns.type}</div>
-                                            <div className="font-bold text-gray-900 flex items-center justify-between group">
-                                                <span className="truncate mr-2 flex items-center gap-1.5 text-[13px]">
-                                                    {getSnsBadge(sns.type)} {sns.value}
-                                                </span>
-                                                <button 
-                                                    onClick={() => {
-                                                        if (sns.value.startsWith('http')) window.open(sns.value, '_blank');
-                                                        else navigator.clipboard.writeText(sns.value).then(() => alert(`'${sns.value}' 가 복사되었습니다!`));
-                                                    }}
-                                                    className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform shrink-0"
-                                                >
-                                                    복사
-                                                </button>
-                                            </div>
-                                        </React.Fragment>
-                                    ))
-                                ) : (
-                                    <>
-                                        <div className="text-gray-400 font-medium flex items-center">카카오톡</div>
-                                        <div className="font-bold text-gray-900 flex items-center justify-between group">
-                                            <span className="flex items-center gap-1.5 text-[13px]">
-                                                {getSnsBadge('kakao')} {contact.kakao}
-                                            </span>
-                                            {contact.kakao !== '비공개' && (
-                                                <button 
-                                                    onClick={() => navigator.clipboard.writeText(contact.kakao).then(() => alert(`카카오톡 아이디 '${contact.kakao}' 가 복사되었습니다!`))}
-                                                    className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform"
-                                                >
-                                                    복사
-                                                </button>
-                                            )}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 하단: FoxTalk 지원 (전체 풀 사이즈) */}
-                <div 
-                    onClick={async () => {
-                        try {
-                            const res = await fetch('/api/auth/session');
-                            const session = await res.json();
-                            if (!session?.user?.id) { alert('로그인이 필요합니다.'); window.location.href = '/login'; return; }
-                            if (session.user.role === 'EMPLOYER') { alert('업체회원은 지원자만 대화를 걸 수 있습니다.'); return; }
-                            
-                            const createRes = await OA_INSERT_CHAT_ROOM({
-                                title: `${job.company_name || job.company || '업소명 미상'} - ${job.title || '구인구직 대화방'}`,
-                                type: '1ON1', max_participants: 2, created_by: session.user.id, job_id: job.id, employer_id: job.user_id, seeker_id: session.user.id
-                            });
-                            if (createRes.success) window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
-                            else alert('채팅방을 생성하지 못했습니다.');
-                        } catch (err) {}
-                    }}
-                    className="w-full bg-gradient-to-br from-gray-900 to-black rounded-xl p-3.5 text-white shadow-md flex items-center justify-between group cursor-pointer hover:scale-[1.01] transition-transform mt-2"
-                >
-                    <div className="flex items-center gap-3.5">
-                        <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center shrink-0">
-                            <span className="text-primary text-[22px]">⚡</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="font-black text-[15px] md:text-[16px] tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-pink-500">FoxTalk 지원하기</span>
-                            <span className="text-[11px] md:text-[12px] text-gray-400 font-medium leading-tight">번호 노출 없이 안전한 1:1 익명 채팅</span>
-                        </div>
-                    </div>
-                    <div className="text-[20px] opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all mr-2">→</div>
-                </div>
-            </div>
-        </div>
-
-        {/* ================= 하단 스크롤 영역 (메인 콘텐츠) ================= */}
+        {/* ================= 메인 콘텐츠 영역 ================= */}
         <div className="max-w-[1100px] mx-auto p-4 md:p-6 lg:p-8 flex flex-col gap-8 md:gap-10">
             
             <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden flex flex-col p-4 md:p-8 space-y-12">
+                
+                {/* 1. 업체 정보 */}
+                <section>
+                    <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
+                       <span className="w-1 h-5 bg-primary rounded-full"></span> 업체 정보
+                    </h3>
+                    <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden p-5 md:p-6">
+                        
+                        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                            
+                            {/* 로고 영역 */}
+                            <div className="w-full md:w-[280px] shrink-0 flex flex-col gap-3">
+                                <div className="w-full aspect-[3/2] bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center overflow-hidden">
+                                    {(job.logo_url || job.image) ? (
+                                        <img src={job.logo_url || job.image} alt="로고" className="w-full h-full object-contain bg-white" />
+                                    ) : (
+                                        <div className="font-black text-gray-800 text-lg">{(job.company_name || job.company)}</div>
+                                    )}
+                                </div>
+                                <div className="flex items-center justify-between px-1">
+                                    <span className="px-2.5 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-bold border border-amber-100/50">👑 프리미엄</span>
+                                    <span className="text-[11px] text-gray-400 font-medium">조회 {Math.floor(Math.random() * 5000)}</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Button variant="outline" className="h-8 rounded-lg border-blue-100 text-blue-600 bg-blue-50/50 hover:bg-blue-50 text-[12px] font-bold px-0 shadow-sm"><ThumbsUp className="w-3.5 h-3.5 mr-1" /> 42</Button>
+                                    <Button variant="outline" className="h-8 rounded-lg border-red-100 text-red-600 bg-red-50/50 hover:bg-red-50 text-[12px] font-bold px-0 shadow-sm"><ThumbsDown className="w-3.5 h-3.5 mr-1" /> 1</Button>
+                                </div>
+                            </div>
+
+                            {/* 업체 정보 내역 영역 */}
+                            <div className="flex-1 w-full">
+                                <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[100px_1fr] gap-y-4 text-[13px] sm:text-[14px]">
+                                    
+                                    {/* 업체명 (닉네임 위) */}
+                                    <div className="text-gray-400 font-medium flex items-center">업체명</div>
+                                    <div className="font-black text-gray-900 text-[15px]">{job.company_name || job.company || '업체명 미상'}</div>
+
+                                    {/* 닉네임 */}
+                                    <div className="text-gray-400 font-medium flex items-center">닉네임</div>
+                                    <div className="font-bold text-gray-900">{contact.nickname}</div>
+                                    
+                                    {/* 담당자 */}
+                                    <div className="text-gray-400 font-medium flex items-center">담당자</div>
+                                    <div className="font-bold text-gray-900">{contact.manager}</div>
+
+                                    {/* 업체주소 */}
+                                    <div className="text-gray-400 font-medium flex items-center">업체주소</div>
+                                    <div className="font-bold text-gray-900 flex items-center gap-1">
+                                        <span className="text-[11px] opacity-70">📍</span> {job.address || job.location || '주소 미상'}
+                                    </div>
+                                    
+                                    <div className="col-span-2 my-1 border-t border-dashed border-gray-100"></div>
+
+                                    {/* 전화번호 */}
+                                    <div className="text-gray-400 font-medium flex items-center">전화번호</div>
+                                    <div className="font-black text-primary text-[16px] tracking-tight flex items-center justify-between group">
+                                        <span>{contact.phone}</span>
+                                        {contact.phone !== '비공개' && (
+                                            <button 
+                                                onClick={() => navigator.clipboard.writeText(contact.phone).then(() => alert(`전화번호 '${contact.phone}' 가 복사되었습니다!`))}
+                                                className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform"
+                                            >
+                                                복사
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    {/* SNS Links */}
+                                    {Array.isArray(job.sns_links) && job.sns_links.length > 0 ? (
+                                        job.sns_links.map((sns: any, idx: number) => (
+                                            <React.Fragment key={idx}>
+                                                <div className="text-gray-400 font-medium flex items-center capitalize">{sns.type}</div>
+                                                <div className="font-bold text-gray-900 flex items-center justify-between group">
+                                                    <span className="truncate mr-2 flex items-center gap-1.5 text-[13px]">
+                                                        {getSnsBadge(sns.type)} {sns.value}
+                                                    </span>
+                                                    <button 
+                                                        onClick={() => {
+                                                            if (sns.value.startsWith('http')) window.open(sns.value, '_blank');
+                                                            else navigator.clipboard.writeText(sns.value).then(() => alert(`'${sns.value}' 가 복사되었습니다!`));
+                                                        }}
+                                                        className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform shrink-0"
+                                                    >
+                                                        복사
+                                                    </button>
+                                                </div>
+                                            </React.Fragment>
+                                        ))
+                                    ) : (
+                                        <>
+                                            <div className="text-gray-400 font-medium flex items-center">카카오톡</div>
+                                            <div className="font-bold text-gray-900 flex items-center justify-between group">
+                                                <span className="flex items-center gap-1.5 text-[13px]">
+                                                    {getSnsBadge('kakao')} {contact.kakao}
+                                                </span>
+                                                {contact.kakao !== '비공개' && (
+                                                    <button 
+                                                        onClick={() => navigator.clipboard.writeText(contact.kakao).then(() => alert(`카카오톡 아이디 '${contact.kakao}' 가 복사되었습니다!`))}
+                                                        className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform"
+                                                    >
+                                                        복사
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* FoxTalk 지원하기 버튼 (풀사이즈) */}
+                        <div className="mt-6 border-t border-gray-100 pt-6">
+                            <div 
+                                onClick={async () => {
+                                    try {
+                                        const res = await fetch('/api/auth/session');
+                                        const session = await res.json();
+                                        if (!session?.user?.id) { alert('로그인이 필요합니다.'); window.location.href = '/login'; return; }
+                                        if (session.user.role === 'EMPLOYER') { alert('업체회원은 지원자만 대화를 걸 수 있습니다.'); return; }
+                                        
+                                        const createRes = await OA_INSERT_CHAT_ROOM({
+                                            title: `${job.company_name || job.company || '업소명 미상'} - ${job.title || '구인구직 대화방'}`,
+                                            type: '1ON1', max_participants: 2, created_by: session.user.id, job_id: job.id, employer_id: job.user_id, seeker_id: session.user.id
+                                        });
+                                        if (createRes.success) window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
+                                        else alert('채팅방을 생성하지 못했습니다.');
+                                    } catch (err) {}
+                                }}
+                                className="w-full bg-gradient-to-br from-gray-900 to-black rounded-xl p-3.5 text-white shadow-md flex items-center justify-between group cursor-pointer hover:scale-[1.01] transition-transform"
+                            >
+                                <div className="flex items-center gap-3.5">
+                                    <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center shrink-0">
+                                        <span className="text-primary text-[22px]">⚡</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="font-black text-[15px] md:text-[16px] tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-pink-500">FoxTalk 지원하기</span>
+                                        <span className="text-[11px] md:text-[12px] text-gray-400 font-medium leading-tight">번호 노출 없이 안전한 1:1 익명 채팅</span>
+                                    </div>
+                                </div>
+                                <div className="text-[20px] opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all mr-2">→</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
                 
                 {/* 2. 업소 이미지 */}
                 {Array.isArray(job.gallery_images || job.images) && (job.gallery_images || job.images).length > 0 && (
