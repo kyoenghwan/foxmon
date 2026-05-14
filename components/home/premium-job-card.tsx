@@ -291,7 +291,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                     </MarqueeText>
                                 </div>
                                 <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-gray-500 w-full min-w-0">
-                                    <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] overflow-hidden max-w-[60%] ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                    <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] overflow-hidden w-full ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
                                         <span className="shrink-0">{sido}</span>
                                         {sigungus && (
                                             <>
@@ -343,7 +343,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                             {/* --- 로고 없는 컴팩트 레이아웃 (일반 배너 등) --- */}
                             {/* 상단: 지역 + 업체명 */}
                             <div className="flex items-center gap-1.5 pb-1 w-full overflow-hidden">
-                                <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] text-[9px] sm:text-[10px] max-w-[45%] overflow-hidden ${
+                                <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] text-[9px] sm:text-[10px] overflow-hidden ${
                                     isCyber ? 'text-black bg-cyan-400 border-none' : 
                                     isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
                                     tier === 'GENERAL' && customColor ? 'bg-white' :
@@ -445,7 +445,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                 {/* 상호명 영역 (지역명 위, 상호명 아래) */}
                                 <div className={`flex-1 min-w-0 flex flex-col justify-center space-y-1`}>
                                     <div className="flex items-center w-full min-w-0">
-                                        <div className={`flex items-center gap-1 shrink-0 border px-1.5 py-[1.5px] leading-[1.1] font-black rounded-[4px] text-[9px] sm:text-[10px] max-w-[80%] overflow-hidden ${
+                                        <div className={`flex items-center gap-1 shrink-0 border px-1.5 py-[1.5px] leading-[1.1] font-black rounded-[4px] text-[9px] sm:text-[10px] w-full overflow-hidden ${
                                             isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
                                         }`}>
                                             <span className="shrink-0">{sido}</span>

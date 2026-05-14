@@ -72,6 +72,9 @@ export async function POST(req: NextRequest) {
                         // roomId를 못 찾았을 때 안내
                         await sendTelegramReply(chatId, "⚠️ 알림 메시지에 [답장(Reply)] 기능을 사용하여 보내주셔야 대화가 연결됩니다.");
                     }
+                } else {
+                    // 사용자가 답장(Reply) 기능을 사용하지 않고 일반 메시지를 보낸 경우
+                    await sendTelegramReply(chatId, "⚠️ 일반 채팅 전송은 지원하지 않습니다.\n\n상대방에게 메시지를 보내시려면, 봇이 보낸 알림 말풍선을 **길게 누르거나 옆으로 밀어서 [답장(Reply)]** 기능을 사용해 주세요.");
                 }
             }
         }
