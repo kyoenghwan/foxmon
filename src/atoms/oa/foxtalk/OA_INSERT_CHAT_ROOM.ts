@@ -17,7 +17,7 @@ export interface ChatRoomData {
 
 export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
     try {
-        const { data: room, error } = await supabaseAdmin
+        let result = await supabaseAdmin
             .from('foxtalk_rooms')
             .insert([{
                 title: data.title,
@@ -34,7 +34,29 @@ export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
             .select()
             .single();
 
-        if (error) throw error;
+        // 1차 시도에서 외래키 오류(job_id, employer_id 등 존재하지 않는 값) 발생 시, 연관 데이터를 null로 처리 후 재시도
+        if (result.error && result.error.message.includes('violates foreign key constraint')) {
+            console.warn('Foreign key violation detected in foxtalk_rooms. Retrying with null job_id and employer_id...', result.error.message);
+            result = await supabaseAdmin
+                .from('foxtalk_rooms')
+                .insert([{
+                    title: data.title,
+                    type: data.type,
+                    room_code: data.room_code || null,
+                    password_hash: data.password_hash || null,
+                    max_participants: data.max_participants,
+                    created_by: data.created_by,
+                    is_active: true,
+                    job_id: null, // 강제 null 처리
+                    employer_id: null, // 강제 null 처리
+                    seeker_id: data.seeker_id || null
+                }])
+                .select()
+                .single();
+        }
+
+        if (result.error) throw result.error;
+        const room = result.data;
 
         // 1:1 방 생성 시 사장님에게 텔레그램 알림 전송 (비동기로 실행)
         if (data.type === '1ON1' && data.employer_id) {
