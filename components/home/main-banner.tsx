@@ -15,14 +15,10 @@ export function MainBanner() {
     const [isHovered, setIsHovered] = useState(false);
     const [itemsPerView, setItemsPerView] = useState(1);
 
-    // 반응형 배너 갯수 조절 (2560px 이상 4개, 1920px 이상 3개, 1280px 이상 2개, 그 미만 1개)
+    // 반응형 배너 갯수 조절
     useEffect(() => {
         const updateView = () => {
-            if (window.innerWidth >= 2560) {
-                setItemsPerView(4);
-            } else if (window.innerWidth >= 1920) {
-                setItemsPerView(3);
-            } else if (window.innerWidth >= 1280) {
+            if (window.innerWidth >= 1024) {
                 setItemsPerView(2);
             } else {
                 setItemsPerView(1);

@@ -22,18 +22,18 @@ export function HomeJobSections() {
     const [noticeIndex, setNoticeIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
 
-    // Firestore 데이터 상태
+    // Firestore ?�이???�태
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
     const [specialJobs, setSpecialJobs] = useState<AdItem[]>([]);
     const [lineJobs, setLineJobs] = useState<AdItem[]>([]);
     const [generalJobs, setGeneralJobs] = useState<AdItem[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // 공지사항 데이터
+    // 공�??�항 ?�이??
     const notices: Notice[] = [
-        { id: 1, title: '[공지] 설 연휴 고객센터 운영 시간 안내', date: '2024-02-14', isNew: true },
-        { id: 2, title: '[안내] 폭스몬 웹 서비스 디자인 고도화 업데이트', date: '2024-02-13' },
-        { id: 3, title: '[이벤트] 친구 초대하고 포인트 받자! (기간 연장)', date: '2024-02-12', isHot: true },
+        { id: 1, title: '[공�?] ???�휴 고객?�터 ?�영 ?�간 ?�내', date: '2024-02-14', isNew: true },
+        { id: 2, title: '[?�내] ??���????�비???�자??고도???�데?�트', date: '2024-02-13' },
+        { id: 3, title: '[?�벤?? 친구 초�??�고 ?�인??받자! (기간 ?�장)', date: '2024-02-12', isHot: true },
     ];
 
     const fetchAllJobs = async (isInitial = false) => {
@@ -55,12 +55,12 @@ export function HomeJobSections() {
         if (isInitial) setLoading(false);
     };
 
-    // Firestore에서 티어별 광고 실시간 페치 (최초 로드 시)
+    // Firestore?�서 ?�어�?광고 ?�시�??�치 (최초 로드 ??
     useEffect(() => {
         fetchAllJobs(true);
     }, []);
 
-    // 자동 롤링 효과 (공지사항)
+    // ?�동 롤링 ?�과 (공�??�항)
     useEffect(() => {
         if (isPaused) return;
         const interval = setInterval(() => {
@@ -69,15 +69,15 @@ export function HomeJobSections() {
         return () => clearInterval(interval);
     }, [isPaused, notices.length]);
 
-    // 1분(60초)마다 서버에 요청하여 모든 유저가 동일한 순위를 보도록 강제 동기화
+    // 1�?60�?마다 ?�버???�청?�여 모든 ?��?가 ?�일???�위�?보도�?강제 ?�기??
     useEffect(() => {
         const adInterval = setInterval(() => {
             fetchAllJobs();
-        }, 60000); // 60초 주기
+        }, 60000); // 60�?주기
         return () => clearInterval(adInterval);
     }, []);
 
-    // 🎨 [IMPACT DEMO] 22종 테마 전체 적용 (50개 카드)
+    // ?�� [IMPACT DEMO] 22�??�마 ?�체 ?�용 (50�?카드)
     const impacts: any[] = [
         'gold', 'neon', 'neon_crazy', 'fire', 'ice', 'emerald', 'glitch', 'storm', 'ghost',
         'forest', 'ocean', 'sakura', 'galaxy', 'sun', 'lava', 'matrix', 'retro',
@@ -85,12 +85,12 @@ export function HomeJobSections() {
     ];
     
     const demoJobs = premiumJobs.map((job, i) => {
-        // 실제 유저가 선택한 테마가 있다면 적용하고, 가상 광고(또는 UPLOAD)일 경우 데모 효과를 순차적으로 입힘
+        // ?�제 ?��?가 ?�택???�마가 ?�다�??�용?�고, 가??광고(?�는 UPLOAD)??경우 ?�모 ?�과�??�차?�으�??�힘
         const finalImpact = (job.isRealAd && job.theme && job.theme !== 'UPLOAD') 
             ? job.theme 
             : impacts[i % impacts.length];
             
-        // effectIntensity 변환 로직 (BizAdPaymentModal과 동일하게 처리)
+        // effectIntensity 변??로직 (BizAdPaymentModal�??�일?�게 처리)
         let finalEffectIntensity = 'medium';
         if (job.isRealAd) {
             if (job.action_type === 'none') {
@@ -114,7 +114,7 @@ export function HomeJobSections() {
         return (
             <div className="container px-4 md:px-6 py-24 flex flex-col items-center justify-center gap-4">
                 <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                <p className="font-bold text-gray-400">최신 구인 정보를 불러오고 있습니다...</p>
+                <p className="font-bold text-gray-400">최신 구인 ?�보�?불러?�고 ?�습?�다...</p>
             </div>
         );
     }
@@ -180,13 +180,13 @@ export function HomeJobSections() {
                              <Plus className="w-4 h-4 mr-1" /> {t.sections.postPremium}
                         </Button>
                         <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
-                            {t.common.viewAll || '전체보기'} <ChevronRight className="w-4 h-4" />
+                            {t.common.viewAll || '?�체보기'} <ChevronRight className="w-4 h-4" />
                         </Link>
                     </div>
                 </div>
                 
                 {demoJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full
+                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 w-full
                         [&>*:nth-child(n+21)]:hidden 
                         sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
                         md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
@@ -207,7 +207,7 @@ export function HomeJobSections() {
                     </div>
                 ) : (
                     <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
-                        <p className="text-gray-400 font-bold">등록된 프리미엄 광고가 없습니다.</p>
+                        <p className="text-gray-400 font-bold">?�록???�리미엄 광고가 ?�습?�다.</p>
                     </div>
                 )}
             </section>
@@ -224,12 +224,12 @@ export function HomeJobSections() {
                             <Plus className="w-3.5 h-3.5" /> {t.sections.postSpecial}
                         </Link>
                         <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
-                            {t.common.viewAll || '전체보기'} <ChevronRight className="w-4 h-4" />
+                            {t.common.viewAll || '?�체보기'} <ChevronRight className="w-4 h-4" />
                         </Link>
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full grid-flow-dense
+                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 w-full grid-flow-dense
                         [&>*:nth-child(n+21)]:hidden 
                         sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
                         md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
@@ -250,7 +250,7 @@ export function HomeJobSections() {
                     </div>
                 ) : (
                     <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
-                        <p className="text-gray-400 font-bold">등록된 스페셜 광고가 없습니다.</p>
+                        <p className="text-gray-400 font-bold">?�록???�페??광고가 ?�습?�다.</p>
                     </div>
                 )}
             </section>
@@ -271,7 +271,7 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full
+                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 w-full
                         [&>*:nth-child(n+21)]:hidden 
                         sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
                         md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
@@ -293,7 +293,7 @@ export function HomeJobSections() {
                     </div>
                 ) : (
                     <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
-                        <p className="text-gray-400 font-bold">등록된 일반 광고가 없습니다.</p>
+                        <p className="text-gray-400 font-bold">?�록???�반 광고가 ?�습?�다.</p>
                     </div>
                 )}
             </section>
@@ -301,24 +301,24 @@ export function HomeJobSections() {
             {/* --- Bottom Board Section --- */}
             <section className="border-t pt-10">
                 <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-                    {/* 1. 구인정보 리스트 */}
+                    {/* 1. 구인?�보 리스??*/}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between pb-2 border-b-2 border-gray-900">
                             <h3 className="font-black text-[16px] md:text-lg uppercase tracking-tight text-gray-900 flex items-center gap-2">
-                                📣 구인정보 리스트
+                                ?�� 구인?�보 리스??
                             </h3>
                             <Link href="/jobs" className="text-[11px] font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-0.5">
-                                더보기 <ChevronRight className="w-3.5 h-3.5" />
+                                ?�보�?<ChevronRight className="w-3.5 h-3.5" />
                             </Link>
                         </div>
                         <ul className="space-y-1">
                             {[
-                                { title: '[강남] 텐프로 주간/야간 급구',  info: '월 500 보장' },
-                                { title: '[해운대] 룸싸롱 초보 환영, 숙식 제공', info: '당일 지급' },
-                                { title: '[수원] 노래주점 식구 모집합니다',  info: '시급 7만' },
-                                { title: '[인천] 하이퍼 가라오케 최고 대우', info: '협의' },
-                                { title: '[제주] 로드샵 1인샵 단기 알바', info: '숙소 제공' },
-                                { title: '[일산] 퍼블릭 주간 매니저 급구', info: '일 30 보장' }
+                                { title: '[강남] ?�프�?주간/?�간 급구',  info: '??500 보장' },
+                                { title: '[?�운?�] 룸싸�?초보 ?�영, ?�식 ?�공', info: '?�일 지�? },
+                                { title: '[?�원] ?�래주점 ?�구 모집?�니??,  info: '?�급 7�? },
+                                { title: '[?�천] ?�이??가?�오케 최고 ?�??, info: '?�의' },
+                                { title: '[?�주] 로드??1?�샵 ?�기 ?�바', info: '?�소 ?�공' },
+                                { title: '[?�산] ?�블�?주간 매니?� 급구', info: '??30 보장' }
                             ].map((job, i) => (
                                 <li key={i} className="group border-b border-gray-100 last:border-none">
                                     <Link href="/jobs" className="flex items-center justify-between py-2.5 hover:translate-x-1 transition-transform">
@@ -330,23 +330,23 @@ export function HomeJobSections() {
                         </ul>
                     </div>
 
-                    {/* 2. 인재정보 리스트 */}
+                    {/* 2. ?�재?�보 리스??*/}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between pb-2 border-b-2 border-gray-900">
                             <h3 className="font-black text-[16px] md:text-lg uppercase tracking-tight text-gray-900 flex items-center gap-2">
-                                🙋‍♀️ 인재정보 리스트
+                                ?��?��?�??�재?�보 리스??
                             </h3>
                             <Link href="/seekers" className="text-[11px] font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-0.5">
-                                더보기 <ChevronRight className="w-3.5 h-3.5" />
+                                ?�보�?<ChevronRight className="w-3.5 h-3.5" />
                             </Link>
                         </div>
                         <ul className="space-y-1">
                             {[
-                                { title: '경기/서울 투잡 구합니다 (주말만)', age: '24세' },
-                                { title: '경력 3년차 분위기 잘 맞춥니다', age: '27세' },
-                                { title: '초보인데 열심히 배우겠습니다', age: '21세' },
-                                { title: '출퇴근 자유로운 곳 찾아요', age: '25세' },
-                                { title: '단기 알바(1개월 급전) 구합니다', age: '22세' }
+                                { title: '경기/?�울 ?�잡 구합?�다 (주말�?', age: '24?? },
+                                { title: '경력 3?�차 분위�???맞춥?�다', age: '27?? },
+                                { title: '초보?�데 ?�심??배우겠습?�다', age: '21?? },
+                                { title: '출퇴�??�유로운 �?찾아??, age: '25?? },
+                                { title: '?�기 ?�바(1개월 급전) 구합?�다', age: '22?? }
                             ].map((seeker, i) => (
                                 <li key={i} className="group border-b border-gray-100 last:border-none">
                                     <Link href="/seekers" className="flex items-center justify-between py-2.5 hover:translate-x-1 transition-transform">
@@ -358,22 +358,22 @@ export function HomeJobSections() {
                         </ul>
                     </div>
 
-                    {/* 3. 커뮤니티 리스트 */}
+                    {/* 3. 커�??�티 리스??*/}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between pb-2 border-b-2 border-gray-900">
                             <h3 className="font-black text-[16px] md:text-lg uppercase tracking-tight text-gray-900 flex items-center gap-2">
-                                💬 커뮤니티 리스트
+                                ?�� 커�??�티 리스??
                             </h3>
                             <Link href="/community" className="text-[11px] font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-0.5">
-                                더보기 <ChevronRight className="w-3.5 h-3.5" />
+                                ?�보�?<ChevronRight className="w-3.5 h-3.5" />
                             </Link>
                         </div>
                         <ul className="space-y-1">
                             {[
-                                { title: '오늘 강남쪽 손님 많나요?', comments: 12 },
-                                { title: '첫 출근인데 팁 좀 알려주세요 ㅠㅠ', comments: 34 },
-                                { title: '진상 손님 대처법 공유합니다', comments: 8 },
-                                { title: '이쪽 일 하면서 느낀점 (장문주의)', comments: 55 }
+                                { title: '?�늘 강남�??�님 많나??', comments: 12 },
+                                { title: '�?출근?�데 ??좀 ?�려주세???�ㅠ', comments: 34 },
+                                { title: '진상 ?�님 ?�처법 공유?�니??, comments: 8 },
+                                { title: '?�쪽 ???�면???��???(?�문주의)', comments: 55 }
                             ].map((post, i) => (
                                 <li key={i} className="group border-b border-gray-100 last:border-none">
                                     <Link href="/community" className="flex items-center justify-between py-2.5 hover:translate-x-1 transition-transform">
