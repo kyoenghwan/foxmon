@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, MessageCircle, Send, Plus, Users, Shield, ArrowLeft, Headset } from 'lucide-react';
+import { X, MessageCircle, Send, Plus, Users, Shield, ArrowLeft, Headset, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM';
 import { OA_INSERT_CHAT_PARTICIPANT } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_PARTICIPANT';
 import { OA_INSERT_CHAT_MESSAGE } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_MESSAGE';
+import { OA_LEAVE_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_LEAVE_CHAT_ROOM';
 import { QA_GET_CHAT_ROOMS } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_ROOMS';
 import { QA_GET_CHAT_MESSAGES } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_MESSAGES';
 
@@ -256,6 +257,21 @@ export function FoxTalkWidget() {
             content: msgInput
         });
         setMsgInput('');
+    };
+
+    const handleLeaveRoom = async () => {
+        if (!currentRoom || !profile) return;
+        
+        if (confirm('대화방을 나가시겠습니까?')) {
+            const res = await OA_LEAVE_CHAT_ROOM(currentRoom.id, profile.sessionId, profile.nickname);
+            if (res.success) {
+                setAppState('LOBBY');
+                loadRooms();
+                setCurrentRoom(null);
+            } else {
+                alert(res.error || '대화방 나가기에 실패했습니다.');
+            }
+        }
     };
 
     // Drag Handlers
@@ -608,6 +624,13 @@ export function FoxTalkWidget() {
                                     참여코드: {currentRoom.room_code}
                                 </span>
                             )}
+                            <button 
+                                onClick={handleLeaveRoom}
+                                className="ml-auto text-gray-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors flex items-center gap-1 shrink-0"
+                                title="대화방 나가기"
+                            >
+                                <LogOut className="w-4 h-4" />
+                            </button>
                         </div>
                         
                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
