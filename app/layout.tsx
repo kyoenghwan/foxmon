@@ -42,7 +42,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f0f2f5]`}
       >
         <ZoomProvider />
-        <div className="max-w-[1280px] mx-auto bg-white min-h-screen relative shadow-[0_0_40px_rgba(0,0,0,0.05)] flex flex-col">
+        <div className="max-w-[1280px] 2xl:max-w-[1096px] 3xl:max-w-[1280px] mx-auto bg-white min-h-screen relative shadow-[0_0_40px_rgba(0,0,0,0.05)] flex flex-col transition-all duration-300">
           <LanguageProvider>
             <AutoLogoutWrapper>
               {children}
