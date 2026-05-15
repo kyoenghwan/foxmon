@@ -9,7 +9,6 @@ export function SideBanners() {
     const [leftAds, setLeftAds] = useState<AdItem[]>([]);
     const [rightAds, setRightAds] = useState<AdItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [bannerScale, setBannerScale] = useState(1);
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -30,13 +29,6 @@ export function SideBanners() {
         }
         fetchSideAds();
     }, []);
-
-    // 화면 크기 변화를 감지 (하지만 스케일링은 하지 않고, CSS 렌더링에 맡김)
-    useEffect(() => {
-        // 사이드 배너가 항상 원래 크기(scale 1)를 유지하도록 고정합니다.
-        // 사용자의 요청: "자꾸 조금씩 해상도가 바뀔때마다 해상도 따라서 자동으로 변경이 되고 있자나 ... 딱 1에서 봤던 크기 그대로 유지해달라"
-        setBannerScale(1);
-    }, [leftAds]); // 광고가 로드되어 DOM이 완성될 때 한 번만 세팅
 
     const handleAdClick = (adId: string) => {
         recordAdExposure(adId);
@@ -120,11 +112,7 @@ export function SideBanners() {
             <div ref={containerRef} className="max-w-[1280px] 2xl:max-w-[1096px] 3xl:max-w-[1280px] mx-auto relative w-full h-0">
                 {/* Left Wing */}
                 <div 
-                    className={`
-                        hidden xl:flex flex-col gap-3 absolute top-0 right-full mr-4 pointer-events-auto transition-all duration-300
-                        w-[150px]
-                    `}
-                    style={{ transform: `scale(${bannerScale})`, transformOrigin: 'top right' }}
+                    className="hidden xl:flex flex-col gap-3 absolute top-0 right-full mr-4 pointer-events-auto transition-all duration-300 w-[150px]"
                 >
                     <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Special Pick</div>
                     {leftAds.map((ad) => (
@@ -140,11 +128,7 @@ export function SideBanners() {
 
                 {/* Right Wing */}
                 <div 
-                    className={`
-                        hidden xl:flex flex-col gap-3 absolute top-0 left-full ml-4 pointer-events-auto transition-all duration-300
-                        w-[150px]
-                    `}
-                    style={{ transform: `scale(${bannerScale})`, transformOrigin: 'top left' }}
+                    className="hidden xl:flex flex-col gap-3 absolute top-0 left-full ml-4 pointer-events-auto transition-all duration-300 w-[150px]"
                 >
                     <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Premium Ad</div>
                     {rightAds.map((ad) => (
