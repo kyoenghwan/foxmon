@@ -38,15 +38,17 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f0f2f5]`}
       >
-        <LanguageProvider>
-          <AutoLogoutWrapper>
-            {children}
-            {modal}
-            <FoxTalkWidget />
-          </AutoLogoutWrapper>
-        </LanguageProvider>
+        <div className="max-w-[1280px] mx-auto bg-white min-h-screen relative shadow-[0_0_40px_rgba(0,0,0,0.05)] flex flex-col">
+          <LanguageProvider>
+            <AutoLogoutWrapper>
+              {children}
+              {modal}
+              <FoxTalkWidget />
+            </AutoLogoutWrapper>
+          </LanguageProvider>
+        </div>
       </body>
     </html>
   );
