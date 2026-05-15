@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { FoxTalkWidget } from "@/components/chat/foxtalk-widget";
 import { AutoLogoutWrapper } from "@/components/auth/auto-logout-wrapper";
+import { ZoomProvider } from "@/components/providers/zoom-provider";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -40,6 +41,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f0f2f5]`}
       >
+        <ZoomProvider />
         <div className="max-w-[1280px] mx-auto bg-white min-h-screen relative shadow-[0_0_40px_rgba(0,0,0,0.05)] flex flex-col">
           <LanguageProvider>
             <AutoLogoutWrapper>
