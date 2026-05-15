@@ -347,6 +347,11 @@ export function FoxTalkWidget() {
         }
     };
 
+    const hideOnRoutes = ['/login', '/register', '/age-gate', '/find-account'];
+    const shouldHide = hideOnRoutes.some(route => pathname?.startsWith(route));
+
+    if (shouldHide) return null;
+
     if (appState === 'CLOSED' || appState === 'MENU') {
         return (
             <div 
