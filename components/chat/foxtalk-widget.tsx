@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { X, MessageCircle, Send, Plus, Users, Shield, ArrowLeft, Headset, LogOut, MoreVertical } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM';
@@ -29,6 +30,7 @@ export function FoxTalkWidget() {
     const [showRoomMenu, setShowRoomMenu] = useState(false);
     const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const pathname = usePathname();
 
     // Auth Role State
     const [userRole, setUserRole] = useState<string | null>(null);
