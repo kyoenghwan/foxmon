@@ -16,10 +16,9 @@ export function ZoomProvider() {
           const realWidth = window.innerWidth * currentZoom;
           
           // Apply zoom only if the real browser window is between 1280px and 1600px
-          // Apply zoom only if the real browser window is between 1024px and 1280px
-          // We disable this on 1440px+ because Chrome's zoom breaks fixed/absolute positioning coordinates.
-          if (realWidth >= 1024 && realWidth < 1280) {
-            const zoomLevel = realWidth / 1280;
+          // We need 1600px to show 1280px main content + two 150px side banners comfortably.
+          if (realWidth >= 1280 && realWidth < 1600) {
+            const zoomLevel = realWidth / 1600;
             document.documentElement.style.zoom = zoomLevel.toString();
           } else {
             document.documentElement.style.zoom = '1';

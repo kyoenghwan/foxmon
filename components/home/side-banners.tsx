@@ -116,19 +116,15 @@ export function SideBanners() {
     };
 
     return (
-        <div className="fixed top-[220px] left-0 w-full z-20 pointer-events-none">
+        <div className="fixed top-[220px] left-0 w-full z-20 pointer-events-none flex justify-center">
+            <div ref={containerRef} className="max-w-[1280px] mx-auto relative w-full h-0">
                 {/* Left Wing */}
                 <div 
                     className={`
-                        hidden xl:flex flex-col gap-3 absolute top-0 pointer-events-auto transition-all duration-300
+                        hidden xl:flex flex-col gap-3 absolute top-0 right-full pointer-events-auto transition-all duration-300
                         w-[150px]
                     `}
-                    style={{ 
-                        left: '50%',
-                        marginLeft: '-600px', // 메인 컨텐츠 영역(1200px)의 좌측 끝으로 밀착
-                        transform: `translateX(calc(-100% - 16px)) scale(${bannerScale})`, 
-                        transformOrigin: 'top right' 
-                    }}
+                    style={{ transform: `scale(${bannerScale})`, transformOrigin: 'top right' }}
                 >
                     <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Special Pick</div>
                     {leftAds.map((ad) => (
@@ -145,15 +141,10 @@ export function SideBanners() {
                 {/* Right Wing */}
                 <div 
                     className={`
-                        hidden xl:flex flex-col gap-3 absolute top-0 pointer-events-auto transition-all duration-300
+                        hidden xl:flex flex-col gap-3 absolute top-0 left-full pointer-events-auto transition-all duration-300
                         w-[150px]
                     `}
-                    style={{ 
-                        left: '50%',
-                        marginLeft: '600px', // 메인 컨텐츠 영역(1200px)의 우측 끝으로 밀착
-                        transform: `translateX(16px) scale(${bannerScale})`, 
-                        transformOrigin: 'top left' 
-                    }}
+                    style={{ transform: `scale(${bannerScale})`, transformOrigin: 'top left' }}
                 >
                     <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Premium Ad</div>
                     {rightAds.map((ad) => (
@@ -166,6 +157,7 @@ export function SideBanners() {
                         + 광고등록
                     </Link>
                 </div>
+            </div>
         </div>
     );
 }
