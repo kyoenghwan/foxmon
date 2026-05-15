@@ -15,6 +15,7 @@ export default auth((req) => {
     const isAgeGatePage = nextUrl.pathname === '/age-gate';
     const isRegisterPage = nextUrl.pathname === '/register';
     const isAdminPath = nextUrl.pathname.startsWith('/fox-office');
+    const isSeoPath = nextUrl.pathname.startsWith('/k/') || nextUrl.pathname === '/sitemap.xml';
     const isPublicStatic = nextUrl.pathname.includes('.') || nextUrl.pathname.startsWith('/_next');
 
     // 0. Transient Session (PC Bang Security) Check
@@ -52,8 +53,8 @@ export default auth((req) => {
         }
     }
 
-    // 2. Age Gate Check (Redirect all unverified users to /age-gate EXCEPT if they are trying to register)
-    if (!isAgeVerified && !isAgeGatePage && !isRegisterPage && !isPublicStatic && !isAdminPath) {
+    // 2. Age Gate Check (Redirect all unverified users to /age-gate EXCEPT if they are trying to register or access SEO pages)
+    if (!isAgeVerified && !isAgeGatePage && !isRegisterPage && !isSeoPath && !isPublicStatic && !isAdminPath) {
         return NextResponse.redirect(new URL('/age-gate', nextUrl));
     }
 
