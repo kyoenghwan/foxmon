@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
     try {
@@ -11,8 +11,8 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
 
         let isAdmin = false;
         if (userId) {
-            // 사이트 관리자인지 확인
-            const { data: adminSetting } = await supabase
+            // 사이트 관리자인지 확인 (RLS 우회를 위해 supabaseAdmin 사용)
+            const { data: adminSetting } = await supabaseAdmin
                 .from('site_settings')
                 .select('key_value')
                 .eq('key_name', 'cs_admin_user_id')
