@@ -10,8 +10,11 @@ import { OA_INSERT_CHAT_MESSAGE } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ME
 import { OA_LEAVE_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_LEAVE_CHAT_ROOM';
 import { QA_GET_CHAT_ROOMS } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_ROOMS';
 import { QA_GET_CHAT_MESSAGES } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_MESSAGES';
+import { FA_CS_CHAT_FLOW } from '@/src/atoms/fa/support/FA_CS_CHAT_FLOW';
+import { QA_GET_CS_MESSAGES } from '@/src/atoms/qa/support/QA_GET_CS_MESSAGES';
+import { OA_INSERT_CS_MESSAGE } from '@/src/atoms/oa/support/OA_INSERT_CS_MESSAGE';
 
-type AppState = 'CLOSED' | 'MENU' | 'SETUP' | 'LOBBY' | 'CREATE_ROOM' | 'ROOM';
+type AppState = 'CLOSED' | 'MENU' | 'SETUP' | 'LOBBY' | 'CREATE_ROOM' | 'ROOM' | 'CS_SETUP' | 'CS_CHAT';
 
 interface Profile {
     sessionId: string;
@@ -73,7 +76,7 @@ export function FoxTalkWidget() {
     };
 
     useEffect(() => {
-        if (appState === 'ROOM') {
+        if (appState === 'ROOM' || appState === 'CS_CHAT') {
             scrollToBottom();
         }
     }, [messages, appState]);
@@ -225,15 +228,72 @@ export function FoxTalkWidget() {
         }
     };
 
+    // CS Chat Methods
+    const handleOpenCS = async () => {
+        const currentProfile = profile || (localStorage.getItem('foxtalk_profile') ? JSON.parse(localStorage.getItem('foxtalk_profile')!) : null);
+        if (!currentProfile) {
+            setAppState('CS_SETUP');
+            return;
+        }
+        await startCSChat(currentProfile);
+    };
+
+    const startCSChat = async (prof: Profile) => {
+        const res = await FA_CS_CHAT_FLOW({
+            session_id: prof.sessionId,
+            nickname: prof.nickname,
+            avatar_type: prof.avatarType
+        });
+        if (res.success && res.data) {
+            setCurrentRoom(res.data);
+            setAppState('CS_CHAT');
+            loadCSMessages(res.data.id);
+        } else {
+            alert('고객센터 연결에 실패했습니다.');
+        }
+    };
+
+    const loadCSMessages = async (roomId: string) => {
+        const res = await QA_GET_CS_MESSAGES(roomId);
+        if (res.success) setMessages(res.data || []);
+    };
+
+    const saveProfileForCS = () => {
+        if (!setupNick) return;
+        const newProfile = {
+            sessionId: crypto.randomUUID(),
+            nickname: setupNick,
+            avatarType: setupAv
+        };
+        localStorage.setItem('foxtalk_profile', JSON.stringify(newProfile));
+        setProfile(newProfile);
+        startCSChat(newProfile);
+    };
+
+    const sendCSMessage = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!msgInput.trim() || !currentRoom || !profile) return;
+
+        await OA_INSERT_CS_MESSAGE({
+            room_id: currentRoom.id,
+            participant_id: profile.sessionId, // User ID or session ID
+            content: msgInput,
+            sender_nickname: profile.nickname
+        });
+        setMsgInput('');
+    };
+
     // Supabase Realtime Subscription
     useEffect(() => {
-        if (appState !== 'ROOM' || !currentRoom) return;
+        if ((appState !== 'ROOM' && appState !== 'CS_CHAT') || !currentRoom) return;
         
         const channel = supabase.channel(`room:${currentRoom.id}`)
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'foxtalk_messages', filter: `room_id=eq.${currentRoom.id}` }, async (payload) => {
                 const newMessage = payload.new;
-                // 작성자 정보 가져오기 (단순 처리를 위해 여기선 간단히 덧붙임, 완벽히 하려면 QA_ATOM 활용)
-                if (newMessage.participant_id && profile && newMessage.participant_id !== profile.sessionId) {
+                // 작성자 정보 가져오기
+                if (appState === 'CS_CHAT' && newMessage.participant_id === 'CS_ADMIN') {
+                     setMessages(prev => [...prev, {...newMessage, participant: { nickname: '폭스몬 고객센터', avatarType: 'fox1' }}]);
+                } else if (newMessage.participant_id && profile && newMessage.participant_id !== profile.sessionId) {
                      const {data: p} = await supabase.from('foxtalk_participants').select('*').eq('id', newMessage.participant_id).single();
                      setMessages(prev => [...prev, {...newMessage, participant: p}]);
                 } else {
@@ -385,10 +445,7 @@ export function FoxTalkWidget() {
 
                         {/* Customer Service Button */}
                         <button 
-                            onClick={() => {
-                                alert('채널톡 고객센터가 곧 연동됩니다!\n(현재는 고객센터 게시판을 이용해주세요.)');
-                                setAppState('CLOSED');
-                            }}
+                            onClick={handleOpenCS}
                             className="w-full text-left flex items-center gap-3.5 px-3 py-3.5 hover:bg-blue-50/50 rounded-2xl transition-colors group mt-1"
                         >
                             <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors shrink-0">
@@ -440,14 +497,18 @@ export function FoxTalkWidget() {
                 onPointerCancel={handlePointerUp}
             >
                 <div className="flex items-center gap-2">
-                    {appState === 'CREATE_ROOM' || appState === 'ROOM' ? (
+                    {appState === 'CREATE_ROOM' || appState === 'ROOM' || appState === 'CS_CHAT' ? (
                         <button onClick={(e) => {
                             e.stopPropagation();
                             if (appState === 'ROOM') {
                                 // 향후 나가기 시스템 메시지 추가 가능
                             }
-                            setAppState('LOBBY'); 
-                            loadRooms();
+                            if (appState === 'CS_CHAT') {
+                                setAppState('MENU');
+                            } else {
+                                setAppState('LOBBY'); 
+                                loadRooms();
+                            }
                             setCurrentRoom(null);
                         }} 
                         onPointerDown={(e) => e.stopPropagation()}
@@ -460,8 +521,12 @@ export function FoxTalkWidget() {
                         </div>
                     )}
                     <div>
-                        <h2 className="font-black text-[16px] leading-tight">여우토크</h2>
-                        <p className="text-[10px] text-white/80 font-medium">실시간 익명 오픈채팅</p>
+                        <h2 className="font-black text-[16px] leading-tight">
+                            {appState === 'CS_SETUP' || appState === 'CS_CHAT' ? '폭스몬 고객센터' : '여우토크'}
+                        </h2>
+                        <p className="text-[10px] text-white/80 font-medium">
+                            {appState === 'CS_SETUP' || appState === 'CS_CHAT' ? '실시간 1:1 상담' : '실시간 익명 오픈채팅'}
+                        </p>
                     </div>
                 </div>
                 <button onClick={(e) => { e.stopPropagation(); setAppState('CLOSED'); }} onPointerDown={(e) => e.stopPropagation()} className="p-1.5 hover:bg-white/20 rounded-full transition-colors">
@@ -499,6 +564,85 @@ export function FoxTalkWidget() {
                             >
                                 여우토크 입장하기
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {appState === 'CS_SETUP' && (
+                    <div className="p-6 flex flex-col h-full justify-center">
+                        <div className="text-center mb-8">
+                            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm">
+                                <Headset className="w-10 h-10 text-blue-500" />
+                            </div>
+                            <h3 className="font-black text-xl text-gray-900 mb-2">고객센터 연결</h3>
+                            <p className="text-sm text-gray-500 font-medium">상담 시 사용할 닉네임을 입력해주세요.</p>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold text-gray-700 mb-1 block">닉네임</label>
+                                <input 
+                                    type="text" 
+                                    value={setupNick}
+                                    onChange={(e) => setSetupNick(e.target.value)}
+                                    placeholder="사용하실 닉네임 입력"
+                                    className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-blue-500 focus:ring-0 outline-none text-sm font-bold"
+                                />
+                            </div>
+                            <button 
+                                onClick={saveProfileForCS}
+                                disabled={!setupNick}
+                                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-black py-3.5 rounded-xl disabled:opacity-50 transition-colors shadow-sm"
+                            >
+                                상담 시작하기
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {appState === 'CS_CHAT' && (
+                    <div className="flex flex-col h-full bg-white">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4 relative bg-gray-50/50">
+                            <div className="text-center py-4">
+                                <div className="inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold shadow-sm">
+                                    고객센터에 연결되었습니다. 문의를 남겨주세요!
+                                </div>
+                            </div>
+                            {messages.map((msg, i) => {
+                                const isMe = msg.participant_id === profile?.sessionId;
+                                return (
+                                    <div key={i} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in slide-in-from-bottom-2 fade-in duration-300`}>
+                                        <div className={`flex items-end gap-1.5 max-w-[85%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                                            {!isMe && (
+                                                <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0 border border-white shadow-sm overflow-hidden text-[13px]">
+                                                    {msg.participant?.avatarType === 'fox1' ? '🎧' : '👤'}
+                                                </div>
+                                            )}
+                                            <div className={`p-2.5 rounded-2xl text-[13px] leading-relaxed shadow-sm break-words ${isMe ? 'bg-blue-500 text-white rounded-tr-sm' : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm'}`}>
+                                                {!isMe && <div className="text-[10px] font-black text-blue-500 mb-1 -mt-0.5">{msg.participant?.nickname || '상담원'}</div>}
+                                                {msg.content}
+                                            </div>
+                                            <span className="text-[9px] text-gray-400 font-medium mb-1 px-0.5 shrink-0">
+                                                {new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            <div ref={messagesEndRef} className="h-1" />
+                        </div>
+                        <div className="p-3 bg-white border-t border-gray-100 shrink-0">
+                            <form onSubmit={sendCSMessage} className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={msgInput}
+                                    onChange={(e) => setMsgInput(e.target.value)}
+                                    placeholder="문의 내용을 입력하세요..."
+                                    className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-medium"
+                                />
+                                <button type="submit" disabled={!msgInput.trim()} className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center disabled:opacity-50 hover:bg-blue-600 transition-colors shrink-0 shadow-sm">
+                                    <Send className="w-4 h-4 ml-0.5" />
+                                </button>
+                            </form>
                         </div>
                     </div>
                 )}

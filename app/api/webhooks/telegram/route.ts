@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSiteSettings } from "@/actions/admin/siteSettings";
 import { OA_INSERT_CHAT_MESSAGE } from "@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_MESSAGE";
+import { OA_INSERT_CS_MESSAGE } from "@/src/atoms/oa/support/OA_INSERT_CS_MESSAGE";
 
 export async function POST(req: NextRequest) {
     try {
@@ -51,22 +52,40 @@ export async function POST(req: NextRequest) {
                     }
 
                     if (roomId) {
-                        // 1. 발신자의 telegram_chat_id로 Foxmon DB user_id 찾기
-                        const { data: user } = await supabaseAdmin
-                            .from('users')
-                            .select('id')
-                            .eq('telegram_chat_id', String(chatId))
+                        // 방 타입 먼저 확인
+                        const { data: room } = await supabaseAdmin
+                            .from('foxtalk_rooms')
+                            .select('type')
+                            .eq('id', roomId)
                             .single();
 
-                        if (user) {
-                            // 2. 채팅방에 메시지 삽입 (이 과정에서 OA_INSERT_CHAT_MESSAGE 내부적으로 상대방에게 다시 텔레그램 푸시도 전송됨)
-                            // 주의: OA_INSERT_CHAT_MESSAGE는 서버 액션이므로 직접 호출 가능
-                            await OA_INSERT_CHAT_MESSAGE({
+                        if (room && room.type === 'CS') {
+                            // CS 방인 경우 관리자가 보낸 메시지로 처리
+                            await OA_INSERT_CS_MESSAGE({
                                 room_id: roomId,
-                                participant_id: user.id,
+                                participant_id: 'CS_ADMIN',
                                 content: text,
                                 message_type: 'TEXT'
                             });
+                        } else {
+                            // 일반 1ON1 방인 경우
+                            // 1. 발신자의 telegram_chat_id로 Foxmon DB user_id 찾기
+                            const { data: user } = await supabaseAdmin
+                                .from('users')
+                                .select('id')
+                                .eq('telegram_chat_id', String(chatId))
+                                .single();
+
+                            if (user) {
+                                // 2. 채팅방에 메시지 삽입 (이 과정에서 OA_INSERT_CHAT_MESSAGE 내부적으로 상대방에게 다시 텔레그램 푸시도 전송됨)
+                                // 주의: OA_INSERT_CHAT_MESSAGE는 서버 액션이므로 직접 호출 가능
+                                await OA_INSERT_CHAT_MESSAGE({
+                                    room_id: roomId,
+                                    participant_id: user.id,
+                                    content: text,
+                                    message_type: 'TEXT'
+                                });
+                            }
                         }
                     } else {
                         // roomId를 못 찾았을 때 안내

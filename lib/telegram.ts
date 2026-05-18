@@ -59,3 +59,50 @@ export async function sendTelegramAlert(userId: string, message: string): Promis
         return false;
     }
 }
+
+/**
+ * 특정 텔레그램 chat_id로 직접 메시지를 전송합니다 (유저 조회 없음).
+ * 고객센터 관리자 알림 등에 사용됩니다.
+ * @param chatId 텔레그램 chat_id (문자열 또는 숫자)
+ * @param message 전송할 텍스트 메시지
+ */
+export async function sendTelegramMessageDirect(chatId: string | number, message: string): Promise<boolean> {
+    try {
+        if (!chatId) return false;
+
+        const { data: settingRow } = await supabaseAdmin
+            .from('site_settings')
+            .select('key_value')
+            .eq('key_name', 'telegram_bot_token')
+            .single();
+
+        const token = settingRow?.key_value;
+
+        if (!token) {
+            console.error("Telegram Bot Token is not set in admin settings.");
+            return false;
+        }
+
+        const url = `https://api.telegram.org/bot${token}/sendMessage`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: message,
+                parse_mode: 'HTML'
+            })
+        });
+
+        const result = await res.json();
+        if (!result.ok) {
+            console.error("Failed to send Telegram direct message:", result);
+            return false;
+        }
+
+        return true;
+    } catch (e) {
+        console.error("sendTelegramMessageDirect exception:", e);
+        return false;
+    }
+}
