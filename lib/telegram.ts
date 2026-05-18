@@ -70,13 +70,24 @@ export async function sendTelegramMessageDirect(chatId: string | number, message
     try {
         if (!chatId) return false;
 
-        const { data: settingRow } = await supabaseAdmin
+        // 1. 먼저 CS 전용 봇 토큰을 찾습니다.
+        let { data: settingRow } = await supabaseAdmin
             .from('site_settings')
             .select('key_value')
-            .eq('key_name', 'telegram_bot_token')
+            .eq('key_name', 'cs_telegram_bot_token')
             .single();
 
-        const token = settingRow?.key_value?.trim();
+        let token = settingRow?.key_value?.trim();
+
+        // 2. CS 전용 봇 토큰이 없으면 기존 공통 봇 토큰으로 폴백합니다.
+        if (!token) {
+            const { data: fallbackRow } = await supabaseAdmin
+                .from('site_settings')
+                .select('key_value')
+                .eq('key_name', 'telegram_bot_token')
+                .single();
+            token = fallbackRow?.key_value?.trim();
+        }
 
         if (!token) {
             console.error("Telegram Bot Token is not set in admin settings.");
