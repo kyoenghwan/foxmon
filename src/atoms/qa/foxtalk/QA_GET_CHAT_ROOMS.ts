@@ -9,7 +9,23 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             .order('created_at', { ascending: false })
             .limit(100);
 
-        if (userRole === 'EMPLOYER') {
+        let isAdmin = false;
+        if (userId) {
+            // 사이트 관리자인지 확인
+            const { data: adminSetting } = await supabase
+                .from('site_settings')
+                .select('key_value')
+                .eq('key_name', 'cs_admin_user_id')
+                .single();
+            if (adminSetting?.key_value?.trim() === userId) {
+                isAdmin = true;
+            }
+        }
+
+        if (isAdmin) {
+            // 관리자는 1ON1 방 중 본인이 포함된 방 + OPEN, SECRET, CS 방 전체를 볼 수 있음
+            query = query.or(`type.in.(OPEN,SECRET,CS),and(type.eq.1ON1,employer_id.eq.${userId}),and(type.eq.1ON1,seeker_id.eq.${userId})`);
+        } else if (userRole === 'EMPLOYER') {
             // 사장님은 본인이 연관된 1ON1 방만 보임
             query = query.eq('type', '1ON1').eq('employer_id', userId);
         } else {

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RoleSelector } from './RoleSelector';
 import { AgeVerificationBox } from './AgeVerificationBox';
-import { ChevronLeft, ChevronRight, Check, Loader2, ArrowLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Loader2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 export function RegisterForm() {
   const router = useRouter();
@@ -47,7 +47,8 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [duplicateChecked, setDuplicateChecked] = useState({ id: false, nickname: false });
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const handleNext = () => setStep(prev => prev + 1);
   const handlePrev = () => setStep(prev => prev - 1);
 
@@ -346,25 +347,45 @@ export function RegisterForm() {
 
                 <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
                   <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">비밀번호 <span className="text-purple-600">*</span></Label>
-                  <Input
-                    type="password"
-                    placeholder="4~12자 입력"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    autoComplete="new-password"
-                    className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
-                  />
+                  <div className="relative w-full">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="4~12자 입력"
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      autoComplete="new-password"
+                      className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
                   <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">비밀번호 확인 <span className="text-purple-600">*</span></Label>
-                  <Input
-                    type="password"
-                    placeholder="비밀번호 다시 입력"
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                    autoComplete="new-password"
-                    className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
-                  />
+                  <div className="relative w-full">
+                    <Input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="비밀번호 다시 입력"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                      autoComplete="new-password"
+                      className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
