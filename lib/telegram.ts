@@ -76,7 +76,7 @@ export async function sendTelegramMessageDirect(chatId: string | number, message
             .eq('key_name', 'telegram_bot_token')
             .single();
 
-        const token = settingRow?.key_value;
+        const token = settingRow?.key_value?.trim();
 
         if (!token) {
             console.error("Telegram Bot Token is not set in admin settings.");

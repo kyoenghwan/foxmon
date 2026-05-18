@@ -58,7 +58,7 @@ export const OA_INSERT_CS_MESSAGE = async (data: CSMessageData) => {
                 .eq('key_name', 'cs_telegram_chat_id')
                 .single();
                 
-            const adminChatId = settingRow?.key_value;
+            const adminChatId = settingRow?.key_value?.trim();
             
             if (adminChatId) {
                 // 수신자에게 텔레그램 전송 (숨겨진 링크 포함하여 답장 매핑에 사용)
