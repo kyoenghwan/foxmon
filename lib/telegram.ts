@@ -74,7 +74,7 @@ export async function sendTelegramMessageDirect(chatId: string | number, message
         let { data: settingRow } = await supabaseAdmin
             .from('site_settings')
             .select('key_value')
-            .eq('key_name', 'cs_telegram_bot_token')
+            .eq('key_name', 'telegram_cs_bot_token')
             .single();
 
         let token = settingRow?.key_value?.trim();
