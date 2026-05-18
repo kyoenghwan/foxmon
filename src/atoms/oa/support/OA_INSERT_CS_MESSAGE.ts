@@ -13,11 +13,26 @@ interface CSMessageData {
 
 export const OA_INSERT_CS_MESSAGE = async (data: CSMessageData) => {
     try {
+        let actualParticipantId = null;
+
+        // data.participant_id로 전달된 값이 'CS_ADMIN'이 아니라면 session_id로 간주하고 실제 participant_id를 조회합니다.
+        if (data.participant_id && data.participant_id !== 'CS_ADMIN') {
+            const { data: p } = await supabaseAdmin
+                .from('foxtalk_participants')
+                .select('id')
+                .eq('room_id', data.room_id)
+                .eq('session_id', data.participant_id)
+                .single();
+            if (p) {
+                actualParticipantId = p.id;
+            }
+        }
+
         const { data: message, error } = await supabaseAdmin
             .from('foxtalk_messages')
             .insert([{
                 room_id: data.room_id,
-                participant_id: data.participant_id || null,
+                participant_id: actualParticipantId, // DB의 실제 foxtalk_participants.id
                 content: data.content,
                 message_type: data.message_type || 'TEXT'
             }])

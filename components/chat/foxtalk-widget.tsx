@@ -235,6 +235,7 @@ export function FoxTalkWidget() {
             setAppState('CS_SETUP');
             return;
         }
+        setProfile(currentProfile);
         await startCSChat(currentProfile);
     };
 
@@ -274,13 +275,18 @@ export function FoxTalkWidget() {
         e.preventDefault();
         if (!msgInput.trim() || !currentRoom || !profile) return;
 
-        await OA_INSERT_CS_MESSAGE({
+        const res = await OA_INSERT_CS_MESSAGE({
             room_id: currentRoom.id,
-            participant_id: profile.sessionId, // User ID or session ID
+            participant_id: profile.sessionId, // This acts as session_id for customers, and 'CS_ADMIN' for admins
             content: msgInput,
             sender_nickname: profile.nickname
         });
-        setMsgInput('');
+        
+        if (res.success) {
+            setMsgInput('');
+        } else {
+            alert('메시지 전송에 실패했습니다.');
+        }
     };
 
     // Supabase Realtime Subscription
