@@ -1,6 +1,7 @@
 "use server";
 
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendTelegramMessageDirect } from '@/lib/telegram';
 
 interface CSMessageData {
     room_id: string;
@@ -45,6 +46,36 @@ export const OA_INSERT_CS_MESSAGE = async (data: CSMessageData) => {
             .from('foxtalk_rooms')
             .update({ last_message_at: new Date().toISOString() })
             .eq('id', data.room_id);
+
+        // --- 텔레그램 관리자에게 알림 전송 (단방향) ---
+        // 관리자가 보낸 경우(participant_id가 관리자 UUID이거나 'CS_ADMIN'인 경우)에는 알림 제외
+        if (data.message_type === 'TEXT' && data.participant_id) {
+            
+            // 관리자 UUID 확인
+            const { data: adminSetting } = await supabaseAdmin
+                .from('site_settings')
+                .select('key_value')
+                .eq('key_name', 'cs_admin_user_id')
+                .single();
+                
+            const adminUUID = adminSetting?.key_value?.trim();
+            
+            if (data.participant_id !== 'CS_ADMIN' && data.participant_id !== adminUUID) {
+                // 관리자 텔레그램 Chat ID 조회
+                const { data: tgSetting } = await supabaseAdmin
+                    .from('site_settings')
+                    .select('key_value')
+                    .eq('key_name', 'cs_telegram_chat_id')
+                    .single();
+                    
+                const adminChatId = tgSetting?.key_value?.trim();
+                
+                if (adminChatId) {
+                    const tgMsg = `🎧 <b>[고객센터 문의 도착]</b>\n👤 <b>${data.sender_nickname || '익명'}</b>\n\n"${data.content}"\n\n👉 폭스몬 웹사이트 관리자 로비에서 확인 및 답변해 주세요.\nhttps://foxmon.co.kr`;
+                    await sendTelegramMessageDirect(adminChatId, tgMsg);
+                }
+            }
+        }
 
         return { success: true, data: message };
     } catch (error: any) {

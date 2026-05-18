@@ -55,9 +55,8 @@ export const OA_INSERT_CHAT_MESSAGE = async (data: MessageData) => {
                         
                     const senderName = sender?.nickname || (data.participant_id === room.seeker_id ? '익명 지원자' : '업체 담당자');
                     
-                    // 수신자에게 텔레그램 전송 (숨겨진 링크 포함하여 답장 매핑에 사용)
-                    const hiddenLink = `<a href="https://foxmon.co.kr/room/${data.room_id}">&#8203;</a>`;
-                    const tgMsg = `💬 <b>${senderName}</b>\n\n${data.content}${hiddenLink}`;
+                    // 수신자에게 텔레그램 전송 (단방향 알림)
+                    const tgMsg = `💬 <b>${senderName}</b>님으로부터 새로운 메시지가 도착했습니다.\n\n"${data.content}"\n\n👉 폭스몬 웹사이트에 접속하여 답변해 주세요.\nhttps://foxmon.co.kr`;
                     
                     await sendTelegramAlert(targetUserId, tgMsg);
                 }
