@@ -26,10 +26,10 @@ export default async function BizLayout({ children }: { children: React.ReactNod
             {/* 공지사항 스타일 서브 헤더 */}
             <div className="bg-gray-50 border-b border-gray-200">
                 <div className="container px-4 md:px-6 py-3 flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary text-white rounded-full text-[11px] font-black">
-                        🏢 업체 관리 포털
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary text-white rounded-full text-[11px] font-black whitespace-nowrap">
+                        🏢 업체관리
                     </span>
-                    <span className="text-[13px] text-gray-500 font-medium">
+                    <span className="text-[11px] md:text-[13px] text-gray-500 font-medium truncate">
                         광고 · 포인트 · 지원자를 한 곳에서 관리하세요.
                     </span>
                 </div>

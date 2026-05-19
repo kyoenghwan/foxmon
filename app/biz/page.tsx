@@ -33,10 +33,10 @@ export default async function BizDashboardPage() {
         <div className="space-y-4 md:space-y-6">
             {/* 환영 메시지 */}
             <div>
-                <h2 className="text-2xl font-black text-gray-900">
+                <h2 className="text-xl md:text-2xl font-black text-gray-900">
                     안녕하세요, <span className="text-primary">{displayName}</span>님 👋
                 </h2>
-                <p className="text-gray-500 font-medium mt-1">
+                <p className="text-[13px] md:text-base text-gray-500 font-medium mt-1">
                     오늘도 최고의 인재를 찾으세요. 폭스몬이 함께합니다.
                 </p>
             </div>
@@ -44,72 +44,86 @@ export default async function BizDashboardPage() {
             {/* 포인트 요약 카드 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-5">
                 {/* 총 포인트 */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-2 md:mb-4">
-                        <span className="text-[12px] md:text-[13px] font-bold text-gray-500">보유 포인트</span>
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-50 rounded-lg md:rounded-xl flex items-center justify-center">
+                <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm flex flex-col justify-between">
+                    <div className="flex items-start justify-between mb-4 md:mb-6">
+                        <div className="flex items-baseline gap-1.5 md:gap-2">
+                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500">보유 포인트</span>
+                            <span className="text-2xl md:text-3xl font-black text-gray-900">{totalPoints.toLocaleString()}P</span>
+                        </div>
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-50 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
                             <Coins className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                         </div>
                     </div>
-                    <p className="text-2xl md:text-3xl font-black text-gray-900">
-                        {totalPoints.toLocaleString()}P
-                    </p>
-                    <div className="flex items-center gap-2 md:gap-3 mt-2 md:mt-3 text-[11px] md:text-[12px] font-bold">
-                        <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                            유료 {paidPoints.toLocaleString()}P
-                        </span>
-                        <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                            보너스 {bonusPoints.toLocaleString()}P
-                        </span>
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
+                        <div className="flex items-center gap-1 md:gap-1.5 text-[10px] md:text-[11px] font-bold">
+                            <span className="text-blue-600 bg-blue-50 px-1.5 md:px-2 py-0.5 rounded-full">
+                                유료 {paidPoints.toLocaleString()}P
+                            </span>
+                            <span className="text-green-600 bg-green-50 px-1.5 md:px-2 py-0.5 rounded-full">
+                                보너스 {bonusPoints.toLocaleString()}P
+                            </span>
+                        </div>
+                        <Link href="/biz/points" className="flex items-center gap-1 text-[11px] md:text-[12px] font-bold text-primary hover:underline shrink-0">
+                            포인트 충전하기 <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
                     </div>
-                    <Link href="/biz/points" className="mt-3 md:mt-4 flex items-center gap-1 text-[11px] md:text-[12px] font-bold text-primary hover:underline">
-                        포인트 충전하기 <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
                 </div>
 
                 {/* 진행 중 배너 광고 */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-2 md:mb-4">
-                        <span className="text-[12px] md:text-[13px] font-bold text-gray-500">진행 중 배너 광고</span>
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-50 rounded-lg md:rounded-xl flex items-center justify-center">
+                <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm flex flex-col justify-between">
+                    <div className="flex items-start justify-between mb-4 md:mb-6">
+                        <div className="flex items-baseline gap-1.5 md:gap-2">
+                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500">진행 중 배너 광고</span>
+                            <span className="text-2xl md:text-3xl font-black text-gray-900">{adCount || 0}개</span>
+                        </div>
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-50 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
                             <Megaphone className="w-4 h-4 md:w-5 md:h-5 text-purple-500" />
                         </div>
                     </div>
-                    <p className="text-2xl md:text-3xl font-black text-gray-900">{adCount || 0}개</p>
-                    <p className="text-[11px] md:text-[12px] font-medium text-gray-400 mt-1 md:mt-2">스페셜/프리미엄 광고</p>
-                    <Link href="/biz/ads" className="mt-3 md:mt-4 flex items-center gap-1 text-[11px] md:text-[12px] font-bold text-purple-500 hover:underline">
-                        광고 관리하기 <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
+                        <p className="text-[11px] md:text-[12px] font-medium text-gray-400">스페셜/프리미엄 광고</p>
+                        <Link href="/biz/ads" className="flex items-center gap-1 text-[11px] md:text-[12px] font-bold text-purple-500 hover:underline shrink-0">
+                            광고 관리하기 <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                    </div>
                 </div>
 
                 {/* 진행 중 구인 공고 */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-2 md:mb-4">
-                        <span className="text-[12px] md:text-[13px] font-bold text-gray-500">진행 중 구인 공고</span>
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-50 rounded-lg md:rounded-xl flex items-center justify-center">
+                <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm flex flex-col justify-between">
+                    <div className="flex items-start justify-between mb-4 md:mb-6">
+                        <div className="flex items-baseline gap-1.5 md:gap-2">
+                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500">진행 중 구인 공고</span>
+                            <span className="text-2xl md:text-3xl font-black text-gray-900">{jobCount || 0}개</span>
+                        </div>
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-50 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
                             <Briefcase className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                         </div>
                     </div>
-                    <p className="text-2xl md:text-3xl font-black text-gray-900">{jobCount || 0}개</p>
-                    <p className="text-[11px] md:text-[12px] font-medium text-gray-400 mt-1 md:mt-2">현재 ACTIVE 상태 공고</p>
-                    <Link href="/biz/jobs" className="mt-3 md:mt-4 flex items-center gap-1 text-[11px] md:text-[12px] font-bold text-primary hover:underline">
-                        구인 공고 관리 <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
+                        <p className="text-[11px] md:text-[12px] font-medium text-gray-400">현재 ACTIVE 상태 공고</p>
+                        <Link href="/biz/jobs" className="flex items-center gap-1 text-[11px] md:text-[12px] font-bold text-primary hover:underline shrink-0">
+                            구인 공고 관리 <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                    </div>
                 </div>
 
                 {/* 이번 달 지원자 */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-2 md:mb-4">
-                        <span className="text-[12px] md:text-[13px] font-bold text-gray-500">이번 달 지원자</span>
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-green-50 rounded-lg md:rounded-xl flex items-center justify-center">
+                <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm flex flex-col justify-between">
+                    <div className="flex items-start justify-between mb-4 md:mb-6">
+                        <div className="flex items-baseline gap-1.5 md:gap-2">
+                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500">이번 달 지원자</span>
+                            <span className="text-2xl md:text-3xl font-black text-gray-900">0명</span>
+                        </div>
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-green-50 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
                             <Users className="w-4 h-4 md:w-5 md:h-5 text-green-500" />
                         </div>
                     </div>
-                    <p className="text-2xl md:text-3xl font-black text-gray-900">0명</p>
-                    <p className="text-[11px] md:text-[12px] font-medium text-gray-400 mt-1 md:mt-2">내 공고 누적 지원자</p>
-                    <Link href="/biz/seekers" className="mt-3 md:mt-4 flex items-center gap-1 text-[11px] md:text-[12px] font-bold text-green-500 hover:underline">
-                        지원자 보기 <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
+                        <p className="text-[11px] md:text-[12px] font-medium text-gray-400">내 공고 누적 지원자</p>
+                        <Link href="/biz/seekers" className="flex items-center gap-1 text-[11px] md:text-[12px] font-bold text-green-500 hover:underline shrink-0">
+                            지원자 보기 <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                    </div>
                 </div>
             </div>
 

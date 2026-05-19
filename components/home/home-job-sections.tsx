@@ -124,11 +124,9 @@ export function HomeJobSections() {
         <main className="container px-4 md:px-6 py-6 md:py-8 space-y-8 md:space-y-10">
             {/* 1. Scrolling Notice Ticker */}
             <section>
-                <div className="flex items-center gap-3 md:gap-4 px-2 py-2">
+                <div className="flex items-center gap-2 md:gap-3 py-1">
                     <div className="flex items-center shrink-0">
-                        <div className="bg-primary/10 text-primary p-1.5 md:p-2 rounded-full shadow-sm">
-                            <Megaphone className="w-4 h-4 md:w-5 md:h-5" />
-                        </div>
+                        <Megaphone className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                     </div>
 
                         <div
@@ -187,13 +185,13 @@ export function HomeJobSections() {
                 </div>
                 
                 {demoJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full ${!showAllPremium ? `
-                        [&>*:nth-child(n+21)]:hidden 
-                        sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
-                        md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
-                        2xl:[&>*:nth-child(n+41)]:block 2xl:[&>*:nth-child(n+51)]:hidden 
-                        3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
-                        4xl:[&>*:nth-child(n+61)]:block 4xl:[&>*:nth-child(n+81)]:hidden
+                    <div className={`grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-1.5 sm:gap-4 w-full ${!showAllPremium ? `
+                        [&>*:nth-child(n+19)]:hidden 
+                        sm:[&>*:nth-child(n+19)]:block sm:[&>*:nth-child(n+25)]:hidden 
+                        md:[&>*:nth-child(n+25)]:block md:[&>*:nth-child(n+33)]:hidden 
+                        2xl:[&>*:nth-child(n+33)]:block 2xl:[&>*:nth-child(n+43)]:hidden 
+                        3xl:[&>*:nth-child(n+43)]:block 3xl:[&>*:nth-child(n+57)]:hidden
+                        4xl:[&>*:nth-child(n+57)]:block 4xl:[&>*:nth-child(n+81)]:hidden
                     ` : ''}`}>
                         {demoJobs.map((job) => (
                             <PremiumJobCard 
@@ -228,13 +226,13 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full grid-flow-dense
-                        [&>*:nth-child(n+21)]:hidden 
-                        sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
-                        md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
-                        2xl:[&>*:nth-child(n+41)]:block 2xl:[&>*:nth-child(n+51)]:hidden 
-                        3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
-                        4xl:[&>*:nth-child(n+61)]:block 4xl:[&>*:nth-child(n+81)]:hidden
+                    <div className={`grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-1.5 sm:gap-4 w-full grid-flow-dense
+                        [&>*:nth-child(n+19)]:hidden 
+                        sm:[&>*:nth-child(n+19)]:block sm:[&>*:nth-child(n+25)]:hidden 
+                        md:[&>*:nth-child(n+25)]:block md:[&>*:nth-child(n+33)]:hidden 
+                        2xl:[&>*:nth-child(n+33)]:block 2xl:[&>*:nth-child(n+43)]:hidden 
+                        3xl:[&>*:nth-child(n+43)]:block 3xl:[&>*:nth-child(n+57)]:hidden
+                        4xl:[&>*:nth-child(n+57)]:block 4xl:[&>*:nth-child(n+81)]:hidden
                     `}>
                         {specialJobs.map((job) => (
                             <PremiumJobCard 
@@ -268,13 +266,13 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full
-                        [&>*:nth-child(n+21)]:hidden 
-                        sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
-                        md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
-                        2xl:[&>*:nth-child(n+41)]:block 2xl:[&>*:nth-child(n+51)]:hidden 
-                        3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
-                        4xl:[&>*:nth-child(n+61)]:block 4xl:[&>*:nth-child(n+81)]:hidden
+                    <div className={`grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-1.5 sm:gap-4 w-full
+                        [&>*:nth-child(n+19)]:hidden 
+                        sm:[&>*:nth-child(n+19)]:block sm:[&>*:nth-child(n+25)]:hidden 
+                        md:[&>*:nth-child(n+25)]:block md:[&>*:nth-child(n+33)]:hidden 
+                        2xl:[&>*:nth-child(n+33)]:block 2xl:[&>*:nth-child(n+43)]:hidden 
+                        3xl:[&>*:nth-child(n+43)]:block 3xl:[&>*:nth-child(n+57)]:hidden
+                        4xl:[&>*:nth-child(n+57)]:block 4xl:[&>*:nth-child(n+81)]:hidden
                     `}>
                         {lineJobs.map((job) => (
                             <PremiumJobCard 
