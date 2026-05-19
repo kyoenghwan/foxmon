@@ -185,7 +185,7 @@ export function HomeJobSections() {
                 </div>
                 
                 {demoJobs.length > 0 ? (
-                    <div className={`grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-1.5 sm:gap-4 w-full ${!showAllPremium ? `
+                    <div className={`grid grid-cols-2 max-[639px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-2 max-[639px]:gap-2 sm:gap-4 w-full ${!showAllPremium ? `
                         [&>*:nth-child(n+19)]:hidden 
                         sm:[&>*:nth-child(n+19)]:block sm:[&>*:nth-child(n+25)]:hidden 
                         md:[&>*:nth-child(n+25)]:block md:[&>*:nth-child(n+33)]:hidden 
