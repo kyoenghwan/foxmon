@@ -20,6 +20,7 @@ interface AgeVerificationBoxProps {
 }
 
 export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificationBoxProps) {
+  const [isVerifying, setIsVerifying] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '홍길동',
