@@ -82,8 +82,6 @@
   @media (min-width: 1024px) { .container { max-width: 880px !important; } }
   @media (min-width: 1280px) { .container { max-width: 880px !important; } }
   @media (min-width: 1440px) { .container { max-width: 1096px !important; } }
-  @media (min-width: 1920px) { .container { max-width: 1312px !important; } }
-  @media (min-width: 2560px) { .container { max-width: 1744px !important; } }
 }
 
 /* Responsive 2-Row Grid Limiters (Bulletproof CSS) */
@@ -99,10 +97,6 @@
 @media (min-width: 1440px) {
   .limit-2-rows > *:nth-child(n+9) { display: block !important; }
   .limit-2-rows > *:nth-child(n+11) { display: none !important; }
-}
-@media (min-width: 2560px) {
-  .limit-2-rows > *:nth-child(n+11) { display: block !important; }
-  .limit-2-rows > *:nth-child(n+17) { display: none !important; }
 }
 
 @layer utilities {
