@@ -341,7 +341,7 @@ export function ResumeManagementModal() {
           )}
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-6 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6 scrollbar-hide">
           {loading ? (
              <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-2">
                <Loader2 className="w-8 h-8 animate-spin" />
@@ -551,26 +551,32 @@ export function ResumeManagementModal() {
                 </div>
              </div>
           ) : (
-            <div className="bg-white border rounded-xl shadow-sm p-6 flex flex-col gap-6">
-              {/* 이력서 제목 (최상단) */}
-              <section className="mb-2">
-                <label className="text-base font-black text-gray-800 block mb-2"><span className="text-primary">*</span> 이력서 제목</label>
-                <input 
-                   type="text" 
-                   value={formData.title || ''} 
-                   onChange={e => setFormData({...formData, title: e.target.value})} 
-                   className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-lg font-bold placeholder-gray-400" 
-                   placeholder="예: 성실하고 책임감 있는 20대 지원자입니다!" 
-                />
+            <div className="bg-white border rounded-xl shadow-sm p-4 flex flex-col gap-4 md:p-6 md:gap-6">
+              {/* 제목 (모바일: 라벨 옆 인라인) */}
+              <section>
+                <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
+                  <label className="text-sm font-black text-gray-800 shrink-0 whitespace-nowrap md:text-base md:mb-2 md:block">
+                    <span className="text-primary">*</span>{' '}
+                    <span className="md:hidden">제목</span>
+                    <span className="hidden md:inline">이력서 제목</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title || ''}
+                    onChange={e => setFormData({ ...formData, title: e.target.value })}
+                    className="flex-1 min-w-0 h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all text-sm font-bold placeholder-gray-400 md:w-full md:h-auto md:p-4 md:border-2 md:rounded-xl md:focus:ring-4 md:text-lg"
+                    placeholder="예: 성실하고 책임감 있는 20대..."
+                  />
+                </div>
               </section>
 
               {/* 사진 및 기본정보 Section */}
               <section>
                 <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">기본 정보</h3>
-                <div className="flex flex-col md:flex-row gap-8">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-8">
                   {/* 왼쪽: 사진 첨부 */}
                   <div className="flex flex-col items-center gap-3 flex-shrink-0">
-                    <div className="relative group cursor-pointer w-32 h-40 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-primary transition-colors">
+                    <div className="relative group cursor-pointer w-24 h-32 md:w-32 md:h-40 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-primary transition-colors">
                        {formData.photo_url ? (
                           <img src={formData.photo_url} alt="Uploaded Photo" className="w-full h-full object-cover" />
                        ) : (
@@ -599,11 +605,11 @@ export function ResumeManagementModal() {
                   <div className="flex-1 flex flex-col gap-5">
                     <div>
                       <label className="text-sm font-bold text-gray-700 block mb-1.5"><span className="text-primary">*</span> 이름/닉네임</label>
-                      <input type="text" value={formData.nickname || ''} onChange={e => setFormData({...formData, nickname: e.target.value})} className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium bg-gray-50/50" placeholder="활동할 이름이나 닉네임" />
+                      <input type="text" value={formData.nickname || ''} onChange={e => setFormData({...formData, nickname: e.target.value})} className="w-full h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium bg-gray-50/50 md:h-auto md:p-3" placeholder="활동할 이름이나 닉네임" />
                     </div>
                     <div>
                       <label className="text-sm font-bold text-gray-700 block mb-1.5">성별 / 출생연도</label>
-                      <div className="flex gap-2 items-center bg-gray-50/50 border border-gray-200 p-2 rounded-lg">
+                      <div className="flex gap-2 items-center bg-gray-50/50 border border-gray-200 p-1.5 rounded-lg md:p-2">
                         <div className="flex gap-3 px-2 border-r border-gray-200">
                           <label className="flex items-center gap-1.5 cursor-pointer font-medium text-sm text-gray-700 hover:text-primary transition-colors">
                             <input type="radio" value="F" checked={formData.gender === 'F'} onChange={e => setFormData({...formData, gender: 'F'})} className="accent-primary w-4 h-4" /> 여성
@@ -632,14 +638,16 @@ export function ResumeManagementModal() {
               {/* 연락처 및 SNS Section */}
               <section>
                 <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">연락처 및 SNS</h3>
-                <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-5 flex flex-col gap-6">
+                <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-3 flex flex-col gap-4 md:p-5 md:gap-6">
                      <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-2">연락처</label>
-                      <div className="flex gap-3 items-center">
-                         <input type="text" value={formData.contact_number || ''} onChange={e => setFormData({...formData, contact_number: e.target.value})} placeholder="010-0000-0000" className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium bg-white" />
-                         <label className="flex items-center gap-2 whitespace-nowrap text-sm font-bold text-gray-700 cursor-pointer hover:text-primary transition-colors bg-white border border-gray-200 p-3 rounded-lg">
-                           <input type="checkbox" checked={formData.is_contact_public} onChange={e => setFormData({...formData, is_contact_public: e.target.checked})} className="accent-primary w-4 h-4 rounded" /> 연락처 공개
-                         </label>
+                      <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
+                        <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-2 md:block">연락처</label>
+                        <input type="text" value={formData.contact_number || ''} onChange={e => setFormData({...formData, contact_number: e.target.value})} placeholder="010-0000-0000" className="flex-1 min-w-0 h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium bg-white md:h-auto md:p-3" />
+                        <label className="flex items-center gap-1 shrink-0 whitespace-nowrap text-xs font-bold text-gray-700 cursor-pointer hover:text-primary transition-colors md:gap-2 md:text-sm md:bg-white md:border md:border-gray-200 md:p-3 md:rounded-lg">
+                          <input type="checkbox" checked={formData.is_contact_public} onChange={e => setFormData({...formData, is_contact_public: e.target.checked})} className="accent-primary w-3.5 h-3.5 rounded md:w-4 md:h-4" />
+                          <span className="md:hidden">공개</span>
+                          <span className="hidden md:inline">연락처 공개</span>
+                        </label>
                       </div>
                     </div>
                     <div>
@@ -656,7 +664,7 @@ export function ResumeManagementModal() {
                               setFormData({...formData, sns_type: e.target.value});
                             }
                           }}
-                          className="w-[120px] p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer"
+                          className="w-[88px] h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:w-[120px] md:h-auto md:p-3"
                         >
                           <option value="">선택</option>
                           <option value="카카오톡">카카오톡</option>
@@ -671,7 +679,7 @@ export function ResumeManagementModal() {
                              placeholder="종류" 
                              value={formData.sns_type || ''} 
                              onChange={e => setFormData({...formData, sns_type: e.target.value})} 
-                             className="w-[100px] p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white" 
+                             className="w-[72px] h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white md:w-[100px] md:h-auto md:p-3" 
                            />
                         )}
                         <input 
@@ -679,7 +687,7 @@ export function ResumeManagementModal() {
                           value={formData.sns_id || ''} 
                           onChange={e => setFormData({...formData, sns_id: e.target.value})} 
                           placeholder="아이디 입력" 
-                          className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white" 
+                          className="flex-1 min-w-0 h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white md:h-auto md:p-3" 
                         />
                       </div>
                     </div>
@@ -696,7 +704,7 @@ export function ResumeManagementModal() {
                         <select
                             value={selectedSido}
                             onChange={handleSidoChange}
-                            className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer"
+                            className="flex-1 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:h-auto md:p-3"
                         >
                             <option value="">시/도 선택</option>
                             {regions.filter(r => !r.parent_code_value).map(sido => (
@@ -712,14 +720,14 @@ export function ResumeManagementModal() {
                                     setFormData({...formData, desired_location: `${selectedSido} ${e.target.value}`.trim()});
                                 }}
                                 placeholder="국가 및 지역 입력 (예: 미국)"
-                                className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white"
+                                className="flex-1 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white md:h-auto md:p-3"
                             />
                         ) : (
                             <select
                                 value={selectedSigungu}
                                 onChange={handleSigunguChange}
                                 disabled={!selectedSido}
-                                className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 cursor-pointer disabled:cursor-not-allowed"
+                                className="flex-1 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 cursor-pointer disabled:cursor-not-allowed md:h-auto md:p-3"
                             >
                                 <option value="">시/군/구 선택</option>
                                 {regions.filter(r => {
@@ -737,7 +745,7 @@ export function ResumeManagementModal() {
                     <select
                         value={formData.desired_industry || ''}
                         onChange={e => setFormData({...formData, desired_industry: e.target.value})}
-                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer"
+                        className="w-full h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:h-auto md:p-3"
                     >
                         <option value="">업종 선택</option>
                         {categories.map(cat => (
@@ -758,7 +766,7 @@ export function ResumeManagementModal() {
                                     setFormData(prev => ({...prev, desired_pay_amount: undefined}));
                                 }
                             }}
-                            className="w-[120px] p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer"
+                            className="w-[88px] h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:w-[120px] md:h-auto md:p-3"
                         >
                             <option value="시급">시급</option>
                             <option value="일급">일급</option>
@@ -773,7 +781,7 @@ export function ResumeManagementModal() {
                                 onChange={e => setFormData({...formData, desired_pay_amount: parseInt(e.target.value) || undefined})} 
                                 disabled={formData.desired_pay_type === '협의'}
                                 placeholder={formData.desired_pay_type === '협의' ? "추후 협의합니다" : "원하는 금액 입력 (숫자만)"} 
-                                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 disabled:text-gray-400" 
+                                className="w-full h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 disabled:text-gray-400 md:h-auto md:p-3" 
                             />
                             {formData.desired_pay_type !== '협의' && <span className="text-sm font-bold text-gray-700 flex-shrink-0">원</span>}
                         </div>
@@ -782,16 +790,16 @@ export function ResumeManagementModal() {
 
                   <div className="sm:col-span-2">
                     <label className="text-sm font-bold text-gray-700 block mb-2">연락 가능 시간</label>
-                    <div className="flex items-center gap-4 bg-gray-50/50 border border-gray-200 p-2 pl-3 rounded-lg">
+                    <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-200 p-1.5 pl-2 rounded-lg md:gap-4 md:p-2 md:pl-3">
                       <input 
                          type="text" 
                          value={formData.contact_time || ''} 
                          disabled={formData.is_anytime_contact} 
                          onChange={e => setFormData({...formData, contact_time: e.target.value})} 
                          placeholder="예: 오후 2시 ~ 오후 8시" 
-                         className="flex-1 p-2 bg-transparent outline-none disabled:text-gray-400 text-sm font-medium" 
+                         className="flex-1 min-w-0 h-8 px-1 bg-transparent outline-none disabled:text-gray-400 text-sm font-medium md:h-auto md:p-2" 
                       />
-                      <label className="flex items-center gap-2 whitespace-nowrap text-sm font-bold text-gray-600 cursor-pointer bg-white border border-gray-200 p-2 rounded-lg hover:text-primary transition-colors">
+                      <label className="flex items-center gap-1 shrink-0 whitespace-nowrap text-xs font-bold text-gray-600 cursor-pointer hover:text-primary transition-colors md:gap-2 md:text-sm md:bg-white md:border md:border-gray-200 md:p-2 md:rounded-lg">
                         <input 
                            type="checkbox" 
                            checked={formData.is_anytime_contact} 
@@ -841,7 +849,7 @@ export function ResumeManagementModal() {
               <section>
                 <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">자기소개 및 경력 상세</h3>
                 <div>
-                   <textarea rows={6} value={formData.self_introduction || ''} onChange={e => setFormData({...formData, self_introduction: e.target.value})} className="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-primary outline-none transition-colors text-sm font-medium resize-none leading-relaxed" placeholder="이전 알바 경험, 본인의 특장점, 마음가짐 등을 자유롭고 자세하게 적어주시면 채용 확률이 200% 상승합니다!" />
+                   <textarea rows={5} value={formData.self_introduction || ''} onChange={e => setFormData({...formData, self_introduction: e.target.value})} className="w-full p-2.5 border border-gray-200 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium resize-none leading-relaxed md:p-3 md:border-2 md:border-gray-100 md:rounded-xl" placeholder="이전 알바 경험, 본인의 특장점, 마음가짐 등을 자유롭고 자세하게 적어주시면 채용 확률이 200% 상승합니다!" />
                 </div>
               </section>
             </div>
