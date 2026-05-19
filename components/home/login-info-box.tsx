@@ -7,6 +7,7 @@ import { User, FileText, Heart, Eye, Clock, LogIn, Mail, Settings, LogOut, Brief
 import { useLanguage } from '@/components/providers/language-provider';
 import { SettingsModal } from '@/components/mypage/SettingsModal';
 import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
+import { MarqueeText } from '@/components/ui/marquee-text';
 import { userSettingsAction } from '@/lib/actions';
 
 interface SessionUser {
@@ -69,11 +70,11 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
 
                     {/* 우측 정보 & 버튼 영역 (flex-col로 상하 배치) */}
                     <div className="flex-1 min-w-0 flex flex-col justify-between h-16 pt-0.5">
-                        {/* 1. 인사말 (한 줄로 통일) */}
-                        <div className="flex items-center">
-                            <h3 className="font-black text-[15px] sm:text-base text-gray-900 leading-tight truncate">
+                        {/* 1. 인사말 (길면 마퀴 스크롤) */}
+                        <div className="w-full min-w-0">
+                            <MarqueeText className="font-black text-[15px] sm:text-base text-gray-900 leading-tight">
                                 <span className="text-primary">{displayName}</span>님 반갑습니다!
-                            </h3>
+                            </MarqueeText>
                         </div>
 
                         {/* 2. 하단 액션 버튼들 (이력서 관리 두껍게, 우측 설정 버튼) */}
