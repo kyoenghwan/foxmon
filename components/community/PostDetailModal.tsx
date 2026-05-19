@@ -27,6 +27,10 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                 const { getCommunityComments } = await import('@/lib/actions/community');
                 const data = await getCommunityComments(post.id);
                 setComments(data);
+                // DB와 실제 댓글 수가 안 맞을 경우(수동 삭제 등) UI 강제 동기화
+                if (data.length !== post.comment_count) {
+                    post.comment_count = data.length;
+                }
             } catch (error) {
                 console.error("Failed to load comments", error);
             } finally {
@@ -34,7 +38,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
             }
         };
         fetchComments();
-    }, [post.id]);
+    }, [post.id, post]);
 
     const handleCommentSubmit = async () => {
         if (!isLoggedIn) {
