@@ -218,10 +218,10 @@ export function RegisterForm() {
       </button>
 
       {/* Brand Header */}
-      <div className="bg-gradient-to-b from-purple-100 via-purple-50/50 to-white px-8 pt-10 pb-8 flex flex-col items-center gap-2 border-b border-gray-100 relative overflow-hidden">
+      <div className="bg-gradient-to-b from-purple-100 via-purple-50/50 to-white px-4 pt-6 pb-4 md:pt-8 md:pb-6 flex flex-col items-center gap-1 border-b border-gray-100 relative overflow-hidden">
         <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
         <div className="absolute top-[-10%] left-[-10%] w-40 h-40 bg-fuchsia-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
-        <div className="relative z-10 w-[200px] md:w-[240px] mb-1 flex justify-center">
+        <div className="relative z-10 w-[200px] md:w-[240px] flex justify-center">
           <Image 
             src="/foxmon_log.png" 
             alt="FOXMON" 
@@ -254,10 +254,10 @@ export function RegisterForm() {
           })}
         </div>
 
-        <div className="min-h-[400px]">
+        <div className="min-h-[300px] pb-4">
           {/* STEP 1: Auth */}
           {step === 1 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+            <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
               <div className="text-center space-y-2">
                 <h3 className="text-xl font-black text-purple-900 italic tracking-tight">STEP 1: 본인 인증 정보 입력</h3>
                 <p className="text-gray-500 text-sm font-medium">서비스 이용을 위해 휴대폰 본인인증이 필요합니다.</p>
