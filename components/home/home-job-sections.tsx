@@ -21,6 +21,7 @@ export function HomeJobSections() {
     const { t } = useLanguage();
     const [noticeIndex, setNoticeIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
+    const [showAllPremium, setShowAllPremium] = useState(false);
 
     // Firestore 데이터 상태
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
@@ -120,7 +121,7 @@ export function HomeJobSections() {
     }
 
     return (
-        <main className="container px-4 md:px-6 py-12 space-y-12">
+        <main className="container px-4 md:px-6 py-6 md:py-8 space-y-8 md:space-y-10">
             {/* 1. Scrolling Notice Ticker */}
             <section>
                 <div className="bg-white border rounded-2xl px-6 py-4 shadow-sm hover:shadow-md transition-shadow">
@@ -171,7 +172,7 @@ export function HomeJobSections() {
                     <div className="flex items-center gap-2">
                         <Crown className="w-6 h-6 text-primary fill-primary animate-bounce" />
                         <h2 className="text-2xl font-black text-gray-900 italic uppercase">
-                            {t.sections.premiumJobsTitle} (IMPACT DEMO)
+                            {t.sections.premiumJobsTitle}
                         </h2>
                     </div>
                     <div className="flex items-center gap-3">
@@ -179,21 +180,24 @@ export function HomeJobSections() {
                         <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white">
                              <Plus className="w-4 h-4 mr-1" /> {t.sections.postPremium}
                         </Button>
-                        <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
-                            {t.common.viewAll || '전체보기'} <ChevronRight className="w-4 h-4" />
-                        </Link>
+                        <button 
+                            onClick={() => setShowAllPremium(!showAllPremium)}
+                            className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1"
+                        >
+                            {showAllPremium ? '접기' : (t.common.viewAll || '전체보기')} {showAllPremium ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </button>
                     </div>
                 </div>
                 
                 {demoJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full
+                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full ${!showAllPremium ? `
                         [&>*:nth-child(n+21)]:hidden 
                         sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
                         md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
                         2xl:[&>*:nth-child(n+41)]:block 2xl:[&>*:nth-child(n+51)]:hidden 
                         3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
                         4xl:[&>*:nth-child(n+61)]:block 4xl:[&>*:nth-child(n+81)]:hidden
-                    `}>
+                    ` : ''}`}>
                         {demoJobs.map((job) => (
                             <PremiumJobCard 
                                 key={job.id}

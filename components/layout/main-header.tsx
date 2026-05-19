@@ -85,11 +85,11 @@ export function MainHeader({ session }: MainHeaderProps) {
             </div>
 
             {/* 1단: 로고, 검색바, 로그인/언어 */}
-            <div className="container mx-auto px-4 lg:px-8 h-24 flex items-center justify-between gap-6">
+            <div className="container mx-auto px-4 lg:px-8 h-16 md:h-20 flex items-center justify-between gap-6">
                 {/* Logo */}
                 <div className="flex-shrink-0">
                     <Link href="/" className="group flex items-center">
-                        <img src="/logo.png" alt="FOXMON" className="h-9 sm:h-11 md:h-14 w-auto drop-shadow-sm hover:scale-105 transition-transform" />
+                        <img src="/logo.png" alt="FOXMON" className="h-8 sm:h-10 md:h-12 w-auto drop-shadow-sm hover:scale-105 transition-transform" />
                     </Link>
                 </div>
 
