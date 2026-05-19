@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { User, Eye, MessageSquare, Clock, X, Send } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { User, Eye, MessageSquare, Clock, X, Send, CornerDownRight } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface PostDetailModalProps {
@@ -14,6 +14,7 @@ interface PostDetailModalProps {
 export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDetailModalProps) {
     const [comments, setComments] = useState<any[]>([]);
     const [newComment, setNewComment] = useState('');
+    const [replyingTo, setReplyingTo] = useState<{ id: string, name: string } | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -49,6 +50,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
             const { createCommunityComment } = await import('@/lib/actions/community');
             const res = await createCommunityComment({
                 post_id: post.id,
+                parent_id: replyingTo?.id,
                 content: newComment,
                 board_id: boardId
             });
@@ -56,6 +58,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
             if (res.success && res.data) {
                 setComments(prev => [...prev, res.data]);
                 setNewComment('');
+                setReplyingTo(null);
                 post.comment_count = (post.comment_count || 0) + 1; // 로컬 카운트 증가
             } else {
                 alert(res.message || '댓글 등록에 실패했습니다.');
@@ -66,6 +69,17 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
             setIsSubmitting(false);
         }
     };
+
+    // 2-Depth 구조로 댓글 정리 (부모 -> 자식)
+    const groupedComments = useMemo(() => {
+        const parentComments = comments.filter(c => !c.parent_id);
+        const childComments = comments.filter(c => c.parent_id);
+        
+        return parentComments.map(parent => ({
+            ...parent,
+            replies: childComments.filter(child => child.parent_id === parent.id)
+        }));
+    }, [comments]);
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -128,37 +142,86 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                         <div className="space-y-4 mb-6">
                             {isLoading ? (
                                 <div className="text-center text-gray-400 text-[13px] py-4">댓글을 불러오는 중...</div>
-                            ) : comments.length === 0 ? (
+                            ) : groupedComments.length === 0 ? (
                                 <div className="text-center text-gray-400 text-[13px] py-6 bg-white rounded-xl border border-gray-100">
                                     첫 번째 댓글을 남겨보세요!
                                 </div>
                             ) : (
-                                comments.map((comment) => (
-                                    <div key={comment.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-2">
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-bold text-[13px] text-gray-800">
-                                                {comment.is_anonymous ? '익명' : comment.author_name}
-                                            </span>
-                                            <span className="text-[11px] text-gray-400">
-                                                {format(new Date(comment.created_at), 'MM-dd HH:mm')}
-                                            </span>
+                                groupedComments.map((parent) => (
+                                    <div key={parent.id} className="space-y-3">
+                                        {/* 부모 댓글 */}
+                                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-bold text-[13px] text-gray-800">
+                                                    {parent.is_anonymous ? '익명' : parent.author_name}
+                                                </span>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-[11px] text-gray-400">
+                                                        {format(new Date(parent.created_at), 'MM-dd HH:mm')}
+                                                    </span>
+                                                    {isLoggedIn && (
+                                                        <button 
+                                                            onClick={() => setReplyingTo({ id: parent.id, name: parent.is_anonymous ? '익명' : parent.author_name })}
+                                                            className="text-[11px] font-bold text-gray-500 hover:text-primary transition-colors"
+                                                        >
+                                                            답글 달기
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <p className="text-[13px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words">
+                                                {parent.content}
+                                            </p>
                                         </div>
-                                        <p className="text-[13px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words">
-                                            {comment.content}
-                                        </p>
+
+                                        {/* 대댓글 목록 (2-Depth) */}
+                                        {parent.replies.length > 0 && (
+                                            <div className="pl-6 md:pl-8 space-y-3">
+                                                {parent.replies.map((reply: any) => (
+                                                    <div key={reply.id} className="relative bg-gray-50/80 p-3.5 rounded-xl border border-gray-100 flex flex-col gap-1.5">
+                                                        <div className="absolute -left-4 md:-left-6 top-3 text-gray-300">
+                                                            <CornerDownRight className="w-4 h-4" />
+                                                        </div>
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="font-bold text-[12px] text-gray-800">
+                                                                {reply.is_anonymous ? '익명' : reply.author_name}
+                                                            </span>
+                                                            <span className="text-[10px] text-gray-400">
+                                                                {format(new Date(reply.created_at), 'MM-dd HH:mm')}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-[12px] md:text-[13px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words">
+                                                            {reply.content}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 ))
                             )}
                         </div>
 
                         {/* Comment Input */}
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 relative">
+                            {replyingTo && (
+                                <div className="absolute -top-8 left-0 flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-[12px] font-bold">
+                                    <CornerDownRight className="w-3.5 h-3.5" />
+                                    <span>{replyingTo.name} 님에게 답글 작성 중...</span>
+                                    <button 
+                                        onClick={() => setReplyingTo(null)}
+                                        className="ml-1 text-primary/70 hover:text-primary transition-colors"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            )}
                             <textarea
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
-                                placeholder={isLoggedIn ? "따뜻한 댓글을 남겨주세요." : "로그인 후 댓글을 작성할 수 있습니다."}
+                                placeholder={isLoggedIn ? (replyingTo ? "답글을 입력하세요." : "따뜻한 댓글을 남겨주세요.") : "로그인 후 작성할 수 있습니다."}
                                 disabled={!isLoggedIn || isSubmitting}
-                                className="w-full h-24 p-3 rounded-xl border border-gray-200 text-[13px] resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                className={`w-full h-24 p-3 rounded-xl border text-[13px] resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${replyingTo ? 'border-primary/50 bg-primary/5' : 'border-gray-200'}`}
                             />
                             <div className="flex justify-end">
                                 <button

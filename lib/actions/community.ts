@@ -215,6 +215,7 @@ export async function getCommunityComments(postId: string) {
 // ============================================
 export async function createCommunityComment(input: {
     post_id: string;
+    parent_id?: string;
     content: string;
     board_id: string; // 권한 검증용
 }) {
@@ -252,6 +253,7 @@ export async function createCommunityComment(input: {
             .from('community_comments')
             .insert({
                 post_id: input.post_id,
+                parent_id: input.parent_id || null,
                 user_id: userId,
                 author_name: authorName,
                 is_anonymous: isAnonymous,
