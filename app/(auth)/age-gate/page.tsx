@@ -39,7 +39,7 @@ function AgeGateContent() {
                             width={1600} 
                             height={400} 
                             priority
-                            className="w-auto h-16 sm:h-20 md:h-24 lg:h-28 object-contain"
+                            className="w-[140px] sm:w-[160px] md:w-[200px] h-auto object-contain"
                         />
                     </div>
 
