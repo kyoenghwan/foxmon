@@ -91,6 +91,44 @@ export function RegisterForm() {
     }
   };
 
+  const handleOpenCombinedPolicies = async (ids: string[]) => {
+    setViewedPolicies(prev => {
+      const next = { ...prev };
+      ids.forEach(id => { next[id as keyof typeof next] = true; });
+      return next;
+    });
+
+    const typeMap: Record<string, 'TERMS' | 'PRIVACY' | 'SMS'> = {
+      service: 'TERMS',
+      privacy: 'PRIVACY',
+      sms: 'SMS'
+    };
+    const labelMap: Record<string, string> = {
+      service: '[필수] 서비스 이용약관',
+      privacy: '[필수] 개인정보 수집 및 이용',
+      sms: '[선택] SMS 마케팅 수신 및 알림'
+    };
+
+    setPolicyModalTitle('통합 약관 보기');
+    setPolicyContent('');
+    setIsPolicyModalOpen(true);
+    setIsPolicyLoading(true);
+
+    try {
+      const contents = await Promise.all(
+        ids.map(async (id) => {
+          const content = await getPolicy(typeMap[id] || 'TERMS');
+          return `==========================================\n[ ${labelMap[id]} ]\n==========================================\n\n${content}\n\n`;
+        })
+      );
+      setPolicyContent(contents.join('\n'));
+    } catch (e) {
+      setPolicyContent('약관을 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setIsPolicyLoading(false);
+    }
+  };
+
   const checkId = async () => {
     if (!formData.loginId) return alert('아이디를 입력해주세요.');
     const result = await FA_CHECK_DUPLICATE_FLOW({ loginId: formData.loginId });
@@ -331,14 +369,18 @@ export function RegisterForm() {
                       onChange={(e) => {
                         const val = e.target.checked;
                         if (val) {
-                          const unviewed = ['service', 'privacy'].find(id => !viewedPolicies[id as keyof typeof viewedPolicies]);
-                          if (unviewed) {
+                          const unviewed = ['service', 'privacy'].filter(id => !viewedPolicies[id as keyof typeof viewedPolicies]);
+                          if (unviewed.length > 0) {
                             alert('필수 약관의 내용을 모두 확인해주세요.');
-                            const labelMap: Record<string, string> = {
-                              service: '[필수] 서비스 이용약관 동의',
-                              privacy: '[필수] 개인정보 수집 및 이용 동의'
-                            };
-                            handleOpenPolicy(unviewed, labelMap[unviewed]);
+                            if (unviewed.length === 1) {
+                              const labelMap: Record<string, string> = {
+                                service: '[필수] 서비스 이용약관 동의',
+                                privacy: '[필수] 개인정보 수집 및 이용 동의'
+                              };
+                              handleOpenPolicy(unviewed[0], labelMap[unviewed[0]]);
+                            } else {
+                              handleOpenCombinedPolicies(unviewed);
+                            }
                             return;
                           }
                         }
