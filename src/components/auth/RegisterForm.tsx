@@ -30,7 +30,7 @@ export function RegisterForm() {
     phoneNumber: '',
     nationality: 'KOREAN' as 'KOREAN' | 'FOREIGNER',
   });
-  
+
   const [formData, setFormData] = useState({
     loginId: '',
     password: '',
@@ -46,9 +46,9 @@ export function RegisterForm() {
     business_address: '',
     verification_doc_url: '',
   });
-  
+
   const [docFile, setDocFile] = useState<File | null>(null);
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [duplicateChecked, setDuplicateChecked] = useState({ id: false, nickname: false });
@@ -115,7 +115,7 @@ export function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateStep4()) return;
-    
+
     if (step === 5 && role === 'EMPLOYER') {
       if (!docFile) {
         setError('신분증 또는 사업자등록증 사본을 첨부해주세요.');
@@ -130,7 +130,7 @@ export function RegisterForm() {
         return;
       }
     }
-    
+
     nvLog('FW', '회원가입 요청 (ID기반)', { loginId: formData.loginId, role });
     setIsLoading(true);
     setError(null);
@@ -161,7 +161,7 @@ export function RegisterForm() {
 
       if (result.success) {
         nvLog('FW', '회원가입 성공 -> 자동 로그인 시도');
-        
+
         // 세션 쿠키 발급 (PC방 보안 로직과 충돌되어 500에러/리디렉션 루프 빠지는 것을 방지)
         document.cookie = "foxmon_transient=1; path=/;";
         document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -183,12 +183,12 @@ export function RegisterForm() {
     }
   };
 
-  const handleAgeVerifySuccess = (data: { 
-    name: string; 
+  const handleAgeVerifySuccess = (data: {
+    name: string;
     birthDate: string;
     gender: string;
-    phoneNumber: string; 
-    nationality: 'KOREAN' | 'FOREIGNER' 
+    phoneNumber: string;
+    nationality: 'KOREAN' | 'FOREIGNER'
   }) => {
     setVerifiedData(data);
     setIsAgeVerified(true);
@@ -196,24 +196,24 @@ export function RegisterForm() {
   };
 
   const totalSteps = role === 'EMPLOYER' ? 5 : 4;
-  
+
   return (
     <div className="w-full max-w-2xl bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100 relative animate-in fade-in zoom-in-95 duration-500">
-      
+
       {/* Back Button */}
-      <button 
-          onClick={() => {
-              if (step > 1) {
-                  handlePrev();
-              } else {
-                  router.push('/age-gate');
-              }
-          }}
-          type="button"
-          className="absolute top-5 left-5 z-20 flex items-center justify-center w-10 h-10 rounded-full bg-white/80 hover:bg-purple-100 text-gray-500 hover:text-purple-700 transition-all shadow-sm backdrop-blur-md border border-purple-100"
-          title={step > 1 ? "이전 단계로 가기" : "초기화면으로 돌아가기"}
+      <button
+        onClick={() => {
+          if (step > 1) {
+            handlePrev();
+          } else {
+            router.push('/age-gate');
+          }
+        }}
+        type="button"
+        className="absolute top-5 left-5 z-20 flex items-center justify-center w-10 h-10 rounded-full bg-white/80 hover:bg-purple-100 text-gray-500 hover:text-purple-700 transition-all shadow-sm backdrop-blur-md border border-purple-100"
+        title={step > 1 ? "이전 단계로 가기" : "연령인증 화면으로 돌아가기"}
       >
-          <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
+        <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
       </button>
 
       {/* Brand Header */}
@@ -233,10 +233,9 @@ export function RegisterForm() {
             const isDone = step > s;
             return (
               <div key={s} className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300 font-bold text-sm ${
-                  isActive ? "bg-purple-600 border-purple-600 text-white shadow-md shadow-purple-600/30" : 
-                  isDone ? "bg-green-500 border-green-500 text-white shadow-md shadow-green-500/30" : "bg-gray-50 border-gray-200 text-gray-400"
-                }`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300 font-bold text-sm ${isActive ? "bg-purple-600 border-purple-600 text-white shadow-md shadow-purple-600/30" :
+                    isDone ? "bg-green-500 border-green-500 text-white shadow-md shadow-green-500/30" : "bg-gray-50 border-gray-200 text-gray-400"
+                  }`}>
                   {isDone ? <Check size={14} strokeWidth={3} /> : s}
                 </div>
                 {s < totalSteps && <div className={`w-4 md:w-8 h-[3px] mx-1 md:mx-2 rounded-full transition-colors ${isDone ? "bg-green-500" : "bg-gray-100"}`} />}
@@ -282,8 +281,8 @@ export function RegisterForm() {
               <div className="space-y-4">
                 <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100 space-y-4">
                   <div className="flex items-center gap-3 p-1">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       id="all_agree"
                       checked={agreements.service && agreements.privacy && agreements.sms}
                       onChange={(e) => {
@@ -294,7 +293,7 @@ export function RegisterForm() {
                     />
                     <Label htmlFor="all_agree" className="text-sm font-black text-gray-900 cursor-pointer">전체 약관에 동의합니다.</Label>
                   </div>
-                  
+
                   <div className="h-px bg-gray-200 mx-1" />
 
                   {[
@@ -304,11 +303,11 @@ export function RegisterForm() {
                   ].map((item) => (
                     <div key={item.id} className="flex items-center justify-between px-1">
                       <div className="flex items-center gap-3">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           id={item.id}
                           checked={agreements[item.id as keyof typeof agreements]}
-                          onChange={(e) => setAgreements({...agreements, [item.id]: e.target.checked})}
+                          onChange={(e) => setAgreements({ ...agreements, [item.id]: e.target.checked })}
                           className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
                         />
                         <Label htmlFor={item.id} className={`text-xs font-bold cursor-pointer ${item.required ? 'text-gray-700' : 'text-gray-500'}`}>
@@ -325,8 +324,8 @@ export function RegisterForm() {
                 <Button type="button" variant="ghost" className="h-14 font-bold text-gray-500 hover:text-purple-700 bg-gray-50 hover:bg-purple-50 flex-1 rounded-2xl" onClick={handlePrev}>
                   <ChevronLeft className="mr-1" size={18} /> 이전
                 </Button>
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   disabled={!agreements.service || !agreements.privacy}
                   onClick={handleNext}
                   className="flex-[2] h-14 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-lg shadow-purple-600/20 transition-all text-base disabled:opacity-50 disabled:grayscale"
@@ -344,7 +343,7 @@ export function RegisterForm() {
                 <h3 className="text-xl font-black text-purple-900 italic uppercase tracking-tight">STEP 4: 계정 정보 입력</h3>
                 <p className="text-gray-500 text-xs font-medium">일부 정보는 본인인증 데이터로 자동 채워집니다.</p>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
                   <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">아이디 <span className="text-purple-600">*</span></Label>
@@ -353,20 +352,19 @@ export function RegisterForm() {
                       placeholder="4~15자 영문/숫자"
                       value={formData.loginId}
                       onChange={(e) => {
-                        setFormData({...formData, loginId: e.target.value});
+                        setFormData({ ...formData, loginId: e.target.value });
                         setDuplicateChecked(prev => ({ ...prev, id: false }));
                       }}
                       autoComplete="off"
                       className="bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11 rounded-xl flex-1 focus-visible:ring-purple-500/50 text-sm font-bold"
                     />
-                    <Button 
-                      type="button" 
-                      onClick={checkId} 
-                      className={`h-11 rounded-xl px-4 text-[10px] font-black transition-all shrink-0 ${
-                        duplicateChecked.id 
-                          ? "bg-green-500 text-white" 
+                    <Button
+                      type="button"
+                      onClick={checkId}
+                      className={`h-11 rounded-xl px-4 text-[10px] font-black transition-all shrink-0 ${duplicateChecked.id
+                          ? "bg-green-500 text-white"
                           : "bg-purple-50 text-purple-700 border border-purple-100"
-                      }`}
+                        }`}
                     >
                       {duplicateChecked.id ? "확인완료" : "중복확인"}
                     </Button>
@@ -380,7 +378,7 @@ export function RegisterForm() {
                       type={showPassword ? "text" : "password"}
                       placeholder="4~12자 입력"
                       value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       autoComplete="new-password"
                       className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm pr-10"
                     />
@@ -401,7 +399,7 @@ export function RegisterForm() {
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="비밀번호 다시 입력"
                       value={formData.confirmPassword}
-                      onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                       autoComplete="new-password"
                       className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm pr-10"
                     />
@@ -423,20 +421,19 @@ export function RegisterForm() {
                       placeholder="활발한 닉네임"
                       value={formData.nickname}
                       onChange={(e) => {
-                        setFormData({...formData, nickname: e.target.value});
+                        setFormData({ ...formData, nickname: e.target.value });
                         setDuplicateChecked(prev => ({ ...prev, nickname: false }));
                       }}
                       autoComplete="off"
                       className="bg-gray-50/50 border-gray-200 h-11 rounded-xl flex-1 text-sm font-bold"
                     />
-                    <Button 
-                      type="button" 
-                      onClick={checkNickname} 
-                      className={`h-11 rounded-xl px-4 text-[10px] font-black transition-all shrink-0 ${
-                        duplicateChecked.nickname 
-                          ? "bg-green-500 text-white" 
+                    <Button
+                      type="button"
+                      onClick={checkNickname}
+                      className={`h-11 rounded-xl px-4 text-[10px] font-black transition-all shrink-0 ${duplicateChecked.nickname
+                          ? "bg-green-500 text-white"
                           : "bg-purple-50 text-purple-700 border border-purple-100"
-                      }`}
+                        }`}
                     >
                       {duplicateChecked.nickname ? "확인완료" : "중복확인"}
                     </Button>
@@ -448,7 +445,7 @@ export function RegisterForm() {
                   <Input
                     placeholder="email@example.com"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     autoComplete="off"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
@@ -508,30 +505,30 @@ export function RegisterForm() {
                 <h3 className="text-xl font-black text-purple-900 italic uppercase">STEP 5: 구인자 신원 확인</h3>
                 <p className="text-gray-500 text-sm font-medium">안전한 직업정보 제공을 위해 실명 및 사업장 확인이 필수입니다.</p>
               </div>
-              
+
               <div className="space-y-4">
                 {/* 사업자 구분 */}
                 <div className="flex items-center gap-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
                   <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider shrink-0">사업자 구분</Label>
                   <div className="flex items-center gap-4">
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="business_type" 
-                        value="사업자" 
+                      <input
+                        type="radio"
+                        name="business_type"
+                        value="사업자"
                         checked={formData.business_type === '사업자'}
-                        onChange={(e) => setFormData({...formData, business_type: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, business_type: e.target.value })}
                         className="w-4 h-4 text-purple-600 focus:ring-purple-500 border-gray-300"
                       />
                       <span className="text-sm font-bold text-gray-800">사업자</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="business_type" 
-                        value="비사업자" 
+                      <input
+                        type="radio"
+                        name="business_type"
+                        value="비사업자"
                         checked={formData.business_type === '비사업자'}
-                        onChange={(e) => setFormData({...formData, business_type: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, business_type: e.target.value })}
                         className="w-4 h-4 text-purple-600 focus:ring-purple-500 border-gray-300"
                       />
                       <span className="text-sm font-bold text-gray-800">비사업자 (프리랜서/영업진)</span>
@@ -550,10 +547,10 @@ export function RegisterForm() {
                   <div className="flex items-center gap-3">
                     <label className="flex items-center justify-center h-11 px-4 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 cursor-pointer hover:bg-gray-50 transition-colors">
                       <span>파일 선택</span>
-                      <input 
-                        type="file" 
-                        accept="image/*,.pdf" 
-                        className="hidden" 
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        className="hidden"
                         onChange={(e) => {
                           if (e.target.files && e.target.files[0]) {
                             setDocFile(e.target.files[0]);
@@ -571,9 +568,9 @@ export function RegisterForm() {
                 {formData.business_type === '사업자' && (
                   <div className="grid grid-cols-[100px_1fr] items-center gap-4">
                     <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">업종 선택</Label>
-                    <select 
+                    <select
                       value={formData.business_category}
-                      onChange={(e) => setFormData({...formData, business_category: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, business_category: e.target.value })}
                       className="w-full bg-gray-50/50 border border-gray-200 font-bold h-11 rounded-xl px-4 text-sm"
                     >
                       <option value="" disabled>업종을 선택하세요</option>
@@ -585,18 +582,18 @@ export function RegisterForm() {
                     </select>
                   </div>
                 )}
-                
+
                 <div className="grid grid-cols-[100px_1fr] items-center gap-4">
                   <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">회사/점포명</Label>
                   <Input
                     placeholder={formData.business_type === '사업자' ? "사업자등록증 상호명" : "실제 일하시는 가게 이름"}
                     value={formData.business_name}
-                    onChange={(e) => setFormData({...formData, business_name: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
                     autoComplete="off"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-[100px_1fr] items-center gap-4">
                   <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider flex flex-col">
                     <span>사업장 주소 <span className="text-purple-600">*</span></span>
@@ -605,7 +602,7 @@ export function RegisterForm() {
                     <Input
                       placeholder={formData.business_type === '사업자' ? "사업자등록증 상 주소" : "실제 근무하시는 가게 주소"}
                       value={formData.business_address}
-                      onChange={(e) => setFormData({...formData, business_address: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, business_address: e.target.value })}
                       autoComplete="off"
                       className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                     />
@@ -617,7 +614,7 @@ export function RegisterForm() {
                   <Input
                     placeholder={formData.business_type === '사업자' ? "사업자등록증 대표자명" : "본인 이름 (또는 사장님 이름)"}
                     value={formData.representative_name}
-                    onChange={(e) => setFormData({...formData, representative_name: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, representative_name: e.target.value })}
                     autoComplete="off"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
@@ -630,7 +627,7 @@ export function RegisterForm() {
                       <Input
                         placeholder="숫자 10자리"
                         value={formData.business_number}
-                        onChange={(e) => setFormData({...formData, business_number: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, business_number: e.target.value })}
                         autoComplete="off"
                         className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                       />
@@ -640,26 +637,27 @@ export function RegisterForm() {
                       <Input
                         placeholder="YYYYMMDD"
                         value={formData.opening_date}
-                        onChange={(e) => setFormData({...formData, opening_date: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, opening_date: e.target.value })}
                         autoComplete="off"
                         className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                       />
                     </div>
                   </>
                 )}
-              
-              <div className="flex gap-3 pt-6 border-t border-gray-100 mt-6">
-                <Button type="button" variant="ghost" className="h-14 font-bold text-gray-500 flex-1 rounded-2xl" onClick={handlePrev}>
-                  <ChevronLeft size={18} /> 이전
-                </Button>
-                <Button type="button" disabled={isLoading} onClick={handleSubmit} className="flex-[2] h-14 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-lg transition-all text-base">
-                  {isLoading ? <Loader2 className="animate-spin w-5 h-5 mx-auto" /> : '최종 가입 완료하기'}
-                </Button>
               </div>
-            </div>
+
+              <div className="flex gap-3 pt-6 border-t border-gray-100 mt-6">
+                  <Button type="button" variant="ghost" className="h-14 font-bold text-gray-500 flex-1 rounded-2xl" onClick={handlePrev}>
+                    <ChevronLeft size={18} /> 이전
+                  </Button>
+                  <Button type="button" disabled={isLoading} onClick={handleSubmit} className="flex-[2] h-14 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-lg transition-all text-base">
+                    {isLoading ? <Loader2 className="animate-spin w-5 h-5 mx-auto" /> : '최종 가입 완료하기'}
+                  </Button>
+                </div>
+              </div>
           )}
-        </div>
+            </div>
       </div>
-    </div>
-  );
+      </div>
+      );
 }

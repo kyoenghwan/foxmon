@@ -1,7 +1,7 @@
 'use server';
 
 import { supabaseAdmin } from '@/lib/supabase';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 export async function uploadVerificationDocument(formData: FormData) {
     try {
@@ -11,7 +11,7 @@ export async function uploadVerificationDocument(formData: FormData) {
         }
 
         const fileExt = file.name.split('.').pop();
-        const fileName = `${uuidv4()}.${fileExt}`;
+        const fileName = `${randomUUID()}.${fileExt}`;
         const filePath = `verifications/${fileName}`;
 
         // Convert File to Buffer/ArrayBuffer for Supabase Storage
