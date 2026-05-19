@@ -75,7 +75,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                             ⭐️ 즐겨찾기
                         </button>
                         <span className="text-gray-300">|</span>
-                        <button onClick={() => alert('📱 모바일: 브라우저 속성 메뉴에서 [홈 화면에 추가]를 누르시면 폰에 앱처럼 아이콘이 생깁니다!')} className="hover:text-primary transition-colors flex items-center gap-1">
+                        <button onClick={() => alert('📱 아이폰: Safari 하단의 [공유] 아이콘을 누르고 [홈 화면에 추가]를 선택하세요.\n🤖 안드로이드: 브라우저 메뉴에서 [홈 화면에 추가]를 선택하세요.')} className="hover:text-primary transition-colors flex items-center gap-1">
                             📱 <span className="hidden sm:inline">폰에 앱 설치</span><span className="sm:hidden">앱 설치</span>
                         </button>
                         <span className="text-gray-300">|</span>
@@ -174,7 +174,7 @@ export function MainHeader({ session }: MainHeaderProps) {
             <div className="border-t border-gray-100 bg-white">
                 <div className="container mx-auto px-4 lg:px-8">
                     <nav className="flex items-center justify-between min-h-[3.5rem] lg:h-14 py-1.5 lg:py-0 relative w-full">
-                        <div className="flex items-center gap-6 md:gap-8 h-full w-full min-w-0">
+                        <div className="flex items-center gap-3 sm:gap-6 md:gap-8 h-full w-full min-w-0">
                             {/* 햄버거 메뉴 (전체) */}
                             <div 
                                 className="h-full flex items-center pr-4 md:pr-6 md:border-r border-gray-100 cursor-pointer group"
@@ -193,14 +193,14 @@ export function MainHeader({ session }: MainHeaderProps) {
                             </div>
 
                             {/* 개별 메뉴 리스트 */}
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 md:gap-x-10 h-auto lg:h-full py-1 lg:py-0 flex-1 min-w-0">
+                            <div className="flex items-center gap-x-3 sm:gap-x-4 md:gap-x-8 h-auto lg:h-full py-2 lg:py-0 flex-1 overflow-x-auto scrollbar-hide">
                                 {menuItems.map((item) => {
                                     const isActive = pathname === item.href;
                                     return (
                                         <Link
                                             key={item.href}
                                             href={item.href}
-                                            className={`text-[14px] sm:text-[15px] lg:text-[16px] font-bold border-b-2 transition-all h-auto py-1 lg:py-0 lg:h-full flex items-center whitespace-nowrap px-1 ${isActive
+                                            className={`text-[13px] sm:text-[14px] lg:text-[16px] font-bold border-b-2 transition-all h-auto py-1 lg:py-0 lg:h-full flex items-center whitespace-nowrap px-1 shrink-0 ${isActive
                                                     ? 'text-primary border-primary'
                                                     : 'text-gray-900 border-transparent hover:border-primary hover:text-primary'
                                                 }`}
@@ -209,8 +209,6 @@ export function MainHeader({ session }: MainHeaderProps) {
                                         </Link>
                                     );
                                 })}
-
-
                             </div>
                         </div>
 
