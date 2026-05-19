@@ -31,6 +31,7 @@ export function RegisterForm() {
     privacy: false,
     sms: false
   });
+  const [pendingAgreement, setPendingAgreement] = useState<string | string[] | 'all' | null>(null);
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
   const [policyModalTitle, setPolicyModalTitle] = useState('');
   const [policyContent, setPolicyContent] = useState('');
@@ -69,8 +70,9 @@ export function RegisterForm() {
   const handleNext = () => setStep(prev => prev + 1);
   const handlePrev = () => setStep(prev => prev - 1);
 
-  const handleOpenPolicy = async (id: string, label: string) => {
+  const handleOpenPolicy = async (id: string, label: string, pendingTarget: string | 'all' | null = null) => {
     setViewedPolicies(prev => ({ ...prev, [id]: true }));
+    setPendingAgreement(pendingTarget);
     const typeMap: Record<string, 'TERMS' | 'PRIVACY' | 'SMS'> = {
       service: 'TERMS',
       privacy: 'PRIVACY',
@@ -91,12 +93,13 @@ export function RegisterForm() {
     }
   };
 
-  const handleOpenCombinedPolicies = async (ids: string[]) => {
+  const handleOpenCombinedPolicies = async (ids: string[], pendingTarget: string | 'all' | null = null) => {
     setViewedPolicies(prev => {
       const next = { ...prev };
       ids.forEach(id => { next[id as keyof typeof next] = true; });
       return next;
     });
+    setPendingAgreement(pendingTarget);
 
     const typeMap: Record<string, 'TERMS' | 'PRIVACY' | 'SMS'> = {
       service: 'TERMS',
@@ -127,6 +130,22 @@ export function RegisterForm() {
     } finally {
       setIsPolicyLoading(false);
     }
+  };
+
+  const handleAgreeFromModal = () => {
+    if (pendingAgreement === 'all') {
+      setAgreements({ service: true, privacy: true, sms: true });
+    } else if (Array.isArray(pendingAgreement)) {
+      setAgreements(prev => {
+        const next = { ...prev };
+        pendingAgreement.forEach(id => { next[id as keyof typeof next] = true; });
+        return next;
+      });
+    } else if (typeof pendingAgreement === 'string') {
+      setAgreements(prev => ({ ...prev, [pendingAgreement]: true }));
+    }
+    setIsPolicyModalOpen(false);
+    setPendingAgreement(null);
   };
 
   const checkId = async () => {
@@ -377,9 +396,9 @@ export function RegisterForm() {
                                 service: '[필수] 서비스 이용약관 동의',
                                 privacy: '[필수] 개인정보 수집 및 이용 동의'
                               };
-                              handleOpenPolicy(unviewed[0], labelMap[unviewed[0]]);
+                              handleOpenPolicy(unviewed[0], labelMap[unviewed[0]], 'all');
                             } else {
-                              handleOpenCombinedPolicies(unviewed);
+                              handleOpenCombinedPolicies(unviewed, 'all');
                             }
                             return;
                           }
@@ -407,7 +426,7 @@ export function RegisterForm() {
                           onChange={(e) => {
                             if (e.target.checked && !viewedPolicies[item.id as keyof typeof viewedPolicies]) {
                               alert('해당 약관의 내용을 먼저 확인해주세요.');
-                              handleOpenPolicy(item.id, item.label);
+                              handleOpenPolicy(item.id, item.label, item.id);
                               return;
                             }
                             setAgreements({ ...agreements, [item.id]: e.target.checked });
@@ -418,7 +437,7 @@ export function RegisterForm() {
                           {item.label}
                         </Label>
                       </div>
-                      <button type="button" onClick={() => handleOpenPolicy(item.id, item.label)} className="text-[10px] text-gray-400 underline underline-offset-2 hover:text-purple-600">보기</button>
+                      <button type="button" onClick={() => handleOpenPolicy(item.id, item.label, item.id)} className="text-[10px] text-gray-400 underline underline-offset-2 hover:text-purple-600">보기</button>
                     </div>
                   ))}
                 </div>
@@ -783,6 +802,14 @@ export function RegisterForm() {
                 {policyContent}
               </div>
             )}
+          </div>
+          <div className="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={() => { setIsPolicyModalOpen(false); setPendingAgreement(null); }} className="px-6 font-bold text-gray-500">
+              닫기
+            </Button>
+            <Button type="button" onClick={handleAgreeFromModal} className="px-8 bg-purple-600 hover:bg-purple-700 text-white font-black shadow-md">
+              확인 및 동의하기
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
