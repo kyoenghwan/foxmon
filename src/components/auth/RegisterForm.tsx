@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import Image from 'next/image';
 import { nvLog } from '@/lib/logger';
 import { FA_REGISTER_FLOW } from '@/src/atoms/fa/auth/FA_REGISTER_FLOW';
 import { FA_CHECK_DUPLICATE_FLOW } from '@/src/atoms/fa/auth/FA_CHECK_DUPLICATE_FLOW';
@@ -220,7 +221,16 @@ export function RegisterForm() {
       <div className="bg-gradient-to-b from-purple-100 via-purple-50/50 to-white px-8 pt-10 pb-8 flex flex-col items-center gap-2 border-b border-gray-100 relative overflow-hidden">
         <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
         <div className="absolute top-[-10%] left-[-10%] w-40 h-40 bg-fuchsia-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
-        <h1 className="text-[34px] font-extrabold tracking-tighter text-purple-900 italic relative z-10 drop-shadow-sm">FOXMON</h1>
+        <div className="relative z-10 w-[140px] md:w-[180px] mb-2 flex justify-center">
+          <Image 
+            src="/foxmon_log.png" 
+            alt="FOXMON" 
+            width={1600} 
+            height={400} 
+            priority
+            className="w-full h-auto object-contain"
+          />
+        </div>
         <p className="text-purple-600 text-[11px] font-black tracking-widest uppercase relative z-10">신뢰할 수 있는 구인구직</p>
       </div>
 
