@@ -24,7 +24,7 @@ export function MainFooter() {
                         <p className="text-2xl font-black text-purple-900 tracking-tighter">1544-0000</p>
                         <p className="text-[11px]">평일 10:00 ~ 18:00 (점심 12:30 ~ 13:30)</p>
                         <p className="text-[11px]">주말 및 공휴일 휴무</p>
-                        <Link href="mailto:help@foxmon.co.kr" className="text-[11px] hover:underline mt-1">help@foxmon.co.kr</Link>
+                        <Link href="mailto:foxmon.support@gmail.com" className="text-[11px] hover:underline mt-1">foxmon.support@gmail.com</Link>
                     </div>
                 </div>
 
