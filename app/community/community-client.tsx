@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CommunitySidebar } from '@/components/community/CommunitySidebar';
 import { PostDetailModal } from '@/components/community/PostDetailModal';
+import { maskName } from '@/lib/utils';
 import { Pencil, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -176,7 +177,7 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
                                     </td>
                                     <td className="py-3 md:py-3.5 px-1 md:px-4 text-center">
                                         <div className="text-[12px] md:text-[13px] text-gray-600 font-medium truncate max-w-[80px] md:max-w-[120px] mx-auto">
-                                            {post.is_anonymous ? '익명' : post.author_name}
+                                            {post.is_anonymous ? '익명' : maskName(post.author_name)}
                                         </div>
                                     </td>
                                     <td className="py-3.5 px-4 text-center text-[12px] text-gray-400 font-medium hidden lg:table-cell">

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { User, Eye, MessageSquare, Clock, X, Send, CornerDownRight } from 'lucide-react';
 import { format } from 'date-fns';
+import { maskName } from '@/lib/utils';
 
 interface PostDetailModalProps {
     post: any;
@@ -106,7 +107,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                                 <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
                                     <User className="w-3.5 h-3.5 text-gray-400" />
                                 </div>
-                                {post.is_anonymous ? '익명' : post.author_name}
+                                {post.is_anonymous ? '익명' : maskName(post.author_name)}
                             </div>
                             <div className="flex items-center gap-1">
                                 <Clock className="w-3.5 h-3.5" />
@@ -153,7 +154,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                                         <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-2">
                                             <div className="flex items-center justify-between">
                                                 <span className="font-bold text-[13px] text-gray-800">
-                                                    {parent.is_anonymous ? '익명' : parent.author_name}
+                                                    {parent.is_anonymous ? '익명' : maskName(parent.author_name)}
                                                 </span>
                                                 <div className="flex items-center gap-3">
                                                     <span className="text-[11px] text-gray-400">
@@ -161,7 +162,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                                                     </span>
                                                     {isLoggedIn && (
                                                         <button 
-                                                            onClick={() => setReplyingTo({ id: parent.id, name: parent.is_anonymous ? '익명' : parent.author_name })}
+                                                            onClick={() => setReplyingTo({ id: parent.id, name: parent.is_anonymous ? '익명' : maskName(parent.author_name) })}
                                                             className="text-[11px] font-bold text-gray-500 hover:text-primary transition-colors"
                                                         >
                                                             답글 달기
@@ -184,7 +185,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                                                         </div>
                                                         <div className="flex items-center justify-between">
                                                             <span className="font-bold text-[12px] text-gray-800">
-                                                                {reply.is_anonymous ? '익명' : reply.author_name}
+                                                                {reply.is_anonymous ? '익명' : maskName(reply.author_name)}
                                                             </span>
                                                             <span className="text-[10px] text-gray-400">
                                                                 {format(new Date(reply.created_at), 'MM-dd HH:mm')}
