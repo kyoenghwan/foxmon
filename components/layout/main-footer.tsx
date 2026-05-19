@@ -21,7 +21,7 @@ export function MainFooter() {
                     {/* Right: CS Center */}
                     <div className="flex flex-col items-start md:items-end gap-2 text-gray-500">
                         <h4 className="font-extrabold text-gray-700">고객센터</h4>
-                        <p className="text-2xl font-black text-purple-900 tracking-tighter">1544-0000</p>
+                        <p className="text-2xl font-black text-purple-900 tracking-tighter">070-8095-5788</p>
                         <p className="text-[11px]">평일 10:00 ~ 18:00 (점심 12:30 ~ 13:30)</p>
                         <p className="text-[11px]">주말 및 공휴일 휴무</p>
                         <Link href="mailto:foxmon.support@gmail.com" className="text-[11px] hover:underline mt-1">foxmon.support@gmail.com</Link>
