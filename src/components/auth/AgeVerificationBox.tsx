@@ -44,7 +44,7 @@ export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificati
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          authMethod: 'MANUAL_MOCK',
+          authMethod: 'MOBILE',
           userRawData: formData
         }),
       });
