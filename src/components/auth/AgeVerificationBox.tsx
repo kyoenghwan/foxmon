@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Smartphone, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Smartphone, ShieldCheck, ChevronRight, X } from 'lucide-react';
 import { nvLog } from '@/lib/logger';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface AgeVerificationBoxProps {
   onVerifySuccess?: (data: { 
@@ -17,56 +20,130 @@ interface AgeVerificationBoxProps {
 }
 
 export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificationBoxProps) {
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '홍길동',
+    birthDate: '19900101',
+    gender: 'MALE',
+    phoneNumber: '01012345678',
+    nationality: 'KOREAN' as const,
+  });
 
-  const handleVerify = (type: string) => {
-    nvLog('FW', `성인 인증 시도: ${type}`);
+  const handleVerifyClick = (type: string) => {
+    nvLog('FW', `성인 인증 폼 열기: ${type}`);
+    setShowForm(true);
+  };
+
+  const handleManualSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsVerifying(true);
     
-    // Real Verification Process (hitting the backend FA_GUEST_AUTH Atom via API)
-    setTimeout(async () => {
-      try {
-        alert('ℹ️ 개발/테스트 환경 안내\n\n현재 본인인증 대행사(PG) 정식 계약 전이므로 실제 인증창 대신 시스템 내부에서 가상 데이터로 인증을 통과시킵니다.');
-        
-        const mockData = {
-          name: '홍길동',
-          birthDate: '19900101',
-          gender: 'MALE',
-          phoneNumber: '01012345678',
-          nationality: 'KOREAN' as const,
-        };
+    try {
+      const response = await fetch('/api/auth/guest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          authMethod: 'MANUAL_MOCK',
+          userRawData: formData
+        }),
+      });
 
-        const response = await fetch('/api/auth/guest', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            authMethod: type,
-            userRawData: mockData
-          }),
-        });
+      const result = await response.json();
 
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          nvLog('FW', '성인 인증 완료 (Mock Backend)', mockData);
-          if (onVerifySuccess) onVerifySuccess(mockData);
-        } else {
-          alert(result.message || '인증에 실패했습니다.');
-        }
-      } catch (err) {
-        alert('서버 연결 오류가 발생했습니다.');
-      } finally {
-        setIsVerifying(false);
+      if (response.ok && result.success) {
+        nvLog('FW', '성인 인증 완료 (Manual Mock)', formData);
+        if (onVerifySuccess) onVerifySuccess(formData);
+      } else {
+        alert(result.message || '인증에 실패했습니다.');
       }
-    }, 1500);
+    } catch (err) {
+      alert('서버 연결 오류가 발생했습니다.');
+    } finally {
+      setIsVerifying(false);
+    }
   };
+
+  if (showForm) {
+    return (
+      <div className={cn("flex flex-col w-full bg-white border border-gray-200 rounded-2xl p-5 shadow-sm animate-in fade-in zoom-in-95", className)}>
+        <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+          <h3 className="text-sm font-black text-gray-800">PG 임시 테스트 폼</h3>
+          <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500">
+            <X size={18} />
+          </button>
+        </div>
+        <form onSubmit={handleManualSubmit} className="space-y-4">
+          <div className="space-y-1">
+            <Label className="text-xs font-bold text-gray-600">이름</Label>
+            <Input 
+              value={formData.name} 
+              onChange={e => setFormData({...formData, name: e.target.value})} 
+              className="h-10 text-sm"
+              required 
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs font-bold text-gray-600">생년월일 (YYYYMMDD)</Label>
+            <Input 
+              value={formData.birthDate} 
+              onChange={e => setFormData({...formData, birthDate: e.target.value})} 
+              className="h-10 text-sm"
+              maxLength={8}
+              required 
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs font-bold text-gray-600">성별</Label>
+            <div className="flex gap-4 pt-1">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="gender" 
+                  checked={formData.gender === 'MALE'} 
+                  onChange={() => setFormData({...formData, gender: 'MALE'})} 
+                  className="text-purple-600"
+                />
+                <span className="text-sm font-bold">남성</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="gender" 
+                  checked={formData.gender === 'FEMALE'} 
+                  onChange={() => setFormData({...formData, gender: 'FEMALE'})} 
+                  className="text-purple-600"
+                />
+                <span className="text-sm font-bold">여성</span>
+              </label>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs font-bold text-gray-600">휴대폰 번호</Label>
+            <Input 
+              value={formData.phoneNumber} 
+              onChange={e => setFormData({...formData, phoneNumber: e.target.value})} 
+              className="h-10 text-sm"
+              required 
+            />
+          </div>
+          <Button 
+            type="submit" 
+            disabled={isVerifying} 
+            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-black mt-2"
+          >
+            {isVerifying ? '처리 중...' : '인증 완료 처리하기'}
+          </Button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("flex flex-col w-full", className)}>
       {/* Verification Options */}
       <div className="flex flex-col gap-3 relative">
         <button 
-          onClick={() => handleVerify('MOBILE')}
+          onClick={() => handleVerifyClick('MOBILE')}
           disabled={isVerifying}
           className="flex items-center justify-between py-2.5 px-4 bg-white border border-[#eee] rounded-2xl shadow-sm hover:border-blue-200 hover:bg-blue-50/30 transition-all group active:scale-[0.98] disabled:opacity-50"
         >
@@ -83,7 +160,7 @@ export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificati
         </button>
 
         <button 
-          onClick={() => handleVerify('IPIN')}
+          onClick={() => handleVerifyClick('IPIN')}
           disabled={isVerifying}
           className="flex items-center justify-between py-2.5 px-4 bg-white border border-[#eee] rounded-2xl shadow-sm hover:border-blue-200 hover:bg-blue-50/30 transition-all group active:scale-[0.98] disabled:opacity-50"
         >
