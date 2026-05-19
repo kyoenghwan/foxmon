@@ -720,5 +720,6 @@ export function RegisterForm() {
         </DialogContent>
       </Dialog>
       </div>
-      );
+    </div>
+  );
 }
