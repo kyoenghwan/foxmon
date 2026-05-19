@@ -231,7 +231,7 @@ export function RegisterForm() {
             className="w-full h-auto object-contain"
           />
         </div>
-        <p className="text-purple-600 text-sm font-black tracking-widest uppercase relative z-10">신뢰할 수 있는 구인구직</p>
+        <p className="text-purple-600 text-sm font-black tracking-widest uppercase relative z-10 -mt-4 md:-mt-6">신뢰할 수 있는 구인구직</p>
       </div>
 
       <div className="p-6 md:p-10 space-y-8">
