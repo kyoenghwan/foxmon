@@ -187,14 +187,13 @@ export function HomeJobSections() {
                 </div>
                 
                 {demoJobs.length > 0 ? (
-                    <div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-8 gap-1.5 sm:gap-3 lg:gap-4 w-full ${!showAllPremium ? `
-                        [&>*:nth-child(n+25)]:hidden 
-                        sm:[&>*:nth-child(n+25)]:block sm:[&>*:nth-child(n+33)]:hidden 
-                        md:[&>*:nth-child(n+33)]:block md:[&>*:nth-child(n+41)]:hidden 
-                        lg:[&>*:nth-child(n+41)]:block lg:[&>*:nth-child(n+51)]:hidden 
-                        xl:[&>*:nth-child(n+51)]:block xl:[&>*:nth-child(n+61)]:hidden
-                        3xl:[&>*:nth-child(n+61)]:block 3xl:[&>*:nth-child(n+71)]:hidden
-                        4xl:[&>*:nth-child(n+71)]:block 4xl:[&>*:nth-child(n+81)]:hidden
+                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full ${!showAllPremium ? `
+                        [&>*:nth-child(n+21)]:hidden 
+                        sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
+                        md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
+                        2xl:[&>*:nth-child(n+41)]:block 2xl:[&>*:nth-child(n+51)]:hidden 
+                        3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
+                        4xl:[&>*:nth-child(n+61)]:block 4xl:[&>*:nth-child(n+81)]:hidden
                     ` : ''}`}>
                         {demoJobs.map((job) => (
                             <PremiumJobCard 
@@ -223,23 +222,19 @@ export function HomeJobSections() {
                     </h2>
                     <div className="flex items-center gap-3">
                         <AdPriceModal type="special" title="Special" />
-                        <Link href="/jobs/post" className="flex items-center gap-1.5 px-4 py-1.5 bg-yellow-400 text-black text-[11px] font-black rounded-lg hover:scale-105 transition-transform shadow-sm">
-                            <Plus className="w-3.5 h-3.5" /> {t.sections.postSpecial}
-                        </Link>
                         <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
                             {t.common.viewAll || '전체보기'} <ChevronRight className="w-4 h-4" />
                         </Link>
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-8 gap-1.5 sm:gap-3 lg:gap-4 w-full grid-flow-dense
-                        [&>*:nth-child(n+25)]:hidden 
-                        sm:[&>*:nth-child(n+25)]:block sm:[&>*:nth-child(n+33)]:hidden 
-                        md:[&>*:nth-child(n+33)]:block md:[&>*:nth-child(n+41)]:hidden 
-                        lg:[&>*:nth-child(n+41)]:block lg:[&>*:nth-child(n+51)]:hidden 
-                        xl:[&>*:nth-child(n+51)]:block xl:[&>*:nth-child(n+61)]:hidden
-                        3xl:[&>*:nth-child(n+61)]:block 3xl:[&>*:nth-child(n+71)]:hidden
-                        4xl:[&>*:nth-child(n+71)]:block 4xl:[&>*:nth-child(n+81)]:hidden
+                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full grid-flow-dense
+                        [&>*:nth-child(n+21)]:hidden 
+                        sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
+                        md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
+                        2xl:[&>*:nth-child(n+41)]:block 2xl:[&>*:nth-child(n+51)]:hidden 
+                        3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
+                        4xl:[&>*:nth-child(n+61)]:block 4xl:[&>*:nth-child(n+81)]:hidden
                     `}>
                         {specialJobs.map((job) => (
                             <PremiumJobCard 
@@ -267,23 +262,19 @@ export function HomeJobSections() {
                         {t.sections.generalJobsTitle}
                     </h2>
                     <div className="flex items-center gap-3">
-                        <Link href="/jobs/post" className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-600 text-[11px] font-bold rounded-lg hover:bg-gray-50 transition-colors">
-                            <Plus className="w-3.5 h-3.5" /> {t.sections.postGeneral}
-                        </Link>
                         <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
                             {t.common.viewAll} <ChevronRight className="w-4 h-4" />
                         </Link>
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-8 gap-1.5 sm:gap-3 lg:gap-4 w-full
-                        [&>*:nth-child(n+25)]:hidden 
-                        sm:[&>*:nth-child(n+25)]:block sm:[&>*:nth-child(n+33)]:hidden 
-                        md:[&>*:nth-child(n+33)]:block md:[&>*:nth-child(n+41)]:hidden 
-                        lg:[&>*:nth-child(n+41)]:block lg:[&>*:nth-child(n+51)]:hidden 
-                        xl:[&>*:nth-child(n+51)]:block xl:[&>*:nth-child(n+61)]:hidden
-                        3xl:[&>*:nth-child(n+61)]:block 3xl:[&>*:nth-child(n+71)]:hidden
-                        4xl:[&>*:nth-child(n+71)]:block 4xl:[&>*:nth-child(n+81)]:hidden
+                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full
+                        [&>*:nth-child(n+21)]:hidden 
+                        sm:[&>*:nth-child(n+21)]:block sm:[&>*:nth-child(n+31)]:hidden 
+                        md:[&>*:nth-child(n+31)]:block md:[&>*:nth-child(n+41)]:hidden 
+                        2xl:[&>*:nth-child(n+41)]:block 2xl:[&>*:nth-child(n+51)]:hidden 
+                        3xl:[&>*:nth-child(n+51)]:block 3xl:[&>*:nth-child(n+61)]:hidden
+                        4xl:[&>*:nth-child(n+61)]:block 4xl:[&>*:nth-child(n+81)]:hidden
                     `}>
                         {lineJobs.map((job) => (
                             <PremiumJobCard 
