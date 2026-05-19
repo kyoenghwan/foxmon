@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { getPolicy, updatePolicy } from '@/lib/actions/policies';
-import { toast } from 'sonner';
 
 type PolicyType = 'ABOUT' | 'TERMS' | 'PRIVACY' | 'YOUTH';
 
@@ -29,7 +28,7 @@ export default function PoliciesAdminPage() {
             const data = await getPolicy(type);
             setContent(data);
         } catch (error) {
-            toast.error('약관 내용을 불러오는데 실패했습니다.');
+            alert('약관 내용을 불러오는데 실패했습니다.');
         } finally {
             setIsLoading(false);
         }
@@ -40,12 +39,12 @@ export default function PoliciesAdminPage() {
         try {
             const result = await updatePolicy(activeTab, content);
             if (result.success) {
-                toast.success('성공적으로 저장되었습니다.');
+                alert('성공적으로 저장되었습니다.');
             } else {
-                toast.error(result.error || '저장에 실패했습니다.');
+                alert(result.error || '저장에 실패했습니다.');
             }
         } catch (error) {
-            toast.error('저장 중 오류가 발생했습니다.');
+            alert('저장 중 오류가 발생했습니다.');
         } finally {
             setIsSaving(false);
         }
