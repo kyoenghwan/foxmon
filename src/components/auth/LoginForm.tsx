@@ -115,31 +115,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
 
         {error && <p className="text-red-500 text-[10px] font-bold mb-5 animate-bounce">⚠️ {error}</p>}
 
-        {/* Checkboxes Group */}
-        <div className="w-full flex justify-center gap-8 mb-5 mt-1">
-          <label className="flex items-center gap-1.5 cursor-pointer group">
-            <input 
-              type="checkbox" 
-              checked={formData.rememberId}
-              onChange={(e) => setFormData(prev => ({...prev, rememberId: e.target.checked}))}
-              className="w-3.5 h-3.5 rounded text-purple-600 border-gray-300 focus:ring-purple-500 shadow-sm"
-            />
-            <span className="text-[11px] font-bold text-gray-500 group-hover:text-purple-600 transition-colors">
-              아이디 저장
-            </span>
-          </label>
-          <label className="flex items-center gap-1.5 cursor-pointer group">
-            <input 
-              type="checkbox" 
-              checked={formData.autoLogin}
-              onChange={(e) => setFormData(prev => ({...prev, autoLogin: e.target.checked}))}
-              className="w-3.5 h-3.5 rounded text-purple-600 border-gray-300 focus:ring-purple-500 shadow-sm"
-            />
-            <span className="text-[11px] font-bold text-gray-500 group-hover:text-purple-600 transition-colors">
-              자동 로그인
-            </span>
-          </label>
-        </div>
+
 
         <div className="w-full flex justify-center mb-6">
           <Button 
@@ -222,31 +198,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
         </div>
       )}
 
-      {/* Checkboxes Group */}
-      <div className="flex justify-center gap-8 mb-6 mt-1 w-full max-w-[280px] mx-auto">
-        <label className="flex items-center gap-1.5 cursor-pointer group">
-          <input 
-            type="checkbox" 
-            checked={formData.rememberId}
-            onChange={(e) => setFormData(prev => ({...prev, rememberId: e.target.checked}))}
-            className="w-4 h-4 rounded text-purple-600 border-gray-300 focus:ring-purple-500 shadow-sm"
-          />
-          <span className="text-[12px] font-bold text-gray-500 group-hover:text-purple-600 transition-colors">
-            아이디 저장
-          </span>
-        </label>
-        <label className="flex items-center gap-1.5 cursor-pointer group">
-          <input 
-            type="checkbox" 
-            checked={formData.autoLogin}
-            onChange={(e) => setFormData(prev => ({...prev, autoLogin: e.target.checked}))}
-            className="w-4 h-4 rounded text-purple-600 border-gray-300 focus:ring-purple-500 shadow-sm"
-          />
-          <span className="text-[12px] font-bold text-gray-500 group-hover:text-purple-600 transition-colors">
-            자동 로그인
-          </span>
-        </label>
-      </div>
+
 
       {/* Perfectly sized and centered login button with equal top/bottom spacing */}
       <div className="w-full flex justify-center mb-7">

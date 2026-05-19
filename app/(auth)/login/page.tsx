@@ -28,17 +28,17 @@ function LoginCombinedContent() {
         <div className="relative min-h-screen w-full bg-[#f8f9fa] flex flex-col p-4 md:p-8 font-sans overflow-x-hidden">
             
             {/* The Login Box is Mathematically Centered! */}
-            <div className="relative w-full max-w-4xl m-auto flex flex-col">
+            <div className="relative w-full max-w-4xl m-auto flex flex-col items-center">
                 
-                {/* FOXMON Logo: Absolute positioning to perfectly float over the independently centered login frame */}
-                <div className="absolute bottom-[calc(100%-5.5rem)] md:bottom-[calc(100%-7rem)] lg:bottom-[calc(100%-8.25rem)] left-0 right-0 flex justify-center z-20 animate-in fade-in slide-in-from-top-4 duration-1000 pointer-events-none px-4 md:px-0">
+                {/* FOXMON Logo: Normal document flow for mobile Safari stability */}
+                <div className="w-full flex justify-center z-20 animate-in fade-in slide-in-from-top-4 duration-1000 pointer-events-none px-4 md:px-0 -mb-16 md:-mb-24 lg:-mb-28">
                     <Image 
                         src="/foxmon_log.png" 
                         alt="FOXMON" 
                         width={1600} 
                         height={400} 
                         priority
-                        className="drop-shadow-2xl w-auto h-72 md:h-[25rem] lg:h-[29rem] max-w-[100vw] object-contain min-w-[200px]"
+                        className="drop-shadow-2xl w-auto h-32 sm:h-48 md:h-[20rem] lg:h-[24rem] max-w-[100vw] object-contain min-w-[200px]"
                     />
                 </div>
 
