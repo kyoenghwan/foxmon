@@ -218,7 +218,7 @@ export function RegisterForm() {
       </button>
 
       {/* Brand Header */}
-      <div className="bg-gradient-to-b from-purple-100 via-purple-50/50 to-white px-4 pt-10 pb-4 md:pt-12 md:pb-6 flex flex-col items-center justify-center border-b border-gray-100 relative overflow-hidden">
+      <div className="bg-gradient-to-b from-purple-100 via-purple-50/50 to-white px-4 pt-16 pb-10 md:pt-20 md:pb-12 flex flex-col items-center justify-center border-b border-gray-100 relative overflow-hidden">
         <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
         <div className="absolute top-[-10%] left-[-10%] w-40 h-40 bg-fuchsia-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
         <div className="relative z-10 w-[240px] md:w-[280px] flex justify-center">
@@ -231,7 +231,7 @@ export function RegisterForm() {
             className="w-full h-auto object-contain"
           />
         </div>
-        <p className="text-purple-600 text-base md:text-lg font-black tracking-widest uppercase relative z-10 -mt-2 md:-mt-3">신뢰할 수 있는 구인구직</p>
+        <p className="text-purple-600 text-base md:text-lg font-black tracking-widest uppercase relative z-10 mt-1 md:mt-2">신뢰할 수 있는 구인구직</p>
       </div>
 
       <div className="p-6 md:p-10 space-y-8">
