@@ -26,6 +26,11 @@ export function RegisterForm() {
     privacy: false,
     sms: true
   });
+  const [viewedPolicies, setViewedPolicies] = useState({
+    service: false,
+    privacy: false,
+    sms: false
+  });
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
   const [policyModalTitle, setPolicyModalTitle] = useState('');
   const [policyContent, setPolicyContent] = useState('');
@@ -65,6 +70,7 @@ export function RegisterForm() {
   const handlePrev = () => setStep(prev => prev - 1);
 
   const handleOpenPolicy = async (id: string, label: string) => {
+    setViewedPolicies(prev => ({ ...prev, [id]: true }));
     const typeMap: Record<string, 'TERMS' | 'PRIVACY' | 'SMS'> = {
       service: 'TERMS',
       privacy: 'PRIVACY',
@@ -324,6 +330,18 @@ export function RegisterForm() {
                       checked={agreements.service && agreements.privacy && agreements.sms}
                       onChange={(e) => {
                         const val = e.target.checked;
+                        if (val) {
+                          const unviewed = ['service', 'privacy'].find(id => !viewedPolicies[id as keyof typeof viewedPolicies]);
+                          if (unviewed) {
+                            alert('필수 약관의 내용을 모두 확인해주세요.');
+                            const labelMap: Record<string, string> = {
+                              service: '[필수] 서비스 이용약관 동의',
+                              privacy: '[필수] 개인정보 수집 및 이용 동의'
+                            };
+                            handleOpenPolicy(unviewed, labelMap[unviewed]);
+                            return;
+                          }
+                        }
                         setAgreements({ service: val, privacy: val, sms: val });
                       }}
                       className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
@@ -344,7 +362,14 @@ export function RegisterForm() {
                           type="checkbox"
                           id={item.id}
                           checked={agreements[item.id as keyof typeof agreements]}
-                          onChange={(e) => setAgreements({ ...agreements, [item.id]: e.target.checked })}
+                          onChange={(e) => {
+                            if (e.target.checked && !viewedPolicies[item.id as keyof typeof viewedPolicies]) {
+                              alert('해당 약관의 내용을 먼저 확인해주세요.');
+                              handleOpenPolicy(item.id, item.label);
+                              return;
+                            }
+                            setAgreements({ ...agreements, [item.id]: e.target.checked });
+                          }}
                           className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
                         />
                         <Label htmlFor={item.id} className={`text-xs font-bold cursor-pointer ${item.required ? 'text-gray-700' : 'text-gray-500'}`}>
