@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
-export async function getPolicy(type: 'ABOUT' | 'TERMS' | 'PRIVACY' | 'YOUTH') {
+export async function getPolicy(type: 'ABOUT' | 'TERMS' | 'PRIVACY' | 'YOUTH' | 'SMS') {
     const supabase = await createClient();
     const { data, error } = await supabase
         .from('site_policies')
@@ -19,7 +19,7 @@ export async function getPolicy(type: 'ABOUT' | 'TERMS' | 'PRIVACY' | 'YOUTH') {
     return data?.content || '내용이 등록되지 않았습니다.';
 }
 
-export async function updatePolicy(type: 'ABOUT' | 'TERMS' | 'PRIVACY' | 'YOUTH', content: string) {
+export async function updatePolicy(type: 'ABOUT' | 'TERMS' | 'PRIVACY' | 'YOUTH' | 'SMS', content: string) {
     const supabase = await createClient();
     
     // Check if user is admin

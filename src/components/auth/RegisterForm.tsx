@@ -10,9 +10,11 @@ import { FA_CHECK_DUPLICATE_FLOW } from '@/src/atoms/fa/auth/FA_CHECK_DUPLICATE_
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { RoleSelector } from './RoleSelector';
 import { AgeVerificationBox } from './AgeVerificationBox';
 import { ChevronLeft, ChevronRight, Check, Loader2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { getPolicy } from '@/lib/actions/policies';
 
 export function RegisterForm() {
   const router = useRouter();
@@ -24,6 +26,10 @@ export function RegisterForm() {
     privacy: false,
     sms: true
   });
+  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+  const [policyModalTitle, setPolicyModalTitle] = useState('');
+  const [policyContent, setPolicyContent] = useState('');
+  const [isPolicyLoading, setIsPolicyLoading] = useState(false);
   const [verifiedData, setVerifiedData] = useState({
     name: '',
     birthDate: '',
@@ -57,6 +63,27 @@ export function RegisterForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const handleNext = () => setStep(prev => prev + 1);
   const handlePrev = () => setStep(prev => prev - 1);
+
+  const handleOpenPolicy = async (id: string, label: string) => {
+    const typeMap: Record<string, 'TERMS' | 'PRIVACY' | 'SMS'> = {
+      service: 'TERMS',
+      privacy: 'PRIVACY',
+      sms: 'SMS'
+    };
+    
+    setPolicyModalTitle(label);
+    setPolicyContent('');
+    setIsPolicyModalOpen(true);
+    setIsPolicyLoading(true);
+    try {
+      const content = await getPolicy(typeMap[id] || 'TERMS');
+      setPolicyContent(content);
+    } catch (e) {
+      setPolicyContent('약관을 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setIsPolicyLoading(false);
+    }
+  };
 
   const checkId = async () => {
     if (!formData.loginId) return alert('아이디를 입력해주세요.');
@@ -324,7 +351,7 @@ export function RegisterForm() {
                           {item.label}
                         </Label>
                       </div>
-                      <button type="button" onClick={() => alert(`${item.label} 내용입니다.`)} className="text-[10px] text-gray-400 underline underline-offset-2 hover:text-purple-600">보기</button>
+                      <button type="button" onClick={() => handleOpenPolicy(item.id, item.label)} className="text-[10px] text-gray-400 underline underline-offset-2 hover:text-purple-600">보기</button>
                     </div>
                   ))}
                 </div>
@@ -667,7 +694,31 @@ export function RegisterForm() {
               </div>
           )}
             </div>
-      </div>
+      {/* Policy Modal */}
+      <Dialog open={isPolicyModalOpen} onOpenChange={setIsPolicyModalOpen}>
+        <DialogContent className="max-w-[90vw] md:max-w-xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden rounded-2xl">
+          <DialogHeader className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+            <DialogTitle className="text-lg font-black text-gray-900 leading-tight">
+              {policyModalTitle}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-gray-500">
+              안전한 서비스 이용을 위한 내용입니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-6 overflow-y-auto flex-1 bg-white">
+            {isPolicyLoading ? (
+              <div className="flex flex-col items-center justify-center py-10 space-y-3">
+                <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
+                <p className="text-sm text-gray-500 font-medium">약관을 불러오는 중입니다...</p>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-medium">
+                {policyContent}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
       );
 }
