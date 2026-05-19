@@ -14,6 +14,7 @@ export default auth((req) => {
 
     const isAgeGatePage = nextUrl.pathname === '/age-gate';
     const isRegisterPage = nextUrl.pathname === '/register';
+    const isLoginPage = nextUrl.pathname === '/login';
     const isAdminPath = nextUrl.pathname.startsWith('/fox-office');
     const isSeoPath = nextUrl.pathname.startsWith('/k/') || nextUrl.pathname === '/sitemap.xml';
     const isPublicStatic = nextUrl.pathname.includes('.') || nextUrl.pathname.startsWith('/_next');
@@ -51,6 +52,12 @@ export default auth((req) => {
         if (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
             return NextResponse.redirect(new URL('/', nextUrl));
         }
+    }
+
+    // 1.5 Global Authentication Check (Strict Private Mode as requested by user)
+    // 로그인이 안 된 상태면 무조건 /login으로 리다이렉트 (회원가입, 로그인, 정적 파일 제외)
+    if (!session?.user && !isLoginPage && !isRegisterPage && !isPublicStatic) {
+        return NextResponse.redirect(new URL('/login', nextUrl));
     }
 
     // 2. Age Gate Check (Redirect all unverified users to /age-gate EXCEPT if they are trying to register or access SEO pages)
