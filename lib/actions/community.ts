@@ -186,3 +186,104 @@ export async function updateCommunityPost(postId: string, input: {
         return { success: false, message: `시스템 오류가 발생했습니다. (${err?.message || ''})` };
     }
 }
+
+// ============================================
+// QA: 댓글 목록 조회
+// ============================================
+export async function getCommunityComments(postId: string) {
+    try {
+        const { data, error } = await supabase
+            .from('community_comments')
+            .select('*')
+            .eq('post_id', postId)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            nvLog('AT', '❌ QA_GET_COMMUNITY_COMMENTS 에러', error);
+            return [];
+        }
+
+        return data || [];
+    } catch (err) {
+        nvLog('AT', '❌ QA_GET_COMMUNITY_COMMENTS 예외', err);
+        return [];
+    }
+}
+
+// ============================================
+// FA: 댓글 작성 Flow
+// ============================================
+export async function createCommunityComment(input: {
+    post_id: string;
+    content: string;
+    board_id: string; // 권한 검증용
+}) {
+    try {
+        // Step 0: 인증 확인
+        const session = await auth();
+        if (!session?.user) {
+            return { success: false, message: '로그인이 필요합니다.' };
+        }
+
+        const user = session.user as any;
+        const userRole = user.role || 'USER';
+        const userId = user.id;
+        const nickname = user.nickname || user.name || '익명';
+
+        // Step 1: 권한 검증 (RA) - 게시판 권한을 그대로 따름
+        const permResult = RA_CHECK_BOARD_PERMISSION({
+            board_id: input.board_id,
+            user_role: userRole,
+        });
+
+        if (!permResult.isValid) {
+            return { success: false, message: permResult.error };
+        }
+
+        if (!input.content.trim()) {
+            return { success: false, message: '댓글 내용을 입력해주세요.' };
+        }
+
+        const isAnonymous = permResult.data?.forceAnonymous || false;
+        const authorName = isAnonymous ? '익명' : nickname;
+
+        // Step 2: 댓글 저장 (OA)
+        const { data: comment, error } = await supabaseAdmin
+            .from('community_comments')
+            .insert({
+                post_id: input.post_id,
+                user_id: userId,
+                author_name: authorName,
+                is_anonymous: isAnonymous,
+                content: input.content.trim(),
+            })
+            .select()
+            .single();
+
+        if (error) {
+            nvLog('AT', '❌ OA_INSERT_COMMUNITY_COMMENT 에러', error);
+            return { success: false, message: '댓글 저장에 실패했습니다.' };
+        }
+
+        // Step 3: 원본 게시글의 댓글 수 증가
+        // (트리거가 없으므로 서버 액션에서 수동 업데이트)
+        const { data: post } = await supabaseAdmin
+            .from('community_posts')
+            .select('comment_count')
+            .eq('id', input.post_id)
+            .single();
+
+        const currentCount = post?.comment_count || 0;
+        await supabaseAdmin
+            .from('community_posts')
+            .update({ comment_count: currentCount + 1 })
+            .eq('id', input.post_id);
+
+        return { success: true, data: comment, message: '댓글이 등록되었습니다.' };
+
+    } catch (err: any) {
+        nvLog('AT', '❌ FA_CREATE_COMMUNITY_COMMENT 예외', err);
+        return { success: false, message: `시스템 오류가 발생했습니다. (${err?.message || ''})` };
+    }
+}
+

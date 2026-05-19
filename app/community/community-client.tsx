@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CommunitySidebar } from '@/components/community/CommunitySidebar';
+import { PostDetailModal } from '@/components/community/PostDetailModal';
 import { Pencil, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -30,6 +30,7 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
     const currentBoard = TABS.find(t => t.id === activeTab) || TABS[0];
 
     const [showWriteModal, setShowWriteModal] = useState(false);
+    const [selectedPost, setSelectedPost] = useState<any>(null);
     const [writeTitle, setWriteTitle] = useState('');
     const [writeContent, setWriteContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,6 +47,11 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
             return;
         }
         setShowWriteModal(true);
+    };
+
+    const handlePostClick = async (post: any) => {
+        // Increment view count via server action or just open modal
+        setSelectedPost(post);
     };
 
     const handleWriteSubmit = async () => {
@@ -147,7 +153,10 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
                                         {post.is_hot ? <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-sm shadow-sm inline-block">HOT</span> : (totalPosts - i)}
                                     </td>
                                     <td className="py-3 md:py-3.5 px-2 md:px-4">
-                                        <Link href={`/community/${activeTab}/${post.id}`} className="flex items-center gap-2 md:gap-2.5 group">
+                                        <button 
+                                            onClick={() => handlePostClick(post)} 
+                                            className="flex items-center gap-2 md:gap-2.5 group w-full text-left"
+                                        >
                                             {post.thumbnail && (
                                                 <img src={post.thumbnail} alt="" className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover shrink-0 border border-gray-100" />
                                             )}
@@ -163,7 +172,7 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
                                                     <span className="text-[11px] text-gray-500 mt-0.5 block font-bold">{post.price}</span>
                                                 )}
                                             </div>
-                                        </Link>
+                                        </button>
                                     </td>
                                     <td className="py-3 md:py-3.5 px-1 md:px-4 text-center">
                                         <div className="text-[12px] md:text-[13px] text-gray-600 font-medium truncate max-w-[80px] md:max-w-[120px] mx-auto">
@@ -206,7 +215,7 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
 
             {/* 글쓰기 모달 (팝업) */}
             {showWriteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
                     <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
                         {/* 모달 헤더 */}
                         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
@@ -263,6 +272,16 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* 게시글 상세 모달 */}
+            {selectedPost && (
+                <PostDetailModal 
+                    post={selectedPost} 
+                    boardId={activeTab} 
+                    isLoggedIn={isLoggedIn} 
+                    onClose={() => setSelectedPost(null)} 
+                />
             )}
         </div>
     );
