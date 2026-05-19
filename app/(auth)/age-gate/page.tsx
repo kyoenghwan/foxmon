@@ -31,8 +31,8 @@ function AgeGateContent() {
                 {/* Main Hybrid Container */}
                 <div className="w-full bg-white border border-[#eee] rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-700 relative z-10">
                     
-                    {/* FOXMON Logo: Moved inside the container to prevent any border overlap */}
-                    <div className="w-full flex justify-center items-center py-5 md:py-6 bg-[#fcfcfc] border-b border-[#f1f1f1]">
+                    {/* FOXMON Logo: Hidden on mobile to save vertical space, visible on tablet/PC */}
+                    <div className="hidden md:flex w-full justify-center items-center py-5 md:py-6 bg-[#fcfcfc] border-b border-[#f1f1f1]">
                         <Image 
                             src="/foxmon_log.png" 
                             alt="FOXMON" 
