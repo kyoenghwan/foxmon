@@ -64,15 +64,15 @@ export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificati
   return (
     <div className={cn("flex flex-col w-full", className)}>
       {/* Verification Options */}
-      <div className="flex flex-col gap-4 relative">
+      <div className="flex flex-col gap-3 relative">
         <button 
           onClick={() => handleVerify('MOBILE')}
           disabled={isVerifying}
-          className="flex items-center justify-between py-3.5 px-5 bg-white border border-[#eee] rounded-2xl shadow-sm hover:border-blue-200 hover:bg-blue-50/30 transition-all group active:scale-[0.98] disabled:opacity-50"
+          className="flex items-center justify-between py-2.5 px-4 bg-white border border-[#eee] rounded-2xl shadow-sm hover:border-blue-200 hover:bg-blue-50/30 transition-all group active:scale-[0.98] disabled:opacity-50"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-              <Smartphone className="w-6 h-6 text-blue-500" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+              <Smartphone className="w-5 h-5 text-blue-500" />
             </div>
             <div className="text-left">
               <div className="text-[13px] sm:text-sm font-black text-[#333]">휴대폰 본인 인증</div>
@@ -85,11 +85,11 @@ export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificati
         <button 
           onClick={() => handleVerify('IPIN')}
           disabled={isVerifying}
-          className="flex items-center justify-between py-3.5 px-5 bg-white border border-[#eee] rounded-2xl shadow-sm hover:border-blue-200 hover:bg-blue-50/30 transition-all group active:scale-[0.98] disabled:opacity-50"
+          className="flex items-center justify-between py-2.5 px-4 bg-white border border-[#eee] rounded-2xl shadow-sm hover:border-blue-200 hover:bg-blue-50/30 transition-all group active:scale-[0.98] disabled:opacity-50"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-              <ShieldCheck className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+              <ShieldCheck className="w-5 h-5 text-gray-400 group-hover:text-blue-500" />
             </div>
             <div className="text-left">
               <div className="text-[13px] sm:text-sm font-black text-[#333]">아이핀(i-PIN) 인증</div>

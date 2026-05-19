@@ -28,28 +28,21 @@ function AgeGateContent() {
             {/* The Login Box is Mathematically Centered! */}
             <div className="relative w-full max-w-4xl m-auto flex flex-col items-center">
                 
-                {/* FOXMON Logo: Normal document flow for mobile Safari stability */}
-                <div className="w-full flex justify-center z-20 animate-in fade-in slide-in-from-top-4 duration-1000 pointer-events-none px-4 md:px-0 -mb-16 md:-mb-24 lg:-mb-28">
-                    <Image 
-                        src="/foxmon_log.png" 
-                        alt="FOXMON" 
-                        width={1600} 
-                        height={400} 
-                        priority
-                        className="drop-shadow-2xl w-auto h-32 sm:h-48 md:h-[20rem] lg:h-[24rem] max-w-[100vw] object-contain min-w-[200px]"
-                    />
-                </div>
-
                 {/* Main Hybrid Container */}
                 <div className="w-full bg-white border border-[#eee] rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-700 relative z-10">
-                    {/* Fixed Close Button for Age-Gate - Inside the card, top right */}
-                    <button 
-                        onClick={handleExit}
-                        className="absolute top-6 right-6 md:top-8 md:right-8 z-50 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all active:scale-95"
-                        title="인증 취소 및 나가기"
-                    >
-                        <X className="w-7 h-7 md:w-8 md:h-8 stroke-[2.5]" />
-                    </button>
+                    
+                    {/* FOXMON Logo: Moved inside the container to prevent any border overlap */}
+                    <div className="w-full flex justify-center items-center py-5 md:py-6 bg-[#fcfcfc] border-b border-[#f1f1f1]">
+                        <Image 
+                            src="/foxmon_log.png" 
+                            alt="FOXMON" 
+                            width={1600} 
+                            height={400} 
+                            priority
+                            className="w-auto h-16 sm:h-20 md:h-24 lg:h-28 object-contain"
+                        />
+                    </div>
+
                     
                     {/* Header Area - Perfectly Symmetrical Top/Bottom Padding, Always Flex-Row (19 icon strictly on left) */}
                     <div className="bg-[#fff] px-4 py-8 md:p-10 flex items-center justify-center border-b-2 border-[#d1d5db]">
@@ -77,7 +70,7 @@ function AgeGateContent() {
                     <div className="flex flex-col lg:flex-row transition-all duration-300">
                         {/* LEFT: Member */}
                         <div className="flex-1 px-6 pb-6 md:px-8 md:pb-8 border-b-2 lg:border-b-0 lg:border-r-2 border-[#d1d5db] flex flex-col bg-white">
-                            <div className="flex flex-col items-center justify-center pt-5 mb-5 md:pt-6 md:mb-6">
+                            <div className="flex flex-col items-center justify-center pt-5 mb-3 md:pt-6 md:mb-4">
                                 <div className="flex items-center justify-center gap-2 text-[#444]">
                                     <div className="p-2 bg-purple-50 rounded-lg">
                                         <Lock className="text-purple-500 w-4 h-4 md:w-5 md:h-5" />
@@ -92,7 +85,7 @@ function AgeGateContent() {
 
                         {/* RIGHT: Non-Member */}
                         <div className="flex-1 px-6 pb-6 md:px-8 md:pb-8 flex flex-col bg-white">
-                            <div className="flex flex-col items-center justify-center pt-5 mb-5 md:pt-6 md:mb-6">
+                            <div className="flex flex-col items-center justify-center pt-5 mb-3 md:pt-6 md:mb-4">
                                 <div className="flex items-center justify-center gap-2 text-[#444]">
                                     <div className="p-2 bg-blue-50 rounded-lg">
                                         <Info className="text-blue-500 w-4 h-4 md:w-5 md:h-5" />

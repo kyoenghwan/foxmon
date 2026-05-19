@@ -86,7 +86,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
       <form onSubmit={handleSubmit} className="w-full max-w-[320px] mx-auto flex flex-col items-center animate-in fade-in duration-500">
         
         {/* Unified Input - No Toggle needed */}
-        <div className="w-full space-y-3 mb-4 mt-2">
+        <div className="w-full space-y-3 mb-2 mt-0">
           <div className="flex items-center gap-3">
             <Label className="w-[60px] text-right text-[13px] font-black text-[#333] tracking-tight shrink-0">아이디</Label>
             <Input
@@ -117,7 +117,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
 
 
 
-        <div className="w-full flex justify-center mb-6">
+        <div className="w-full flex justify-center mb-4 mt-4">
           <Button 
             type="submit" 
             disabled={isLoading}
@@ -128,7 +128,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
         </div>
 
         {/* Links Layout */}
-        <div className="flex flex-col items-center gap-4 pt-5 border-t border-gray-100 w-full">
+        <div className="flex flex-col items-center gap-3 pt-4 border-t border-gray-100 w-full">
           <div className="flex items-center gap-4">
             <Link 
               href="/find-account" 
@@ -164,7 +164,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
     <form onSubmit={handleSubmit} className="flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* Unified Inputs Section */}
-      <div className="flex flex-col gap-5 w-full mb-7 mt-4">
+      <div className="flex flex-col gap-4 w-full mb-5 mt-2">
         <div className="flex items-center gap-6">
             <Label className="w-24 text-right text-gray-500 text-[13px] font-black uppercase tracking-wider shrink-0">아이디</Label>
             <Input
@@ -201,7 +201,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
 
 
       {/* Perfectly sized and centered login button with equal top/bottom spacing */}
-      <div className="w-full flex justify-center mb-7">
+      <div className="w-full flex justify-center mb-5 mt-3">
         <Button 
           type="submit" 
           disabled={isLoading}
@@ -212,7 +212,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
       </div>
 
       {/* Links Layout - Increased font size and perfectly aligned spacing */}
-      <div className="flex flex-col items-center gap-5 pt-7 border-t border-gray-100 w-full">
+      <div className="flex flex-col items-center gap-4 pt-5 border-t border-gray-100 w-full">
         <div className="flex items-center gap-6">
           <Link 
             href="/find-account" 
