@@ -56,42 +56,51 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         return (
             <div className="h-full bg-white rounded-2xl border p-5 flex flex-col shadow-sm">
                 
-                {/* Top Section: Avatar & Welcome text */}
-                <div className="flex items-center gap-3">
-                    {/* 프로필 이미지 - 둥근 정사각형 */}
-                    <div className="h-14 w-14 rounded-xl bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden border border-orange-100">
+                {/* Top Section: Avatar & Welcome text (New Layout) */}
+                <div className="flex items-start gap-4">
+                    {/* 프로필 이미지 - 약간 커짐 */}
+                    <div className="h-16 w-16 rounded-[1rem] bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden border border-orange-100">
                         {profileImageUrl ? (
-                            <img src={profileImageUrl} alt="프로필" className="w-full h-full object-contain" />
+                            <img src={profileImageUrl} alt="프로필" className="w-full h-full object-cover" />
                         ) : (
-                            <User className="h-7 w-7 stroke-[2.5]" />
+                            <User className="h-8 w-8 stroke-[2.5]" />
                         )}
                     </div>
 
-                    {/* 닉네임 & 인사 - flex-1로 남은 공간 전부 사용 */}
-                    <div className="flex-1 min-w-0">
-                        <h3 className="font-black text-lg text-gray-900 leading-tight truncate">
-                            <span className="text-primary">{displayName}</span>님
-                        </h3>
-                        <p className="text-[11px] text-gray-500 font-bold tracking-tight mt-0.5">반갑습니다!</p>
-                    </div>
+                    {/* 우측 정보 & 버튼 영역 (flex-col로 상하 배치) */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-between h-16 pt-0.5">
+                        {/* 1. 인사말 (한 줄로 통일) */}
+                        <div className="flex items-center">
+                            <h3 className="font-black text-[15px] sm:text-base text-gray-900 leading-tight truncate">
+                                <span className="text-primary">{displayName}</span>님 반갑습니다!
+                            </h3>
+                        </div>
 
-                    {/* 우측 상단 액션 버튼들 */}
-                    <div className="flex items-center gap-2">
-                        {showResumeMenu && (
-                            <div className="flex items-center lg:hidden">
-                                <ResumeManagementModal />
+                        {/* 2. 하단 액션 버튼들 (이력서 관리 두껍게, 우측 설정 버튼) */}
+                        <div className="flex items-center gap-2 mt-auto">
+                            {showResumeMenu && (
+                                <div className="flex-1 lg:hidden">
+                                    {/* ResumeManagementModal 내부에 하드코딩된 button을 덮어쓰기 위해 CSS 적용 */}
+                                    <div className="w-full h-8 [&>button]:w-full [&>button]:h-full [&>button]:justify-center [&>button]:rounded-lg">
+                                        <ResumeManagementModal />
+                                    </div>
+                                </div>
+                            )}
+                            {isEmployer && (
+                                <div className="flex-1 lg:hidden">
+                                    <Link 
+                                        href="/biz" 
+                                        className="w-full h-8 flex items-center justify-center gap-1.5 px-3 text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-lg transition-all shadow-sm"
+                                    >
+                                        <Briefcase className="w-3.5 h-3.5" />
+                                        <span>업체관리</span>
+                                    </Link>
+                                </div>
+                            )}
+                            <div className="shrink-0">
+                                <SettingsModal />
                             </div>
-                        )}
-                        {isEmployer && (
-                            <Link 
-                                href="/biz" 
-                                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm lg:hidden"
-                            >
-                                <Briefcase className="w-3.5 h-3.5" />
-                                <span>업체관리</span>
-                            </Link>
-                        )}
-                        <SettingsModal />
+                        </div>
                     </div>
                 </div>
 
