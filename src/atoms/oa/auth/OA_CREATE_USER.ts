@@ -19,6 +19,9 @@ interface CreateUserParams {
   business_category?: string;
   opening_date?: string;
   sms_consent: boolean;
+  business_type?: string;
+  business_address?: string;
+  verification_doc_url?: string;
 }
 
 /**
@@ -61,6 +64,9 @@ export async function OA_CREATE_USER(input: CreateUserParams): Promise<{ success
           business_number: input.business_number || null,
           business_category: input.business_category || null,
           opening_date: input.opening_date || null,
+          business_type: input.business_type || '비사업자',
+          business_address: input.business_address || null,
+          verification_doc_url: input.verification_doc_url || null,
           created_at: new Date().toISOString(),
         }
       ])

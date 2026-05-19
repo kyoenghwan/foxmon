@@ -42,7 +42,12 @@ export function RegisterForm() {
     business_number: '',
     business_category: '',
     opening_date: '',
+    business_type: '비사업자',
+    business_address: '',
+    verification_doc_url: '',
   });
+  
+  const [docFile, setDocFile] = useState<File | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,7 +117,15 @@ export function RegisterForm() {
     if (!validateStep4()) return;
     
     if (step === 5 && role === 'EMPLOYER') {
-      if (!formData.business_category) {
+      if (!docFile) {
+        setError('신분증 또는 사업자등록증 사본을 첨부해주세요.');
+        return;
+      }
+      if (!formData.business_address) {
+        setError('실제 영업장 주소를 입력해주세요.');
+        return;
+      }
+      if (formData.business_type === '사업자' && !formData.business_category) {
         setError('필수 사업자 정보(업종)를 선택해주세요.');
         return;
       }
@@ -123,12 +136,27 @@ export function RegisterForm() {
     setError(null);
 
     try {
+      let finalDocUrl = '';
+      if (docFile) {
+        const { uploadVerificationDocument } = await import('@/lib/actions/upload');
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', docFile);
+        const uploadResult = await uploadVerificationDocument(uploadFormData);
+        if (!uploadResult.success) {
+          setError(uploadResult.message || '파일 업로드에 실패했습니다.');
+          setIsLoading(false);
+          return;
+        }
+        finalDocUrl = uploadResult.url!;
+      }
+
       const result = await FA_REGISTER_FLOW({
         ...formData,
         ...verifiedData,
         role: role!,
         is_age_verified: isAgeVerified,
-        smsConsent: agreements.sms, // TOS에서 받은 동의값 사용
+        smsConsent: agreements.sms,
+        verification_doc_url: finalDocUrl,
       });
 
       if (result.success) {
@@ -477,67 +505,148 @@ export function RegisterForm() {
           {step === 5 && role === 'EMPLOYER' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-2 border-b border-gray-100 pb-4">
-                <h3 className="text-xl font-black text-purple-900 italic uppercase">STEP 5: 사업자 정보 기입</h3>
-                <p className="text-gray-500 text-sm font-medium">사업자 인증용 정보를 입력해 주세요.</p>
+                <h3 className="text-xl font-black text-purple-900 italic uppercase">STEP 5: 구인자 신원 확인</h3>
+                <p className="text-gray-500 text-sm font-medium">안전한 직업정보 제공을 위해 실명 및 사업장 확인이 필수입니다.</p>
               </div>
               
               <div className="space-y-4">
-                <div className="grid grid-cols-[100px_1fr] items-center gap-4">
-                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">업종 선택</Label>
-                  <select 
-                    value={formData.business_category}
-                    onChange={(e) => setFormData({...formData, business_category: e.target.value})}
-                    className="w-full bg-gray-50/50 border border-gray-200 font-bold h-11 rounded-xl px-4 text-sm"
-                  >
-                    <option value="" disabled>업종을 선택하세요</option>
-                    <option value="룸사롱">룸사롱</option>
-                    <option value="단란주점">단란주점</option>
-                    <option value="노래방">노래방</option>
-                    <option value="카페">카페</option>
-                    <option value="기타">기타</option>
-                  </select>
+                {/* 사업자 구분 */}
+                <div className="flex items-center gap-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider shrink-0">사업자 구분</Label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="business_type" 
+                        value="사업자" 
+                        checked={formData.business_type === '사업자'}
+                        onChange={(e) => setFormData({...formData, business_type: e.target.value})}
+                        className="w-4 h-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                      />
+                      <span className="text-sm font-bold text-gray-800">사업자</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="business_type" 
+                        value="비사업자" 
+                        checked={formData.business_type === '비사업자'}
+                        onChange={(e) => setFormData({...formData, business_type: e.target.value})}
+                        className="w-4 h-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                      />
+                      <span className="text-sm font-bold text-gray-800">비사업자 (프리랜서/영업진)</span>
+                    </label>
+                  </div>
                 </div>
+
+                {/* 확인문서 첨부 */}
+                <div className="p-4 bg-purple-50/50 rounded-xl border border-purple-100 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-gray-900 text-[12px] font-black uppercase">확인문서 첨부 <span className="text-purple-600">*</span></Label>
+                    <span className="text-[10px] text-gray-500 font-medium">
+                      {formData.business_type === '사업자' ? '사업자등록증/영업허가증' : '주민등록증/운전면허증'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center justify-center h-11 px-4 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 cursor-pointer hover:bg-gray-50 transition-colors">
+                      <span>파일 선택</span>
+                      <input 
+                        type="file" 
+                        accept="image/*,.pdf" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            setDocFile(e.target.files[0]);
+                          }
+                        }}
+                      />
+                    </label>
+                    <span className="text-sm text-gray-500 truncate flex-1">
+                      {docFile ? docFile.name : '선택된 파일 없음'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-red-500 font-bold tracking-tight">※ 기업회원 심사를 위한 필수항목입니다. (허위 제출 시 가입 거절)</p>
+                </div>
+
+                {formData.business_type === '사업자' && (
+                  <div className="grid grid-cols-[100px_1fr] items-center gap-4">
+                    <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">업종 선택</Label>
+                    <select 
+                      value={formData.business_category}
+                      onChange={(e) => setFormData({...formData, business_category: e.target.value})}
+                      className="w-full bg-gray-50/50 border border-gray-200 font-bold h-11 rounded-xl px-4 text-sm"
+                    >
+                      <option value="" disabled>업종을 선택하세요</option>
+                      <option value="룸사롱">룸사롱</option>
+                      <option value="단란주점">단란주점</option>
+                      <option value="노래방">노래방</option>
+                      <option value="카페">카페</option>
+                      <option value="기타">기타</option>
+                    </select>
+                  </div>
+                )}
+                
                 <div className="grid grid-cols-[100px_1fr] items-center gap-4">
-                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">상호명</Label>
+                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">회사/점포명</Label>
                   <Input
-                    placeholder="예: (주)폭스몬"
+                    placeholder={formData.business_type === '사업자' ? "사업자등록증 상호명" : "실제 일하시는 가게 이름"}
                     value={formData.business_name}
                     onChange={(e) => setFormData({...formData, business_name: e.target.value})}
                     autoComplete="off"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
                 </div>
+                
+                <div className="grid grid-cols-[100px_1fr] items-center gap-4">
+                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider flex flex-col">
+                    <span>사업장 주소 <span className="text-purple-600">*</span></span>
+                  </Label>
+                  <div className="space-y-2">
+                    <Input
+                      placeholder={formData.business_type === '사업자' ? "사업자등록증 상 주소" : "실제 근무하시는 가게 주소"}
+                      value={formData.business_address}
+                      onChange={(e) => setFormData({...formData, business_address: e.target.value})}
+                      autoComplete="off"
+                      className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-[100px_1fr] items-center gap-4">
                   <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">대표자 성명</Label>
                   <Input
-                    placeholder="사업자 등록증 기준"
+                    placeholder={formData.business_type === '사업자' ? "사업자등록증 대표자명" : "본인 이름 (또는 사장님 이름)"}
                     value={formData.representative_name}
                     onChange={(e) => setFormData({...formData, representative_name: e.target.value})}
                     autoComplete="off"
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
                 </div>
-                <div className="grid grid-cols-[100px_1fr] items-center gap-4">
-                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">사업자 번호</Label>
-                  <Input
-                    placeholder="숫자 10자리"
-                    value={formData.business_number}
-                    onChange={(e) => setFormData({...formData, business_number: e.target.value})}
-                    autoComplete="off"
-                    className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
-                  />
-                </div>
-                <div className="grid grid-cols-[100px_1fr] items-center gap-4">
-                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">개업일자</Label>
-                  <Input
-                    placeholder="YYYYMMDD"
-                    value={formData.opening_date}
-                    onChange={(e) => setFormData({...formData, opening_date: e.target.value})}
-                    autoComplete="off"
-                    className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
-                  />
-                </div>
-              </div>
+
+                {formData.business_type === '사업자' && (
+                  <>
+                    <div className="grid grid-cols-[100px_1fr] items-center gap-4">
+                      <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">사업자 번호</Label>
+                      <Input
+                        placeholder="숫자 10자리"
+                        value={formData.business_number}
+                        onChange={(e) => setFormData({...formData, business_number: e.target.value})}
+                        autoComplete="off"
+                        className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
+                      />
+                    </div>
+                    <div className="grid grid-cols-[100px_1fr] items-center gap-4">
+                      <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">개업일자</Label>
+                      <Input
+                        placeholder="YYYYMMDD"
+                        value={formData.opening_date}
+                        onChange={(e) => setFormData({...formData, opening_date: e.target.value})}
+                        autoComplete="off"
+                        className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
+                      />
+                    </div>
+                  </>
+                )}
               
               <div className="flex gap-3 pt-6 border-t border-gray-100 mt-6">
                 <Button type="button" variant="ghost" className="h-14 font-bold text-gray-500 flex-1 rounded-2xl" onClick={handlePrev}>

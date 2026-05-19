@@ -21,6 +21,9 @@ interface RegisterInput {
   business_category?: string;
   opening_date?: string;
   smsConsent: boolean;
+  business_type?: string;
+  business_address?: string;
+  verification_doc_url?: string;
 }
 
 /**
@@ -67,6 +70,9 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
       business_number: input.business_number,
       business_category: input.business_category,
       opening_date: input.opening_date,
+      business_type: input.business_type,
+      business_address: input.business_address,
+      verification_doc_url: input.verification_doc_url,
       sms_consent: input.smsConsent,
     });
 
