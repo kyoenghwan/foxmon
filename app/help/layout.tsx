@@ -3,6 +3,7 @@ import { HelpSidebar } from '@/components/help/HelpSidebar';
 import { SideBanners } from '@/components/home/side-banners';
 import { auth } from '@/auth';
 import Link from 'next/link';
+import { MainFooter } from '@/components/layout/main-footer';
 
 export default async function HelpLayout({ children }: { children: React.ReactNode }) {
     const session = await auth();
@@ -38,15 +39,7 @@ export default async function HelpLayout({ children }: { children: React.ReactNo
                     </div>
                 </div>
             </div>
-
-            <footer className="bg-gray-100 border-t py-8 mt-auto">
-                <div className="container px-4 md:px-6">
-                    <div className="flex flex-col items-center gap-3">
-                        <img src="/logo.png" alt="FOXMON" className="h-7 opacity-40 grayscale" />
-                        <p className="text-gray-400 text-xs text-center">© Foxmon Inc. All rights reserved.</p>
-                    </div>
-                </div>
-            </footer>
+            <MainFooter />
         </div>
     );
 }

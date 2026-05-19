@@ -5,6 +5,7 @@ import { RegionSelector } from '@/components/home/region-selector';
 import { IndustrySelector } from '@/components/home/industry-selector';
 import { HeroSection } from '@/components/home/hero-section';
 import { SideBanners } from '@/components/home/side-banners';
+import { MainFooter } from '@/components/layout/main-footer';
 
 interface PageProps {
     title: string;
@@ -76,11 +77,7 @@ export default async function SubPageLayout({ title, description, hideSearch = f
                 </div>
             </main>
 
-            <footer className="bg-gray-50 py-10 border-t mt-12">
-                <div className="container px-4 text-xs text-gray-400 text-center">
-                    <p>© Foxmon Inc. All rights reserved.</p>
-                </div>
-            </footer>
+            <MainFooter />
         </div>
     );
 }

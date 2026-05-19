@@ -13,13 +13,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const WARNING_TIME_MS = 4 * 60 * 1000; // 4분 경과 시 경고창
-const LOGOUT_TIME_MS = 5 * 60 * 1000; // 5분 경과 시 자동 로그아웃 (경고창 후 1분)
+const WARNING_TIME_MS = 50 * 1000; // 50초 경과 시 경고창
+const LOGOUT_TIME_MS = 60 * 1000; // 총 1분 (60초) 경과 시 자동 로그아웃
 
 function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const [showWarning, setShowWarning] = useState(false);
-  const [remainingSeconds, setRemainingSeconds] = useState(60);
+  const [remainingSeconds, setRemainingSeconds] = useState(10);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
@@ -34,7 +34,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
     if (status === 'authenticated') {
       timerRef.current = setTimeout(() => {
         setShowWarning(true);
-        setRemainingSeconds(60);
+        setRemainingSeconds(10);
       }, WARNING_TIME_MS);
     }
   }, [showWarning, status]);
@@ -47,7 +47,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
           if (prev <= 1) {
             clearInterval(countdownRef.current!);
             signOut({ redirect: false }).then(() => {
-                router.push('/');
+                router.push('/login');
             });
             return 0;
           }
@@ -112,7 +112,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   const handleLogoutNow = () => {
     setShowWarning(false);
     signOut({ redirect: false }).then(() => {
-        router.push('/');
+        router.push('/login');
     });
   };
 
