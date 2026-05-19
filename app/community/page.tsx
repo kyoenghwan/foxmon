@@ -1,6 +1,7 @@
 import SubPageLayout from '@/components/layout/sub-page-layout';
 import { CommunityClient } from './community-client';
 import { getCommunityPosts } from '@/lib/actions/community';
+import { auth } from '@/auth';
 
 export default async function CommunityPage({
   searchParams,
@@ -10,6 +11,8 @@ export default async function CommunityPage({
   const params = await searchParams;
   const activeTab = params.tab || 'free';
   const { posts, total } = await getCommunityPosts(activeTab, 1, 20);
+  const session = await auth();
+  const isLoggedIn = !!session?.user;
 
   return (
     <SubPageLayout
@@ -17,7 +20,7 @@ export default async function CommunityPage({
       description="여우들의 생생한 후기와 비밀 수다 공간"
       hideSearch={true}
     >
-      <CommunityClient activeTab={activeTab} initialPosts={posts} totalPosts={total} />
+      <CommunityClient activeTab={activeTab} initialPosts={posts} totalPosts={total} isLoggedIn={isLoggedIn} />
     </SubPageLayout>
   );
 }

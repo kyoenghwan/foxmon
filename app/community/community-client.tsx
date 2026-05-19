@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CommunitySidebar } from '@/components/community/CommunitySidebar';
@@ -25,12 +25,56 @@ const TABS: BoardTab[] = [
     { id: 'business', label: '업소장터', prefix: '🏪업소장터' },
 ];
 
-export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0 }: { activeTab: string, initialPosts?: any[], totalPosts?: number }) {
+export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, isLoggedIn = false }: { activeTab: string, initialPosts?: any[], totalPosts?: number, isLoggedIn?: boolean }) {
     const router = useRouter();
     const currentBoard = TABS.find(t => t.id === activeTab) || TABS[0];
 
+    const [showWriteModal, setShowWriteModal] = useState(false);
+    const [writeTitle, setWriteTitle] = useState('');
+    const [writeContent, setWriteContent] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleTabChange = (tabId: string) => {
         router.push(`/community?tab=${tabId}`);
+    };
+
+    const handleWriteClick = () => {
+        if (!isLoggedIn) {
+            if (confirm('로그인 후 이용할 수 있습니다. 로그인 페이지로 이동하시겠습니까?')) {
+                router.push('/login');
+            }
+            return;
+        }
+        setShowWriteModal(true);
+    };
+
+    const handleWriteSubmit = async () => {
+        if (!writeTitle.trim() || !writeContent.trim()) {
+            alert('제목과 내용을 모두 입력해주세요.');
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            const { createCommunityPost } = await import('@/lib/actions/community');
+            const res = await createCommunityPost({
+                board_id: activeTab,
+                title: writeTitle,
+                content: writeContent
+            });
+            if (res.success) {
+                alert('게시글이 등록되었습니다.');
+                setShowWriteModal(false);
+                setWriteTitle('');
+                setWriteContent('');
+                router.refresh(); // Refresh server component
+            } else {
+                alert(res.message);
+            }
+        } catch (error) {
+            alert('게시글 등록 중 오류가 발생했습니다.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -64,7 +108,10 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0 }
                 {/* 게시판 제목 + 글쓰기 버튼 */}
                 <div className="flex items-center justify-between px-1 sm:px-0">
                     <h2 className="text-lg md:text-xl font-black text-gray-900">{currentBoard.label}</h2>
-                    <button className="flex items-center gap-1.5 px-4 md:px-5 py-2 md:py-2.5 bg-primary text-white font-black text-[13px] md:text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95">
+                    <button 
+                        onClick={handleWriteClick}
+                        className="flex items-center gap-1.5 px-4 md:px-5 py-2 md:py-2.5 bg-primary text-white font-black text-[13px] md:text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95"
+                    >
                         <Pencil className="w-4 h-4" />
                         글쓰기
                     </button>
@@ -156,6 +203,67 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0 }
                     </div>
                 </div>
             </div>
+
+            {/* 글쓰기 모달 (팝업) */}
+            {showWriteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+                    <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                        {/* 모달 헤더 */}
+                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <h3 className="text-[16px] font-black text-gray-900 flex items-center gap-2">
+                                <Pencil className="w-4 h-4 text-primary" />
+                                {currentBoard.label} 글쓰기
+                            </h3>
+                            <button 
+                                onClick={() => setShowWriteModal(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        
+                        {/* 모달 바디 (입력폼) */}
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <input 
+                                    type="text" 
+                                    placeholder="제목을 입력하세요" 
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-[14px] font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    value={writeTitle}
+                                    onChange={(e) => setWriteTitle(e.target.value)}
+                                    maxLength={100}
+                                />
+                            </div>
+                            <div>
+                                <textarea 
+                                    placeholder="내용을 입력하세요. 욕설, 비방, 광고 등은 무통보 삭제될 수 있습니다." 
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-[14px] h-40 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    value={writeContent}
+                                    onChange={(e) => setWriteContent(e.target.value)}
+                                    maxLength={2000}
+                                />
+                            </div>
+                        </div>
+
+                        {/* 모달 푸터 (버튼) */}
+                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
+                            <button 
+                                onClick={() => setShowWriteModal(false)}
+                                className="px-5 py-2.5 rounded-xl text-[14px] font-bold text-gray-600 hover:bg-gray-200 transition-colors"
+                            >
+                                취소
+                            </button>
+                            <button 
+                                onClick={handleWriteSubmit}
+                                disabled={isSubmitting}
+                                className="px-6 py-2.5 rounded-xl text-[14px] font-black bg-primary text-white hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                                {isSubmitting ? '등록 중...' : '등록하기'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
