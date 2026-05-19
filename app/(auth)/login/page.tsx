@@ -47,7 +47,7 @@ function LoginCombinedContent() {
 
                     
                     {/* Header Area - Perfectly Symmetrical Top/Bottom Padding, Always Flex-Row (19 icon strictly on left) */}
-                    <div className="bg-[#fff] px-4 py-8 md:p-10 flex items-center justify-center border-b-2 border-[#d1d5db]">
+                    <div className="bg-[#fff] px-4 py-5 md:px-10 md:py-6 flex items-center justify-center border-b-2 border-[#d1d5db]">
                         <div className="flex flex-row items-center justify-center gap-3 sm:gap-4 md:gap-6 w-full max-w-2xl text-left">
                             <div className="relative shrink-0">
                                 <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border-[6px] border-[#e60012]/10 flex items-center justify-center bg-white">
