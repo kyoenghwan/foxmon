@@ -221,7 +221,7 @@ export function RegisterForm() {
       <div className="bg-gradient-to-b from-purple-100 via-purple-50/50 to-white px-8 pt-10 pb-8 flex flex-col items-center gap-2 border-b border-gray-100 relative overflow-hidden">
         <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
         <div className="absolute top-[-10%] left-[-10%] w-40 h-40 bg-fuchsia-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
-        <div className="relative z-10 w-[140px] md:w-[180px] mb-2 flex justify-center">
+        <div className="relative z-10 w-[200px] md:w-[240px] mb-1 flex justify-center">
           <Image 
             src="/foxmon_log.png" 
             alt="FOXMON" 
@@ -231,7 +231,7 @@ export function RegisterForm() {
             className="w-full h-auto object-contain"
           />
         </div>
-        <p className="text-purple-600 text-[11px] font-black tracking-widest uppercase relative z-10">신뢰할 수 있는 구인구직</p>
+        <p className="text-purple-600 text-sm font-black tracking-widest uppercase relative z-10">신뢰할 수 있는 구인구직</p>
       </div>
 
       <div className="p-6 md:p-10 space-y-8">
