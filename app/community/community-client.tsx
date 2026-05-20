@@ -88,12 +88,12 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
         <div className="flex flex-col md:flex-row gap-6 items-start">
             {/* [Mobile·Tablet] 상단 메뉴 — 두 줄 그리드 (한눈에 보기) */}
             <div className="w-full lg:hidden bg-white sticky top-[130px] z-20 border-b border-gray-100 shadow-sm">
-                <div className="grid grid-rows-2 grid-flow-col auto-cols-fr gap-2 px-3 py-3 w-full">
+                <div className="grid grid-rows-2 grid-flow-col auto-cols-fr gap-1.5 px-2 py-2.5 w-full">
                     {TABS.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => handleTabChange(tab.id)}
-                            className={`min-h-[40px] px-2 py-2 rounded-xl text-[12px] sm:text-[13px] font-black transition-all text-center leading-tight ${
+                            className={`min-h-[34px] min-w-0 px-1.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition-all text-center leading-none whitespace-nowrap overflow-hidden text-ellipsis ${
                                 activeTab === tab.id
                                     ? 'bg-primary text-white shadow-md'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
