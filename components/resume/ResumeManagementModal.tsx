@@ -604,32 +604,42 @@ export function ResumeManagementModal() {
                   {/* 오른쪽: 기본정보 폼 */}
                   <div className="flex-1 flex flex-col gap-5">
                     <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-1.5"><span className="text-primary">*</span> 이름/닉네임</label>
-                      <input type="text" value={formData.nickname || ''} onChange={e => setFormData({...formData, nickname: e.target.value})} className="w-full h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium bg-gray-50/50 md:h-auto md:p-3" placeholder="활동할 이름이나 닉네임" />
+                      <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
+                        <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-1.5 md:block">
+                          <span className="text-primary">*</span> 이름/닉네임
+                        </label>
+                        <input type="text" value={formData.nickname || ''} onChange={e => setFormData({...formData, nickname: e.target.value})} className="flex-1 min-w-0 h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium bg-gray-50/50 md:w-full md:h-auto md:p-3" placeholder="활동할 이름이나 닉네임" />
+                      </div>
                     </div>
                     <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-1.5">성별 / 출생연도</label>
-                      <div className="flex gap-2 items-center bg-gray-50/50 border border-gray-200 p-1.5 rounded-lg md:p-2">
-                        <div className="flex gap-3 px-2 border-r border-gray-200">
-                          <label className="flex items-center gap-1.5 cursor-pointer font-medium text-sm text-gray-700 hover:text-primary transition-colors">
-                            <input type="radio" value="F" checked={formData.gender === 'F'} onChange={e => setFormData({...formData, gender: 'F'})} className="accent-primary w-4 h-4" /> 여성
-                          </label>
-                          <label className="flex items-center gap-1.5 cursor-pointer font-medium text-sm text-gray-700 hover:text-primary transition-colors">
-                            <input type="radio" value="M" checked={formData.gender === 'M'} onChange={e => setFormData({...formData, gender: 'M'})} className="accent-primary w-4 h-4" /> 남성
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-1 px-1">
-                           <input 
-                               type="number" 
-                               value={formData.birth_year || ''} 
-                               onChange={e => setFormData({...formData, birth_year: parseInt(e.target.value) || undefined})} 
-                               placeholder="예: 1995" 
-                               className="w-full p-1.5 bg-white border border-gray-200 rounded focus:border-primary outline-none transition-colors text-sm font-bold text-center" 
-                           />
-                           <span className="text-xs text-gray-500 font-medium whitespace-nowrap">년생</span>
+                      <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
+                        <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-1.5 md:block">
+                          <span className="text-primary">*</span>{' '}
+                          <span className="md:hidden">성별/출생</span>
+                          <span className="hidden md:inline">성별 / 출생연도</span>
+                        </label>
+                        <div className="flex-1 min-w-0 flex gap-1 items-center bg-gray-50/50 border border-gray-200 p-1 rounded-lg md:gap-2 md:p-2">
+                          <div className="flex gap-1.5 px-1 border-r border-gray-200 md:gap-3 md:px-2">
+                            <label className="flex items-center gap-0.5 cursor-pointer font-medium text-[11px] text-gray-700 hover:text-primary transition-colors md:gap-1.5 md:text-sm">
+                              <input type="radio" value="F" checked={formData.gender === 'F'} onChange={e => setFormData({...formData, gender: 'F'})} className="accent-primary w-3.5 h-3.5 md:w-4 md:h-4" /> 여성
+                            </label>
+                            <label className="flex items-center gap-0.5 cursor-pointer font-medium text-[11px] text-gray-700 hover:text-primary transition-colors md:gap-1.5 md:text-sm">
+                              <input type="radio" value="M" checked={formData.gender === 'M'} onChange={e => setFormData({...formData, gender: 'M'})} className="accent-primary w-3.5 h-3.5 md:w-4 md:h-4" /> 남성
+                            </label>
+                          </div>
+                          <div className="flex items-center gap-0.5 flex-1 min-w-0 px-0.5 md:gap-1.5 md:px-1">
+                            <input
+                              type="number"
+                              value={formData.birth_year || ''}
+                              onChange={e => setFormData({...formData, birth_year: parseInt(e.target.value) || undefined})}
+                              placeholder="1995"
+                              className="w-full min-w-0 h-7 px-1 bg-white border border-gray-200 rounded focus:border-primary outline-none transition-colors text-xs font-bold text-center md:h-auto md:p-1.5 md:text-sm"
+                            />
+                            <span className="text-[10px] text-gray-500 font-medium whitespace-nowrap md:text-xs">년생</span>
+                          </div>
                         </div>
                       </div>
-                      <p className="text-[11px] text-gray-400 mt-1.5 font-medium ml-1">※ 작성 후 목록에서는 나이로 자동 변환되어 노출됩니다.</p>
+                      <p className="text-[10px] text-gray-400 mt-1 font-medium md:text-[11px] md:mt-1.5 md:ml-1">※ 작성 후 목록에서는 나이로 자동 변환되어 노출됩니다.</p>
                     </div>
                   </div>
                 </div>
@@ -699,8 +709,9 @@ export function ResumeManagementModal() {
                 <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">희망 근무 조건</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
                   <div>
-                    <label className="text-sm font-bold text-gray-700 block mb-2">희망 지역</label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
+                      <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-2 md:block">희망 지역</label>
+                      <div className="flex flex-1 min-w-0 gap-1.5 md:gap-2">
                         <select
                             value={selectedSido}
                             onChange={handleSidoChange}
@@ -738,26 +749,33 @@ export function ResumeManagementModal() {
                                 ))}
                             </select>
                         )}
+                      </div>
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-bold text-gray-700 block mb-2">희망 업종</label>
-                    <select
+                    <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
+                      <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-2 md:block">희망 업종</label>
+                      <select
                         value={formData.desired_industry || ''}
                         onChange={e => setFormData({...formData, desired_industry: e.target.value})}
-                        className="w-full h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:h-auto md:p-3"
+                        className="flex-1 min-w-0 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:w-full md:h-auto md:p-3"
                     >
                         <option value="">업종 선택</option>
                         {categories.map(cat => (
                             <option key={cat.code_value} value={cat.code_name}>{cat.code_name}</option>
                         ))}
                     </select>
+                    </div>
                   </div>
 
-                  {/* 원하는 급여 */}
+                  {/* 급여 */}
                   <div className="sm:col-span-2">
-                    <label className="text-sm font-bold text-gray-700 block mb-2">원하는 급여</label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
+                      <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-2 md:block">
+                        <span className="md:hidden">급여</span>
+                        <span className="hidden md:inline">원하는 급여</span>
+                      </label>
+                      <div className="flex flex-1 min-w-0 gap-1.5 md:gap-2">
                         <select
                             value={formData.desired_pay_type || '협의'}
                             onChange={e => {
@@ -766,7 +784,7 @@ export function ResumeManagementModal() {
                                     setFormData(prev => ({...prev, desired_pay_amount: undefined}));
                                 }
                             }}
-                            className="w-[88px] h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:w-[120px] md:h-auto md:p-3"
+                            className="w-[72px] shrink-0 h-9 px-1.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-xs font-medium bg-white cursor-pointer md:w-[120px] md:h-auto md:p-3 md:text-sm"
                         >
                             <option value="시급">시급</option>
                             <option value="일급">일급</option>
@@ -774,23 +792,28 @@ export function ResumeManagementModal() {
                             <option value="월급">월급</option>
                             <option value="협의">추후 협의</option>
                         </select>
-                        <div className="flex flex-1 items-center gap-2">
+                        <div className="flex flex-1 min-w-0 items-center gap-1">
                             <input 
                                 type="number" 
                                 value={formData.desired_pay_amount || ''} 
                                 onChange={e => setFormData({...formData, desired_pay_amount: parseInt(e.target.value) || undefined})} 
                                 disabled={formData.desired_pay_type === '협의'}
-                                placeholder={formData.desired_pay_type === '협의' ? "추후 협의합니다" : "원하는 금액 입력 (숫자만)"} 
-                                className="w-full h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 disabled:text-gray-400 md:h-auto md:p-3" 
+                                placeholder={formData.desired_pay_type === '협의' ? '협의' : '금액'} 
+                                className="w-full min-w-0 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 disabled:text-gray-400 md:h-auto md:p-3" 
                             />
-                            {formData.desired_pay_type !== '협의' && <span className="text-sm font-bold text-gray-700 flex-shrink-0">원</span>}
+                            {formData.desired_pay_type !== '협의' && <span className="text-xs font-bold text-gray-700 flex-shrink-0 md:text-sm">원</span>}
                         </div>
+                      </div>
                     </div>
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="text-sm font-bold text-gray-700 block mb-2">연락 가능 시간</label>
-                    <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-200 p-1.5 pl-2 rounded-lg md:gap-4 md:p-2 md:pl-3">
+                    <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
+                      <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-2 md:block">
+                        <span className="md:hidden">연락시간</span>
+                        <span className="hidden md:inline">연락 가능 시간</span>
+                      </label>
+                      <div className="flex flex-1 min-w-0 items-center gap-1.5 bg-gray-50/50 border border-gray-200 p-1.5 pl-2 rounded-lg md:gap-4 md:p-2 md:pl-3">
                       <input 
                          type="text" 
                          value={formData.contact_time || ''} 
@@ -808,6 +831,7 @@ export function ResumeManagementModal() {
                         /> 
                         상관없음
                       </label>
+                      </div>
                     </div>
                   </div>
                 </div>
