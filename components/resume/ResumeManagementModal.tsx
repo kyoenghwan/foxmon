@@ -28,6 +28,13 @@ import {
   normalizeDesiredIndustries,
   parseDesiredIndustries,
 } from '@/lib/resume-industry';
+import {
+  formatDesiredLocations,
+  isSigunguSelected,
+  MAX_DESIRED_SIGUNGU,
+  normalizeDesiredLocation,
+  parseDesiredLocations,
+} from '@/lib/resume-location';
 
 function resolveSalaryTypeValue(type: string | undefined, salaryTypes: CodeItem[]) {
   if (!type) return '';
@@ -82,7 +89,7 @@ export function ResumeManagementModal() {
   const [salaryTypes, setSalaryTypes] = useState<CodeItem[]>([]);
   const [keywordsList, setKeywordsList] = useState<CodeItem[]>([]);
   const [selectedSido, setSelectedSido] = useState<string>('');
-  const [selectedSigungu, setSelectedSigungu] = useState<string>('');
+  const [selectedSigungus, setSelectedSigungus] = useState<string[]>([]);
   const [isCustomSns, setIsCustomSns] = useState(false);
 
   useEffect(() => {
@@ -104,32 +111,39 @@ export function ResumeManagementModal() {
   const isPayNegotiable = isNegotiableSalaryType(formData.desired_pay_type, salaryTypes);
 
   useEffect(() => {
-    if (formData.desired_location) {
-      const parts = formData.desired_location.split(' ');
-      if (parts.length >= 2) {
-        setSelectedSido(parts[0]);
-        setSelectedSigungu(parts.slice(1).join(' '));
-      } else {
-        setSelectedSido(parts[0]);
-        setSelectedSigungu('');
-      }
-    } else {
-      setSelectedSido('');
-      setSelectedSigungu('');
-    }
+    const { sido, sigungus } = parseDesiredLocations(formData.desired_location);
+    setSelectedSido(sido);
+    setSelectedSigungus(sigungus);
   }, [formData.desired_location]);
+
+  const syncDesiredLocation = (sido: string, sigungus: string[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      desired_location: formatDesiredLocations(sido, sigungus),
+    }));
+  };
 
   const handleSidoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const sido = e.target.value;
     setSelectedSido(sido);
-    setSelectedSigungu('');
-    setFormData(prev => ({ ...prev, desired_location: sido }));
+    setSelectedSigungus([]);
+    syncDesiredLocation(sido, []);
   };
 
-  const handleSigunguChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const sigungu = e.target.value;
-    setSelectedSigungu(sigungu);
-    setFormData(prev => ({ ...prev, desired_location: `${selectedSido} ${sigungu}`.trim() }));
+  const toggleSigungu = (name: string, checked: boolean) => {
+    let next = [...selectedSigungus];
+    if (checked) {
+      if (next.includes(name)) return;
+      if (next.length >= MAX_DESIRED_SIGUNGU) {
+        alert(`시/군/구는 최대 ${MAX_DESIRED_SIGUNGU}개까지만 선택할 수 있습니다.`);
+        return;
+      }
+      next.push(name);
+    } else {
+      next = next.filter((s) => s !== name);
+    }
+    setSelectedSigungus(next);
+    syncDesiredLocation(selectedSido, next);
   };
 
   useEffect(() => {
@@ -141,7 +155,7 @@ export function ResumeManagementModal() {
       setViewMode('LIST');
       setFormData({});
       setSelectedSido('');
-      setSelectedSigungu('');
+      setSelectedSigungus([]);
       setActiveTab('RESUME');
     }
   }, [isOpen]);
@@ -230,6 +244,7 @@ export function ResumeManagementModal() {
       const { desired_industries: _omit, ...rest } = formData;
       const payload: ResumeData = {
         ...(rest as ResumeData),
+        desired_location: normalizeDesiredLocation(formData.desired_location) || undefined,
         desired_industry: formatDesiredIndustries(industries) || undefined,
       };
       const res = await manageResumeAction('SAVE', payload);
@@ -441,7 +456,7 @@ export function ResumeManagementModal() {
                             <div className="min-w-0">
                               <h4 className="font-black text-lg text-gray-900 group-hover:text-primary transition-colors truncate">{r.title}</h4>
                               <p className="text-sm text-gray-500 font-medium mt-1">
-                                 업데이트: {r.updated_at ? new Date(r.updated_at).toLocaleDateString() : '방금'} | {r.desired_location || '희망지역 미기재'}
+                                 업데이트: {r.updated_at ? new Date(r.updated_at).toLocaleDateString() : '방금'} | {r.desired_location || '지역 미기재'}
                               </p>
                             </div>
                           </div>
@@ -766,59 +781,76 @@ export function ResumeManagementModal() {
                 </div>
               </section>
 
-              {/* 희망 근무 조건 Section */}
+              {/* 근무 조건 Section */}
               <section>
-                <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">희망 근무 조건</h3>
+                <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">근무 조건</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
-                  <div>
-                    <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
-                      <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-2 md:block">희망 지역</label>
-                      <div className="flex flex-1 min-w-0 gap-1.5 md:gap-2">
-                        <select
-                            value={selectedSido}
-                            onChange={handleSidoChange}
-                            className="flex-1 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:h-auto md:p-3"
-                        >
-                            <option value="">시/도 선택</option>
-                            {regions.filter(r => !r.parent_code_value).map(sido => (
-                                <option key={sido.code_value} value={sido.code_name}>{sido.code_name}</option>
-                            ))}
-                        </select>
-                        {selectedSido === '해외' ? (
-                            <input
-                                type="text"
-                                value={selectedSigungu}
-                                onChange={(e) => {
-                                    setSelectedSigungu(e.target.value);
-                                    setFormData({...formData, desired_location: `${selectedSido} ${e.target.value}`.trim()});
-                                }}
-                                placeholder="국가 및 지역 입력 (예: 미국)"
-                                className="flex-1 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white md:h-auto md:p-3"
-                            />
-                        ) : (
-                            <select
-                                value={selectedSigungu}
-                                onChange={handleSigunguChange}
-                                disabled={!selectedSido}
-                                className="flex-1 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 cursor-pointer disabled:cursor-not-allowed md:h-auto md:p-3"
-                            >
-                                <option value="">시/군/구 선택</option>
-                                {regions.filter(r => {
-                                    const sido = regions.find(s => s.code_name === selectedSido && !s.parent_code_value);
-                                    return r.parent_code_value === sido?.code_value;
-                                }).map(sigungu => (
-                                    <option key={sigungu.code_value} value={sigungu.code_name}>{sigungu.code_name}</option>
-                                ))}
-                            </select>
-                        )}
-                      </div>
+                  <div className="sm:col-span-2">
+                    <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch mb-2">
+                      <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-2 md:block">지역</label>
+                      <select
+                        value={selectedSido}
+                        onChange={handleSidoChange}
+                        className="flex-1 min-w-0 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:max-w-xs md:h-auto md:p-3"
+                      >
+                        <option value="">시/도 선택</option>
+                        {regions.filter((r) => !r.parent_code_value).map((sido) => (
+                          <option key={sido.code_value} value={sido.code_name}>
+                            {sido.code_name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
+                    {selectedSido === '해외' ? (
+                      <input
+                        type="text"
+                        value={selectedSigungus[0] ?? ''}
+                        onChange={(e) => {
+                          const detail = e.target.value;
+                          setSelectedSigungus(detail ? [detail] : []);
+                          syncDesiredLocation('해외', detail ? [detail] : []);
+                        }}
+                        placeholder="국가 및 지역 입력 (예: 미국)"
+                        className="w-full mt-2 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white md:h-auto md:p-3"
+                      />
+                    ) : selectedSido ? (
+                      <div className="mt-2">
+                        <p className="text-xs text-gray-500 font-medium mb-2">
+                          (시/군/구는 {MAX_DESIRED_SIGUNGU}개까지 선택 가능합니다.)
+                        </p>
+                        <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100 max-h-40 overflow-y-auto">
+                          {regions
+                            .filter((r) => {
+                              const sido = regions.find(
+                                (s) => s.code_name === selectedSido && !s.parent_code_value
+                              );
+                              return r.parent_code_value === sido?.code_value;
+                            })
+                            .map((sigungu) => (
+                              <label
+                                key={sigungu.code_value}
+                                className="flex items-center gap-1.5 cursor-pointer min-w-0"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSigunguSelected(selectedSigungus, sigungu.code_name)}
+                                  onChange={(e) => toggleSigungu(sigungu.code_name, e.target.checked)}
+                                  className="accent-primary w-3.5 h-3.5 sm:w-4 sm:h-4 rounded shrink-0"
+                                />
+                                <span className="text-[11px] sm:text-sm font-medium text-gray-700 truncate">
+                                  {sigungu.code_name}
+                                </span>
+                              </label>
+                            ))}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                   <div className="sm:col-span-2">
                     <div className="flex items-center gap-2 mb-2">
-                      <label className="text-sm font-bold text-gray-700">희망 업종</label>
+                      <label className="text-sm font-bold text-gray-700">업종</label>
                       <span className="text-xs text-gray-500 font-medium">
-                        (희망 업종은 {MAX_DESIRED_INDUSTRIES}개까지 선택 가능합니다.)
+                        (업종은 {MAX_DESIRED_INDUSTRIES}개까지 선택 가능합니다.)
                       </span>
                     </div>
                     <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100">
@@ -843,7 +875,7 @@ export function ResumeManagementModal() {
                                 if (e.target.checked) {
                                   if (!selected && current.length >= MAX_DESIRED_INDUSTRIES) {
                                     alert(
-                                      `희망 업종은 최대 ${MAX_DESIRED_INDUSTRIES}개까지만 선택할 수 있습니다.`
+                                      `업종은 최대 ${MAX_DESIRED_INDUSTRIES}개까지만 선택할 수 있습니다.`
                                     );
                                     return;
                                   }
