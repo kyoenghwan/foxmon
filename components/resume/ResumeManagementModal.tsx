@@ -330,7 +330,8 @@ export function ResumeManagementModal() {
     }
   };
 
-  const handleToggleAdStatus = async (ad: any) => {
+  const handleToggleAdStatus = async (e: React.MouseEvent, ad: SeekerAdData) => {
+    e.stopPropagation();
     setDeleting(ad.id); // Reusing deleting state as loading
     try {
       const newStatus = ad.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
@@ -389,7 +390,7 @@ export function ResumeManagementModal() {
     try {
       const res = await manageSeekerAdAction('SAVE', adFormData);
       if (res.success) {
-        alert('구직글이 등록되었습니다.');
+        alert(adFormData.id ? '구직글이 수정되었습니다.' : '구직글이 등록되었습니다.');
         setAdFormView(false);
         setAdFormData({});
         fetchAds(); // refresh list
@@ -402,6 +403,21 @@ export function ResumeManagementModal() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleOpenAdEdit = (ad: SeekerAdData) => {
+    setAdFormData({
+      id: ad.id,
+      resume_id: ad.resume_id,
+      ad_title: ad.ad_title || '',
+      status: ad.status,
+    });
+    setAdFormView(true);
+  };
+
+  const handleOpenNewAdForm = () => {
+    setAdFormData({});
+    setAdFormView(true);
   };
 
   const handleAdDelete = async (e: React.MouseEvent, ad: SeekerAdData) => {
@@ -569,81 +585,107 @@ export function ResumeManagementModal() {
                       <h3 className="font-black text-lg text-gray-800">등록된 구직글이 없어요</h3>
                       <p className="text-sm font-medium text-gray-500 mt-1">인재정보 게시판에 나를 알리고 스카우트 제안을 받아보세요!</p>
                     </div>
-                    <Button onClick={() => { if(resumes.length === 0) { alert('먼저 이력서를 작성해주세요!'); setActiveTab('RESUME'); } else { setAdFormView(true); } }} className="rounded-xl px-8 font-black mt-2">
+                    <Button onClick={() => { if(resumes.length === 0) { alert('먼저 이력서를 작성해주세요!'); setActiveTab('RESUME'); } else { handleOpenNewAdForm(); } }} className="rounded-xl px-8 font-black mt-2">
                       <Plus className="w-4 h-4 mr-1" /> 새 구직글 등록하기
                     </Button>
                   </div>
                 ) : (
                   <>
-                    <div className="bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden w-full overflow-x-auto">
-                        <table className="w-full min-w-[600px] text-center text-sm">
-                            <thead className="bg-gray-50 border-b border-gray-200 text-gray-600 font-bold">
-                                <tr>
-                                    <th className="py-3.5 px-4 w-[40%] text-left">제목</th>
-                                    <th className="py-3.5 px-2 w-[15%]">상태</th>
-                                    <th className="py-3.5 px-2 w-[25%]">연결된 이력서</th>
-                                    <th className="py-3.5 px-2 w-[15%]">작성일</th>
-                                    <th className="py-3.5 px-2 w-[5%]">삭제</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {seekerAds.map(ad => {
-                                    const dateObj = new Date(ad.created_at || new Date());
-                                    const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-                                    const isStatusActive = ad.status === 'ACTIVE';
-                                    
-                                    return (
-                                        <tr key={ad.id} className="hover:bg-gray-50 transition-colors group">
-                                            <td className="py-4 px-4 text-left">
-                                                <button 
-                                                    onClick={() => {
-                                                        setIsOpen(false);
-                                                        router.push(`/seekers/${ad.id}`);
-                                                    }}
-                                                    className="font-extrabold text-gray-900 truncate max-w-[200px] hover:text-primary hover:underline transition-colors text-left focus:outline-none cursor-pointer"
-                                                >
-                                                    {ad.ad_title}
-                                                </button>
-                                            </td>
-                                            <td className="py-4 px-2">
-                                                <button 
-                                                    onClick={() => handleToggleAdStatus(ad)}
-                                                    disabled={deleting === ad.id}
-                                                    className={cn(
-                                                        "px-3 py-1.5 rounded-full text-[12px] font-bold tracking-tight transition-colors focus:outline-none cursor-pointer",
-                                                        isStatusActive 
-                                                            ? "bg-green-100 text-green-700 hover:bg-green-200 hover:scale-105 active:scale-95" 
-                                                            : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:scale-105 active:scale-95"
-                                                    )}
-                                                    title={isStatusActive ? "클릭 시 구직 완료로 변경" : "클릭 시 다시 구직 중으로 변경"}
-                                                >
-                                                    {deleting === ad.id ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : (isStatusActive ? '구직 중' : '구직 완료')}
-                                                </button>
-                                            </td>
-                                            <td className="py-4 px-2 text-gray-600 font-medium truncate max-w-[150px]">
-                                                {(ad.resumes as any)?.title || '알 수 없음'}
-                                            </td>
-                                            <td className="py-4 px-2 text-gray-400 font-medium text-[13px]">
-                                                {dateStr}
-                                            </td>
-                                            <td className="py-4 px-2 flex justify-center items-center">
-                                                <Button 
-                                                    variant="ghost"
-                                                    onClick={(e) => handleAdDelete(e, ad)}
-                                                    disabled={deleting === ad.id}
-                                                    className="w-8 h-8 p-0 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 shrink-0"
-                                                    title="구직글 삭제"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                    <div className="flex flex-col gap-3">
+                      {seekerAds.map((ad) => {
+                        const resume = ad.resumes as { title?: string; desired_location?: string } | undefined;
+                        const updated = ad.updated_at || ad.created_at;
+                        const dateDisplay = updated ? new Date(updated).toLocaleDateString() : '방금';
+                        const loc = resume?.desired_location?.trim();
+                        const metaRight = loc || (resume?.title ? `이력서: ${resume.title}` : '지역 미기재');
+                        const isStatusActive = ad.status === 'ACTIVE';
+
+                        return (
+                          <div
+                            key={ad.id}
+                            className="bg-white border border-gray-200 rounded-2xl p-4 md:p-5 hover:border-primary hover:shadow-md transition-all group"
+                          >
+                            <p className="text-xs md:text-sm text-gray-500 font-medium">
+                              업데이트: {dateDisplay} · {metaRight}
+                            </p>
+                            <div className="mt-2 flex items-start gap-2">
+                              <div
+                                className="min-w-0 flex-1 cursor-pointer pr-1"
+                                title={ad.ad_title || undefined}
+                                role="button"
+                                tabIndex={0}
+                                aria-label={`구직글 보기: ${ad.ad_title || '제목 없음'}`}
+                                onClick={() => {
+                                  setIsOpen(false);
+                                  router.push(`/seekers/${ad.id}`);
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    setIsOpen(false);
+                                    router.push(`/seekers/${ad.id}`);
+                                  }
+                                }}
+                              >
+                                <MarqueeText className="font-black text-base md:text-lg text-gray-900 group-hover:text-primary transition-colors text-left">
+                                  {ad.ad_title}
+                                </MarqueeText>
+                              </div>
+                              <div className="flex items-center justify-end gap-2 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleToggleAdStatus(e, ad)}
+                                  disabled={deleting === ad.id}
+                                  aria-label={
+                                    isStatusActive ? '구직 중, 탭하여 구직 완료로 전환' : '구직 완료, 탭하여 구직 중으로 전환'
+                                  }
+                                  className={cn(
+                                    'flex items-center justify-center gap-0 sm:gap-1.5 h-8 min-w-9 sm:min-w-0 px-2 sm:px-3 rounded-full text-xs font-bold border transition-all focus:outline-none disabled:opacity-50',
+                                    isStatusActive
+                                      ? 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
+                                      : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
+                                  )}
+                                  title={isStatusActive ? '클릭 시 구직 완료로 변경' : '클릭 시 다시 구직 중으로 변경'}
+                                >
+                                  {deleting === ad.id ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                                  ) : (
+                                    <>
+                                      <span className="sm:hidden font-black text-[11px]">{isStatusActive ? '구직' : '완료'}</span>
+                                      <span className="hidden sm:inline">{isStatusActive ? '구직 중' : '구직 완료'}</span>
+                                    </>
+                                  )}
+                                </button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8 rounded-full shadow-sm shrink-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenAdEdit(ad);
+                                  }}
+                                  aria-label="구직글 수정"
+                                  title="구직글 수정"
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleAdDelete(e, ad)}
+                                  disabled={deleting === ad.id}
+                                  className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-50 shrink-0"
+                                  title="구직글 삭제"
+                                >
+                                  {deleting === ad.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <Button onClick={() => setAdFormView(true)} variant="ghost" className="border-2 border-dashed border-gray-300 rounded-2xl py-8 font-black text-gray-500 hover:text-primary hover:border-primary transition-all hover:bg-primary/5 mt-4">
+                    <Button onClick={handleOpenNewAdForm} variant="ghost" className="border-2 border-dashed border-gray-300 rounded-2xl py-8 font-black text-gray-500 hover:text-primary hover:border-primary transition-all hover:bg-primary/5 mt-4">
                       <Plus className="w-5 h-5 mr-2" /> 새 구직글 추가 등록
                     </Button>
                   </>
@@ -686,7 +728,7 @@ export function ResumeManagementModal() {
                   </Button>
                   <Button className="flex-1 py-6 rounded-xl font-black text-base" onClick={handleAdSave} disabled={saving}>
                     {saving ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : (
-                      <><Save className="w-5 h-5 mr-2" /> 인재정보 등록하기</>
+                      <><Save className="w-5 h-5 mr-2" /> {adFormData.id ? '수정 저장' : '인재정보 등록하기'}</>
                     )}
                   </Button>
                 </div>

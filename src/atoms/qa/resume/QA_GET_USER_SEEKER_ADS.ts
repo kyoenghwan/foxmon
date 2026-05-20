@@ -9,8 +9,12 @@ export interface SeekerAdData {
   status: string;
   created_at: string;
   updated_at: string;
-  // joined data
-  resumes?: any;
+  /** join: seeker_ads → resumes */
+  resumes?: {
+    title?: string;
+    gender?: string;
+    desired_location?: string;
+  };
 }
 
 export async function QA_GET_USER_SEEKER_ADS(userId: string): Promise<{ success: boolean; data: SeekerAdData[] | null; error: string | null }> {
@@ -18,7 +22,7 @@ export async function QA_GET_USER_SEEKER_ADS(userId: string): Promise<{ success:
   try {
     const { data, error } = await supabaseAdmin
       .from('seeker_ads')
-      .select('*, resumes(title, gender)')
+      .select('*, resumes(title, gender, desired_location)')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
