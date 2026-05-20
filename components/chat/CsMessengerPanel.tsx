@@ -31,21 +31,32 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
   const [reply, setReply] = useState('');
   const [loadingMsg, setLoadingMsg] = useState(false);
   const [sending, setSending] = useState(false);
+  const [listError, setListError] = useState<string | null>(null);
+  const [msgError, setMsgError] = useState<string | null>(null);
 
   const selectedRoom = rooms.find((r) => r.id === selectedId);
 
   const refreshRooms = useCallback(async () => {
+    setListError(null);
     const res = await listCsRoomsForAdmin();
     if (res.success && res.data) {
       setRooms(res.data);
       setSelectedId((prev) => prev ?? res.data[0]?.id ?? null);
+    } else {
+      setListError(res.error || '문의 목록을 불러오지 못했습니다.');
     }
   }, []);
 
   const loadMessages = useCallback(async (roomId: string) => {
     setLoadingMsg(true);
+    setMsgError(null);
     const res = await getCsRoomMessages(roomId);
-    if (res.success) setMessages((res.data as CsMessage[]) || []);
+    if (res.success) {
+      setMessages((res.data as CsMessage[]) || []);
+    } else {
+      setMessages([]);
+      setMsgError(res.error || '대화를 불러오지 못했습니다.');
+    }
     setLoadingMsg(false);
   }, []);
 
@@ -142,7 +153,10 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
               </button>
             </li>
           ))}
-          {rooms.length === 0 ? (
+          {listError ? (
+            <li className="p-4 text-center text-[11px] text-red-600 font-bold">{listError}</li>
+          ) : null}
+          {rooms.length === 0 && !listError ? (
             <li className="p-6 text-center text-[12px] text-gray-400">문의 없음</li>
           ) : null}
         </ul>
@@ -158,6 +172,9 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
               </p>
             </div>
             <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50/50">
+              {msgError ? (
+                <p className="text-center text-xs text-red-600 font-bold">{msgError}</p>
+              ) : null}
               {loadingMsg ? (
                 <p className="text-center text-xs text-gray-400">불러오는 중…</p>
               ) : (

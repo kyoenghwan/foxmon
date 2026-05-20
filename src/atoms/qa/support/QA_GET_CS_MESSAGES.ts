@@ -8,10 +8,22 @@ export const QA_GET_CS_MESSAGES = async (roomId: string) => {
 
         const { data: messages, error } = await supabaseAdmin
             .from('foxtalk_messages')
-            .select(`
-                *,
-                participant:foxtalk_participants(*)
-            `)
+            .select(
+                `
+                id,
+                room_id,
+                participant_id,
+                content,
+                message_type,
+                created_at,
+                participant:foxtalk_participants!foxtalk_messages_participant_id_fkey(
+                    id,
+                    session_id,
+                    nickname,
+                    avatar_type
+                )
+            `
+            )
             .eq('room_id', roomId)
             .order('created_at', { ascending: true })
             .limit(100);

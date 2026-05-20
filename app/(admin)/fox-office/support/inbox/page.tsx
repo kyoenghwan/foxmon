@@ -5,19 +5,26 @@ import { Headset, ArrowLeft } from 'lucide-react';
 import { getSiteSettings } from '@/actions/admin/siteSettings';
 import { listCsRoomsForAdmin } from '@/actions/admin/csMessenger';
 import { CsMessengerInbox } from '@/components/admin/CsMessengerInbox';
+import { isAdminRole } from '@/lib/normalize-user-role';
 
 export default async function CsMessengerInboxPage() {
   const session = await auth();
-  const role = (session?.user as { role?: string } | undefined)?.role;
+  const user = session?.user as { role?: string; id?: string; login_id?: string } | undefined;
 
-  if (!session?.user || (role !== 'ADMIN' && role !== 'SUPER_ADMIN')) {
+  if (
+    !session?.user ||
+    (!isAdminRole(user?.role) &&
+      !String(user?.login_id || '').trim().toLowerCase().startsWith('foxmon_'))
+  ) {
     redirect('/');
   }
 
   const [roomsRes, settingsRes] = await Promise.all([listCsRoomsForAdmin(), getSiteSettings()]);
   const rooms = roomsRes.success ? roomsRes.data || [] : [];
   const csAdminUserId =
-    (settingsRes.success && settingsRes.data?.cs_admin_user_id) || '';
+    (settingsRes.success && settingsRes.data?.cs_admin_user_id?.trim()) ||
+    user?.id ||
+    '';
 
   return (
     <div className="space-y-6">
