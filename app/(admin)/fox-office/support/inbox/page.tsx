@@ -16,7 +16,8 @@ export default async function CsMessengerInboxPage() {
 
   const [roomsRes, settingsRes] = await Promise.all([listCsRoomsForAdmin(), getSiteSettings()]);
   const rooms = roomsRes.success ? roomsRes.data || [] : [];
-  const csAdminUserId = settingsRes.success ? settingsRes.data?.cs_admin_user_id : undefined;
+  const csAdminUserId =
+    (settingsRes.success && settingsRes.data?.cs_admin_user_id) || '';
 
   return (
     <div className="space-y-6">
@@ -46,7 +47,7 @@ export default async function CsMessengerInboxPage() {
         </div>
       ) : null}
 
-      <CsMessengerInbox initialRooms={rooms} csAdminUserId={csAdminUserId} />
+      <CsMessengerInbox csAdminUserId={csAdminUserId} />
     </div>
   );
 }

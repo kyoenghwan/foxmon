@@ -122,8 +122,18 @@ export const OA_INSERT_CS_MESSAGE = async (data: CSMessageData) => {
             data.participant_id !== 'CS_ADMIN' &&
             data.participant_id !== adminUUID;
 
-        if (isCustomerText && adminUUID) {
-            await insertCsAutoReply(data.room_id, adminUUID);
+        // 고객 첫 문의 1회만 자동 접수 안내 (매 메시지마다 반복 방지)
+        if (isCustomerText && adminUUID && actualParticipantId) {
+            const { count } = await supabaseAdmin
+                .from('foxtalk_messages')
+                .select('id', { count: 'exact', head: true })
+                .eq('room_id', data.room_id)
+                .eq('participant_id', actualParticipantId)
+                .eq('message_type', 'TEXT');
+
+            if (count === 1) {
+                await insertCsAutoReply(data.room_id, adminUUID);
+            }
         }
 
         if (isCustomerText) {

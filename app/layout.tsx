@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { FoxTalkWidget } from "@/components/chat/foxtalk-widget";
+import { CsAgentDock } from "@/components/chat/cs-agent-dock";
 import { AutoLogoutWrapper } from "@/components/auth/auto-logout-wrapper";
 import { MaxWidthWrapper } from "@/src/components/layout/MaxWidthWrapper";
 
@@ -47,6 +48,7 @@ export default function RootLayout({
               {children}
               {modal}
               <FoxTalkWidget />
+              <CsAgentDock />
             </AutoLogoutWrapper>
           </LanguageProvider>
         </MaxWidthWrapper>
