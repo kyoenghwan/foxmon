@@ -139,41 +139,39 @@ export function MainHeader({ session }: MainHeaderProps) {
                 </div>
             </div>
 
-            {/* 1단: 검색(좌측 영역) + 가운데 로고 + 계정(우측 영역) */}
-            <div className="container mx-auto px-4 lg:px-8 h-16 md:h-20 relative flex items-center justify-center">
-                {/* 좌측 절반: 검색(중앙 방향으로 정렬, 데스크톱만) */}
-                <div className="absolute inset-y-0 left-4 lg:left-8 right-1/2 z-10 flex items-center justify-end pr-2 md:pr-8 min-w-0">
-                    <div className="hidden md:flex w-full max-w-2xl flex-col justify-center items-end">
-                        <div className="relative group w-full">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Search className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
-                            </div>
-                            <input
-                                type="text"
-                                placeholder={t.common.searchPlaceholder || "어떤 알바를 찾으세요?"}
-                                className="block w-full pl-12 pr-4 py-3.5 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
-                            />
-                        </div>
-                        <div className="hidden lg:flex items-center gap-4 mt-2 px-4 text-[12px] font-bold text-gray-500 w-full justify-end">
-                            <span className="text-primary text-[11px]">추천키워드</span>
-                            <Link href="/jobs?q=서울구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">서울구인</Link>
-                            <Link href="/jobs?q=인천구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">인천구인</Link>
-                            <Link href="/jobs?q=경기구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">경기구인</Link>
-                            <Link href="/jobs?q=스웨디시구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">스웨디시구인</Link>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 가운데 로고 (컨테이너 기준 수평 중앙) */}
-                <div className="relative z-20 shrink-0">
+            {/* 1단: 로고(좌) · 검색(중) · 로그인(우) */}
+            <div className="container mx-auto px-4 lg:px-8 h-16 md:h-20 flex items-center justify-between gap-6">
+                <div className="flex-shrink-0">
                     <Link href="/" className="group flex items-center">
-                        <img src="/logo.png" alt="FOXMON" className="h-8 sm:h-10 md:h-12 w-auto drop-shadow-sm hover:scale-105 transition-transform" />
+                        <img
+                            src="/logo.png"
+                            alt="FOXMON"
+                            className="h-9 sm:h-11 md:h-14 w-auto drop-shadow-sm hover:scale-105 transition-transform"
+                        />
                     </Link>
                 </div>
 
-                {/* 우측 절반: 로그인 / 로그아웃 */}
-                <div className="absolute inset-y-0 left-1/2 right-4 lg:right-8 z-10 flex items-center justify-end min-w-0 pl-2 md:pl-8">
-                    <div className="flex items-center gap-2 sm:gap-4 text-[12px] sm:text-[13px] font-bold text-gray-500">
+                <div className="flex-1 max-w-2xl hidden md:flex flex-col justify-center">
+                    <div className="relative group w-full">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <Search className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder={t.common.searchPlaceholder || "어떤 알바를 찾으세요?"}
+                            className="block w-full pl-12 pr-4 py-3.5 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
+                        />
+                    </div>
+                    <div className="hidden lg:flex items-center gap-4 mt-2 px-4 text-[12px] font-bold text-gray-500 w-full">
+                        <span className="text-primary text-[11px]">추천키워드</span>
+                        <Link href="/jobs?q=서울구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">서울구인</Link>
+                        <Link href="/jobs?q=인천구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">인천구인</Link>
+                        <Link href="/jobs?q=경기구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">경기구인</Link>
+                        <Link href="/jobs?q=스웨디시구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">스웨디시구인</Link>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2 sm:gap-4 text-[12px] sm:text-[13px] font-bold text-gray-500 shrink-0">
                     {session ? (
                         <div className="flex items-center gap-2 sm:gap-3">
                             <span className="flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-[13px] font-bold text-gray-600">
@@ -201,7 +199,6 @@ export function MainHeader({ session }: MainHeaderProps) {
                             <span className="text-gray-300">|</span>
                             <button 
                                 onClick={async () => {
-                                    // 1. 즉시 UI를 흐리게 하거나 로딩 상태로 보이게 할 수도 있습니다.
                                     document.body.style.opacity = '0.5';
                                     try {
                                         document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -224,7 +221,6 @@ export function MainHeader({ session }: MainHeaderProps) {
                             <Link href="/signup" className="hover:text-gray-900 transition-colors">회원가입</Link>
                         </div>
                     )}
-                    </div>
                 </div>
             </div>
 
