@@ -59,17 +59,19 @@ export async function QA_GET_JOB_BY_ID(jobId: string) {
       const { data: commonCodes } = await QA_GET_COMMON_CODES(undefined, true);
       
       if (commonCodes && Array.isArray(commonCodes)) {
+        const resolveTag = (code: string) => {
+          const match = commonCodes.find(
+            (c) =>
+              c.code_value === code &&
+              (c.list_type === 'KEYWORD' || c.list_type === 'AMENITY')
+          );
+          return match ? match.code_name : code;
+        };
         if (Array.isArray(data.amenities)) {
-          data.amenities = data.amenities.map((code: string) => {
-            const match = commonCodes.find(c => c.code_value === code && c.list_type === 'AMENITY');
-            return match ? match.code_name : code;
-          });
+          data.amenities = data.amenities.map(resolveTag);
         }
         if (Array.isArray(data.keywords)) {
-          data.keywords = data.keywords.map((code: string) => {
-            const match = commonCodes.find(c => c.code_value === code && c.list_type === 'KEYWORD');
-            return match ? match.code_name : code;
-          });
+          data.keywords = data.keywords.map(resolveTag);
         }
       }
     } catch (codeError) {

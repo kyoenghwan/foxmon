@@ -2,6 +2,8 @@ import type { CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 
 /** 희망 업종 — DB에는 콤마 구분 문자열, 폼에서는 배열로 사용 */
 export const MAX_DESIRED_INDUSTRIES = 3;
+export const OTHER_INDUSTRY_CODE = 'CAT1_OTHER';
+export const OTHER_INDUSTRY_LABEL = '기타';
 
 /** CATEGORY_1 + CATEGORY_2를 1차/2차 구분 없이 하나의 선택 목록으로 합침 */
 export function buildFlatIndustryOptions(
@@ -40,7 +42,9 @@ export function formatDesiredIndustries(industries?: string[]): string {
   return industries.slice(0, MAX_DESIRED_INDUSTRIES).join(', ');
 }
 
-export function normalizeDesiredIndustries(industries?: string[]): string[] {
+export function normalizeDesiredIndustries(
+  industries?: string | string[] | null
+): string[] {
   return parseDesiredIndustries(industries).slice(0, MAX_DESIRED_INDUSTRIES);
 }
 
@@ -60,6 +64,46 @@ function resumeHasIndustryToken(
 }
 
 /** 업종 필터: 이력서에 저장된 업종(최대 3개)과 검색 업종·상하위 업종 매칭 */
+export function getCustomOtherIndustry(
+  industries: string[] | undefined,
+  options: { code_value: string; code_name: string }[]
+): string {
+  const known = new Set(
+    options.flatMap((o) => [o.code_value, o.code_name, OTHER_INDUSTRY_LABEL, OTHER_INDUSTRY_CODE])
+  );
+  return (industries || []).find((i) => !known.has(i)) ?? '';
+}
+
+export function isOtherIndustryChecked(
+  industries: string[] | undefined,
+  options: { code_value: string; code_name: string }[]
+): boolean {
+  if (!industries?.length) return false;
+  if (
+    industries.some((i) => i === OTHER_INDUSTRY_LABEL || i === OTHER_INDUSTRY_CODE)
+  ) {
+    return true;
+  }
+  return !!getCustomOtherIndustry(industries, options);
+}
+
+export function applyOtherIndustryText(
+  industries: string[],
+  otherText: string,
+  options: { code_value: string; code_name: string }[]
+): string[] {
+  const custom = getCustomOtherIndustry(industries, options);
+  const withoutOther = industries.filter((i) => {
+    if (i === OTHER_INDUSTRY_LABEL || i === OTHER_INDUSTRY_CODE) return false;
+    return i !== custom;
+  });
+  const trimmed = otherText.trim();
+  if (!trimmed) {
+    return [...withoutOther, OTHER_INDUSTRY_LABEL];
+  }
+  return [...withoutOther, trimmed];
+}
+
 export function resumeMatchesIndustryFilter(
   desiredIndustry: string | undefined | null,
   filterName: string,

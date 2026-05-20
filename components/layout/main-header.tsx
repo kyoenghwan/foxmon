@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useLayoutEffect, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,13 @@ import { Globe, Search, Menu, FileText, Briefcase, LogOut, ShieldCheck, User, X,
 import { signOut } from 'next-auth/react';
 import { useLanguage } from '@/components/providers/language-provider';
 import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
+import { cn } from '@/lib/utils';
+import {
+  getStayLoggedIn,
+  setStayLoggedIn as persistStayLoggedIn,
+  STAY_LOGGED_IN_CHANGED_EVENT,
+  STAY_LOGGED_IN_STORAGE_KEY,
+} from '@/lib/stay-logged-in';
 
 // Define a type that matches the session structure we expect
 interface SessionUser {
@@ -35,7 +42,25 @@ export function MainHeader({ session }: MainHeaderProps) {
     const [showMegaMenu, setShowMegaMenu] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
+    const [stayLoggedIn, setStayLoggedIn] = useState(false);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useLayoutEffect(() => {
+        setStayLoggedIn(getStayLoggedIn());
+    }, []);
+
+    useEffect(() => {
+        const sync = () => setStayLoggedIn(getStayLoggedIn());
+        const onStorage = (e: StorageEvent) => {
+            if (e.key === STAY_LOGGED_IN_STORAGE_KEY || e.key === null) sync();
+        };
+        window.addEventListener(STAY_LOGGED_IN_CHANGED_EVENT, sync);
+        window.addEventListener('storage', onStorage);
+        return () => {
+            window.removeEventListener(STAY_LOGGED_IN_CHANGED_EVENT, sync);
+            window.removeEventListener('storage', onStorage);
+        };
+    }, []);
 
     const handleMouseEnter = () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -70,53 +95,85 @@ export function MainHeader({ session }: MainHeaderProps) {
             {/* 상단 툴바 (Top Utility Bar) */}
             <div className="bg-gray-50 border-b border-gray-100">
                 <div className="container mx-auto px-4 lg:px-8 h-9 flex items-center justify-between text-[11px] sm:text-xs font-bold text-gray-500 overflow-x-auto scrollbar-hide whitespace-nowrap">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                        <button onClick={() => alert('💻 PC: [Ctrl + D] (Mac은 Cmd + D)를 누르시면 즐겨찾기에 등록됩니다!')} className="hover:text-primary transition-colors flex items-center gap-1">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                        <button onClick={() => alert('💻 PC: [Ctrl + D] (Mac은 Cmd + D)를 누르시면 즐겨찾기에 등록됩니다!')} className="hover:text-primary transition-colors flex items-center gap-1 shrink-0">
                             ⭐️ 즐겨찾기
                         </button>
-                        <span className="text-gray-300">|</span>
-                        <button onClick={() => alert('📱 아이폰: Safari 하단의 [공유] 아이콘을 누르고 [홈 화면에 추가]를 선택하세요.\n🤖 안드로이드: 브라우저 메뉴에서 [홈 화면에 추가]를 선택하세요.')} className="hover:text-primary transition-colors flex items-center gap-1">
+                        <span className="text-gray-300 shrink-0">|</span>
+                        <button onClick={() => alert('📱 아이폰: Safari 하단의 [공유] 아이콘을 누르고 [홈 화면에 추가]를 선택하세요.\n🤖 안드로이드: 브라우저 메뉴에서 [홈 화면에 추가]를 선택하세요.')} className="hover:text-primary transition-colors flex items-center gap-1 shrink-0">
                             📱 <span className="hidden sm:inline">폰에 앱 설치</span><span className="sm:hidden">앱 설치</span>
                         </button>
-                        <span className="text-gray-300">|</span>
-                        <Link href="/notice" className="hover:text-primary transition-colors">공지사항</Link>
+                        <span className="text-gray-300 shrink-0">|</span>
+                        <Link href="/notice" className="hover:text-primary transition-colors shrink-0">공지사항</Link>
                     </div>
+                    {session ? (
+                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pl-2">
+                            <span className="text-[10px] sm:text-[11px] font-bold text-gray-600 whitespace-nowrap">
+                                로그인 유지
+                            </span>
+                            <button
+                                type="button"
+                                role="switch"
+                                aria-checked={stayLoggedIn}
+                                aria-label="로그인 유지"
+                                title="켜면 무동작 시 자동 로그아웃이 적용되지 않습니다."
+                                onClick={() => {
+                                    const next = !stayLoggedIn;
+                                    setStayLoggedIn(next);
+                                    persistStayLoggedIn(next);
+                                }}
+                                className={cn(
+                                    'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                                    stayLoggedIn ? 'border-primary bg-primary' : 'border-gray-300 bg-gray-200'
+                                )}
+                            >
+                                <span
+                                    className={cn(
+                                        'pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform duration-200 ease-out',
+                                        stayLoggedIn ? 'translate-x-4' : 'translate-x-0.5'
+                                    )}
+                                />
+                            </button>
+                        </div>
+                    ) : null}
                 </div>
             </div>
 
-            {/* 1단: 로고, 검색바, 로그인/언어 */}
-            <div className="container mx-auto px-4 lg:px-8 h-16 md:h-20 flex items-center justify-between gap-6">
-                {/* Logo */}
-                <div className="flex-shrink-0">
+            {/* 1단: 검색(좌측 영역) + 가운데 로고 + 계정(우측 영역) */}
+            <div className="container mx-auto px-4 lg:px-8 h-16 md:h-20 relative flex items-center justify-center">
+                {/* 좌측 절반: 검색(중앙 방향으로 정렬, 데스크톱만) */}
+                <div className="absolute inset-y-0 left-4 lg:left-8 right-1/2 z-10 flex items-center justify-end pr-2 md:pr-8 min-w-0">
+                    <div className="hidden md:flex w-full max-w-2xl flex-col justify-center items-end">
+                        <div className="relative group w-full">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Search className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder={t.common.searchPlaceholder || "어떤 알바를 찾으세요?"}
+                                className="block w-full pl-12 pr-4 py-3.5 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
+                            />
+                        </div>
+                        <div className="hidden lg:flex items-center gap-4 mt-2 px-4 text-[12px] font-bold text-gray-500 w-full justify-end">
+                            <span className="text-primary text-[11px]">추천키워드</span>
+                            <Link href="/jobs?q=서울구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">서울구인</Link>
+                            <Link href="/jobs?q=인천구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">인천구인</Link>
+                            <Link href="/jobs?q=경기구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">경기구인</Link>
+                            <Link href="/jobs?q=스웨디시구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">스웨디시구인</Link>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 가운데 로고 (컨테이너 기준 수평 중앙) */}
+                <div className="relative z-20 shrink-0">
                     <Link href="/" className="group flex items-center">
                         <img src="/logo.png" alt="FOXMON" className="h-8 sm:h-10 md:h-12 w-auto drop-shadow-sm hover:scale-105 transition-transform" />
                     </Link>
                 </div>
 
-                {/* 중앙: 대형 검색바 (알바몬 스타일) */}
-                <div className="flex-1 max-w-2xl hidden md:flex flex-col justify-center">
-                    <div className="relative group w-full">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Search className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder={t.common.searchPlaceholder || "어떤 알바를 찾으세요?"}
-                            className="block w-full pl-12 pr-4 py-3.5 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
-                        />
-                    </div>
-                    {/* 추천 키워드 (테블릿 md 구간에서는 공간 부족으로 숨김, lg부터 표시) */}
-                    <div className="hidden lg:flex items-center gap-4 mt-2 px-4 text-[12px] font-bold text-gray-500 w-full">
-                        <span className="text-primary text-[11px]">추천키워드</span>
-                        <Link href="/jobs?q=서울구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">서울구인</Link>
-                        <Link href="/jobs?q=인천구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">인천구인</Link>
-                        <Link href="/jobs?q=경기구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">경기구인</Link>
-                        <Link href="/jobs?q=스웨디시구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">스웨디시구인</Link>
-                    </div>
-                </div>
-
-                {/* 우측: 언어 설정 및 로그인 (간소화) */}
-                <div className="flex items-center gap-2 sm:gap-4 text-[12px] sm:text-[13px] font-bold text-gray-500">
+                {/* 우측 절반: 로그인 / 로그아웃 */}
+                <div className="absolute inset-y-0 left-1/2 right-4 lg:right-8 z-10 flex items-center justify-end min-w-0 pl-2 md:pl-8">
+                    <div className="flex items-center gap-2 sm:gap-4 text-[12px] sm:text-[13px] font-bold text-gray-500">
                     {session ? (
                         <div className="flex items-center gap-2 sm:gap-3">
                             <span className="flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-[13px] font-bold text-gray-600">
@@ -167,6 +224,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                             <Link href="/signup" className="hover:text-gray-900 transition-colors">회원가입</Link>
                         </div>
                     )}
+                    </div>
                 </div>
             </div>
 

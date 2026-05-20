@@ -6,6 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
+import {
+    buildUnifiedTagOptions,
+    isTagSelected,
+    mergeSelectedTagCodes,
+} from '@/lib/tag-options';
 import { userSettingsAction } from '@/lib/actions';
 import { compressImageFile } from '@/lib/image-utils';
 import { LoadMyDataModal } from './LoadMyDataModal';
@@ -433,8 +438,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const [regions, setRegions] = useState<CodeItem[]>([]);
     const [categories1, setCategories1] = useState<CodeItem[]>([]);
     const [categories2, setCategories2] = useState<CodeItem[]>([]);
-    const [amenitiesList, setAmenitiesList] = useState<CodeItem[]>([]);
-    const [keywordsList, setKeywordsList] = useState<CodeItem[]>([]);
+    const [tagsList, setTagsList] = useState<CodeItem[]>([]);
     const [employmentTypes, setEmploymentTypes] = useState<CodeItem[]>([]);
 
     const [selectedSido, setSelectedSido] = useState<string>('');
@@ -454,8 +458,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                 setRegions(res.data.filter(c => c.list_type === 'JOB_REGION_1' || c.list_type === 'JOB_REGION_2'));
                 setCategories1(res.data.filter(c => c.list_type === 'CATEGORY_1'));
                 setCategories2(res.data.filter(c => c.list_type === 'CATEGORY_2'));
-                setAmenitiesList(res.data.filter(c => c.list_type === 'AMENITY'));
-                setKeywordsList(res.data.filter(c => c.list_type === 'KEYWORD'));
+                setTagsList(buildUnifiedTagOptions(res.data));
                 setEmploymentTypes(res.data.filter(c => c.list_type === 'EMPLOYMENT_TYPE'));
             }
         };
@@ -502,6 +505,17 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         fetchUserProfile();
         fetchTierPrices();
     }, [isNew]);
+
+    useEffect(() => {
+        if (!tagsList.length) return;
+        if ((form.amenities?.length ?? 0) > 0) {
+            setForm((prev) => ({
+                ...prev,
+                keywords: mergeSelectedTagCodes(prev.keywords, prev.amenities),
+                amenities: [],
+            }));
+        }
+    }, [tagsList.length, initialData?.id]);
 
     useEffect(() => {
         // location이 "서울 강남구,서초구" 형태일 때 분리
@@ -604,7 +618,11 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         }
         setSaving(true);
         try {
-            const payload = { ...form };
+            const payload = {
+                ...form,
+                keywords: mergeSelectedTagCodes(form.keywords, form.amenities),
+                amenities: [] as string[],
+            };
             if (payload.action_type && payload.effect_intensity) {
                 payload.effect_intensity = `${payload.effect_intensity}::${payload.action_type}`;
             } else if (payload.action_type) {
@@ -1532,24 +1550,27 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         <div>
                             <div className="flex items-center gap-2 mb-3">
                                 <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                                    <CheckCircle2 className="w-4 h-4 text-primary" />
-                                    편의사항 <span className="text-red-500">*</span>
+                                    <Tag className="w-4 h-4 text-primary" />
+                                    키워드·혜택 <span className="text-red-500">*</span>
                                 </h3>
-                                <span className="text-[11px] text-blue-500 font-medium bg-blue-50 px-2 py-0.5 rounded-full">2개 이상 선택 권장</span>
+                                <span className="text-[11px] text-blue-500 font-medium bg-blue-50 px-2 py-0.5 rounded-full">2개 이상 선택 권장 · 검색에 유리합니다</span>
                             </div>
                             <div className="flex flex-wrap gap-2">
-                                {amenitiesList.map(item => {
-                                    const isSelected = form.amenities?.includes(item.code_value);
+                                {tagsList.map((item) => {
+                                    const isSelected = isTagSelected(form.keywords, item);
                                     return (
                                         <button
                                             key={item.code_value}
                                             type="button"
                                             onClick={() => {
-                                                const current = form.amenities || [];
-                                                const next = isSelected 
-                                                    ? current.filter(v => v !== item.code_value) 
+                                                const current = form.keywords || [];
+                                                const next = isSelected
+                                                    ? current.filter(
+                                                          (v) =>
+                                                              v !== item.code_value && v !== item.code_name
+                                                      )
                                                     : [...current, item.code_value];
-                                                update('amenities', next);
+                                                update('keywords', next);
                                             }}
                                             className={`px-3 py-1.5 rounded-full text-[13px] font-bold transition-all border ${
                                                 isSelected 
@@ -1561,43 +1582,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         </button>
                                     );
                                 })}
-                                {!amenitiesList.length && <span className="text-[13px] text-gray-400">데이터 로딩 중...</span>}
-                            </div>
-                        </div>
-
-                        <div>
-                            <div className="flex items-center gap-2 mb-3">
-                                <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                                    <Tag className="w-4 h-4 text-primary" />
-                                    키워드
-                                </h3>
-                                <span className="text-[11px] text-blue-500 font-medium bg-blue-50 px-2 py-0.5 rounded-full">검색에 유리합니다</span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {keywordsList.map(item => {
-                                    const isSelected = form.keywords?.includes(item.code_value);
-                                    return (
-                                        <button
-                                            key={item.code_value}
-                                            type="button"
-                                            onClick={() => {
-                                                const current = form.keywords || [];
-                                                const next = isSelected 
-                                                    ? current.filter(v => v !== item.code_value) 
-                                                    : [...current, item.code_value];
-                                                update('keywords', next);
-                                            }}
-                                            className={`px-3 py-1.5 rounded-full text-[13px] font-bold transition-all border ${
-                                                isSelected 
-                                                    ? 'border-gray-800 bg-gray-800 text-white shadow-sm' 
-                                                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            # {item.code_name}
-                                        </button>
-                                    );
-                                })}
-                                {!keywordsList.length && <span className="text-[13px] text-gray-400">데이터 로딩 중...</span>}
+                                {!tagsList.length && <span className="text-[13px] text-gray-400">데이터 로딩 중...</span>}
                             </div>
                         </div>
                     </div>

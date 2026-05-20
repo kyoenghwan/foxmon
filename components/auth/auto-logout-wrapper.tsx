@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react';
 import { signOut, useSession, SessionProvider } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import {
@@ -12,6 +12,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  getStayLoggedIn,
+  STAY_LOGGED_IN_CHANGED_EVENT,
+  STAY_LOGGED_IN_STORAGE_KEY,
+} from '@/lib/stay-logged-in';
 
 const WARNING_TIME_MS = 5 * 60 * 1000; // 5분 무동작 시 경고
 const LOGOUT_COUNTDOWN_SEC = 30; // 경고 후 30초 뒤 자동 로그아웃
@@ -40,6 +45,26 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   const prevStatusRef = useRef(status);
   const pathname = usePathname();
   const skipIdleTimer = isAuthPath(pathname);
+  const [stayLoggedIn, setStayLoggedIn] = useState(false);
+
+  useLayoutEffect(() => {
+    setStayLoggedIn(getStayLoggedIn());
+  }, []);
+
+  useEffect(() => {
+    const sync = () => setStayLoggedIn(getStayLoggedIn());
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STAY_LOGGED_IN_STORAGE_KEY || e.key === null) sync();
+    };
+    window.addEventListener(STAY_LOGGED_IN_CHANGED_EVENT, sync);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener(STAY_LOGGED_IN_CHANGED_EVENT, sync);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
+
+  const idleDisabled = skipIdleTimer || stayLoggedIn;
 
   const clearIdleTimer = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -77,7 +102,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   }, [clearTimers]);
 
   const resetTimer = useCallback((force = false) => {
-    if (skipIdleTimer || status !== 'authenticated') return;
+    if (idleDisabled || status !== 'authenticated') return;
     if (showWarning && !force) return;
 
     clearIdleTimer();
@@ -87,7 +112,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
       setRemainingSeconds(LOGOUT_COUNTDOWN_SEC);
       setShowWarning(true);
     }, WARNING_TIME_MS);
-  }, [showWarning, status, skipIdleTimer, clearIdleTimer]);
+  }, [showWarning, status, idleDisabled, clearIdleTimer]);
 
   // 로그인/로그아웃 시 유휴 타이머 상태 완전 초기화
   useEffect(() => {
@@ -96,14 +121,14 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
 
     if (!isAuthenticated) {
       resetIdleState();
-    } else if (!wasAuthenticated && isAuthenticated && !skipIdleTimer) {
+    } else if (!wasAuthenticated && isAuthenticated && !idleDisabled) {
       // 새 로그인 직후 이전 카운트다운(0초) 상태가 남지 않도록 초기화
       resetIdleState();
       resetTimer(true);
     }
 
     prevStatusRef.current = status;
-  }, [status, skipIdleTimer, resetIdleState, resetTimer]);
+  }, [status, idleDisabled, resetIdleState, resetTimer]);
 
   // 카운트다운 로직
   useEffect(() => {
@@ -124,15 +149,38 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
       remainingSeconds <= 0 &&
       status === 'authenticated' &&
       !logoutInProgressRef.current &&
-      !skipIdleTimer
+      !idleDisabled
     ) {
       void performLogout();
     }
-  }, [showWarning, remainingSeconds, status, performLogout, skipIdleTimer]);
+  }, [showWarning, remainingSeconds, status, performLogout, idleDisabled]);
+
+  const prevStayLoggedInRef = useRef<boolean | null>(null);
+
+  // 로그인 유지 토글 시에만 타이머 정리 / 재시작 (마운트 직후 이중 resetTimer 방지)
+  useEffect(() => {
+    if (status !== 'authenticated' || skipIdleTimer) return;
+
+    const prev = prevStayLoggedInRef.current;
+    prevStayLoggedInRef.current = stayLoggedIn;
+
+    if (prev === null) {
+      if (stayLoggedIn) resetIdleState();
+      return;
+    }
+    if (prev === stayLoggedIn) return;
+
+    if (stayLoggedIn) {
+      resetIdleState();
+    } else {
+      resetIdleState();
+      resetTimer(true);
+    }
+  }, [stayLoggedIn, status, skipIdleTimer, resetIdleState, resetTimer]);
 
   // 활동 감지 이벤트 리스너
   useEffect(() => {
-    if (status !== 'authenticated' || skipIdleTimer) {
+    if (status !== 'authenticated' || idleDisabled) {
       clearIdleTimer();
       return;
     }
@@ -157,7 +205,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
       });
       clearIdleTimer();
     };
-  }, [resetTimer, status, pathname, skipIdleTimer, clearIdleTimer, showWarning]);
+  }, [resetTimer, status, pathname, idleDisabled, clearIdleTimer, showWarning]);
 
   // Option A: 탭 닫힘 시 로그아웃 처리 (beforeunload)
   useEffect(() => {

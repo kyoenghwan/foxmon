@@ -1,6 +1,7 @@
 /** 근무 지역 — DB에는 콤마 구분 문자열 (예: "서울 강남구, 서울 서초구") */
 
 export const MAX_DESIRED_SIGUNGU = 3;
+export const SIGUNGU_ALL_LABEL = '전체';
 
 export function parseDesiredLocations(value?: string | null): {
   sido: string;
@@ -25,7 +26,11 @@ export function parseDesiredLocations(value?: string | null): {
     if (seg === sido) continue;
     if (seg.startsWith(`${sido} `)) {
       const sg = seg.slice(sido.length).trim();
-      if (sg) sigungus.push(sg);
+      if (sg === SIGUNGU_ALL_LABEL) {
+        sigungus.push(SIGUNGU_ALL_LABEL);
+      } else if (sg) {
+        sigungus.push(sg);
+      }
     } else {
       const tokens = seg.split(/\s+/).filter(Boolean);
       if (tokens.length > 1 && tokens[0] === sido) {
@@ -51,6 +56,9 @@ export function formatDesiredLocations(sido: string, sigungus: string[]): string
     MAX_DESIRED_SIGUNGU
   );
   if (normalized.length === 0) return sido;
+  if (normalized.includes(SIGUNGU_ALL_LABEL)) {
+    return `${sido} ${SIGUNGU_ALL_LABEL}`.trim();
+  }
   return normalized.map((sg) => `${sido} ${sg}`.trim()).join(', ');
 }
 
@@ -61,4 +69,8 @@ export function normalizeDesiredLocation(value?: string | null): string {
 
 export function isSigunguSelected(sigungus: string[], name: string): boolean {
   return sigungus.includes(name);
+}
+
+export function isSigunguAllSelected(sigungus: string[]): boolean {
+  return sigungus.includes(SIGUNGU_ALL_LABEL);
 }

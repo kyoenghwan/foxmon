@@ -206,18 +206,30 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                             
                             <div className="col-span-2 my-2 border-t border-dashed border-gray-100"></div>
 
-                            <div className="text-gray-400 font-medium flex items-center">편의사항</div>
+                            <div className="text-gray-400 font-medium flex items-center">키워드·혜택</div>
                             <div className="flex flex-wrap gap-1.5">
-                                {Array.isArray(job.amenities) && job.amenities.length > 0 ? job.amenities.map((tag: string) => (
-                                    <span key={tag} className="text-[12px] bg-gray-50 border border-gray-200 text-gray-600 px-2.5 py-1 rounded-full font-medium">{tag}</span>
-                                )) : <span className="text-[12px] text-gray-400">등록된 편의사항이 없습니다.</span>}
-                            </div>
-                            
-                            <div className="text-gray-400 font-medium flex items-center">키워드</div>
-                            <div className="flex flex-wrap gap-1.5">
-                                {Array.isArray(job.keywords) && job.keywords.length > 0 ? job.keywords.map((tag: string) => (
-                                    <span key={tag} className="text-[12px] bg-blue-50/80 border border-blue-100 text-blue-600 px-2.5 py-1 rounded-full font-bold">{tag}</span>
-                                )) : <span className="text-[12px] text-gray-400">등록된 키워드가 없습니다.</span>}
+                                {(() => {
+                                    const tags = [
+                                        ...new Set([
+                                            ...(Array.isArray(job.keywords) ? job.keywords : []),
+                                            ...(Array.isArray(job.amenities) ? job.amenities : []),
+                                        ]),
+                                    ];
+                                    return tags.length > 0 ? (
+                                        tags.map((tag: string) => (
+                                            <span
+                                                key={tag}
+                                                className="text-[12px] bg-blue-50/80 border border-blue-100 text-blue-600 px-2.5 py-1 rounded-full font-bold"
+                                            >
+                                                {tag}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span className="text-[12px] text-gray-400">
+                                            등록된 키워드·혜택이 없습니다.
+                                        </span>
+                                    );
+                                })()}
                             </div>
                         </div>
                     </div>

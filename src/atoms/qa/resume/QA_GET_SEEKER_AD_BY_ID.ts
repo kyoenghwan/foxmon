@@ -30,7 +30,8 @@ export async function QA_GET_SEEKER_AD_BY_ID(id: string): Promise<{ success: boo
             contact_number,
             is_contact_public,
             sns_type,
-            sns_id
+            sns_id,
+            sns_links
         ),
         users:user_id (
             name,

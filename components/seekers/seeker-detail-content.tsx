@@ -7,12 +7,29 @@ import Link from "next/link";
 
 export function SeekerDetailContent({ job, isModal = false, onClose }: { job: any, isModal?: boolean, onClose?: () => void }) {
   const { ad_title, resumes, users } = job;
-  const { 
-    nickname, title, gender, birth_year, photo_url, 
+  const {
+    nickname, title, gender, birth_year, photo_url,
     desired_location, desired_industry, desired_pay_type, desired_pay_amount,
     self_introduction, keywords, contact_number, is_contact_public, sns_type, sns_id,
+    sns_links,
     contact_time, is_anytime_contact
   } = resumes || {};
+
+  const snsDisplayList: { label: string; id: string }[] = (() => {
+    const raw = sns_links;
+    if (Array.isArray(raw) && raw.length > 0) {
+      return raw
+        .map((x: Record<string, unknown>) => ({
+          label: String(x?.type ?? x?.channel ?? 'SNS'),
+          id: String(x?.value ?? x?.account ?? '').trim(),
+        }))
+        .filter((x) => x.id);
+    }
+    if (sns_id) {
+      return [{ label: sns_type || 'SNS', id: sns_id }];
+    }
+    return [];
+  })();
 
   // 이름 마스킹
   const rawName = nickname || users?.name || '익명';
@@ -143,13 +160,17 @@ export function SeekerDetailContent({ job, isModal = false, onClose }: { job: an
                 {is_anytime_contact ? '언제든지 가능' : (contact_time || '무관')}
               </div>
             </div>
-            {sns_id && (
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 sm:col-span-2 flex items-center gap-3">
-                <MessageCircle className="w-5 h-5 text-green-500" />
-                <div>
-                  <div className="text-xs text-gray-500 font-medium mb-0.5">{sns_type || 'SNS'} ID</div>
-                  <div className="font-bold text-gray-900">{sns_id}</div>
-                </div>
+            {snsDisplayList.length > 0 && (
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 sm:col-span-2 space-y-3">
+                {snsDisplayList.map((sns, i) => (
+                  <div key={`${sns.label}-${sns.id}-${i}`} className="flex items-center gap-3">
+                    <MessageCircle className="w-5 h-5 text-green-500 shrink-0" />
+                    <div>
+                      <div className="text-xs text-gray-500 font-medium mb-0.5">{sns.label} ID</div>
+                      <div className="font-bold text-gray-900">{sns.id}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

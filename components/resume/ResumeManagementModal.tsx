@@ -21,20 +21,35 @@ import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMM
 import { nvLog } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import {
+  applyOtherIndustryText,
   buildFlatIndustryOptions,
   formatDesiredIndustries,
+  getCustomOtherIndustry,
   isDesiredIndustrySelected,
+  isOtherIndustryChecked,
   MAX_DESIRED_INDUSTRIES,
   normalizeDesiredIndustries,
+  OTHER_INDUSTRY_CODE,
+  OTHER_INDUSTRY_LABEL,
   parseDesiredIndustries,
 } from '@/lib/resume-industry';
 import {
   formatDesiredLocations,
+  isSigunguAllSelected,
   isSigunguSelected,
   MAX_DESIRED_SIGUNGU,
   normalizeDesiredLocation,
   parseDesiredLocations,
+  SIGUNGU_ALL_LABEL,
 } from '@/lib/resume-location';
+import { buildUnifiedTagOptions, isTagSelected } from '@/lib/tag-options';
+import {
+  appendEmptySnsRow,
+  buildResumeSnsPayload,
+  resumeSnsSelectValue,
+  resumeToSnsRows,
+  type ResumeSnsFormRow,
+} from '@/lib/resume-sns';
 
 function resolveSalaryTypeValue(type: string | undefined, salaryTypes: CodeItem[]) {
   if (!type) return '';
@@ -49,10 +64,6 @@ function isNegotiableSalaryType(type: string | undefined, salaryTypes: CodeItem[
     return match.code_value === 'NEGOTIATE' || match.code_name.includes('협의');
   }
   return type === '협의' || type.includes('협의');
-}
-
-function isKeywordSelected(keywords: string[] | undefined, item: CodeItem) {
-  return (keywords || []).some((k) => k === item.code_value || k === item.code_name);
 }
 
 function formatPayAmount(amount?: number) {
@@ -90,7 +101,8 @@ export function ResumeManagementModal() {
   const [keywordsList, setKeywordsList] = useState<CodeItem[]>([]);
   const [selectedSido, setSelectedSido] = useState<string>('');
   const [selectedSigungus, setSelectedSigungus] = useState<string[]>([]);
-  const [isCustomSns, setIsCustomSns] = useState(false);
+  const [otherIndustryText, setOtherIndustryText] = useState('');
+  const [snsRows, setSnsRows] = useState<ResumeSnsFormRow[]>([{ type: '', value: '' }]);
 
   useEffect(() => {
     const fetchMasterData = async () => {
@@ -101,7 +113,7 @@ export function ResumeManagementModal() {
         const category2 = res.data.filter((c) => c.list_type === 'CATEGORY_2');
         setIndustryOptions(buildFlatIndustryOptions(category1, category2));
         setSalaryTypes(res.data.filter(c => c.list_type === 'SALARY_TYPE').sort((a, b) => a.sort_order - b.sort_order));
-        setKeywordsList(res.data.filter(c => c.list_type === 'KEYWORD').sort((a, b) => a.sort_order - b.sort_order));
+        setKeywordsList(buildUnifiedTagOptions(res.data));
       }
     };
     fetchMasterData();
@@ -132,7 +144,10 @@ export function ResumeManagementModal() {
 
   const toggleSigungu = (name: string, checked: boolean) => {
     let next = [...selectedSigungus];
-    if (checked) {
+    if (name === SIGUNGU_ALL_LABEL) {
+      next = checked ? [SIGUNGU_ALL_LABEL] : next.filter((s) => s !== SIGUNGU_ALL_LABEL);
+    } else if (checked) {
+      next = next.filter((s) => s !== SIGUNGU_ALL_LABEL);
       if (next.includes(name)) return;
       if (next.length >= MAX_DESIRED_SIGUNGU) {
         alert(`시/군/구는 최대 ${MAX_DESIRED_SIGUNGU}개까지만 선택할 수 있습니다.`);
@@ -146,6 +161,23 @@ export function ResumeManagementModal() {
     syncDesiredLocation(selectedSido, next);
   };
 
+  const sigunguAllSelected = isSigunguAllSelected(selectedSigungus);
+  const hasSpecificSigungu = selectedSigungus.some((s) => s !== SIGUNGU_ALL_LABEL);
+
+  const isOtherIndustryOption = (item: CodeItem) =>
+    item.code_value === OTHER_INDUSTRY_CODE || item.code_name === OTHER_INDUSTRY_LABEL;
+
+  const handleOtherIndustryTextChange = (text: string) => {
+    setOtherIndustryText(text);
+    const current =
+      formData.desired_industries ?? parseDesiredIndustries(formData.desired_industry);
+    if (!isOtherIndustryChecked(current, industryOptions)) return;
+    setFormData({
+      ...formData,
+      desired_industries: applyOtherIndustryText(current, text, industryOptions),
+    });
+  };
+
   useEffect(() => {
     if (isOpen) {
       fetchResumes();
@@ -156,6 +188,8 @@ export function ResumeManagementModal() {
       setFormData({});
       setSelectedSido('');
       setSelectedSigungus([]);
+      setOtherIndustryText('');
+      setSnsRows([{ type: '', value: '' }]);
       setActiveTab('RESUME');
     }
   }, [isOpen]);
@@ -188,15 +222,16 @@ export function ResumeManagementModal() {
 
   const handleOpenForm = async (resume?: ResumeData) => {
     if (resume) {
+      const desiredIndustries = parseDesiredIndustries(resume.desired_industry);
       setFormData({
         ...resume,
-        desired_industries: parseDesiredIndustries(resume.desired_industry),
+        desired_industries: desiredIndustries,
       });
-      setIsCustomSns(!!resume.sns_type && !['카카오톡', '라인', '텔레그램'].includes(resume.sns_type));
+      setOtherIndustryText(getCustomOtherIndustry(desiredIndustries, industryOptions));
+      setSnsRows(resumeToSnsRows(resume));
       setViewMode('FORM');
     } else {
       setLoading(true);
-      setIsCustomSns(false);
       try {
         const res = await manageResumeAction('GET_DEFAULTS');
         setFormData({
@@ -206,9 +241,11 @@ export function ResumeManagementModal() {
           gender: (res as any).data?.gender || 'F',
           contact_number: (res as any).data?.phone_number || ''
         });
+        setSnsRows([{ type: '', value: '' }]);
       } catch (err) {
         console.error(err);
         setFormData({ title: '', is_contact_public: false, is_anytime_contact: false });
+        setSnsRows([{ type: '', value: '' }]);
       } finally {
         setLoading(false);
         setViewMode('FORM');
@@ -242,10 +279,14 @@ export function ResumeManagementModal() {
         formData.desired_industries ?? formData.desired_industry
       );
       const { desired_industries: _omit, ...rest } = formData;
+      const snsPart = buildResumeSnsPayload(snsRows);
       const payload: ResumeData = {
         ...(rest as ResumeData),
         desired_location: normalizeDesiredLocation(formData.desired_location) || undefined,
         desired_industry: formatDesiredIndustries(industries) || undefined,
+        sns_links: snsPart.sns_links,
+        sns_type: snsPart.sns_type,
+        sns_id: snsPart.sns_id,
       };
       const res = await manageResumeAction('SAVE', payload);
       if (res.success) {
@@ -390,9 +431,9 @@ export function ResumeManagementModal() {
         <DialogHeader className="px-6 py-5 border-b flex-shrink-0">
           <DialogTitle className="font-black text-xl flex items-center gap-2">
             {(viewMode === 'FORM' || adFormView) && (
-               <button onClick={() => { setViewMode('LIST'); setAdFormView(false); }} className="hover:bg-gray-100 p-1 rounded-full transition">
-                 <ArrowLeft className="w-5 h-5" />
-               </button>
+              <button onClick={() => { setViewMode('LIST'); setAdFormView(false); }} className="hover:bg-gray-100 p-1 rounded-full transition">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
             )}
             {viewMode === 'FORM' ? '📝 이력서 작성/수정' : adFormView ? '📢 구직글 등록' : activeTab === 'RESUME' ? '📝 이력서 관리' : '📢 구직글 관리'}
           </DialogTitle>
@@ -404,10 +445,10 @@ export function ResumeManagementModal() {
           )}
           <DialogDescription className="font-medium text-gray-500 mt-3">
             {viewMode === 'LIST' && !adFormView
-               ? activeTab === 'RESUME' 
+              ? activeTab === 'RESUME' 
                   ? '기존에 등록된 이력서를 선택하거나 새로 등록하세요.' 
                   : '작성된 이력서를 바탕으로 인재정보 게시판에 구직 광고를 올릴 수 있습니다.'
-               : viewMode === 'FORM'
+              : viewMode === 'FORM'
                   ? '빈틈없이 꼼꼼하게 채워 지원율을 높이세요!'
                   : '원하는 이력서를 선택하고 구직 게시판에 올릴 제목을 입력하세요.'}
           </DialogDescription>
@@ -420,10 +461,10 @@ export function ResumeManagementModal() {
 
         <div className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6 scrollbar-hide">
           {loading ? (
-             <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-2">
-               <Loader2 className="w-8 h-8 animate-spin" />
-               <p className="font-bold text-sm">이력서를 불러오는 중입니다...</p>
-             </div>
+            <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-2">
+              <Loader2 className="w-8 h-8 animate-spin" />
+              <p className="font-bold text-sm">이력서를 불러오는 중입니다...</p>
+            </div>
           ) : viewMode === 'LIST' && !adFormView ? (
             <div className="flex flex-col gap-4">
               {activeTab === 'RESUME' ? (
@@ -456,7 +497,7 @@ export function ResumeManagementModal() {
                             <div className="min-w-0">
                               <h4 className="font-black text-lg text-gray-900 group-hover:text-primary transition-colors truncate">{r.title}</h4>
                               <p className="text-sm text-gray-500 font-medium mt-1">
-                                 업데이트: {r.updated_at ? new Date(r.updated_at).toLocaleDateString() : '방금'} | {r.desired_location || '지역 미기재'}
+                                업데이트: {r.updated_at ? new Date(r.updated_at).toLocaleDateString() : '방금'} | {r.desired_location || '지역 미기재'}
                               </p>
                             </div>
                           </div>
@@ -587,9 +628,9 @@ export function ResumeManagementModal() {
               )}
             </div>
           ) : adFormView ? (
-             <div className="bg-white border rounded-xl shadow-sm p-6 flex flex-col gap-6">
+            <div className="bg-white border rounded-xl shadow-sm p-6 flex flex-col gap-6">
                 <section>
-                  <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">구직글 올리기</h3>
+                  <h3 className="font-black border-l-3 border-primary pl-2.5 mb-3 text-gray-800 text-sm md:text-base">구직글 올리기</h3>
                   <div className="flex flex-col gap-4">
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-1">어떤 이력서를 사용할까요?</label>
@@ -626,13 +667,13 @@ export function ResumeManagementModal() {
                     )}
                   </Button>
                 </div>
-             </div>
+            </div>
           ) : (
             <div className="bg-white border rounded-xl shadow-sm p-4 flex flex-col gap-4 md:p-6 md:gap-6">
               {/* 제목 (모바일: 라벨 옆 인라인) */}
               <section>
                 <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
-                  <label className="text-sm font-black text-gray-800 shrink-0 whitespace-nowrap md:text-base md:mb-2 md:block">
+                  <label className="text-base font-black text-gray-800 shrink-0 whitespace-nowrap md:text-lg md:mb-2 md:block">
                     <span className="text-primary">*</span>{' '}
                     <span className="md:hidden">제목</span>
                     <span className="hidden md:inline">이력서 제목</span>
@@ -649,32 +690,32 @@ export function ResumeManagementModal() {
 
               {/* 사진 및 기본정보 Section */}
               <section>
-                <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">기본 정보</h3>
+                <h3 className="font-black border-l-3 border-primary pl-2.5 mb-3 text-gray-800 text-sm md:text-base">기본 정보</h3>
                 <div className="flex flex-col md:flex-row gap-4 md:gap-8">
                   {/* 왼쪽: 사진 첨부 */}
                   <div className="flex flex-col items-center gap-3 flex-shrink-0">
                     <div className="relative group cursor-pointer w-24 h-32 md:w-32 md:h-40 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-primary transition-colors">
-                       {formData.photo_url ? (
+                      {formData.photo_url ? (
                           <img src={formData.photo_url} alt="Uploaded Photo" className="w-full h-full object-cover" />
-                       ) : (
+                      ) : (
                           <div className="flex flex-col items-center gap-2 text-gray-400 group-hover:text-primary transition-colors">
-                             <Upload className="w-6 h-6" />
-                             <span className="text-[11px] font-bold">사진 등록</span>
+                            <Upload className="w-6 h-6" />
+                            <span className="text-[11px] font-bold">사진 등록</span>
                           </div>
-                       )}
-                       <input 
+                      )}
+                      <input 
                           type="file" 
                           accept="image/*" 
                           onChange={handlePhotoUpload} 
                           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" 
                           title="사진 변경하기"
-                       />
+                      />
                     </div>
                     <div className="text-center">
-                       <p className="text-[11px] text-gray-500 font-medium leading-tight">(5MB 이하 이미지 권장)</p>
-                       {formData.photo_url && (
-                         <Button variant="ghost" className="h-6 px-3 text-xs mt-2 text-red-500 hover:text-red-600 hover:bg-red-50 p-0" onClick={() => setFormData({...formData, photo_url: undefined})}>사진 삭제</Button>
-                       )}
+                      <p className="text-[11px] text-gray-500 font-medium leading-tight">(5MB 이하 이미지 권장)</p>
+                      {formData.photo_url && (
+                        <Button variant="ghost" className="h-6 px-3 text-xs mt-2 text-red-500 hover:text-red-600 hover:bg-red-50 p-0" onClick={() => setFormData({...formData, photo_url: undefined})}>사진 삭제</Button>
+                      )}
                     </div>
                   </div>
 
@@ -724,9 +765,9 @@ export function ResumeManagementModal() {
 
               {/* 연락처 및 SNS Section */}
               <section>
-                <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">연락처 및 SNS</h3>
+                <h3 className="font-black border-l-3 border-primary pl-2.5 mb-3 text-gray-800 text-sm md:text-base">연락처 및 SNS</h3>
                 <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-3 flex flex-col gap-4 md:p-5 md:gap-6">
-                     <div>
+                    <div>
                       <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
                         <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-2 md:block">연락처</label>
                         <input type="text" value={formData.contact_number || ''} onChange={e => setFormData({...formData, contact_number: e.target.value})} placeholder="010-0000-0000" className="flex-1 min-w-0 h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm font-medium bg-white md:h-auto md:p-3" />
@@ -738,44 +779,90 @@ export function ResumeManagementModal() {
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-2">SNS 계정 (선택)</label>
-                      <div className="flex gap-2">
-                        <select 
-                          value={isCustomSns ? '기타' : (formData.sns_type || '')} 
-                          onChange={e => {
-                            if (e.target.value === '기타') {
-                              setIsCustomSns(true);
-                              setFormData({...formData, sns_type: ''});
-                            } else {
-                              setIsCustomSns(false);
-                              setFormData({...formData, sns_type: e.target.value});
+                      <div className="flex flex-row items-start justify-between gap-2 mb-2 md:items-center">
+                        <label className="text-sm font-bold text-gray-700 shrink-0">SNS 계정 (선택)</label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-2.5 text-xs font-bold shrink-0 border-primary/40 text-primary hover:bg-primary/5"
+                          onClick={() => {
+                            const next = appendEmptySnsRow(snsRows);
+                            if (!next) {
+                              alert('SNS는 최대 10개까지 등록할 수 있습니다.');
+                              return;
                             }
+                            setSnsRows(next);
                           }}
-                          className="w-[88px] h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:w-[120px] md:h-auto md:p-3"
                         >
-                          <option value="">선택</option>
-                          <option value="카카오톡">카카오톡</option>
-                          <option value="라인">라인</option>
-                          <option value="텔레그램">텔레그램</option>
-                          <option value="인스타그램">인스타그램</option>
-                          <option value="기타">직접입력</option>
-                        </select>
-                        {isCustomSns && (
-                           <input 
-                             type="text" 
-                             placeholder="종류" 
-                             value={formData.sns_type || ''} 
-                             onChange={e => setFormData({...formData, sns_type: e.target.value})} 
-                             className="w-[72px] h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white md:w-[100px] md:h-auto md:p-3" 
-                           />
-                        )}
-                        <input 
-                          type="text" 
-                          value={formData.sns_id || ''} 
-                          onChange={e => setFormData({...formData, sns_id: e.target.value})} 
-                          placeholder="아이디 입력" 
-                          className="flex-1 min-w-0 h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white md:h-auto md:p-3" 
-                        />
+                          <Plus className="w-3.5 h-3.5 mr-0.5" />
+                          +추가
+                        </Button>
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        {snsRows.map((row, idx) => {
+                          const selectVal = resumeSnsSelectValue(row.type);
+                          const showCustomType = selectVal === '기타';
+                          return (
+                            <div key={idx} className="flex flex-wrap items-center gap-2">
+                              <select
+                                value={selectVal}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  setSnsRows((prev) =>
+                                    prev.map((r, i) =>
+                                      i === idx ? { ...r, type: v === '기타' ? '' : v } : r
+                                    )
+                                  );
+                                }}
+                                className="w-[88px] h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:w-[120px] md:h-auto md:p-3"
+                              >
+                                <option value="">선택</option>
+                                <option value="카카오톡">카카오톡</option>
+                                <option value="라인">라인</option>
+                                <option value="텔레그램">텔레그램</option>
+                                <option value="인스타그램">인스타그램</option>
+                                <option value="기타">직접입력</option>
+                              </select>
+                              {showCustomType && (
+                                <input
+                                  type="text"
+                                  placeholder="종류"
+                                  value={row.type}
+                                  onChange={(e) =>
+                                    setSnsRows((prev) =>
+                                      prev.map((r, i) => (i === idx ? { ...r, type: e.target.value } : r))
+                                    )
+                                  }
+                                  className="w-[72px] h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white md:w-[100px] md:h-auto md:p-3"
+                                />
+                              )}
+                              <input
+                                type="text"
+                                value={row.value}
+                                onChange={(e) =>
+                                  setSnsRows((prev) =>
+                                    prev.map((r, i) => (i === idx ? { ...r, value: e.target.value } : r))
+                                  )
+                                }
+                                placeholder="아이디 입력"
+                                className="flex-1 min-w-[120px] h-9 px-2.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white md:h-auto md:p-3"
+                              />
+                              {snsRows.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setSnsRows((prev) => prev.filter((_, i) => i !== idx))
+                                  }
+                                  className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 shrink-0"
+                                  aria-label="SNS 행 삭제"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                 </div>
@@ -783,7 +870,7 @@ export function ResumeManagementModal() {
 
               {/* 근무 조건 Section */}
               <section>
-                <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">근무 조건</h3>
+                <h3 className="font-black border-l-3 border-primary pl-2.5 mb-3 text-gray-800 text-sm md:text-base">근무 조건</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
                   <div className="sm:col-span-2">
                     <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch mb-2">
@@ -826,22 +913,34 @@ export function ResumeManagementModal() {
                               );
                               return r.parent_code_value === sido?.code_value;
                             })
-                            .map((sigungu) => (
-                              <label
-                                key={sigungu.code_value}
-                                className="flex items-center gap-1.5 cursor-pointer min-w-0"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isSigunguSelected(selectedSigungus, sigungu.code_name)}
-                                  onChange={(e) => toggleSigungu(sigungu.code_name, e.target.checked)}
-                                  className="accent-primary w-3.5 h-3.5 sm:w-4 sm:h-4 rounded shrink-0"
-                                />
-                                <span className="text-[11px] sm:text-sm font-medium text-gray-700 truncate">
-                                  {sigungu.code_name}
-                                </span>
-                              </label>
-                            ))}
+                            .map((sigungu) => {
+                              const isAllOption = sigungu.code_name === SIGUNGU_ALL_LABEL;
+                              const disabled =
+                                (sigunguAllSelected && !isAllOption) ||
+                                (hasSpecificSigungu && isAllOption);
+                              return (
+                                <label
+                                  key={sigungu.code_value}
+                                  className={cn(
+                                    'flex items-center gap-1.5 min-w-0',
+                                    disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                                  )}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isSigunguSelected(selectedSigungus, sigungu.code_name)}
+                                    disabled={disabled}
+                                    onChange={(e) =>
+                                      toggleSigungu(sigungu.code_name, e.target.checked)
+                                    }
+                                    className="accent-primary w-3.5 h-3.5 sm:w-4 sm:h-4 rounded shrink-0 disabled:cursor-not-allowed"
+                                  />
+                                  <span className="text-[11px] sm:text-sm font-medium text-gray-700 truncate">
+                                    {sigungu.code_name}
+                                  </span>
+                                </label>
+                              );
+                            })}
                         </div>
                       </div>
                     ) : null}
@@ -858,15 +957,60 @@ export function ResumeManagementModal() {
                           <label key={item.code_value} className="flex items-center gap-1.5 cursor-pointer min-w-0">
                             <input
                               type="checkbox"
-                              checked={isDesiredIndustrySelected(
-                                formData.desired_industries,
-                                item.code_value,
-                                item.code_name
-                              )}
+                              checked={
+                                isOtherIndustryOption(item)
+                                  ? isOtherIndustryChecked(
+                                      formData.desired_industries,
+                                      industryOptions
+                                    )
+                                  : isDesiredIndustrySelected(
+                                      formData.desired_industries,
+                                      item.code_value,
+                                      item.code_name
+                                    )
+                              }
                               onChange={(e) => {
                                 const current =
                                   formData.desired_industries ??
                                   parseDesiredIndustries(formData.desired_industry);
+                                if (isOtherIndustryOption(item)) {
+                                  if (e.target.checked) {
+                                    if (
+                                      !isOtherIndustryChecked(current, industryOptions) &&
+                                      current.length >= MAX_DESIRED_INDUSTRIES
+                                    ) {
+                                      alert(
+                                        `업종은 최대 ${MAX_DESIRED_INDUSTRIES}개까지만 선택할 수 있습니다.`
+                                      );
+                                      return;
+                                    }
+                                    setOtherIndustryText('');
+                                    setFormData({
+                                      ...formData,
+                                      desired_industries: applyOtherIndustryText(
+                                        current,
+                                        '',
+                                        industryOptions
+                                      ),
+                                    });
+                                  } else {
+                                    setOtherIndustryText('');
+                                    const custom = getCustomOtherIndustry(
+                                      current,
+                                      industryOptions
+                                    );
+                                    setFormData({
+                                      ...formData,
+                                      desired_industries: current.filter(
+                                        (v) =>
+                                          v !== item.code_value &&
+                                          v !== item.code_name &&
+                                          v !== custom
+                                      ),
+                                    });
+                                  }
+                                  return;
+                                }
                                 const selected = isDesiredIndustrySelected(
                                   current,
                                   item.code_value,
@@ -910,6 +1054,15 @@ export function ResumeManagementModal() {
                           </span>
                         )}
                     </div>
+                    {isOtherIndustryChecked(formData.desired_industries, industryOptions) && (
+                      <input
+                        type="text"
+                        value={otherIndustryText}
+                        onChange={(e) => handleOtherIndustryTextChange(e.target.value)}
+                        placeholder="업종을 직접 입력해 주세요"
+                        className="w-full mt-2 h-9 px-3 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white md:h-auto md:p-3"
+                      />
+                    )}
                   </div>
 
                   {/* 급여 */}
@@ -971,19 +1124,19 @@ export function ResumeManagementModal() {
                       </label>
                       <div className="flex flex-1 min-w-0 items-center gap-1.5 bg-gray-50/50 border border-gray-200 p-1.5 pl-2 rounded-lg md:gap-4 md:p-2 md:pl-3">
                       <input 
-                         type="text" 
-                         value={formData.contact_time || ''} 
-                         disabled={formData.is_anytime_contact} 
-                         onChange={e => setFormData({...formData, contact_time: e.target.value})} 
-                         placeholder="예: 오후 2시 ~ 오후 8시" 
-                         className="flex-1 min-w-0 h-8 px-1 bg-transparent outline-none disabled:text-gray-400 text-sm font-medium md:h-auto md:p-2" 
+                        type="text" 
+                        value={formData.contact_time || ''} 
+                        disabled={formData.is_anytime_contact} 
+                        onChange={e => setFormData({...formData, contact_time: e.target.value})} 
+                        placeholder="예: 오후 2시 ~ 오후 8시" 
+                        className="flex-1 min-w-0 h-8 px-1 bg-transparent outline-none disabled:text-gray-400 text-sm font-medium md:h-auto md:p-2" 
                       />
                       <label className="flex items-center gap-1 shrink-0 whitespace-nowrap text-xs font-bold text-gray-600 cursor-pointer hover:text-primary transition-colors md:gap-2 md:text-sm md:bg-white md:border md:border-gray-200 md:p-2 md:rounded-lg">
                         <input 
-                           type="checkbox" 
-                           checked={formData.is_anytime_contact} 
-                           onChange={e => setFormData({...formData, is_anytime_contact: e.target.checked})} 
-                           className="accent-primary w-4 h-4 rounded" 
+                          type="checkbox" 
+                          checked={formData.is_anytime_contact} 
+                          onChange={e => setFormData({...formData, is_anytime_contact: e.target.checked})} 
+                          className="accent-primary w-4 h-4 rounded" 
                         /> 
                         상관없음
                       </label>
@@ -996,18 +1149,20 @@ export function ResumeManagementModal() {
               {/* 키워드 Section */}
               <section>
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="font-black border-l-4 border-primary pl-3 text-gray-800 text-lg">키워드</h3>
-                  <span className="text-xs text-gray-500 font-medium">(키워드는 3개까지 선택 가능합니다.)</span>
+                  <h3 className="font-black border-l-3 border-primary pl-2.5 text-gray-800 text-sm md:text-base">키워드</h3>
+                  <span className="text-xs text-gray-500 font-medium">
+                    (키워드·혜택은 3개까지 선택 가능합니다.)
+                  </span>
                 </div>
                 <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100">
                   {keywordsList.map((item) => (
                     <label key={item.code_value} className="flex items-center gap-1.5 cursor-pointer min-w-0">
                       <input
                         type="checkbox"
-                        checked={isKeywordSelected(formData.keywords, item)}
+                        checked={isTagSelected(formData.keywords, item)}
                         onChange={(e) => {
                           const current = formData.keywords || [];
-                          const selected = isKeywordSelected(current, item);
+                          const selected = isTagSelected(current, item);
                           if (e.target.checked) {
                             if (!selected && current.length >= 3) {
                               alert('키워드는 최대 3개까지만 선택할 수 있습니다.');
@@ -1041,9 +1196,9 @@ export function ResumeManagementModal() {
 
               {/* 자기소개 Section */}
               <section>
-                <h3 className="font-black border-l-4 border-primary pl-3 mb-4 text-gray-800 text-lg">자기소개 및 경력 상세</h3>
+                <h3 className="font-black border-l-3 border-primary pl-2.5 mb-3 text-gray-800 text-sm md:text-base">자기소개 및 경력 상세</h3>
                 <div>
-                   <textarea rows={5} value={formData.self_introduction || ''} onChange={e => setFormData({...formData, self_introduction: e.target.value})} className="w-full p-2.5 border border-gray-200 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium resize-none leading-relaxed md:p-3 md:border-2 md:border-gray-100 md:rounded-xl" placeholder="이전 알바 경험, 본인의 특장점, 마음가짐 등을 자유롭고 자세하게 적어주시면 채용 확률이 200% 상승합니다!" />
+                  <textarea rows={5} value={formData.self_introduction || ''} onChange={e => setFormData({...formData, self_introduction: e.target.value})} className="w-full p-2.5 border border-gray-200 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium resize-none leading-relaxed md:p-3 md:border-2 md:border-gray-100 md:rounded-xl" placeholder="이전 알바 경험, 본인의 특장점, 마음가짐 등을 자유롭고 자세하게 적어주시면 채용 확률이 200% 상승합니다!" />
                 </div>
               </section>
             </div>

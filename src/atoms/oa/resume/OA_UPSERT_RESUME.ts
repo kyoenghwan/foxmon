@@ -13,6 +13,8 @@ export interface ResumeData {
   is_contact_public?: boolean;
   sns_type?: string;
   sns_id?: string;
+  /** 다중 SNS (레거시 sns_type/sns_id와 병행; 첫 항목은 sns_type·sns_id와 맞추는 것을 권장) */
+  sns_links?: { type: string; value: string }[] | null;
   desired_location?: string;
   desired_industry?: string;
   desired_pay_type?: string;
