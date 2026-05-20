@@ -24,6 +24,8 @@ import {
   buildFlatIndustryOptions,
   formatDesiredIndustries,
   isDesiredIndustrySelected,
+  MAX_DESIRED_INDUSTRIES,
+  normalizeDesiredIndustries,
   parseDesiredIndustries,
 } from '@/lib/resume-industry';
 
@@ -222,8 +224,9 @@ export function ResumeManagementModal() {
     }
     setSaving(true);
     try {
-      const industries =
-        formData.desired_industries ?? parseDesiredIndustries(formData.desired_industry);
+      const industries = normalizeDesiredIndustries(
+        formData.desired_industries ?? formData.desired_industry
+      );
       const { desired_industries: _omit, ...rest } = formData;
       const payload: ResumeData = {
         ...(rest as ResumeData),
@@ -812,7 +815,12 @@ export function ResumeManagementModal() {
                     </div>
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="text-sm font-bold text-gray-700 block mb-2">희망 업종</label>
+                    <div className="flex items-center gap-2 mb-2">
+                      <label className="text-sm font-bold text-gray-700">희망 업종</label>
+                      <span className="text-xs text-gray-500 font-medium">
+                        (희망 업종은 {MAX_DESIRED_INDUSTRIES}개까지 선택 가능합니다.)
+                      </span>
+                    </div>
                     <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100">
                         {industryOptions.map((item) => (
                           <label key={item.code_value} className="flex items-center gap-1.5 cursor-pointer min-w-0">
@@ -833,6 +841,12 @@ export function ResumeManagementModal() {
                                   item.code_name
                                 );
                                 if (e.target.checked) {
+                                  if (!selected && current.length >= MAX_DESIRED_INDUSTRIES) {
+                                    alert(
+                                      `희망 업종은 최대 ${MAX_DESIRED_INDUSTRIES}개까지만 선택할 수 있습니다.`
+                                    );
+                                    return;
+                                  }
                                   if (!selected) {
                                     const normalized = current.filter(
                                       (v) => v !== item.code_value && v !== item.code_name

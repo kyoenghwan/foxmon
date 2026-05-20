@@ -15,23 +15,11 @@ import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMM
 import { GeneralSeekerListRow } from './GeneralSeekerListRow';
 import { getPublicSeekerAdsAction, getSeekerAdByIdAction } from '@/lib/actions';
 import { SeekerModalWrapper } from '@/components/seekers/seeker-modal-wrapper';
-import { resumeMatchesIndustryFilter } from '@/lib/resume-industry';
+import { buildFlatIndustryOptions, resumeMatchesIndustryFilter } from '@/lib/resume-industry';
 
 interface SeekersListContentProps {
     isEmployer?: boolean;
 }
-
-const INDUSTRIES = [
-    { id: 'all', nameKo: '전체 업종' },
-    { id: 'karaoke', nameKo: '노래주점' },
-    { id: 'danran', nameKo: '단란주점' },
-    { id: 'cafe-bar', nameKo: '카페/BAR' },
-    { id: 'room-salon', nameKo: '룸싸롱' },
-    { id: 'tenpro', nameKo: '텐프로/쩜오' },
-    { id: 'dabang', nameKo: '다방' },
-    { id: 'yojung', nameKo: '요정' },
-    { id: 'etc', nameKo: '기타' },
-];
 
 export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
@@ -46,6 +34,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
 
     // Master data for hierarchical regions
     const [regions, setRegions] = useState<CodeItem[]>([]);
+    const [industryOptions, setIndustryOptions] = useState<CodeItem[]>([]);
 
     // Filter states
     const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -62,13 +51,16 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
 
     // Fetch hierarchical regions
     useEffect(() => {
-        const fetchRegions = async () => {
+        const fetchMasterData = async () => {
             const res = await QA_GET_COMMON_CODES(undefined, true);
             if (res.success && res.data) {
                 setRegions(res.data.filter(c => c.list_type === 'JOB_REGION_1' || c.list_type === 'JOB_REGION_2'));
+                const category1 = res.data.filter((c) => c.list_type === 'CATEGORY_1');
+                const category2 = res.data.filter((c) => c.list_type === 'CATEGORY_2');
+                setIndustryOptions(buildFlatIndustryOptions(category1, category2));
             }
         };
-        fetchRegions();
+        fetchMasterData();
     }, []);
 
     const handleOpenSeeker = async (id: string) => {
@@ -158,8 +150,16 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
             
             // 2. Industry Filter
             if (selectedIndustry !== 'all') {
-                const industryName = INDUSTRIES.find(i => i.id === selectedIndustry)?.nameKo;
-                if (industryName && !resumeMatchesIndustryFilter(resumes.desired_industry, industryName)) {
+                const opt = industryOptions.find((o) => o.code_value === selectedIndustry);
+                if (
+                    opt &&
+                    !resumeMatchesIndustryFilter(
+                        resumes.desired_industry,
+                        opt.code_name,
+                        opt.code_value,
+                        industryOptions
+                    )
+                ) {
                     return false;
                 }
             }
@@ -196,7 +196,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
             
             return true;
         });
-    }, [generalJobs, selectedSido, selectedSigungu, selectedIndustry, selectedPayType, selectedGender, selectedAge, regions]);
+    }, [generalJobs, selectedSido, selectedSigungu, selectedIndustry, selectedPayType, selectedGender, selectedAge, regions, industryOptions]);
 
     if (loading) {
         return (
@@ -385,8 +385,9 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                                 onChange={(e) => setSelectedIndustry(e.target.value)}
                                 className="w-full border border-gray-200 rounded-lg p-3 text-sm text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer bg-gray-50/50"
                             >
-                                {INDUSTRIES.map(i => (
-                                    <option key={i.id} value={i.id}>{i.nameKo}</option>
+                                <option value="all">전체 업종</option>
+                                {industryOptions.map((i) => (
+                                    <option key={i.code_value} value={i.code_value}>{i.code_name}</option>
                                 ))}
                             </select>
                         </div>
