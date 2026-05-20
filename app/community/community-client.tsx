@@ -86,17 +86,17 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
 
     return (
         <div className="flex flex-col md:flex-row gap-6 items-start">
-            {/* [Mobile Only] 상단 가로 스크롤 탭 내비게이션 */}
-            <div className="w-full md:hidden bg-white sticky top-[130px] z-20 border-b border-gray-100 overflow-x-auto scrollbar-hide shadow-sm">
-                <div className="flex px-4 py-2.5 gap-2 w-max">
+            {/* [Mobile·Tablet] 상단 메뉴 — 두 줄 그리드 (한눈에 보기) */}
+            <div className="w-full lg:hidden bg-white sticky top-[130px] z-20 border-b border-gray-100 shadow-sm">
+                <div className="grid grid-rows-2 grid-flow-col auto-cols-fr gap-2 px-3 py-3 w-full">
                     {TABS.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => handleTabChange(tab.id)}
-                            className={`px-3.5 py-1.5 rounded-full text-[12px] font-bold transition-all whitespace-nowrap ${
+                            className={`min-h-[40px] px-2 py-2 rounded-xl text-[12px] sm:text-[13px] font-black transition-all text-center leading-tight ${
                                 activeTab === tab.id
                                     ? 'bg-primary text-white shadow-md'
-                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                         >
                             {tab.label}
@@ -105,8 +105,8 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
                 </div>
             </div>
 
-            {/* [Desktop Only] 좌측 사이드바 */}
-            <div className="w-52 shrink-0 sticky top-[130px] hidden md:block">
+            {/* [Large Desktop] 좌측 사이드바 */}
+            <div className="w-52 shrink-0 sticky top-[130px] hidden lg:block">
                 <CommunitySidebar currentTab={activeTab} onTabChange={handleTabChange} />
             </div>
 
