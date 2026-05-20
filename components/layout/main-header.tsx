@@ -145,7 +145,7 @@ export function MainHeader({ session }: MainHeaderProps) {
             {/* 1단: 역할(좌) · 로고(중앙·조금 큼) · 로그인/가입(우, 비로그인만) · 검색은 아래 줄(md+) */}
             <div className="container mx-auto px-4 lg:px-8 flex flex-col gap-2 md:gap-2.5 py-2 md:py-2.5">
                 <div className="relative flex items-center justify-center min-h-[3.5rem] md:min-h-[4.25rem]">
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-[38%] sm:max-w-[40%] pr-1">
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-[38%] sm:max-w-[40%] pr-1">
                         {session ? (
                             <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                                 <span className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] font-bold text-gray-600 min-w-0">

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Megaphone, Plus, Zap, Crown, Loader2, HelpCircle, ChevronLeft } from 'lucide-react';
+import { ChevronRight, Megaphone, Plus, Zap, Crown, Loader2, ChevronLeft } from 'lucide-react';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { useLanguage } from '@/components/providers/language-provider';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
@@ -219,14 +219,13 @@ export function HomeJobSections() {
                         <Zap className="w-6 h-6 text-yellow-500 animate-pulse" /> {t.sections.specialJobsTitle}
                     </h2>
                     <div className="flex items-center gap-3">
-                        <AdPriceModal type="special" title="Special" />
                         <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
                             {t.common.viewAll || '전체보기'} <ChevronRight className="w-4 h-4" />
                         </Link>
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className={`grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-1.5 sm:gap-4 w-full grid-flow-dense
+                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-1.5 sm:gap-4 w-full grid-flow-dense
                         [&>*:nth-child(n+19)]:hidden 
                         sm:[&>*:nth-child(n+19)]:block sm:[&>*:nth-child(n+25)]:hidden 
                         md:[&>*:nth-child(n+25)]:block md:[&>*:nth-child(n+33)]:hidden 
@@ -266,7 +265,7 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className={`grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-1.5 sm:gap-4 w-full
+                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-1.5 sm:gap-4 w-full
                         [&>*:nth-child(n+19)]:hidden 
                         sm:[&>*:nth-child(n+19)]:block sm:[&>*:nth-child(n+25)]:hidden 
                         md:[&>*:nth-child(n+25)]:block md:[&>*:nth-child(n+33)]:hidden 
