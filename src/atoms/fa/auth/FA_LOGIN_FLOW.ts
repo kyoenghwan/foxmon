@@ -1,3 +1,4 @@
+import { normalizeLoginId } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
 import { RA_VALIDATE_LOGIN } from '@/src/atoms/ra/auth/RA_VALIDATE_LOGIN';
 import { QA_GET_USER_AUTH } from '@/src/atoms/qa/auth/QA_GET_USER_AUTH';
 import { RA_VERIFY_PASSWORD } from '@/src/atoms/ra/auth/RA_VERIFY_PASSWORD';
@@ -9,7 +10,8 @@ import { nvLog } from '../../../../lib/logger';
  */
 export const FA_LOGIN_FLOW = async (input: { loginId?: string; password?: string; authContext?: any }) => {
   // Context Mapping의 핵심: 모든 입출력은 context 객체 내부에서만 순환합니다.
-  const context: any = { input };
+  const normalizedLoginId = normalizeLoginId(input?.loginId ?? '');
+  const context: any = { input: { ...input, loginId: normalizedLoginId } };
   nvLog('AT', '▶️ FA_LOGIN_FLOW 시작', { loginId: context.input.loginId });
 
   try {

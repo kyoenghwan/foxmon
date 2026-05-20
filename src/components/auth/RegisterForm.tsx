@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { nvLog } from '@/lib/logger';
 import { FA_REGISTER_FLOW } from '@/src/atoms/fa/auth/FA_REGISTER_FLOW';
 import { FA_CHECK_DUPLICATE_FLOW } from '@/src/atoms/fa/auth/FA_CHECK_DUPLICATE_FLOW';
+import { normalizeLoginId } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -473,13 +474,14 @@ export function RegisterForm() {
                   <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">아이디 <span className="text-purple-600">*</span></Label>
                   <div className="flex gap-2">
                     <Input
-                      placeholder="4~15자 영문/숫자"
+                      placeholder="4~15자 영문 소문자·숫자"
                       value={formData.loginId}
                       onChange={(e) => {
-                        setFormData({ ...formData, loginId: e.target.value });
+                        setFormData({ ...formData, loginId: normalizeLoginId(e.target.value) });
                         setDuplicateChecked(prev => ({ ...prev, id: false }));
                       }}
                       autoComplete="off"
+                      spellCheck={false}
                       className="bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11 rounded-xl flex-1 focus-visible:ring-purple-500/50 text-sm font-bold"
                     />
                     <Button
