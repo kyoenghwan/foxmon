@@ -51,6 +51,10 @@ import {
   type ResumeSnsFormRow,
 } from '@/lib/resume-sns';
 
+/** 이력서 폼 주요 블록 구분 (테두리·배경) */
+const RESUME_FORM_SECTION_CLASS =
+  'rounded-xl border border-gray-200 bg-gray-50/50 shadow-sm p-4 md:p-6 space-y-4';
+
 function resolveSalaryTypeValue(type: string | undefined, salaryTypes: CodeItem[]) {
   if (!type) return '';
   const match = salaryTypes.find((s) => s.code_value === type || s.code_name === type);
@@ -671,7 +675,7 @@ export function ResumeManagementModal() {
           ) : (
             <div className="bg-white border rounded-xl shadow-sm p-4 flex flex-col gap-4 md:p-6 md:gap-6">
               {/* 제목 (모바일: 라벨 옆 인라인) */}
-              <section>
+              <section className={RESUME_FORM_SECTION_CLASS}>
                 <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
                   <label className="text-base font-black text-gray-800 shrink-0 whitespace-nowrap md:text-lg md:mb-2 md:block">
                     <span className="text-primary">*</span>{' '}
@@ -689,8 +693,8 @@ export function ResumeManagementModal() {
               </section>
 
               {/* 사진 및 기본정보 Section */}
-              <section>
-                <h3 className="font-black border-l-3 border-primary pl-2.5 mb-3 text-gray-800 text-sm md:text-base">기본 정보</h3>
+              <section className={RESUME_FORM_SECTION_CLASS}>
+                <h3 className="font-black border-l-3 border-primary pl-2.5 text-gray-800 text-sm md:text-base">기본 정보</h3>
                 <div className="flex flex-col md:flex-row gap-4 md:gap-8">
                   {/* 왼쪽: 사진 첨부 */}
                   <div className="flex flex-col items-center gap-3 flex-shrink-0">
@@ -764,9 +768,9 @@ export function ResumeManagementModal() {
               </section>
 
               {/* 연락처 및 SNS Section */}
-              <section>
-                <h3 className="font-black border-l-3 border-primary pl-2.5 mb-3 text-gray-800 text-sm md:text-base">연락처 및 SNS</h3>
-                <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-3 flex flex-col gap-4 md:p-5 md:gap-6">
+              <section className={RESUME_FORM_SECTION_CLASS}>
+                <h3 className="font-black border-l-3 border-primary pl-2.5 text-gray-800 text-sm md:text-base">연락처 및 SNS</h3>
+                <div className="flex flex-col gap-4 md:gap-6">
                     <div>
                       <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
                         <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-2 md:block">연락처</label>
@@ -869,8 +873,8 @@ export function ResumeManagementModal() {
               </section>
 
               {/* 근무 조건 Section */}
-              <section>
-                <h3 className="font-black border-l-3 border-primary pl-2.5 mb-3 text-gray-800 text-sm md:text-base">근무 조건</h3>
+              <section className={RESUME_FORM_SECTION_CLASS}>
+                <h3 className="font-black border-l-3 border-primary pl-2.5 text-gray-800 text-sm md:text-base">근무 조건</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
                   <div className="sm:col-span-2">
                     <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch mb-2">
@@ -1147,14 +1151,14 @@ export function ResumeManagementModal() {
               </section>
 
               {/* 키워드 Section */}
-              <section>
-                <div className="flex items-center gap-2 mb-4">
+              <section className={RESUME_FORM_SECTION_CLASS}>
+                <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-black border-l-3 border-primary pl-2.5 text-gray-800 text-sm md:text-base">키워드</h3>
                   <span className="text-xs text-gray-500 font-medium">
                     (키워드·혜택은 3개까지 선택 가능합니다.)
                   </span>
                 </div>
-                <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100">
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 bg-white p-3 sm:p-4 rounded-xl border border-gray-200/80">
                   {keywordsList.map((item) => (
                     <label key={item.code_value} className="flex items-center gap-1.5 cursor-pointer min-w-0">
                       <input
@@ -1195,8 +1199,8 @@ export function ResumeManagementModal() {
               </section>
 
               {/* 자기소개 Section */}
-              <section>
-                <h3 className="font-black border-l-3 border-primary pl-2.5 mb-3 text-gray-800 text-sm md:text-base">자기소개 및 경력 상세</h3>
+              <section className={RESUME_FORM_SECTION_CLASS}>
+                <h3 className="font-black border-l-3 border-primary pl-2.5 text-gray-800 text-sm md:text-base">자기소개 및 경력 상세</h3>
                 <div>
                   <textarea rows={5} value={formData.self_introduction || ''} onChange={e => setFormData({...formData, self_introduction: e.target.value})} className="w-full p-2.5 border border-gray-200 rounded-lg focus:border-primary outline-none transition-colors text-sm font-medium resize-none leading-relaxed md:p-3 md:border-2 md:border-gray-100 md:rounded-xl" placeholder="이전 알바 경험, 본인의 특장점, 마음가짐 등을 자유롭고 자세하게 적어주시면 채용 확률이 200% 상승합니다!" />
                 </div>
