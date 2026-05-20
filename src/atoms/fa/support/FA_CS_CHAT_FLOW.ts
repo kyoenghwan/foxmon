@@ -1,5 +1,6 @@
 "use server";
 
+import { supabaseAdmin } from '@/lib/supabase';
 import { QA_GET_CS_ROOM } from '@/src/atoms/qa/support/QA_GET_CS_ROOM';
 import { OA_INSERT_CS_ROOM } from '@/src/atoms/oa/support/OA_INSERT_CS_ROOM';
 import { OA_INSERT_CHAT_PARTICIPANT } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_PARTICIPANT';
@@ -28,13 +29,29 @@ export const FA_CS_CHAT_FLOW = async (data: CSFlowData) => {
 
         if (!room) throw new Error('방 정보가 없습니다.');
 
-        // 3. 방에 참여자로 등록 (이미 등록되어 있으면 중복 에러가 날 수 있으나 OA 쪽에서 처리되거나 무시됨, 여기서는 그냥 시도)
+        // 3. 고객 참여자 등록 (upsert)
         await OA_INSERT_CHAT_PARTICIPANT({
             room_id: room.id,
             session_id: data.session_id,
             nickname: data.nickname,
             avatar_type: data.avatar_type
         });
+
+        // 4. site_settings 의 고객센터 전용 계정을 동일 방에 참가자로 등록 (실시간 상담·수신용)
+        const { data: adminSetting } = await supabaseAdmin
+            .from('site_settings')
+            .select('key_value')
+            .eq('key_name', 'cs_admin_user_id')
+            .single();
+        const adminUserId = adminSetting?.key_value?.trim();
+        if (adminUserId && adminUserId !== data.session_id) {
+            await OA_INSERT_CHAT_PARTICIPANT({
+                room_id: room.id,
+                session_id: adminUserId,
+                nickname: '폭스몬 고객센터',
+                avatar_type: 'fox1',
+            });
+        }
 
         return { success: true, data: room };
     } catch (error: any) {

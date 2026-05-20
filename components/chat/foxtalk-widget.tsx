@@ -38,6 +38,8 @@ export function FoxTalkWidget() {
     // Auth Role State
     const [userRole, setUserRole] = useState<string | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
+    /** 로그인 시 고객센터/폭스톡에 쓸 안정적인 식별자·표시명 (DB session_id = user.id) */
+    const [sessionChatUser, setSessionChatUser] = useState<{ id: string; nickname: string } | null>(null);
 
     useEffect(() => {
         // Fetch session once to determine user role for menu display
@@ -49,6 +51,13 @@ export function FoxTalkWidget() {
                 }
                 if (session?.user?.id) {
                     setUserId(session.user.id);
+                    const nick =
+                        String((session.user as { nickname?: string }).nickname || '').trim() ||
+                        String(session.user.name || '').trim() ||
+                        '고객';
+                    setSessionChatUser({ id: session.user.id, nickname: nick });
+                } else {
+                    setSessionChatUser(null);
                 }
             })
             .catch(() => {});
@@ -80,6 +89,12 @@ export function FoxTalkWidget() {
             scrollToBottom();
         }
     }, [messages, appState]);
+
+    useEffect(() => {
+        if (appState === 'CS_SETUP' && sessionChatUser?.nickname) {
+            setSetupNick(sessionChatUser.nickname);
+        }
+    }, [appState, sessionChatUser]);
 
     useEffect(() => {
         // 커스텀 이벤트 수신 (다른 컴포넌트에서 폭스톡 열기)
@@ -230,12 +245,31 @@ export function FoxTalkWidget() {
 
     // CS Chat Methods
     const handleOpenCS = async () => {
-        const currentProfile = profile || (localStorage.getItem('foxtalk_profile') ? JSON.parse(localStorage.getItem('foxtalk_profile')!) : null);
+        const fromSession =
+            sessionChatUser?.id != null
+                ? {
+                      sessionId: sessionChatUser.id,
+                      nickname: sessionChatUser.nickname?.trim() || '고객',
+                      avatarType:
+                          profile?.sessionId === sessionChatUser.id
+                              ? profile.avatarType
+                              : 'fox1',
+                  }
+                : null;
+        const fromStorage =
+            profile ||
+            (typeof window !== 'undefined' && localStorage.getItem('foxtalk_profile')
+                ? (JSON.parse(localStorage.getItem('foxtalk_profile')!) as Profile)
+                : null);
+        const currentProfile = fromSession || fromStorage;
         if (!currentProfile) {
             setAppState('CS_SETUP');
             return;
         }
         setProfile(currentProfile);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('foxtalk_profile', JSON.stringify(currentProfile));
+        }
         await startCSChat(currentProfile);
     };
 
@@ -260,11 +294,12 @@ export function FoxTalkWidget() {
     };
 
     const saveProfileForCS = () => {
-        if (!setupNick) return;
-        const newProfile = {
-            sessionId: crypto.randomUUID(),
-            nickname: setupNick,
-            avatarType: setupAv
+        if (!setupNick.trim()) return;
+        const sid = sessionChatUser?.id ?? crypto.randomUUID();
+        const newProfile: Profile = {
+            sessionId: sid,
+            nickname: setupNick.trim(),
+            avatarType: setupAv,
         };
         localStorage.setItem('foxtalk_profile', JSON.stringify(newProfile));
         setProfile(newProfile);
@@ -295,16 +330,21 @@ export function FoxTalkWidget() {
         
         const channel = supabase.channel(`room:${currentRoom.id}`)
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'foxtalk_messages', filter: `room_id=eq.${currentRoom.id}` }, async (payload) => {
-                const newMessage = payload.new;
-                // 작성자 정보 가져오기
-                if (appState === 'CS_CHAT' && newMessage.participant_id === 'CS_ADMIN') {
-                     setMessages(prev => [...prev, {...newMessage, participant: { nickname: '폭스몬 고객센터', avatarType: 'fox1' }}]);
-                } else if (newMessage.participant_id && profile && newMessage.participant_id !== profile.sessionId) {
-                     const {data: p} = await supabase.from('foxtalk_participants').select('*').eq('id', newMessage.participant_id).single();
-                     setMessages(prev => [...prev, {...newMessage, participant: p}]);
-                } else {
-                    setMessages(prev => [...prev, newMessage]);
+                const newMessage = payload.new as Record<string, unknown> & { id?: string; participant_id?: string };
+                if (!newMessage?.id) return;
+                let participant: Record<string, unknown> | null = null;
+                if (newMessage.participant_id) {
+                    const { data: p } = await supabase
+                        .from('foxtalk_participants')
+                        .select('*')
+                        .eq('id', newMessage.participant_id)
+                        .single();
+                    participant = p;
                 }
+                setMessages((prev) => {
+                    if (prev.some((m: { id?: string }) => m.id === newMessage.id)) return prev;
+                    return [...prev, { ...newMessage, participant }];
+                });
             })
             .subscribe();
 
@@ -614,7 +654,7 @@ export function FoxTalkWidget() {
                                 </div>
                             </div>
                             {messages.map((msg, i) => {
-                                const isMe = msg.participant_id === profile?.sessionId;
+                                const isMe = msg.participant?.session_id === profile?.sessionId;
                                 return (
                                     <div key={i} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in slide-in-from-bottom-2 fade-in duration-300`}>
                                         <div className={`flex items-end gap-1.5 max-w-[85%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -850,7 +890,7 @@ export function FoxTalkWidget() {
                                     );
                                 }
                                 
-                                const isMe = m.participant?.nickname === profile?.nickname; // 간단 판별
+                                const isMe = m.participant?.session_id === profile?.sessionId;
 
                                 return (
                                     <div key={m.id || i} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2`}>
