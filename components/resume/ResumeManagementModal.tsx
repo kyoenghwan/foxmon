@@ -518,15 +518,16 @@ export function ResumeManagementModal() {
                             <button
                               type="button"
                               onClick={(e) => handleTogglePublic(e, r)}
-                              className={`flex items-center gap-1.5 px-3 h-8 rounded-full text-xs font-bold border transition-all ${
+                              aria-label={r.is_public ? '공개 중, 탭하여 비공개로 전환' : '비공개, 탭하여 공개로 전환'}
+                              className={`flex items-center justify-center gap-0 sm:gap-1.5 h-8 min-w-9 sm:min-w-0 px-2 sm:px-3 rounded-full text-xs font-bold border transition-all ${
                                 r.is_public
                                   ? 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
                                   : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
                               }`}
                               title={r.is_public ? '공개 중 (클릭하여 비공개)' : '비공개 (클릭하여 공개)'}
                             >
-                              {r.is_public ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                              {r.is_public ? '공개' : '비공개'}
+                              {r.is_public ? <Eye className="w-3.5 h-3.5 shrink-0" /> : <EyeOff className="w-3.5 h-3.5 shrink-0" />}
+                              <span className="hidden sm:inline">{r.is_public ? '공개' : '비공개'}</span>
                             </button>
                             <Button
                               type="button"
