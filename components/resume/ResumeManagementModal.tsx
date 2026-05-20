@@ -21,6 +21,7 @@ import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMM
 import { nvLog } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import {
+  buildFlatIndustryOptions,
   formatDesiredIndustries,
   isDesiredIndustrySelected,
   parseDesiredIndustries,
@@ -75,7 +76,7 @@ export function ResumeManagementModal() {
 
   // Master Data
   const [regions, setRegions] = useState<CodeItem[]>([]);
-  const [categories, setCategories] = useState<CodeItem[]>([]);
+  const [industryOptions, setIndustryOptions] = useState<CodeItem[]>([]);
   const [salaryTypes, setSalaryTypes] = useState<CodeItem[]>([]);
   const [keywordsList, setKeywordsList] = useState<CodeItem[]>([]);
   const [selectedSido, setSelectedSido] = useState<string>('');
@@ -87,7 +88,9 @@ export function ResumeManagementModal() {
       const res = await QA_GET_COMMON_CODES(undefined, true);
       if (res.success && res.data) {
         setRegions(res.data.filter(c => c.list_type === 'JOB_REGION_1' || c.list_type === 'JOB_REGION_2'));
-        setCategories(res.data.filter(c => c.list_type === 'CATEGORY_1'));
+        const category1 = res.data.filter((c) => c.list_type === 'CATEGORY_1');
+        const category2 = res.data.filter((c) => c.list_type === 'CATEGORY_2');
+        setIndustryOptions(buildFlatIndustryOptions(category1, category2));
         setSalaryTypes(res.data.filter(c => c.list_type === 'SALARY_TYPE').sort((a, b) => a.sort_order - b.sort_order));
         setKeywordsList(res.data.filter(c => c.list_type === 'KEYWORD').sort((a, b) => a.sort_order - b.sort_order));
       }
@@ -811,7 +814,7 @@ export function ResumeManagementModal() {
                   <div className="sm:col-span-2">
                     <label className="text-sm font-bold text-gray-700 block mb-2">희망 업종</label>
                     <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100">
-                        {categories.map((item) => (
+                        {industryOptions.map((item) => (
                           <label key={item.code_value} className="flex items-center gap-1.5 cursor-pointer min-w-0">
                             <input
                               type="checkbox"
@@ -855,7 +858,7 @@ export function ResumeManagementModal() {
                             </span>
                           </label>
                         ))}
-                        {categories.length === 0 && (
+                        {industryOptions.length === 0 && (
                           <span className="col-span-3 text-sm text-gray-400 font-medium py-2">
                             업종을 불러오는 중...
                           </span>
