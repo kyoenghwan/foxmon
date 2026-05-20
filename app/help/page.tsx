@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bell, Search, Eye, Pin, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bell } from 'lucide-react';
 
 // 추후 QA 원자 연동 예정 — 현재 데모 데이터
 const mockNotices = [
@@ -21,14 +21,11 @@ const tabs = ['전체', '공지', '기타'];
 
 export default function NoticePage() {
     const [activeTab, setActiveTab] = useState('전체');
-    const [searchQuery, setSearchQuery] = useState('');
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
-    const filtered = mockNotices.filter(n => {
-        const matchTab = activeTab === '전체' || n.category === activeTab;
-        const matchSearch = !searchQuery || n.title.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchTab && matchSearch;
-    });
+    const filtered = mockNotices.filter(
+        (n) => activeTab === '전체' || n.category === activeTab
+    );
 
     // pinned 먼저, 나머지는 날짜순
     const pinned = filtered.filter(n => n.is_pinned);
@@ -42,33 +39,22 @@ export default function NoticePage() {
                 </h2>
             </div>
 
-            {/* 탭 + 검색 */}
-            <div className="flex items-center justify-between">
-                <div className="flex gap-1 border-b border-gray-200">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2.5 text-[14px] font-bold border-b-2 transition-all -mb-px ${
-                                activeTab === tab
-                                    ? 'border-primary text-primary'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                            }`}
-                        >
-                            {tab}
-                        </button>
-                    ))}
-                </div>
-                <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        placeholder="검색..."
-                        className="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-[13px] w-48 outline-none focus:border-primary"
-                    />
-                </div>
+            {/* 카테고리 탭 */}
+            <div className="flex items-center gap-0 border-b border-gray-200 w-full">
+                {tabs.map((tab) => (
+                    <button
+                        key={tab}
+                        type="button"
+                        onClick={() => setActiveTab(tab)}
+                        className={`flex-1 sm:flex-none px-5 sm:px-6 py-2.5 text-[13px] sm:text-[14px] font-bold border-b-2 transition-all -mb-px whitespace-nowrap text-center ${
+                            activeTab === tab
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                        }`}
+                    >
+                        {tab}
+                    </button>
+                ))}
             </div>
 
             {/* 총 건수 */}
@@ -140,7 +126,7 @@ export default function NoticePage() {
 
                 {filtered.length === 0 && (
                     <div className="py-16 text-center text-gray-400 text-[14px] font-medium">
-                        검색 결과가 없습니다.
+                        등록된 공지가 없습니다.
                     </div>
                 )}
             </div>
