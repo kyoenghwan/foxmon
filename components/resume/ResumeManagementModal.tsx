@@ -18,6 +18,26 @@ import { SeekerAdData } from '@/src/atoms/qa/resume/QA_GET_USER_SEEKER_ADS';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { nvLog } from '@/lib/logger';
 import { cn } from '@/lib/utils';
+
+function resolveSalaryTypeValue(type: string | undefined, salaryTypes: CodeItem[]) {
+  if (!type) return '';
+  const match = salaryTypes.find((s) => s.code_value === type || s.code_name === type);
+  return match?.code_value ?? type;
+}
+
+function isNegotiableSalaryType(type: string | undefined, salaryTypes: CodeItem[]) {
+  if (!type) return false;
+  const match = salaryTypes.find((s) => s.code_value === type || s.code_name === type);
+  if (match) {
+    return match.code_value === 'NEGOTIATE' || match.code_name.includes('협의');
+  }
+  return type === '협의' || type.includes('협의');
+}
+
+function isKeywordSelected(keywords: string[] | undefined, item: CodeItem) {
+  return (keywords || []).some((k) => k === item.code_value || k === item.code_name);
+}
+
 export function ResumeManagementModal() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -37,6 +57,8 @@ export function ResumeManagementModal() {
   // Master Data
   const [regions, setRegions] = useState<CodeItem[]>([]);
   const [categories, setCategories] = useState<CodeItem[]>([]);
+  const [salaryTypes, setSalaryTypes] = useState<CodeItem[]>([]);
+  const [keywordsList, setKeywordsList] = useState<CodeItem[]>([]);
   const [selectedSido, setSelectedSido] = useState<string>('');
   const [selectedSigungu, setSelectedSigungu] = useState<string>('');
   const [isCustomSns, setIsCustomSns] = useState(false);
@@ -47,10 +69,15 @@ export function ResumeManagementModal() {
       if (res.success && res.data) {
         setRegions(res.data.filter(c => c.list_type === 'JOB_REGION_1' || c.list_type === 'JOB_REGION_2'));
         setCategories(res.data.filter(c => c.list_type === 'CATEGORY_1'));
+        setSalaryTypes(res.data.filter(c => c.list_type === 'SALARY_TYPE').sort((a, b) => a.sort_order - b.sort_order));
+        setKeywordsList(res.data.filter(c => c.list_type === 'KEYWORD').sort((a, b) => a.sort_order - b.sort_order));
       }
     };
     fetchMasterData();
   }, []);
+
+  const selectedPayType = resolveSalaryTypeValue(formData.desired_pay_type, salaryTypes);
+  const isPayNegotiable = isNegotiableSalaryType(formData.desired_pay_type, salaryTypes);
 
   useEffect(() => {
     if (formData.desired_location) {
@@ -777,31 +804,37 @@ export function ResumeManagementModal() {
                       </label>
                       <div className="flex flex-1 min-w-0 gap-1.5 md:gap-2">
                         <select
-                            value={formData.desired_pay_type || '협의'}
+                            value={selectedPayType || salaryTypes[0]?.code_value || ''}
                             onChange={e => {
-                                setFormData({...formData, desired_pay_type: e.target.value});
-                                if (e.target.value === '협의') {
-                                    setFormData(prev => ({...prev, desired_pay_amount: undefined}));
-                                }
+                                const next = e.target.value;
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  desired_pay_type: next,
+                                  ...(isNegotiableSalaryType(next, salaryTypes) ? { desired_pay_amount: undefined } : {}),
+                                }));
                             }}
                             className="w-[72px] shrink-0 h-9 px-1.5 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-xs font-medium bg-white cursor-pointer md:w-[120px] md:h-auto md:p-3 md:text-sm"
                         >
-                            <option value="시급">시급</option>
-                            <option value="일급">일급</option>
-                            <option value="주급">주급</option>
-                            <option value="월급">월급</option>
-                            <option value="협의">추후 협의</option>
+                            {salaryTypes.length > 0 ? (
+                              salaryTypes.map((item) => (
+                                <option key={item.code_value} value={item.code_value}>
+                                  {item.code_name}
+                                </option>
+                              ))
+                            ) : (
+                              <option value="">로딩 중...</option>
+                            )}
                         </select>
                         <div className="flex flex-1 min-w-0 items-center gap-1">
                             <input 
                                 type="number" 
                                 value={formData.desired_pay_amount || ''} 
                                 onChange={e => setFormData({...formData, desired_pay_amount: parseInt(e.target.value) || undefined})} 
-                                disabled={formData.desired_pay_type === '협의'}
-                                placeholder={formData.desired_pay_type === '협의' ? '협의' : '금액'} 
+                                disabled={isPayNegotiable}
+                                placeholder={isPayNegotiable ? '협의' : '금액'} 
                                 className="w-full min-w-0 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 disabled:text-gray-400 md:h-auto md:p-3" 
                             />
-                            {formData.desired_pay_type !== '협의' && <span className="text-xs font-bold text-gray-700 flex-shrink-0 md:text-sm">원</span>}
+                            {!isPayNegotiable && <span className="text-xs font-bold text-gray-700 flex-shrink-0 md:text-sm">원</span>}
                         </div>
                       </div>
                     </div>
@@ -843,29 +876,43 @@ export function ResumeManagementModal() {
                   <h3 className="font-black border-l-4 border-primary pl-3 text-gray-800 text-lg">키워드</h3>
                   <span className="text-xs text-gray-500 font-medium">(키워드는 3개까지 선택 가능합니다.)</span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                  {['선불가능', '성형지원', '숙식제공', '경력우대', '당일지급', '초보가능', '파트타임', '주말알바', '당일알바', '주간알바', '투잡알바', '평일알바'].map((kw) => (
-                    <label key={kw} className="flex items-center gap-2 cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={(formData.keywords || []).includes(kw)}
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100">
+                  {keywordsList.map((item) => (
+                    <label key={item.code_value} className="flex items-center gap-1.5 cursor-pointer min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={isKeywordSelected(formData.keywords, item)}
                         onChange={(e) => {
-                           const current = formData.keywords || [];
-                           if (e.target.checked) {
-                             if (current.length >= 3) {
-                               alert('키워드는 최대 3개까지만 선택할 수 있습니다.');
-                               return;
-                             }
-                             setFormData({...formData, keywords: [...current, kw]});
-                           } else {
-                             setFormData({...formData, keywords: current.filter(k => k !== kw)});
-                           }
+                          const current = formData.keywords || [];
+                          const selected = isKeywordSelected(current, item);
+                          if (e.target.checked) {
+                            if (!selected && current.length >= 3) {
+                              alert('키워드는 최대 3개까지만 선택할 수 있습니다.');
+                              return;
+                            }
+                            if (!selected) {
+                              const normalized = current.filter(
+                                (k) => k !== item.code_value && k !== item.code_name
+                              );
+                              setFormData({ ...formData, keywords: [...normalized, item.code_value] });
+                            }
+                          } else {
+                            setFormData({
+                              ...formData,
+                              keywords: current.filter(
+                                (k) => k !== item.code_value && k !== item.code_name
+                              ),
+                            });
+                          }
                         }}
-                        className="accent-primary w-4 h-4 rounded" 
+                        className="accent-primary w-3.5 h-3.5 sm:w-4 sm:h-4 rounded shrink-0"
                       />
-                      <span className="text-sm font-medium text-gray-700">{kw}</span>
+                      <span className="text-[11px] sm:text-sm font-medium text-gray-700 truncate">{item.code_name}</span>
                     </label>
                   ))}
+                  {keywordsList.length === 0 && (
+                    <span className="col-span-3 text-sm text-gray-400 font-medium py-2">키워드를 불러오는 중...</span>
+                  )}
                 </div>
               </section>
 
