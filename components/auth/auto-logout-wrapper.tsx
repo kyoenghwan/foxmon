@@ -13,13 +13,21 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-// TODO(테스트 후 복구): 운영 시 WARNING_TIME_MS = 290_000, LOGOUT_COUNTDOWN_SEC = 10
-const WARNING_TIME_MS = 10 * 1000; // 테스트용: 10초 무동작 시 경고
-const LOGOUT_COUNTDOWN_SEC = 10; // 테스트용: 경고 후 10초 뒤 로그아웃
+const WARNING_TIME_MS = 5 * 60 * 1000; // 5분 무동작 시 경고
+const LOGOUT_COUNTDOWN_SEC = 30; // 경고 후 30초 뒤 자동 로그아웃
 
 function clearFoxmonSessionCookies() {
   document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
   document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
+function isAuthPath(pathname: string) {
+  return (
+    pathname === '/login' ||
+    pathname.startsWith('/register') ||
+    pathname === '/age-gate' ||
+    pathname === '/find-account'
+  );
 }
 
 function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
@@ -29,35 +37,73 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const logoutInProgressRef = useRef(false);
+  const prevStatusRef = useRef(status);
   const pathname = usePathname();
+  const skipIdleTimer = isAuthPath(pathname);
+
+  const clearIdleTimer = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = null;
+  }, []);
+
+  const clearCountdown = useCallback(() => {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    countdownRef.current = null;
+  }, []);
+
+  const clearTimers = useCallback(() => {
+    clearIdleTimer();
+    clearCountdown();
+  }, [clearIdleTimer, clearCountdown]);
+
+  const resetIdleState = useCallback(() => {
+    clearTimers();
+    setShowWarning(false);
+    setRemainingSeconds(LOGOUT_COUNTDOWN_SEC);
+    logoutInProgressRef.current = false;
+  }, [clearTimers]);
 
   const performLogout = useCallback(async () => {
     if (logoutInProgressRef.current) return;
     logoutInProgressRef.current = true;
+    clearTimers();
     setShowWarning(false);
-
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (countdownRef.current) clearInterval(countdownRef.current);
+    setRemainingSeconds(LOGOUT_COUNTDOWN_SEC);
 
     clearFoxmonSessionCookies();
     await signOut({ redirect: false });
     // session_expired=1 없이 /login 이동 시 auth.config가 로그인 상태면 홈(/)으로 되돌림
     window.location.href = '/login?session_expired=1';
-  }, []);
+  }, [clearTimers]);
 
   const resetTimer = useCallback((force = false) => {
+    if (skipIdleTimer || status !== 'authenticated') return;
     if (showWarning && !force) return;
 
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (countdownRef.current) clearInterval(countdownRef.current);
+    clearIdleTimer();
 
-    if (status === 'authenticated') {
-      timerRef.current = setTimeout(() => {
-        setShowWarning(true);
-        setRemainingSeconds(LOGOUT_COUNTDOWN_SEC);
-      }, WARNING_TIME_MS);
+    timerRef.current = setTimeout(() => {
+      // remainingSeconds를 먼저 세팅한 뒤 경고를 켜야 0초 상태에서 즉시 로그아웃되지 않음
+      setRemainingSeconds(LOGOUT_COUNTDOWN_SEC);
+      setShowWarning(true);
+    }, WARNING_TIME_MS);
+  }, [showWarning, status, skipIdleTimer, clearIdleTimer]);
+
+  // 로그인/로그아웃 시 유휴 타이머 상태 완전 초기화
+  useEffect(() => {
+    const wasAuthenticated = prevStatusRef.current === 'authenticated';
+    const isAuthenticated = status === 'authenticated';
+
+    if (!isAuthenticated) {
+      resetIdleState();
+    } else if (!wasAuthenticated && isAuthenticated && !skipIdleTimer) {
+      // 새 로그인 직후 이전 카운트다운(0초) 상태가 남지 않도록 초기화
+      resetIdleState();
+      resetTimer(true);
     }
-  }, [showWarning, status]);
+
+    prevStatusRef.current = status;
+  }, [status, skipIdleTimer, resetIdleState, resetTimer]);
 
   // 카운트다운 로직
   useEffect(() => {
@@ -73,25 +119,32 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   }, [showWarning, status]);
 
   useEffect(() => {
-    if (showWarning && remainingSeconds <= 0 && status === 'authenticated') {
+    if (
+      showWarning &&
+      remainingSeconds <= 0 &&
+      status === 'authenticated' &&
+      !logoutInProgressRef.current &&
+      !skipIdleTimer
+    ) {
       void performLogout();
     }
-  }, [showWarning, remainingSeconds, status, performLogout]);
+  }, [showWarning, remainingSeconds, status, performLogout, skipIdleTimer]);
 
   // 활동 감지 이벤트 리스너
   useEffect(() => {
-    if (status !== 'authenticated') {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      if (countdownRef.current) clearInterval(countdownRef.current);
+    if (status !== 'authenticated' || skipIdleTimer) {
+      clearIdleTimer();
       return;
     }
 
-    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
-    
-    resetTimer();
-    
-    const handleActivity = () => {
+    if (!showWarning) {
       resetTimer();
+    }
+
+    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+
+    const handleActivity = () => {
+      if (!showWarning) resetTimer();
     };
 
     events.forEach((event) => {
@@ -102,10 +155,9 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
       events.forEach((event) => {
         window.removeEventListener(event, handleActivity);
       });
-      if (timerRef.current) clearTimeout(timerRef.current);
-      if (countdownRef.current) clearInterval(countdownRef.current);
+      clearIdleTimer();
     };
-  }, [resetTimer, status, pathname]); 
+  }, [resetTimer, status, pathname, skipIdleTimer, clearIdleTimer, showWarning]);
 
   // Option A: 탭 닫힘 시 로그아웃 처리 (beforeunload)
   useEffect(() => {
@@ -123,9 +175,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   }, [status]);
 
   const handleExtendSession = () => {
-    logoutInProgressRef.current = false;
-    setShowWarning(false);
-    setRemainingSeconds(LOGOUT_COUNTDOWN_SEC);
+    resetIdleState();
     resetTimer(true);
   };
 
