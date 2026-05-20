@@ -319,8 +319,9 @@ export function FoxTalkWidget() {
         
         if (res.success) {
             setMsgInput('');
+            await loadCSMessages(currentRoom.id);
         } else {
-            alert('메시지 전송에 실패했습니다.');
+            alert(res.message || res.error || '메시지 전송에 실패했습니다.');
         }
     };
 

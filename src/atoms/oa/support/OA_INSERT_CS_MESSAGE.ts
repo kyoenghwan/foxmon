@@ -2,83 +2,146 @@
 
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendTelegramMessageDirect } from '@/lib/telegram';
+import { OA_INSERT_CHAT_PARTICIPANT } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_PARTICIPANT';
 
 interface CSMessageData {
     room_id: string;
-    participant_id?: string; // 시스템 메시지 또는 관리자일 경우 특정 마커 사용 (예: 'CS_ADMIN')
+    participant_id?: string;
     content: string;
     message_type?: 'TEXT' | 'SYSTEM_JOIN' | 'SYSTEM_LEAVE' | 'SYSTEM_ALERT';
-    sender_nickname?: string; // 텔레그램 발송용
+    sender_nickname?: string;
+}
+
+async function getCsAdminUserId(): Promise<string | null> {
+    const { data } = await supabaseAdmin
+        .from('site_settings')
+        .select('key_value')
+        .eq('key_name', 'cs_admin_user_id')
+        .single();
+    return data?.key_value?.trim() || null;
+}
+
+async function resolveParticipantId(
+    roomId: string,
+    sessionId: string,
+    senderNickname?: string
+): Promise<string | null> {
+    const { data: existing } = await supabaseAdmin
+        .from('foxtalk_participants')
+        .select('id')
+        .eq('room_id', roomId)
+        .eq('session_id', sessionId)
+        .maybeSingle();
+
+    if (existing?.id) return existing.id;
+
+    await OA_INSERT_CHAT_PARTICIPANT({
+        room_id: roomId,
+        session_id: sessionId,
+        nickname: senderNickname || '고객',
+        avatar_type: 'fox1',
+    });
+
+    const { data: created } = await supabaseAdmin
+        .from('foxtalk_participants')
+        .select('id')
+        .eq('room_id', roomId)
+        .eq('session_id', sessionId)
+        .maybeSingle();
+
+    return created?.id || null;
+}
+
+async function insertCsAutoReply(roomId: string, adminUserId: string) {
+    await OA_INSERT_CHAT_PARTICIPANT({
+        room_id: roomId,
+        session_id: adminUserId,
+        nickname: '폭스몬 고객센터',
+        avatar_type: 'fox1',
+    });
+
+    const { data: csParticipant } = await supabaseAdmin
+        .from('foxtalk_participants')
+        .select('id')
+        .eq('room_id', roomId)
+        .eq('session_id', adminUserId)
+        .maybeSingle();
+
+    if (!csParticipant?.id) return;
+
+    await supabaseAdmin.from('foxtalk_messages').insert([
+        {
+            room_id: roomId,
+            participant_id: csParticipant.id,
+            content:
+                '문의해 주셔서 감사합니다. 담당자가 확인 후 순서대로 답변드리겠습니다. 잠시만 기다려 주세요.',
+            message_type: 'TEXT',
+        },
+    ]);
 }
 
 export const OA_INSERT_CS_MESSAGE = async (data: CSMessageData) => {
     try {
-        let actualParticipantId = null;
+        let actualParticipantId: string | null = null;
+        const adminUUID = await getCsAdminUserId();
 
-        // data.participant_id로 전달된 값이 'CS_ADMIN'이 아니라면 session_id로 간주하고 실제 participant_id를 조회합니다.
         if (data.participant_id && data.participant_id !== 'CS_ADMIN') {
-            const { data: p } = await supabaseAdmin
-                .from('foxtalk_participants')
-                .select('id')
-                .eq('room_id', data.room_id)
-                .eq('session_id', data.participant_id)
-                .single();
-            if (p) {
-                actualParticipantId = p.id;
-            }
+            actualParticipantId = await resolveParticipantId(
+                data.room_id,
+                data.participant_id,
+                data.sender_nickname
+            );
         }
 
         const { data: message, error } = await supabaseAdmin
             .from('foxtalk_messages')
-            .insert([{
-                room_id: data.room_id,
-                participant_id: actualParticipantId, // DB의 실제 foxtalk_participants.id
-                content: data.content,
-                message_type: data.message_type || 'TEXT'
-            }])
+            .insert([
+                {
+                    room_id: data.room_id,
+                    participant_id: actualParticipantId,
+                    content: data.content,
+                    message_type: data.message_type || 'TEXT',
+                },
+            ])
             .select()
             .single();
 
         if (error) throw error;
 
-        // 방의 last_message_at 업데이트
         await supabaseAdmin
             .from('foxtalk_rooms')
             .update({ last_message_at: new Date().toISOString() })
             .eq('id', data.room_id);
 
-        // --- 텔레그램 관리자에게 알림 전송 (단방향) ---
-        // 관리자가 보낸 경우(participant_id가 관리자 UUID이거나 'CS_ADMIN'인 경우)에는 알림 제외
-        if (data.message_type === 'TEXT' && data.participant_id) {
-            
-            // 관리자 UUID 확인
-            const { data: adminSetting } = await supabaseAdmin
+        const isCustomerText =
+            data.message_type !== 'SYSTEM_JOIN' &&
+            data.message_type !== 'SYSTEM_LEAVE' &&
+            data.message_type !== 'SYSTEM_ALERT' &&
+            (data.message_type || 'TEXT') === 'TEXT' &&
+            !!data.participant_id &&
+            data.participant_id !== 'CS_ADMIN' &&
+            data.participant_id !== adminUUID;
+
+        if (isCustomerText && adminUUID) {
+            await insertCsAutoReply(data.room_id, adminUUID);
+        }
+
+        if (isCustomerText) {
+            const { data: tgSetting } = await supabaseAdmin
                 .from('site_settings')
                 .select('key_value')
-                .eq('key_name', 'cs_admin_user_id')
+                .eq('key_name', 'cs_telegram_chat_id')
                 .single();
-                
-            const adminUUID = adminSetting?.key_value?.trim();
-            
-            if (data.participant_id !== 'CS_ADMIN' && data.participant_id !== adminUUID) {
-                // 관리자 텔레그램 Chat ID 조회
-                const { data: tgSetting } = await supabaseAdmin
-                    .from('site_settings')
-                    .select('key_value')
-                    .eq('key_name', 'cs_telegram_chat_id')
-                    .single();
-                    
-                const adminChatId = tgSetting?.key_value?.trim();
-                
-                if (adminChatId) {
-                    const tgMsg = `🎧 <b>[고객센터 문의 도착]</b>\n👤 <b>${data.sender_nickname || '익명'}</b>\n\n"${data.content}"\n\n👉 폭스몬 웹사이트 관리자 로비에서 확인 및 답변해 주세요.\nhttps://foxmon.co.kr`;
-                    await sendTelegramMessageDirect(adminChatId, tgMsg);
-                }
+
+            const adminChatId = tgSetting?.key_value?.trim();
+            if (adminChatId) {
+                const tgMsg = `🎧 <b>[고객센터 문의 도착]</b>\n👤 <b>${data.sender_nickname || '익명'}</b>\n\n"${data.content}"\n\n👉 관리자 고객센터 메신저에서 답변해 주세요.\nhttps://foxmon.co.kr/fox-office/support/inbox`;
+                await sendTelegramMessageDirect(adminChatId, tgMsg);
             }
         }
 
         return { success: true, data: message };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('OA_INSERT_CS_MESSAGE Error:', error);
         return { success: false, error: '메시지 전송에 실패했습니다.' };
     }

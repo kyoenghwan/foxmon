@@ -28,6 +28,7 @@ const ADMIN_MENUS = [
   { id: 'community', label: '커뮤니티 관리', icon: MessageSquare, href: '/fox-office/community' },
   { id: 'support', label: '고객센터', icon: HelpCircle, href: '/fox-office/support' },
   { id: 'support-staff', label: '고객센터 담당자', icon: Users, href: '/fox-office/support/staff' },
+  { id: 'support-inbox', label: '고객센터 메신저', icon: MessageSquare, href: '/fox-office/support/inbox' },
   { id: 'settings', label: '시스템 설정', icon: Settings, href: '/fox-office/settings' },
   { id: 'policies', label: '약관 및 정책 관리', icon: FileText, href: '/fox-office/settings/policies' },
   { id: 'master-data', label: '공통코드/마스터', icon: FileText, href: '/fox-office/master-data' },

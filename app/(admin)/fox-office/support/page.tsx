@@ -33,7 +33,10 @@ export default function AdminSupportPage() {
                     </div>
                 </Link>
 
-                <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-6">
+                <Link
+                    href="/fox-office/support/inbox"
+                    className="bg-white rounded-2xl border border-gray-200 p-6 hover:border-primary hover:shadow-md transition-all"
+                >
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center">
                             <Headset className="w-6 h-6 text-primary/70" />
@@ -41,11 +44,11 @@ export default function AdminSupportPage() {
                         <div className="min-w-0">
                             <h3 className="font-black text-gray-900 text-[16px]">메신저 관리(인박스)</h3>
                             <p className="text-[13px] font-medium text-gray-500 mt-1">
-                                CS 채팅방 목록/답장/배정 기능은 다음 단계로 연결됩니다.
+                                고객 문의 목록 확인 · 답변 (실시간 반영)
                             </p>
                         </div>
                     </div>
-                </div>
+                </Link>
             </div>
         </div>
     );
