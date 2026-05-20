@@ -38,7 +38,7 @@ interface MainHeaderProps {
 
 export function MainHeader({ session }: MainHeaderProps) {
     const { language, setLanguage, t } = useLanguage();
-    const pathname = usePathname();
+    const pathname = usePathname() ?? '';
     const [showMegaMenu, setShowMegaMenu] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
@@ -80,6 +80,9 @@ export function MainHeader({ session }: MainHeaderProps) {
     const isEmployer = session?.user?.role === 'EMPLOYER' || session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN';
     const showResumeMenu = session?.user?.role !== 'EMPLOYER';
     const isBusinessVerified = (session?.user as any)?.business_number ? true : false;
+    /** 홈·구인 등은 프로필 카드에 로그아웃이 있음. `/biz`, `/help`만 헤더에 유지 */
+    const showLogoutInHeader =
+        !!session && (pathname.startsWith('/biz') || pathname.startsWith('/help'));
 
     // 요청하신 순서대로 메뉴 재배치
     const menuItems = [
@@ -139,19 +142,77 @@ export function MainHeader({ session }: MainHeaderProps) {
                 </div>
             </div>
 
-            {/* 1단: 로고(좌) · 검색(중) · 로그인(우) */}
-            <div className="container mx-auto px-4 lg:px-8 h-16 md:h-20 flex items-center justify-between gap-6">
-                <div className="flex-shrink-0">
-                    <Link href="/" className="group flex items-center">
+            {/* 1단: 역할(좌) · 로고(중앙·조금 큼) · 로그인/가입(우, 비로그인만) · 검색은 아래 줄(md+) */}
+            <div className="container mx-auto px-4 lg:px-8 flex flex-col gap-2 md:gap-2.5 py-2 md:py-2.5">
+                <div className="relative flex items-center justify-center min-h-[3.5rem] md:min-h-[4.25rem]">
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-[38%] sm:max-w-[40%] pr-1">
+                        {session ? (
+                            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                                <span className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] font-bold text-gray-600 min-w-0">
+                                    <span className={`shrink-0 text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full font-black text-white ${
+                                        session.user?.role === 'SUPER_ADMIN' ? 'bg-red-500' :
+                                        session.user?.role === 'ADMIN' ? 'bg-purple-600' :
+                                        session.user?.role === 'EMPLOYER' ? 'bg-primary' : 'bg-blue-500'
+                                    }`}>
+                                        {session.user?.role === 'SUPER_ADMIN' ? 'S' :
+                                         session.user?.role === 'ADMIN' ? 'A' :
+                                         session.user?.role === 'EMPLOYER' ? 'B' : 'U'}
+                                    </span>
+                                    <span className="text-primary font-black ml-0.5 hidden sm:inline truncate">
+                                        {session.user?.role === 'SUPER_ADMIN' ? '최고 관리자' :
+                                         session.user?.role === 'ADMIN' ? '일반 관리자' :
+                                         session.user?.role === 'EMPLOYER' ? '업체회원' : '개인회원'}
+                                    </span>
+                                </span>
+                                {(session.user?.role === 'ADMIN' || session.user?.role === 'SUPER_ADMIN') && (
+                                    <>
+                                        <span className="text-gray-300 hidden md:inline shrink-0">|</span>
+                                        <Link href="/fox-office" className="hover:text-primary transition-colors hidden md:inline text-[12px] shrink-0">관리자홈</Link>
+                                    </>
+                                )}
+                            </div>
+                        ) : null}
+                    </div>
+
+                    <Link href="/" className="group flex items-center z-10">
                         <img
                             src="/logo.png"
                             alt="FOXMON"
-                            className="h-9 sm:h-11 md:h-14 w-auto drop-shadow-sm hover:scale-105 transition-transform"
+                            className="h-10 sm:h-12 md:h-16 w-auto drop-shadow-sm hover:scale-105 transition-transform"
                         />
                     </Link>
+
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-end gap-2 sm:gap-3 min-w-0 max-w-[38%] sm:max-w-[40%] pl-1 text-[12px] sm:text-[13px] font-bold text-gray-500">
+                        {!session ? (
+                            <div className="flex items-center gap-2 sm:gap-3 whitespace-nowrap">
+                                <Link href="/login" className="hover:text-gray-900 transition-colors">로그인</Link>
+                                <span className="text-gray-300">|</span>
+                                <Link href="/signup" className="hover:text-gray-900 transition-colors">회원가입</Link>
+                            </div>
+                        ) : showLogoutInHeader ? (
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    document.body.style.opacity = '0.5';
+                                    try {
+                                        document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                        document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                        await signOut({ callbackUrl: '/login' });
+                                    } catch (e) {
+                                        console.error(e);
+                                    }
+                                }}
+                                className="flex items-center gap-1 font-black text-red-500 hover:text-red-700 transition-colors whitespace-nowrap"
+                            >
+                                <LogOut className="w-3.5 h-3.5 shrink-0" />
+                                <span className="hidden sm:inline">로그아웃</span>
+                                <span className="sm:hidden">LOGOUT</span>
+                            </button>
+                        ) : null}
+                    </div>
                 </div>
 
-                <div className="flex-1 max-w-2xl hidden md:flex flex-col justify-center">
+                <div className="flex-1 max-w-2xl w-full mx-auto hidden md:flex flex-col justify-center">
                     <div className="relative group w-full">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <Search className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
@@ -169,58 +230,6 @@ export function MainHeader({ session }: MainHeaderProps) {
                         <Link href="/jobs?q=경기구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">경기구인</Link>
                         <Link href="/jobs?q=스웨디시구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">스웨디시구인</Link>
                     </div>
-                </div>
-
-                <div className="flex items-center gap-2 sm:gap-4 text-[12px] sm:text-[13px] font-bold text-gray-500 shrink-0">
-                    {session ? (
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            <span className="flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-[13px] font-bold text-gray-600">
-                                <span className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full font-black text-white ${
-                                    session.user?.role === 'SUPER_ADMIN' ? 'bg-red-500' : 
-                                    session.user?.role === 'ADMIN' ? 'bg-purple-600' : 
-                                    session.user?.role === 'EMPLOYER' ? 'bg-primary' : 'bg-blue-500'
-                                }`}>
-                                    {session.user?.role === 'SUPER_ADMIN' ? 'S' : 
-                                     session.user?.role === 'ADMIN' ? 'A' : 
-                                     session.user?.role === 'EMPLOYER' ? 'B' : 'U'}
-                                </span>
-                                <span className="text-primary font-black ml-1 hidden sm:inline">
-                                    {session.user?.role === 'SUPER_ADMIN' ? '최고 관리자' : 
-                                     session.user?.role === 'ADMIN' ? '일반 관리자' : 
-                                     session.user?.role === 'EMPLOYER' ? '업체회원' : '개인회원'}
-                                </span>
-                            </span>
-                            {(session.user?.role === 'ADMIN' || session.user?.role === 'SUPER_ADMIN') && (
-                                <>
-                                    <span className="text-gray-300 hidden sm:inline">|</span>
-                                    <Link href="/fox-office" className="hover:text-primary transition-colors hidden sm:inline">관리자홈</Link>
-                                </>
-                            )}
-                            <span className="text-gray-300">|</span>
-                            <button 
-                                onClick={async () => {
-                                    document.body.style.opacity = '0.5';
-                                    try {
-                                        document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                                        document.cookie = "foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                                        await signOut({ callbackUrl: '/login' });
-                                    } catch (e) {
-                                        console.error(e);
-                                    }
-                                }} 
-                                className="flex items-center gap-1 font-black text-red-500 hover:text-red-700 transition-colors"
-                            >
-                                <LogOut className="w-3.5 h-3.5" />
-                                <span className="hidden xs:inline">로그아웃</span><span className="xs:hidden">LOGOUT</span>
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-2 sm:gap-3 whitespace-nowrap">
-                            <Link href="/login" className="hover:text-gray-900 transition-colors">로그인</Link>
-                            <span className="text-gray-300">|</span>
-                            <Link href="/signup" className="hover:text-gray-900 transition-colors">회원가입</Link>
-                        </div>
-                    )}
                 </div>
             </div>
 

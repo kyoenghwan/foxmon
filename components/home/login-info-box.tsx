@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { User, FileText, Heart, Eye, Clock, LogIn, Mail, Settings, LogOut, Briefcase } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 import { useLanguage } from '@/components/providers/language-provider';
 import { SettingsModal } from '@/components/mypage/SettingsModal';
 import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
@@ -69,12 +70,32 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                     </div>
 
                     {/* 우측 정보 & 버튼 영역 (flex-col로 상하 배치) */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-between h-16 pt-0.5">
-                        {/* 1. 인사말 (길면 마퀴 스크롤) */}
-                        <div className="w-full min-w-0">
-                            <MarqueeText className="font-black text-[15px] sm:text-base text-gray-900 leading-tight">
-                                <span className="text-primary">{displayName}</span>님 반갑습니다!
-                            </MarqueeText>
+                    <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[4rem] pt-0.5 gap-2">
+                        {/* 1. 인사말 + 로그아웃(우측 끝) */}
+                        <div className="flex w-full min-w-0 items-center gap-2">
+                            <div className="min-w-0 flex-1">
+                                <MarqueeText className="font-black text-[15px] sm:text-base text-gray-900 leading-tight">
+                                    <span className="text-primary">{displayName}</span>님 반갑습니다!
+                                </MarqueeText>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    document.body.style.opacity = '0.5';
+                                    try {
+                                        document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                        document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                        await signOut({ callbackUrl: '/login' });
+                                    } catch (e) {
+                                        console.error(e);
+                                    }
+                                }}
+                                className="shrink-0 flex items-center gap-0.5 sm:gap-1 font-black text-red-500 hover:text-red-700 transition-colors text-[11px] sm:text-xs"
+                            >
+                                <LogOut className="w-3.5 h-3.5 shrink-0" />
+                                <span className="hidden sm:inline">로그아웃</span>
+                                <span className="sm:hidden tracking-tight">LOGOUT</span>
+                            </button>
                         </div>
 
                         {/* 2. 하단 액션 버튼들 (이력서 관리 두껍게, 우측 설정 버튼) */}
@@ -106,7 +127,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                 </div>
 
                 {/* Bottom Icons - Flex spaced */}
-                <div className="flex justify-around items-center pt-4 border-t border-gray-100 mt-auto px-1">
+                <div className="flex justify-around items-center pt-4 mt-auto px-1">
                     <Link href="/mypage/scraps" prefetch={false} className="flex flex-col items-center gap-1.5 group">
                         <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110">
                             <Heart className="h-5 w-5 fill-current" />
