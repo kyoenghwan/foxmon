@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, Search, Lock, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { AgeVerificationBox } from '@/src/components/auth/AgeVerificationBox';
 import { nvLog } from '@/lib/logger';
-import { normalizeLoginId } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
+import { normalizeLoginIdForAuth } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
 
 function FindAccountContent() {
     const router = useRouter();
@@ -72,7 +72,7 @@ function FindAccountContent() {
                     mode: 'RESET_PW',
                     name: verifiedData.name,
                     phoneNumber: verifiedData.phoneNumber,
-                    loginId: normalizeLoginId(loginId),
+                    loginId: normalizeLoginIdForAuth(loginId),
                     newPassword,
                 }),
             });

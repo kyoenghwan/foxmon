@@ -6,10 +6,17 @@ export const LOGIN_ID_MAX_LENGTH = 15;
 export const LOGIN_ID_PATTERN = /^[a-z0-9]{4,15}$/;
 
 /**
- * 입력값을 저장·조회용 login_id로 정규화 (소문자, 영문·숫자만)
+ * 회원가입 입력 정규화 (소문자, 영문·숫자만 — 언더스코어 제거)
  */
 export function normalizeLoginId(raw: string): string {
   return raw.trim().toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, LOGIN_ID_MAX_LENGTH);
+}
+
+/**
+ * 로그인·비밀번호 찾기 조회용 (운영 계정 foxmon_cs 등 언더스코어 유지)
+ */
+export function normalizeLoginIdForAuth(raw: string): string {
+  return raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, LOGIN_ID_MAX_LENGTH);
 }
 
 export function RA_VALIDATE_LOGIN_ID_FORMAT(loginId: string): {

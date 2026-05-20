@@ -1,5 +1,5 @@
 import { nvLog } from '@/lib/logger';
-import { normalizeLoginId } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
+import { normalizeLoginIdForAuth } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
 import { QA_FIND_USER_BY_INFO } from '../../qa/auth/QA_FIND_USER_BY_INFO';
 import { OA_RESET_USER_PASSWORD } from '../../oa/auth/OA_RESET_USER_PASSWORD';
 
@@ -36,7 +36,7 @@ export async function FA_FIND_ACCOUNT_FLOW({ mode, name, phoneNumber, loginId, n
 
     if (mode === 'RESET_PW') {
       // For password reset, also verify loginId matches
-      if (loginId && normalizeLoginId(userData.loginId) !== normalizeLoginId(loginId)) {
+      if (loginId && normalizeLoginIdForAuth(userData.loginId) !== normalizeLoginIdForAuth(loginId)) {
         return { success: false, message: '입력하신 아이디와 사용자 정보가 일치하지 않습니다.' };
       }
 
