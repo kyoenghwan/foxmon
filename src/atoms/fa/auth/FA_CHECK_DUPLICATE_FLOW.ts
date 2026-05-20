@@ -1,10 +1,22 @@
 import { nvLog } from '@/lib/logger';
+import { RA_VALIDATE_RESERVED_LOGIN_ID } from '@/src/atoms/ra/auth/RA_VALIDATE_RESERVED_LOGIN_ID';
 import { QA_CHECK_ID_NICKNAME_EXISTS } from '../../qa/auth/QA_CHECK_ID_NICKNAME_EXISTS';
 
 export async function FA_CHECK_DUPLICATE_FLOW(input: { loginId?: string; nickname?: string }) {
   nvLog('AT', '▶️ FA_CHECK_DUPLICATE_FLOW 시작', input);
 
   try {
+    if (input.loginId) {
+      const reservedCheck = RA_VALIDATE_RESERVED_LOGIN_ID(input.loginId);
+      if (!reservedCheck.isValid) {
+        return {
+          success: false,
+          message: reservedCheck.error || '사용할 수 없는 아이디입니다.',
+          duplicateType: 'ID' as const,
+        };
+      }
+    }
+
     const existsCheck = await QA_CHECK_ID_NICKNAME_EXISTS(input);
 
     if (!existsCheck.success) {

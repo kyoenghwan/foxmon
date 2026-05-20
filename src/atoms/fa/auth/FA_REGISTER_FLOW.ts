@@ -1,4 +1,5 @@
 import { RA_HASH_PASSWORD } from '@/src/atoms/ra/auth/RA_HASH_PASSWORD';
+import { RA_VALIDATE_RESERVED_LOGIN_ID } from '@/src/atoms/ra/auth/RA_VALIDATE_RESERVED_LOGIN_ID';
 import { QA_CHECK_ID_NICKNAME_EXISTS } from '@/src/atoms/qa/auth/QA_CHECK_ID_NICKNAME_EXISTS';
 import { OA_CREATE_USER } from '@/src/atoms/oa/auth/OA_CREATE_USER';
 import { nvLog } from '../../../../lib/logger';
@@ -33,6 +34,11 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
   nvLog('AT', '▶️ FA_REGISTER_FLOW 시작', { loginId: input.loginId, role: input.role });
 
   try {
+    const reservedCheck = RA_VALIDATE_RESERVED_LOGIN_ID(input.loginId);
+    if (!reservedCheck.isValid) {
+      return { success: false, message: reservedCheck.error || '사용할 수 없는 아이디입니다.' };
+    }
+
     // 1. 아이디 및 닉네임 중복 확인
     const duplicateCheck = await QA_CHECK_ID_NICKNAME_EXISTS({
       loginId: input.loginId,

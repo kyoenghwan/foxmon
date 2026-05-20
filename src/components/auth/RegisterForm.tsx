@@ -151,8 +151,9 @@ export function RegisterForm() {
   const checkId = async () => {
     if (!formData.loginId) return alert('아이디를 입력해주세요.');
     const result = await FA_CHECK_DUPLICATE_FLOW({ loginId: formData.loginId });
-    if (!result.success && result.duplicateType === 'ID') {
-      alert('이미 사용 중인 아이디입니다.');
+    if (!result.success) {
+      alert(result.message || '사용할 수 없는 아이디입니다.');
+      setDuplicateChecked((prev) => ({ ...prev, id: false }));
     } else if (result.success) {
       alert('사용 가능한 아이디입니다.');
       setDuplicateChecked(prev => ({ ...prev, id: true }));
