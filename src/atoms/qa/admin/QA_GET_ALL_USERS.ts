@@ -11,7 +11,7 @@ export async function QA_GET_ALL_USERS() {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, login_id, name, nickname, role, is_age_verified, created_at, phone_number')
+      .select('id, login_id, name, nickname, role, staff_team, is_age_verified, created_at, phone_number')
       .order('created_at', { ascending: false });
 
     if (error) throw error;

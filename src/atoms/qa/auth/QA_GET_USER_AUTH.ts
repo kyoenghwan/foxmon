@@ -8,7 +8,7 @@ import { nvLog } from '../../../../lib/logger';
  */
 export async function QA_GET_USER_AUTH(input: { loginId: string }): Promise<{ 
   success: boolean; 
-  data: { id: any; login_id: any; email: any; password: any; is_age_verified: any; role: any; business_number: any; nickname: any } | null; 
+  data: { id: any; login_id: any; email: any; password: any; is_age_verified: any; role: any; staff_team?: any; business_number: any; nickname: any } | null; 
   error: string | null 
 }> {
   nvLog('AT', '▶️ QA_GET_USER_AUTH 시작', input);
@@ -35,7 +35,7 @@ export async function QA_GET_USER_AUTH(input: { loginId: string }): Promise<{
 
     const { data, error } = await supabase
       .from('users')
-      .select('id, login_id, email, password, is_age_verified, role, business_number, nickname')
+      .select('id, login_id, email, password, is_age_verified, role, staff_team, business_number, nickname')
       .eq('login_id', input.loginId)
       .single();
 

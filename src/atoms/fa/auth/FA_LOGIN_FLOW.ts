@@ -62,6 +62,7 @@ export const FA_LOGIN_FLOW = async (input: { loginId?: string; password?: string
         email: context.authResult.data.email,
         is_age_verified: context.authResult.data.is_age_verified,
         role: context.authResult.data.role,
+        staff_team: context.authResult.data.staff_team,
         business_number: context.authResult.data.business_number,
         nickname: context.authResult.data.nickname,
       },

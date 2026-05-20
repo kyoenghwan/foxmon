@@ -27,6 +27,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             email: result.data.email,
                             is_age_verified: result.data.is_age_verified,
                             role: (result.data as any).role,
+                            staff_team: (result.data as any).staff_team,
                             business_number: (result.data as any).business_number,
                             nickname: (result.data as any).nickname,
                             autoLogin: parsedCredentials.data.autoLogin === 'true',
@@ -46,6 +47,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 token.login_id = (user as any).login_id;
                 token.is_age_verified = (user as any).is_age_verified;
                 token.role = (user as any).role;
+                token.staff_team = (user as any).staff_team;
                 token.business_number = (user as any).business_number;
                 token.nickname = (user as any).nickname;
                 token.autoLogin = (user as any).autoLogin;
@@ -58,6 +60,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 (session.user as any).login_id = token.login_id;
                 (session.user as any).is_age_verified = token.is_age_verified;
                 (session.user as any).role = token.role;
+                (session.user as any).staff_team = (token as any).staff_team;
                 (session.user as any).business_number = token.business_number;
                 (session.user as any).nickname = token.nickname;
                 (session.user as any).autoLogin = token.autoLogin;
