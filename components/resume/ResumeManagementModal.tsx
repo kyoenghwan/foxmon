@@ -38,6 +38,18 @@ function isKeywordSelected(keywords: string[] | undefined, item: CodeItem) {
   return (keywords || []).some((k) => k === item.code_value || k === item.code_name);
 }
 
+function formatPayAmount(amount?: number) {
+  if (amount === undefined || amount === null || Number.isNaN(amount)) return '';
+  return amount.toLocaleString('ko-KR');
+}
+
+function parsePayAmountInput(value: string): number | undefined {
+  const raw = value.replace(/[^0-9]/g, '');
+  if (!raw) return undefined;
+  const num = parseInt(raw, 10);
+  return Number.isNaN(num) ? undefined : num;
+}
+
 export function ResumeManagementModal() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -826,13 +838,19 @@ export function ResumeManagementModal() {
                             )}
                         </select>
                         <div className="flex flex-1 min-w-0 items-center gap-1">
-                            <input 
-                                type="number" 
-                                value={formData.desired_pay_amount || ''} 
-                                onChange={e => setFormData({...formData, desired_pay_amount: parseInt(e.target.value) || undefined})} 
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                value={formatPayAmount(formData.desired_pay_amount)}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    desired_pay_amount: parsePayAmountInput(e.target.value),
+                                  })
+                                }
                                 disabled={isPayNegotiable}
-                                placeholder={isPayNegotiable ? '협의' : '금액'} 
-                                className="w-full min-w-0 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 disabled:text-gray-400 md:h-auto md:p-3" 
+                                placeholder={isPayNegotiable ? '협의' : '금액'}
+                                className="w-full min-w-0 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white disabled:bg-gray-50 disabled:text-gray-400 md:h-auto md:p-3"
                             />
                             {!isPayNegotiable && <span className="text-xs font-bold text-gray-700 flex-shrink-0 md:text-sm">원</span>}
                         </div>

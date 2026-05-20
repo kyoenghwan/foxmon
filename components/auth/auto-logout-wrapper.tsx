@@ -13,13 +13,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const WARNING_TIME_MS = 290 * 1000; // 4분 50초 경과 시 경고창
-const LOGOUT_TIME_MS = 300 * 1000; // 총 5분 경과 시 자동 로그아웃
+// TODO(테스트 후 복구): 운영 시 WARNING_TIME_MS = 290_000, LOGOUT_COUNTDOWN_SEC = 10
+const WARNING_TIME_MS = 10 * 1000; // 테스트용: 10초 무동작 시 경고
+const LOGOUT_COUNTDOWN_SEC = 10; // 테스트용: 경고 후 10초 뒤 로그아웃
 
 function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const [showWarning, setShowWarning] = useState(false);
-  const [remainingSeconds, setRemainingSeconds] = useState(10);
+  const [remainingSeconds, setRemainingSeconds] = useState(LOGOUT_COUNTDOWN_SEC);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
@@ -34,7 +35,7 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
     if (status === 'authenticated') {
       timerRef.current = setTimeout(() => {
         setShowWarning(true);
-        setRemainingSeconds(10);
+        setRemainingSeconds(LOGOUT_COUNTDOWN_SEC);
       }, WARNING_TIME_MS);
     }
   }, [showWarning, status]);

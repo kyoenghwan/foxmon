@@ -5,7 +5,7 @@ import { nvLog } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
@@ -15,23 +15,25 @@ interface LoginFormProps {
   simpleStyle?: boolean;
 }
 
+const INITIAL_FORM = {
+  loginId: '',
+  password: '',
+  autoLogin: false,
+};
+
 export function LoginForm({ simpleStyle = false }: LoginFormProps) {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    loginId: '',
-    password: '',
-    autoLogin: false,
-    rememberId: false,
-  });
+  const pathname = usePathname();
+  const [formData, setFormData] = useState(INITIAL_FORM);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedId = localStorage.getItem('foxmon_saved_id');
-    if (savedId) {
-      setFormData(prev => ({ ...prev, loginId: savedId, rememberId: true }));
-    }
-  }, []);
+    localStorage.removeItem('foxmon_saved_id');
+    setFormData(INITIAL_FORM);
+    setError(null);
+    setIsLoading(false);
+  }, [pathname]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,12 +55,6 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
         setIsLoading(false);
       } else {
         nvLog('FW', '로그인 성공 -> 메인 이동 (Hard Refresh)');
-
-        if (formData.rememberId) {
-            localStorage.setItem('foxmon_saved_id', formData.loginId);
-        } else {
-            localStorage.removeItem('foxmon_saved_id');
-        }
 
         if (!formData.autoLogin) {
             // Set session cookie for PC Bang security. Max-age deleted on browser close.
@@ -83,7 +79,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
   // --- 1. [Age-Gate 용] Simple Style (Compact & Unified) ---
   if (simpleStyle) {
     return (
-      <form onSubmit={handleSubmit} className="w-full max-w-[320px] mx-auto flex flex-col items-center animate-in fade-in duration-500">
+      <form onSubmit={handleSubmit} autoComplete="off" className="w-full max-w-[320px] mx-auto flex flex-col items-center animate-in fade-in duration-500">
         
         {/* Unified Input - No Toggle needed */}
         <div className="w-full space-y-3 mb-2 mt-0">
@@ -91,10 +87,14 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
             <Label className="w-[60px] text-right text-[13px] font-black text-[#333] tracking-tight shrink-0">아이디</Label>
             <Input
               id="loginId"
+              name="foxmon-login-id"
               type="text"
               placeholder="아이디를 입력하세요"
               value={formData.loginId}
               onChange={(e) => setFormData(prev => ({...prev, loginId: e.target.value}))}
+              autoComplete="off"
+              readOnly
+              onFocus={(e) => e.currentTarget.removeAttribute('readonly')}
               className="flex-1 bg-white border-[#e5e7eb] rounded-xl h-10 text-[13px] focus-visible:ring-1 focus-visible:ring-purple-500/30 shadow-sm"
               required
             />
@@ -103,10 +103,14 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
             <Label className="w-[60px] text-right text-[13px] font-black text-[#333] tracking-tight shrink-0">비밀번호</Label>
             <Input
               id="password"
+              name="foxmon-login-password"
               type="password"
               placeholder="비밀번호를 입력하세요"
               value={formData.password}
               onChange={(e) => setFormData(prev => ({...prev, password: e.target.value}))}
+              autoComplete="new-password"
+              readOnly
+              onFocus={(e) => e.currentTarget.removeAttribute('readonly')}
               className="flex-1 bg-white border-[#e5e7eb] rounded-xl h-10 text-[13px] focus-visible:ring-1 focus-visible:ring-purple-500/30 shadow-sm"
               required
             />
@@ -161,7 +165,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
 
   // --- 2. [Login Page 용] Premium Style (Unified & Modern) ---
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <form onSubmit={handleSubmit} autoComplete="off" className="flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* Unified Inputs Section */}
       <div className="flex flex-col gap-4 w-full mb-5 mt-2">
@@ -169,10 +173,14 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
             <Label className="w-24 text-right text-gray-500 text-[13px] font-black uppercase tracking-wider shrink-0">아이디</Label>
             <Input
               id="loginId"
+              name="foxmon-login-id"
               type="text"
               placeholder="아이디를 입력하세요"
               value={formData.loginId}
               onChange={(e) => setFormData(prev => ({...prev, loginId: e.target.value}))}
+              autoComplete="off"
+              readOnly
+              onFocus={(e) => e.currentTarget.removeAttribute('readonly')}
               className="flex-1 bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-13 rounded-2xl px-5 text-sm font-medium focus-visible:ring-purple-500/50 shadow-sm transition-all"
               required
             />
@@ -182,10 +190,14 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
             <Label className="w-24 text-right text-gray-500 text-[13px] font-black uppercase tracking-wider shrink-0">비밀번호</Label>
             <Input
               id="password"
+              name="foxmon-login-password"
               type="password"
               placeholder="비밀번호를 입력하세요"
               value={formData.password}
               onChange={(e) => setFormData(prev => ({...prev, password: e.target.value}))}
+              autoComplete="new-password"
+              readOnly
+              onFocus={(e) => e.currentTarget.removeAttribute('readonly')}
               className="flex-1 bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-13 rounded-2xl px-5 text-sm font-medium focus-visible:ring-purple-500/50 shadow-sm transition-all"
               required
             />
