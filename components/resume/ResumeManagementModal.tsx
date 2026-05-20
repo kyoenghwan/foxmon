@@ -800,7 +800,7 @@ export function ResumeManagementModal() {
                           }}
                         >
                           <Plus className="w-3.5 h-3.5 mr-0.5" />
-                          +추가
+                          추가
                         </Button>
                       </div>
                       <div className="flex flex-col gap-3">
