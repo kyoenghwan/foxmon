@@ -1,6 +1,11 @@
 "use server";
 
 import { supabaseAdmin } from "@/lib/supabase";
+import {
+  csDateRangeToIso,
+  hasActiveCsSearch,
+  type CsRoomSearchFilters,
+} from "@/lib/cs-search";
 
 export type CsRoomListItem = {
   id: string;
@@ -9,13 +14,18 @@ export type CsRoomListItem = {
   created_at: string;
   last_message_at: string | null;
   customer_nickname: string | null;
+  customer_login_id: string | null;
   customer_login_hint: string | null;
   last_message_preview: string | null;
-  /** 고객 메시지 미확인 */
   has_unread: boolean;
 };
 
-export async function QA_LIST_CS_ROOMS(csAdminUserId?: string | null) {
+export type { CsRoomSearchFilters };
+
+export async function QA_LIST_CS_ROOMS(
+  csAdminUserId?: string | null,
+  filters?: CsRoomSearchFilters
+) {
   try {
     const { data: rooms, error } = await supabaseAdmin
       .from("foxtalk_rooms")
@@ -27,18 +37,69 @@ export async function QA_LIST_CS_ROOMS(csAdminUserId?: string | null) {
     if (error) throw error;
     if (!rooms?.length) return { success: true, data: [] as CsRoomListItem[] };
 
-    const roomIds = rooms.map((r) => r.id);
+    let roomIds = rooms.map((r) => r.id);
+    const { fromIso, toIso } = csDateRangeToIso(filters || {});
+
+    if (hasActiveCsSearch(filters)) {
+      let matchIds: Set<string> | null = null;
+
+      const mergeIds = (ids: string[]) => {
+        const s = new Set(ids);
+        if (matchIds === null) matchIds = s;
+        else matchIds = new Set([...matchIds].filter((id) => s.has(id)));
+      };
+
+      if (filters?.content?.trim()) {
+        const kw = `%${filters.content.trim()}%`;
+        const { data: msgHits } = await supabaseAdmin
+          .from("foxtalk_messages")
+          .select("room_id")
+          .in("room_id", roomIds)
+          .ilike("content", kw);
+        mergeIds((msgHits || []).map((m) => m.room_id));
+      }
+
+      if (fromIso || toIso) {
+        let dateQ = supabaseAdmin
+          .from("foxtalk_messages")
+          .select("room_id")
+          .in("room_id", roomIds);
+        if (fromIso) dateQ = dateQ.gte("created_at", fromIso);
+        if (toIso) dateQ = dateQ.lte("created_at", toIso);
+        const { data: dateHits } = await dateQ;
+        mergeIds((dateHits || []).map((m) => m.room_id));
+      }
+
+      if (matchIds !== null) {
+        roomIds = [...matchIds];
+      }
+    }
+
+    const filteredRooms = rooms.filter((r) => roomIds.includes(r.id));
+    if (!filteredRooms.length) return { success: true, data: [] as CsRoomListItem[] };
+
+    const activeRoomIds = filteredRooms.map((r) => r.id);
 
     const { data: participants } = await supabaseAdmin
       .from("foxtalk_participants")
       .select("id, room_id, session_id, nickname, last_read_at")
-      .in("room_id", roomIds);
+      .in("room_id", activeRoomIds);
 
     const { data: lastMessages } = await supabaseAdmin
       .from("foxtalk_messages")
       .select("room_id, content, created_at, participant_id")
-      .in("room_id", roomIds)
+      .in("room_id", activeRoomIds)
       .order("created_at", { ascending: false });
+
+    const creatorIds = [
+      ...new Set(filteredRooms.map((r) => r.created_by).filter(Boolean)),
+    ];
+    const { data: users } = await supabaseAdmin
+      .from("users")
+      .select("id, login_id, nickname, name")
+      .in("id", creatorIds);
+
+    const userById = new Map((users || []).map((u) => [u.id, u]));
 
     const adminId = csAdminUserId?.trim() || "";
 
@@ -63,7 +124,9 @@ export async function QA_LIST_CS_ROOMS(csAdminUserId?: string | null) {
       }
     }
 
-    const items: CsRoomListItem[] = rooms.map((room) => {
+    const loginQ = filters?.loginId?.trim().toLowerCase() || "";
+
+    let items: CsRoomListItem[] = filteredRooms.map((room) => {
       const customer = (participants || []).find(
         (p) =>
           p.room_id === room.id &&
@@ -86,6 +149,7 @@ export async function QA_LIST_CS_ROOMS(csAdminUserId?: string | null) {
         ? new Date(lastCustomer.created_at).getTime()
         : 0;
       const has_unread = customerMsgMs > 0 && customerMsgMs > lastReadMs;
+      const userRow = userById.get(room.created_by);
 
       return {
         id: room.id,
@@ -93,12 +157,23 @@ export async function QA_LIST_CS_ROOMS(csAdminUserId?: string | null) {
         created_by: room.created_by,
         created_at: room.created_at,
         last_message_at: room.last_message_at,
-        customer_nickname: cust?.nickname || null,
+        customer_nickname: cust?.nickname || userRow?.nickname || userRow?.name || null,
+        customer_login_id: userRow?.login_id || null,
         customer_login_hint: room.created_by?.slice(0, 8) || null,
         last_message_preview: last?.content?.slice(0, 80) || null,
         has_unread,
       };
     });
+
+    if (loginQ) {
+      items = items.filter(
+        (item) =>
+          item.customer_login_id?.toLowerCase().includes(loginQ) ||
+          item.customer_nickname?.toLowerCase().includes(loginQ) ||
+          item.title.toLowerCase().includes(loginQ) ||
+          item.created_by.toLowerCase().includes(loginQ)
+      );
+    }
 
     return { success: true, data: items };
   } catch (err: unknown) {

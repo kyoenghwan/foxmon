@@ -3,7 +3,10 @@
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { QA_GET_CS_MESSAGES } from "@/src/atoms/qa/support/QA_GET_CS_MESSAGES";
-import { QA_LIST_CS_ROOMS } from "@/src/atoms/qa/support/QA_LIST_CS_ROOMS";
+import {
+  QA_LIST_CS_ROOMS,
+  type CsRoomSearchFilters,
+} from "@/src/atoms/qa/support/QA_LIST_CS_ROOMS";
 import { OA_INSERT_CS_MESSAGE } from "@/src/atoms/oa/support/OA_INSERT_CS_MESSAGE";
 import { getSiteSettings } from "@/actions/admin/siteSettings";
 import { isAdminRole } from "@/lib/normalize-user-role";
@@ -18,7 +21,7 @@ function canAccessCsMessenger(user?: SessionUser) {
   return isAdminRole(user.role) || loginId.startsWith("foxmon_");
 }
 
-export async function listCsRoomsForAdmin() {
+export async function listCsRoomsForAdmin(filters?: CsRoomSearchFilters) {
   const session = await auth();
   const user = session?.user as SessionUser | undefined;
   if (!session?.user || !canAccessCsMessenger(user)) {
@@ -31,7 +34,7 @@ export async function listCsRoomsForAdmin() {
     user?.id ||
     undefined;
 
-  return QA_LIST_CS_ROOMS(csAdminId);
+  return QA_LIST_CS_ROOMS(csAdminId, filters);
 }
 
 export async function getCsRoomMessages(roomId: string) {

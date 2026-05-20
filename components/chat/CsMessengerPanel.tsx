@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { Headset, RefreshCw, Send } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Headset, RefreshCw, Search, Send, X } from 'lucide-react';
 import {
   getCsRoomMessages,
   listCsRoomsForAdmin,
@@ -9,6 +9,7 @@ import {
   sendCsAdminReply,
 } from '@/actions/admin/csMessenger';
 import type { CsRoomListItem } from '@/src/atoms/qa/support/QA_LIST_CS_ROOMS';
+import type { CsRoomSearchFilters } from '@/lib/cs-search';
 import { formatChatListTime, formatChatMessageTime } from '@/lib/format-chat-time';
 import { supabase } from '@/lib/supabase';
 
@@ -19,6 +20,21 @@ export type CsMessage = {
   participant_id?: string | null;
   participant?: { session_id?: string; nickname?: string } | null;
 };
+
+function highlightContent(text: string, query: string) {
+  if (!query.trim()) return text;
+  const q = query.trim();
+  const lower = text.toLowerCase();
+  const idx = lower.indexOf(q.toLowerCase());
+  if (idx < 0) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="bg-yellow-200 rounded px-0.5">{text.slice(idx, idx + q.length)}</mark>
+      {text.slice(idx + q.length)}
+    </>
+  );
+}
 
 type Props = {
   csAdminUserId: string;
@@ -35,19 +51,58 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
   const [sending, setSending] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
   const [msgError, setMsgError] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
+
+  const [searchLogin, setSearchLogin] = useState('');
+  const [searchDateFrom, setSearchDateFrom] = useState('');
+  const [searchDateTo, setSearchDateTo] = useState('');
+  const [searchContent, setSearchContent] = useState('');
+  const [appliedFilters, setAppliedFilters] = useState<CsRoomSearchFilters>({});
 
   const selectedRoom = rooms.find((r) => r.id === selectedId);
 
-  const refreshRooms = useCallback(async () => {
-    setListError(null);
-    const res = await listCsRoomsForAdmin();
-    if (res.success && res.data) {
-      setRooms(res.data);
-      setSelectedId((prev) => prev ?? res.data[0]?.id ?? null);
-    } else {
-      setListError(res.error || '문의 목록을 불러오지 못했습니다.');
-    }
-  }, []);
+  const buildFilters = useCallback((): CsRoomSearchFilters => {
+    const f: CsRoomSearchFilters = {};
+    if (searchLogin.trim()) f.loginId = searchLogin.trim();
+    if (searchDateFrom) f.dateFrom = searchDateFrom;
+    if (searchDateTo) f.dateTo = searchDateTo;
+    if (searchContent.trim()) f.content = searchContent.trim();
+    return f;
+  }, [searchLogin, searchDateFrom, searchDateTo, searchContent]);
+
+  const refreshRooms = useCallback(
+    async (filters?: CsRoomSearchFilters) => {
+      setListError(null);
+      const res = await listCsRoomsForAdmin(filters);
+      if (res.success && res.data) {
+        setRooms(res.data);
+        setSelectedId((prev) => {
+          if (prev && res.data!.some((r) => r.id === prev)) return prev;
+          return res.data![0]?.id ?? null;
+        });
+      } else {
+        setListError(res.error || '문의 목록을 불러오지 못했습니다.');
+      }
+    },
+    []
+  );
+
+  const runSearch = useCallback(async () => {
+    const filters = buildFilters();
+    setAppliedFilters(filters);
+    setSearching(true);
+    await refreshRooms(filters);
+    setSearching(false);
+  }, [buildFilters, refreshRooms]);
+
+  const clearSearch = useCallback(async () => {
+    setSearchLogin('');
+    setSearchDateFrom('');
+    setSearchDateTo('');
+    setSearchContent('');
+    setAppliedFilters({});
+    await refreshRooms();
+  }, [refreshRooms]);
 
   const loadMessages = useCallback(async (roomId: string) => {
     setLoadingMsg(true);
@@ -69,8 +124,8 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
   useEffect(() => {
     if (!selectedId || !csAdminUserId) return;
     void loadMessages(selectedId);
-    void markCsRoomRead(selectedId, csAdminUserId).then(() => refreshRooms());
-  }, [selectedId, csAdminUserId, loadMessages, refreshRooms]);
+    void markCsRoomRead(selectedId, csAdminUserId).then(() => refreshRooms(appliedFilters));
+  }, [selectedId, csAdminUserId, loadMessages, refreshRooms, appliedFilters]);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -99,13 +154,13 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
           const isCustomer = participant?.session_id !== csAdminUserId;
           if (isCustomer) {
             onCustomerMessage?.();
-            void markCsRoomRead(selectedId, csAdminUserId).then(() => refreshRooms());
+            void markCsRoomRead(selectedId, csAdminUserId).then(() => refreshRooms(appliedFilters));
           }
           setMessages((prev) => {
             if (prev.some((m) => m.id === row.id)) return prev;
             return [...prev, { ...row, participant }];
           });
-          void refreshRooms();
+          void refreshRooms(appliedFilters);
         }
       )
       .subscribe();
@@ -113,7 +168,14 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [selectedId, csAdminUserId, refreshRooms, onCustomerMessage]);
+  }, [selectedId, csAdminUserId, refreshRooms, onCustomerMessage, appliedFilters]);
+
+  const contentQuery = appliedFilters.content || '';
+  const displayMessages = useMemo(() => {
+    if (!contentQuery.trim()) return messages;
+    const q = contentQuery.trim().toLowerCase();
+    return messages.filter((m) => m.content.toLowerCase().includes(q));
+  }, [messages, contentQuery]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,22 +189,96 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
     }
     setReply('');
     await loadMessages(selectedId);
-    await refreshRooms();
+    await refreshRooms(appliedFilters);
   };
+
+  const hasSearch =
+    !!searchLogin.trim() ||
+    !!searchDateFrom ||
+    !!searchDateTo ||
+    !!searchContent.trim();
 
   return (
     <div
       className={`grid gap-0 min-h-0 flex-1 ${
-        compact ? 'grid-cols-1 sm:grid-cols-[200px_1fr]' : 'grid-cols-1 lg:grid-cols-[240px_1fr]'
+        compact
+          ? 'grid-cols-1 sm:grid-cols-[220px_1fr]'
+          : 'grid-cols-1 lg:grid-cols-[280px_1fr]'
       }`}
     >
-      <div className="border-b sm:border-b-0 sm:border-r border-gray-100 flex flex-col min-h-[120px] max-h-[220px] sm:max-h-none">
-        <div className="p-2 border-b flex justify-between items-center bg-gray-50 shrink-0">
-          <span className="text-[11px] font-black text-gray-600">문의 {rooms.length}</span>
-          <button type="button" onClick={() => void refreshRooms()} className="p-1 rounded hover:bg-gray-200">
-            <RefreshCw className="w-3.5 h-3.5" />
-          </button>
+      <div className="border-b sm:border-b-0 sm:border-r border-gray-100 flex flex-col min-h-[120px] max-h-[280px] sm:max-h-none">
+        <div className="p-2 border-b bg-gray-50 shrink-0 space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-[11px] font-black text-gray-600">문의 {rooms.length}</span>
+            <div className="flex gap-1">
+              {hasSearch ? (
+                <button
+                  type="button"
+                  onClick={() => void clearSearch()}
+                  className="p-1 rounded hover:bg-gray-200"
+                  title="검색 초기화"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => void refreshRooms(appliedFilters)}
+                className="p-1 rounded hover:bg-gray-200"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <input
+              type="text"
+              value={searchLogin}
+              onChange={(e) => setSearchLogin(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && void runSearch()}
+              placeholder="아이디·닉네임"
+              className="w-full h-8 px-2 rounded-lg border border-gray-200 text-[11px] font-medium"
+            />
+            {!compact ? (
+              <div className="flex gap-1">
+                <input
+                  type="date"
+                  value={searchDateFrom}
+                  onChange={(e) => setSearchDateFrom(e.target.value)}
+                  className="flex-1 h-8 px-1 rounded-lg border border-gray-200 text-[10px]"
+                  title="시작일"
+                />
+                <input
+                  type="date"
+                  value={searchDateTo}
+                  onChange={(e) => setSearchDateTo(e.target.value)}
+                  className="flex-1 h-8 px-1 rounded-lg border border-gray-200 text-[10px]"
+                  title="종료일"
+                />
+              </div>
+            ) : null}
+            <div className="flex gap-1">
+              <input
+                type="text"
+                value={searchContent}
+                onChange={(e) => setSearchContent(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && void runSearch()}
+                placeholder="대화 내용 검색"
+                className="flex-1 h-8 px-2 rounded-lg border border-gray-200 text-[11px] font-medium"
+              />
+              <button
+                type="button"
+                onClick={() => void runSearch()}
+                disabled={searching}
+                className="h-8 px-2 rounded-lg bg-gray-900 text-white flex items-center gap-1 text-[11px] font-black disabled:opacity-50"
+              >
+                <Search className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
+
         <ul className="flex-1 overflow-y-auto divide-y divide-gray-50">
           {rooms.map((room) => (
             <li key={room.id}>
@@ -163,6 +299,11 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
                     </span>
                   ) : null}
                 </div>
+                {room.customer_login_id ? (
+                  <p className="text-[9px] text-gray-500 font-bold truncate">
+                    @{room.customer_login_id}
+                  </p>
+                ) : null}
                 <p className="text-[10px] text-gray-500 truncate mt-0.5">
                   {room.last_message_preview || '—'}
                 </p>
@@ -178,7 +319,9 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
             <li className="p-4 text-center text-[11px] text-red-600 font-bold">{listError}</li>
           ) : null}
           {rooms.length === 0 && !listError ? (
-            <li className="p-6 text-center text-[12px] text-gray-400">문의 없음</li>
+            <li className="p-6 text-center text-[12px] text-gray-400">
+              {hasSearch ? '검색 결과 없음' : '문의 없음'}
+            </li>
           ) : null}
         </ul>
       </div>
@@ -191,6 +334,16 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
                 <Headset className="w-4 h-4 text-primary" />
                 {selectedRoom.customer_nickname || selectedRoom.title}
               </p>
+              {selectedRoom.customer_login_id ? (
+                <p className="text-[11px] text-gray-500 font-bold mt-0.5">
+                  아이디: {selectedRoom.customer_login_id}
+                </p>
+              ) : null}
+              {contentQuery ? (
+                <p className="text-[10px] text-primary font-bold mt-1">
+                  대화 내 「{contentQuery}」 검색 · {displayMessages.length}건
+                </p>
+              ) : null}
             </div>
             <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50/50">
               {msgError ? (
@@ -198,8 +351,10 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
               ) : null}
               {loadingMsg ? (
                 <p className="text-center text-xs text-gray-400">불러오는 중…</p>
+              ) : displayMessages.length === 0 && contentQuery ? (
+                <p className="text-center text-xs text-gray-400">이 방에 해당 내용이 없습니다.</p>
               ) : (
-                messages.map((msg) => {
+                displayMessages.map((msg) => {
                   const isStaff = msg.participant?.session_id === csAdminUserId;
                   return (
                     <div
@@ -218,7 +373,7 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
                             {msg.participant?.nickname || '고객'}
                           </p>
                         )}
-                        {msg.content}
+                        {highlightContent(msg.content, contentQuery)}
                       </div>
                       <span className="text-[9px] text-gray-400 mt-0.5 px-1">
                         {formatChatMessageTime(msg.created_at)}
