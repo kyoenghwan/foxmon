@@ -25,9 +25,9 @@ export default function AdminSupportPage() {
                             <ShieldCheck className="w-6 h-6 text-primary" />
                         </div>
                         <div className="min-w-0">
-                            <h3 className="font-black text-gray-900 text-[16px]">담당자/권한 관리</h3>
+                            <h3 className="font-black text-gray-900 text-[16px]">고객센터 관리</h3>
                             <p className="text-[13px] font-medium text-gray-500 mt-1">
-                                관리자 계정에 “광고/고객응대” 담당을 부여하고, 대표 상담원을 지정합니다.
+                                담당자·업무시간·자동 응답 메시지·자동화(준비 중)를 설정합니다.
                             </p>
                         </div>
                     </div>

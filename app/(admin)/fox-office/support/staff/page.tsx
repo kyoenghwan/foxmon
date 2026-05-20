@@ -1,11 +1,18 @@
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { ShieldCheck, Users, Headset, Megaphone } from "lucide-react";
+import { ShieldCheck, Users, Headset, Megaphone, Clock, MessageSquare, Bot } from "lucide-react";
 import { QA_GET_SUPPORT_STAFF_USERS } from "@/src/atoms/qa/admin/QA_GET_SUPPORT_STAFF_USERS";
 import { isSupabaseServiceRoleConfigured } from "@/lib/supabase";
 import { getSiteSettings, updateSiteSettings } from "@/actions/admin/siteSettings";
 import { updateUserStaffTeam } from "@/actions/admin/staffTeams";
+import {
+  parseCsSettings,
+  csSettingsToPayload,
+  businessHoursLabel,
+  DEFAULT_CS_SETTINGS,
+} from "@/lib/cs-settings";
+import { isAdminRole } from "@/lib/normalize-user-role";
 
 function staffTeamLabel(v?: string | null) {
   if (v === "CS") return "고객응대";
@@ -38,9 +45,9 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
   const sp = (await searchParams) || {};
   const flashMsg = sp.msg ? decodeURIComponent(sp.msg) : null;
   const flashType = sp.type === "ok" ? "ok" : sp.type === "error" ? "error" : null;
-  const canEditStaff = role === "ADMIN" || role === "SUPER_ADMIN";
+  const canEditStaff = isAdminRole(role);
 
-  if (!session?.user || (role !== "ADMIN" && role !== "SUPER_ADMIN")) {
+  if (!session?.user || !canEditStaff) {
     redirect("/");
   }
 
@@ -53,13 +60,23 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
 
   const settings = settingsRes.success ? (settingsRes.data as Record<string, string>) : {};
   const primaryCsAdminUserId = settings?.cs_admin_user_id || "";
+  const csSettings = parseCsSettings(settings);
+  const dayOptions = [
+    { v: 1, l: "월" },
+    { v: 2, l: "화" },
+    { v: 3, l: "수" },
+    { v: 4, l: "목" },
+    { v: 5, l: "금" },
+    { v: 6, l: "토" },
+    { v: 0, l: "일" },
+  ];
 
   async function setPrimaryCsUser(formData: FormData) {
     "use server";
     const nextId = String(formData.get("cs_admin_user_id") || "").trim();
     const s = await auth();
     const r = (s?.user as unknown as SessionUser | undefined)?.role;
-    if (!s?.user || (r !== "ADMIN" && r !== "SUPER_ADMIN")) {
+    if (!s?.user || !isAdminRole(r)) {
       redirect("/fox-office/support/staff?type=error&msg=" + encodeURIComponent("권한이 없습니다."));
     }
     const res = await updateSiteSettings({ cs_admin_user_id: nextId });
@@ -95,16 +112,52 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
     redirect("/fox-office/support/staff?type=ok&msg=" + encodeURIComponent("담당 역할이 저장되었습니다."));
   }
 
+  async function saveCsPolicy(formData: FormData) {
+    "use server";
+    const s = await auth();
+    const r = (s?.user as unknown as SessionUser | undefined)?.role;
+    if (!s?.user || !isAdminRole(r)) {
+      redirect("/fox-office/support/staff?type=error&msg=" + encodeURIComponent("권한이 없습니다."));
+    }
+    const days = formData.getAll("cs_days").map((d) => String(d));
+    const payload = csSettingsToPayload({
+      hoursStart: String(formData.get("cs_hours_start") || DEFAULT_CS_SETTINGS.hoursStart),
+      hoursEnd: String(formData.get("cs_hours_end") || DEFAULT_CS_SETTINGS.hoursEnd),
+      days: days.length
+        ? days.map((d) => parseInt(d, 10)).filter((n) => !Number.isNaN(n))
+        : DEFAULT_CS_SETTINGS.days,
+      timezone: String(formData.get("cs_timezone") || DEFAULT_CS_SETTINGS.timezone),
+      messageInHours: String(formData.get("cs_msg_in_hours") || DEFAULT_CS_SETTINGS.messageInHours),
+      messageAfterHours: String(
+        formData.get("cs_msg_after_hours") || DEFAULT_CS_SETTINGS.messageAfterHours
+      ),
+      automationEnabled: formData.get("cs_automation_enabled") === "on",
+      automationRulesJson: String(
+        formData.get("cs_automation_rules") || DEFAULT_CS_SETTINGS.automationRulesJson
+      ),
+    });
+    const res = await updateSiteSettings(payload);
+    revalidatePath("/fox-office/support/staff");
+    revalidatePath("/fox-office/support/inbox");
+    if (!res.success) {
+      redirect(
+        "/fox-office/support/staff?type=error&msg=" +
+          encodeURIComponent(res.error || "고객센터 정책 저장에 실패했습니다.")
+      );
+    }
+    redirect("/fox-office/support/staff?type=ok&msg=" + encodeURIComponent("업무시간·응대 메시지가 저장되었습니다."));
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
             <ShieldCheck className="w-6 h-6 text-primary" />
-            고객센터 담당자/권한 관리
+            고객센터 관리
           </h2>
           <p className="text-[13px] text-gray-500 font-medium mt-1">
-            관리자 계정에 담당 역할(운영/광고/고객응대)을 부여하고, 고객센터 대표 상담원(기본 수신자)을 지정합니다.
+            담당자 지정, 업무시간·자동 응답 메시지, 문의 자동화(준비 중)를 한곳에서 관리합니다.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -285,6 +338,123 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
             </table>
           </div>
         </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-5">
+        <div className="flex items-center gap-2">
+          <Clock className="w-5 h-5 text-primary" />
+          <h3 className="font-black text-gray-900">업무시간 · 자동 응답 메시지</h3>
+        </div>
+        <p className="text-[12px] text-gray-500 font-medium -mt-2">
+          고객이 <span className="font-black">첫 문의</span>를 남길 때만 자동 안내가 발송됩니다. 업무시간 안/밖 메시지가
+          달라집니다. (현재 설정: {businessHoursLabel(csSettings)})
+        </p>
+
+        <form action={saveCsPolicy} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <label className="block">
+              <span className="text-[12px] font-black text-gray-700">시작 시각</span>
+              <input
+                type="time"
+                name="cs_hours_start"
+                defaultValue={csSettings.hoursStart}
+                className="mt-1 w-full h-11 px-3 border border-gray-200 rounded-xl text-[13px] font-bold"
+              />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-black text-gray-700">종료 시각</span>
+              <input
+                type="time"
+                name="cs_hours_end"
+                defaultValue={csSettings.hoursEnd}
+                className="mt-1 w-full h-11 px-3 border border-gray-200 rounded-xl text-[13px] font-bold"
+              />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-black text-gray-700">시간대</span>
+              <input
+                type="text"
+                name="cs_timezone"
+                defaultValue={csSettings.timezone}
+                placeholder="Asia/Seoul"
+                className="mt-1 w-full h-11 px-3 border border-gray-200 rounded-xl text-[13px] font-bold"
+              />
+            </label>
+          </div>
+
+          <div>
+            <span className="text-[12px] font-black text-gray-700">업무 요일</span>
+            <div className="mt-2 flex flex-wrap gap-3">
+              {dayOptions.map((d) => (
+                <label key={d.v} className="inline-flex items-center gap-1.5 text-[13px] font-bold text-gray-700">
+                  <input
+                    type="checkbox"
+                    name="cs_days"
+                    value={String(d.v)}
+                    defaultChecked={csSettings.days.includes(d.v)}
+                    className="rounded border-gray-300"
+                  />
+                  {d.l}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <label className="block">
+            <span className="text-[12px] font-black text-gray-700 flex items-center gap-1">
+              <MessageSquare className="w-3.5 h-3.5" />
+              업무시간 중 첫 문의 자동 안내
+            </span>
+            <textarea
+              name="cs_msg_in_hours"
+              rows={3}
+              defaultValue={csSettings.messageInHours}
+              className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-[13px] font-medium resize-y"
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-[12px] font-black text-gray-700 flex items-center gap-1">
+              <MessageSquare className="w-3.5 h-3.5" />
+              업무시간 외 첫 문의 자동 안내
+            </span>
+            <textarea
+              name="cs_msg_after_hours"
+              rows={3}
+              defaultValue={csSettings.messageAfterHours}
+              className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-[13px] font-medium resize-y"
+            />
+          </label>
+
+          <button
+            type="submit"
+            className="h-11 px-6 rounded-xl bg-gray-900 text-white text-[13px] font-black hover:bg-black transition"
+          >
+            업무시간·메시지 저장
+          </button>
+        </form>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-5 opacity-90">
+        <div className="flex items-center gap-2">
+          <Bot className="w-5 h-5 text-gray-500" />
+          <h3 className="font-black text-gray-800">자동 응답 봇 (준비 중)</h3>
+        </div>
+        <p className="text-[12px] text-gray-500 font-medium mt-2">
+          특정 키워드·문의 유형에 따라 미리 등록한 답변을 자동 전송하는 기능입니다. 규칙 JSON 형식으로 저장되며, 다음
+          단계에서 키워드 매칭·FAQ 연동을 붙일 예정입니다.
+        </p>
+        <label className="mt-4 inline-flex items-center gap-2 text-[13px] font-bold text-gray-600">
+          <input type="checkbox" defaultChecked={csSettings.automationEnabled} disabled className="rounded" />
+          자동화 사용 (추후 활성화)
+        </label>
+        <textarea
+          rows={6}
+          defaultValue={csSettings.automationRulesJson}
+          placeholder='[{"keywords":["배너","광고"],"reply":"..."}]'
+          className="mt-2 w-full px-3 py-2 border border-gray-200 rounded-xl text-[12px] font-mono bg-gray-50 resize-y"
+          readOnly
+        />
       </div>
     </div>
   );

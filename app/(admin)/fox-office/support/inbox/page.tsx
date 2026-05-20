@@ -34,7 +34,7 @@ export default async function CsMessengerInboxPage() {
           className="inline-flex items-center gap-1 text-[13px] font-bold text-gray-500 hover:text-primary"
         >
           <ArrowLeft className="w-4 h-4" />
-          담당자 관리
+          고객센터 관리
         </Link>
       </div>
 

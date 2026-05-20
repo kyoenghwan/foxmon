@@ -3,6 +3,8 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendTelegramMessageDirect } from '@/lib/telegram';
 import { OA_INSERT_CHAT_PARTICIPANT } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_PARTICIPANT';
+import { QA_GET_CS_SETTINGS } from '@/src/atoms/qa/support/QA_GET_CS_SETTINGS';
+import { isWithinBusinessHours } from '@/lib/cs-settings';
 
 interface CSMessageData {
     room_id: string;
@@ -53,6 +55,11 @@ async function resolveParticipantId(
 }
 
 async function insertCsAutoReply(roomId: string, adminUserId: string) {
+    const settingsRes = await QA_GET_CS_SETTINGS();
+    const settings = settingsRes.data;
+    const inHours = isWithinBusinessHours(settings);
+    const content = inHours ? settings.messageInHours : settings.messageAfterHours;
+
     await OA_INSERT_CHAT_PARTICIPANT({
         room_id: roomId,
         session_id: adminUserId,
@@ -73,8 +80,7 @@ async function insertCsAutoReply(roomId: string, adminUserId: string) {
         {
             room_id: roomId,
             participant_id: csParticipant.id,
-            content:
-                '문의해 주셔서 감사합니다. 담당자가 확인 후 순서대로 답변드리겠습니다. 잠시만 기다려 주세요.',
+            content,
             message_type: 'TEXT',
         },
     ]);

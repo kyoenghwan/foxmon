@@ -5,9 +5,11 @@ import { Headset, RefreshCw, Send } from 'lucide-react';
 import {
   getCsRoomMessages,
   listCsRoomsForAdmin,
+  markCsRoomRead,
   sendCsAdminReply,
 } from '@/actions/admin/csMessenger';
 import type { CsRoomListItem } from '@/src/atoms/qa/support/QA_LIST_CS_ROOMS';
+import { formatChatListTime, formatChatMessageTime } from '@/lib/format-chat-time';
 import { supabase } from '@/lib/supabase';
 
 export type CsMessage = {
@@ -65,8 +67,10 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
   }, [refreshRooms]);
 
   useEffect(() => {
-    if (selectedId) void loadMessages(selectedId);
-  }, [selectedId, loadMessages]);
+    if (!selectedId || !csAdminUserId) return;
+    void loadMessages(selectedId);
+    void markCsRoomRead(selectedId, csAdminUserId).then(() => refreshRooms());
+  }, [selectedId, csAdminUserId, loadMessages, refreshRooms]);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -93,7 +97,10 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
             participant = p;
           }
           const isCustomer = participant?.session_id !== csAdminUserId;
-          if (isCustomer) onCustomerMessage?.();
+          if (isCustomer) {
+            onCustomerMessage?.();
+            void markCsRoomRead(selectedId, csAdminUserId).then(() => refreshRooms());
+          }
           setMessages((prev) => {
             if (prev.some((m) => m.id === row.id)) return prev;
             return [...prev, { ...row, participant }];
@@ -142,14 +149,28 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
               <button
                 type="button"
                 onClick={() => setSelectedId(room.id)}
-                className={`w-full text-left p-2.5 hover:bg-orange-50/60 ${
+                className={`w-full text-left p-2.5 hover:bg-orange-50/60 relative ${
                   selectedId === room.id ? 'bg-orange-50 border-l-4 border-primary' : ''
                 }`}
               >
-                <p className="font-black text-[12px] truncate">{room.customer_nickname || room.title}</p>
+                <div className="flex items-start justify-between gap-1">
+                  <p className="font-black text-[12px] truncate flex-1">
+                    {room.customer_nickname || room.title}
+                  </p>
+                  {room.has_unread ? (
+                    <span className="shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center">
+                      N
+                    </span>
+                  ) : null}
+                </div>
                 <p className="text-[10px] text-gray-500 truncate mt-0.5">
                   {room.last_message_preview || '—'}
                 </p>
+                {room.last_message_at ? (
+                  <p className="text-[9px] text-gray-400 mt-0.5">
+                    {formatChatListTime(room.last_message_at)}
+                  </p>
+                ) : null}
               </button>
             </li>
           ))}
@@ -181,7 +202,10 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
                 messages.map((msg) => {
                   const isStaff = msg.participant?.session_id === csAdminUserId;
                   return (
-                    <div key={msg.id} className={`flex ${isStaff ? 'justify-end' : 'justify-start'}`}>
+                    <div
+                      key={msg.id}
+                      className={`flex flex-col ${isStaff ? 'items-end' : 'items-start'}`}
+                    >
                       <div
                         className={`max-w-[88%] rounded-2xl px-2.5 py-2 text-[12px] ${
                           isStaff
@@ -196,6 +220,9 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
                         )}
                         {msg.content}
                       </div>
+                      <span className="text-[9px] text-gray-400 mt-0.5 px-1">
+                        {formatChatMessageTime(msg.created_at)}
+                      </span>
                     </div>
                   );
                 })
