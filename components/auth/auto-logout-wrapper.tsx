@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { signOut, useSession, SessionProvider } from 'next-auth/react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -17,21 +17,40 @@ import { Button } from "@/components/ui/button";
 const WARNING_TIME_MS = 10 * 1000; // 테스트용: 10초 무동작 시 경고
 const LOGOUT_COUNTDOWN_SEC = 10; // 테스트용: 경고 후 10초 뒤 로그아웃
 
+function clearFoxmonSessionCookies() {
+  document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
 function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [showWarning, setShowWarning] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(LOGOUT_COUNTDOWN_SEC);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
+  const logoutInProgressRef = useRef(false);
   const pathname = usePathname();
-  const router = useRouter();
 
-  const resetTimer = useCallback(() => {
-    if (showWarning) return; 
+  const performLogout = useCallback(async () => {
+    if (logoutInProgressRef.current) return;
+    logoutInProgressRef.current = true;
+    setShowWarning(false);
 
     if (timerRef.current) clearTimeout(timerRef.current);
     if (countdownRef.current) clearInterval(countdownRef.current);
-    
+
+    clearFoxmonSessionCookies();
+    await signOut({ redirect: false });
+    // session_expired=1 없이 /login 이동 시 auth.config가 로그인 상태면 홈(/)으로 되돌림
+    window.location.href = '/login?session_expired=1';
+  }, []);
+
+  const resetTimer = useCallback((force = false) => {
+    if (showWarning && !force) return;
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+
     if (status === 'authenticated') {
       timerRef.current = setTimeout(() => {
         setShowWarning(true);
@@ -42,24 +61,22 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
 
   // 카운트다운 로직
   useEffect(() => {
-    if (showWarning && status === 'authenticated') {
-      countdownRef.current = setInterval(() => {
-        setRemainingSeconds((prev) => {
-          if (prev <= 1) {
-            clearInterval(countdownRef.current!);
-            signOut({ redirect: false }).then(() => {
-                router.push('/login');
-            });
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
+    if (!showWarning || status !== 'authenticated') return;
+
+    countdownRef.current = setInterval(() => {
+      setRemainingSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
     return () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, [showWarning, status]);
+
+  useEffect(() => {
+    if (showWarning && remainingSeconds <= 0 && status === 'authenticated') {
+      void performLogout();
+    }
+  }, [showWarning, remainingSeconds, status, performLogout]);
 
   // 활동 감지 이벤트 리스너
   useEffect(() => {
@@ -106,15 +123,14 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
   }, [status]);
 
   const handleExtendSession = () => {
+    logoutInProgressRef.current = false;
     setShowWarning(false);
-    resetTimer();
+    setRemainingSeconds(LOGOUT_COUNTDOWN_SEC);
+    resetTimer(true);
   };
 
   const handleLogoutNow = () => {
-    setShowWarning(false);
-    signOut({ redirect: false }).then(() => {
-        router.push('/login');
-    });
+    void performLogout();
   };
 
   if (status !== 'authenticated') {
