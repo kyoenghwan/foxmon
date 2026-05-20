@@ -139,7 +139,7 @@ export function HomeJobSections() {
                                 style={{ transform: `translateY(-${noticeIndex * 24}px)` }}
                             >
                                 {notices.map((n) => (
-                                    <Link key={n.id} href="/notice" className="h-6 flex items-center gap-3 group">
+                                    <Link key={n.id} href="/help" className="h-6 flex items-center gap-3 group">
                                         <div className="flex items-center gap-1.5 shrink-0">
                                             {n.isNew && <span className="bg-orange-500 text-white text-[8px] font-black px-1 rounded-sm leading-none py-0.5">NEW</span>}
                                             {n.isHot && <span className="bg-primary text-black text-[8px] font-black px-1 rounded-sm leading-none py-0.5">HOT</span>}
@@ -155,7 +155,7 @@ export function HomeJobSections() {
                             </div>
                         </div>
 
-                        <Link href="/notice" className="pl-2 shrink-0 text-gray-300 hover:text-primary transition-colors">
+                        <Link href="/help" className="pl-2 shrink-0 text-gray-300 hover:text-primary transition-colors">
                             <ChevronRight className="w-5 h-5" />
                         </Link>
                 </div>

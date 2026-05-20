@@ -15,7 +15,6 @@ interface BoardTab {
 }
 
 const TABS: BoardTab[] = [
-    { id: 'notice', label: '공지사항', prefix: '📢공지' },
     { id: 'event', label: '이벤트', prefix: '🎉이벤트' },
     { id: 'free', label: '자유게시판', prefix: '💬자유' },
     { id: 'foxtalk', label: '폭스수다', prefix: '🦊폭스수다' },
@@ -28,7 +27,7 @@ const TABS: BoardTab[] = [
 
 export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, isLoggedIn = false }: { activeTab: string, initialPosts?: any[], totalPosts?: number, isLoggedIn?: boolean }) {
     const router = useRouter();
-    const currentBoard = TABS.find(t => t.id === activeTab) || TABS[0];
+    const currentBoard = TABS.find(t => t.id === activeTab) || TABS.find(t => t.id === 'free')!;
 
     const [showWriteModal, setShowWriteModal] = useState(false);
     const [selectedPost, setSelectedPost] = useState<any>(null);

@@ -107,7 +107,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                             📱 <span className="hidden sm:inline">폰에 앱 설치</span><span className="sm:hidden">앱 설치</span>
                         </button>
                         <span className="text-gray-300 shrink-0">|</span>
-                        <Link href="/notice" className="hover:text-primary transition-colors shrink-0">공지사항</Link>
+                        <Link href="/help" className="hover:text-primary transition-colors shrink-0">공지사항</Link>
                     </div>
                     {session ? (
                         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pl-2">
@@ -369,7 +369,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                             <div className="grid grid-cols-1 gap-y-3 text-[14px] font-medium text-gray-600">
                                 <Link href="#" className="hover:text-primary transition-colors">질문답변</Link>
                                 <Link href="#" className="hover:text-primary transition-colors">자주묻는질문</Link>
-                                <Link href="/notice" className="hover:text-primary transition-colors">공지사항</Link>
+                                <Link href="/help" className="hover:text-primary transition-colors">공지사항</Link>
                                 <Link href="/jobs/post" className="hover:text-primary transition-colors flex items-center gap-1">
                                     광고상품안내 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span>
                                 </Link>
@@ -461,7 +461,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     <div className="flex flex-col gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
                                         <Link href="#">질문답변</Link>
                                         <Link href="#">자주묻는질문</Link>
-                                        <Link href="/notice">공지사항</Link>
+                                        <Link href="/help">공지사항</Link>
                                         <Link href="/jobs/post" className="flex items-center gap-2">광고상품안내 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
                                     </div>
                                 )}

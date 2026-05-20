@@ -1,5 +1,5 @@
 import React from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, User, Eye, MessageSquare, Clock } from 'lucide-react';
 import SubPageLayout from '@/components/layout/sub-page-layout';
@@ -13,6 +13,10 @@ export default async function CommunityPostDetailPage({
     params: Promise<{ board: string; id: string }>;
 }) {
     const { board, id } = await params;
+
+    if (board === 'notice') {
+        redirect('/help');
+    }
     
     // UUID 형식 검증 등 필요한 경우 추가 (현재는 간단히 ID로 조회)
     const post = await getCommunityPostById(id);

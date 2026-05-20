@@ -12,7 +12,6 @@ const sections: SidebarSection[] = [
     {
         title: '전체 공개',
         items: [
-            { id: 'notice', label: '공지사항', icon: AlertTriangle },
             { id: 'event', label: '이벤트', icon: Star },
             { id: 'free', label: '자유게시판', icon: Users },
         ],

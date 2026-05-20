@@ -12,7 +12,6 @@ const TABS = [
     { id: 'tips', label: '꿀팁·노하우' },
     { id: 'report', label: '업소제보' },
     { id: 'business', label: '업소장터' },
-    { id: 'notice', label: '공지사항' },
     { id: 'event', label: '이벤트' }
 ];
 
