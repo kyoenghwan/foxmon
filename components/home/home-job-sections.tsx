@@ -10,7 +10,7 @@ import { AdPriceModal } from '@/components/jobs/AdPriceModal';
 import { Button } from '@/components/ui/button';
 
 interface Notice {
-    id: number;
+    id: string;
     title: string;
     date: string;
     isNew?: boolean;
@@ -30,12 +30,7 @@ export function HomeJobSections() {
     const [generalJobs, setGeneralJobs] = useState<AdItem[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // 공지사항 데이터
-    const notices: Notice[] = [
-        { id: 1, title: '[공지] 설 연휴 고객센터 운영 시간 안내', date: '2024-02-14', isNew: true },
-        { id: 2, title: '[안내] 폭스몬 웹 서비스 디자인 고도화 업데이트', date: '2024-02-13' },
-        { id: 3, title: '[이벤트] 친구 초대하고 포인트 받자! (기간 연장)', date: '2024-02-12', isHot: true },
-    ];
+    const [notices, setNotices] = useState<Notice[]>([]);
 
     const fetchAllJobs = async (isInitial = false) => {
         if (isInitial) setLoading(true);
@@ -56,14 +51,19 @@ export function HomeJobSections() {
         if (isInitial) setLoading(false);
     };
 
-    // Firestore에서 티어별 광고 실시간 페치 (최초 로드 시)
     useEffect(() => {
         fetchAllJobs(true);
+        import('@/lib/actions/help').then(({ getHomeNotices }) => {
+            getHomeNotices(5).then((rows) => {
+                if (rows.length) {
+                    setNotices(rows);
+                }
+            });
+        });
     }, []);
 
-    // 자동 롤링 효과 (공지사항)
     useEffect(() => {
-        if (isPaused) return;
+        if (isPaused || notices.length === 0) return;
         const interval = setInterval(() => {
             setNoticeIndex((prev) => (prev + 1) % notices.length);
         }, 3000);

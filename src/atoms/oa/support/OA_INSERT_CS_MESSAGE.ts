@@ -6,6 +6,7 @@ import { OA_INSERT_CHAT_PARTICIPANT } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHA
 import { QA_GET_CS_SETTINGS } from '@/src/atoms/qa/support/QA_GET_CS_SETTINGS';
 import { isWithinBusinessHours } from '@/lib/cs-settings';
 import { shouldSendCsAutoReply } from '@/lib/cs-auto-reply';
+import { matchCsAutomationReply, parseCsAutomationRules } from '@/lib/cs-automation';
 
 interface CSMessageData {
     room_id: string;
@@ -63,12 +64,7 @@ async function resolveParticipantId(
     return created?.id || null;
 }
 
-async function insertCsAutoReply(roomId: string, adminUserId: string) {
-    const settingsRes = await QA_GET_CS_SETTINGS();
-    const settings = settingsRes.data;
-    const inHours = isWithinBusinessHours(settings);
-    const content = inHours ? settings.messageInHours : settings.messageAfterHours;
-
+async function insertCsTextAsAdmin(roomId: string, adminUserId: string, content: string) {
     await OA_INSERT_CHAT_PARTICIPANT({
         room_id: roomId,
         session_id: adminUserId,
@@ -98,6 +94,14 @@ async function insertCsAutoReply(roomId: string, adminUserId: string) {
         .from('foxtalk_rooms')
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', roomId);
+}
+
+async function insertCsAutoReply(roomId: string, adminUserId: string) {
+    const settingsRes = await QA_GET_CS_SETTINGS();
+    const settings = settingsRes.data;
+    const inHours = isWithinBusinessHours(settings);
+    const content = inHours ? settings.messageInHours : settings.messageAfterHours;
+    await insertCsTextAsAdmin(roomId, adminUserId, content);
 }
 
 export const OA_INSERT_CS_MESSAGE = async (data: CSMessageData) => {
@@ -177,6 +181,27 @@ export const OA_INSERT_CS_MESSAGE = async (data: CSMessageData) => {
 
             if (sendAuto) {
                 await insertCsAutoReply(data.room_id, adminUUID);
+            }
+
+            if (settings.automationEnabled) {
+                const rules = parseCsAutomationRules(settings.automationRulesJson);
+                const botReply = matchCsAutomationReply(data.content, rules);
+                if (botReply) {
+                    const { data: recentAfter } = await supabaseAdmin
+                        .from('foxtalk_messages')
+                        .select('id, participant_id, content, message_type')
+                        .eq('room_id', data.room_id)
+                        .order('created_at', { ascending: false })
+                        .limit(3);
+                    const csIdSet = new Set(csParticipantIds);
+                    const lastBot =
+                        recentAfter?.[0]?.participant_id &&
+                        csIdSet.has(recentAfter[0].participant_id) &&
+                        recentAfter[0].content?.trim() === botReply.trim();
+                    if (!lastBot) {
+                        await insertCsTextAsAdmin(data.room_id, adminUUID, botReply);
+                    }
+                }
             }
         }
 

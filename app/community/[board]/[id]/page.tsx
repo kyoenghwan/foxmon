@@ -6,6 +6,8 @@ import SubPageLayout from '@/components/layout/sub-page-layout';
 import { getCommunityPostById } from '@/lib/actions/community';
 import { format } from 'date-fns';
 import { CommunityDetailClient } from './CommunityDetailClient';
+import { CommunityCommentsSection } from '@/components/community/CommunityCommentsSection';
+import { auth } from '@/auth';
 
 export default async function CommunityPostDetailPage({
     params,
@@ -20,6 +22,8 @@ export default async function CommunityPostDetailPage({
     
     // UUID 형식 검증 등 필요한 경우 추가 (현재는 간단히 ID로 조회)
     const post = await getCommunityPostById(id);
+    const session = await auth();
+    const isLoggedIn = !!session?.user;
 
     if (!post) {
         return notFound();
@@ -79,12 +83,12 @@ export default async function CommunityPostDetailPage({
                         />
                     </div>
 
-                    {/* 하단 영역 (댓글 등 확장 가능) */}
-                    <div className="bg-gray-50 p-4 md:p-6 border-t border-gray-100">
-                        <div className="flex items-center justify-center text-gray-400 text-[13px]">
-                            댓글 기능은 준비 중입니다.
-                        </div>
-                    </div>
+                    <CommunityCommentsSection
+                        postId={id}
+                        boardId={board}
+                        isLoggedIn={isLoggedIn}
+                        initialCount={post.comment_count || 0}
+                    />
                 </div>
             </CommunityDetailClient>
         </SubPageLayout>

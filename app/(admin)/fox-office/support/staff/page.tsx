@@ -157,7 +157,7 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
             고객센터 관리
           </h2>
           <p className="text-[13px] text-gray-500 font-medium mt-1">
-            담당자 지정, 업무시간·자동 응답 메시지, 문의 자동화(준비 중)를 한곳에서 관리합니다.
+            담당자 지정, 업무시간·자동 응답 메시지, 키워드 자동 응답 봇을 한곳에서 관리합니다.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -426,35 +426,39 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
             />
           </label>
 
+          <div className="border-t border-gray-100 pt-4 mt-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Bot className="w-5 h-5 text-primary" />
+              <h4 className="font-black text-gray-800 text-[14px]">키워드 자동 응답 봇</h4>
+            </div>
+            <p className="text-[12px] text-gray-500 font-medium mb-3">
+              고객 메시지에 키워드가 포함되면 아래 규칙의 답변을 자동 전송합니다. JSON 배열 형식입니다.
+            </p>
+            <label className="inline-flex items-center gap-2 text-[13px] font-bold text-gray-700 mb-2">
+              <input
+                type="checkbox"
+                name="cs_automation_enabled"
+                defaultChecked={csSettings.automationEnabled}
+                className="rounded border-gray-300"
+              />
+              자동 응답 봇 사용
+            </label>
+            <textarea
+              name="cs_automation_rules"
+              rows={6}
+              defaultValue={csSettings.automationRulesJson}
+              placeholder='[{"keywords":["배너","광고"],"reply":"광고 문의 감사합니다. 담당자가 확인 후 답변드립니다."}]'
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-[12px] font-mono resize-y"
+            />
+          </div>
+
           <button
             type="submit"
             className="h-11 px-6 rounded-xl bg-gray-900 text-white text-[13px] font-black hover:bg-black transition"
           >
-            업무시간·메시지 저장
+            업무시간·메시지·자동봇 저장
           </button>
         </form>
-      </div>
-
-      <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-5 opacity-90">
-        <div className="flex items-center gap-2">
-          <Bot className="w-5 h-5 text-gray-500" />
-          <h3 className="font-black text-gray-800">자동 응답 봇 (준비 중)</h3>
-        </div>
-        <p className="text-[12px] text-gray-500 font-medium mt-2">
-          특정 키워드·문의 유형에 따라 미리 등록한 답변을 자동 전송하는 기능입니다. 규칙 JSON 형식으로 저장되며, 다음
-          단계에서 키워드 매칭·FAQ 연동을 붙일 예정입니다.
-        </p>
-        <label className="mt-4 inline-flex items-center gap-2 text-[13px] font-bold text-gray-600">
-          <input type="checkbox" defaultChecked={csSettings.automationEnabled} disabled className="rounded" />
-          자동화 사용 (추후 활성화)
-        </label>
-        <textarea
-          rows={6}
-          defaultValue={csSettings.automationRulesJson}
-          placeholder='[{"keywords":["배너","광고"],"reply":"..."}]'
-          className="mt-2 w-full px-3 py-2 border border-gray-200 rounded-xl text-[12px] font-mono bg-gray-50 resize-y"
-          readOnly
-        />
       </div>
     </div>
   );

@@ -10,7 +10,8 @@ import {
   CreditCard, 
   Settings, 
   MessageSquare, 
-  HelpCircle, 
+  HelpCircle,
+  Bell,
   ArrowLeftRight,
   ShieldCheck,
   Building2
@@ -27,6 +28,7 @@ const ADMIN_MENUS = [
   { id: 'points', label: '포인트 및 정책 관리', icon: ArrowLeftRight, href: '/fox-office/points' },
   { id: 'community', label: '커뮤니티 관리', icon: MessageSquare, href: '/fox-office/community' },
   { id: 'support', label: '고객센터', icon: HelpCircle, href: '/fox-office/support' },
+  { id: 'help-content', label: '공지·FAQ·문의', icon: Bell, href: '/fox-office/help' },
   { id: 'support-staff', label: '고객센터 관리', icon: Users, href: '/fox-office/support/staff' },
   { id: 'support-inbox', label: '고객센터 메신저', icon: MessageSquare, href: '/fox-office/support/inbox' },
   { id: 'settings', label: '시스템 설정', icon: Settings, href: '/fox-office/settings' },
