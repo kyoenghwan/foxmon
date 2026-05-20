@@ -1,6 +1,6 @@
 "use server";
 
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin, isSupabaseServiceRoleConfigured } from "@/lib/supabase";
 import { auth } from "@/auth";
 
 export async function getSiteSettings() {
@@ -34,6 +34,13 @@ export async function updateSiteSettings(payload: Record<string, string>) {
     
     if (!session?.user || !['ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role)) {
         return { success: false, error: 'Unauthorized' };
+    }
+
+    if (!isSupabaseServiceRoleConfigured) {
+        return {
+            success: false,
+            error: 'SUPABASE_SERVICE_ROLE_KEY가 없어 설정을 저장할 수 없습니다.',
+        };
     }
 
     // 각 키에 대해 UPSERT 수행

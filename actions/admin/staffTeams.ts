@@ -7,8 +7,7 @@ export async function updateUserStaffTeam(payload: { userId: string; staffTeam: 
   const session = await auth();
   const role = (session?.user as unknown as { role?: string } | undefined)?.role;
 
-  // 담당자 지정(권한 부여)은 SUPER_ADMIN만 허용
-  if (!session?.user || role !== "SUPER_ADMIN") {
+  if (!session?.user || (role !== "ADMIN" && role !== "SUPER_ADMIN")) {
     return { success: false, error: "Unauthorized" as const };
   }
 

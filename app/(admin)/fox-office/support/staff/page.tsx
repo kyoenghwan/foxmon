@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ShieldCheck, Users, Headset, Megaphone } from "lucide-react";
 import { QA_GET_SUPPORT_STAFF_USERS } from "@/src/atoms/qa/admin/QA_GET_SUPPORT_STAFF_USERS";
@@ -26,10 +27,18 @@ type AdminUserRow = {
   staff_team?: string | null;
 };
 
-export default async function SupportStaffManagementPage() {
+type PageProps = {
+  searchParams?: Promise<{ msg?: string; type?: string }>;
+};
+
+export default async function SupportStaffManagementPage({ searchParams }: PageProps) {
   const session = await auth();
   const sessionUser = session?.user as unknown as SessionUser | undefined;
   const role = sessionUser?.role;
+  const sp = (await searchParams) || {};
+  const flashMsg = sp.msg ? decodeURIComponent(sp.msg) : null;
+  const flashType = sp.type === "ok" ? "ok" : sp.type === "error" ? "error" : null;
+  const canEditStaff = role === "ADMIN" || role === "SUPER_ADMIN";
 
   if (!session?.user || (role !== "ADMIN" && role !== "SUPER_ADMIN")) {
     redirect("/");
@@ -50,16 +59,40 @@ export default async function SupportStaffManagementPage() {
     const nextId = String(formData.get("cs_admin_user_id") || "").trim();
     const s = await auth();
     const r = (s?.user as unknown as SessionUser | undefined)?.role;
-    if (!s?.user || (r !== "ADMIN" && r !== "SUPER_ADMIN")) return;
-    await updateSiteSettings({ cs_admin_user_id: nextId });
+    if (!s?.user || (r !== "ADMIN" && r !== "SUPER_ADMIN")) {
+      redirect("/fox-office/support/staff?type=error&msg=" + encodeURIComponent("권한이 없습니다."));
+    }
+    const res = await updateSiteSettings({ cs_admin_user_id: nextId });
+    revalidatePath("/fox-office/support/staff");
+    if (!res.success) {
+      redirect(
+        "/fox-office/support/staff?type=error&msg=" +
+          encodeURIComponent(res.error || "대표 상담원 저장에 실패했습니다.")
+      );
+    }
+    redirect("/fox-office/support/staff?type=ok&msg=" + encodeURIComponent("대표 상담원이 저장되었습니다."));
   }
 
   async function setStaffTeam(formData: FormData) {
     "use server";
     const userId = String(formData.get("user_id") || "").trim();
     const staffTeam = String(formData.get("staff_team") || "OPS").trim() as "OPS" | "AD" | "CS";
-    if (!userId) return;
-    await updateUserStaffTeam({ userId, staffTeam });
+    if (!userId) {
+      redirect("/fox-office/support/staff?type=error&msg=" + encodeURIComponent("계정을 선택해 주세요."));
+    }
+    const res = await updateUserStaffTeam({ userId, staffTeam });
+    revalidatePath("/fox-office/support/staff");
+    if (!res.success) {
+      redirect(
+        "/fox-office/support/staff?type=error&msg=" +
+          encodeURIComponent(
+            res.error === "Unauthorized"
+              ? "담당 역할 변경 권한이 없습니다."
+              : "담당 역할 저장에 실패했습니다."
+          )
+      );
+    }
+    redirect("/fox-office/support/staff?type=ok&msg=" + encodeURIComponent("담당 역할이 저장되었습니다."));
   }
 
   return (
@@ -85,6 +118,18 @@ export default async function SupportStaffManagementPage() {
           ) : null}
         </div>
       </div>
+
+      {flashMsg && flashType ? (
+        <div
+          className={`rounded-2xl border px-4 py-3 text-[13px] font-bold ${
+            flashType === "ok"
+              ? "border-green-200 bg-green-50 text-green-800"
+              : "border-red-200 bg-red-50 text-red-800"
+          }`}
+        >
+          {flashMsg}
+        </div>
+      ) : null}
 
       {usersFetchError ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] font-bold text-red-800">
@@ -145,7 +190,7 @@ export default async function SupportStaffManagementPage() {
             <h3 className="font-black text-gray-900">관리자 계정 담당 역할 지정</h3>
           </div>
           <p className="text-[12px] text-gray-500 font-medium mt-1">
-            SUPER_ADMIN만 변경할 수 있습니다. (ADMIN은 조회만 가능)
+            ADMIN · SUPER_ADMIN 계정에서 담당 역할(운영/광고/고객응대)을 변경할 수 있습니다.
           </p>
 
           <div className="mt-4 overflow-x-auto">
@@ -209,7 +254,7 @@ export default async function SupportStaffManagementPage() {
                           <select
                             name="staff_team"
                             defaultValue={u.staff_team || "OPS"}
-                            disabled={role !== "SUPER_ADMIN"}
+                            disabled={!canEditStaff}
                             className="h-9 px-2 border border-gray-200 rounded-lg text-[12px] font-bold bg-white disabled:bg-gray-50 disabled:text-gray-400"
                           >
                             <option value="OPS">운영</option>
@@ -218,7 +263,7 @@ export default async function SupportStaffManagementPage() {
                           </select>
                           <button
                             type="submit"
-                            disabled={role !== "SUPER_ADMIN"}
+                            disabled={!canEditStaff}
                             className="h-9 px-3 rounded-lg bg-gray-900 text-white text-[12px] font-black disabled:opacity-40"
                           >
                             저장
