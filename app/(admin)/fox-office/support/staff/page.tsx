@@ -1,7 +1,8 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { ShieldCheck, Users, Headset, Megaphone } from "lucide-react";
-import { QA_GET_ALL_USERS } from "@/src/atoms/qa/admin/QA_GET_ALL_USERS";
+import { QA_GET_ADMIN_USERS } from "@/src/atoms/qa/admin/QA_GET_ADMIN_USERS";
+import { isSupabaseServiceRoleConfigured } from "@/lib/supabase";
 import { getSiteSettings, updateSiteSettings } from "@/actions/admin/siteSettings";
 import { updateUserStaffTeam } from "@/actions/admin/staffTeams";
 
@@ -34,9 +35,9 @@ export default async function SupportStaffManagementPage() {
     redirect("/");
   }
 
-  const [usersRes, settingsRes] = await Promise.all([QA_GET_ALL_USERS(), getSiteSettings()]);
-  const users = usersRes.success ? ((usersRes.data as unknown) as AdminUserRow[]) : [];
-  const adminUsers = users.filter((u) => u.role === "ADMIN" || u.role === "SUPER_ADMIN");
+  const [usersRes, settingsRes] = await Promise.all([QA_GET_ADMIN_USERS(), getSiteSettings()]);
+  const adminUsers = usersRes.success ? ((usersRes.data as unknown) as AdminUserRow[]) : [];
+  const usersFetchError = usersRes.success ? null : usersRes.error;
 
   const settings = settingsRes.success ? (settingsRes.data as Record<string, string>) : {};
   const primaryCsAdminUserId = settings?.cs_admin_user_id || "";
@@ -81,6 +82,24 @@ export default async function SupportStaffManagementPage() {
           ) : null}
         </div>
       </div>
+
+      {usersFetchError ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] font-bold text-red-800">
+          {usersFetchError}
+          {!isSupabaseServiceRoleConfigured ? (
+            <p className="mt-2 font-medium text-red-700">
+              Vercel/서버 환경 변수에 <code className="font-mono text-[12px]">SUPABASE_SERVICE_ROLE_KEY</code>를
+              넣은 뒤 재배포하면 ADMIN 계정이 모두 표시됩니다.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      <p className="text-[12px] text-gray-500 font-medium">
+        표시 조건: <span className="font-black text-gray-700">users.role</span> 이{" "}
+        <span className="font-black">ADMIN</span> 또는 <span className="font-black">SUPER_ADMIN</span> 인 계정만
+        (현재 {adminUsers.length}명)
+      </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-gray-200 p-5 lg:col-span-1">

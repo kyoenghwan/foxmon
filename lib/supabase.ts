@@ -9,5 +9,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey;
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
+/** 서버 관리자 API가 RLS를 우회하려면 필수. 없으면 supabaseAdmin이 anon과 동일해져 일부 행만 조회됨 */
+export const isSupabaseServiceRoleConfigured =
+  !!process.env.SUPABASE_SERVICE_ROLE_KEY &&
+  process.env.SUPABASE_SERVICE_ROLE_KEY !== supabaseAnonKey;
+
 export const isSupabaseEnabled = !!supabaseUrl && !!supabaseAnonKey && !supabaseUrl.includes('kgwvftaebjkjwwpsftqv.supabase.co') === false;
 // 위 조건은 나중에 실제 URL 검증으로 고도화 가능

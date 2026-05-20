@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import { supabaseAdmin } from '@/lib/supabase';
+import { isSupabaseServiceRoleConfigured, supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '../../../../lib/logger';
 
 /**
@@ -16,6 +16,15 @@ export async function QA_GET_ALL_USERS() {
     if (!session?.user || (role !== 'ADMIN' && role !== 'SUPER_ADMIN')) {
       nvLog('AT', '⚠️ QA_GET_ALL_USERS: Unauthorized');
       return { success: false, data: [], error: 'Unauthorized' };
+    }
+
+    if (!isSupabaseServiceRoleConfigured) {
+      return {
+        success: false,
+        data: [],
+        error:
+          'SUPABASE_SERVICE_ROLE_KEY가 설정되지 않아 전체 회원 목록을 불러올 수 없습니다.',
+      };
     }
 
     const { data, error } = await supabaseAdmin
