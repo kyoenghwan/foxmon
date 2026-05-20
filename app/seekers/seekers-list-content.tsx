@@ -15,6 +15,7 @@ import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMM
 import { GeneralSeekerListRow } from './GeneralSeekerListRow';
 import { getPublicSeekerAdsAction, getSeekerAdByIdAction } from '@/lib/actions';
 import { SeekerModalWrapper } from '@/components/seekers/seeker-modal-wrapper';
+import { resumeMatchesIndustryFilter } from '@/lib/resume-industry';
 
 interface SeekersListContentProps {
     isEmployer?: boolean;
@@ -158,7 +159,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
             // 2. Industry Filter
             if (selectedIndustry !== 'all') {
                 const industryName = INDUSTRIES.find(i => i.id === selectedIndustry)?.nameKo;
-                if (industryName && resumes.desired_industry !== industryName) {
+                if (industryName && !resumeMatchesIndustryFilter(resumes.desired_industry, industryName)) {
                     return false;
                 }
             }

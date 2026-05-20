@@ -14,10 +14,17 @@ import {
 import { FileText, Plus, ArrowLeft, Loader2, Save, Upload, User2, Trash2, Eye, EyeOff } from 'lucide-react';
 import { manageResumeAction, manageSeekerAdAction } from '@/lib/actions';
 import { ResumeData } from '@/src/atoms/oa/resume/OA_UPSERT_RESUME';
+
+type ResumeFormState = Partial<ResumeData> & { desired_industries?: string[] };
 import { SeekerAdData } from '@/src/atoms/qa/resume/QA_GET_USER_SEEKER_ADS';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { nvLog } from '@/lib/logger';
 import { cn } from '@/lib/utils';
+import {
+  formatDesiredIndustries,
+  isDesiredIndustrySelected,
+  parseDesiredIndustries,
+} from '@/lib/resume-industry';
 
 function resolveSalaryTypeValue(type: string | undefined, salaryTypes: CodeItem[]) {
   if (!type) return '';
@@ -62,7 +69,7 @@ export function ResumeManagementModal() {
   const [deleting, setDeleting] = useState<string | null>(null);
   
   // Form state
-  const [formData, setFormData] = useState<Partial<ResumeData>>({});
+  const [formData, setFormData] = useState<ResumeFormState>({});
   const [adFormView, setAdFormView] = useState<boolean>(false);
   const [adFormData, setAdFormData] = useState<Partial<SeekerAdData>>({});
 
@@ -162,7 +169,10 @@ export function ResumeManagementModal() {
 
   const handleOpenForm = async (resume?: ResumeData) => {
     if (resume) {
-      setFormData({ ...resume });
+      setFormData({
+        ...resume,
+        desired_industries: parseDesiredIndustries(resume.desired_industry),
+      });
       setIsCustomSns(!!resume.sns_type && !['카카오톡', '라인', '텔레그램'].includes(resume.sns_type));
       setViewMode('FORM');
     } else {
@@ -209,7 +219,14 @@ export function ResumeManagementModal() {
     }
     setSaving(true);
     try {
-      const res = await manageResumeAction('SAVE', formData as ResumeData);
+      const industries =
+        formData.desired_industries ?? parseDesiredIndustries(formData.desired_industry);
+      const { desired_industries: _omit, ...rest } = formData;
+      const payload: ResumeData = {
+        ...(rest as ResumeData),
+        desired_industry: formatDesiredIndustries(industries) || undefined,
+      };
+      const res = await manageResumeAction('SAVE', payload);
       if (res.success) {
         alert('저장되었습니다.');
         setViewMode('LIST');
@@ -791,19 +808,58 @@ export function ResumeManagementModal() {
                       </div>
                     </div>
                   </div>
-                  <div>
-                    <div className="flex flex-row items-center gap-2 md:flex-col md:items-stretch">
-                      <label className="text-sm font-bold text-gray-700 shrink-0 whitespace-nowrap md:mb-2 md:block">희망 업종</label>
-                      <select
-                        value={formData.desired_industry || ''}
-                        onChange={e => setFormData({...formData, desired_industry: e.target.value})}
-                        className="flex-1 min-w-0 h-9 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium bg-white cursor-pointer md:w-full md:h-auto md:p-3"
-                    >
-                        <option value="">업종 선택</option>
-                        {categories.map(cat => (
-                            <option key={cat.code_value} value={cat.code_name}>{cat.code_name}</option>
+                  <div className="sm:col-span-2">
+                    <label className="text-sm font-bold text-gray-700 block mb-2">희망 업종</label>
+                    <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100">
+                        {categories.map((item) => (
+                          <label key={item.code_value} className="flex items-center gap-1.5 cursor-pointer min-w-0">
+                            <input
+                              type="checkbox"
+                              checked={isDesiredIndustrySelected(
+                                formData.desired_industries,
+                                item.code_value,
+                                item.code_name
+                              )}
+                              onChange={(e) => {
+                                const current =
+                                  formData.desired_industries ??
+                                  parseDesiredIndustries(formData.desired_industry);
+                                const selected = isDesiredIndustrySelected(
+                                  current,
+                                  item.code_value,
+                                  item.code_name
+                                );
+                                if (e.target.checked) {
+                                  if (!selected) {
+                                    const normalized = current.filter(
+                                      (v) => v !== item.code_value && v !== item.code_name
+                                    );
+                                    setFormData({
+                                      ...formData,
+                                      desired_industries: [...normalized, item.code_name],
+                                    });
+                                  }
+                                } else {
+                                  setFormData({
+                                    ...formData,
+                                    desired_industries: current.filter(
+                                      (v) => v !== item.code_value && v !== item.code_name
+                                    ),
+                                  });
+                                }
+                              }}
+                              className="accent-primary w-3.5 h-3.5 sm:w-4 sm:h-4 rounded shrink-0"
+                            />
+                            <span className="text-[11px] sm:text-sm font-medium text-gray-700 truncate">
+                              {item.code_name}
+                            </span>
+                          </label>
                         ))}
-                    </select>
+                        {categories.length === 0 && (
+                          <span className="col-span-3 text-sm text-gray-400 font-medium py-2">
+                            업종을 불러오는 중...
+                          </span>
+                        )}
                     </div>
                   </div>
 
