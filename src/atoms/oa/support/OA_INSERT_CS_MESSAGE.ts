@@ -5,6 +5,7 @@ import { sendTelegramMessageDirect } from '@/lib/telegram';
 import { OA_INSERT_CHAT_PARTICIPANT } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_PARTICIPANT';
 import { QA_GET_CS_SETTINGS } from '@/src/atoms/qa/support/QA_GET_CS_SETTINGS';
 import { isWithinBusinessHours } from '@/lib/cs-settings';
+import { shouldSendCsAutoReply } from '@/lib/cs-auto-reply';
 
 interface CSMessageData {
     room_id: string;
@@ -19,8 +20,16 @@ async function getCsAdminUserId(): Promise<string | null> {
         .from('site_settings')
         .select('key_value')
         .eq('key_name', 'cs_admin_user_id')
-        .single();
-    return data?.key_value?.trim() || null;
+        .maybeSingle();
+    const fromSettings = data?.key_value?.trim();
+    if (fromSettings) return fromSettings;
+
+    const { data: fallback } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('login_id', 'foxmon_cs')
+        .maybeSingle();
+    return fallback?.id?.trim() || null;
 }
 
 async function resolveParticipantId(
@@ -84,6 +93,11 @@ async function insertCsAutoReply(roomId: string, adminUserId: string) {
             message_type: 'TEXT',
         },
     ]);
+
+    await supabaseAdmin
+        .from('foxtalk_rooms')
+        .update({ last_message_at: new Date().toISOString() })
+        .eq('id', roomId);
 }
 
 export const OA_INSERT_CS_MESSAGE = async (data: CSMessageData) => {
@@ -128,16 +142,40 @@ export const OA_INSERT_CS_MESSAGE = async (data: CSMessageData) => {
             data.participant_id !== 'CS_ADMIN' &&
             data.participant_id !== adminUUID;
 
-        // 고객 첫 문의 1회만 자동 접수 안내 (매 메시지마다 반복 방지)
         if (isCustomerText && adminUUID && actualParticipantId) {
-            const { count } = await supabaseAdmin
+            const settingsRes = await QA_GET_CS_SETTINGS();
+            const settings = settingsRes.data;
+
+            const { count: customerTextCount } = await supabaseAdmin
                 .from('foxtalk_messages')
                 .select('id', { count: 'exact', head: true })
                 .eq('room_id', data.room_id)
                 .eq('participant_id', actualParticipantId)
                 .eq('message_type', 'TEXT');
 
-            if (count === 1) {
+            const { data: recentMsgs } = await supabaseAdmin
+                .from('foxtalk_messages')
+                .select('id, participant_id, content, message_type')
+                .eq('room_id', data.room_id)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            const { data: csParts } = await supabaseAdmin
+                .from('foxtalk_participants')
+                .select('id')
+                .eq('room_id', data.room_id)
+                .eq('session_id', adminUUID);
+
+            const csParticipantIds = (csParts || []).map((p) => p.id).filter(Boolean) as string[];
+
+            const sendAuto = shouldSendCsAutoReply({
+                settings,
+                customerTextCount: customerTextCount ?? 0,
+                recentMessagesNewestFirst: recentMsgs || [],
+                csParticipantIds,
+            });
+
+            if (sendAuto) {
                 await insertCsAutoReply(data.room_id, adminUUID);
             }
         }

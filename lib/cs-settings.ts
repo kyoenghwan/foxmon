@@ -80,9 +80,9 @@ function getZonedWeekdayAndMinutes(date: Date, timezone: string): { day: number;
   const dtf = new Intl.DateTimeFormat('en-US', {
     timeZone: timezone,
     weekday: 'short',
-    hour: '2-digit',
+    hour: 'numeric',
     minute: '2-digit',
-    hour12: false,
+    hourCycle: 'h23',
   });
   const parts = Object.fromEntries(
     dtf.formatToParts(date).filter((p) => p.type !== 'literal').map((p) => [p.type, p.value])
