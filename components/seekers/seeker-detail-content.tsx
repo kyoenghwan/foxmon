@@ -165,8 +165,9 @@ export function SeekerDetailContent({
           </div>
         </div>
 
-        {/* 근무조건 + 자기소개 + 연락 (한 블록) */}
-        <section className="rounded-2xl border border-gray-100 bg-gray-50/80 p-4 sm:p-5">
+        {/* 희망 근무조건 */}
+        <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+          <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">희망 근무조건</h2>
           <div className="space-y-2.5 text-sm leading-relaxed text-gray-800 sm:text-[15px]">
             <p>
               <span className="font-bold text-gray-500">지역</span>
@@ -183,35 +184,40 @@ export function SeekerDetailContent({
               <span className="text-gray-400"> : </span>
               <span className="font-bold text-primary">{payText}</span>
             </p>
-            <div className="border-t border-gray-200/80 pt-3">
-              <p className="font-bold text-gray-500">자기소개</p>
-              <p className="mt-1 whitespace-pre-wrap text-gray-800">
-                {self_introduction?.trim() || '등록된 자기소개가 없습니다.'}
-              </p>
+          </div>
+        </section>
+
+        {/* 자기소개 */}
+        <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+          <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">자기소개</h2>
+          <p className="whitespace-pre-wrap text-sm font-medium leading-relaxed text-gray-800 sm:text-[15px]">
+            {self_introduction?.trim() || '등록된 자기소개가 없습니다.'}
+          </p>
+        </section>
+
+        {/* 연락처 및 SNS */}
+        <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+          <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">연락처 및 SNS</h2>
+          <div className="space-y-2 text-sm font-bold text-gray-900 sm:text-[15px]">
+            <div className="flex items-center gap-2">
+              <Phone className="h-3.5 w-3.5 shrink-0 text-gray-400" />
+              <span className="shrink-0 font-black text-gray-700">연락처</span>
+              <span className="text-gray-400">:</span>
+              <span className="min-w-0 break-words">{contactLine}</span>
             </div>
-            <div className="border-t border-gray-200/80 pt-3">
-              <p className="mb-2 font-bold text-gray-500">연락처 및 SNS</p>
-              <div className="overflow-x-auto pb-0.5 scrollbar-hide">
-                <div className="inline-flex min-w-max flex-nowrap items-center gap-x-3 gap-y-0 text-sm font-bold text-gray-900 sm:text-[15px]">
-                  <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
-                    <Phone className="h-3.5 w-3.5 text-gray-400" />
-                    연락 : {contactLine}
-                  </span>
-                  <span className="shrink-0 text-gray-300">|</span>
-                  <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
-                    <Clock className="h-3.5 w-3.5 text-gray-400" />
-                    시간 : {timeLine}
-                  </span>
-                  {snsInline ? (
-                    <>
-                      <span className="shrink-0 text-gray-300">|</span>
-                      <span className="shrink-0 whitespace-nowrap text-[13px] text-gray-800 sm:text-[15px]">
-                        SNS : {snsInline}
-                      </span>
-                    </>
-                  ) : null}
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-3.5 w-3.5 shrink-0 text-gray-400" />
+              <span className="shrink-0 font-black text-gray-700">연락가능시간</span>
+              <span className="text-gray-400">:</span>
+              <span className="min-w-0 break-words">{timeLine}</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="mt-[2px] h-3.5 w-3.5 shrink-0 text-gray-300">•</span>
+              <span className="shrink-0 font-black text-gray-700">SNS</span>
+              <span className="text-gray-400">:</span>
+              <span className="min-w-0 break-words text-gray-800">
+                {snsInline || '없음'}
+              </span>
             </div>
           </div>
         </section>
