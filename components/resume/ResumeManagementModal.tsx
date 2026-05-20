@@ -489,9 +489,14 @@ export function ResumeManagementModal() {
                   <>
                     {resumes.map(r => (
                       <div key={r.id || r.title} className="bg-white border border-gray-200 rounded-2xl p-4 md:p-5 hover:border-primary hover:shadow-md transition-all group">
-                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-4">
+                        {/* 1행: 업데이트 · 지역 */}
+                        <p className="text-xs md:text-sm text-gray-500 font-medium">
+                          업데이트: {r.updated_at ? new Date(r.updated_at).toLocaleDateString() : '방금'} · {r.desired_location || '지역 미기재'}
+                        </p>
+                        {/* 2행: 제목(좌) · 버튼(우 정렬) */}
+                        <div className="mt-2 flex items-start gap-2">
                           <div
-                            className="min-w-0 flex-1 cursor-pointer md:pr-2"
+                            className="min-w-0 flex-1 cursor-pointer pr-1"
                             onClick={() => handleOpenForm(r)}
                             role="button"
                             tabIndex={0}
@@ -502,15 +507,11 @@ export function ResumeManagementModal() {
                               }
                             }}
                           >
-                            <h4 className="font-black text-base md:text-lg text-gray-900 group-hover:text-primary transition-colors break-words [overflow-wrap:anywhere] line-clamp-2">
+                            <h4 className="font-black text-base md:text-lg text-gray-900 group-hover:text-primary transition-colors break-words [overflow-wrap:anywhere] line-clamp-2 text-left">
                               {r.title}
                             </h4>
-                            <p className="text-xs md:text-sm text-gray-500 font-medium mt-1">
-                              업데이트: {r.updated_at ? new Date(r.updated_at).toLocaleDateString() : '방금'} · {r.desired_location || '지역 미기재'}
-                            </p>
                           </div>
-                          <div className="flex items-center justify-end gap-2 shrink-0 flex-wrap">
-                            {/* 공개/비공개 토글 */}
+                          <div className="flex items-center justify-end gap-2 shrink-0">
                             <button
                               type="button"
                               onClick={(e) => handleTogglePublic(e, r)}
