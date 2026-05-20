@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { FileText, Plus, ArrowLeft, Loader2, Save, Upload, User2, Trash2, Eye, EyeOff } from 'lucide-react';
+import { FileText, Plus, ArrowLeft, Loader2, Save, Upload, Trash2, Eye, EyeOff, Pencil } from 'lucide-react';
 import { manageResumeAction, manageSeekerAdAction } from '@/lib/actions';
 import { ResumeData } from '@/src/atoms/oa/resume/OA_UPSERT_RESUME';
 
@@ -488,26 +488,31 @@ export function ResumeManagementModal() {
                 ) : (
                   <>
                     {resumes.map(r => (
-                      <div key={r.id || r.title} className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-primary hover:shadow-md transition-all group">
-                        <div className="flex justify-between items-center gap-4">
-                          <div className="flex items-center gap-4 cursor-pointer flex-1 min-w-0" onClick={() => handleOpenForm(r)}>
-                            {r.photo_url ? (
-                              <img src={r.photo_url} alt="Profile" className="w-12 h-12 object-cover rounded-full border bg-gray-50 flex-shrink-0" />
-                            ) : (
-                              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center border text-gray-400 flex-shrink-0">
-                                <User2 className="w-6 h-6" />
-                              </div>
-                            )}
-                            <div className="min-w-0">
-                              <h4 className="font-black text-lg text-gray-900 group-hover:text-primary transition-colors truncate">{r.title}</h4>
-                              <p className="text-sm text-gray-500 font-medium mt-1">
-                                업데이트: {r.updated_at ? new Date(r.updated_at).toLocaleDateString() : '방금'} | {r.desired_location || '지역 미기재'}
-                              </p>
-                            </div>
+                      <div key={r.id || r.title} className="bg-white border border-gray-200 rounded-2xl p-4 md:p-5 hover:border-primary hover:shadow-md transition-all group">
+                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-4">
+                          <div
+                            className="min-w-0 flex-1 cursor-pointer md:pr-2"
+                            onClick={() => handleOpenForm(r)}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handleOpenForm(r);
+                              }
+                            }}
+                          >
+                            <h4 className="font-black text-base md:text-lg text-gray-900 group-hover:text-primary transition-colors break-words [overflow-wrap:anywhere] line-clamp-2">
+                              {r.title}
+                            </h4>
+                            <p className="text-xs md:text-sm text-gray-500 font-medium mt-1">
+                              업데이트: {r.updated_at ? new Date(r.updated_at).toLocaleDateString() : '방금'} · {r.desired_location || '지역 미기재'}
+                            </p>
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="flex items-center justify-end gap-2 shrink-0 flex-wrap">
                             {/* 공개/비공개 토글 */}
                             <button
+                              type="button"
                               onClick={(e) => handleTogglePublic(e, r)}
                               className={`flex items-center gap-1.5 px-3 h-8 rounded-full text-xs font-bold border transition-all ${
                                 r.is_public
@@ -519,13 +524,22 @@ export function ResumeManagementModal() {
                               {r.is_public ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                               {r.is_public ? '공개' : '비공개'}
                             </button>
-                            {/* 수정하기 */}
-                            <Button variant="outline" className="rounded-full shadow-sm text-xs h-8 whitespace-nowrap" onClick={() => handleOpenForm(r)}>수정하기</Button>
-                            {/* 삭제 */}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 rounded-full shadow-sm shrink-0"
+                              onClick={() => handleOpenForm(r)}
+                              aria-label="이력서 수정"
+                              title="이력서 수정"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
                             <button
+                              type="button"
                               onClick={(e) => handleDelete(e, r)}
                               disabled={deleting === r.id}
-                              className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-50"
+                              className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-50 shrink-0"
                               title="이력서 삭제"
                             >
                               {deleting === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
