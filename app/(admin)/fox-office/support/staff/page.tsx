@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { ShieldCheck, Users, Headset, Megaphone } from "lucide-react";
-import { QA_GET_ADMIN_USERS } from "@/src/atoms/qa/admin/QA_GET_ADMIN_USERS";
+import { QA_GET_SUPPORT_STAFF_USERS } from "@/src/atoms/qa/admin/QA_GET_SUPPORT_STAFF_USERS";
 import { isSupabaseServiceRoleConfigured } from "@/lib/supabase";
 import { getSiteSettings, updateSiteSettings } from "@/actions/admin/siteSettings";
 import { updateUserStaffTeam } from "@/actions/admin/staffTeams";
@@ -35,8 +35,11 @@ export default async function SupportStaffManagementPage() {
     redirect("/");
   }
 
-  const [usersRes, settingsRes] = await Promise.all([QA_GET_ADMIN_USERS(), getSiteSettings()]);
-  const adminUsers = usersRes.success ? ((usersRes.data as unknown) as AdminUserRow[]) : [];
+  const [usersRes, settingsRes] = await Promise.all([
+    QA_GET_SUPPORT_STAFF_USERS(),
+    getSiteSettings(),
+  ]);
+  const staffUsers = usersRes.success ? ((usersRes.data as unknown) as AdminUserRow[]) : [];
   const usersFetchError = usersRes.success ? null : usersRes.error;
 
   const settings = settingsRes.success ? (settingsRes.data as Record<string, string>) : {};
@@ -96,9 +99,9 @@ export default async function SupportStaffManagementPage() {
       ) : null}
 
       <p className="text-[12px] text-gray-500 font-medium">
-        표시 조건: <span className="font-black text-gray-700">users.role</span> 이{" "}
-        <span className="font-black">ADMIN</span> 또는 <span className="font-black">SUPER_ADMIN</span> 인 계정만
-        (현재 {adminUsers.length}명)
+        표시 조건: <span className="font-black">ADMIN</span> / <span className="font-black">SUPER_ADMIN</span>,{" "}
+        <span className="font-black">staff_team=CS</span>, 또는{" "}
+        <span className="font-black">login_id가 foxmon_ 로 시작</span> 하는 계정 (현재 {staffUsers.length}명)
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -118,7 +121,7 @@ export default async function SupportStaffManagementPage() {
               className="w-full h-11 px-3 border border-gray-200 rounded-xl text-[13px] font-bold bg-white focus:outline-none focus:border-primary"
             >
               <option value="">(미지정)</option>
-              {adminUsers.map((u) => (
+              {staffUsers.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.nickname || u.name || u.login_id} ({u.login_id}) · {u.role} · {staffTeamLabel(u.staff_team)}
                 </option>
@@ -157,7 +160,7 @@ export default async function SupportStaffManagementPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {adminUsers.map((u) => {
+                {staffUsers.map((u) => {
                   const isPrimary = primaryCsAdminUserId && u.id === primaryCsAdminUserId;
                   return (
                     <tr key={u.id} className="hover:bg-orange-50/30 transition-colors">
@@ -226,7 +229,7 @@ export default async function SupportStaffManagementPage() {
                   );
                 })}
 
-                {adminUsers.length === 0 ? (
+                {staffUsers.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="p-10 text-center text-gray-500 font-medium">
                       관리자 계정이 없습니다.
