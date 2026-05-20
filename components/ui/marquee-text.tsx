@@ -9,14 +9,14 @@ interface MarqueeTextProps {
 }
 
 export function MarqueeText({ children, className = '', style }: MarqueeTextProps) {
-    const textRef = useRef<HTMLDivElement>(null);
+    const measureRef = useRef<HTMLSpanElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
 
     useEffect(() => {
         const checkOverflow = () => {
-            if (containerRef.current && textRef.current) {
-                setIsOverflowing(textRef.current.scrollWidth > containerRef.current.clientWidth);
+            if (containerRef.current && measureRef.current) {
+                setIsOverflowing(measureRef.current.scrollWidth > containerRef.current.clientWidth);
             }
         };
         const timer = setTimeout(checkOverflow, 100);
@@ -31,6 +31,14 @@ export function MarqueeText({ children, className = '', style }: MarqueeTextProp
 
     return (
         <div ref={containerRef} className="w-full min-w-0 overflow-hidden relative flex items-center" style={style}>
+            {/* 항상 마운트되는 측정용 텍스트 (레이아웃에 영향 없음) */}
+            <span
+                ref={measureRef}
+                className={`${className} pointer-events-none absolute left-0 top-0 whitespace-nowrap opacity-0`}
+                aria-hidden
+            >
+                {children}
+            </span>
             {isOverflowing ? (
                 <div
                     className={`${displayClass} whitespace-nowrap inline-block`}
@@ -40,9 +48,7 @@ export function MarqueeText({ children, className = '', style }: MarqueeTextProp
                     <span>{children}</span>
                 </div>
             ) : (
-                <div ref={textRef} className={`${className} whitespace-nowrap`}>
-                    {children}
-                </div>
+                <div className={`${className} whitespace-nowrap min-w-0`}>{children}</div>
             )}
         </div>
     );

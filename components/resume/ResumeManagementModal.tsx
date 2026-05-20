@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { MarqueeText } from '@/components/ui/marquee-text';
 import { FileText, Plus, ArrowLeft, Loader2, Save, Upload, Trash2, Eye, EyeOff, Pencil } from 'lucide-react';
 import { manageResumeAction, manageSeekerAdAction } from '@/lib/actions';
 import { ResumeData } from '@/src/atoms/oa/resume/OA_UPSERT_RESUME';
@@ -497,9 +498,11 @@ export function ResumeManagementModal() {
                         <div className="mt-2 flex items-start gap-2">
                           <div
                             className="min-w-0 flex-1 cursor-pointer pr-1"
+                            title={r.title || undefined}
                             onClick={() => handleOpenForm(r)}
                             role="button"
                             tabIndex={0}
+                            aria-label={`이력서 수정: ${r.title || '제목 없음'}`}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
@@ -507,9 +510,9 @@ export function ResumeManagementModal() {
                               }
                             }}
                           >
-                            <h4 className="font-black text-base md:text-lg text-gray-900 group-hover:text-primary transition-colors break-words [overflow-wrap:anywhere] line-clamp-2 text-left">
+                            <MarqueeText className="font-black text-base md:text-lg text-gray-900 group-hover:text-primary transition-colors text-left">
                               {r.title}
-                            </h4>
+                            </MarqueeText>
                           </div>
                           <div className="flex items-center justify-end gap-2 shrink-0">
                             <button
