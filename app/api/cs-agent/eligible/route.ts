@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getSiteSettings } from '@/actions/admin/siteSettings';
+import { isAdminRole } from '@/lib/normalize-user-role';
 
 export async function GET() {
   const session = await auth();
@@ -12,7 +13,10 @@ export async function GET() {
     return NextResponse.json({ eligible: false, csAdminUserId: null });
   }
 
-  if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+  const loginId = String(user.login_id || '').trim().toLowerCase();
+  const isCsOpsAccount = loginId.startsWith('foxmon_');
+
+  if (!isAdminRole(user.role) && !isCsOpsAccount) {
     return NextResponse.json({ eligible: false, csAdminUserId: null });
   }
 

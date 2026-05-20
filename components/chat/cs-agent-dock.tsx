@@ -2,13 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Headset, X } from 'lucide-react';
+import { isAdminRole } from '@/lib/normalize-user-role';
 import { CsMessengerPanel } from '@/components/chat/CsMessengerPanel';
 import { playCsNotificationSound } from '@/lib/play-cs-notification';
 import { supabase } from '@/lib/supabase';
 
 export function CsAgentDock() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
   const [eligible, setEligible] = useState(false);
   const [csAdminUserId, setCsAdminUserId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -16,15 +19,41 @@ export function CsAgentDock() {
   const openRef = useRef(open);
   openRef.current = open;
 
+  const sessionUser = session?.user as
+    | { id?: string; role?: string; login_id?: string }
+    | undefined;
+
   useEffect(() => {
-    fetch('/api/cs-agent/eligible')
+    if (status !== 'authenticated' || !sessionUser?.id) {
+      setEligible(false);
+      setCsAdminUserId(null);
+      return;
+    }
+
+    const loginId = String(sessionUser.login_id || '').trim().toLowerCase();
+    const canShow =
+      isAdminRole(sessionUser.role) || loginId.startsWith('foxmon_');
+
+    if (!canShow) {
+      setEligible(false);
+      setCsAdminUserId(null);
+      return;
+    }
+
+    fetch('/api/cs-agent/eligible', { credentials: 'include' })
       .then((r) => r.json())
       .then((data: { eligible?: boolean; csAdminUserId?: string }) => {
-        setEligible(!!data.eligible);
-        setCsAdminUserId(data.csAdminUserId || null);
+        const adminId = data.csAdminUserId || sessionUser.id || null;
+        setEligible(!!data.eligible || canShow);
+        setCsAdminUserId(adminId);
       })
-      .catch(() => {});
-  }, []);
+      .catch(() => {
+        if (canShow) {
+          setEligible(true);
+          setCsAdminUserId(sessionUser.id || null);
+        }
+      });
+  }, [status, sessionUser?.id, sessionUser?.role, sessionUser?.login_id]);
 
   const onCustomerMessage = useCallback(() => {
     if (!openRef.current) {
@@ -83,7 +112,7 @@ export function CsAgentDock() {
             setOpen(true);
             setUnread(0);
           }}
-          className="fixed z-[55] left-5 bottom-5 flex items-center gap-2 h-14 pl-4 pr-5 rounded-full bg-gray-900 text-white shadow-2xl hover:bg-black transition-all"
+          className="fixed z-[70] left-5 bottom-6 flex items-center gap-2 h-14 pl-4 pr-5 rounded-full bg-gray-900 text-white shadow-2xl hover:bg-black transition-all"
           aria-label="고객센터 상담 답변"
         >
           <Headset className="w-5 h-5 text-primary shrink-0" />

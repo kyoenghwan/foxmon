@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
+import { normalizeDbEnum } from '@/lib/normalize-user-role';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
@@ -26,8 +27,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             login_id: result.data.loginId,
                             email: result.data.email,
                             is_age_verified: result.data.is_age_verified,
-                            role: (result.data as any).role,
-                            staff_team: (result.data as any).staff_team,
+                            role: normalizeDbEnum((result.data as any).role),
+                            staff_team: normalizeDbEnum((result.data as any).staff_team) || undefined,
                             business_number: (result.data as any).business_number,
                             nickname: (result.data as any).nickname,
                             autoLogin: parsedCredentials.data.autoLogin === 'true',

@@ -2,12 +2,13 @@
 
 import { supabaseAdmin, isSupabaseServiceRoleConfigured } from "@/lib/supabase";
 import { auth } from "@/auth";
+import { isAdminRole } from "@/lib/normalize-user-role";
 
 export async function getSiteSettings() {
     const session = await auth();
     
     // 안전을 위해 Role 체크 수행
-    if (!session?.user || !['ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role)) {
+    if (!session?.user || !isAdminRole((session.user as any).role)) {
         return { success: false, error: 'Unauthorized' };
     }
 
@@ -32,7 +33,7 @@ export async function getSiteSettings() {
 export async function updateSiteSettings(payload: Record<string, string>) {
     const session = await auth();
     
-    if (!session?.user || !['ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role)) {
+    if (!session?.user || !isAdminRole((session.user as any).role)) {
         return { success: false, error: 'Unauthorized' };
     }
 

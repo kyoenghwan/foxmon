@@ -1,4 +1,5 @@
 import { normalizeLoginIdForAuth } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
+import { normalizeDbEnum } from '@/lib/normalize-user-role';
 import { RA_VALIDATE_LOGIN } from '@/src/atoms/ra/auth/RA_VALIDATE_LOGIN';
 import { QA_GET_USER_AUTH } from '@/src/atoms/qa/auth/QA_GET_USER_AUTH';
 import { RA_VERIFY_PASSWORD } from '@/src/atoms/ra/auth/RA_VERIFY_PASSWORD';
@@ -63,8 +64,8 @@ export const FA_LOGIN_FLOW = async (input: { loginId?: string; password?: string
         loginId: context.authResult.data.login_id,
         email: context.authResult.data.email,
         is_age_verified: context.authResult.data.is_age_verified,
-        role: context.authResult.data.role,
-        staff_team: context.authResult.data.staff_team,
+        role: normalizeDbEnum(context.authResult.data.role),
+        staff_team: normalizeDbEnum(context.authResult.data.staff_team) || undefined,
         business_number: context.authResult.data.business_number,
         nickname: context.authResult.data.nickname,
       },
