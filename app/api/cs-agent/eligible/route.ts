@@ -20,14 +20,8 @@ export async function GET() {
   const csAdminUserId =
     (settings.success && settings.data?.cs_admin_user_id?.trim()) || null;
 
-  const loginId = String(user.login_id || '').toLowerCase();
-  const eligible =
-    user.staff_team === 'CS' ||
-    loginId.startsWith('foxmon_') ||
-    (!!csAdminUserId && user.id === csAdminUserId);
-
   return NextResponse.json({
-    eligible,
+    eligible: true,
     csAdminUserId: csAdminUserId || user.id,
   });
 }

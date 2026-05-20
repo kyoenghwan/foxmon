@@ -1,5 +1,5 @@
 import { nvLog } from '@/lib/logger';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 interface FindUserByInfoInput {
   name: string;
@@ -10,7 +10,7 @@ export async function QA_FIND_USER_BY_INFO({ name, phoneNumber }: FindUserByInfo
   nvLog('AT', '▶️ QA_FIND_USER_BY_INFO 시작', { name, phoneNumber });
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .select('id, login_id, name, phone_number')
       .eq('name', name)

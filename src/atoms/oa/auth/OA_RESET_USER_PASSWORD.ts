@@ -1,5 +1,5 @@
 import { nvLog } from '@/lib/logger';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { RA_HASH_PASSWORD } from '../../ra/auth/RA_HASH_PASSWORD';
 
 interface ResetPasswordInput {
@@ -15,7 +15,7 @@ export async function OA_RESET_USER_PASSWORD({ userId, newPassword }: ResetPassw
     const { data: hashedPassword } = await RA_HASH_PASSWORD(newPassword);
 
     // 2. Update DB
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('users')
       .update({ password: hashedPassword })
       .eq('id', userId);

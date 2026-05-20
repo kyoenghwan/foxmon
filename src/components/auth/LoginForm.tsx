@@ -9,6 +9,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
+import { normalizeLoginId } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
 import { Loader2 } from 'lucide-react';
 
 interface LoginFormProps {
@@ -37,13 +38,14 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    nvLog('FW', '로그인 시도', { loginId: formData.loginId });
+    const loginId = normalizeLoginId(formData.loginId);
+    nvLog('FW', '로그인 시도', { loginId });
     setIsLoading(true);
     setError(null);
 
     try {
       const result = await signIn('credentials', {
-        loginId: formData.loginId,
+        loginId,
         password: formData.password,
         autoLogin: formData.autoLogin ? 'true' : 'false',
         redirect: false,
