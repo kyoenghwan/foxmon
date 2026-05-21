@@ -6,7 +6,32 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Dialog = DialogPrimitive.Root
+const Dialog = ({ open, onOpenChange, ...props }: DialogPrimitive.DialogProps) => {
+    React.useEffect(() => {
+        if (!open || !onOpenChange) return;
+
+        const modalStateKey = `modal-${Math.random().toString(36).substring(2, 11)}`;
+
+        // Push state to prevent back navigation from leaving the page
+        window.history.pushState({ modalKey: modalStateKey }, '');
+
+        const handlePopState = () => {
+            onOpenChange(false);
+        };
+
+        window.addEventListener('popstate', handlePopState);
+
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+            // If the modal was closed programmatically (e.g. by close button), pop the state
+            if (window.history.state?.modalKey === modalStateKey) {
+                window.history.back();
+            }
+        };
+    }, [open, onOpenChange]);
+
+    return <DialogPrimitive.Root open={open} onOpenChange={onOpenChange} {...props} />;
+}
 
 const DialogTrigger = DialogPrimitive.Trigger
 
