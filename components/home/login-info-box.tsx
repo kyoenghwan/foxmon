@@ -56,25 +56,25 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         const showResumeMenu = session.user.role !== 'EMPLOYER';
         
         return (
-            <div className="h-full bg-white rounded-2xl border p-5 flex flex-col shadow-sm">
+            <div className="h-full bg-white rounded-2xl border p-4 sm:p-5 flex flex-col shadow-sm">
                 
                 {/* Top Section: Avatar & Welcome text (New Layout) */}
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-2.5 sm:gap-4">
                     {/* 프로필 이미지 - 약간 커짐 */}
-                    <div className="h-16 w-16 rounded-[1rem] bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden border border-orange-100">
+                    <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-[1rem] bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden border border-orange-100">
                         {profileImageUrl ? (
                             <img src={profileImageUrl} alt="프로필" className="w-full h-full object-cover" />
                         ) : (
-                            <User className="h-8 w-8 stroke-[2.5]" />
+                            <User className="h-6 w-6 sm:h-8 sm:w-8 stroke-[2.5]" />
                         )}
                     </div>
 
                     {/* 우측 정보 & 버튼 영역 (flex-col로 상하 배치) */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[4rem] pt-0.5 gap-2">
+                    <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[3rem] sm:min-h-[4rem] pt-0.5 gap-1.5 sm:gap-2">
                         {/* 1. 인사말 + 로그아웃(우측 끝) */}
-                        <div className="flex w-full min-w-0 items-center gap-2">
+                        <div className="flex w-full min-w-0 items-center gap-1 sm:gap-2">
                             <div className="min-w-0 flex-1">
-                                <MarqueeText className="font-black text-[15px] sm:text-base text-gray-900 leading-tight">
+                                <MarqueeText className="font-black text-[13px] min-[375px]:text-[15px] sm:text-base text-gray-900 leading-tight">
                                     <span className="text-primary">{displayName}</span>님 반갑습니다!
                                 </MarqueeText>
                             </div>
@@ -90,7 +90,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                         console.error(e);
                                     }
                                 }}
-                                className="shrink-0 flex items-center gap-0.5 sm:gap-1 font-black text-red-500 hover:text-red-700 transition-colors text-[11px] sm:text-xs"
+                                className="shrink-0 flex items-center gap-0.5 sm:gap-1 font-black text-red-500 hover:text-red-700 transition-colors text-[10px] sm:text-xs"
                             >
                                 <LogOut className="w-3.5 h-3.5 shrink-0" />
                                 <span className="hidden sm:inline">로그아웃</span>
@@ -99,11 +99,11 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                         </div>
 
                         {/* 2. 하단 액션 버튼들 (이력서 관리 두껍게, 우측 설정 버튼) */}
-                        <div className="flex items-center gap-2 mt-auto">
+                        <div className="flex items-center gap-1.5 sm:gap-2 mt-auto">
                             {showResumeMenu && (
                                 <div className="flex-1 lg:hidden">
                                     {/* ResumeManagementModal 내부에 하드코딩된 button을 덮어쓰기 위해 CSS 적용 */}
-                                    <div className="w-full h-8 [&>button]:w-full [&>button]:h-full [&>button]:justify-center [&>button]:rounded-lg">
+                                    <div className="w-full h-7.5 sm:h-8 [&>button]:w-full [&>button]:h-full [&>button]:justify-center [&>button]:rounded-lg">
                                         <ResumeManagementModal />
                                     </div>
                                 </div>
@@ -112,14 +112,14 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                 <div className="flex-1 lg:hidden">
                                     <Link 
                                         href="/biz" 
-                                        className="w-full h-8 flex items-center justify-center gap-1.5 px-3 text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-lg transition-all shadow-sm"
+                                        className="w-full h-7.5 sm:h-8 flex items-center justify-center gap-1 px-2.5 text-[11px] sm:text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-lg transition-all shadow-sm"
                                     >
                                         <Briefcase className="w-3.5 h-3.5" />
                                         <span>업체관리</span>
                                     </Link>
                                 </div>
                             )}
-                            <div className="shrink-0">
+                            <div className="shrink-0 scale-90 sm:scale-100 origin-right">
                                 <SettingsModal />
                             </div>
                         </div>
@@ -127,36 +127,36 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                 </div>
 
                 {/* Bottom Icons - Flex spaced */}
-                <div className="flex justify-around items-center pt-4 mt-auto px-1">
-                    <Link href="/mypage/scraps" prefetch={false} className="flex flex-col items-center gap-1.5 group">
-                        <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110">
-                            <Heart className="h-5 w-5 fill-current" />
+                <div className="flex justify-around items-center pt-3 sm:pt-4 mt-auto px-0.5 sm:px-1">
+                    <Link href="/mypage/scraps" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group">
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110">
+                            <Heart className="h-4.5 w-4.5 sm:h-5 sm:w-5 fill-current" />
                         </div>
-                        <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">스크랩알바</span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">스크랩알바</span>
                     </Link>
-                    <Link href="/mypage/applications" prefetch={false} className="flex flex-col items-center gap-1.5 group">
-                        <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gray-50 group-hover:bg-blue-50 transition-all duration-300 text-gray-400 group-hover:text-blue-500 group-hover:scale-110">
-                            <FileText className="h-5 w-5" />
+                    <Link href="/mypage/applications" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group">
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-blue-50 transition-all duration-300 text-gray-400 group-hover:text-blue-500 group-hover:scale-110">
+                            <FileText className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                         </div>
-                        <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">지원현황</span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">지원현황</span>
                     </Link>
-                    <Link href="/mypage/viewers" prefetch={false} className="flex flex-col items-center gap-1.5 group">
-                        <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gray-50 group-hover:bg-emerald-50 transition-all duration-300 text-gray-400 group-hover:text-emerald-500 group-hover:scale-110">
-                            <Eye className="h-5 w-5" />
+                    <Link href="/mypage/viewers" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group">
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-emerald-50 transition-all duration-300 text-gray-400 group-hover:text-emerald-500 group-hover:scale-110">
+                            <Eye className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                         </div>
-                        <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">나를 본 업체</span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">나를 본 업체</span>
                     </Link>
-                    <Link href="/mypage/recent" prefetch={false} className="flex flex-col items-center gap-1.5 group">
-                        <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gray-50 group-hover:bg-indigo-50 transition-all duration-300 text-gray-400 group-hover:text-indigo-500 group-hover:scale-110">
-                            <Clock className="h-5 w-5" />
+                    <Link href="/mypage/recent" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group">
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-indigo-50 transition-all duration-300 text-gray-400 group-hover:text-indigo-500 group-hover:scale-110">
+                            <Clock className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                         </div>
-                        <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">최근 본 알바</span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">최근 본 알바</span>
                     </Link>
-                    <Link href="/mypage/messages" prefetch={false} className="flex flex-col items-center gap-1.5 group">
-                        <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gray-50 group-hover:bg-purple-50 transition-all duration-300 text-gray-400 group-hover:text-purple-500 group-hover:scale-110">
-                            <Mail className="h-5 w-5" />
+                    <Link href="/mypage/messages" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group">
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-purple-50 transition-all duration-300 text-gray-400 group-hover:text-purple-500 group-hover:scale-110">
+                            <Mail className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                         </div>
-                        <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">쪽지함</span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap">쪽지함</span>
                     </Link>
                 </div>
             </div>

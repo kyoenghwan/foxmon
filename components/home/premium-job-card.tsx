@@ -445,7 +445,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                 {/* 상호명 영역 (지역명 위, 상호명 아래) */}
                                 <div className={`flex-1 min-w-0 flex flex-col justify-center space-y-1`}>
                                     <div className="flex items-center w-full min-w-0">
-                                <div className={`flex items-center gap-1 shrink-0 border px-1.5 py-[1.5px] leading-[1.1] font-black rounded-[4px] text-[3.2vw] sm:text-[11px] lg:text-[12px] w-full overflow-hidden ${
+                                <div className={`flex items-center gap-1 shrink-0 border px-1.5 py-[2px] leading-normal font-black rounded-[4px] text-[2.8vw] sm:text-[11px] lg:text-[12px] w-full overflow-hidden ${
                                             isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
                                         }`}>
                                             <span className="shrink-0">{sido}</span>

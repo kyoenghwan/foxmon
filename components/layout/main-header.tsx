@@ -237,10 +237,10 @@ export function MainHeader({ session }: MainHeaderProps) {
             <div className="border-t border-gray-100 bg-white">
                 <div className="container mx-auto px-4 lg:px-8">
                     <nav className="flex items-center justify-between min-h-[3.5rem] lg:h-14 py-1.5 lg:py-0 relative w-full">
-                        <div className="flex items-center gap-3 sm:gap-6 md:gap-8 h-full w-full min-w-0">
+                        <div className="flex items-center gap-1.5 sm:gap-6 md:gap-8 h-full w-full min-w-0">
                             {/* 햄버거 메뉴 (전체) */}
                             <div 
-                                className="h-full flex items-center pr-4 md:pr-6 md:border-r border-gray-100 cursor-pointer group"
+                                className="h-full flex items-center pr-2 sm:pr-4 md:pr-6 md:border-r border-gray-100 cursor-pointer group"
                                 onMouseEnter={handleMouseEnter}
                                 onMouseLeave={handleMouseLeave}
                                 onClick={() => {
@@ -251,19 +251,19 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     }
                                 }}
                             >
-                                <Menu className="w-6 h-6 text-gray-800 group-hover:text-primary transition-colors md:mr-2" />
+                                <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800 group-hover:text-primary transition-colors md:mr-2" />
                                 <span className="hidden lg:inline font-black text-[15px] sm:text-[16px] text-gray-800 group-hover:text-primary transition-colors whitespace-nowrap">전체메뉴</span>
                             </div>
 
                             {/* 개별 메뉴 리스트 */}
-                            <div className="flex items-center gap-x-3 sm:gap-x-4 md:gap-x-8 h-auto lg:h-full py-2 lg:py-0 flex-1 overflow-x-auto scrollbar-hide">
+                            <div className="flex items-center gap-x-2 sm:gap-x-4 md:gap-x-8 h-auto lg:h-full py-2 lg:py-0 flex-1 overflow-x-auto scrollbar-hide">
                                 {menuItems.map((item) => {
                                     const isActive = pathname === item.href;
                                     return (
                                         <Link
                                             key={item.href}
                                             href={item.href}
-                                            className={`text-[13px] sm:text-[14px] lg:text-[16px] font-bold border-b-2 transition-all h-auto py-1 lg:py-0 lg:h-full flex items-center whitespace-nowrap px-1 shrink-0 ${isActive
+                                            className={`text-[12px] min-[360px]:text-[13px] sm:text-[14px] lg:text-[16px] font-bold border-b-2 transition-all h-auto py-1 lg:py-0 lg:h-full flex items-center whitespace-nowrap px-0.5 sm:px-1 shrink-0 ${isActive
                                                     ? 'text-primary border-primary'
                                                     : 'text-gray-900 border-transparent hover:border-primary hover:text-primary'
                                                 }`}

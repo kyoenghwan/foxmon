@@ -144,7 +144,7 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 h-full rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-6'} shadow-md relative overflow-hidden group cursor-pointer`}
+                            className={`flex-shrink-0 h-full rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer`}
                             style={{ 
                                 width: itemsPerView > 1 ? `calc((100% - ${(itemsPerView - 1) * 16}px) / ${itemsPerView})` : '100%'
                             }}
@@ -175,36 +175,35 @@ export function MainBanner() {
 
                                     {/* 호버 시 밝기 조절 */}
                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors z-15" />
-
                                     <div className="relative z-20 h-full flex flex-col justify-between">
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-3 mb-1">
+                                        <div className="space-y-1.5 sm:space-y-3">
+                                            <div className="flex items-center gap-2 sm:gap-3 mb-0.5 sm:mb-1">
                                                 {hasLogo && (
-                                                    <div className="w-12 h-8 sm:w-[60px] sm:h-[40px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
+                                                    <div className="w-10 h-7 sm:w-[60px] sm:h-[40px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
                                                         <div 
                                                             className="w-full h-full bg-contain bg-center bg-no-repeat" 
                                                             style={{ backgroundImage: `url(${logoUrl})` }} 
                                                         />
                                                     </div>
                                                 )}
-                                                <h3 className="text-white font-black text-xl sm:text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform origin-left duration-300">
+                                                <h3 className="text-white font-black text-[5vw] min-[375px]:text-[4.5vw] sm:text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform origin-left duration-300">
                                                     {banner.company}
                                                 </h3>
                                             </div>
-                                            <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
+                                            <p className="text-white/95 text-[3.8vw] min-[375px]:text-[3.5vw] sm:text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
                                                 {banner.title}
                                             </p>
                                         </div>
 
-                                        <div className="flex flex-col gap-1.5 mt-auto">
-                                            <p className="text-white/70 text-[11px] font-bold tracking-wider">{banner.location}</p>
-                                            <div className="flex items-center gap-2">
+                                        <div className="flex flex-col gap-1 sm:gap-1.5 mt-auto">
+                                            <p className="text-white/70 text-[10px] sm:text-[11px] font-bold tracking-wider">{banner.location}</p>
+                                            <div className="flex items-center gap-1.5 sm:gap-2">
                                                 {payType && (
-                                                    <span className="px-2 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[11px] font-black tracking-wide border border-white/10 shadow-sm">
+                                                    <span className="px-1.5 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[9px] sm:text-[11px] font-black tracking-wide border border-white/10 shadow-sm">
                                                         {payType}
                                                     </span>
                                                 )}
-                                                <span className="text-white font-black text-lg sm:text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                                <span className="text-white font-black text-[4.8vw] min-[375px]:text-[4.2vw] sm:text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
                                                     {payAmount}
                                                 </span>
                                             </div>

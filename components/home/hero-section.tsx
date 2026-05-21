@@ -18,7 +18,7 @@ export function HeroSection({ session }: HeroSectionProps) {
             <div className="container px-4 md:px-6">
                 <div className="flex flex-col lg:flex-row gap-6 lg:h-[200px]">
                     {/* 좌측: 메인 공고 배너 슬라이더 */}
-                    <div className="flex-1 min-w-0 h-full">
+                    <div className="flex-1 min-w-0 h-[145px] min-[375px]:h-[165px] sm:h-[200px] lg:h-full">
                         <MainBanner />
                     </div>
 

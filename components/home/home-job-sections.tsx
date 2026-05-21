@@ -163,23 +163,23 @@ export function HomeJobSections() {
 
             {/* --- Tier 1: Premium Jobs (Demo: 50 Cards) --- */}
             <section>
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-2">
-                        <Crown className="w-6 h-6 text-primary fill-primary animate-bounce" />
-                        <h2 className="text-2xl font-black text-gray-900 italic uppercase">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                        <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-primary fill-primary animate-bounce" />
+                        <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap">
                             {t.sections.premiumJobsTitle}
                         </h2>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-3">
                         <AdPriceModal type="premium" title="Premium" />
                         <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white">
                              <Plus className="w-4 h-4 mr-1" /> {t.sections.postPremium}
                         </Button>
                         <button 
                             onClick={() => setShowAllPremium(!showAllPremium)}
-                            className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1"
+                            className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
                         >
-                            {showAllPremium ? '접기' : (t.common.viewAll || '전체보기')} {showAllPremium ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                            {showAllPremium ? '접기' : (t.common.viewAll || '전체보기')} {showAllPremium ? <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                         </button>
                     </div>
                 </div>
@@ -208,13 +208,13 @@ export function HomeJobSections() {
 
             {/* --- Tier 2: Special Jobs --- */}
             <section>
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2 italic uppercase">
-                        <Zap className="w-6 h-6 text-yellow-500 animate-pulse" /> {t.sections.specialJobsTitle}
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h2 className="text-lg sm:text-2xl font-black text-gray-900 flex items-center gap-1 sm:gap-2 italic uppercase whitespace-nowrap">
+                        <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500 animate-pulse" /> {t.sections.specialJobsTitle}
                     </h2>
-                    <div className="flex items-center gap-3">
-                        <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
-                            {t.common.viewAll || '전체보기'} <ChevronRight className="w-4 h-4" />
+                    <div className="flex items-center gap-1.5 sm:gap-3">
+                        <Link href="/jobs" className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap">
+                            {t.common.viewAll || '전체보기'} <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </Link>
                     </div>
                 </div>
@@ -242,13 +242,13 @@ export function HomeJobSections() {
 
             {/* --- Tier 3: General Jobs --- */}
             <section>
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-black text-gray-900 italic uppercase">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap">
                         {t.sections.generalJobsTitle}
                     </h2>
-                    <div className="flex items-center gap-3">
-                        <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
-                            {t.common.viewAll} <ChevronRight className="w-4 h-4" />
+                    <div className="flex items-center gap-1.5 sm:gap-3">
+                        <Link href="/jobs" className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap">
+                            {t.common.viewAll} <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </Link>
                     </div>
                 </div>
