@@ -7,6 +7,72 @@ import Link from 'next/link';
 import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM';
 
 export function JobDetailContent({ job, isModal = false, onClose }: { job: any, isModal?: boolean, onClose?: () => void }) {
+  const [isScrapped, setIsScrapped] = React.useState(false);
+
+  // 최근 본 공고 및 스크랩 상태 조회
+  React.useEffect(() => {
+    if (!job?.id) return;
+
+    // 1. 최근 본 공고 저장
+    try {
+      const recentStr = localStorage.getItem('foxmon_recent') || '[]';
+      let recentArr: string[] = JSON.parse(recentStr);
+      // 기존 것 제거하고 제일 앞에 추가 (시간 역순 정렬)
+      recentArr = recentArr.filter((id) => id !== job.id);
+      recentArr.unshift(job.id);
+      // 최대 30개 제한
+      if (recentArr.length > 30) recentArr = recentArr.slice(0, 30);
+      localStorage.setItem('foxmon_recent', JSON.stringify(recentArr));
+    } catch (e) {
+      console.error(e);
+    }
+
+    // 2. 스크랩 여부 판단
+    try {
+      const scrapStr = localStorage.getItem('foxmon_scraps') || '[]';
+      const scrapArr: string[] = JSON.parse(scrapStr);
+      setIsScrapped(scrapArr.includes(job.id));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [job?.id]);
+
+  const handleToggleScrap = () => {
+    if (!job?.id) return;
+    try {
+      const scrapStr = localStorage.getItem('foxmon_scraps') || '[]';
+      let scrapArr: string[] = JSON.parse(scrapStr);
+      if (scrapArr.includes(job.id)) {
+        scrapArr = scrapArr.filter((id) => id !== job.id);
+        setIsScrapped(false);
+      } else {
+        scrapArr.push(job.id);
+        setIsScrapped(true);
+      }
+      localStorage.setItem('foxmon_scraps', JSON.stringify(scrapArr));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRecordApplication = () => {
+    if (!job?.id) return;
+    try {
+      const appStr = localStorage.getItem('foxmon_applications') || '[]';
+      let appArr: { jobId: string, appliedAt: string }[] = JSON.parse(appStr);
+      // 중복 체크
+      if (!appArr.some(item => item.jobId === job.id)) {
+        appArr.unshift({
+          jobId: job.id,
+          appliedAt: new Date().toISOString()
+        });
+        localStorage.setItem('foxmon_applications', JSON.stringify(appArr));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const getSnsBadge = (type: string) => {
     switch (type.toLowerCase()) {
       case 'kakao': return <span className="bg-[#fee500] text-[#000000] text-[10px] px-1.5 py-0.5 rounded shadow-sm font-black tracking-tighter">TALK</span>;
@@ -297,8 +363,14 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
       
       {/* 하단 고정 지원 바 (공통) */}
       <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-100 p-3 sm:p-4 md:p-5 flex gap-2 sm:gap-3 z-50">
-        <Button variant="outline" className="h-[52px] w-[52px] shrink-0 border-gray-200 rounded-2xl shadow-sm text-gray-400 hover:text-red-500 transition-colors">
-           <Heart className="w-6 h-6" />
+        <Button 
+            onClick={handleToggleScrap}
+            variant="outline" 
+            className={`h-[52px] w-[52px] shrink-0 border-gray-200 rounded-2xl shadow-sm transition-colors ${
+                isScrapped ? 'text-red-500 hover:text-red-600 bg-red-50/30' : 'text-gray-400 hover:text-red-500'
+            }`}
+        >
+           <Heart className={`w-6 h-6 ${isScrapped ? 'fill-current' : ''}`} />
         </Button>
         <div 
             onClick={async () => {
@@ -312,7 +384,10 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                         title: `${job.company_name || job.company || '업소명 미상'} - ${job.title || '구인구직 대화방'}`,
                         type: '1ON1', max_participants: 2, created_by: session.user.id, job_id: job.id, employer_id: job.user_id, seeker_id: session.user.id
                     });
-                    if (createRes.success) window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
+                    if (createRes.success) {
+                        handleRecordApplication();
+                        window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
+                    }
                     else alert('채팅방을 생성하지 못했습니다.');
                 } catch (err) {}
             }}

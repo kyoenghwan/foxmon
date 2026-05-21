@@ -222,3 +222,20 @@ export async function adminCommunityAction(actionType: 'DELETE', payload: string
 
     return { success: false, message: '잘못된 액션입니다.' };
 }
+
+import { QA_GET_JOB_BY_ID } from '@/src/atoms/qa/auth/QA_GET_JOB_BY_ID';
+
+export async function getJobsByIdsAction(ids: string[]) {
+    try {
+        const results = await Promise.all(
+            ids.map(async (id) => {
+                const res = await QA_GET_JOB_BY_ID(id);
+                return res.success ? res.data : null;
+            })
+        );
+        return { success: true, data: results.filter(Boolean) };
+    } catch (e: any) {
+        return { success: false, message: e.message || '공고 데이터를 가져오는 데 실패했습니다.' };
+    }
+}
+
