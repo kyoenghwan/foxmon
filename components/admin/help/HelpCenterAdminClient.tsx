@@ -9,6 +9,8 @@ import {
   adminReplyInquiry,
 } from '@/actions/admin/helpCenter';
 import { FaqAdminPanel } from './FaqAdminPanel';
+import { NoticeForm } from './NoticeAdminPanel';
+import { MarkdownContent } from '@/components/help/MarkdownContent';
 
 type Tab = 'notices' | 'faqs' | 'inquiries';
 
@@ -60,7 +62,10 @@ export function HelpCenterAdminClient({
 
       {tab === 'notices' && (
         <div className="space-y-4">
-          <NoticeForm onSaved={reload} />
+          <NoticeForm
+            onSaved={reload}
+            onSave={(data) => adminUpsertNotice(data)}
+          />
           <div className="bg-white rounded-2xl border border-gray-200 divide-y">
             {notices.map((n) => (
               <div key={n.id} className="p-4 flex flex-wrap items-center justify-between gap-2">
@@ -70,7 +75,7 @@ export function HelpCenterAdminClient({
                   <span className="font-bold text-gray-900">{n.title}</span>
                 </div>
                 <div className="flex gap-2">
-                  <NoticeForm edit={n} onSaved={reload} compact />
+                  <NoticeForm edit={n} onSaved={reload} compact onSave={(data) => adminUpsertNotice(data)} />
                   <button
                     type="button"
                     className="text-[12px] font-bold text-red-600"
@@ -92,114 +97,79 @@ export function HelpCenterAdminClient({
       {tab === 'faqs' && <FaqAdminPanel categories={faqCategories} faqs={faqs} />}
 
       {tab === 'inquiries' && (
-        <div className="bg-white rounded-2xl border border-gray-200 divide-y">
-          {inquiries.length === 0 ? (
-            <p className="p-8 text-center text-gray-400 text-[14px]">접수된 문의가 없습니다.</p>
-          ) : (
-            inquiries.map((inq) => (
-              <div key={inq.id} className="p-5 space-y-3">
-                <div className="flex flex-wrap gap-2 items-center">
-                  <span className="text-[11px] font-black bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">{inq.status}</span>
-                  <span className="text-[12px] text-gray-500">{inq.category}</span>
-                  <span className="font-bold text-gray-900">{inq.title}</span>
-                  <span className="text-[11px] text-gray-400 ml-auto">
-                    {new Date(inq.created_at).toLocaleString()}
-                  </span>
-                </div>
-                <p className="text-[13px] text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded-lg">{inq.content}</p>
-                {inq.reply && (
-                  <p className="text-[13px] text-blue-800 bg-blue-50 p-3 rounded-lg whitespace-pre-wrap">
-                    <strong>기존 답변:</strong> {inq.reply}
-                  </p>
-                )}
-                <textarea
-                  rows={3}
-                  value={replyDraft[inq.id] ?? inq.reply ?? ''}
-                  onChange={(e) => setReplyDraft((p) => ({ ...p, [inq.id]: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl p-3 text-[13px]"
-                  placeholder="관리자 답변 입력"
-                />
-                <button
-                  type="button"
-                  className="h-9 px-4 rounded-lg bg-primary text-white text-[12px] font-black"
-                  onClick={async () => {
-                    const res = await adminReplyInquiry({ id: inq.id, reply: replyDraft[inq.id] || '' });
-                    if (res.success) {
-                      alert('답변이 저장되었습니다.');
-                      reload();
-                    } else alert(res.error);
-                  }}
-                >
-                  답변 저장
-                </button>
-              </div>
-            ))
-          )}
+        <div className="space-y-4">
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-[13px] text-blue-800 leading-relaxed">
+            <p className="font-black">1:1 문의 표시 규칙</p>
+            <ul className="mt-2 space-y-1 list-disc pl-5 font-medium">
+              <li>
+                <strong>회원(고객센터 /help/inquiry):</strong> 본인이 접수한 문의만 목록에 보입니다. 다른 회원 문의는
+                볼 수 없습니다.
+              </li>
+              <li>
+                <strong>운영자(이 화면):</strong> ADMIN·foxmon_ 운영 계정·CS 담당 등 권한이 있는 분은{' '}
+                <strong>전체 회원 문의</strong>를 보고 답변할 수 있습니다.
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-gray-200 divide-y">
+            {inquiries.length === 0 ? (
+              <p className="p-8 text-center text-gray-400 text-[14px]">접수된 문의가 없습니다.</p>
+            ) : (
+              inquiries.map((inq) => {
+                const u = inq.users as { login_id?: string; nickname?: string; name?: string } | null;
+                const who =
+                  u?.nickname || u?.name || u?.login_id || `회원(${String(inq.user_id || '').slice(0, 8)}…)`;
+                return (
+                  <div key={inq.id} className="p-5 space-y-3">
+                    <div className="flex flex-wrap gap-2 items-center">
+                      <span className="text-[11px] font-black bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
+                        {inq.status}
+                      </span>
+                      <span className="text-[12px] text-gray-500">{inq.category}</span>
+                      <span className="font-bold text-gray-900">{inq.title}</span>
+                      <span className="text-[11px] text-gray-500">문의자: {who}</span>
+                      <span className="text-[11px] text-gray-400 ml-auto">
+                        {new Date(inq.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-lg text-[13px] text-gray-700">
+                      <p className="font-bold text-gray-500 text-[11px] mb-1">문의 내용</p>
+                      <p className="whitespace-pre-wrap">{inq.content}</p>
+                    </div>
+                    {inq.reply && (
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="font-bold text-blue-600 text-[11px] mb-1">저장된 답변</p>
+                        <MarkdownContent content={inq.reply} />
+                      </div>
+                    )}
+                    <textarea
+                      rows={4}
+                      value={replyDraft[inq.id] ?? inq.reply ?? ''}
+                      onChange={(e) => setReplyDraft((p) => ({ ...p, [inq.id]: e.target.value }))}
+                      className="w-full border border-gray-200 rounded-xl p-3 text-[13px] font-mono"
+                      placeholder="관리자 답변 (Markdown 가능)"
+                    />
+                    <button
+                      type="button"
+                      className="h-9 px-4 rounded-lg bg-primary text-white text-[12px] font-black"
+                      onClick={async () => {
+                        const res = await adminReplyInquiry({ id: inq.id, reply: replyDraft[inq.id] || '' });
+                        if (res.success) {
+                          alert('답변이 저장되었습니다. 해당 회원의 1:1 문의 목록에 표시됩니다.');
+                          reload();
+                        } else alert(res.error);
+                      }}
+                    >
+                      답변 저장
+                    </button>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function NoticeForm({
-  edit,
-  onSaved,
-  compact,
-}: {
-  edit?: any;
-  onSaved: () => void;
-  compact?: boolean;
-}) {
-  const [open, setOpen] = useState(!compact);
-  const [category, setCategory] = useState(edit?.category || '공지');
-  const [title, setTitle] = useState(edit?.title || '');
-  const [content, setContent] = useState(edit?.content || '');
-  const [isPinned, setIsPinned] = useState(!!edit?.is_pinned);
-
-  if (compact && !open) {
-    return (
-      <button type="button" className="text-[12px] font-bold text-primary" onClick={() => setOpen(true)}>
-        수정
-      </button>
-    );
-  }
-
-  return (
-    <div className={`bg-white rounded-2xl border border-gray-200 p-4 space-y-2 ${compact ? '' : 'mb-4'}`}>
-      {!compact && <h3 className="font-black text-[14px]">{edit ? '공지 수정' : '공지 등록'}</h3>}
-      <select value={category} onChange={(e) => setCategory(e.target.value)} className="border rounded-lg px-2 py-1 text-[13px]">
-        <option value="공지">공지</option>
-        <option value="기타">기타</option>
-      </select>
-      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목" className="w-full border rounded-lg px-3 py-2 text-[13px]" />
-      <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={4} placeholder="내용" className="w-full border rounded-lg px-3 py-2 text-[13px]" />
-      <label className="text-[12px] font-bold flex items-center gap-2">
-        <input type="checkbox" checked={isPinned} onChange={(e) => setIsPinned(e.target.checked)} />
-        상단 고정(알림)
-      </label>
-      <button
-        type="button"
-        className="h-9 px-4 bg-gray-900 text-white rounded-lg text-[12px] font-black"
-        onClick={async () => {
-          const res = await adminUpsertNotice({
-            id: edit?.id,
-            category,
-            title,
-            content,
-            is_pinned: isPinned,
-          });
-          if (res.success) {
-            onSaved();
-            if (compact) setOpen(false);
-            else {
-              setTitle('');
-              setContent('');
-            }
-          } else alert(res.error);
-        }}
-      >
-        저장
-      </button>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Bell } from 'lucide-react';
 import type { PublicNotice } from '@/lib/actions/help';
 import { incrementNoticeViewCount } from '@/lib/actions/help';
+import { MarkdownContent } from '@/components/help/MarkdownContent';
 
 const tabs = ['전체', '공지', '기타'];
 
@@ -89,8 +90,15 @@ export function NoticePageClient({ initialNotices }: { initialNotices: PublicNot
                             <div className="px-3 py-3 text-center text-[13px] text-gray-700 font-bold hidden md:flex items-center justify-center">{vc(notice.id, notice.view_count).toLocaleString()}</div>
                         </div>
                         {expandedId === notice.id && (
-                            <div className="bg-orange-50/10 p-6 border-b border-gray-200 text-[14px] text-gray-800 leading-relaxed font-medium whitespace-pre-wrap animate-in fade-in slide-in-from-top-2">
-                                {notice.content}
+                            <div className="bg-orange-50/10 p-6 border-b border-gray-200 animate-in fade-in slide-in-from-top-2">
+                                {notice.content_format !== 'html' ? (
+                                    <MarkdownContent content={notice.content} />
+                                ) : (
+                                    <div
+                                        className="text-[14px] text-gray-800 leading-relaxed"
+                                        dangerouslySetInnerHTML={{ __html: notice.content }}
+                                    />
+                                )}
                             </div>
                         )}
                     </React.Fragment>
@@ -112,8 +120,15 @@ export function NoticePageClient({ initialNotices }: { initialNotices: PublicNot
                             <div className="px-3 py-3 text-center text-[13px] text-gray-700 font-bold hidden md:flex items-center justify-center">{vc(notice.id, notice.view_count).toLocaleString()}</div>
                         </div>
                         {expandedId === notice.id && (
-                            <div className="bg-gray-50/50 p-6 border-b border-gray-200 text-[14px] text-gray-800 leading-relaxed font-medium whitespace-pre-wrap animate-in fade-in slide-in-from-top-2">
-                                {notice.content}
+                            <div className="bg-gray-50/50 p-6 border-b border-gray-200 animate-in fade-in slide-in-from-top-2">
+                                {notice.content_format !== 'html' ? (
+                                    <MarkdownContent content={notice.content} />
+                                ) : (
+                                    <div
+                                        className="text-[14px] text-gray-800 leading-relaxed"
+                                        dangerouslySetInnerHTML={{ __html: notice.content }}
+                                    />
+                                )}
                             </div>
                         )}
                     </React.Fragment>

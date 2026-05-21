@@ -36,8 +36,21 @@ const ADMIN_MENUS = [
   { id: 'master-data', label: '공통코드/마스터', icon: FileText, href: '/fox-office/master-data' },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({
+  isFullAdmin = true,
+  canManageHelp = true,
+}: {
+  isFullAdmin?: boolean;
+  canManageHelp?: boolean;
+}) {
   const pathname = usePathname();
+
+  const visibleMenus = ADMIN_MENUS.filter((menu) => {
+    if (isFullAdmin) return true;
+    if (!canManageHelp) return false;
+    const opsOnly = ['support', 'support-staff', 'support-inbox', 'help-content'];
+    return opsOnly.includes(menu.id);
+  });
 
   return (
     <aside className="w-64 bg-[#1a1c23] min-h-screen text-gray-300 flex flex-col sticky top-0 shadow-2xl z-50">
@@ -54,7 +67,7 @@ export function AdminSidebar() {
 
       {/* Menus */}
       <nav className="flex-1 py-6 px-3 space-y-1">
-        {ADMIN_MENUS.map((menu) => {
+        {visibleMenus.map((menu) => {
           const isActive = pathname === menu.href;
           return (
             <Link 

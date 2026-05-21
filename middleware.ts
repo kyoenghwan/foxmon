@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
+import {
+    canAccessFoxOfficeAdmin,
+    canAccessFoxOfficeSupportRoutes,
+    isFoxOfficeSupportPath,
+} from '@/lib/help-center-auth';
 
 const { auth } = NextAuth(authConfig);
 
@@ -48,8 +53,16 @@ export default auth((req) => {
 
     // 1. Admin Path Security Check (Obscure path: /fox-office)
     if (isAdminPath) {
-        const userRole = (session?.user as any)?.role;
-        if (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
+        const user = session?.user as {
+            id?: string;
+            role?: string;
+            login_id?: string;
+            staff_team?: string;
+        };
+        const allowed = isFoxOfficeSupportPath(nextUrl.pathname)
+            ? canAccessFoxOfficeSupportRoutes(user)
+            : canAccessFoxOfficeAdmin(user);
+        if (!allowed) {
             return NextResponse.redirect(new URL('/', nextUrl));
         }
     }

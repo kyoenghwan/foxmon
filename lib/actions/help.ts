@@ -10,6 +10,7 @@ export type PublicNotice = {
   category: string;
   title: string;
   content: string;
+  content_format?: string;
   author_name: string;
   created_at: string;
   view_count: number;
@@ -75,6 +76,7 @@ export async function getPublicNotices(category?: string): Promise<PublicNotice[
       category: n.category,
       title: n.title,
       content: n.content,
+      content_format: n.content_format || 'markdown',
       author_name: n.author_name,
       created_at: formatNoticeDate(n.created_at),
       view_count: n.view_count ?? 0,

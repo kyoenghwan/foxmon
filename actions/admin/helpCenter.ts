@@ -3,20 +3,22 @@
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase";
-import { isAdminRole } from "@/lib/normalize-user-role";
+import { canManageHelpCenter } from "@/lib/help-center-auth";
 
-function assertAdmin() {
+function assertHelpCenterStaff() {
   return auth().then((session) => {
-    const role = (session?.user as { role?: string } | undefined)?.role;
-    if (!session?.user || !isAdminRole(role)) {
+    const user = session?.user as
+      | { id?: string; role?: string; login_id?: string; staff_team?: string }
+      | undefined;
+    if (!session?.user || !canManageHelpCenter(user)) {
       return { ok: false as const, error: "Unauthorized" };
     }
-    return { ok: true as const, userId: session.user.id as string };
+    return { ok: true as const, userId: session.user.id as string, user };
   });
 }
 
 export async function adminListNotices() {
-  const gate = await assertAdmin();
+  const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error, data: [] };
   const { data, error } = await supabaseAdmin
     .from("notices")
@@ -34,13 +36,15 @@ export async function adminUpsertNotice(input: {
   content: string;
   is_pinned: boolean;
   author_name?: string;
+  content_format?: string;
 }) {
-  const gate = await assertAdmin();
+  const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error };
   const row = {
     category: input.category.trim() || "공지",
     title: input.title.trim(),
     content: input.content.trim(),
+    content_format: input.content_format || "markdown",
     is_pinned: input.is_pinned,
     author_name: input.author_name?.trim() || "영자",
     author_id: gate.userId,
@@ -61,7 +65,7 @@ export async function adminUpsertNotice(input: {
 }
 
 export async function adminDeleteNotice(id: string) {
-  const gate = await assertAdmin();
+  const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error };
   const { error } = await supabaseAdmin.from("notices").delete().eq("id", id);
   if (error) return { success: false, error: error.message };
@@ -71,7 +75,7 @@ export async function adminDeleteNotice(id: string) {
 }
 
 export async function adminListFaqCategories() {
-  const gate = await assertAdmin();
+  const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error, data: [] };
   const { data, error } = await supabaseAdmin
     .from("faq_categories")
@@ -87,7 +91,7 @@ export async function adminUpsertFaqCategory(input: {
   sort_order?: number;
   is_active?: boolean;
 }) {
-  const gate = await assertAdmin();
+  const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error };
   const name = input.name.trim();
   if (!name) return { success: false, error: "항목 이름을 입력해주세요." };
@@ -107,7 +111,7 @@ export async function adminUpsertFaqCategory(input: {
 }
 
 export async function adminDeleteFaqCategory(id: string) {
-  const gate = await assertAdmin();
+  const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error };
   const { count } = await supabaseAdmin
     .from("faqs")
@@ -124,7 +128,7 @@ export async function adminDeleteFaqCategory(id: string) {
 }
 
 export async function adminListFaqs() {
-  const gate = await assertAdmin();
+  const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error, data: [] };
   const { data, error } = await supabaseAdmin
     .from("faqs")
@@ -143,7 +147,7 @@ export async function adminUpsertFaq(input: {
   is_active?: boolean;
   answer_format?: string;
 }) {
-  const gate = await assertAdmin();
+  const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error };
 
   const { data: cat } = await supabaseAdmin
@@ -176,7 +180,7 @@ export async function adminUpsertFaq(input: {
 }
 
 export async function adminDeleteFaq(id: string) {
-  const gate = await assertAdmin();
+  const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error };
   const { error } = await supabaseAdmin.from("faqs").delete().eq("id", id);
   if (error) return { success: false, error: error.message };
@@ -186,13 +190,23 @@ export async function adminDeleteFaq(id: string) {
 }
 
 export async function adminListInquiries(status?: string) {
-  const gate = await assertAdmin();
+  const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error, data: [] };
-  let q = supabaseAdmin.from("inquiries").select("*").order("created_at", { ascending: false });
+  let q = supabaseAdmin
+    .from("inquiries")
+    .select("*, users(login_id, nickname, name)")
+    .order("created_at", { ascending: false });
   if (status && status !== "ALL") {
     q = q.eq("status", status);
   }
-  const { data, error } = await q;
+  let { data, error } = await q;
+  if (error) {
+    let fallback = supabaseAdmin.from("inquiries").select("*").order("created_at", { ascending: false });
+    if (status && status !== "ALL") fallback = fallback.eq("status", status);
+    const res = await fallback;
+    data = res.data;
+    error = res.error;
+  }
   if (error) return { success: false, error: error.message, data: [] };
   return { success: true, data: data || [] };
 }
@@ -202,7 +216,7 @@ export async function adminReplyInquiry(input: {
   reply: string;
   status?: "ANSWERED" | "CLOSED";
 }) {
-  const gate = await assertAdmin();
+  const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error };
   const reply = input.reply.trim();
   if (!reply) return { success: false, error: "답변 내용을 입력해주세요." };

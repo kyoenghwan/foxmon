@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { MessageCircle, Send, Clock, CheckCircle2, AlertCircle, ChevronDown, Plus } from 'lucide-react';
 import type { UserInquiry } from '@/lib/actions/help';
 import { createInquiry, getMyInquiries } from '@/lib/actions/help';
+import { MarkdownContent } from '@/components/help/MarkdownContent';
 
 const INQUIRY_CATEGORIES = [
     '계정 문의',
@@ -207,11 +208,11 @@ export function InquiryPageClient({
                                         </div>
                                         {inq.reply && (
                                             <div className="bg-blue-50 rounded-xl p-4">
-                                                <p className="text-[12px] font-bold text-blue-600 mb-1">
+                                                <p className="text-[12px] font-bold text-blue-600 mb-2">
                                                     관리자 답변
                                                     {inq.replied_at ? ` (${new Date(inq.replied_at).toLocaleDateString()})` : ''}
                                                 </p>
-                                                <p className="text-[14px] text-gray-700 whitespace-pre-line">{inq.reply}</p>
+                                                <MarkdownContent content={inq.reply} />
                                             </div>
                                         )}
                                     </div>

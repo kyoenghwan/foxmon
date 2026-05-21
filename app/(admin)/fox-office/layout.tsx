@@ -2,19 +2,28 @@ import { AdminSidebar } from '@/src/components/admin/AdminSidebar';
 import { AdminNavbar } from '@/src/components/admin/AdminNavbar';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
+import { canAccessFoxOfficeAdmin, canManageHelpCenter } from '@/lib/help-center-auth';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
     const session = await auth();
+    const user = session?.user as {
+        id?: string;
+        role?: string;
+        login_id?: string;
+        staff_team?: string;
+    };
 
-    // Security check (Duplicate of middleware for solid isolation)
-    if (!session?.user || ((session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'SUPER_ADMIN')) {
+    if (!session?.user || (!canAccessFoxOfficeAdmin(user) && !canManageHelpCenter(user))) {
         redirect('/');
     }
 
     return (
         <div className="flex h-screen bg-[#f9fafb] overflow-hidden">
             {/* Sidebar (Fixed Width) */}
-            <AdminSidebar />
+            <AdminSidebar
+                isFullAdmin={canAccessFoxOfficeAdmin(user)}
+                canManageHelp={canManageHelpCenter(user)}
+            />
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden">
