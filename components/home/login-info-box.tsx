@@ -71,12 +71,40 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
 
                     {/* 우측 정보 & 버튼 영역 (flex-col로 상하 배치) */}
                     <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[4rem] sm:min-h-[5rem] pt-0.5 gap-1.5 sm:gap-2">
-                        {/* 1. 인사말 + 로그아웃(우측 끝) */}
-                        <div className="flex w-full min-w-0 items-center gap-1 sm:gap-2">
+                        {/* 1. 상단 인사말 및 설정 버튼 (설정 우측 정렬) */}
+                        <div className="flex w-full min-w-0 items-center justify-between gap-1 sm:gap-2">
                             <div className="min-w-0 flex-1">
                                 <MarqueeText className="font-black text-[13px] min-[375px]:text-[15px] sm:text-base text-gray-900 leading-tight">
                                     <span className="text-primary">{displayName}</span>님 반갑습니다!
                                 </MarqueeText>
+                            </div>
+                            <div className="shrink-0 scale-90 sm:scale-100 origin-right">
+                                <SettingsModal />
+                            </div>
+                        </div>
+
+                        {/* 2. 하단 액션 버튼들 (이력서/업체 관리 좌측, 로그아웃 우측 정렬) */}
+                        <div className="flex items-center justify-between w-full mt-auto">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                {showResumeMenu && (
+                                    <div className="lg:hidden">
+                                        {/* ResumeManagementModal 내부에 하드코딩된 button을 덮어쓰기 위해 CSS 적용 */}
+                                        <div className="h-7.5 sm:h-8 [&>button]:px-5 [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full">
+                                            <ResumeManagementModal />
+                                        </div>
+                                    </div>
+                                )}
+                                {isEmployer && (
+                                    <div className="lg:hidden">
+                                        <Link 
+                                            href="/biz" 
+                                            className="h-7.5 sm:h-8 flex items-center justify-center gap-1.5 px-5 text-[11px] sm:text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                                        >
+                                            <Briefcase className="w-3.5 h-3.5" />
+                                            <span>업체관리</span>
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
                             <button
                                 type="button"
@@ -90,38 +118,12 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                         console.error(e);
                                     }
                                 }}
-                                className="shrink-0 flex items-center gap-0.5 sm:gap-1 font-black text-red-500 hover:text-red-700 transition-colors text-[10px] sm:text-xs"
+                                className="shrink-0 flex items-center gap-0.5 sm:gap-1 font-black text-red-500 hover:text-red-700 transition-colors text-[10px] sm:text-xs ml-auto"
                             >
                                 <LogOut className="w-3.5 h-3.5 shrink-0" />
                                 <span className="hidden sm:inline">로그아웃</span>
                                 <span className="sm:hidden tracking-tight">LOGOUT</span>
                             </button>
-                        </div>
-
-                        {/* 2. 하단 액션 버튼들 (이력서 관리 최적화, 우측 설정 버튼) */}
-                        <div className="flex items-center gap-1.5 sm:gap-2 mt-auto">
-                            {showResumeMenu && (
-                                <div className="lg:hidden">
-                                    {/* ResumeManagementModal 내부에 하드코딩된 button을 덮어쓰기 위해 CSS 적용 */}
-                                    <div className="h-7.5 sm:h-8 [&>button]:px-5 [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full">
-                                        <ResumeManagementModal />
-                                    </div>
-                                </div>
-                            )}
-                            {isEmployer && (
-                                <div className="lg:hidden">
-                                    <Link 
-                                        href="/biz" 
-                                        className="h-7.5 sm:h-8 flex items-center justify-center gap-1.5 px-5 text-[11px] sm:text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
-                                    >
-                                        <Briefcase className="w-3.5 h-3.5" />
-                                        <span>업체관리</span>
-                                    </Link>
-                                </div>
-                            )}
-                            <div className="shrink-0 scale-90 sm:scale-100 origin-left">
-                                <SettingsModal />
-                            </div>
                         </div>
                     </div>
                 </div>
