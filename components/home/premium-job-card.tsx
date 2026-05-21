@@ -319,7 +319,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         </span>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <MarqueeText className={`text-[13px] sm:text-[14px] lg:text-[15px] max-[424px]:text-[3.1vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' : isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` : 'text-gray-800 bg-green-200/50'}`}>
+                                        <MarqueeText className={`text-[15px] sm:text-[16px] lg:text-[17px] max-[424px]:text-[3.5vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' : isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` : 'text-gray-800 bg-green-200/50'}`}>
                                             {title}
                                         </MarqueeText>
                                     </div>
@@ -384,7 +384,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         </span>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <MarqueeText className={`text-[13px] sm:text-[14px] lg:text-[15px] max-[424px]:text-[3.1vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${
+                                        <MarqueeText className={`text-[15px] sm:text-[16px] lg:text-[17px] max-[424px]:text-[3.5vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${
                                             isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
                                             isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
                                             'text-gray-800'
@@ -484,7 +484,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                     </span>
                                 )}
                                 <div className="flex-1 min-w-0">
-                                    <MarqueeText className={`text-[13px] sm:text-[14px] lg:text-[15px] max-[424px]:text-[3.1vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${
+                                    <MarqueeText className={`text-[15px] sm:text-[16px] lg:text-[17px] max-[424px]:text-[3.5vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${
                                         isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
                                         isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
                                         'text-gray-800 bg-green-200/50'
