@@ -9,6 +9,10 @@ import { format } from 'date-fns';
 import { CommunityDetailClient } from './CommunityDetailClient';
 import { CommunityCommentsSection } from '@/components/community/CommunityCommentsSection';
 import { auth } from '@/auth';
+import {
+    canAccessCommunityBoard,
+    getDefaultCommunityTab,
+} from '@/lib/community-boards';
 
 export async function generateMetadata({ params }: { params: Promise<{ board: string; id: string }> }): Promise<Metadata> {
     const { id } = await params;
@@ -53,19 +57,24 @@ export default async function CommunityPostDetailPage({
     // UUID 형식 검증 등 필요한 경우 추가 (현재는 간단히 ID로 조회)
     const post = await getCommunityPostById(id);
     const session = await auth();
+    const userRole = (session?.user as { role?: string } | undefined)?.role ?? null;
     const isLoggedIn = !!session?.user;
 
     if (!post) {
         return notFound();
     }
 
+    if (!canAccessCommunityBoard(board, userRole)) {
+        redirect(`/community?tab=${getDefaultCommunityTab(userRole)}`);
+    }
+
     return (
         <SubPageLayout
             title="커뮤니티"
-            description="여우들의 생생한 후기와 비밀 수다 공간"
+            description="전체·여성·업소 회원별 게시판이 구분되어 있습니다"
             hideSearch={true}
         >
-            <CommunityDetailClient activeTab={board}>
+            <CommunityDetailClient activeTab={board} userRole={userRole}>
                 <div className="max-w-4xl mx-auto bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     {/* 상단 헤더 영역 */}
                     <div className="p-4 md:p-6 border-b border-gray-100 flex flex-col gap-4">

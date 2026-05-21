@@ -1,32 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CommunitySidebar } from '@/components/community/CommunitySidebar';
 import { PostDetailModal } from '@/components/community/PostDetailModal';
 import { maskName } from '@/lib/utils';
 import { Pencil, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
+import {
+    COMMUNITY_AUDIENCE_LABELS,
+    getCommunityBoard,
+    getVisibleCommunityBoards,
+    getCommunitySidebarSections,
+    canAccessCommunityBoard,
+} from '@/lib/community-boards';
 
-interface BoardTab {
-    id: string;
-    label: string;
-    prefix: string;
-}
-
-const TABS: BoardTab[] = [
-    { id: 'free', label: '자유게시판', prefix: '💬자유' },
-    { id: 'foxtalk', label: '폭스수다', prefix: '🦊폭스수다' },
-    { id: 'foxmarket', label: '폭스중고', prefix: '🛍️폭스중고' },
-    { id: 'reviews', label: '업소후기', prefix: '⭐후기' },
-    { id: 'tips', label: '꿀팁·노하우', prefix: '💡꿀팁' },
-    { id: 'report', label: '업소제보', prefix: '🚨제보' },
-    { id: 'business', label: '업소장터', prefix: '🏪업소장터' },
-];
-
-export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, isLoggedIn = false }: { activeTab: string, initialPosts?: any[], totalPosts?: number, isLoggedIn?: boolean }) {
+export function CommunityClient({
+    activeTab,
+    initialPosts = [],
+    totalPosts = 0,
+    isLoggedIn = false,
+    userRole = null,
+}: {
+    activeTab: string;
+    initialPosts?: any[];
+    totalPosts?: number;
+    isLoggedIn?: boolean;
+    userRole?: string | null;
+}) {
     const router = useRouter();
-    const currentBoard = TABS.find(t => t.id === activeTab) || TABS.find(t => t.id === 'free')!;
+    const visibleBoards = useMemo(() => getVisibleCommunityBoards(userRole), [userRole]);
+    const sidebarSections = useMemo(() => getCommunitySidebarSections(userRole), [userRole]);
+    const currentBoard =
+        getCommunityBoard(activeTab) || visibleBoards[0] || getCommunityBoard('free')!;
+    const canWrite = isLoggedIn && canAccessCommunityBoard(activeTab, userRole);
 
     const [showWriteModal, setShowWriteModal] = useState(false);
     const [selectedPost, setSelectedPost] = useState<any>(null);
@@ -43,6 +50,10 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
             if (confirm('로그인 후 이용할 수 있습니다. 로그인 페이지로 이동하시겠습니까?')) {
                 router.push('/login');
             }
+            return;
+        }
+        if (!canAccessCommunityBoard(activeTab, userRole)) {
+            alert('이 게시판에 글을 쓸 권한이 없습니다.');
             return;
         }
         setShowWriteModal(true);
@@ -85,42 +96,67 @@ export function CommunityClient({ activeTab, initialPosts = [], totalPosts = 0, 
     return (
         <div className="flex flex-col md:flex-row gap-6 items-start">
             {/* [Mobile·Tablet] 상단 메뉴 — 두 줄 그리드 (한눈에 보기) */}
-            <div className="w-full lg:hidden bg-white sticky top-[130px] z-20 border-b border-gray-100 shadow-sm">
-                <div className="grid grid-rows-2 grid-flow-col auto-cols-fr gap-1.5 px-2 py-2.5 w-full">
-                    {TABS.map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => handleTabChange(tab.id)}
-                            className={`min-h-[34px] min-w-0 px-1.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition-all text-center leading-none whitespace-nowrap overflow-hidden text-ellipsis ${
-                                activeTab === tab.id
-                                    ? 'bg-primary text-white shadow-md'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
+            <div className="w-full lg:hidden bg-white sticky top-[130px] z-20 border-b border-gray-100 shadow-sm space-y-2 px-2 py-2.5">
+                {sidebarSections.map((section) => (
+                    <div key={section.title}>
+                        <p className="text-[10px] font-black text-gray-400 mb-1 px-0.5">{section.title}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                            {section.items.map((item) => (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => handleTabChange(item.id)}
+                                    className={`min-h-[32px] px-2.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition-all whitespace-nowrap ${
+                                        activeTab === item.id
+                                            ? 'bg-primary text-white shadow-md'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {item.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
 
             {/* [Large Desktop] 좌측 사이드바 */}
             <div className="w-52 shrink-0 sticky top-[130px] hidden lg:block">
-                <CommunitySidebar currentTab={activeTab} onTabChange={handleTabChange} />
+                <CommunitySidebar currentTab={activeTab} onTabChange={handleTabChange} userRole={userRole} />
             </div>
 
             {/* 우측 게시판 콘텐츠 */}
             <div className="flex-1 min-w-0 w-full space-y-4">
                 {/* 게시판 제목 + 글쓰기 버튼 */}
-                <div className="flex items-center justify-between px-1 sm:px-0">
-                    <h2 className="text-lg md:text-xl font-black text-gray-900">{currentBoard.label}</h2>
-                    <button 
-                        onClick={handleWriteClick}
-                        className="flex items-center gap-1.5 px-4 md:px-5 py-2 md:py-2.5 bg-primary text-white font-black text-[13px] md:text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95"
-                    >
-                        <Pencil className="w-4 h-4" />
-                        글쓰기
-                    </button>
+                <div className="flex items-center justify-between px-1 sm:px-0 gap-2">
+                    <div className="min-w-0">
+                        <h2 className="text-lg md:text-xl font-black text-gray-900">{currentBoard.label}</h2>
+                        <p className="text-[11px] text-gray-500 font-bold mt-0.5">
+                            {COMMUNITY_AUDIENCE_LABELS[currentBoard.audience]}
+                        </p>
+                    </div>
+                    {canWrite && (
+                        <button
+                            type="button"
+                            onClick={handleWriteClick}
+                            className="flex items-center gap-1.5 px-4 md:px-5 py-2 md:py-2.5 bg-primary text-white font-black text-[13px] md:text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95 shrink-0"
+                        >
+                            <Pencil className="w-4 h-4" />
+                            글쓰기
+                        </button>
+                    )}
                 </div>
+
+                {currentBoard.audience === 'women' && (
+                    <div className="bg-pink-50 border border-pink-100 rounded-xl p-3 mx-1 sm:mx-0 text-[12px] text-pink-800 font-medium">
+                        여성 회원(구직 회원) 전용 공간입니다. 업소 회원은 이용할 수 없습니다.
+                    </div>
+                )}
+                {currentBoard.audience === 'employer' && (
+                    <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 mx-1 sm:mx-0 text-[12px] text-amber-900 font-medium">
+                        업소·사업자 회원 전용 공간입니다. 구직 회원 전용 게시판과 분리되어 있습니다.
+                    </div>
+                )}
 
                 {/* 업소제보 안내 */}
                 {activeTab === 'report' && (

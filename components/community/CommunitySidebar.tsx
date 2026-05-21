@@ -1,46 +1,44 @@
 'use client';
 
-import { MessageSquare, ShoppingBag, Store, Star, Lightbulb, AlertTriangle, Users } from 'lucide-react';
+import { MessageSquare, ShoppingBag, Store, Star, Lightbulb, AlertTriangle, Users, Lock } from 'lucide-react';
 import { SidebarNav, SidebarSection } from '@/components/layout/SidebarNav';
+import { getCommunitySidebarSections } from '@/lib/community-boards';
+
+const ICONS: Record<string, typeof Users> = {
+  free: Users,
+  tips: Lightbulb,
+  foxtalk: MessageSquare,
+  foxmarket: ShoppingBag,
+  reviews: Star,
+  secret: Lock,
+  report: AlertTriangle,
+  business: Store,
+};
 
 interface CommunitySidebarProps {
-    currentTab: string;
-    onTabChange: (tabId: string) => void;
+  currentTab: string;
+  onTabChange: (tabId: string) => void;
+  userRole?: string | null;
 }
 
-const sections: SidebarSection[] = [
-    {
-        title: '전체 공개',
-        items: [
-            { id: 'free', label: '자유게시판', icon: Users },
-        ],
-    },
-    {
-        title: '여성 회원 전용',
-        items: [
-            { id: 'foxtalk', label: '폭스수다', icon: MessageSquare },
-            { id: 'foxmarket', label: '폭스중고', icon: ShoppingBag },
-            { id: 'reviews', label: '업소후기', icon: Star },
-            { id: 'tips', label: '꿀팁·노하우', icon: Lightbulb },
-            { id: 'secret', label: '비밀게시판', icon: MessageSquare },
-            { id: 'report', label: '업소제보', icon: AlertTriangle },
-        ],
-    },
-    {
-        title: '사업자 전용',
-        items: [
-            { id: 'business', label: '업소장터', icon: Store },
-        ],
-    },
-];
+export function CommunitySidebar({ currentTab, onTabChange, userRole }: CommunitySidebarProps) {
+  const sectionGroups = getCommunitySidebarSections(userRole);
 
-export function CommunitySidebar({ currentTab, onTabChange }: CommunitySidebarProps) {
-    return (
-        <SidebarNav
-            title="커뮤니티"
-            sections={sections}
-            activeId={currentTab}
-            onItemClick={onTabChange}
-        />
-    );
+  const sections: SidebarSection[] = sectionGroups.map((g) => ({
+    title: g.title,
+    items: g.items.map((item) => ({
+      id: item.id,
+      label: item.label,
+      icon: ICONS[item.id] || Users,
+    })),
+  }));
+
+  return (
+    <SidebarNav
+      title="커뮤니티"
+      sections={sections}
+      activeId={currentTab}
+      onItemClick={onTabChange}
+    />
+  );
 }

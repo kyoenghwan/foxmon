@@ -3,25 +3,22 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { CommunitySidebar } from '@/components/community/CommunitySidebar';
+import { getVisibleCommunityBoards } from '@/lib/community-boards';
 
-const TABS = [
-    { id: 'free', label: '자유게시판' },
-    { id: 'foxtalk', label: '폭스수다' },
-    { id: 'foxmarket', label: '폭스중고' },
-    { id: 'reviews', label: '업소후기' },
-    { id: 'tips', label: '꿀팁·노하우' },
-    { id: 'report', label: '업소제보' },
-    { id: 'business', label: '업소장터' },
-];
-
-export function CommunityDetailClient({ 
-    activeTab, 
-    children 
-}: { 
+export function CommunityDetailClient({
+    activeTab,
+    userRole,
+    children,
+}: {
     activeTab: string;
+    userRole?: string | null;
     children: React.ReactNode;
 }) {
     const router = useRouter();
+    const tabs = getVisibleCommunityBoards(userRole).map((b) => ({
+        id: b.id,
+        label: b.label,
+    }));
 
     const handleTabChange = (tabId: string) => {
         router.push(`/community?tab=${tabId}`);
@@ -29,17 +26,15 @@ export function CommunityDetailClient({
 
     return (
         <div className="flex flex-col md:flex-row gap-6 items-start">
-            {/* [Mobile Only] 상단 가로 스크롤 탭 내비게이션 (모바일에서는 상세 페이지에서도 탭을 통해 다른 게시판으로 이동 가능하도록) */}
-            <div className="w-full md:hidden bg-white sticky top-[130px] z-20 border-b border-gray-100 overflow-x-auto scrollbar-hide shadow-sm">
-                <div className="flex px-4 py-2.5 gap-2 w-max">
-                    {TABS.map((tab) => (
+            <div className="w-full lg:hidden bg-white sticky top-[130px] z-20 border-b border-gray-100 shadow-sm px-2 py-2">
+                <div className="flex gap-1.5 overflow-x-auto pb-1">
+                    {tabs.map((tab) => (
                         <button
                             key={tab.id}
+                            type="button"
                             onClick={() => handleTabChange(tab.id)}
-                            className={`px-3.5 py-1.5 rounded-full text-[12px] font-bold transition-all whitespace-nowrap ${
-                                activeTab === tab.id
-                                    ? 'bg-primary text-white shadow-md'
-                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                            className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold ${
+                                activeTab === tab.id ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'
                             }`}
                         >
                             {tab.label}
@@ -47,16 +42,10 @@ export function CommunityDetailClient({
                     ))}
                 </div>
             </div>
-
-            {/* [Desktop Only] 좌측 사이드바 */}
-            <div className="w-52 shrink-0 sticky top-[130px] hidden md:block">
-                <CommunitySidebar currentTab={activeTab} onTabChange={handleTabChange} />
+            <div className="w-52 shrink-0 sticky top-[130px] hidden lg:block">
+                <CommunitySidebar currentTab={activeTab} onTabChange={handleTabChange} userRole={userRole} />
             </div>
-
-            {/* 우측 게시판 콘텐츠 (상세 페이지 등) */}
-            <div className="flex-1 min-w-0 w-full space-y-4">
-                {children}
-            </div>
+            <div className="flex-1 min-w-0">{children}</div>
         </div>
     );
 }

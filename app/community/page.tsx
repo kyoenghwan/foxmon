@@ -3,6 +3,10 @@ import { CommunityClient } from './community-client';
 import { getCommunityPosts } from '@/lib/actions/community';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
+import {
+  canAccessCommunityBoard,
+  getDefaultCommunityTab,
+} from '@/lib/community-boards';
 
 export default async function CommunityPage({
   searchParams,
@@ -16,18 +20,31 @@ export default async function CommunityPage({
   if (params.tab === 'event') {
     redirect('/help?tab=이벤트');
   }
-  const activeTab = params.tab || 'free';
-  const { posts, total } = await getCommunityPosts(activeTab, 1, 20);
   const session = await auth();
+  const userRole = (session?.user as { role?: string } | undefined)?.role ?? null;
+  let activeTab = params.tab || getDefaultCommunityTab(userRole);
+
+  if (!canAccessCommunityBoard(activeTab, userRole)) {
+    activeTab = getDefaultCommunityTab(userRole);
+    redirect(`/community?tab=${activeTab}`);
+  }
+
+  const { posts, total } = await getCommunityPosts(activeTab, 1, 20);
   const isLoggedIn = !!session?.user;
 
   return (
     <SubPageLayout
       title="커뮤니티"
-      description="여우들의 생생한 후기와 비밀 수다 공간"
+      description="전체·여성·업소 회원별 게시판이 구분되어 있습니다"
       hideSearch={true}
     >
-      <CommunityClient activeTab={activeTab} initialPosts={posts} totalPosts={total} isLoggedIn={isLoggedIn} />
+      <CommunityClient
+        activeTab={activeTab}
+        initialPosts={posts}
+        totalPosts={total}
+        isLoggedIn={isLoggedIn}
+        userRole={userRole}
+      />
     </SubPageLayout>
   );
 }
