@@ -56,6 +56,7 @@ export function NoticeForm({
           className="h-10 px-3 border border-gray-200 rounded-lg text-[13px] font-bold"
         >
           <option value="공지">공지</option>
+          <option value="이벤트">이벤트</option>
           <option value="기타">기타</option>
         </select>
         <label className="inline-flex items-center gap-2 text-[12px] font-bold text-gray-700 h-10">

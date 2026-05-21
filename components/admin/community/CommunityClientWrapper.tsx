@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Trash2, ExternalLink, AlertCircle, MessageSquare, Star } from 'lucide-react';
+import { Trash2, ExternalLink, AlertCircle, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { adminCommunityAction } from '@/lib/actions';
@@ -13,7 +13,7 @@ import { Pencil } from 'lucide-react';
 export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }) {
     const [posts, setPosts] = useState(initialPosts);
     const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
-    const [writeBoardId, setWriteBoardId] = useState<'notice' | 'event' | string>('notice');
+    const [writeBoardId, setWriteBoardId] = useState<string>('free');
     const [editingPost, setEditingPost] = useState<any | null>(null);
     const router = useRouter();
 
@@ -48,21 +48,14 @@ export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }
                     <span className="text-sm font-bold text-gray-600">총 <span className="text-primary">{posts.length}</span>개의 게시글</span>
                 </div>
                 
-                <div className="flex gap-2">
-                    <button 
-                        onClick={() => { setWriteBoardId('notice'); setIsWriteModalOpen(true); }}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white font-black text-[13px] rounded-xl hover:bg-gray-800 transition-all shadow-sm active:scale-95"
+                <div className="flex flex-wrap gap-2">
+                    <Link
+                        href="/fox-office/help"
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white font-black text-[13px] rounded-xl hover:bg-gray-800 transition-all shadow-sm"
                     >
                         <AlertCircle className="w-4 h-4" />
-                        공지사항 작성
-                    </button>
-                    <button 
-                        onClick={() => { setWriteBoardId('event'); setIsWriteModalOpen(true); }}
-                        className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white font-black text-[13px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95"
-                    >
-                        <Star className="w-4 h-4" />
-                        이벤트 작성
-                    </button>
+                        공지·이벤트 작성 (고객센터)
+                    </Link>
                 </div>
             </div>
 

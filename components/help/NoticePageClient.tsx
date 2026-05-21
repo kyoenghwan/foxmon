@@ -6,10 +6,18 @@ import type { PublicNotice } from '@/lib/actions/help';
 import { incrementNoticeViewCount } from '@/lib/actions/help';
 import { MarkdownContent } from '@/components/help/MarkdownContent';
 
-const tabs = ['전체', '공지', '기타'];
+const tabs = ['전체', '공지', '이벤트', '기타'] as const;
+export type NoticeTab = (typeof tabs)[number];
 
-export function NoticePageClient({ initialNotices }: { initialNotices: PublicNotice[] }) {
-    const [activeTab, setActiveTab] = useState('전체');
+export function NoticePageClient({
+    initialNotices,
+    initialTab = '전체',
+}: {
+    initialNotices: PublicNotice[];
+    initialTab?: string;
+}) {
+    const resolvedTab = tabs.includes(initialTab as NoticeTab) ? initialTab : '전체';
+    const [activeTab, setActiveTab] = useState(resolvedTab);
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [viewCounts, setViewCounts] = useState<Record<string, number>>(() =>
         Object.fromEntries(initialNotices.map((n) => [n.id, n.view_count]))
@@ -38,8 +46,14 @@ export function NoticePageClient({ initialNotices }: { initialNotices: PublicNot
         <div className="space-y-5">
             <div>
                 <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-primary" /> 공지사항
+                    <Bell className="w-5 h-5 text-primary" />
+                    {activeTab === '이벤트' ? '이벤트' : '공지사항'}
                 </h2>
+                {activeTab === '이벤트' && (
+                    <p className="text-[12px] text-gray-500 font-medium mt-1">
+                        프로모션·참여 이벤트 안내는 고객센터에서 확인합니다.
+                    </p>
+                )}
             </div>
 
             <div className="flex items-center gap-0 border-b border-gray-200 w-full">

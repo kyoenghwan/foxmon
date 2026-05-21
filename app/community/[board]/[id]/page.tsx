@@ -46,6 +46,9 @@ export default async function CommunityPostDetailPage({
     if (board === 'notice') {
         redirect('/help');
     }
+    if (board === 'event') {
+        redirect('/help?tab=이벤트');
+    }
     
     // UUID 형식 검증 등 필요한 경우 추가 (현재는 간단히 ID로 조회)
     const post = await getCommunityPostById(id);

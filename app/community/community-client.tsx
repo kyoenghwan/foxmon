@@ -15,7 +15,6 @@ interface BoardTab {
 }
 
 const TABS: BoardTab[] = [
-    { id: 'event', label: '이벤트', prefix: '🎉이벤트' },
     { id: 'free', label: '자유게시판', prefix: '💬자유' },
     { id: 'foxtalk', label: '폭스수다', prefix: '🦊폭스수다' },
     { id: 'foxmarket', label: '폭스중고', prefix: '🛍️폭스중고' },

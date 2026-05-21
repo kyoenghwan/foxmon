@@ -13,6 +13,9 @@ export default async function CommunityPage({
   if (params.tab === 'notice') {
     redirect('/help');
   }
+  if (params.tab === 'event') {
+    redirect('/help?tab=이벤트');
+  }
   const activeTab = params.tab || 'free';
   const { posts, total } = await getCommunityPosts(activeTab, 1, 20);
   const session = await auth();
