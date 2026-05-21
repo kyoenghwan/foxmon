@@ -123,41 +123,41 @@ export function HomeJobSections() {
     return (
         <main className="container px-4 md:px-6 py-6 md:py-8 space-y-8 md:space-y-10">
             {/* 1. Scrolling Notice Ticker */}
-            <section>
-                <div className="flex items-center gap-2 md:gap-3 py-1">
+            <section className="bg-gray-50/60 border border-gray-100 rounded-2xl px-4 py-2.5 shadow-sm">
+                <div className="flex items-center gap-2 md:gap-3">
                     <div className="flex items-center shrink-0">
                         <Megaphone className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                     </div>
 
+                    <div
+                        className="relative flex-1 h-6 overflow-hidden"
+                        onMouseEnter={() => setIsPaused(true)}
+                        onMouseLeave={() => setIsPaused(false)}
+                    >
                         <div
-                            className="relative flex-1 h-6 overflow-hidden"
-                            onMouseEnter={() => setIsPaused(true)}
-                            onMouseLeave={() => setIsPaused(false)}
+                            className="transition-transform duration-500 ease-in-out"
+                            style={{ transform: `translateY(-${noticeIndex * 24}px)` }}
                         >
-                            <div
-                                className="transition-transform duration-500 ease-in-out"
-                                style={{ transform: `translateY(-${noticeIndex * 24}px)` }}
-                            >
-                                {notices.map((n) => (
-                                    <Link key={n.id} href="/help" className="h-6 flex items-center gap-3 group">
-                                        <div className="flex items-center gap-1.5 shrink-0">
-                                            {n.isNew && <span className="bg-orange-500 text-white text-[8px] font-black px-1 rounded-sm leading-none py-0.5">NEW</span>}
-                                            {n.isHot && <span className="bg-primary text-black text-[8px] font-black px-1 rounded-sm leading-none py-0.5">HOT</span>}
-                                        </div>
-                                        <span className="text-[14px] font-bold text-gray-700 group-hover:text-primary transition-colors truncate">
-                                            {n.title}
-                                        </span>
-                                        <span className="hidden sm:inline text-[11px] text-gray-400 font-medium ml-auto">
-                                            {n.date}
-                                        </span>
-                                    </Link>
-                                ))}
-                            </div>
+                            {notices.map((n) => (
+                                <Link key={n.id} href="/help" className="h-6 flex items-center gap-3 group">
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                        {n.isNew && <span className="bg-orange-500 text-white text-[8px] font-black px-1 rounded-sm leading-none py-0.5">NEW</span>}
+                                        {n.isHot && <span className="bg-primary text-black text-[8px] font-black px-1 rounded-sm leading-none py-0.5">HOT</span>}
+                                    </div>
+                                    <span className="text-[13px] sm:text-[14px] font-bold text-gray-700 group-hover:text-primary transition-colors truncate">
+                                        {n.title}
+                                    </span>
+                                    <span className="hidden sm:inline text-[11px] text-gray-400 font-medium ml-auto">
+                                        {n.date}
+                                    </span>
+                                </Link>
+                            ))}
                         </div>
+                    </div>
 
-                        <Link href="/help" className="pl-2 shrink-0 text-gray-300 hover:text-primary transition-colors">
-                            <ChevronRight className="w-5 h-5" />
-                        </Link>
+                    <Link href="/help" className="pl-2 shrink-0 text-gray-400 hover:text-primary transition-colors">
+                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </Link>
                 </div>
             </section>
 
