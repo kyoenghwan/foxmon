@@ -187,7 +187,7 @@ export function HomeJobSections() {
                 {demoJobs.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
                         {demoJobs.map((job, idx) => (
-                            <div key={job.id} className={`w-[calc(50%-4px)] min-[375px]:w-[165px] lg:w-[210px] shrink-0 ${!showAllPremium && idx >= 12 ? 'hidden sm:block' : ''} ${!showAllPremium && idx >= 15 ? 'sm:hidden lg:block' : ''} ${!showAllPremium && idx >= 20 ? 'lg:hidden xl:block' : ''} ${!showAllPremium && idx >= 24 ? 'xl:hidden' : ''}`}>
+                            <div key={job.id} className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${!showAllPremium && idx >= 12 ? 'hidden sm:block' : ''} ${!showAllPremium && idx >= 15 ? 'sm:hidden lg:block' : ''} ${!showAllPremium && idx >= 20 ? 'lg:hidden xl:block' : ''} ${!showAllPremium && idx >= 24 ? 'xl:hidden' : ''}`}>
                                 <PremiumJobCard 
                                     {...(job as any)} 
                                     impactType={(job as any).impactType}
@@ -221,7 +221,7 @@ export function HomeJobSections() {
                 {specialJobs.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-1.5 sm:gap-4 w-full">
                         {specialJobs.map((job, idx) => (
-                            <div key={job.id} className={`w-[calc(50%-4px)] min-[375px]:w-[165px] lg:w-[210px] shrink-0 ${idx >= 12 ? 'hidden sm:block' : ''} ${idx >= 15 ? 'sm:hidden lg:block' : ''} ${idx >= 20 ? 'lg:hidden xl:block' : ''} ${idx >= 24 ? 'xl:hidden' : ''}`}>
+                            <div key={job.id} className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${idx >= 12 ? 'hidden sm:block' : ''} ${idx >= 15 ? 'sm:hidden lg:block' : ''} ${idx >= 20 ? 'lg:hidden xl:block' : ''} ${idx >= 24 ? 'xl:hidden' : ''}`}>
                                 <PremiumJobCard 
                                     {...(job as any)} 
                                     impactType="none" 
@@ -255,7 +255,7 @@ export function HomeJobSections() {
                 {lineJobs.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-1.5 sm:gap-4 w-full">
                         {lineJobs.map((job, idx) => (
-                            <div key={job.id} className={`w-[calc(50%-4px)] min-[375px]:w-[165px] lg:w-[210px] shrink-0 ${idx >= 12 ? 'hidden sm:block' : ''} ${idx >= 15 ? 'sm:hidden lg:block' : ''} ${idx >= 20 ? 'lg:hidden xl:block' : ''} ${idx >= 24 ? 'xl:hidden' : ''}`}>
+                            <div key={job.id} className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${idx >= 12 ? 'hidden sm:block' : ''} ${idx >= 15 ? 'sm:hidden lg:block' : ''} ${idx >= 20 ? 'lg:hidden xl:block' : ''} ${idx >= 24 ? 'xl:hidden' : ''}`}>
                                 <PremiumJobCard 
                                     {...(job as any)} 
                                     impactType="none" 
