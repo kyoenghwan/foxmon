@@ -212,8 +212,8 @@ export function MainHeader({ session }: MainHeaderProps) {
                     <div className="flex-1 max-w-2xl flex flex-col gap-1.5 justify-center">
                         {/* 1. 검색창 */}
                         <div className="relative group w-full">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Search className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-primary transition-colors" />
                             </div>
                             <input
                                 type="text"
@@ -225,13 +225,13 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     }
                                 }}
                                 placeholder={t.common.searchPlaceholder || "어떤 알바를 찾으세요?"}
-                                className="block w-full pl-12 pr-12 py-2 md:py-3 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
+                                className="block w-full pl-9 pr-9 py-1.5 md:py-2 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-[13px] md:text-sm font-bold shadow-sm"
                             />
                             <button
                                 onClick={() => handleSearch(searchQuery)}
-                                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-primary transition-colors"
+                                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-primary transition-colors"
                             >
-                                <Search className="h-5 w-5" />
+                                <Search className="h-4 w-4" />
                             </button>
                         </div>
 
@@ -372,7 +372,7 @@ export function MainHeader({ session }: MainHeaderProps) {
             <div className="border-t border-gray-100 bg-white">
                 <div className="container mx-auto px-4 lg:px-8">
                     <nav className="flex items-center justify-between min-h-[3.5rem] lg:h-14 py-1.5 lg:py-0 relative w-full">
-                        <div className="flex items-center gap-1.5 sm:gap-6 md:gap-8 h-full w-full min-w-0">
+                        <div className="flex items-center gap-4 sm:gap-6 md:gap-8 h-full w-full min-w-0">
                             {/* 햄버거 메뉴 (전체) */}
                             <div 
                                 className="h-full flex items-center pr-2 sm:pr-4 md:pr-6 md:border-r border-gray-100 cursor-pointer group"
@@ -391,7 +391,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                             </div>
 
                             {/* 개별 메뉴 리스트 */}
-                            <div className="flex items-center justify-between lg:justify-start gap-x-4 lg:gap-x-8 h-auto lg:h-full py-2 lg:py-0 flex-1 overflow-x-auto scrollbar-hide">
+                            <div className="flex items-center justify-start gap-x-4 sm:gap-x-6 lg:gap-x-8 h-auto lg:h-full py-2 lg:py-0 flex-1 overflow-x-auto scrollbar-hide">
                                 {menuItems.map((item) => {
                                     const isActive = pathname === item.href;
                                     return (
