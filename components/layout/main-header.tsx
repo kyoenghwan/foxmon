@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useLayoutEffect, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -23,6 +23,9 @@ import {
   STAY_LOGGED_IN_CHANGED_EVENT,
   STAY_LOGGED_IN_STORAGE_KEY,
 } from '@/lib/stay-logged-in';
+import { QA_GET_POPULAR_KEYWORDS } from '@/src/atoms/qa/search/QA_GET_POPULAR_KEYWORDS';
+import { FA_RECORD_SEARCH_KEYWORD_FLOW } from '@/src/atoms/fa/search/FA_RECORD_SEARCH_KEYWORD_FLOW';
+import type { SearchKeyword } from '@/src/atoms/da/search/DA_SEARCH_KEYWORD_TYPES';
 
 // Define a type that matches the session structure we expect
 interface SessionUser {
@@ -39,11 +42,19 @@ interface MainHeaderProps {
 export function MainHeader({ session }: MainHeaderProps) {
     const { language, setLanguage, t } = useLanguage();
     const pathname = usePathname() ?? '';
+    const router = useRouter();
     const [showMegaMenu, setShowMegaMenu] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
     const [stayLoggedIn, setStayLoggedIn] = useState(false);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // 검색어 및 실시간 인기 검색어 상태
+    const [searchQuery, setSearchQuery] = useState('');
+    const [popularKeywords, setPopularKeywords] = useState<SearchKeyword[]>([]);
+    const [currentRankIndex, setCurrentRankIndex] = useState(0);
+    const [showRankDropdown, setShowRankDropdown] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     useLayoutEffect(() => {
         setStayLoggedIn(getStayLoggedIn());
@@ -61,6 +72,47 @@ export function MainHeader({ session }: MainHeaderProps) {
             window.removeEventListener('storage', onStorage);
         };
     }, []);
+
+    // 실시간 인기 검색어 주기적 로딩
+    useEffect(() => {
+        const fetchKeywords = async () => {
+            const res = await QA_GET_POPULAR_KEYWORDS();
+            if (res.success && res.data) {
+                setPopularKeywords(res.data);
+            }
+        };
+        fetchKeywords();
+        const interval = setInterval(fetchKeywords, 30000); // 30초마다 갱신
+        return () => clearInterval(interval);
+    }, []);
+
+    // 인기 검색어 자동 롤링 타이머 (3초)
+    useEffect(() => {
+        if (popularKeywords.length <= 1) return;
+        const timer = setInterval(() => {
+            setCurrentRankIndex((prev) => (prev + 1) % popularKeywords.length);
+        }, 3000);
+        return () => clearInterval(timer);
+    }, [popularKeywords]);
+
+    // 드롭다운 외부 클릭 감지 이벤트
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowRankDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // 검색 실행 및 DB 카운터 증가 핸들러
+    const handleSearch = (query: string) => {
+        const trimmed = query.trim();
+        if (!trimmed) return;
+        FA_RECORD_SEARCH_KEYWORD_FLOW(trimmed).catch(console.error);
+        router.push(`/jobs?q=${encodeURIComponent(trimmed)}`);
+    };
 
     const handleMouseEnter = () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -142,13 +194,153 @@ export function MainHeader({ session }: MainHeaderProps) {
                 </div>
             </div>
 
-            {/* 1단: 역할(좌) · 로고(중앙·조금 큼) · 로그인/가입(우, 비로그인만) · 검색은 아래 줄(md+) */}
-            <div className="container mx-auto px-4 lg:px-8 flex flex-col gap-2 md:gap-2.5 py-2 md:py-2.5">
-                <div className="relative flex items-center justify-center min-h-[3.5rem] md:min-h-[4.25rem]">
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-[38%] sm:max-w-[40%] pr-1">
+            {/* 1단: 로고(좌) · 검색창 & 인기키워드(중앙) · 회원정보/로그인(우) */}
+            <div className="container mx-auto px-4 lg:px-8 py-3 md:py-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    {/* 좌측: 로고 */}
+                    <div className="flex items-center justify-between md:justify-start shrink-0">
+                        <Link href="/" className="group flex items-center">
+                            <img
+                                src="/logo.png"
+                                alt="FOXMON"
+                                className="h-9 sm:h-11 md:h-14 w-auto drop-shadow-sm hover:scale-105 transition-transform"
+                            />
+                        </Link>
+
+                        {/* 모바일 화면에서는 우측 유틸리티를 로고 옆에 간단히 배치 */}
+                        <div className="flex md:hidden items-center gap-2">
+                            {!session ? (
+                                <Link href="/login" className="text-xs font-bold text-gray-500 hover:text-gray-900">로그인</Link>
+                            ) : (
+                                <button
+                                    onClick={async () => {
+                                        document.body.style.opacity = '0.5';
+                                        try {
+                                            document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                            document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                            await signOut({ callbackUrl: '/login' });
+                                        } catch (e) {
+                                            console.error(e);
+                                        }
+                                    }}
+                                    className="text-xs font-black text-red-500"
+                                >
+                                    로그아웃
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* 중앙: 검색창 & 실시간 검색어 */}
+                    <div className="flex-1 max-w-2xl w-full mx-auto md:mx-0 flex flex-col justify-center">
+                        <div className="relative group w-full">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Search className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+                            </div>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleSearch(searchQuery);
+                                    }
+                                }}
+                                placeholder={t.common.searchPlaceholder || "어떤 알바를 찾으세요?"}
+                                className="block w-full pl-12 pr-12 py-3 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
+                            />
+                            <button
+                                onClick={() => handleSearch(searchQuery)}
+                                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-primary transition-colors"
+                            >
+                                <Search className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        {/* 실시간 인기 키워드 롤링 & 드롭다운 */}
+                        <div className="flex items-center gap-4 mt-1.5 px-4 text-[12px] font-bold text-gray-500 w-full relative z-30">
+                            <span className="text-primary text-[11px] shrink-0">실시간 검색어</span>
+                            
+                            {/* 롤링 검색어 영역 */}
+                            <div className="flex-1 overflow-hidden h-5 relative cursor-pointer" onClick={() => {
+                                if (popularKeywords[currentRankIndex]) {
+                                    handleSearch(popularKeywords[currentRankIndex].keyword);
+                                }
+                            }}>
+                                {popularKeywords.length > 0 ? (
+                                    popularKeywords.map((item, idx) => (
+                                        <div
+                                            key={item.keyword}
+                                            className={cn(
+                                                "absolute left-0 top-0 w-full h-full flex items-center gap-2 transition-all duration-500 ease-in-out transform",
+                                                idx === currentRankIndex
+                                                    ? "opacity-100 translate-y-0"
+                                                    : "opacity-0 translate-y-4 pointer-events-none"
+                                            )}
+                                        >
+                                            <span className="text-primary font-black shrink-0">{idx + 1}</span>
+                                            <span className="text-gray-800 hover:text-primary transition-colors truncate">{item.keyword}</span>
+                                            {idx === 0 && <span className="text-[9px] bg-red-500 text-white px-1.5 py-0.2 rounded-sm scale-90 font-black shrink-0">HOT</span>}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <span className="text-gray-400 font-medium">검색어 불러오는 중...</span>
+                                )}
+                            </div>
+
+                            {/* 전체 순위 드롭다운 버튼 & 레이어 */}
+                            <div className="relative" ref={dropdownRef}>
+                                <button
+                                    onClick={() => setShowRankDropdown(!showRankDropdown)}
+                                    className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-900 transition-colors font-bold px-2 py-0.5 border border-gray-200 rounded bg-white shadow-xs"
+                                >
+                                    <span>인기순위</span>
+                                    <span className={cn("text-[9px] transition-transform duration-200", showRankDropdown ? "rotate-180" : "")}>▼</span>
+                                </button>
+
+                                {/* 드롭다운 레이어 */}
+                                {showRankDropdown && popularKeywords.length > 0 && (
+                                    <div className="absolute right-0 top-full mt-1.5 w-56 bg-white border border-gray-200 rounded-xl shadow-xl py-3 px-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                                        <div className="text-[11px] font-black text-gray-400 border-b pb-1.5 mb-2 px-2 flex justify-between items-center">
+                                            <span>실시간 인기 키워드</span>
+                                            <span className="text-primary">10위 기준</span>
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            {popularKeywords.map((item, idx) => (
+                                                <button
+                                                    key={item.keyword}
+                                                    onClick={() => {
+                                                        handleSearch(item.keyword);
+                                                        setShowRankDropdown(false);
+                                                    }}
+                                                    className="w-full flex items-center justify-between text-left px-2 py-1.5 rounded-lg hover:bg-primary/5 transition-all text-xs font-bold text-gray-700"
+                                                >
+                                                    <div className="flex items-center gap-2 truncate">
+                                                        <span className={cn(
+                                                            "text-[10px] w-4 h-4 flex items-center justify-center rounded-sm font-black shrink-0",
+                                                            idx < 3 ? "bg-primary/10 text-primary" : "text-gray-400"
+                                                        )}>
+                                                            {idx + 1}
+                                                        </span>
+                                                        <span className="truncate hover:text-primary transition-colors">{item.keyword}</span>
+                                                    </div>
+                                                    <span className="text-[10px] font-medium text-gray-400">
+                                                        {item.clicks_count.toLocaleString()}회
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 우측: 회원정보 / 로그인 버튼 (데스크톱에서만 노출) */}
+                    <div className="hidden md:flex items-center gap-3 shrink-0 text-[12px] sm:text-[13px] font-bold text-gray-500">
                         {session ? (
-                            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                                <span className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] font-bold text-gray-600 min-w-0">
+                            <div className="flex items-center gap-2">
+                                <span className="flex items-center gap-1.5 text-[11px] sm:text-[13px] font-bold text-gray-600">
                                     <span className={`shrink-0 text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full font-black text-white ${
                                         session.user?.role === 'SUPER_ADMIN' ? 'bg-red-500' :
                                         session.user?.role === 'ADMIN' ? 'bg-purple-600' :
@@ -166,69 +358,34 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 </span>
                                 {(session.user?.role === 'ADMIN' || session.user?.role === 'SUPER_ADMIN') && (
                                     <>
-                                        <span className="text-gray-300 hidden md:inline shrink-0">|</span>
-                                        <Link href="/fox-office" className="hover:text-primary transition-colors hidden md:inline text-[12px] shrink-0">관리자홈</Link>
+                                        <span className="text-gray-300 shrink-0">|</span>
+                                        <Link href="/fox-office" className="hover:text-primary transition-colors text-[12px] shrink-0">관리자홈</Link>
                                     </>
                                 )}
+                                <span className="text-gray-300 shrink-0">|</span>
+                                <button
+                                    onClick={async () => {
+                                        document.body.style.opacity = '0.5';
+                                        try {
+                                            document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                            document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                            await signOut({ callbackUrl: '/login' });
+                                        } catch (e) {
+                                            console.error(e);
+                                        }
+                                    }}
+                                    className="font-black text-red-500 hover:text-red-700 transition-colors whitespace-nowrap shrink-0"
+                                >
+                                    로그아웃
+                                </button>
                             </div>
-                        ) : null}
-                    </div>
-
-                    <Link href="/" className="group flex items-center z-10">
-                        <img
-                            src="/logo.png"
-                            alt="FOXMON"
-                            className="h-10 sm:h-12 md:h-16 w-auto drop-shadow-sm hover:scale-105 transition-transform"
-                        />
-                    </Link>
-
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-end gap-2 sm:gap-3 min-w-0 max-w-[38%] sm:max-w-[40%] pl-1 text-[12px] sm:text-[13px] font-bold text-gray-500">
-                        {!session ? (
-                            <div className="flex items-center gap-2 sm:gap-3 whitespace-nowrap">
+                        ) : (
+                            <div className="flex items-center gap-2.5 whitespace-nowrap">
                                 <Link href="/login" className="hover:text-gray-900 transition-colors">로그인</Link>
                                 <span className="text-gray-300">|</span>
                                 <Link href="/signup" className="hover:text-gray-900 transition-colors">회원가입</Link>
                             </div>
-                        ) : showLogoutInHeader ? (
-                            <button
-                                type="button"
-                                onClick={async () => {
-                                    document.body.style.opacity = '0.5';
-                                    try {
-                                        document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                                        document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                                        await signOut({ callbackUrl: '/login' });
-                                    } catch (e) {
-                                        console.error(e);
-                                    }
-                                }}
-                                className="flex items-center gap-1 font-black text-red-500 hover:text-red-700 transition-colors whitespace-nowrap"
-                            >
-                                <LogOut className="w-3.5 h-3.5 shrink-0" />
-                                <span className="hidden sm:inline">로그아웃</span>
-                                <span className="sm:hidden">LOGOUT</span>
-                            </button>
-                        ) : null}
-                    </div>
-                </div>
-
-                <div className="flex-1 max-w-2xl w-full mx-auto hidden md:flex flex-col justify-center">
-                    <div className="relative group w-full">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Search className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder={t.common.searchPlaceholder || "어떤 알바를 찾으세요?"}
-                            className="block w-full pl-12 pr-4 py-3.5 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
-                        />
-                    </div>
-                    <div className="hidden lg:flex items-center gap-4 mt-2 px-4 text-[12px] font-bold text-gray-500 w-full">
-                        <span className="text-primary text-[11px]">추천키워드</span>
-                        <Link href="/jobs?q=서울구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">서울구인</Link>
-                        <Link href="/jobs?q=인천구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">인천구인</Link>
-                        <Link href="/jobs?q=경기구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">경기구인</Link>
-                        <Link href="/jobs?q=스웨디시구인" className="hover:text-gray-900 transition-colors whitespace-nowrap">스웨디시구인</Link>
+                        )}
                     </div>
                 </div>
             </div>
@@ -263,7 +420,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                         <Link
                                             key={item.href}
                                             href={item.href}
-                                            className={`text-[12px] min-[360px]:text-[13px] sm:text-[14px] lg:text-[16px] font-bold border-b-2 transition-all h-auto py-1 lg:py-0 lg:h-full flex items-center whitespace-nowrap px-0.5 sm:px-1 shrink-0 ${isActive
+                                            className={`text-[13px] min-[360px]:text-[14px] sm:text-[15px] lg:text-[17px] xl:text-[18px] font-black border-b-2 transition-all h-auto py-1 lg:py-0 lg:h-full flex items-center whitespace-nowrap px-0.5 sm:px-1 shrink-0 ${isActive
                                                     ? 'text-primary border-primary'
                                                     : 'text-gray-900 border-transparent hover:border-primary hover:text-primary'
                                                 }`}

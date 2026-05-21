@@ -18,12 +18,12 @@ export function HeroSection({ session }: HeroSectionProps) {
             <div className="container px-4 md:px-6">
                 <div className="flex flex-col lg:flex-row gap-6 lg:h-[200px]">
                     {/* 좌측: 메인 공고 배너 슬라이더 */}
-                    <div className="flex-1 min-w-0 h-[145px] min-[375px]:h-[165px] sm:h-[200px] lg:h-full">
+                    <div className="flex-1 min-w-0 aspect-[3/2] md:aspect-[2.5/1] lg:aspect-auto lg:h-full">
                         <MainBanner />
                     </div>
 
                     {/* 우측: 유저 로그인/커뮤니티 정보 박스 */}
-                    <div className="w-full lg:w-[320px] h-full flex-shrink-0">
+                    <div className="w-full lg:w-[320px] h-[200px] lg:h-full flex-shrink-0">
                         <LoginInfoBox session={session} />
                     </div>
                 </div>
