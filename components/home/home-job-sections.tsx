@@ -22,6 +22,8 @@ export function HomeJobSections() {
     const [noticeIndex, setNoticeIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [showAllPremium, setShowAllPremium] = useState(false);
+    const [showAllSpecial, setShowAllSpecial] = useState(false);
+    const [showAllGeneral, setShowAllGeneral] = useState(false);
 
     // Firestore 데이터 상태
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
@@ -186,7 +188,18 @@ export function HomeJobSections() {
                 {demoJobs.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
                         {demoJobs.map((job, idx) => (
-                            <div key={job.id} className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${!showAllPremium && idx >= 12 ? 'hidden sm:block' : ''} ${!showAllPremium && idx >= 15 ? 'sm:hidden lg:block' : ''} ${!showAllPremium && idx >= 20 ? 'lg:hidden xl:block' : ''} ${!showAllPremium && idx >= 24 ? 'xl:hidden' : ''}`}>
+                            <div 
+                                key={job.id} 
+                                className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
+                                    !showAllPremium && idx >= 20 ? 'hidden min-[425px]:block' : ''
+                                } ${
+                                    !showAllPremium && idx >= 30 ? 'min-[425px]:hidden md:block' : ''
+                                } ${
+                                    !showAllPremium && idx >= 40 ? 'md:hidden lg:block' : ''
+                                } ${
+                                    !showAllPremium && idx >= 50 ? 'lg:hidden xl:block' : ''
+                                }`}
+                            >
                                 <PremiumJobCard 
                                     {...(job as any)} 
                                     impactType={(job as any).impactType}
@@ -212,15 +225,29 @@ export function HomeJobSections() {
                         <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500 animate-pulse" /> {t.sections.specialJobsTitle}
                     </h2>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        <Link href="/jobs" className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap">
-                            {t.common.viewAll || '전체보기'} <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </Link>
+                        <button 
+                            onClick={() => setShowAllSpecial(!showAllSpecial)}
+                            className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
+                        >
+                            {showAllSpecial ? '접기' : (t.common.viewAll || '전체보기')} {showAllSpecial ? <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                        </button>
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-1.5 sm:gap-4 w-full">
                         {specialJobs.map((job, idx) => (
-                            <div key={job.id} className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${idx >= 12 ? 'hidden sm:block' : ''} ${idx >= 15 ? 'sm:hidden lg:block' : ''} ${idx >= 20 ? 'lg:hidden xl:block' : ''} ${idx >= 24 ? 'xl:hidden' : ''}`}>
+                            <div 
+                                key={job.id} 
+                                className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
+                                    !showAllSpecial && idx >= 20 ? 'hidden min-[425px]:block' : ''
+                                } ${
+                                    !showAllSpecial && idx >= 30 ? 'min-[425px]:hidden md:block' : ''
+                                } ${
+                                    !showAllSpecial && idx >= 40 ? 'md:hidden lg:block' : ''
+                                } ${
+                                    !showAllSpecial && idx >= 50 ? 'lg:hidden xl:block' : ''
+                                }`}
+                            >
                                 <PremiumJobCard 
                                     {...(job as any)} 
                                     impactType="none" 
@@ -246,15 +273,29 @@ export function HomeJobSections() {
                         {t.sections.generalJobsTitle}
                     </h2>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        <Link href="/jobs" className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap">
-                            {t.common.viewAll} <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </Link>
+                        <button 
+                            onClick={() => setShowAllGeneral(!showAllGeneral)}
+                            className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
+                        >
+                            {showAllGeneral ? '접기' : (t.common.viewAll || '전체보기')} {showAllGeneral ? <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                        </button>
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-1.5 sm:gap-4 w-full">
                         {lineJobs.map((job, idx) => (
-                            <div key={job.id} className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${idx >= 12 ? 'hidden sm:block' : ''} ${idx >= 15 ? 'sm:hidden lg:block' : ''} ${idx >= 20 ? 'lg:hidden xl:block' : ''} ${idx >= 24 ? 'xl:hidden' : ''}`}>
+                            <div 
+                                key={job.id} 
+                                className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
+                                    !showAllGeneral && idx >= 20 ? 'hidden min-[425px]:block' : ''
+                                } ${
+                                    !showAllGeneral && idx >= 30 ? 'min-[425px]:hidden md:block' : ''
+                                } ${
+                                    !showAllGeneral && idx >= 40 ? 'md:hidden lg:block' : ''
+                                } ${
+                                    !showAllGeneral && idx >= 50 ? 'lg:hidden xl:block' : ''
+                                }`}
+                            >
                                 <PremiumJobCard 
                                     {...(job as any)} 
                                     impactType="none" 
