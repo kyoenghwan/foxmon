@@ -49,7 +49,7 @@ export function MainFooter() {
                         {/* Right: CS Center */}
                         <div className="flex flex-col items-start md:items-end gap-2 text-gray-500">
                             <h4 className="font-extrabold text-gray-700">고객센터</h4>
-                            <p className="text-2xl font-black text-purple-900 tracking-tighter">070-8098-5116</p>
+                            <p className="text-2xl font-black text-purple-900 tracking-tighter">070-7954-6146</p>
                             <p className="text-[11px]">평일 10:00 ~ 18:00 (점심 12:30 ~ 13:30)</p>
                             <p className="text-[11px]">주말 및 공휴일 휴무</p>
                             <Link href="mailto:foxmon.support@gmail.com" className="text-[11px] hover:underline mt-1">foxmon.support@gmail.com</Link>
@@ -61,9 +61,9 @@ export function MainFooter() {
                     {/* Bottom: Legal Info */}
                     <div className="flex flex-col gap-4 text-[11px] text-gray-400 leading-relaxed font-medium">
                         <p>
-                            상호명: (주)폭스몬 | 대표: 민경환 | 개인정보관리책임자: 민경환 <br/>
+                            상호명: 폭스몬 | 대표: 민경환 | 개인정보관리책임자: 민경환 <br/>
                             사업장 주소: 경기도 김포시 고촌읍 신곡로29번길 57, 가동 501호(지하임) <br/>
-                            사업자등록번호: [발급 대기중] | 직업정보제공사업 신고번호: [발급 대기중] | 통신판매업신고: [발급 대기중] <br/>
+                            사업자등록번호: 478-47-01041 | 직업정보제공사업 신고번호: [발급 대기중] | 통신판매업신고: [발급 대기중] <br/>
                         </p>
                         <p className="opacity-70">
                             폭스몬은 통신판매중개자이며 통신판매의 당사자가 아닙니다. 따라서 폭스몬은 상품·거래정보 및 거래에 대하여 책임을 지지 않습니다.
