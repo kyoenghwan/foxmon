@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Loader2, Plus, Crown, Zap, ChevronRight } from 'lucide-react';
+import { Loader2, Plus, Crown, Zap, ChevronRight, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
@@ -10,6 +10,7 @@ import { AdPriceModal } from '@/components/jobs/AdPriceModal';
 import { Button } from '@/components/ui/button';
 import { RegionSelector } from '@/components/home/region-selector';
 import { IndustrySelector } from '@/components/home/industry-selector';
+import { useLanguage } from '@/components/providers/language-provider';
 
 interface JobsListContentProps {
     isEmployer?: boolean;
@@ -17,6 +18,11 @@ interface JobsListContentProps {
 }
 
 export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProps) {
+    const { t } = useLanguage();
+    const [showAllPremium, setShowAllPremium] = useState(false);
+    const [showAllSpecial, setShowAllSpecial] = useState(false);
+    const [showAllGeneral, setShowAllGeneral] = useState(false);
+
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
     const [specialJobs, setSpecialJobs] = useState<AdItem[]>([]);
     const [lineJobs, setLineJobs] = useState<AdItem[]>([]);
@@ -97,14 +103,14 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
         <div className="space-y-12">
             {/* Top 20 Premium Banners */}
             <section>
-                <div className="flex items-center justify-between mb-6 border-b pb-4">
-                    <div className="flex items-center gap-2">
-                        <Crown className="w-6 h-6 text-primary fill-primary animate-bounce" />
-                        <h2 className="text-2xl font-black text-gray-900 italic uppercase">
-                            프리미엄 광고 (IMPACT DEMO)
+                <div className="flex items-center justify-between mb-4 sm:mb-6 border-b pb-4">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                        <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-primary fill-primary animate-bounce" />
+                        <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap">
+                            {t.sections.premiumJobsTitle}
                         </h2>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-3">
                         <AdPriceModal type="premium" title="Premium" />
                         {isEmployer && (
                             <Link href="/biz/ads/new">
@@ -113,15 +119,31 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                                 </Button>
                             </Link>
                         )}
-                        <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
-                            전체보기 <ChevronRight className="w-4 h-4" />
-                        </Link>
+                        <button 
+                            onClick={() => setShowAllPremium(!showAllPremium)}
+                            className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
+                        >
+                            {showAllPremium ? '접기' : '전체보기'} {showAllPremium ? <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                        </button>
                     </div>
                 </div>
                 {demoJobs.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
-                        {demoJobs.map((job) => (
-                            <div key={job.id} className="w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0">
+                        {demoJobs.map((job, idx) => (
+                            <div 
+                                key={job.id} 
+                                className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
+                                    !showAllPremium && idx >= 10 ? 'hidden min-[425px]:block' : ''
+                                } ${
+                                    !showAllPremium && idx >= 15 ? 'min-[425px]:hidden md:block' : ''
+                                } ${
+                                    !showAllPremium && idx >= 20 ? 'md:hidden lg:block' : ''
+                                } ${
+                                    !showAllPremium && idx >= 25 ? 'lg:hidden xl:block' : ''
+                                } ${
+                                    !showAllPremium && idx >= 30 ? 'xl:hidden' : ''
+                                }`}
+                            >
                                 <PremiumJobCard 
                                     {...(job as any)} 
                                     impactType={(job as any).impactType}
@@ -142,29 +164,47 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
 
             {/* Special 20 Banners */}
             <section>
-                <div className="flex items-center justify-between mb-6 border-b pb-4">
-                    <div className="flex items-center gap-2">
-                        <Zap className="w-6 h-6 text-yellow-500 animate-pulse" />
-                        <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2 italic uppercase">
-                            스페셜 광고
+                <div className="flex items-center justify-between mb-4 sm:mb-6 border-b pb-4">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                        <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500 animate-pulse" />
+                        <h2 className="text-lg sm:text-2xl font-black text-gray-900 flex items-center gap-1 sm:gap-2 italic uppercase whitespace-nowrap">
+                            {t.sections.specialJobsTitle}
                         </h2>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-3">
                         <AdPriceModal type="special" title="Special" />
                         {isEmployer && (
-                            <Link href="/biz/ads/new" className="flex items-center gap-1.5 px-4 py-1.5 bg-yellow-400 text-black text-[11px] font-black rounded-lg hover:scale-105 transition-transform shadow-sm">
-                                <Plus className="w-3.5 h-3.5" /> 스페셜 등록
+                            <Link href="/biz/ads/new">
+                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-black bg-yellow-400 hover:bg-yellow-500">
+                                    <Plus className="w-4 h-4 mr-1" /> 스페셜 등록
+                                </Button>
                             </Link>
                         )}
-                        <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
-                            전체보기 <ChevronRight className="w-4 h-4" />
-                        </Link>
+                        <button 
+                            onClick={() => setShowAllSpecial(!showAllSpecial)}
+                            className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
+                        >
+                            {showAllSpecial ? '접기' : '전체보기'} {showAllSpecial ? <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                        </button>
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
-                        {specialJobs.map((job) => (
-                            <div key={job.id} className="w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0">
+                        {specialJobs.map((job, idx) => (
+                            <div 
+                                key={job.id} 
+                                className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
+                                    !showAllSpecial && idx >= 10 ? 'hidden min-[425px]:block' : ''
+                                } ${
+                                    !showAllSpecial && idx >= 15 ? 'min-[425px]:hidden md:block' : ''
+                                } ${
+                                    !showAllSpecial && idx >= 20 ? 'md:hidden lg:block' : ''
+                                } ${
+                                    !showAllSpecial && idx >= 25 ? 'lg:hidden xl:block' : ''
+                                } ${
+                                    !showAllSpecial && idx >= 30 ? 'xl:hidden' : ''
+                                }`}
+                            >
                                 <PremiumJobCard 
                                     {...(job as any)} 
                                     impactType="none" 
@@ -185,28 +225,46 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
 
             {/* General Job Cards */}
             <section>
-                <div className="flex items-center justify-between mb-6 border-b pb-4">
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-2xl font-black text-gray-900 italic uppercase">
-                            일반 광고
+                <div className="flex items-center justify-between mb-4 sm:mb-6 border-b pb-4">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                        <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap">
+                            {t.sections.generalJobsTitle}
                         </h2>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-3">
                         <AdPriceModal type="line" title="Line" />
                         {isEmployer && (
-                            <Link href="/biz/ads/new" className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-600 text-[11px] font-bold rounded-lg hover:bg-gray-50 transition-colors">
-                                <Plus className="w-3.5 h-3.5" /> 일반 등록
+                            <Link href="/biz/ads/new">
+                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-gray-700 bg-white border hover:bg-gray-50">
+                                    <Plus className="w-4 h-4 mr-1" /> 일반 등록
+                                </Button>
                             </Link>
                         )}
-                        <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1">
-                            전체보기 <ChevronRight className="w-4 h-4" />
-                        </Link>
+                        <button 
+                            onClick={() => setShowAllGeneral(!showAllGeneral)}
+                            className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
+                        >
+                            {showAllGeneral ? '접기' : '전체보기'} {showAllGeneral ? <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                        </button>
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
-                        {lineJobs.map((job) => (
-                            <div key={job.id} className="w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0">
+                        {lineJobs.map((job, idx) => (
+                            <div 
+                                key={job.id} 
+                                className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
+                                    !showAllGeneral && idx >= 10 ? 'hidden min-[425px]:block' : ''
+                                } ${
+                                    !showAllGeneral && idx >= 15 ? 'min-[425px]:hidden md:block' : ''
+                                } ${
+                                    !showAllGeneral && idx >= 20 ? 'md:hidden lg:block' : ''
+                                } ${
+                                    !showAllGeneral && idx >= 25 ? 'lg:hidden xl:block' : ''
+                                } ${
+                                    !showAllGeneral && idx >= 30 ? 'xl:hidden' : ''
+                                }`}
+                            >
                                 <PremiumJobCard 
                                     {...(job as any)} 
                                     impactType="none" 
