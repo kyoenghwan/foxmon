@@ -19,9 +19,10 @@ import { buildFlatIndustryOptions, resumeMatchesIndustryFilter } from '@/lib/res
 
 interface SeekersListContentProps {
     isEmployer?: boolean;
+    searchQuery?: string;
 }
 
-export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
+export function SeekersListContent({ isEmployer, searchQuery }: SeekersListContentProps) {
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
     const [specialJobs, setSpecialJobs] = useState<AdItem[]>([]);
     const [lineJobs, setLineJobs] = useState<AdItem[]>([]);
@@ -81,9 +82,9 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
             setLoading(true);
             try {
                 const [p, s, l, gRes] = await Promise.all([
-                    getRotatedAds('PREMIUM', 50),
-                    getRotatedAds('SPECIAL', 50),
-                    getRotatedAds('LINE', 50),
+                    getRotatedAds('PREMIUM', 50, searchQuery),
+                    getRotatedAds('SPECIAL', 50, searchQuery),
+                    getRotatedAds('AD_GENERAL', 50, searchQuery),
                     getPublicSeekerAdsAction()
                 ]);
                 setPremiumJobs(p);
@@ -100,7 +101,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
             setLoading(false);
         }
         fetchJobs();
-    }, []);
+    }, [searchQuery]);
 
     // 🎨 [IMPACT DEMO] 22종 테마 전체 적용
     const impacts: any[] = [
@@ -108,23 +109,27 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
         'forest', 'ocean', 'sakura', 'galaxy', 'sun', 'lava', 'matrix', 'retro',
         'diamond', 'platinum', 'aura', 'candy', 'toxic'
     ];
-    const demoJobs = Array.from({ length: 20 }, (_, i) => {
-        const baseJob = premiumJobs.length > 0 
-            ? premiumJobs[i % premiumJobs.length] 
-            : {
-                id: `mock-${i}`,
-                company: `프리미엄 광고 ${i + 1}`,
-                title: `성실하게 일하겠습니다 (${i + 1})`,
-                location: '서울 강남구',
-                pay: '[시급] 70,000원',
-                image: '',
-                impactType: 'none'
-            };
+    const demoJobs = premiumJobs.map((job, i) => {
+        const finalImpact = (job.isRealAd && job.theme && job.theme !== 'UPLOAD') 
+            ? job.theme 
+            : impacts[i % impacts.length];
+            
+        let finalEffectIntensity = 'medium';
+        if (job.isRealAd) {
+            if (job.action_type === 'none') {
+                finalEffectIntensity = 'none';
+            } else {
+                finalEffectIntensity = `${job.effect_intensity || 'medium'}::${job.action_type || 'shimmer'}`;
+            }
+        }
 
         return {
-            ...baseJob,
-            id: `demo-${i}`,
-            impactType: impacts[i % impacts.length]
+            ...job,
+            id: job.isRealAd ? job.id : `demo-${i}-${job.id}`,
+            impactType: finalImpact,
+            effectIntensity: finalEffectIntensity,
+            customColor: job.color,
+            bgOpacity: job.bg_opacity
         };
     });
 
@@ -207,16 +212,13 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
         );
     }
 
-    // 프리미엄, 스페셜, 일반 모두 2줄 고정 
-    const twoRowPremiumSpecialGridClasses = `limit-2-rows grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 4xl:grid-cols-8 gap-2 sm:gap-3 xl:gap-4 w-full`;
-
     // Pagination logic
     const totalPages = Math.ceil(filteredGeneralJobs.length / ITEMS_PER_PAGE);
     const paginatedTableJobs = filteredGeneralJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     return (
         <div className="space-y-12">
-            {/* Top 20 Premium Banners (2 Rows) */}
+            {/* Top 20 Premium Banners */}
             <section>
                 <div className="flex items-center justify-between mb-6 border-b pb-4">
                     <div className="flex items-center gap-2">
@@ -240,13 +242,18 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     </div>
                 </div>
                 {demoJobs.length > 0 ? (
-                    <div className={twoRowPremiumSpecialGridClasses}>
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
                         {demoJobs.map((job) => (
-                            <PremiumJobCard 
-                                key={job.id} 
-                                {...(job as any)} 
-                                impactType={(job as any).impactType}
-                            />
+                            <div key={job.id} className="w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0">
+                                <PremiumJobCard 
+                                    {...(job as any)} 
+                                    impactType={(job as any).impactType}
+                                    effectIntensity={(job as any).effectIntensity}
+                                    customColor={(job as any).customColor}
+                                    bgOpacity={(job as any).bgOpacity}
+                                    tier="PREMIUM"
+                                />
+                            </div>
                         ))}
                     </div>
                 ) : (
@@ -256,7 +263,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                 )}
             </section>
 
-            {/* Special 20 Banners (2 Rows) */}
+            {/* Special 20 Banners */}
             <section>
                 <div className="flex items-center justify-between mb-6 border-b pb-4">
                     <div className="flex items-center gap-2">
@@ -278,9 +285,18 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className={twoRowPremiumSpecialGridClasses}>
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
                         {specialJobs.map((job) => (
-                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" tier="SPECIAL" customColor={(job as any).color} />
+                            <div key={job.id} className="w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0">
+                                <PremiumJobCard 
+                                    {...(job as any)} 
+                                    impactType="none" 
+                                    effectIntensity="none" 
+                                    tier="SPECIAL" 
+                                    customColor={(job as any).color} 
+                                    bgOpacity={(job as any).bg_opacity}
+                                />
+                            </div>
                         ))}
                     </div>
                 ) : (
@@ -290,7 +306,7 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                 )}
             </section>
 
-            {/* General Job Cards (2 Rows) */}
+            {/* General Job Cards */}
             <section>
                 <div className="flex items-center justify-between mb-6 border-b pb-4">
                     <div className="flex items-center gap-2">
@@ -311,9 +327,19 @@ export function SeekersListContent({ isEmployer }: SeekersListContentProps) {
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className={twoRowPremiumSpecialGridClasses}>
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
                         {lineJobs.map((job) => (
-                            <PremiumJobCard key={job.id} {...(job as any)} impactType="none" effectIntensity="none" hideLogo={true} tier="GENERAL" customColor={(job as any).color} />
+                            <div key={job.id} className="w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0">
+                                <PremiumJobCard 
+                                    {...(job as any)} 
+                                    impactType="none" 
+                                    effectIntensity="none" 
+                                    hideLogo={true} 
+                                    tier="GENERAL" 
+                                    customColor={(job as any).color} 
+                                    bgOpacity={(job as any).bg_opacity}
+                                />
+                            </div>
                         ))}
                     </div>
                 ) : (
