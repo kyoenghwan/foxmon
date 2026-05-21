@@ -128,19 +128,31 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                     </div>
                 </div>
 
-                {/* Bottom Icons - 2 핵심 기능만 남김 (스크랩알바, 최근 본 알바) */}
-                <div className="flex justify-around items-center pt-3 sm:pt-4 mt-3 lg:mt-auto px-8 sm:px-12">
+                {/* Bottom Icons - 4 핵심 기능 (스크랩, 최근 본 공고, 지원한 공고, 나를 본 업체) */}
+                <div className="flex justify-around items-center pt-3 sm:pt-4 mt-3 lg:mt-auto px-1 sm:px-2">
                     <Link href="/mypage/scraps" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110 mx-auto">
                             <Heart className="h-4.5 w-4.5 sm:h-5 sm:w-5 fill-current" />
                         </div>
-                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">스크랩알바</span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">스크랩</span>
                     </Link>
                     <Link href="/mypage/recent" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-indigo-50 transition-all duration-300 text-gray-400 group-hover:text-indigo-500 group-hover:scale-110 mx-auto">
                             <Clock className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                         </div>
-                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">최근 본 알바</span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">최근 본 공고</span>
+                    </Link>
+                    <Link href="/mypage/applications" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-blue-50 transition-all duration-300 text-gray-400 group-hover:text-blue-500 group-hover:scale-110 mx-auto">
+                            <FileText className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+                        </div>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">지원한 공고</span>
+                    </Link>
+                    <Link href="/mypage/viewers" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-emerald-50 transition-all duration-300 text-gray-400 group-hover:text-emerald-500 group-hover:scale-110 mx-auto">
+                            <Eye className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+                        </div>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">나를 본 업체</span>
                     </Link>
                 </div>
             </div>
