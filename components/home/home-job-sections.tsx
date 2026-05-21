@@ -171,7 +171,6 @@ export function HomeJobSections() {
                         </h2>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        <AdPriceModal type="premium" title="Premium" />
                         <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white">
                              <Plus className="w-4 h-4 mr-1" /> {t.sections.postPremium}
                         </Button>

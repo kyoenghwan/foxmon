@@ -33,15 +33,18 @@ export async function uploadHelpFaqImage(formData: FormData): Promise<{
     return { success: false, message: '이미지는 5MB 이하만 가능합니다.' };
   }
 
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
-  const filePath = `faq/${randomUUID()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
+  
+  // WebP 이미지로 최적화 변환 (애니메이션 지원)
+  const { optimizeToWebp } = await import('@/lib/image-optimizer');
+  const optimized = await optimizeToWebp(buffer);
 
+  const filePath = `faq/${randomUUID()}.${optimized.ext}`;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 
   for (const bucket of BUCKETS) {
-    const { error } = await supabaseAdmin.storage.from(bucket).upload(filePath, buffer, {
-      contentType: file.type,
+    const { error } = await supabaseAdmin.storage.from(bucket).upload(filePath, optimized.buffer, {
+      contentType: optimized.contentType,
       upsert: false,
     });
     if (error) continue;
@@ -51,7 +54,7 @@ export async function uploadHelpFaqImage(formData: FormData): Promise<{
     return {
       success: true,
       url,
-      markdown: `![${file.name}](${url})`,
+      markdown: `![${file.name.replace(/\.[^/.]+$/, "")}.webp](${url})`,
     };
   }
 

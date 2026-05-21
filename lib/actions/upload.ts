@@ -10,18 +10,27 @@ export async function uploadVerificationDocument(formData: FormData) {
             return { success: false, message: '파일이 없습니다.' };
         }
 
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${randomUUID()}.${fileExt}`;
-        const filePath = `verifications/${fileName}`;
-
         // Convert File to Buffer/ArrayBuffer for Supabase Storage
         const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+        let buffer = Buffer.from(arrayBuffer);
+        let contentType = file.type;
+        let fileExt = file.name.split('.').pop() || 'png';
+
+        if (file.type.startsWith('image/')) {
+            const { optimizeToWebp } = await import('@/lib/image-optimizer');
+            const optimized = await optimizeToWebp(buffer);
+            buffer = optimized.buffer;
+            contentType = optimized.contentType;
+            fileExt = optimized.ext;
+        }
+
+        const fileName = `${randomUUID()}.${fileExt}`;
+        const filePath = `verifications/${fileName}`;
 
         const { data, error } = await supabaseAdmin.storage
             .from('verification_docs')
             .upload(filePath, buffer, {
-                contentType: file.type,
+                contentType: contentType,
                 upsert: false
             });
 

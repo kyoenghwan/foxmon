@@ -41,6 +41,7 @@
     "react-hook-form": "^7.71.1",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
+    "sharp": "^0.34.5",
     "suneditor": "^2.44.10",
     "suneditor-react": "^3.6.1",
     "tailwind-merge": "^3.4.0",
