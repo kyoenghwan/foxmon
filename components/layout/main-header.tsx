@@ -194,10 +194,9 @@ export function MainHeader({ session }: MainHeaderProps) {
                 </div>
             </div>
 
-            {/* 1단: 로고(좌) · 검색창(중앙/우) & 실시간 검색어(아래 전체 영역) */}
-            <div className="container mx-auto px-4 lg:px-8 py-3 md:py-4 flex flex-col gap-2">
-                {/* 1행: 로고 & 검색창 & 우측 로그인정보(데스크톱) */}
-                <div className="flex flex-row items-center justify-between gap-3 md:gap-4 w-full">
+            {/* 1단: 로고(좌) · 검색창 & 키워드(세로 스택) · 회원정보/로그인(우) */}
+            <div className="container mx-auto px-4 lg:px-8 py-3 md:py-4">
+                <div className="flex flex-row items-center justify-between gap-3 md:gap-6 w-full">
                     {/* 좌측: 로고 */}
                     <div className="flex items-center shrink-0">
                         <Link href="/" className="group flex items-center">
@@ -209,29 +208,110 @@ export function MainHeader({ session }: MainHeaderProps) {
                         </Link>
                     </div>
 
-                    {/* 중앙/우측: 검색창 */}
-                    <div className="flex-1 max-w-2xl relative group">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Search className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+                    {/* 중앙: 검색 영역 & 키워드 영역 (세로 스택) */}
+                    <div className="flex-1 max-w-2xl flex flex-col gap-1.5 justify-center">
+                        {/* 1. 검색창 */}
+                        <div className="relative group w-full">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Search className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+                            </div>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleSearch(searchQuery);
+                                    }
+                                }}
+                                placeholder={t.common.searchPlaceholder || "어떤 알바를 찾으세요?"}
+                                className="block w-full pl-12 pr-12 py-2 md:py-3 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
+                            />
+                            <button
+                                onClick={() => handleSearch(searchQuery)}
+                                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-primary transition-colors"
+                            >
+                                <Search className="h-5 w-5" />
+                            </button>
                         </div>
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    handleSearch(searchQuery);
+
+                        {/* 2. 키워드 롤링 & 드롭다운 */}
+                        <div className="flex items-center gap-4 px-2 text-[12px] font-bold text-gray-500 w-full relative z-30">
+                            <span className="text-primary text-[11px] shrink-0">키워드</span>
+                            
+                            {/* 롤링 검색어 영역 */}
+                            <div className="flex-1 overflow-hidden h-5 relative cursor-pointer" onClick={() => {
+                                if (popularKeywords[currentRankIndex]) {
+                                    handleSearch(popularKeywords[currentRankIndex].keyword);
                                 }
-                            }}
-                            placeholder={t.common.searchPlaceholder || "어떤 알바를 찾으세요?"}
-                            className="block w-full pl-12 pr-12 py-2 md:py-3 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
-                        />
-                        <button
-                            onClick={() => handleSearch(searchQuery)}
-                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-primary transition-colors"
-                        >
-                            <Search className="h-5 w-5" />
-                        </button>
+                            }}>
+                                {popularKeywords.length > 0 ? (
+                                    popularKeywords.map((item, idx) => (
+                                        <div
+                                            key={item.keyword}
+                                            className={cn(
+                                                "absolute left-0 top-0 w-full h-full flex items-center gap-2 transition-all duration-500 ease-in-out transform",
+                                                idx === currentRankIndex
+                                                    ? "opacity-100 translate-y-0"
+                                                    : "opacity-0 translate-y-4 pointer-events-none"
+                                            )}
+                                        >
+                                            <span className="text-primary font-black shrink-0">{idx + 1}</span>
+                                            <span className="text-gray-800 hover:text-primary transition-colors truncate">{item.keyword}</span>
+                                            {idx === 0 && <span className="text-[9px] bg-red-500 text-white px-1.5 py-0.2 rounded-sm scale-90 font-black shrink-0">HOT</span>}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <span className="text-gray-400 font-medium">검색어 불러오는 중...</span>
+                                )}
+                            </div>
+
+                            {/* 전체 순위 드롭다운 버튼 & 레이어 */}
+                            <div className="relative" ref={dropdownRef}>
+                                <button
+                                    onClick={() => setShowRankDropdown(!showRankDropdown)}
+                                    className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-900 transition-colors font-bold px-2 py-0.5 border border-gray-200 rounded bg-white shadow-xs"
+                                >
+                                    <span>보기</span>
+                                    <span className={cn("text-[9px] transition-transform duration-200", showRankDropdown ? "rotate-180" : "")}>▼</span>
+                                </button>
+
+                                {/* 드롭다운 레이어 */}
+                                {showRankDropdown && popularKeywords.length > 0 && (
+                                    <div className="absolute right-0 top-full mt-1.5 w-56 bg-white border border-gray-200 rounded-xl shadow-xl py-3 px-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                                        <div className="text-[11px] font-black text-gray-400 border-b pb-1.5 mb-2 px-2 flex justify-between items-center">
+                                            <span>인기 키워드</span>
+                                            <span className="text-primary">조회수</span>
+                                        </div>
+                                        <div className="flex flex-col gap-1 max-h-80 overflow-y-auto scrollbar-thin">
+                                            {popularKeywords.map((item, idx) => (
+                                                <button
+                                                    key={item.keyword}
+                                                    onClick={() => {
+                                                        handleSearch(item.keyword);
+                                                        setShowRankDropdown(false);
+                                                    }}
+                                                    className="w-full flex items-center justify-between text-left px-2 py-1.5 rounded-lg hover:bg-primary/5 transition-all text-xs font-bold text-gray-700"
+                                                >
+                                                    <div className="flex items-center gap-2 truncate">
+                                                        <span className={cn(
+                                                            "text-[10px] w-4 h-4 flex items-center justify-center rounded-sm font-black shrink-0",
+                                                            idx < 3 ? "bg-primary/10 text-primary" : "text-gray-400"
+                                                        )}>
+                                                            {idx + 1}
+                                                        </span>
+                                                        <span className="truncate hover:text-primary transition-colors">{item.keyword}</span>
+                                                    </div>
+                                                    <span className="text-[10px] font-medium text-gray-400">
+                                                        {item.clicks_count.toLocaleString()}회
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
                     {/* 우측: 회원정보 / 로그인 버튼 (데스크톱에서만 노출) */}
@@ -282,84 +362,6 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 <Link href="/login" className="hover:text-gray-900 transition-colors">로그인</Link>
                                 <span className="text-gray-300">|</span>
                                 <Link href="/signup" className="hover:text-gray-900 transition-colors">회원가입</Link>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* 2행: 실시간 인기 키워드 롤링 & 드롭다운 (로고 아래 전체 영역까지 사용) */}
-                <div className="flex items-center gap-4 mt-1 px-2 text-[12px] font-bold text-gray-500 w-full relative z-30">
-                    <span className="text-primary text-[11px] shrink-0">키워드</span>
-                    
-                    {/* 롤링 검색어 영역 */}
-                    <div className="flex-1 overflow-hidden h-5 relative cursor-pointer" onClick={() => {
-                        if (popularKeywords[currentRankIndex]) {
-                            handleSearch(popularKeywords[currentRankIndex].keyword);
-                        }
-                    }}>
-                        {popularKeywords.length > 0 ? (
-                            popularKeywords.map((item, idx) => (
-                                <div
-                                    key={item.keyword}
-                                    className={cn(
-                                        "absolute left-0 top-0 w-full h-full flex items-center gap-2 transition-all duration-500 ease-in-out transform",
-                                        idx === currentRankIndex
-                                            ? "opacity-100 translate-y-0"
-                                            : "opacity-0 translate-y-4 pointer-events-none"
-                                    )}
-                                >
-                                    <span className="text-primary font-black shrink-0">{idx + 1}</span>
-                                    <span className="text-gray-800 hover:text-primary transition-colors truncate">{item.keyword}</span>
-                                    {idx === 0 && <span className="text-[9px] bg-red-500 text-white px-1.5 py-0.2 rounded-sm scale-90 font-black shrink-0">HOT</span>}
-                                </div>
-                            ))
-                        ) : (
-                            <span className="text-gray-400 font-medium">검색어 불러오는 중...</span>
-                        )}
-                    </div>
-
-                    {/* 전체 순위 드롭다운 버튼 & 레이어 */}
-                    <div className="relative" ref={dropdownRef}>
-                        <button
-                            onClick={() => setShowRankDropdown(!showRankDropdown)}
-                            className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-900 transition-colors font-bold px-2 py-0.5 border border-gray-200 rounded bg-white shadow-xs"
-                        >
-                            <span>보기</span>
-                            <span className={cn("text-[9px] transition-transform duration-200", showRankDropdown ? "rotate-180" : "")}>▼</span>
-                        </button>
-
-                        {/* 드롭다운 레이어 */}
-                        {showRankDropdown && popularKeywords.length > 0 && (
-                            <div className="absolute right-0 top-full mt-1.5 w-56 bg-white border border-gray-200 rounded-xl shadow-xl py-3 px-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
-                                <div className="text-[11px] font-black text-gray-400 border-b pb-1.5 mb-2 px-2 flex justify-between items-center">
-                                    <span>인기 키워드</span>
-                                    <span className="text-primary">전체 기준</span>
-                                </div>
-                                <div className="flex flex-col gap-1 max-h-80 overflow-y-auto scrollbar-thin">
-                                    {popularKeywords.map((item, idx) => (
-                                        <button
-                                            key={item.keyword}
-                                            onClick={() => {
-                                                handleSearch(item.keyword);
-                                                setShowRankDropdown(false);
-                                            }}
-                                            className="w-full flex items-center justify-between text-left px-2 py-1.5 rounded-lg hover:bg-primary/5 transition-all text-xs font-bold text-gray-700"
-                                        >
-                                            <div className="flex items-center gap-2 truncate">
-                                                <span className={cn(
-                                                    "text-[10px] w-4 h-4 flex items-center justify-center rounded-sm font-black shrink-0",
-                                                    idx < 3 ? "bg-primary/10 text-primary" : "text-gray-400"
-                                                )}>
-                                                    {idx + 1}
-                                                </span>
-                                                <span className="truncate hover:text-primary transition-colors">{item.keyword}</span>
-                                            </div>
-                                            <span className="text-[10px] font-medium text-gray-400">
-                                                {item.clicks_count.toLocaleString()}회
-                                            </span>
-                                        </button>
-                                    ))}
-                                </div>
                             </div>
                         )}
                     </div>
