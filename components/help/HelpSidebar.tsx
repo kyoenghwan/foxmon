@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Bell, HelpCircle, MessageCircle, Gift } from 'lucide-react';
+import { Bell, HelpCircle, MessageCircle } from 'lucide-react';
 import { SidebarNav, SidebarSection } from '@/components/layout/SidebarNav';
 import Link from 'next/link';
 
@@ -9,7 +9,6 @@ const sections: SidebarSection[] = [
     {
         items: [
             { id: '/help', label: '공지사항', icon: Bell, href: '/help' },
-            { id: '/help-events', label: '이벤트', icon: Gift, href: '/help?tab=이벤트' },
             { id: '/help/faq', label: '자주 묻는 질문', icon: HelpCircle, href: '/help/faq' },
             { id: '/help/inquiry', label: '1:1 문의', icon: MessageCircle, href: '/help/inquiry' },
         ],
@@ -22,13 +21,11 @@ export function HelpSidebar({ isMobile = false }: { isMobile?: boolean }) {
     const helpTab = searchParams.get('tab');
 
     const activeId =
-        pathname === '/help' && helpTab === '이벤트'
-            ? '/help-events'
-            : pathname === '/help'
-              ? '/help'
-              : sections[0].items.find(
-                    (item) => item.href && item.href !== '/help' && pathname.startsWith(item.href.split('?')[0])
-                )?.id || '/help';
+        pathname === '/help'
+            ? '/help'
+            : sections[0].items.find(
+                  (item) => item.href && item.href !== '/help' && pathname.startsWith(item.href.split('?')[0])
+              )?.id || '/help';
 
     
     if (isMobile) {
