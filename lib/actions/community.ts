@@ -89,12 +89,12 @@ export async function createCommunityPost(input: {
 
         // Step 2.5: 불법 금지어 자체 필터링
         const { checkBadWords } = await import('@/lib/utils/bad-words');
-        const titleCheck = checkBadWords(input.title);
+        const titleCheck = await checkBadWords(input.title);
         if (titleCheck.hasBadWord) {
             return { success: false, message: `제목에 불법/유해 금지어 [${titleCheck.word}]가 포함되어 사용할 수 없습니다.` };
         }
         
-        const contentCheck = checkBadWords(input.content);
+        const contentCheck = await checkBadWords(input.content);
         if (contentCheck.hasBadWord) {
             return { success: false, message: `본문에 불법/유해 금지어 [${contentCheck.word}]가 포함되어 사용할 수 없습니다.` };
         }
@@ -259,7 +259,7 @@ export async function createCommunityComment(input: {
 
         // 불법 금지어 자체 필터링
         const { checkBadWords } = await import('@/lib/utils/bad-words');
-        const contentCheck = checkBadWords(input.content);
+        const contentCheck = await checkBadWords(input.content);
         if (contentCheck.hasBadWord) {
             return { success: false, message: `댓글에 불법/유해 금지어 [${contentCheck.word}]가 포함되어 사용할 수 없습니다.` };
         }

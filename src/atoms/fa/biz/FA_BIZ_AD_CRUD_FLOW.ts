@@ -19,11 +19,11 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
 
             // 0. 불법 금지어 자체 필터링
             const { checkBadWords } = await import('@/lib/utils/bad-words');
-            const titleCheck = checkBadWords(payload.title || '');
+            const titleCheck = await checkBadWords(payload.title || '');
             if (titleCheck.hasBadWord) {
                 return { success: false, message: `제목에 불법/유해 금지어 [${titleCheck.word}]가 포함되어 사용할 수 없습니다.` };
             }
-            const contentCheck = checkBadWords(payload.detail_content || '');
+            const contentCheck = await checkBadWords(payload.detail_content || '');
             if (contentCheck.hasBadWord) {
                 return { success: false, message: `본문에 불법/유해 금지어 [${contentCheck.word}]가 포함되어 사용할 수 없습니다.` };
             }
@@ -160,11 +160,11 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
 
             // 0. 불법 금지어 자체 필터링
             const { checkBadWords } = await import('@/lib/utils/bad-words');
-            const titleCheck = checkBadWords(payload.title || '');
+            const titleCheck = await checkBadWords(payload.title || '');
             if (titleCheck.hasBadWord) {
                 return { success: false, message: `제목에 불법/유해 금지어 [${titleCheck.word}]가 포함되어 사용할 수 없습니다.` };
             }
-            const contentCheck = checkBadWords(payload.detail_content || '');
+            const contentCheck = await checkBadWords(payload.detail_content || '');
             if (contentCheck.hasBadWord) {
                 return { success: false, message: `본문에 불법/유해 금지어 [${contentCheck.word}]가 포함되어 사용할 수 없습니다.` };
             }

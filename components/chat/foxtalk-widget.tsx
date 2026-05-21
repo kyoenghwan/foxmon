@@ -311,7 +311,7 @@ export function FoxTalkWidget() {
         if (!msgInput.trim() || !currentRoom || !profile) return;
 
         const { maskBadWords } = await import('@/lib/utils/bad-words');
-        const maskedContent = maskBadWords(msgInput);
+        const maskedContent = await maskBadWords(msgInput);
 
         const res = await OA_INSERT_CS_MESSAGE({
             room_id: currentRoom.id,
@@ -366,7 +366,7 @@ export function FoxTalkWidget() {
         if (!p) return;
 
         const { maskBadWords } = await import('@/lib/utils/bad-words');
-        const maskedContent = maskBadWords(msgInput);
+        const maskedContent = await maskBadWords(msgInput);
 
         await OA_INSERT_CHAT_MESSAGE({
             room_id: currentRoom.id,
