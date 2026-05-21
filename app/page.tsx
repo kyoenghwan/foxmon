@@ -18,11 +18,14 @@ export default async function Home() {
       <SideBanners />
       <MainHeader session={session} />
 
-      {/* Hero Section: 배너 및 로그인 정보 (공통 컴포넌트) */}
-      <HeroSection session={session} />
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col w-full">
+        {/* Hero Section: 배너 및 로그인 정보 (공통 컴포넌트) */}
+        <HeroSection session={session} />
 
-      {/* Localized Job Sections (Firestore Real-time Data) */}
-      <HomeJobSections />
+        {/* Localized Job Sections (Firestore Real-time Data) */}
+        <HomeJobSections />
+      </main>
 
       <MainFooter />
     </div>

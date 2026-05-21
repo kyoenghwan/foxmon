@@ -14,6 +14,7 @@
 | 도메인 | 트리거 키워드 | 특수 지침 파일 | 위험도 |
 |---|---|---|---|
 | 배너 | "배너", "banner", "광고", "가로 세로", "비율" | `banner_responsive_sync.md` | 🔴 HIGH |
+| SEO | "SEO", "검색", "메타데이터", "구글", "태그", "로딩" | `01_seo_optimization_rules.md` | 🟠 MEDIUM |
 
 ## 프로젝트 전역 제약 사항
 

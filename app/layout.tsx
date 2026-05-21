@@ -26,8 +26,31 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Foxmon | 여우들의 은밀한 알바",
-  description: "여우몬 커뮤니티 및 구인구직 플랫폼",
+  title: "Foxmon | 여우들의 은밀한 구인구직",
+  description: "유흥알바, 고수익알바, 텐프로, 룸싸롱 등 프리미엄 유흥업소 구인구직 및 커뮤니티 플랫폼 폭스몬입니다.",
+  keywords: ["폭스몬", "유흥알바", "고수익알바", "텐프로", "룸싸롱", "구인구직", "여성알바", "유흥커뮤니티"],
+  openGraph: {
+    title: "Foxmon | 여우들의 은밀한 구인구직",
+    description: "유흥알바, 고수익알바, 텐프로, 룸싸롱 등 프리미엄 유흥업소 구인구직 및 커뮤니티 플랫폼 폭스몬입니다.",
+    url: "https://foxmon-d.vercel.app", // 추후 정식 도메인으로 변경 예정
+    siteName: "Foxmon",
+    images: [
+      {
+        url: "/og-image.jpg", // 임시. 나중에 실제 이미지 경로로 변경해야 함.
+        width: 1200,
+        height: 630,
+        alt: "Foxmon 로고 및 소개",
+      },
+    ],
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Foxmon | 여우들의 은밀한 구인구직",
+    description: "프리미엄 유흥업소 구인구직 및 커뮤니티 플랫폼 폭스몬",
+    images: ["/og-image.jpg"],
+  },
 };
 
 export default function RootLayout({

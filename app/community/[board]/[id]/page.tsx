@@ -3,11 +3,38 @@ import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, User, Eye, MessageSquare, Clock } from 'lucide-react';
 import SubPageLayout from '@/components/layout/sub-page-layout';
+import { Metadata } from 'next';
 import { getCommunityPostById } from '@/lib/actions/community';
 import { format } from 'date-fns';
 import { CommunityDetailClient } from './CommunityDetailClient';
 import { CommunityCommentsSection } from '@/components/community/CommunityCommentsSection';
 import { auth } from '@/auth';
+
+export async function generateMetadata({ params }: { params: Promise<{ board: string; id: string }> }): Promise<Metadata> {
+    const { id } = await params;
+    const post = await getCommunityPostById(id);
+    
+    if (!post) {
+        return {
+            title: '게시글을 찾을 수 없습니다 | 폭스몬 커뮤니티',
+        };
+    }
+
+    // HTML 태그 제거 및 텍스트만 추출 (최대 160자)
+    const plainTextDescription = post.content?.replace(/<[^>]*>?/gm, '').substring(0, 160) || '폭스몬 커뮤니티 게시글입니다.';
+
+    return {
+        title: `${post.title} | 폭스몬 커뮤니티`,
+        description: plainTextDescription,
+        openGraph: {
+            title: `${post.title} | 폭스몬 커뮤니티`,
+            description: plainTextDescription,
+            type: 'article',
+            publishedTime: post.created_at,
+            authors: [post.is_anonymous ? '익명' : (post.author_name || '폭스몬 사용자')],
+        }
+    };
+}
 
 export default async function CommunityPostDetailPage({
     params,
