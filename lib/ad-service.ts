@@ -105,24 +105,51 @@ let MOCK_ADS: AdItem[] = Array.from({ length: 150 }).map((_, i) => {
 /**
  * Fair Ad Rotation Service (Supabase)
  */
-export async function getRotatedAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL', limitCount: number = 20): Promise<AdItem[]> {
+export async function getRotatedAds(
+    tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL', 
+    limitCount: number = 20,
+    searchQuery?: string
+): Promise<AdItem[]> {
+    const filterBySearch = (items: AdItem[], query?: string) => {
+        if (!query) return items;
+        const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+        return items.filter(item => {
+            return terms.every(term => {
+                const inTitle = item.title?.toLowerCase().includes(term);
+                const inCompany = (item.company || item.company_name)?.toLowerCase().includes(term);
+                const inLocation = item.location?.toLowerCase().includes(term);
+                const inCategory = (item.category || item.category1 || item.category2)?.toLowerCase().includes(term);
+                const inKeywords = Array.isArray(item.keywords) && item.keywords.some(kw => String(kw).toLowerCase().includes(term));
+                return inTitle || inCompany || inLocation || inCategory || inKeywords;
+            });
+        });
+    };
+
     if (!IS_SUPABASE_ENABLED) {
         const filtered = MOCK_ADS.filter(ad => ad.tier === tier);
-        return applyRollingLogic(filtered, limitCount);
+        const searched = filterBySearch(filtered, searchQuery);
+        return applyRollingLogic(searched, limitCount);
     }
 
     try {
-        // tier가 GENERAL이면 순수 구인 공고이므로 jobs, 아니면 배너 광고이므로 biz_ads를 조회합니다.
-        // 데모 목적으로, 아직 결제하지 않은(PENDING) 광고도 모두 표시하기 위해 supabaseAdmin(RLS 무시)을 사용합니다.
         const targetTable = tier === 'GENERAL' ? 'jobs' : 'biz_ads';
 
-        const { data, error } = await supabaseAdmin
+        let queryBuilder = supabaseAdmin
             .from(targetTable)
             .select('*')
             .eq('tier', tier);
 
+        if (searchQuery) {
+            const terms = searchQuery.trim().split(/\s+/).filter(Boolean);
+            for (const term of terms) {
+                queryBuilder = queryBuilder.or(`title.ilike.%${term}%,location.ilike.%${term}%,company_name.ilike.%${term}%,category1.ilike.%${term}%,category2.ilike.%${term}%`);
+            }
+        }
+
+        const { data, error } = await queryBuilder;
+
         if (error || !data || data.length === 0) {
-            return getMockAds(tier, limitCount);
+            return getMockAds(tier, limitCount, searchQuery);
         }
 
         let ads: AdItem[] = data.map((item: any) => ({
@@ -133,24 +160,43 @@ export async function getRotatedAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 
             isRealAd: true
         })) as AdItem[];
         
-        // 실제 광고가 모자랄 경우 가상의 광고로 나머지 영역을 채워줍니다 (항상 limitCount만큼 유지)
         if (ads.length < limitCount) {
             const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
-            ads = [...ads, ...mockAdsForTier.slice(0, limitCount - ads.length)];
+            const filteredMock = filterBySearch(mockAdsForTier, searchQuery);
+            ads = [...ads, ...filteredMock.slice(0, limitCount - ads.length)];
         }
 
         return applyRollingLogic(ads, limitCount);
     } catch (error) {
-        return getMockAds(tier, limitCount);
+        return getMockAds(tier, limitCount, searchQuery);
     }
 }
 
 /**
  * Internal Helper for Fallback Mocking
  */
-function getMockAds(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL', count: number): AdItem[] {
+function getMockAds(
+    tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL', 
+    count: number,
+    searchQuery?: string
+): AdItem[] {
     const filtered = MOCK_ADS.filter(ad => ad.tier === tier);
-    return applyRollingLogic(filtered, count);
+    const filterBySearch = (items: AdItem[], q?: string) => {
+        if (!q) return items;
+        const terms = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+        return items.filter(item => {
+            return terms.every(term => {
+                const inTitle = item.title?.toLowerCase().includes(term);
+                const inCompany = (item.company || item.company_name)?.toLowerCase().includes(term);
+                const inLocation = item.location?.toLowerCase().includes(term);
+                const inCategory = (item.category || item.category1 || item.category2)?.toLowerCase().includes(term);
+                const inKeywords = Array.isArray(item.keywords) && item.keywords.some(kw => String(kw).toLowerCase().includes(term));
+                return inTitle || inCompany || inLocation || inCategory || inKeywords;
+            });
+        });
+    };
+    const searched = filterBySearch(filtered, searchQuery);
+    return applyRollingLogic(searched, count);
 }
 
 /**

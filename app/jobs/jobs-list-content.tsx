@@ -13,9 +13,10 @@ import { IndustrySelector } from '@/components/home/industry-selector';
 
 interface JobsListContentProps {
     isEmployer?: boolean;
+    searchQuery?: string;
 }
 
-export function JobsListContent({ isEmployer }: JobsListContentProps) {
+export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProps) {
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
     const [specialJobs, setSpecialJobs] = useState<AdItem[]>([]);
     const [lineJobs, setLineJobs] = useState<AdItem[]>([]);
@@ -31,10 +32,10 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
             setLoading(true);
             try {
                 const [p, s, l, g] = await Promise.all([
-                    getRotatedAds('PREMIUM', 50),
-                    getRotatedAds('SPECIAL', 50),
-                    getRotatedAds('LINE', 50),
-                    getRotatedAds('GENERAL', 50)
+                    getRotatedAds('PREMIUM', 50, searchQuery),
+                    getRotatedAds('SPECIAL', 50, searchQuery),
+                    getRotatedAds('LINE', 50, searchQuery),
+                    getRotatedAds('GENERAL', 50, searchQuery)
                 ]);
                 setPremiumJobs(p);
                 setSpecialJobs(s);
@@ -46,7 +47,7 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
             setLoading(false);
         }
         fetchJobs();
-    }, []);
+    }, [searchQuery]);
 
     // 🎨 [IMPACT DEMO] 22종 테마 전체 적용
     const impacts: any[] = [
@@ -54,25 +55,28 @@ export function JobsListContent({ isEmployer }: JobsListContentProps) {
         'forest', 'ocean', 'sakura', 'galaxy', 'sun', 'lava', 'matrix', 'retro',
         'diamond', 'platinum', 'aura', 'candy', 'toxic'
     ];
-    const demoJobs = Array.from({ length: 20 }, (_, i) => {
-        const baseJob = premiumJobs.length > 0 
-            ? premiumJobs[i % premiumJobs.length] 
-            : {
+    
+    const demoJobs = premiumJobs.length > 0 
+        ? premiumJobs.map((job, i) => ({
+            ...job,
+            impactType: impacts[i % impacts.length]
+          }))
+        : searchQuery 
+            ? [] 
+            : Array.from({ length: 20 }, (_, i) => ({
                 id: `mock-${i}`,
                 company: `프리미엄 광고 ${i + 1}`,
                 title: `최고의 대우 보장합니다 (${i + 1})`,
                 location: '서울 강남구',
                 pay: '[시급] 70,000원',
                 image: '',
-                impactType: 'none'
-            };
-
-        return {
-            ...baseJob,
-            id: `demo-${i}`,
-            impactType: impacts[i % impacts.length]
-        };
-    });
+                impactType: impacts[i % impacts.length],
+                is_big: false,
+                tier: 'PREMIUM' as const,
+                weight: 1,
+                exposure_count: 0,
+                last_exposed_at: ''
+              }));
 
     if (loading) {
         return (

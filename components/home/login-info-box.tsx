@@ -98,28 +98,28 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             </button>
                         </div>
 
-                        {/* 2. 하단 액션 버튼들 (이력서 관리 두껍게, 우측 설정 버튼) */}
+                        {/* 2. 하단 액션 버튼들 (이력서 관리 최적화, 우측 설정 버튼) */}
                         <div className="flex items-center gap-1.5 sm:gap-2 mt-auto">
                             {showResumeMenu && (
-                                <div className="flex-1 lg:hidden">
+                                <div className="lg:hidden">
                                     {/* ResumeManagementModal 내부에 하드코딩된 button을 덮어쓰기 위해 CSS 적용 */}
-                                    <div className="w-full h-7.5 sm:h-8 [&>button]:w-full [&>button]:h-full [&>button]:justify-center [&>button]:rounded-lg">
+                                    <div className="h-7.5 sm:h-8 [&>button]:px-5 [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full">
                                         <ResumeManagementModal />
                                     </div>
                                 </div>
                             )}
                             {isEmployer && (
-                                <div className="flex-1 lg:hidden">
+                                <div className="lg:hidden">
                                     <Link 
                                         href="/biz" 
-                                        className="w-full h-7.5 sm:h-8 flex items-center justify-center gap-1 px-2.5 text-[11px] sm:text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-lg transition-all shadow-sm"
+                                        className="h-7.5 sm:h-8 flex items-center justify-center gap-1.5 px-5 text-[11px] sm:text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
                                     >
                                         <Briefcase className="w-3.5 h-3.5" />
                                         <span>업체관리</span>
                                     </Link>
                                 </div>
                             )}
-                            <div className="shrink-0 scale-90 sm:scale-100 origin-right">
+                            <div className="shrink-0 scale-90 sm:scale-100 origin-left">
                                 <SettingsModal />
                             </div>
                         </div>
