@@ -310,10 +310,13 @@ export function FoxTalkWidget() {
         e.preventDefault();
         if (!msgInput.trim() || !currentRoom || !profile) return;
 
+        const { maskBadWords } = await import('@/lib/utils/bad-words');
+        const maskedContent = maskBadWords(msgInput);
+
         const res = await OA_INSERT_CS_MESSAGE({
             room_id: currentRoom.id,
             participant_id: profile.sessionId, // This acts as session_id for customers, and 'CS_ADMIN' for admins
-            content: msgInput,
+            content: maskedContent,
             sender_nickname: profile.nickname
         });
         
@@ -362,10 +365,13 @@ export function FoxTalkWidget() {
         const { data: p } = await supabase.from('foxtalk_participants').select('id').eq('room_id', currentRoom.id).eq('session_id', profile.sessionId).single();
         if (!p) return;
 
+        const { maskBadWords } = await import('@/lib/utils/bad-words');
+        const maskedContent = maskBadWords(msgInput);
+
         await OA_INSERT_CHAT_MESSAGE({
             room_id: currentRoom.id,
             participant_id: p.id,
-            content: msgInput
+            content: maskedContent
         });
         setMsgInput('');
     };

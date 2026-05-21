@@ -17,6 +17,17 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
         if (actionType === 'CREATE') {
             if (!payload) return { success: false, message: 'payload가 필요합니다.' };
 
+            // 0. 불법 금지어 자체 필터링
+            const { checkBadWords } = await import('@/lib/utils/bad-words');
+            const titleCheck = checkBadWords(payload.title || '');
+            if (titleCheck.hasBadWord) {
+                return { success: false, message: `제목에 불법/유해 금지어 [${titleCheck.word}]가 포함되어 사용할 수 없습니다.` };
+            }
+            const contentCheck = checkBadWords(payload.detail_content || '');
+            if (contentCheck.hasBadWord) {
+                return { success: false, message: `본문에 불법/유해 금지어 [${contentCheck.word}]가 포함되어 사용할 수 없습니다.` };
+            }
+
             // 1. 서버 측에서 최종 결제 포인트 재계산 (보안 검증)
             const isDraft = payload._isDraft === true;
             
@@ -146,6 +157,17 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
 
         if (actionType === 'UPDATE') {
             if (!jobId || !payload) return { success: false, message: 'jobId와 payload가 필요합니다.' };
+
+            // 0. 불법 금지어 자체 필터링
+            const { checkBadWords } = await import('@/lib/utils/bad-words');
+            const titleCheck = checkBadWords(payload.title || '');
+            if (titleCheck.hasBadWord) {
+                return { success: false, message: `제목에 불법/유해 금지어 [${titleCheck.word}]가 포함되어 사용할 수 없습니다.` };
+            }
+            const contentCheck = checkBadWords(payload.detail_content || '');
+            if (contentCheck.hasBadWord) {
+                return { success: false, message: `본문에 불법/유해 금지어 [${contentCheck.word}]가 포함되어 사용할 수 없습니다.` };
+            }
 
             // 1. 기존 공고 확인
             const { data: existingJob, error: checkError } = await supabase

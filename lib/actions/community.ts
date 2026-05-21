@@ -87,6 +87,18 @@ export async function createCommunityPost(input: {
             return { success: false, message: validResult.error };
         }
 
+        // Step 2.5: 불법 금지어 자체 필터링
+        const { checkBadWords } = await import('@/lib/utils/bad-words');
+        const titleCheck = checkBadWords(input.title);
+        if (titleCheck.hasBadWord) {
+            return { success: false, message: `제목에 불법/유해 금지어 [${titleCheck.word}]가 포함되어 사용할 수 없습니다.` };
+        }
+        
+        const contentCheck = checkBadWords(input.content);
+        if (contentCheck.hasBadWord) {
+            return { success: false, message: `본문에 불법/유해 금지어 [${contentCheck.word}]가 포함되어 사용할 수 없습니다.` };
+        }
+
         // Step 3: 게시글 저장 (OA)
         const isAnonymous = permResult.data?.forceAnonymous || false;
         const authorName = isAnonymous ? '익명' : nickname;
@@ -243,6 +255,13 @@ export async function createCommunityComment(input: {
 
         if (!input.content.trim()) {
             return { success: false, message: '댓글 내용을 입력해주세요.' };
+        }
+
+        // 불법 금지어 자체 필터링
+        const { checkBadWords } = await import('@/lib/utils/bad-words');
+        const contentCheck = checkBadWords(input.content);
+        if (contentCheck.hasBadWord) {
+            return { success: false, message: `댓글에 불법/유해 금지어 [${contentCheck.word}]가 포함되어 사용할 수 없습니다.` };
         }
 
         const isAnonymous = permResult.data?.forceAnonymous || false;
