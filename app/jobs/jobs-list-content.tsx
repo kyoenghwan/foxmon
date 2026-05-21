@@ -1,24 +1,63 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Loader2, Plus, Crown, Zap, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Loader2, Plus, Crown, Zap, ChevronRight, ChevronLeft, Search } from 'lucide-react';
 import Link from 'next/link';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { GeneralJobListRow } from '@/components/jobs/general-job-list-row';
 import { AdPriceModal } from '@/components/jobs/AdPriceModal';
 import { Button } from '@/components/ui/button';
-import { RegionSelector } from '@/components/home/region-selector';
-import { IndustrySelector } from '@/components/home/industry-selector';
 import { useLanguage } from '@/components/providers/language-provider';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 
 interface JobsListContentProps {
     isEmployer?: boolean;
     searchQuery?: string;
 }
 
+function resolveRegion(param: string, list: CodeItem[]): string {
+    if (!param || param === 'all') return 'all';
+    const found = list.find(r => 
+        r.code_value.toLowerCase() === param.toLowerCase() ||
+        r.code_name === param
+    );
+    return found ? found.code_value : 'all';
+}
+
+function resolveIndustry(param: string, list: CodeItem[]): string {
+    if (!param || param === 'all') return 'all';
+    const found = list.find(i => 
+        i.code_value.toLowerCase() === param.toLowerCase() ||
+        i.code_value.toLowerCase().includes(param.toLowerCase()) ||
+        i.code_name === param ||
+        (param === 'cafe-bar' && i.code_value === 'CAT1_BAR') ||
+        (param === 'room-salon' && i.code_value === 'CAT1_ROOM')
+    );
+    return found ? found.code_value : 'all';
+}
+
 export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProps) {
     const { t } = useLanguage();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const qParam = searchParams.get('q') || '';
+    const regionParam = searchParams.get('region') || 'all';
+    const industryParam = searchParams.get('industry') || 'all';
+
+    const [dbRegions, setDbRegions] = useState<CodeItem[]>([]);
+    const [dbIndustries, setDbIndustries] = useState<CodeItem[]>([]);
+
+    const [selectedRegion, setSelectedRegion] = useState(regionParam);
+    const [selectedIndustry, setSelectedIndustry] = useState(industryParam);
+    const [searchKeyword, setSearchKeyword] = useState(qParam);
+
+    const [isRegionOpen, setIsRegionOpen] = useState(true);
+    const [isIndustryOpen, setIsIndustryOpen] = useState(true);
+    const [isKeywordOpen, setIsKeywordOpen] = useState(true);
+
     const [showAllPremium, setShowAllPremium] = useState(false);
     const [showAllSpecial, setShowAllSpecial] = useState(false);
     const [showAllGeneral, setShowAllGeneral] = useState(false);
@@ -33,15 +72,58 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 20;
 
+    // Load master data on mount
+    useEffect(() => {
+        async function fetchCodes() {
+            const res = await QA_GET_COMMON_CODES(undefined, true);
+            if (res.success && res.data) {
+                setDbRegions(res.data.filter(c => c.list_type === 'JOB_REGION_1'));
+                setDbIndustries(res.data.filter(c => c.list_type === 'CATEGORY_1'));
+            }
+        }
+        fetchCodes();
+    }, []);
+
+    // URL 파라미터가 변경되면 로컬 상태 동기화
+    useEffect(() => {
+        if (dbRegions.length > 0) {
+            setSelectedRegion(resolveRegion(regionParam, dbRegions));
+        } else {
+            setSelectedRegion(regionParam);
+        }
+        if (dbIndustries.length > 0) {
+            setSelectedIndustry(resolveIndustry(industryParam, dbIndustries));
+        } else {
+            setSelectedIndustry(industryParam);
+        }
+        setSearchKeyword(qParam);
+    }, [qParam, regionParam, industryParam, dbRegions, dbIndustries]);
+
     useEffect(() => {
         async function fetchJobs() {
             setLoading(true);
             try {
+                // 지역 및 업종 코드를 한글 텍스트 검색어로 변환
+                const resolvedReg = resolveRegion(regionParam, dbRegions);
+                const resolvedInd = resolveIndustry(industryParam, dbIndustries);
+
+                const regionTerm = dbRegions.find(r => r.code_value === resolvedReg)?.code_name || '';
+                const industryTerm = dbIndustries.find(i => i.code_value === resolvedInd)?.code_name || '';
+                
+                // 공백으로 연결하여 다중 검색어가 되도록 빌드
+                const combinedTerms = [
+                    regionTerm && regionTerm !== '전체' ? regionTerm : '', 
+                    industryTerm && industryTerm !== '전체' ? industryTerm : '', 
+                    qParam
+                ]
+                    .filter(Boolean)
+                    .join(' ');
+
                 const [p, s, l, g] = await Promise.all([
-                    getRotatedAds('PREMIUM', 50, searchQuery),
-                    getRotatedAds('SPECIAL', 50, searchQuery),
-                    getRotatedAds('AD_GENERAL', 50, searchQuery),
-                    getRotatedAds('GENERAL', 50, searchQuery)
+                    getRotatedAds('PREMIUM', 50, combinedTerms),
+                    getRotatedAds('SPECIAL', 50, combinedTerms),
+                    getRotatedAds('AD_GENERAL', 50, combinedTerms),
+                    getRotatedAds('GENERAL', 50, combinedTerms)
                 ]);
                 setPremiumJobs(p);
                 setSpecialJobs(s);
@@ -53,7 +135,21 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
             setLoading(false);
         }
         fetchJobs();
-    }, [searchQuery]);
+    }, [qParam, regionParam, industryParam, dbRegions, dbIndustries]);
+
+    const handleSearchClick = () => {
+        const params = new URLSearchParams();
+        if (searchKeyword.trim()) {
+            params.set('q', searchKeyword.trim());
+        }
+        if (selectedRegion !== 'all') {
+            params.set('region', selectedRegion.toLowerCase());
+        }
+        if (selectedIndustry !== 'all') {
+            params.set('industry', selectedIndustry.toLowerCase());
+        }
+        router.push(`/jobs?${params.toString()}`);
+    };
 
     // 🎨 [IMPACT DEMO] 22종 테마 전체 적용
     const impacts: any[] = [
@@ -285,29 +381,155 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
             </section>
 
             {/* Search Condition Card */}
-            <section className="bg-white rounded-xl p-4 border shadow-sm space-y-4">
+            <section className="bg-white rounded-xl p-6 border shadow-sm space-y-6">
                 {/* Region Selection */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                    <h2 className="text-[13px] font-extrabold flex items-center gap-2 text-gray-800 w-full sm:w-24 shrink-0 mt-1 sm:mt-2">
-                        <span className="w-1.5 h-3.5 bg-primary rounded-full" />
-                        지역 선택
-                    </h2>
-                    <div className="flex-1 overflow-x-auto pb-1">
-                        <RegionSelector />
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b pb-2">
+                        <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
+                            <span className="w-1.5 h-3.5 bg-primary rounded-full" />
+                            지역 선택
+                        </h3>
+                        <button 
+                            onClick={() => setIsRegionOpen(!isRegionOpen)}
+                            className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
+                        >
+                            {isRegionOpen ? '접기' : '보기'} {isRegionOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
+                        </button>
                     </div>
+                    {isRegionOpen && (
+                        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-9 gap-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                            <button
+                                onClick={() => setSelectedRegion('all')}
+                                className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                    selectedRegion === 'all'
+                                        ? 'border-primary bg-primary text-white shadow-sm'
+                                        : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                }`}
+                            >
+                                전체
+                            </button>
+                            {dbRegions.map((r) => (
+                                <button
+                                    key={r.code_value}
+                                    onClick={() => setSelectedRegion(r.code_value)}
+                                    className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                        selectedRegion === r.code_value
+                                            ? 'border-primary bg-primary text-white shadow-sm'
+                                            : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                    }`}
+                                >
+                                    {r.code_name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                <div className="border-t border-gray-100" />
-
                 {/* Industry Selection */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                    <h2 className="text-[13px] font-extrabold flex items-center gap-2 text-gray-800 w-full sm:w-24 shrink-0 mt-1 sm:mt-2">
-                        <span className="w-1.5 h-3.5 bg-orange-400 rounded-full" />
-                        업종 선택
-                    </h2>
-                    <div className="flex-1 overflow-x-auto pb-1">
-                        <IndustrySelector />
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b pb-2">
+                        <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
+                            <span className="w-1.5 h-3.5 bg-orange-400 rounded-full" />
+                            업종 선택
+                        </h3>
+                        <button 
+                            onClick={() => setIsIndustryOpen(!isIndustryOpen)}
+                            className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
+                        >
+                            {isIndustryOpen ? '접기' : '보기'} {isIndustryOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
+                        </button>
                     </div>
+                    {isIndustryOpen && (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                            <button
+                                onClick={() => setSelectedIndustry('all')}
+                                className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                    selectedIndustry === 'all'
+                                        ? 'border-orange-400 bg-orange-400 text-white shadow-sm'
+                                        : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                }`}
+                            >
+                                전체
+                            </button>
+                            {dbIndustries.map((ind) => (
+                                <button
+                                    key={ind.code_value}
+                                    onClick={() => setSelectedIndustry(ind.code_value)}
+                                    className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                        selectedIndustry === ind.code_value
+                                            ? 'border-orange-400 bg-orange-400 text-white shadow-sm'
+                                            : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                    }`}
+                                >
+                                    {ind.code_name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Keyword Selection */}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b pb-2">
+                        <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
+                            <span className="w-1.5 h-3.5 bg-purple-400 rounded-full" />
+                            키워드 선택
+                        </h3>
+                        <button 
+                            onClick={() => setIsKeywordOpen(!isKeywordOpen)}
+                            className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
+                        >
+                            {isKeywordOpen ? '접기' : '보기'} {isKeywordOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
+                        </button>
+                    </div>
+                    {isKeywordOpen && (
+                        <div className="pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                            <div className="relative max-w-md">
+                                <input
+                                    type="text"
+                                    value={searchKeyword}
+                                    onChange={(e) => setSearchKeyword(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleSearchClick();
+                                        }
+                                    }}
+                                    placeholder="검색할 키워드를 입력해 주세요."
+                                    className="w-full border border-gray-200 rounded-lg py-2.5 pl-4 pr-10 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                />
+                                {searchKeyword && (
+                                    <button 
+                                        onClick={() => setSearchKeyword('')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 font-bold text-lg"
+                                    >
+                                        &times;
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Bottom Search Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-100">
+                    <div className="text-[11px] sm:text-xs font-bold text-gray-400">
+                        현재 검색 조건:{" "}
+                        <span className="text-primary font-black">
+                            {[
+                                dbRegions.find((r) => r.code_value === selectedRegion)?.code_name,
+                                dbIndustries.find((i) => i.code_value === selectedIndustry)?.code_name,
+                                searchKeyword ? `"${searchKeyword}"` : "",
+                            ]
+                                .filter(Boolean)
+                                .join(" > ") || "전체"}
+                        </span>
+                    </div>
+                    <Button 
+                        onClick={handleSearchClick}
+                        className="w-full sm:w-auto font-black px-8 py-5 rounded-lg text-white bg-primary hover:bg-orange-600 hover:scale-[1.02] active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"
+                    >
+                        <Search className="w-4 h-4" /> 검색하기
+                    </Button>
                 </div>
             </section>
 

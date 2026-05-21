@@ -1,22 +1,42 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Loader2, Plus, Crown, Zap, ChevronRight, ChevronLeft, Filter } from 'lucide-react';
+import { Loader2, Plus, Crown, Zap, ChevronRight, ChevronLeft, Filter, Search } from 'lucide-react';
 import Link from 'next/link';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { GeneralJobListRow } from '@/components/jobs/general-job-list-row';
 import { AdPriceModal } from '@/components/jobs/AdPriceModal';
 import { Button } from '@/components/ui/button';
-import { RegionSelector } from '@/components/home/region-selector';
-import { IndustrySelector } from '@/components/home/industry-selector';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { useLanguage } from '@/components/providers/language-provider';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 import { GeneralSeekerListRow } from './GeneralSeekerListRow';
 import { getPublicSeekerAdsAction, getSeekerAdByIdAction } from '@/lib/actions';
 import { SeekerModalWrapper } from '@/components/seekers/seeker-modal-wrapper';
 import { buildFlatIndustryOptions, resumeMatchesIndustryFilter } from '@/lib/resume-industry';
+
+function resolveRegion(param: string, list: CodeItem[]): string {
+    if (!param || param === 'all') return 'all';
+    const found = list.find(r => 
+        r.code_value.toLowerCase() === param.toLowerCase() ||
+        r.code_name === param
+    );
+    return found ? found.code_value : 'all';
+}
+
+function resolveIndustry(param: string, list: CodeItem[]): string {
+    if (!param || param === 'all') return 'all';
+    const found = list.find(i => 
+        i.code_value.toLowerCase() === param.toLowerCase() ||
+        i.code_value.toLowerCase().includes(param.toLowerCase()) ||
+        i.code_name === param ||
+        (param === 'cafe-bar' && i.code_value === 'CAT1_BAR') ||
+        (param === 'room-salon' && i.code_value === 'CAT1_ROOM')
+    );
+    return found ? found.code_value : 'all';
+}
 
 interface SeekersListContentProps {
     isEmployer?: boolean;
@@ -25,6 +45,21 @@ interface SeekersListContentProps {
 
 export function SeekersListContent({ isEmployer, searchQuery }: SeekersListContentProps) {
     const { t } = useLanguage();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const qParam = searchParams.get('q') || '';
+    const regionParam = searchParams.get('region') || 'all';
+    const industryParam = searchParams.get('industry') || 'all';
+
+    const [selectedRegion, setSelectedRegion] = useState(regionParam);
+    const [selectedIndustry, setSelectedIndustry] = useState(industryParam);
+    const [searchKeyword, setSearchKeyword] = useState(qParam);
+
+    const [isRegionOpen, setIsRegionOpen] = useState(true);
+    const [isIndustryOpen, setIsIndustryOpen] = useState(true);
+    const [isKeywordOpen, setIsKeywordOpen] = useState(true);
+
     const [showAllPremium, setShowAllPremium] = useState(false);
     const [showAllSpecial, setShowAllSpecial] = useState(false);
     const [showAllGeneral, setShowAllGeneral] = useState(false);
@@ -43,11 +78,10 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
     const [regions, setRegions] = useState<CodeItem[]>([]);
     const [industryOptions, setIndustryOptions] = useState<CodeItem[]>([]);
 
+    const dbRegions = regions.filter(c => c.list_type === 'JOB_REGION_1');
+    const dbIndustries = industryOptions.filter(c => c.list_type === 'CATEGORY_1');
+
     // Filter states
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [selectedSido, setSelectedSido] = useState('all');
-    const [selectedSigungu, setSelectedSigungu] = useState('all');
-    const [selectedIndustry, setSelectedIndustry] = useState('all');
     const [selectedPayType, setSelectedPayType] = useState('all');
     const [selectedGender, setSelectedGender] = useState('all');
     const [selectedAge, setSelectedAge] = useState('all');
@@ -55,6 +89,21 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
     // Pagination state for the list table
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 20;
+
+    // URL 파라미터가 변경되면 로컬 상태 동기화
+    useEffect(() => {
+        if (dbRegions.length > 0) {
+            setSelectedRegion(resolveRegion(regionParam, dbRegions));
+        } else {
+            setSelectedRegion(regionParam);
+        }
+        if (dbIndustries.length > 0) {
+            setSelectedIndustry(resolveIndustry(industryParam, dbIndustries));
+        } else {
+            setSelectedIndustry(industryParam);
+        }
+        setSearchKeyword(qParam);
+    }, [qParam, regionParam, industryParam, regions, industryOptions]);
 
     // Fetch hierarchical regions
     useEffect(() => {
@@ -87,10 +136,26 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
         async function fetchJobs() {
             setLoading(true);
             try {
+                // 지역 및 업종 코드를 한글 텍스트 검색어로 변환
+                const resolvedReg = resolveRegion(regionParam, dbRegions);
+                const resolvedInd = resolveIndustry(industryParam, dbIndustries);
+
+                const regionTerm = dbRegions.find(r => r.code_value === resolvedReg)?.code_name || '';
+                const industryTerm = dbIndustries.find(i => i.code_value === resolvedInd)?.code_name || '';
+                
+                // 공백으로 연결하여 다중 검색어가 되도록 빌드
+                const combinedTerms = [
+                    regionTerm && regionTerm !== '전체' ? regionTerm : '', 
+                    industryTerm && industryTerm !== '전체' ? industryTerm : '', 
+                    qParam
+                ]
+                    .filter(Boolean)
+                    .join(' ');
+
                 const [p, s, l, gRes] = await Promise.all([
-                    getRotatedAds('PREMIUM', 50, searchQuery),
-                    getRotatedAds('SPECIAL', 50, searchQuery),
-                    getRotatedAds('AD_GENERAL', 50, searchQuery),
+                    getRotatedAds('PREMIUM', 50, combinedTerms),
+                    getRotatedAds('SPECIAL', 50, combinedTerms),
+                    getRotatedAds('AD_GENERAL', 50, combinedTerms),
                     getPublicSeekerAdsAction()
                 ]);
                 setPremiumJobs(p);
@@ -107,7 +172,21 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
             setLoading(false);
         }
         fetchJobs();
-    }, [searchQuery]);
+    }, [qParam, regionParam, industryParam, regions, industryOptions]);
+
+    const handleSearchClick = () => {
+        const params = new URLSearchParams();
+        if (searchKeyword.trim()) {
+            params.set('q', searchKeyword.trim());
+        }
+        if (selectedRegion !== 'all') {
+            params.set('region', selectedRegion.toLowerCase());
+        }
+        if (selectedIndustry !== 'all') {
+            params.set('industry', selectedIndustry.toLowerCase());
+        }
+        router.push(`/seekers?${params.toString()}`);
+    };
 
     // 🎨 [IMPACT DEMO] 22종 테마 전체 적용
     const impacts: any[] = [
@@ -146,50 +225,49 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
             const users = job.users || {};
             
             // 1. Region Filter
-            if (selectedSido !== 'all') {
-                const sidoName = regions.find(r => r.code_value === selectedSido)?.code_name;
-                if (sidoName && !resumes.desired_location?.includes(sidoName)) {
+            if (regionParam !== 'all') {
+                const resolvedReg = resolveRegion(regionParam, dbRegions);
+                const regionName = dbRegions.find(r => r.code_value === resolvedReg)?.code_name;
+                if (regionName && !resumes.desired_location?.includes(regionName)) {
                     return false;
-                }
-                if (selectedSigungu !== 'all') {
-                    const sigunguName = regions.find(r => r.code_value === selectedSigungu)?.code_name;
-                    if (sigunguName && !resumes.desired_location?.includes(sigunguName)) {
-                        return false;
-                    }
                 }
             }
             
             // 2. Industry Filter
-            if (selectedIndustry !== 'all') {
-                const opt = industryOptions.find((o) => o.code_value === selectedIndustry);
-                if (
-                    opt &&
-                    !resumeMatchesIndustryFilter(
-                        resumes.desired_industry,
-                        opt.code_name,
-                        opt.code_value,
-                        industryOptions
-                    )
-                ) {
+            if (industryParam !== 'all') {
+                const resolvedInd = resolveIndustry(industryParam, dbIndustries);
+                const industryName = dbIndustries.find(i => i.code_value === resolvedInd)?.code_name;
+                if (industryName && !resumes.desired_industry?.includes(industryName)) {
                     return false;
                 }
             }
 
-            // 3. Pay Type Filter
+            // 3. Keyword Filter
+            if (qParam.trim()) {
+                const kw = qParam.trim().toLowerCase();
+                const inTitle = resumes.title?.toLowerCase().includes(kw);
+                const inDesiredJob = resumes.desired_job?.toLowerCase().includes(kw);
+                const inSkills = resumes.skills?.toLowerCase().includes(kw);
+                if (!inTitle && !inDesiredJob && !inSkills) {
+                    return false;
+                }
+            }
+            
+            // 4. Pay Type Filter
             if (selectedPayType !== 'all') {
                 if (resumes.desired_pay_type !== selectedPayType) {
                     return false;
                 }
             }
 
-            // 4. Gender Filter
+            // 5. Gender Filter
             if (selectedGender !== 'all') {
                 if (resumes.gender !== selectedGender) {
                     return false;
                 }
             }
 
-            // 5. Age Filter
+            // 6. Age Filter
             if (selectedAge !== 'all') {
                 const currentYear = new Date().getFullYear();
                 const birthYearStr = users.birth_date ? users.birth_date.split('-')[0] : resumes.birth_year;
@@ -207,7 +285,7 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
             
             return true;
         });
-    }, [generalJobs, selectedSido, selectedSigungu, selectedIndustry, selectedPayType, selectedGender, selectedAge, regions, industryOptions]);
+    }, [generalJobs, qParam, regionParam, industryParam, selectedPayType, selectedGender, selectedAge]);
 
     if (loading) {
         return (
@@ -407,132 +485,204 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                 )}
             </section>
 
-            {/* Filter Toggle Button */}
-            <div className="flex justify-start mt-4 mb-2">
-                <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setIsFilterOpen(!isFilterOpen)}
-                    className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-200 text-gray-700 shadow-sm"
-                >
-                    <Filter className="w-4 h-4" />
-                    상세 필터 {isFilterOpen ? '닫기' : '열기'}
-                </Button>
-            </div>
+            {/* Search Condition Card */}
+            <section className="bg-white rounded-xl p-6 border shadow-sm space-y-6">
+                {/* Region Selection */}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b pb-2">
+                        <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
+                            <span className="w-1.5 h-3.5 bg-primary rounded-full" />
+                            지역 선택
+                        </h3>
+                        <button 
+                            onClick={() => setIsRegionOpen(!isRegionOpen)}
+                            className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
+                        >
+                            {isRegionOpen ? '접기' : '보기'} {isRegionOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
+                        </button>
+                    </div>
+                    {isRegionOpen && (
+                        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-9 gap-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                            <button
+                                onClick={() => setSelectedRegion('all')}
+                                className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                    selectedRegion === 'all'
+                                        ? 'border-primary bg-primary text-white shadow-sm'
+                                        : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                }`}
+                            >
+                                전체
+                            </button>
+                            {dbRegions.map((r) => (
+                                <button
+                                    key={r.code_value}
+                                    onClick={() => setSelectedRegion(r.code_value)}
+                                    className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                        selectedRegion === r.code_value
+                                            ? 'border-primary bg-primary text-white shadow-sm'
+                                            : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                    }`}
+                                >
+                                    {r.code_name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
-            {/* Collapsible Filter Content */}
-            {isFilterOpen && (
-                <section className="bg-white rounded-xl p-5 border shadow-sm mb-4 animate-in slide-in-from-top-2 fade-in duration-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {/* Region Selection (Sido & Sigungu) */}
-                        <div className="space-y-3">
-                            <label className="text-[14px] font-bold flex items-center gap-2 text-gray-800">
-                                <span className="w-1.5 h-3.5 bg-primary rounded-full" />
-                                지역 선택
-                            </label>
-                            <div className="flex gap-2">
-                                <select 
-                                    value={selectedSido}
-                                    onChange={(e) => {
-                                        setSelectedSido(e.target.value);
-                                        setSelectedSigungu('all');
+                {/* Industry Selection */}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b pb-2">
+                        <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
+                            <span className="w-1.5 h-3.5 bg-orange-400 rounded-full" />
+                            업종 선택
+                        </h3>
+                        <button 
+                            onClick={() => setIsIndustryOpen(!isIndustryOpen)}
+                            className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
+                        >
+                            {isIndustryOpen ? '접기' : '보기'} {isIndustryOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
+                        </button>
+                    </div>
+                    {isIndustryOpen && (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                            <button
+                                onClick={() => setSelectedIndustry('all')}
+                                className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                    selectedIndustry === 'all'
+                                        ? 'border-orange-400 bg-orange-400 text-white shadow-sm'
+                                        : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                }`}
+                            >
+                                전체
+                            </button>
+                            {dbIndustries.map((ind) => (
+                                <button
+                                    key={ind.code_value}
+                                    onClick={() => setSelectedIndustry(ind.code_value)}
+                                    className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                        selectedIndustry === ind.code_value
+                                            ? 'border-orange-400 bg-orange-400 text-white shadow-sm'
+                                            : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                    }`}
+                                >
+                                    {ind.code_name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Keyword Selection */}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b pb-2">
+                        <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
+                            <span className="w-1.5 h-3.5 bg-purple-400 rounded-full" />
+                            키워드 선택
+                        </h3>
+                        <button 
+                            onClick={() => setIsKeywordOpen(!isKeywordOpen)}
+                            className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
+                        >
+                            {isKeywordOpen ? '접기' : '보기'} {isKeywordOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
+                        </button>
+                    </div>
+                    {isKeywordOpen && (
+                        <div className="pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                            <div className="relative max-w-md">
+                                <input
+                                    type="text"
+                                    value={searchKeyword}
+                                    onChange={(e) => setSearchKeyword(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleSearchClick();
+                                        }
                                     }}
-                                    className="flex-1 border border-gray-200 rounded-lg p-3 text-sm text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer bg-gray-50/50"
-                                >
-                                    <option value="all">시/도 전체</option>
-                                    {regions.filter(r => !r.parent_code_value).map(r => (
-                                        <option key={r.code_value} value={r.code_value}>{r.code_name}</option>
-                                    ))}
-                                </select>
-                                <select 
-                                    value={selectedSigungu}
-                                    onChange={(e) => setSelectedSigungu(e.target.value)}
-                                    disabled={selectedSido === 'all'}
-                                    className="flex-1 border border-gray-200 rounded-lg p-3 text-sm text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer bg-gray-50/50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <option value="all">시/군/구 전체</option>
-                                    {regions.filter(r => r.parent_code_value === selectedSido).map(r => (
-                                        <option key={r.code_value} value={r.code_value}>{r.code_name}</option>
-                                    ))}
-                                </select>
+                                    placeholder="검색할 키워드를 입력해 주세요."
+                                    className="w-full border border-gray-200 rounded-lg py-2.5 pl-4 pr-10 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                />
+                                {searchKeyword && (
+                                    <button 
+                                        onClick={() => setSearchKeyword('')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 font-bold text-lg"
+                                    >
+                                        &times;
+                                    </button>
+                                )}
                             </div>
                         </div>
-                        
-                        {/* Industry Selection */}
-                        <div className="space-y-3">
-                            <label className="text-[14px] font-bold flex items-center gap-2 text-gray-800">
-                                <span className="w-1.5 h-3.5 bg-orange-400 rounded-full" />
-                                업종 선택
-                            </label>
-                            <select 
-                                value={selectedIndustry}
-                                onChange={(e) => setSelectedIndustry(e.target.value)}
-                                className="w-full border border-gray-200 rounded-lg p-3 text-sm text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer bg-gray-50/50"
-                            >
-                                <option value="all">전체 업종</option>
-                                {industryOptions.map((i) => (
-                                    <option key={i.code_value} value={i.code_value}>{i.code_name}</option>
-                                ))}
-                            </select>
-                        </div>
+                    )}
+                </div>
 
-                        {/* Pay Type Selection */}
-                        <div className="space-y-3">
-                            <label className="text-[14px] font-bold flex items-center gap-2 text-gray-800">
-                                <span className="w-1.5 h-3.5 bg-green-500 rounded-full" />
-                                급여 조건
-                            </label>
-                            <select 
-                                value={selectedPayType}
-                                onChange={(e) => setSelectedPayType(e.target.value)}
-                                className="w-full border border-gray-200 rounded-lg p-3 text-sm text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer bg-gray-50/50"
-                            >
-                                <option value="all">전체</option>
-                                <option value="시급">시급</option>
-                                <option value="일급">일급</option>
-                                <option value="주급">주급</option>
-                                <option value="월급">월급</option>
-                                <option value="협의">협의</option>
-                            </select>
-                        </div>
-
-                        {/* Gender Selection */}
-                        <div className="space-y-3">
-                            <label className="text-[14px] font-bold flex items-center gap-2 text-gray-800">
-                                <span className="w-1.5 h-3.5 bg-pink-400 rounded-full" />
-                                성별
-                            </label>
-                            <select 
-                                value={selectedGender}
-                                onChange={(e) => setSelectedGender(e.target.value)}
-                                className="w-full border border-gray-200 rounded-lg p-3 text-sm text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer bg-gray-50/50"
-                            >
-                                <option value="all">전체</option>
-                                <option value="F">여성</option>
-                                <option value="M">남성</option>
-                            </select>
-                        </div>
-
-                        {/* Age Selection */}
-                        <div className="space-y-3">
-                            <label className="text-[14px] font-bold flex items-center gap-2 text-gray-800">
-                                <span className="w-1.5 h-3.5 bg-purple-400 rounded-full" />
-                                연령대
-                            </label>
-                            <select 
-                                value={selectedAge}
-                                onChange={(e) => setSelectedAge(e.target.value)}
-                                className="w-full border border-gray-200 rounded-lg p-3 text-sm text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer bg-gray-50/50"
-                            >
-                                <option value="all">전체</option>
-                                <option value="20s">20대</option>
-                                <option value="30s">30대</option>
-                                <option value="40s_plus">40대 이상</option>
-                            </select>
-                        </div>
+                {/* Additional Filters: Pay, Gender, Age */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-gray-500">급여 조건</label>
+                        <select 
+                            value={selectedPayType}
+                            onChange={(e) => setSelectedPayType(e.target.value)}
+                            className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 cursor-pointer"
+                        >
+                            <option value="all">전체 급여</option>
+                            <option value="시급">시급</option>
+                            <option value="일급">일급</option>
+                            <option value="주급">주급</option>
+                            <option value="월급">월급</option>
+                            <option value="협의">협의</option>
+                        </select>
                     </div>
-                </section>
-            )}
+
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-gray-500">성별</label>
+                        <select 
+                            value={selectedGender}
+                            onChange={(e) => setSelectedGender(e.target.value)}
+                            className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 cursor-pointer"
+                        >
+                            <option value="all">전체 성별</option>
+                            <option value="F">여성</option>
+                            <option value="M">남성</option>
+                        </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-gray-500">연령대</label>
+                        <select 
+                            value={selectedAge}
+                            onChange={(e) => setSelectedAge(e.target.value)}
+                            className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 cursor-pointer"
+                        >
+                            <option value="all">전체 연령대</option>
+                            <option value="20s">20대</option>
+                            <option value="30s">30대</option>
+                            <option value="40s_plus">40대 이상</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Bottom Search Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-100">
+                    <div className="text-[11px] sm:text-xs font-bold text-gray-400">
+                        현재 검색 조건:{" "}
+                        <span className="text-primary font-black">
+                            {[
+                                dbRegions.find((r) => r.code_value === selectedRegion)?.code_name,
+                                dbIndustries.find((i) => i.code_value === selectedIndustry)?.code_name,
+                                searchKeyword ? `"${searchKeyword}"` : "",
+                            ]
+                                .filter(Boolean)
+                                .join(" > ") || "전체"}
+                        </span>
+                    </div>
+                    <Button 
+                        onClick={handleSearchClick}
+                        className="w-full sm:w-auto font-black px-8 py-5 rounded-lg text-white bg-primary hover:bg-orange-600 hover:scale-[1.02] active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"
+                    >
+                        <Search className="w-4 h-4" /> 검색하기
+                    </Button>
+                </div>
+            </section>
 
             {/* General Jobs List */}
             <section>
