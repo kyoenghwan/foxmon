@@ -6,6 +6,7 @@ import { applyRollingLogic } from './ad-rolling-logic';
 export interface AdItem {
     id: string;
     company: string;
+    company_name?: string; // DB 호환용
     title: string;
     location: string;
     pay: string;
@@ -13,6 +14,10 @@ export interface AdItem {
     logo_url?: string;
     color?: string;
     theme?: string;
+    category?: string;     // Mock/카테고리명 호환용
+    category1?: string;    // DB 카테고리1
+    category2?: string;    // DB 카테고리2
+    keywords?: string[];   // 태그 배열
     action_type?: string;
     effect_intensity?: string;
     bg_opacity?: string;
