@@ -17,7 +17,7 @@ export function MainBanner() {
 
     // 반응형 배너 갯수 조절
     useEffect(() => {
-        setItemsPerView(2);
+        setItemsPerView(1);
     }, []);
 
     // 1. Firestore에서 공정한 알고리즘이 적용된 광고 가져오기

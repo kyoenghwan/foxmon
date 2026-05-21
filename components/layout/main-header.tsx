@@ -289,7 +289,7 @@ export function MainHeader({ session }: MainHeaderProps) {
 
                 {/* 2행: 실시간 인기 키워드 롤링 & 드롭다운 (로고 아래 전체 영역까지 사용) */}
                 <div className="flex items-center gap-4 mt-1 px-2 text-[12px] font-bold text-gray-500 w-full relative z-30">
-                    <span className="text-primary text-[11px] shrink-0">실시간 검색어</span>
+                    <span className="text-primary text-[11px] shrink-0">키워드</span>
                     
                     {/* 롤링 검색어 영역 */}
                     <div className="flex-1 overflow-hidden h-5 relative cursor-pointer" onClick={() => {
@@ -324,7 +324,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                             onClick={() => setShowRankDropdown(!showRankDropdown)}
                             className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-900 transition-colors font-bold px-2 py-0.5 border border-gray-200 rounded bg-white shadow-xs"
                         >
-                            <span>인기순위</span>
+                            <span>보기</span>
                             <span className={cn("text-[9px] transition-transform duration-200", showRankDropdown ? "rotate-180" : "")}>▼</span>
                         </button>
 
@@ -332,10 +332,10 @@ export function MainHeader({ session }: MainHeaderProps) {
                         {showRankDropdown && popularKeywords.length > 0 && (
                             <div className="absolute right-0 top-full mt-1.5 w-56 bg-white border border-gray-200 rounded-xl shadow-xl py-3 px-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
                                 <div className="text-[11px] font-black text-gray-400 border-b pb-1.5 mb-2 px-2 flex justify-between items-center">
-                                    <span>실시간 인기 키워드</span>
-                                    <span className="text-primary">10위 기준</span>
+                                    <span>인기 키워드</span>
+                                    <span className="text-primary">전체 기준</span>
                                 </div>
-                                <div className="flex flex-col gap-1">
+                                <div className="flex flex-col gap-1 max-h-80 overflow-y-auto scrollbar-thin">
                                     {popularKeywords.map((item, idx) => (
                                         <button
                                             key={item.keyword}

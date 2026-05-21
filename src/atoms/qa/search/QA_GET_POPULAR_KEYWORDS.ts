@@ -17,7 +17,7 @@ export async function QA_GET_POPULAR_KEYWORDS(): Promise<{
             .from('search_keywords')
             .select('*')
             .order('clicks_count', { ascending: false })
-            .limit(10);
+            .limit(100);
 
         if (error) {
             console.warn('QA_GET_POPULAR_KEYWORDS error (using fallback):', error.message);
