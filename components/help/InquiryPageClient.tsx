@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MessageCircle, Send, Clock, CheckCircle2, AlertCircle, ChevronDown, Plus } from 'lucide-react';
 import type { UserInquiry } from '@/lib/actions/help';
-import { createInquiry } from '@/lib/actions/help';
+import { createInquiry, getMyInquiries } from '@/lib/actions/help';
 
 const INQUIRY_CATEGORIES = [
     '계정 문의',
@@ -32,9 +32,11 @@ const StatusBadge = ({ status }: { status: string }) => {
 export function InquiryPageClient({
     initialInquiries,
     isLoggedIn,
+    loadError,
 }: {
     initialInquiries: UserInquiry[];
     isLoggedIn: boolean;
+    loadError?: string | null;
 }) {
     const router = useRouter();
     const [inquiries, setInquiries] = useState(initialInquiries);
@@ -60,7 +62,12 @@ export function InquiryPageClient({
         const res = await createInquiry({ category, title, content });
         setSubmitting(false);
         if (res.success) {
-            alert(res.message);
+            if (res.inquiry) {
+                setInquiries((prev) => [res.inquiry!, ...prev]);
+            } else {
+                const refreshed = await getMyInquiries();
+                if (refreshed.inquiries.length) setInquiries(refreshed.inquiries);
+            }
             setShowForm(false);
             setCategory('');
             setTitle('');
@@ -73,15 +80,10 @@ export function InquiryPageClient({
 
     return (
         <div className="space-y-5">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
-                        <MessageCircle className="w-5 h-5 text-primary" /> 1:1 문의
-                    </h2>
-                    <p className="text-[13px] text-gray-500 font-medium mt-1">
-                        궁금하신 점이나 건의사항을 남겨주세요. 답변은 쪽지함과 이메일로 전달됩니다.
-                    </p>
-                </div>
+            <div className="flex items-center justify-between gap-3">
+                <h2 className="text-xl font-black text-gray-900 flex items-center gap-2 shrink-0">
+                    <MessageCircle className="w-5 h-5 text-primary" /> 1:1 문의
+                </h2>
                 <button
                     type="button"
                     onClick={() => {
@@ -93,10 +95,10 @@ export function InquiryPageClient({
                         }
                         setShowForm(!showForm);
                     }}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white font-black text-[13px] rounded-xl hover:bg-orange-600 transition-all shadow-sm whitespace-nowrap shrink-0"
                 >
-                    <Plus className="w-4 h-4" />
-                    문의 작성
+                    <Plus className="w-4 h-4 shrink-0" />
+                    문의하기
                 </button>
             </div>
 
@@ -162,7 +164,14 @@ export function InquiryPageClient({
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
                     <h3 className="font-black text-[14px] text-gray-700">내 문의 내역</h3>
+                    <p className="text-[11px] text-gray-400 font-medium mt-0.5">본인이 접수한 문의와 답변만 표시됩니다.</p>
                 </div>
+
+                {loadError && (
+                    <div className="mx-5 mt-4 p-3 rounded-lg bg-red-50 border border-red-100 text-[12px] text-red-700 font-medium">
+                        문의 목록을 불러오지 못했습니다. {loadError}
+                    </div>
+                )}
 
                 {!isLoggedIn ? (
                     <div className="py-16 text-center text-gray-500 text-[14px]">

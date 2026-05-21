@@ -148,7 +148,7 @@ export async function createInquiry(input: {
   category: string;
   title: string;
   content: string;
-}): Promise<{ success: boolean; message: string }> {
+}): Promise<{ success: boolean; message: string; inquiry?: UserInquiry }> {
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, message: '로그인 후 문의를 접수할 수 있습니다.' };
@@ -161,18 +161,30 @@ export async function createInquiry(input: {
   }
 
   try {
-    const { error } = await supabaseAdmin.from('inquiries').insert({
-      user_id: session.user.id,
-      category,
-      title,
-      content,
-      status: 'PENDING',
-    });
+    const { data, error } = await supabaseAdmin
+      .from('inquiries')
+      .insert({
+        user_id: session.user.id,
+        category,
+        title,
+        content,
+        status: 'PENDING',
+      })
+      .select('*')
+      .single();
     if (error) {
       nvLog('AT', '❌ createInquiry', error);
-      return { success: false, message: `문의 접수에 실패했습니다. (${error.message})` };
+      const hint =
+        error.message?.includes('inquiries') || error.code === '42P01'
+          ? ' (DB에 inquiries 테이블이 없을 수 있습니다. Supabase 마이그레이션을 적용해 주세요.)'
+          : '';
+      return { success: false, message: `문의 접수에 실패했습니다. (${error.message})${hint}` };
     }
-    return { success: true, message: '문의가 접수되었습니다. 답변은 쪽지함 및 이메일로 전달됩니다.' };
+    return {
+      success: true,
+      message: '문의가 접수되었습니다.',
+      inquiry: data as UserInquiry,
+    };
   } catch (err: unknown) {
     return { success: false, message: (err as Error)?.message || '시스템 오류' };
   }
