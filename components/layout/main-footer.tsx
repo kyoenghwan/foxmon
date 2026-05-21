@@ -62,7 +62,7 @@ export function MainFooter() {
                     <div className="flex flex-col gap-4 text-[11px] text-gray-400 leading-relaxed font-medium">
                         <p>
                             상호명: 폭스몬 | 대표: 민경환 | 개인정보관리책임자: 민경환 <br/>
-                            사업장 주소: 경기도 김포시 고촌읍 신곡로29번길 57, 가동 501호(지하임) <br/>
+                            사업장 주소: 경기도 김포시 고촌읍 신곡로29번길 57, 가동 501호 <br/>
                             사업자등록번호: 478-47-01041 | 직업정보제공사업 신고번호: [발급 대기중] | 통신판매업신고: [발급 대기중] <br/>
                         </p>
                         <p className="opacity-70">
