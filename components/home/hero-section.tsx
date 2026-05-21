@@ -23,7 +23,7 @@ export function HeroSection({ session }: HeroSectionProps) {
                     </div>
 
                     {/* 우측: 유저 로그인/커뮤니티 정보 박스 */}
-                    <div className="w-full lg:w-[320px] h-[200px] lg:h-full flex-shrink-0">
+                    <div className="w-full lg:w-[320px] h-auto lg:h-full flex-shrink-0">
                         <LoginInfoBox session={session} />
                     </div>
                 </div>

@@ -61,16 +61,16 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                 {/* Top Section: Avatar & Welcome text (New Layout) */}
                 <div className="flex items-start gap-2.5 sm:gap-4">
                     {/* 프로필 이미지 - 약간 커짐 */}
-                    <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-[1rem] bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden border border-orange-100">
+                    <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl sm:rounded-[1rem] bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden border border-orange-100">
                         {profileImageUrl ? (
                             <img src={profileImageUrl} alt="프로필" className="w-full h-full object-cover" />
                         ) : (
-                            <User className="h-6 w-6 sm:h-8 sm:w-8 stroke-[2.5]" />
+                            <User className="h-8 w-8 sm:h-10 sm:w-10 stroke-[2.5]" />
                         )}
                     </div>
 
                     {/* 우측 정보 & 버튼 영역 (flex-col로 상하 배치) */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[3rem] sm:min-h-[4rem] pt-0.5 gap-1.5 sm:gap-2">
+                    <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[4rem] sm:min-h-[5rem] pt-0.5 gap-1.5 sm:gap-2">
                         {/* 1. 인사말 + 로그아웃(우측 끝) */}
                         <div className="flex w-full min-w-0 items-center gap-1 sm:gap-2">
                             <div className="min-w-0 flex-1">
@@ -127,7 +127,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                 </div>
 
                 {/* Bottom Icons - Flex spaced */}
-                <div className="flex justify-around items-center pt-3 sm:pt-4 mt-auto px-0.5 sm:px-1">
+                <div className="flex justify-around items-center pt-3 sm:pt-4 mt-3 lg:mt-auto px-0.5 sm:px-1">
                     <Link href="/mypage/scraps" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110">
                             <Heart className="h-4.5 w-4.5 sm:h-5 sm:w-5 fill-current" />

@@ -196,9 +196,9 @@ export function MainHeader({ session }: MainHeaderProps) {
 
             {/* 1단: 로고(좌) · 검색창 & 인기키워드(중앙) · 회원정보/로그인(우) */}
             <div className="container mx-auto px-4 lg:px-8 py-3 md:py-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-row items-center justify-between gap-3 md:gap-4">
                     {/* 좌측: 로고 */}
-                    <div className="flex items-center justify-between md:justify-start shrink-0">
+                    <div className="flex items-center shrink-0">
                         <Link href="/" className="group flex items-center">
                             <img
                                 src="/logo.png"
@@ -206,29 +206,6 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 className="h-9 sm:h-11 md:h-14 w-auto drop-shadow-sm hover:scale-105 transition-transform"
                             />
                         </Link>
-
-                        {/* 모바일 화면에서는 우측 유틸리티를 로고 옆에 간단히 배치 */}
-                        <div className="flex md:hidden items-center gap-2">
-                            {!session ? (
-                                <Link href="/login" className="text-xs font-bold text-gray-500 hover:text-gray-900">로그인</Link>
-                            ) : (
-                                <button
-                                    onClick={async () => {
-                                        document.body.style.opacity = '0.5';
-                                        try {
-                                            document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                                            document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                                            await signOut({ callbackUrl: '/login' });
-                                        } catch (e) {
-                                            console.error(e);
-                                        }
-                                    }}
-                                    className="text-xs font-black text-red-500"
-                                >
-                                    로그아웃
-                                </button>
-                            )}
-                        </div>
                     </div>
 
                     {/* 중앙: 검색창 & 실시간 검색어 */}
@@ -247,7 +224,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     }
                                 }}
                                 placeholder={t.common.searchPlaceholder || "어떤 알바를 찾으세요?"}
-                                className="block w-full pl-12 pr-12 py-3 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
+                                className="block w-full pl-12 pr-12 py-2 md:py-3 border-2 border-primary/20 rounded-full bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all text-sm font-bold shadow-sm"
                             />
                             <button
                                 onClick={() => handleSearch(searchQuery)}
