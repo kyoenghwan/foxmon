@@ -17,7 +17,16 @@ export function MainBanner() {
 
     // 반응형 배너 갯수 조절
     useEffect(() => {
-        setItemsPerView(1);
+        const handleResize = () => {
+            if (window.innerWidth < 1024) {
+                setItemsPerView(1.25);
+            } else {
+                setItemsPerView(1);
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     // 1. Firestore에서 공정한 알고리즘이 적용된 광고 가져오기
