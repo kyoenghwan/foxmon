@@ -185,24 +185,18 @@ export function HomeJobSections() {
                 </div>
                 
                 {demoJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 max-[639px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-2 max-[639px]:gap-2 sm:gap-4 w-full ${!showAllPremium ? `
-                        [&>*:nth-child(n+19)]:hidden 
-                        sm:[&>*:nth-child(n+19)]:block sm:[&>*:nth-child(n+25)]:hidden 
-                        md:[&>*:nth-child(n+25)]:block md:[&>*:nth-child(n+33)]:hidden 
-                        2xl:[&>*:nth-child(n+33)]:block 2xl:[&>*:nth-child(n+43)]:hidden 
-                        3xl:[&>*:nth-child(n+43)]:block 3xl:[&>*:nth-child(n+57)]:hidden
-                        4xl:[&>*:nth-child(n+57)]:block 4xl:[&>*:nth-child(n+81)]:hidden
-                    ` : ''}`}>
-                        {demoJobs.map((job) => (
-                            <PremiumJobCard 
-                                key={job.id}
-                                {...(job as any)} 
-                                impactType={(job as any).impactType}
-                                effectIntensity={(job as any).effectIntensity}
-                                customColor={(job as any).customColor}
-                                bgOpacity={(job as any).bgOpacity}
-                                tier="PREMIUM"
-                            />
+                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-center gap-2 sm:gap-4 w-full">
+                        {demoJobs.map((job, idx) => (
+                            <div key={job.id} className={`w-full sm:w-[165px] lg:w-[210px] sm:shrink-0 ${!showAllPremium && idx >= 12 ? 'hidden sm:block' : ''} ${!showAllPremium && idx >= 15 ? 'sm:hidden lg:block' : ''} ${!showAllPremium && idx >= 20 ? 'lg:hidden xl:block' : ''} ${!showAllPremium && idx >= 24 ? 'xl:hidden' : ''}`}>
+                                <PremiumJobCard 
+                                    {...(job as any)} 
+                                    impactType={(job as any).impactType}
+                                    effectIntensity={(job as any).effectIntensity}
+                                    customColor={(job as any).customColor}
+                                    bgOpacity={(job as any).bgOpacity}
+                                    tier="PREMIUM"
+                                />
+                            </div>
                         ))}
                     </div>
                 ) : (
@@ -225,24 +219,18 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-1.5 sm:gap-4 w-full grid-flow-dense
-                        [&>*:nth-child(n+19)]:hidden 
-                        sm:[&>*:nth-child(n+19)]:block sm:[&>*:nth-child(n+25)]:hidden 
-                        md:[&>*:nth-child(n+25)]:block md:[&>*:nth-child(n+33)]:hidden 
-                        2xl:[&>*:nth-child(n+33)]:block 2xl:[&>*:nth-child(n+43)]:hidden 
-                        3xl:[&>*:nth-child(n+43)]:block 3xl:[&>*:nth-child(n+57)]:hidden
-                        4xl:[&>*:nth-child(n+57)]:block 4xl:[&>*:nth-child(n+81)]:hidden
-                    `}>
-                        {specialJobs.map((job) => (
-                            <PremiumJobCard 
-                                key={job.id} 
-                                {...(job as any)} 
-                                impactType="none" 
-                                effectIntensity="none" 
-                                tier="SPECIAL" 
-                                customColor={(job as any).color} 
-                                bgOpacity={(job as any).bg_opacity}
-                            />
+                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-center gap-1.5 sm:gap-4 w-full">
+                        {specialJobs.map((job, idx) => (
+                            <div key={job.id} className={`w-full sm:w-[165px] lg:w-[210px] sm:shrink-0 ${idx >= 12 ? 'hidden sm:block' : ''} ${idx >= 15 ? 'sm:hidden lg:block' : ''} ${idx >= 20 ? 'lg:hidden xl:block' : ''} ${idx >= 24 ? 'xl:hidden' : ''}`}>
+                                <PremiumJobCard 
+                                    {...(job as any)} 
+                                    impactType="none" 
+                                    effectIntensity="none" 
+                                    tier="SPECIAL" 
+                                    customColor={(job as any).color} 
+                                    bgOpacity={(job as any).bg_opacity}
+                                />
+                            </div>
                         ))}
                     </div>
                 ) : (
@@ -265,25 +253,19 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-1.5 sm:gap-4 w-full
-                        [&>*:nth-child(n+19)]:hidden 
-                        sm:[&>*:nth-child(n+19)]:block sm:[&>*:nth-child(n+25)]:hidden 
-                        md:[&>*:nth-child(n+25)]:block md:[&>*:nth-child(n+33)]:hidden 
-                        2xl:[&>*:nth-child(n+33)]:block 2xl:[&>*:nth-child(n+43)]:hidden 
-                        3xl:[&>*:nth-child(n+43)]:block 3xl:[&>*:nth-child(n+57)]:hidden
-                        4xl:[&>*:nth-child(n+57)]:block 4xl:[&>*:nth-child(n+81)]:hidden
-                    `}>
-                        {lineJobs.map((job) => (
-                            <PremiumJobCard 
-                                key={job.id} 
-                                {...(job as any)} 
-                                impactType="none" 
-                                effectIntensity="none" 
-                                hideLogo={true} 
-                                tier="GENERAL" 
-                                customColor={(job as any).color} 
-                                bgOpacity={(job as any).bg_opacity}
-                            />
+                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-center gap-1.5 sm:gap-4 w-full">
+                        {lineJobs.map((job, idx) => (
+                            <div key={job.id} className={`w-full sm:w-[165px] lg:w-[210px] sm:shrink-0 ${idx >= 12 ? 'hidden sm:block' : ''} ${idx >= 15 ? 'sm:hidden lg:block' : ''} ${idx >= 20 ? 'lg:hidden xl:block' : ''} ${idx >= 24 ? 'xl:hidden' : ''}`}>
+                                <PremiumJobCard 
+                                    {...(job as any)} 
+                                    impactType="none" 
+                                    effectIntensity="none" 
+                                    hideLogo={true} 
+                                    tier="GENERAL" 
+                                    customColor={(job as any).color} 
+                                    bgOpacity={(job as any).bg_opacity}
+                                />
+                            </div>
                         ))}
                     </div>
                 ) : (
