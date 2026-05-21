@@ -1,7 +1,7 @@
-import { getPublicFaqs } from '@/lib/actions/help';
+import { getPublicFaqs, getPublicFaqCategories } from '@/lib/actions/help';
 import { FaqPageClient } from '@/components/help/FaqPageClient';
 
 export default async function FaqPage() {
-    const faqs = await getPublicFaqs();
-    return <FaqPageClient initialFaqs={faqs} />;
+    const [faqs, categories] = await Promise.all([getPublicFaqs(), getPublicFaqCategories()]);
+    return <FaqPageClient initialFaqs={faqs} categories={categories} />;
 }

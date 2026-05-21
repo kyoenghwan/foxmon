@@ -16,11 +16,19 @@ export type PublicNotice = {
   is_pinned: boolean;
 };
 
+export type PublicFaqCategory = {
+  id: string;
+  name: string;
+  sort_order: number;
+};
+
 export type PublicFaq = {
   id: string;
   category: string;
+  category_id?: string | null;
   question: string;
   answer: string;
+  answer_format?: string;
   sort_order: number;
 };
 
@@ -89,23 +97,52 @@ export async function incrementNoticeViewCount(noticeId: string) {
   }
 }
 
-export async function getPublicFaqs(category?: string): Promise<PublicFaq[]> {
+export async function getPublicFaqCategories(): Promise<PublicFaqCategory[]> {
+  try {
+    const { data, error } = await supabase
+      .from('faq_categories')
+      .select('id, name, sort_order')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+    if (error) {
+      nvLog('AT', '❌ getPublicFaqCategories', error);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    nvLog('AT', '❌ getPublicFaqCategories 예외', err);
+    return [];
+  }
+}
+
+export async function getPublicFaqs(categoryName?: string): Promise<PublicFaq[]> {
   try {
     let q = supabase
       .from('faqs')
-      .select('*')
+      .select('id, category, category_id, question, answer, answer_format, sort_order, faq_categories(name)')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true });
-    if (category && category !== '전체') {
-      q = q.eq('category', category);
+    if (categoryName && categoryName !== '전체') {
+      q = q.eq('category', categoryName);
     }
     const { data, error } = await q;
     if (error) {
       nvLog('AT', '❌ getPublicFaqs', error);
       return [];
     }
-    return data || [];
+    return (data || []).map((row: Record<string, unknown>) => {
+      const joined = row.faq_categories as { name?: string } | null;
+      return {
+        id: row.id as string,
+        category: joined?.name || (row.category as string) || '기타',
+        category_id: row.category_id as string | null,
+        question: row.question as string,
+        answer: row.answer as string,
+        answer_format: (row.answer_format as string) || 'markdown',
+        sort_order: (row.sort_order as number) ?? 0,
+      };
+    });
   } catch (err) {
     nvLog('AT', '❌ getPublicFaqs 예외', err);
     return [];

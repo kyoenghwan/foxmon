@@ -6,20 +6,21 @@ import { Bell, HelpCircle, MessageCircle } from 'lucide-react';
 import {
   adminUpsertNotice,
   adminDeleteNotice,
-  adminUpsertFaq,
-  adminDeleteFaq,
   adminReplyInquiry,
 } from '@/actions/admin/helpCenter';
+import { FaqAdminPanel } from './FaqAdminPanel';
 
 type Tab = 'notices' | 'faqs' | 'inquiries';
 
 export function HelpCenterAdminClient({
   notices,
   faqs,
+  faqCategories,
   inquiries,
 }: {
   notices: any[];
   faqs: any[];
+  faqCategories: any[];
   inquiries: any[];
 }) {
   const router = useRouter();
@@ -88,33 +89,7 @@ export function HelpCenterAdminClient({
         </div>
       )}
 
-      {tab === 'faqs' && (
-        <div className="space-y-4">
-          <FaqForm onSaved={reload} />
-          <div className="bg-white rounded-2xl border border-gray-200 divide-y">
-            {faqs.map((f) => (
-              <div key={f.id} className="p-4">
-                <p className="text-[11px] text-gray-400">{f.category}</p>
-                <p className="font-bold text-gray-900">{f.question}</p>
-                <div className="flex gap-2 mt-2">
-                  <FaqForm edit={f} onSaved={reload} compact />
-                  <button
-                    type="button"
-                    className="text-[12px] font-bold text-red-600"
-                    onClick={async () => {
-                      if (!confirm('삭제할까요?')) return;
-                      await adminDeleteFaq(f.id);
-                      reload();
-                    }}
-                  >
-                    삭제
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {tab === 'faqs' && <FaqAdminPanel categories={faqCategories} faqs={faqs} />}
 
       {tab === 'inquiries' && (
         <div className="bg-white rounded-2xl border border-gray-200 divide-y">
@@ -229,39 +204,3 @@ function NoticeForm({
   );
 }
 
-function FaqForm({ edit, onSaved, compact }: { edit?: any; onSaved: () => void; compact?: boolean }) {
-  const [open, setOpen] = useState(!compact);
-  const [category, setCategory] = useState(edit?.category || '이용 안내');
-  const [question, setQuestion] = useState(edit?.question || '');
-  const [answer, setAnswer] = useState(edit?.answer || '');
-
-  if (compact && !open) {
-    return (
-      <button type="button" className="text-[12px] font-bold text-primary" onClick={() => setOpen(true)}>
-        수정
-      </button>
-    );
-  }
-
-  return (
-    <div className={`bg-white rounded-2xl border border-gray-200 p-4 space-y-2 ${compact ? '' : 'mb-4'}`}>
-      {!compact && <h3 className="font-black text-[14px]">{edit ? 'FAQ 수정' : 'FAQ 등록'}</h3>}
-      <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="카테고리" className="w-full border rounded-lg px-3 py-2 text-[13px]" />
-      <input value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="질문" className="w-full border rounded-lg px-3 py-2 text-[13px]" />
-      <textarea value={answer} onChange={(e) => setAnswer(e.target.value)} rows={3} placeholder="답변" className="w-full border rounded-lg px-3 py-2 text-[13px]" />
-      <button
-        type="button"
-        className="h-9 px-4 bg-gray-900 text-white rounded-lg text-[12px] font-black"
-        onClick={async () => {
-          const res = await adminUpsertFaq({ id: edit?.id, category, question, answer });
-          if (res.success) {
-            onSaved();
-            if (compact) setOpen(false);
-          } else alert(res.error);
-        }}
-      >
-        저장
-      </button>
-    </div>
-  );
-}
