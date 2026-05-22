@@ -59,9 +59,10 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
             <div className="h-full bg-white rounded-2xl border p-4 sm:p-5 flex flex-col shadow-sm">
                 
                 {/* Top Section: Avatar & Welcome text (New Layout) */}
+                {/* Top Section: Avatar & Welcome text (New Layout) */}
                 <div className="flex items-start gap-2.5 sm:gap-4">
-                    {/* 프로필 이미지 - 약간 커짐 */}
-                    <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl sm:rounded-[1rem] bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden border border-orange-100">
+                    {/* 프로필 이미지 - 모바일 h-[72px](72px), sm h-20(80px)으로 정밀 제어 */}
+                    <div className="h-[72px] w-[72px] sm:h-20 sm:w-20 rounded-xl sm:rounded-[1rem] bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden border border-orange-100">
                         {profileImageUrl ? (
                             <img src={profileImageUrl} alt="프로필" className="w-full h-full object-cover" />
                         ) : (
@@ -69,36 +70,36 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                         )}
                     </div>
 
-                    {/* 우측 정보 & 버튼 영역 (flex-col로 상하 배치) */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-start pt-0.5 gap-1 sm:gap-1.5">
-                        {/* 1. 상단 인사말 및 설정 버튼 (설정 우측 정렬) */}
-                        <div className="flex w-full min-w-0 items-center justify-between gap-1 sm:gap-2">
+                    {/* 우측 정보 & 버튼 영역 (프로필 이미지 높이와 완전히 일치하도록 h-[72px] sm:h-20 적용) */}
+                    <div className="flex-1 min-w-0 h-[72px] sm:h-20 flex flex-col justify-between">
+                        {/* 1. 상단 인사말 및 설정 버튼 (절반 높이인 h-[36px] sm:h-10) */}
+                        <div className="h-[36px] sm:h-10 flex w-full min-w-0 items-center justify-between gap-1 sm:gap-2">
                             <div className="min-w-0 flex-1">
                                 <MarqueeText className="font-black text-[13px] min-[375px]:text-[15px] sm:text-base text-gray-900 leading-tight">
                                     <span className="text-primary">{displayName}</span>님 반갑습니다!
                                 </MarqueeText>
                             </div>
-                            <div className="shrink-0 scale-90 sm:scale-100 origin-right">
+                            <div className="shrink-0 scale-90 sm:scale-100 origin-right flex items-center">
                                 <SettingsModal />
                             </div>
                         </div>
 
-                        {/* 2. 하단 액션 버튼들 (이력서/업체 관리 좌측, 로그아웃 우측 정렬) */}
-                        <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-1.5 sm:gap-2">
+                        {/* 2. 하단 액션 버튼들 (절반 높이인 h-[36px] sm:h-10) */}
+                        <div className="h-[36px] sm:h-10 flex items-center justify-between w-full">
+                            <div className="flex items-center gap-1.5 sm:gap-2 h-full">
                                 {showResumeMenu && (
-                                    <div className="lg:hidden">
+                                    <div className="lg:hidden h-full">
                                         {/* ResumeManagementModal 내부에 하드코딩된 button을 덮어쓰기 위해 CSS 적용 */}
-                                        <div className="h-9 sm:h-10 [&>button]:px-5.5 [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full [&>button]:text-[13px] sm:[&>button]:text-[15px]">
+                                        <div className="h-full [&>button]:px-[22px] [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full [&>button]:text-[13px] sm:[&>button]:text-[15px]">
                                             <ResumeManagementModal />
                                         </div>
                                     </div>
                                 )}
                                 {isEmployer && (
-                                    <div className="lg:hidden">
+                                    <div className="lg:hidden h-full">
                                         <Link 
                                             href="/biz" 
-                                            className="h-9 sm:h-10 flex items-center justify-center gap-1.5 px-5.5 text-[13px] sm:text-[15px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                                            className="h-full flex items-center justify-center gap-1.5 px-[22px] text-[13px] sm:text-[15px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
                                         >
                                             <Briefcase className="w-4 h-4" />
                                             <span>업체관리</span>
@@ -118,7 +119,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                         console.error(e);
                                     }
                                 }}
-                                className="shrink-0 flex items-center gap-1 sm:gap-1.5 font-black text-red-500 hover:text-red-700 hover:bg-red-50 px-3 h-9 sm:h-10 rounded-full transition-all active:scale-95 text-[12px] sm:text-[14px] ml-auto"
+                                className="shrink-0 flex items-center justify-center gap-1 sm:gap-1.5 font-black text-red-500 hover:text-red-700 hover:bg-red-50 px-3 h-full rounded-full transition-all active:scale-95 text-[12px] sm:text-[14px] ml-auto"
                             >
                                 <LogOut className="w-4 h-4 shrink-0" />
                                 <span className="hidden sm:inline">로그아웃</span>
