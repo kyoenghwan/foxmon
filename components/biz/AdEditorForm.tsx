@@ -17,6 +17,7 @@ import { LoadMyDataModal } from './LoadMyDataModal';
 import dynamic from 'next/dynamic';
 
 // Fabric.js는 브라우저 전용이므로 SSR 비활성화
+import type { AdCanvasEditorRef } from '@/components/biz/AdCanvasEditor';
 const AdCanvasEditor = dynamic(() => import('@/components/biz/AdCanvasEditor'), { ssr: false });
 const SunEditor = dynamic(() => import('suneditor-react'), { 
     ssr: false, 
@@ -342,6 +343,7 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (html: s
 
 // ─── 메인 폼 컴포넌트 ───
 export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD' }: AdEditorFormProps) {
+    const canvasRef = useRef<any>(null);
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
     const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | 'mainDesign' | null>(null);
@@ -358,13 +360,60 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const [manualCeoName, setManualCeoName] = useState('');
     const [manualBizName, setManualBizName] = useState('');
     
+    // detail_content의 캔버스 데이터 여부 검증 헬퍼
+    const isCanvasData = (content?: string) => {
+        if (!content) return false;
+        return content.startsWith('{"version":') || content.startsWith('{"isCanvas":') || content.includes('"isCanvas":true');
+    };
+
+    // 캔버스 복합 JSON에서 이미지 HTML 추출 또는 텍스트 폴백
+    const renderDetailContent = (content?: string) => {
+        if (!content) return '';
+        
+        // 신규 복합 JSON인 경우
+        if (content.startsWith('{"isCanvas":') || content.includes('"isCanvas":true')) {
+            try {
+                const parsed = JSON.parse(content);
+                return parsed.imageHtml || '';
+            } catch (e) {
+                return content;
+            }
+        }
+        
+        // 구식 Fabric.js JSON인 경우 (생 JSON 노출 방지 및 텍스트 폴백)
+        if (content.startsWith('{"version":') || content.includes('"objects":')) {
+            try {
+                const parsed = JSON.parse(content);
+                const objects = parsed.objects || [];
+                // 텍스트 계열 객체들만 추출하여 줄바꿈으로 연결
+                const texts = objects
+                    .filter((obj: any) => ['textbox', 'text', 'i-text'].includes(obj.type))
+                    .map((obj: any) => obj.text)
+                    .filter(Boolean);
+                
+                if (texts.length > 0) {
+                    return `<div class="p-6 bg-yellow-50/50 border border-yellow-200 rounded-xl space-y-4 text-center">
+                        <div class="bg-yellow-100 text-yellow-800 text-[12px] font-bold px-3 py-1 rounded-md inline-block mb-4">
+                            ⚠️ 구버전으로 저장된 광고 배너입니다. 수정 후 다시 저장하시면 고화질 이미지 배너로 변경됩니다.
+                        </div>
+                        <div class="text-gray-800 font-bold leading-relaxed whitespace-pre-wrap">${texts.join('\n\n')}</div>
+                    </div>`;
+                }
+            } catch (e) {
+                return content;
+            }
+        }
+        
+        return content;
+    };
+
     // 모드 전환 시 이전 데이터를 임시 저장하기 위한 ref
-    const canvasContentRef = useRef<string>(initialData?.detail_content?.startsWith('{"version":') ? initialData.detail_content : '');
-    const htmlContentRef = useRef<string>(!initialData?.detail_content?.startsWith('{"version":') ? (initialData?.detail_content || '') : '');
+    const canvasContentRef = useRef<string>(isCanvasData(initialData?.detail_content) ? initialData.detail_content : '');
+    const htmlContentRef = useRef<string>(!isCanvasData(initialData?.detail_content) ? (initialData?.detail_content || '') : '');
     
     // 초기 모드 결정
     const initialDesignMode = initialData?.detail_content 
-        ? (initialData.detail_content.startsWith('{"version":') ? 'canvas' : 'html') 
+        ? (isCanvasData(initialData.detail_content) ? 'canvas' : 'html') 
         : 'canvas';
 
     // effect_intensity 복합 데이터 파싱 ('강도::액션' 형식)
@@ -618,8 +667,17 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         }
         setSaving(true);
         try {
+            let finalDetailContent = form.detail_content;
+            if (form.design_mode === 'canvas' && canvasRef.current) {
+                const latestData = canvasRef.current.saveLatest?.();
+                if (latestData) {
+                    finalDetailContent = latestData;
+                }
+            }
+
             const payload = {
                 ...form,
+                detail_content: finalDetailContent,
                 keywords: mergeSelectedTagCodes(form.keywords, form.amenities),
                 amenities: [] as string[],
             };
@@ -1696,6 +1754,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 {form.design_mode === 'canvas' ? (
                                     <div className="animate-in fade-in zoom-in-95 duration-300">
                                         <AdCanvasEditor
+                                            ref={canvasRef}
                                             value={form.detail_content}
                                             onChange={(json) => update('detail_content', json)}
                                             bgImage={form.detail_bg_image}
@@ -1794,8 +1853,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         </div>
                         <div className="w-full overflow-y-auto bg-gray-200 p-4 flex justify-center">
                             <div 
-                                className="w-full max-w-[600px] min-h-[450px] bg-white shadow-md relative"
-                                style={{
+                                className="w-full max-w-[600px] min-h-[450px] bg-white shadow-md relative flex justify-center"
+                                style={isCanvasData(form.detail_content) ? {} : {
                                     backgroundImage: form.detail_bg_image ? `url(${form.detail_bg_image.replace('PATTERN|', '')})` : 'none',
                                     backgroundSize: form.detail_bg_image?.startsWith('PATTERN|') ? 'auto' : 'cover',
                                     backgroundRepeat: form.detail_bg_image?.startsWith('PATTERN|') ? 'repeat' : 'no-repeat',
@@ -1803,7 +1862,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     height: htmlEditorHeight > 450 ? htmlEditorHeight : 'auto'
                                 }}
                             >
-                                <div className="p-4 prose prose-sm max-w-none break-words" dangerouslySetInnerHTML={{ __html: form.detail_content || '<p class="text-gray-400 text-center mt-10">내용이 없습니다.</p>' }} />
+                                <div className={`${isCanvasData(form.detail_content) ? 'w-full' : 'p-4 prose prose-sm max-w-none break-words'}`} dangerouslySetInnerHTML={{ __html: renderDetailContent(form.detail_content) || '<p class="text-gray-400 text-center mt-10">내용이 없습니다.</p>' }} />
                             </div>
                         </div>
                     </div>

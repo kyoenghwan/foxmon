@@ -9,6 +9,53 @@ import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM'
 export function JobDetailContent({ job, isModal = false, onClose }: { job: any, isModal?: boolean, onClose?: () => void }) {
   const [isScrapped, setIsScrapped] = React.useState(false);
 
+  // detail_content의 캔버스 데이터 여부 검증 헬퍼
+  const isCanvasData = (content?: string) => {
+    if (!content) return false;
+    return content.startsWith('{"version":') || content.startsWith('{"isCanvas":') || content.includes('"isCanvas":true');
+  };
+
+  // 캔버스 복합 JSON에서 이미지 HTML 추출 또는 텍스트 폴백
+  const renderDetailContent = (content?: string) => {
+    if (!content) return '';
+    
+    // 신규 복합 JSON인 경우
+    if (content.startsWith('{"isCanvas":') || content.includes('"isCanvas":true')) {
+      try {
+        const parsed = JSON.parse(content);
+        return parsed.imageHtml || '';
+      } catch (e) {
+        return content;
+      }
+    }
+
+    // 구식 Fabric.js JSON인 경우 (생 JSON 노출 방지 및 텍스트 폴백)
+    if (content.startsWith('{"version":') || content.includes('"objects":')) {
+      try {
+        const parsed = JSON.parse(content);
+        const objects = parsed.objects || [];
+        // 텍스트 계열 객체들만 추출하여 줄바꿈으로 연결
+        const texts = objects
+          .filter((obj: any) => ['textbox', 'text', 'i-text'].includes(obj.type))
+          .map((obj: any) => obj.text)
+          .filter(Boolean);
+        
+        if (texts.length > 0) {
+          return `<div class="p-6 bg-yellow-50/50 border border-yellow-200 rounded-xl space-y-4 text-center">
+            <div class="bg-yellow-100 text-yellow-800 text-[12px] font-bold px-3 py-1 rounded-md inline-block mb-4">
+              ⚠️ 구버전으로 저장된 공고 배너입니다. 수정 후 다시 저장하시면 고화질 이미지 배너로 변경됩니다.
+            </div>
+            <div class="text-gray-800 font-bold leading-relaxed whitespace-pre-wrap">${texts.join('\n\n')}</div>
+          </div>`;
+        }
+      } catch (e) {
+        return content;
+      }
+    }
+    
+    return content;
+  };
+
   // 최근 본 공고 및 스크랩 상태 조회
   React.useEffect(() => {
     if (!job?.id) return;
@@ -338,7 +385,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                             {job.detail_content ? (
                                 <div 
                                     className="w-full rounded-xl overflow-hidden shadow-sm border border-gray-200 min-h-[400px] flex justify-center"
-                                    style={{
+                                    style={isCanvasData(job.detail_content) ? {} : {
                                         backgroundColor: job.detail_bg_color || 'transparent',
                                         backgroundImage: job.detail_bg_image ? `url(${job.detail_bg_image.replace('PATTERN|', '')})` : 'none',
                                         backgroundSize: job.detail_bg_image?.startsWith('PATTERN|') ? 'auto' : 'cover',
@@ -346,11 +393,11 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                                         backgroundPosition: 'top center'
                                     }}
                                 >
-                                    <div 
-                                        className="w-full max-w-4xl min-h-full"
-                                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
-                                        dangerouslySetInnerHTML={{ __html: job.detail_content }} 
-                                    />
+                                     <div 
+                                         className={isCanvasData(job.detail_content) ? "w-full min-h-full" : "w-full max-w-4xl min-h-full"}
+                                         style={isCanvasData(job.detail_content) ? {} : { backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+                                         dangerouslySetInnerHTML={{ __html: renderDetailContent(job.detail_content) }} 
+                                     />
                                 </div>
                             ) : (job.logo_url || job.image) ? (
                                 <div className="w-full flex justify-center group">

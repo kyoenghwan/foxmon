@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import {
     Image as ImageIcon, Type, Trash2, Download, Plus, Move, RotateCcw,
     Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
@@ -11,6 +11,10 @@ import {
 
 // Fabric.js v6: named imports
 import { Canvas, FabricText, Textbox, FabricImage, Rect, Pattern, Shadow } from 'fabric';
+
+export interface AdCanvasEditorRef {
+    saveLatest: () => string;
+}
 
 // ─── 타입 ───
 interface AdCanvasEditorProps {
@@ -46,14 +50,14 @@ const BG_PRESETS = [
 ];
 
 // ─── 메인 컴포넌트 ───
-export default function AdCanvasEditor({
+const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
     value,
     onChange,
     bgImage,
     onBgImageChange,
     width = 600,
     height = 400,
-}: AdCanvasEditorProps) {
+}, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricRef = useRef<Canvas | null>(null);
     const [activeObj, setActiveObj] = useState<any>(null);
@@ -206,10 +210,21 @@ export default function AdCanvasEditor({
         };
         window.addEventListener('keydown', handleKeyDown);
 
-        // 기존 데이터 로드
+        // 기존 데이터 로드 (단순 Fabric JSON과 복합 JSON 둘 다 대응 가능하도록 구현)
         if (value) {
             try {
-                canvas.loadFromJSON(JSON.parse(value)).then(() => {
+                let canvasDataStr = value;
+                if (value.startsWith('{"isCanvas":') || value.includes('"isCanvas":true')) {
+                    const parsed = JSON.parse(value);
+                    canvasDataStr = parsed.canvasData || '';
+                }
+                const parsedJson = JSON.parse(canvasDataStr);
+                // 가변 높이(height) 복원
+                if (parsedJson && typeof parsedJson.height === 'number') {
+                    setCanvasHeight(parsedJson.height);
+                    canvas.setDimensions({ width, height: parsedJson.height });
+                }
+                canvas.loadFromJSON(parsedJson).then(() => {
                     canvas.renderAll();
                 });
             } catch { /* 초기 빈 값 */ }
@@ -300,13 +315,101 @@ export default function AdCanvasEditor({
         }
     };
 
+    // ── 디바운스 유틸 함수 ──
+    const debounce = (func: Function, wait: number) => {
+        let timeout: any;
+        const debounced = (...args: any[]) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func(...args), wait);
+        };
+        debounced.cancel = () => clearTimeout(timeout);
+        return debounced;
+    };
+
+    const debouncedEmitChangeRef = useRef<any>(null);
+
+    // onChange가 변경될 때마다 debouncedEmitChange 갱신
+    useEffect(() => {
+        debouncedEmitChangeRef.current = debounce((canvas: Canvas) => {
+            if (!onChange) return;
+
+            // 1. 현재 선택된 객체 임시 해제하여 깔끔한 상태 캡처
+            const activeObj = canvas.getActiveObject();
+            if (activeObj) {
+                canvas.discardActiveObject();
+                canvas.renderAll();
+            }
+
+            // 2. JPEG 캡처 (용량 대폭 압축: format: 'jpeg', quality: 0.85, multiplier: 1.2)
+            const dataURL = canvas.toDataURL({ format: 'jpeg', quality: 0.85, multiplier: 1.2 } as any);
+            const imageHtml = `<img src="${dataURL}" style="width: 100%; height: auto; display: block; margin: 0 auto;" />`;
+
+            // 3. 임시 해제했던 객체 복원
+            if (activeObj) {
+                canvas.setActiveObject(activeObj);
+                canvas.renderAll();
+            }
+
+            // 4. Fabric.js JSON 데이터 획득 및 height 추가
+            const json = (canvas as any).toJSON(['id', 'selectable', 'evented']);
+            json.height = canvasHeight;
+
+            // 5. 복합 JSON 빌드
+            const compositeData = {
+                isCanvas: true,
+                canvasData: JSON.stringify(json),
+                imageHtml: imageHtml
+            };
+
+            onChange(JSON.stringify(compositeData));
+        }, 500);
+
+        return () => {
+            if (debouncedEmitChangeRef.current && debouncedEmitChangeRef.current.cancel) {
+                debouncedEmitChangeRef.current.cancel();
+            }
+        };
+    }, [onChange, canvasHeight]);
+
+    // 부모 컴포넌트에서 강제 저장을 수행하기 위한 ref 인터페이스 구현
+    useImperativeHandle(ref, () => ({
+        saveLatest: () => {
+            const canvas = fabricRef.current;
+            if (!canvas) return '';
+
+            // 1. 활성화된 오브젝트 및 편집 텍스트 강제 해제 (포커스 아웃 효과)
+            canvas.discardActiveObject();
+            canvas.renderAll();
+
+            // 2. JPEG 캡처
+            const dataURL = canvas.toDataURL({ format: 'jpeg', quality: 0.85, multiplier: 1.2 } as any);
+            const imageHtml = `<img src="${dataURL}" style="width: 100%; height: auto; display: block; margin: 0 auto;" />`;
+
+            // 3. Fabric.js JSON 데이터 획득 및 height 저장
+            const json = (canvas as any).toJSON(['id', 'selectable', 'evented']);
+            json.height = canvasHeight;
+
+            // 4. 복합 JSON 빌드
+            const compositeData = {
+                isCanvas: true,
+                canvasData: JSON.stringify(json),
+                imageHtml: imageHtml
+            };
+
+            const resultStr = JSON.stringify(compositeData);
+            if (onChange) {
+                onChange(resultStr);
+            }
+            return resultStr;
+        }
+    }), [canvasHeight, onChange]);
+
     // ── 부모에 JSON 전달 ──
     const emitChange = useCallback((canvas: Canvas) => {
-        if (onChange) {
-            const json = (canvas as any).toJSON(['id', 'selectable', 'evented']);
-            onChange(JSON.stringify(json));
+        if (debouncedEmitChangeRef.current) {
+            debouncedEmitChangeRef.current(canvas);
         }
-    }, [onChange]);
+    }, []);
 
     // ── 전체 테마 템플릿 적용 ──
     const applyFullTheme = async (themeName: 'gold_bar' | 'neon_nightclub') => {
@@ -933,4 +1036,8 @@ export default function AdCanvasEditor({
             )}
         </div>
     );
-}
+});
+
+AdCanvasEditor.displayName = 'AdCanvasEditor';
+
+export default AdCanvasEditor;
