@@ -72,6 +72,7 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
     const [showAllPremium, setShowAllPremium] = useState(false);
     const [showAllSpecial, setShowAllSpecial] = useState(false);
     const [showAllGeneral, setShowAllGeneral] = useState(false);
+    const [isFilterExpanded, setIsFilterExpanded] = useState(true);
 
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
     const [specialJobs, setSpecialJobs] = useState<AdItem[]>([]);
@@ -571,266 +572,293 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
             </section>
 
             {/* Search Condition Card */}
-            <section className="bg-white rounded-xl p-6 border shadow-sm space-y-6">
-                {/* Region Selection */}
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b pb-2">
-                        <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
-                            <span className="w-1.5 h-3.5 bg-primary rounded-full" />
-                            지역 선택
-                        </h3>
-                        <button 
-                            onClick={() => setIsRegionOpen(!isRegionOpen)}
-                            className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
-                        >
-                            {isRegionOpen ? '접기' : '보기'} {isRegionOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
-                        </button>
-                    </div>
-                    {isRegionOpen && (
-                        <div className="flex flex-col sm:flex-row gap-4 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
-                            {/* 1차 지역 (시/도) */}
-                            <div className="flex-1 space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500">시/도 선택</label>
-                                <select
-                                    value={selectedSido}
-                                    onChange={(e) => {
-                                        const val = e.target.value;
-                                        setSelectedSido(val);
-                                        setSelectedSigungu('all');
-                                    }}
-                                    className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 cursor-pointer"
-                                >
-                                    <option value="all">전국 (전체)</option>
-                                    {dbRegions1.map((r) => (
-                                        <option key={r.code_value} value={r.code_value}>
-                                            {r.code_name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* 2차 지역 (시/군/구) */}
-                            <div className="flex-1 space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500">구/군/시 선택</label>
-                                <select
-                                    value={selectedSigungu}
-                                    onChange={(e) => setSelectedSigungu(e.target.value)}
-                                    disabled={selectedSido === 'all'}
-                                    className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                                >
-                                    <option value="all">전체</option>
-                                    {dbRegions2
-                                        .filter((r) => r.parent_code_value === selectedSido)
-                                        .map((r) => (
-                                            <option key={r.code_value} value={r.code_value}>
-                                                {r.code_name}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
+            <section className="bg-white rounded-xl border shadow-sm transition-all duration-300">
+                {/* 검색 필터 헤더 */}
+                <div 
+                    onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+                    className="p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl"
+                >
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                        <div className="flex items-center gap-2">
+                            <Filter className="w-5 h-5 text-primary" />
+                            <h2 className="text-[16px] sm:text-[17px] font-black text-gray-800 tracking-tight">상세 검색 필터</h2>
                         </div>
-                    )}
-                </div>
-
-                {/* Industry Selection */}
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b pb-2">
-                        <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
-                            <span className="w-1.5 h-3.5 bg-orange-400 rounded-full" />
-                            업종 선택
-                        </h3>
-                        <button 
-                            onClick={() => setIsIndustryOpen(!isIndustryOpen)}
-                            className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
-                        >
-                            {isIndustryOpen ? '접기' : '보기'} {isIndustryOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
-                        </button>
-                    </div>
-                    {isIndustryOpen && (
-                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
-                            <button
-                                onClick={() => setSelectedIndustry('all')}
-                                className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
-                                    selectedIndustry === 'all'
-                                        ? 'border-orange-400 bg-orange-400 text-white shadow-sm'
-                                        : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
-                                }`}
-                            >
-                                전체
-                            </button>
-                            {dbIndustries.map((ind) => (
-                                <button
-                                    key={ind.code_value}
-                                    onClick={() => setSelectedIndustry(ind.code_value)}
-                                    className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
-                                        selectedIndustry === ind.code_value
-                                            ? 'border-orange-400 bg-orange-400 text-white shadow-sm'
-                                            : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
-                                    }`}
-                                >
-                                    {ind.code_name}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Keyword Selection */}
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b pb-2">
-                        <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
-                            <span className="w-1.5 h-3.5 bg-purple-400 rounded-full" />
-                            키워드 선택
-                        </h3>
-                        <button 
-                            onClick={() => setIsKeywordOpen(!isKeywordOpen)}
-                            className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
-                        >
-                            {isKeywordOpen ? '접기' : '보기'} {isKeywordOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
-                        </button>
-                    </div>
-                    {isKeywordOpen && (
-                        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
-                            <button
-                                onClick={() => setSelectedKeyword('all')}
-                                className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
-                                    selectedKeyword === 'all'
-                                        ? 'border-purple-500 bg-purple-500 text-white shadow-sm'
-                                        : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
-                                }`}
-                            >
-                                전체
-                            </button>
-                            {dbKeywords.map((k) => (
-                                <button
-                                    key={k.code_value}
-                                    onClick={() => setSelectedKeyword(k.code_value)}
-                                    className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
-                                        selectedKeyword === k.code_value
-                                            ? 'border-purple-500 bg-purple-500 text-white shadow-sm'
-                                            : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
-                                    }`}
-                                >
-                                    {k.code_name}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Search Term Input */}
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b pb-2">
-                        <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
-                            <span className="w-1.5 h-3.5 bg-teal-500 rounded-full" />
-                            검색어 입력
-                        </h3>
-                        <button 
-                            onClick={() => setIsSearchTermOpen(!isSearchTermOpen)}
-                            className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
-                        >
-                            {isSearchTermOpen ? '접기' : '보기'} {isSearchTermOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
-                        </button>
-                    </div>
-                    {isSearchTermOpen && (
-                        <div className="pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
-                            <div className="relative max-w-md">
-                                <input
-                                    type="text"
-                                    value={searchKeyword}
-                                    onChange={(e) => setSearchKeyword(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            handleSearchClick();
-                                        }
-                                    }}
-                                    placeholder="검색할 상세 키워드를 입력해 주세요."
-                                    className="w-full border border-gray-200 rounded-lg py-2.5 pl-4 pr-10 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                />
-                                {searchKeyword && (
-                                    <button 
-                                        onClick={() => setSearchKeyword('')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 font-bold text-lg"
-                                    >
-                                        &times;
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Additional Filters: Pay, Gender, Age */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-500">급여 조건</label>
-                        <select 
-                            value={selectedPayType}
-                            onChange={(e) => setSelectedPayType(e.target.value)}
-                            className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 cursor-pointer"
-                        >
-                            <option value="all">전체 급여</option>
-                            <option value="시급">시급</option>
-                            <option value="일급">일급</option>
-                            <option value="주급">주급</option>
-                            <option value="월급">월급</option>
-                            <option value="협의">협의</option>
-                        </select>
-                    </div>
-
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-500">성별</label>
-                        <select 
-                            value={selectedGender}
-                            onChange={(e) => setSelectedGender(e.target.value)}
-                            className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 cursor-pointer"
-                        >
-                            <option value="all">전체 성별</option>
-                            <option value="F">여성</option>
-                            <option value="M">남성</option>
-                        </select>
-                    </div>
-
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-500">연령대</label>
-                        <select 
-                            value={selectedAge}
-                            onChange={(e) => setSelectedAge(e.target.value)}
-                            className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 cursor-pointer"
-                        >
-                            <option value="all">전체 연령대</option>
-                            <option value="20s">20대</option>
-                            <option value="30s">30대</option>
-                            <option value="40s_plus">40대 이상</option>
-                        </select>
-                    </div>
-                </div>
-
-                {/* Bottom Search Actions */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-100">
-                    <div className="text-[11px] sm:text-xs font-bold text-gray-400">
-                        현재 검색 조건:{" "}
-                        <span className="text-primary font-black">
-                            {[
-                                dbRegions1.find((r) => r.code_value === selectedSido)?.code_name,
-                                dbRegions2.find((r) => r.code_value === selectedSigungu)?.code_name !== '전체' 
-                                    ? dbRegions2.find((r) => r.code_value === selectedSigungu)?.code_name 
-                                    : null,
-                                dbIndustries.find((i) => i.code_value === selectedIndustry)?.code_name,
-                                dbKeywords.find((k) => k.code_value === selectedKeyword)?.code_name,
-                                searchKeyword ? `"${searchKeyword}"` : "",
-                            ]
-                                .filter(Boolean)
-                                .join(" > ") || "전체"}
+                        <span className="text-[11px] sm:text-xs text-gray-400 font-semibold sm:mt-1">
+                            원하는 조건의 인재를 더욱 빠르고 스마트하게 검색해보세요.
                         </span>
                     </div>
-                    <Button 
-                        onClick={handleSearchClick}
-                        className="w-full sm:w-auto font-black px-8 py-5 rounded-lg text-white bg-primary hover:bg-orange-600 hover:scale-[1.02] active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"
+                    <button 
+                        type="button"
+                        className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary flex items-center gap-1 transition-colors shrink-0 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg"
                     >
-                        <Search className="w-4 h-4" /> 검색하기
-                    </Button>
+                        {isFilterExpanded ? '필터 닫기' : '필터 열기'}
+                        <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isFilterExpanded ? 'rotate-90' : 'rotate-0'}`} />
+                    </button>
                 </div>
+
+                {isFilterExpanded && (
+                    <div className="p-6 pt-0 border-t border-gray-100 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200">
+                        {/* Region Selection */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between border-b pb-2">
+                                <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
+                                    <span className="w-1.5 h-3.5 bg-primary rounded-full" />
+                                    지역 선택
+                                </h3>
+                                <button 
+                                    onClick={() => setIsRegionOpen(!isRegionOpen)}
+                                    className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
+                                >
+                                    {isRegionOpen ? '접기' : '보기'} {isRegionOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
+                                </button>
+                            </div>
+                            {isRegionOpen && (
+                                <div className="flex flex-col sm:flex-row gap-4 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                                    {/* 1차 지역 (시/도) */}
+                                    <div className="flex-1 space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-500">시/도 선택</label>
+                                        <select
+                                            value={selectedSido}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setSelectedSido(val);
+                                                setSelectedSigungu('all');
+                                            }}
+                                            className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 cursor-pointer"
+                                        >
+                                            <option value="all">전국 (전체)</option>
+                                            {dbRegions1.map((r) => (
+                                                <option key={r.code_value} value={r.code_value}>
+                                                    {r.code_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* 2차 지역 (시/군/구) */}
+                                    <div className="flex-1 space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-500">구/군/시 선택</label>
+                                        <select
+                                            value={selectedSigungu}
+                                            onChange={(e) => setSelectedSigungu(e.target.value)}
+                                            disabled={selectedSido === 'all'}
+                                            className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                        >
+                                            <option value="all">전체</option>
+                                            {dbRegions2
+                                                .filter((r) => r.parent_code_value === selectedSido)
+                                                .map((r) => (
+                                                    <option key={r.code_value} value={r.code_value}>
+                                                        {r.code_name}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Industry Selection */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between border-b pb-2">
+                                <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
+                                    <span className="w-1.5 h-3.5 bg-orange-400 rounded-full" />
+                                    업종 선택
+                                </h3>
+                                <button 
+                                    onClick={() => setIsIndustryOpen(!isIndustryOpen)}
+                                    className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
+                                >
+                                    {isIndustryOpen ? '접기' : '보기'} {isIndustryOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
+                                </button>
+                            </div>
+                            {isIndustryOpen && (
+                                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                                    <button
+                                        onClick={() => setSelectedIndustry('all')}
+                                        className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                            selectedIndustry === 'all'
+                                                ? 'border-orange-400 bg-orange-400 text-white shadow-sm'
+                                                : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                        }`}
+                                    >
+                                        전체
+                                    </button>
+                                    {dbIndustries.map((ind) => (
+                                        <button
+                                            key={ind.code_value}
+                                            onClick={() => setSelectedIndustry(ind.code_value)}
+                                            className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                                selectedIndustry === ind.code_value
+                                                    ? 'border-orange-400 bg-orange-400 text-white shadow-sm'
+                                                    : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                            }`}
+                                        >
+                                            {ind.code_name}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Keyword Selection */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between border-b pb-2">
+                                <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
+                                    <span className="w-1.5 h-3.5 bg-purple-400 rounded-full" />
+                                    키워드 선택
+                                </h3>
+                                <button 
+                                    onClick={() => setIsKeywordOpen(!isKeywordOpen)}
+                                    className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
+                                >
+                                    {isKeywordOpen ? '접기' : '보기'} {isKeywordOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
+                                </button>
+                            </div>
+                            {isKeywordOpen && (
+                                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                                    <button
+                                        onClick={() => setSelectedKeyword('all')}
+                                        className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                            selectedKeyword === 'all'
+                                                ? 'border-purple-500 bg-purple-500 text-white shadow-sm'
+                                                : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                        }`}
+                                    >
+                                        전체
+                                    </button>
+                                    {dbKeywords.map((k) => (
+                                        <button
+                                            key={k.code_value}
+                                            onClick={() => setSelectedKeyword(k.code_value)}
+                                            className={`flex items-center justify-center p-2 rounded-lg border text-xs sm:text-sm font-bold transition-all ${
+                                                selectedKeyword === k.code_value
+                                                    ? 'border-purple-500 bg-purple-500 text-white shadow-sm'
+                                                    : 'border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-gray-700'
+                                            }`}
+                                        >
+                                            {k.code_name}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Search Term Input */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between border-b pb-2">
+                                <h3 className="text-[14px] font-extrabold flex items-center gap-2 text-gray-800">
+                                    <span className="w-1.5 h-3.5 bg-teal-500 rounded-full" />
+                                    검색어 입력
+                                </h3>
+                                <button 
+                                    onClick={() => setIsSearchTermOpen(!isSearchTermOpen)}
+                                    className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
+                                >
+                                    {isSearchTermOpen ? '접기' : '보기'} {isSearchTermOpen ? <ChevronLeft className="w-3 h-3 rotate-90" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
+                                </button>
+                            </div>
+                            {isSearchTermOpen && (
+                                <div className="pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                                    <div className="relative max-w-md">
+                                        <input
+                                            type="text"
+                                            value={searchKeyword}
+                                            onChange={(e) => setSearchKeyword(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    handleSearchClick();
+                                                }
+                                            }}
+                                            placeholder="검색할 상세 키워드를 입력해 주세요."
+                                            className="w-full border border-gray-200 rounded-lg py-2.5 pl-4 pr-10 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                        />
+                                        {searchKeyword && (
+                                            <button 
+                                                onClick={() => setSearchKeyword('')}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 font-bold text-lg"
+                                            >
+                                                &times;
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Additional Filters: Pay, Gender, Age */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500">급여 조건</label>
+                                <select 
+                                    value={selectedPayType}
+                                    onChange={(e) => setSelectedPayType(e.target.value)}
+                                    className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 cursor-pointer"
+                                >
+                                    <option value="all">전체 급여</option>
+                                    <option value="시급">시급</option>
+                                    <option value="일급">일급</option>
+                                    <option value="주급">주급</option>
+                                    <option value="월급">월급</option>
+                                    <option value="협의">협의</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500">성별</label>
+                                <select 
+                                    value={selectedGender}
+                                    onChange={(e) => setSelectedGender(e.target.value)}
+                                    className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 cursor-pointer"
+                                >
+                                    <option value="all">전체 성별</option>
+                                    <option value="F">여성</option>
+                                    <option value="M">남성</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500">연령대</label>
+                                <select 
+                                    value={selectedAge}
+                                    onChange={(e) => setSelectedAge(e.target.value)}
+                                    className="w-full border border-gray-200 rounded-lg p-2.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50/50 cursor-pointer"
+                                >
+                                    <option value="all">전체 연령대</option>
+                                    <option value="20s">20대</option>
+                                    <option value="30s">30대</option>
+                                    <option value="40s_plus">40대 이상</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Bottom Search Actions */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-100">
+                            <div className="text-[11px] sm:text-xs font-bold text-gray-400">
+                                현재 검색 조건:{" "}
+                                <span className="text-primary font-black">
+                                    {[
+                                        dbRegions1.find((r) => r.code_value === selectedSido)?.code_name,
+                                        dbRegions2.find((r) => r.code_value === selectedSigungu)?.code_name !== '전체' 
+                                            ? dbRegions2.find((r) => r.code_value === selectedSigungu)?.code_name 
+                                            : null,
+                                        dbIndustries.find((i) => i.code_value === selectedIndustry)?.code_name,
+                                        dbKeywords.find((k) => k.code_value === selectedKeyword)?.code_name,
+                                        searchKeyword ? `"${searchKeyword}"` : "",
+                                    ]
+                                        .filter(Boolean)
+                                        .join(" > ") || "전체"}
+                                </span>
+                            </div>
+                            <Button 
+                                onClick={handleSearchClick}
+                                className="w-full sm:w-auto font-black px-8 py-5 rounded-lg text-white bg-primary hover:bg-orange-600 hover:scale-[1.02] active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"
+                            >
+                                <Search className="w-4 h-4" /> 검색하기
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </section>
 
             {/* General Jobs List */}
@@ -849,8 +877,8 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                     )}
                 </div>
                 {generalJobs.length > 0 ? (
-                    <div className="bg-white border-t-2 border-gray-900 shadow-sm rounded-b-xl">
-                        <div className="divide-y divide-gray-100">
+                    <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-3">
                             {paginatedTableJobs.map((job) => (
                                 <GeneralSeekerListRow 
                                     key={job.id} 
@@ -864,7 +892,7 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                         {(() => {
                             const displayPages = Math.max(totalPages, 4);
                             return (
-                                <div className="flex justify-center items-center gap-1.5 py-6">
+                                <div className="flex justify-center items-center gap-1.5 py-4 bg-white border border-gray-200/60 rounded-xl sm:rounded-2xl shadow-sm mt-2">
                                     <button 
                                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                         disabled={currentPage === 1}

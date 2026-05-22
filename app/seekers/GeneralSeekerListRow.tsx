@@ -56,7 +56,7 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
                 if (onClick) onClick();
                 else router.push(`/seekers/${job.id}`);
             }}
-            className={`p-4 hover:bg-gray-50/80 active:scale-[0.99] transition-all border-b border-gray-100 flex flex-col gap-2.5 cursor-pointer relative group ${isInactive ? 'opacity-50 grayscale' : ''}`}
+            className={`p-4 sm:p-5 hover:bg-gray-50/50 active:scale-[0.99] transition-all border border-gray-200/80 rounded-xl bg-white shadow-sm hover:shadow-md hover:border-primary/30 flex flex-col gap-2.5 cursor-pointer relative group ${isInactive ? 'opacity-50 grayscale' : ''}`}
         >
             {/* 1행: 이름, 성별/나이 및 메타 정보, 작성일 */}
             <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] sm:text-[13px]">

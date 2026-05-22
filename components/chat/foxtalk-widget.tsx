@@ -582,8 +582,12 @@ export function FoxTalkWidget() {
                         </p>
                     </div>
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); setAppState('CLOSED'); }} onPointerDown={(e) => e.stopPropagation()} className="p-1.5 hover:bg-white/20 rounded-full transition-colors">
-                    <X className="w-5 h-5 text-white" />
+                <button
+                    onClick={(e) => { e.stopPropagation(); setAppState('CLOSED'); }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="px-3.5 py-1.5 bg-white/20 hover:bg-white/30 active:scale-95 text-white rounded-full text-[12px] font-black transition-all focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
+                >
+                    닫기
                 </button>
             </div>
 

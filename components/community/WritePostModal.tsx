@@ -103,8 +103,11 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
                             {isReport && !editPost && ' · 작성자명이 익명으로 표시됩니다'}
                         </p>
                     </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-                        <X className="w-5 h-5" />
+                    <button
+                        onClick={onClose}
+                        className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
+                    >
+                        닫기
                     </button>
                 </div>
 

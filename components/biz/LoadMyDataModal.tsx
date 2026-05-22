@@ -49,8 +49,11 @@ export function LoadMyDataModal({ isOpen, onClose, onSelect, sourceType }: LoadM
                         {sourceType === 'JOB' ? <FileText className="w-5 h-5 text-green-500" /> : <Megaphone className="w-5 h-5 text-orange-500" />}
                         {sourceType === 'JOB' ? '내 구인 공고 불러오기' : '내 광고 본문 불러오기'}
                     </h3>
-                    <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-                        <X className="w-5 h-5" />
+                    <button
+                        onClick={onClose}
+                        className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
+                    >
+                        닫기
                     </button>
                 </div>
 

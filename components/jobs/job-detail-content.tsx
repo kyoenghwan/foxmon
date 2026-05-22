@@ -96,14 +96,20 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
     <div className="flex flex-col min-h-full bg-white relative">
       
       {/* 상단 닫기/뒤로가기 헤더 */}
-      <div className="sticky top-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100 px-4 h-14 flex items-center justify-end shrink-0">
+      <div className="sticky top-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100 px-4 h-14 flex items-center justify-end shrink-0 gap-2">
          {isModal ? (
-           <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 shrink-0">
-             <X className="w-5 h-5" />
-           </Button>
+           <button
+             onClick={onClose}
+             className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
+           >
+             닫기
+           </button>
          ) : (
-           <Link href="/jobs" className="w-9 h-9 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 shrink-0">
-             <X className="w-5 h-5" />
+           <Link
+             href="/jobs"
+             className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0 flex items-center justify-center"
+           >
+             닫기
            </Link>
          )}
       </div>
