@@ -39,10 +39,14 @@ export function FoxTalkWidget() {
     const { data: session } = useSession();
 
     const getRoomDisplayTitle = (room: any) => {
-        if (room.type === '1ON1' && userId) {
-            if (room.employer_id === userId) {
+        const currentUserId = (userId || profile?.sessionId)?.toLowerCase().trim();
+        const employerId = room.employer_id?.toLowerCase().trim();
+        const seekerId = room.seeker_id?.toLowerCase().trim();
+
+        if (room.type === '1ON1' && currentUserId) {
+            if (employerId === currentUserId) {
                 return `${room.seeker?.nickname || room.seeker?.name || '구직자'} 님과의 대화방`;
-            } else if (room.seeker_id === userId) {
+            } else if (seekerId === currentUserId) {
                 return `${room.employer?.business_name || room.employer?.nickname || room.employer?.name || '업체'} 님과의 대화방`;
             }
         }
@@ -215,6 +219,8 @@ export function FoxTalkWidget() {
         if (res.success) setRooms(res.data || []);
     };
 
+    const roomIdsString = rooms.map(r => r.id).join(',');
+
     // LOBBY 상태에서도 새로운 메시지를 실시간으로 받기 위한 Supabase Subscription
     useEffect(() => {
         if (appState !== 'LOBBY' || !userId) return;
@@ -242,7 +248,7 @@ export function FoxTalkWidget() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [appState, userId, rooms.length]);
+    }, [appState, userId, roomIdsString]);
 
     // Save Profile
     const saveProfile = () => {
@@ -868,7 +874,7 @@ export function FoxTalkWidget() {
                                         </div>
                                         {room.unread_count > 0 && (
                                             <div className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center shrink-0 animate-pulse">
-                                                N
+                                                n
                                             </div>
                                         )}
                                     </button>
