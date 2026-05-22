@@ -17,7 +17,6 @@ import { FoxTalkWidget } from "@/components/chat/foxtalk-widget";
 import { CsAgentDock } from "@/components/chat/cs-agent-dock";
 import { AutoLogoutWrapper } from "@/components/auth/auto-logout-wrapper";
 import { MaxWidthWrapper } from "@/src/components/layout/MaxWidthWrapper";
-import { ViewportScaler } from "@/components/layout/viewport-scaler";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -67,56 +66,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
   modal: React.ReactNode;
-}>) {
+  }>) {
   return (
     <html lang="ko">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f0f2f5]`}
       >
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                function adjustViewport() {
-                  var w = window.innerWidth || document.documentElement.clientWidth || screen.width;
-                  if (w > 0 && w < 600) {
-                    var scale = w / 600;
-                    var meta = document.querySelector('meta[name="viewport"]');
-                    if (meta) {
-                      meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
-                    } else {
-                      meta = document.createElement('meta');
-                      meta.name = 'viewport';
-                      meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
-                      document.head.appendChild(meta);
-                    }
-                    if (document.body) {
-                      document.body.style.zoom = scale;
-                      document.body.style.width = '600px';
-                      document.body.style.margin = '0 auto';
-                      document.body.style.overflowX = 'hidden';
-                    }
-                  } else {
-                    var meta = document.querySelector('meta[name="viewport"]');
-                    if (meta) {
-                      meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
-                    }
-                    if (document.body) {
-                      document.body.style.zoom = '';
-                      document.body.style.width = '';
-                      document.body.style.margin = '';
-                      document.body.style.overflowX = '';
-                    }
-                  }
-                }
-                adjustViewport();
-                window.addEventListener('resize', adjustViewport);
-                window.addEventListener('DOMContentLoaded', adjustViewport);
-              })();
-            `
-          }}
-        />
-        <ViewportScaler />
         <MaxWidthWrapper>
           <LanguageProvider>
             <AutoLogoutWrapper>

@@ -1,0 +1,138 @@
+﻿
+> foxmon@0.1.0 build
+> next build --webpack
+
+node.exe : ??`eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/do
+cs/app/api-reference/cli/next#next-lint-options
+위치 C:\Program Files\nodejs\npm.ps1:29 문자:3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (??`eslint` conf...xt-lint-options:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+??Invalid next.config.ts options detected: 
+??    Unrecognized key(s) in object: 'eslint'
+??See more info here: https://nextjs.org/docs/messages/invalid-next-config
+??Next.js 16.1.6 (webpack)
+- Environments: .env.local, .env
+- Experiments (use with caution):
+  쨌 serverActions
+
+??The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messa
+ges/middleware-to-proxy
+  Creating an optimized production build ...
+> [PWA] Compile server
+> [PWA] Compile server
+> [PWA] Compile client (static)
+> [PWA] Auto register service worker with: D:\Antigravity\Foxmon\node_modules\next-pwa\register.js
+> [PWA] Service worker: D:\Antigravity\Foxmon\public\sw.js
+> [PWA]   url: /sw.js
+> [PWA]   scope: /
+??Compiled successfully in 15.7s
+  Skipping validation of types
+  Collecting page data using 15 workers ...
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+  Generating static pages using 15 workers (0/52) ...
+??metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://
+localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+??metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://
+localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+??metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://
+localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+?쏉툘 [SYSTEM] Logger Initialized
+?쏉툘 [SYSTEM] Logger Initialized
+  Generating static pages using 15 workers (13/52) 
+[15:11:55] ?쏉툘 [ATOM] ?띰툘 QA_GET_ALL_USERS ?쒖옉 
+[15:11:55] ?쏉툘 [ATOM] ??QA_GET_ALL_USERS ?먮윭 Dynamic server usage: Route /fox-office/users couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+  Generating static pages using 15 workers (26/52) 
+  Generating static pages using 15 workers (39/52) 
+??Generating static pages using 15 workers (52/52) in 1215.6ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+??? /
+????/_not-found
+??? /(...)jobs/[id]
+??? /(...)seekers/[id]
+????/age-gate
+??? /api/admin/telegram-webhook
+??? /api/auth/[...nextauth]
+??? /api/auth/find-account
+??? /api/auth/guest
+??? /api/auth/register
+??? /api/cron/check-biz-status
+??? /api/cs-agent/eligible
+??? /api/webhooks/telegram
+??? /biz
+??? /biz/ads
+??? /biz/ads/[id]/edit
+??? /biz/ads/new
+??? /biz/jobs
+??? /biz/jobs/[id]
+??? /biz/jobs/new
+??? /biz/points
+??? /biz/profile
+??? /biz/seekers
+??? /community
+??? /community/[board]/[id]
+????/employer/jobs/new
+????/employer/points
+??? /employer/profile
+??? /employer/search
+????/find-account
+??? /fox-office
+??? /fox-office/accounting
+??? /fox-office/ad-rankings
+??? /fox-office/ads
+??? /fox-office/community
+??? /fox-office/employers
+??? /fox-office/help
+??? /fox-office/jobs
+??? /fox-office/master-data
+??? /fox-office/points
+??? /fox-office/settings
+??? /fox-office/settings/policies
+??? /fox-office/support
+??? /fox-office/support/inbox
+??? /fox-office/support/staff
+??? /fox-office/users
+??? /help
+??? /help/faq
+??? /help/inquiry
+????/job-seeker/profile
+??? /jobs
+??? /jobs/(.)[id]
+??? /jobs/[id]
+????/jobs/post
+??? /k/[keyword]
+????/login
+????/notice
+????/register
+????/robots.txt
+??? /seeker/resume
+??? /seekers
+??? /seekers/(.)[id]
+??? /seekers/[id]
+????/sitemap.xml
+??? /special-jobs
+
+
+? Proxy (Middleware)
+
+?? (Static)   prerendered as static content
+?  (Dynamic)  server-rendered on demand
+

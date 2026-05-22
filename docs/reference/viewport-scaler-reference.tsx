@@ -3,6 +3,14 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
+/**
+ * [기술 참고용] ViewportScaler
+ * 
+ * 모바일 화면(600px 미만)에서 가로 해상도를 강제로 600px로 고정하고,
+ * 브라우저의 실제 너비 비례에 맞춰 CSS zoom 스타일로 축소(scale-down) 렌더링을 제공하는 컴포넌트입니다.
+ * 
+ * 반응형 분기 조절이 어렵거나, 600px에 특화된 레이아웃을 전 기종에서 그대로 유지하고 싶을 때 사용됩니다.
+ */
 export function ViewportScaler() {
     const pathname = usePathname();
 
