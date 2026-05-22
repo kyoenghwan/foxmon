@@ -159,14 +159,13 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
     }, [qParam, regionParam, industryParam, keywordParam, dbRegions1, dbRegions2, dbIndustries]);
 
     const handleOpenSeeker = async (id: string) => {
-        setSelectedSeekerId(id);
         setIsSeekerLoading(true);
         const res = await getSeekerAdByIdAction(id);
         if (res.success && res.data) {
             setSelectedSeekerData(res.data);
+            setSelectedSeekerId(id);
         } else {
             alert('이력서 정보를 불러오는데 실패했습니다.');
-            setSelectedSeekerId(null);
         }
         setIsSeekerLoading(false);
     };
@@ -916,10 +915,23 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
 
             {/* Seeker Detail Modal */}
             <SeekerModalWrapper 
-                isOpen={!!selectedSeekerId} 
-                onClose={() => setSelectedSeekerId(null)} 
+                isOpen={!!selectedSeekerId && !!selectedSeekerData} 
+                onClose={() => {
+                    setSelectedSeekerId(null);
+                    setSelectedSeekerData(null);
+                }} 
                 job={selectedSeekerData} 
             />
+
+            {/* Seeker Detail Loading Overlay */}
+            {isSeekerLoading && (
+                <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] z-[9999] flex items-center justify-center pointer-events-auto">
+                    <div className="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center gap-3">
+                        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                        <p className="text-sm font-bold text-gray-600">인재 정보를 불러오고 있습니다...</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
