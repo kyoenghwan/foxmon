@@ -4,7 +4,11 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
     try {
         let query = supabase
             .from('foxtalk_rooms')
-            .select('*')
+            .select(`
+                *,
+                employer:employer_id(id, login_id, nickname, name, business_name),
+                seeker:seeker_id(id, login_id, nickname, name)
+            `)
             .eq('is_active', true)
             .order('created_at', { ascending: false })
             .limit(100);
@@ -42,7 +46,51 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
 
         if (error) throw error;
         
-        return { success: true, data: rooms || [] };
+        // 각 방의 최근 메시지 및 안읽은 카운트 조회
+        const decoratedRooms = await Promise.all((rooms || []).map(async (room: any) => {
+            // 1. 최근 메시지 1개 쿼리
+            const { data: latestMsg } = await supabase
+                .from('foxtalk_messages')
+                .select('content, created_at, participant_id')
+                .eq('room_id', room.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            // 2. 안읽은 메시지 카운팅
+            let unreadCount = 0;
+            if (userId) {
+                const { data: participant } = await supabase
+                    .from('foxtalk_participants')
+                    .select('id, last_read_at')
+                    .eq('room_id', room.id)
+                    .eq('session_id', userId)
+                    .maybeSingle();
+
+                if (participant) {
+                    const lastReadAt = participant.last_read_at || '1970-01-01T00:00:00.000Z';
+                    const { count, error: countErr } = await supabase
+                        .from('foxtalk_messages')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('room_id', room.id)
+                        .neq('participant_id', participant.id)
+                        .gt('created_at', lastReadAt);
+                    
+                    if (!countErr && count !== null) {
+                        unreadCount = count;
+                    }
+                }
+            }
+
+            return {
+                ...room,
+                latest_message: latestMsg ? latestMsg.content : null,
+                latest_message_at: latestMsg ? latestMsg.created_at : null,
+                unread_count: unreadCount
+            };
+        }));
+
+        return { success: true, data: decoratedRooms };
     } catch (error: any) {
         console.error('QA_GET_CHAT_ROOMS Error:', error);
         return { success: false, error: '방 목록을 불러오지 못했습니다.' };

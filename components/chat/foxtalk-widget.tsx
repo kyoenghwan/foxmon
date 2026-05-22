@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { X, MessageCircle, Send, Plus, Users, Shield, ArrowLeft, Headset, LogOut, MoreVertical } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM';
 import { OA_INSERT_CHAT_PARTICIPANT } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_PARTICIPANT';
+import { OA_UPDATE_PARTICIPANT_READ } from '@/src/atoms/oa/foxtalk/OA_UPDATE_PARTICIPANT_READ';
 import { OA_INSERT_CHAT_MESSAGE } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_MESSAGE';
 import { OA_LEAVE_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_LEAVE_CHAT_ROOM';
 import { QA_GET_CHAT_ROOMS } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_ROOMS';
@@ -34,6 +36,18 @@ export function FoxTalkWidget() {
     const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const pathname = usePathname();
+    const { data: session } = useSession();
+
+    const getRoomDisplayTitle = (room: any) => {
+        if (room.type === '1ON1' && userId) {
+            if (room.employer_id === userId) {
+                return `${room.seeker?.nickname || room.seeker?.name || '구직자'} 님과의 대화방`;
+            } else if (room.seeker_id === userId) {
+                return `${room.employer?.business_name || room.employer?.nickname || room.employer?.name || '업체'} 님과의 대화방`;
+            }
+        }
+        return room.title;
+    };
 
     // Auth Role State
     const [userRole, setUserRole] = useState<string | null>(null);
@@ -42,26 +56,24 @@ export function FoxTalkWidget() {
     const [sessionChatUser, setSessionChatUser] = useState<{ id: string; nickname: string } | null>(null);
 
     useEffect(() => {
-        // Fetch session once to determine user role for menu display
-        fetch('/api/auth/session')
-            .then(res => res.json())
-            .then(session => {
-                if (session?.user?.role) {
-                    setUserRole(session.user.role);
-                }
-                if (session?.user?.id) {
-                    setUserId(session.user.id);
-                    const nick =
-                        String((session.user as { nickname?: string }).nickname || '').trim() ||
-                        String(session.user.name || '').trim() ||
-                        '고객';
-                    setSessionChatUser({ id: session.user.id, nickname: nick });
-                } else {
-                    setSessionChatUser(null);
-                }
-            })
-            .catch(() => {});
-    }, []);
+        if (session?.user) {
+            if ((session.user as any).role) {
+                setUserRole((session.user as any).role);
+            }
+            if (session.user.id) {
+                setUserId(session.user.id);
+                const nick =
+                    String((session.user as { nickname?: string }).nickname || '').trim() ||
+                    String(session.user.name || '').trim() ||
+                    '고객';
+                setSessionChatUser({ id: session.user.id, nickname: nick });
+            }
+        } else {
+            setUserRole(null);
+            setUserId(null);
+            setSessionChatUser(null);
+        }
+    }, [session]);
 
     // Setup Form State
     const [setupNick, setSetupNick] = useState('');
@@ -79,6 +91,32 @@ export function FoxTalkWidget() {
             setProfile(JSON.parse(saved));
         }
     }, []);
+
+    useEffect(() => {
+        if (sessionChatUser) {
+            const sid = sessionChatUser.id;
+            const nick = sessionChatUser.nickname;
+            
+            const saved = localStorage.getItem('foxtalk_profile');
+            const currentProfile = saved ? JSON.parse(saved) : null;
+            
+            if (!currentProfile || currentProfile.sessionId !== sid || currentProfile.nickname !== nick) {
+                const newProfile = {
+                    sessionId: sid,
+                    nickname: nick,
+                    avatarType: currentProfile?.avatarType || 'fox1'
+                };
+                localStorage.setItem('foxtalk_profile', JSON.stringify(newProfile));
+                setProfile(newProfile);
+            }
+        }
+    }, [sessionChatUser]);
+
+    useEffect(() => {
+        if (userId && appState === 'LOBBY') {
+            loadRooms();
+        }
+    }, [userId, appState]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -102,8 +140,16 @@ export function FoxTalkWidget() {
             const { roomId } = e.detail || {};
             
             if (roomId) {
-                // 특정 방으로 바로 입장 (이미 생성된 방이거나 새로 만든 방)
-                const { data: room } = await supabase.from('foxtalk_rooms').select('*').eq('id', roomId).single();
+                // 특정 방으로 바로 입장 (이미 생성된 방이거나 새로 만든 방) - employer, seeker 정보 조인
+                const { data: room } = await supabase
+                    .from('foxtalk_rooms')
+                    .select(`
+                        *,
+                        employer:employer_id(id, login_id, nickname, name, business_name),
+                        seeker:seeker_id(id, login_id, nickname, name)
+                    `)
+                    .eq('id', roomId)
+                    .single();
                 if (room) {
                     // 프로필이 설정되어 있지 않다면 SETUP 화면으로
                     const currentProfile = profile || (localStorage.getItem('foxtalk_profile') ? JSON.parse(localStorage.getItem('foxtalk_profile')!) : null);
@@ -168,6 +214,35 @@ export function FoxTalkWidget() {
         const res = await QA_GET_CHAT_ROOMS(userId || undefined, userRole || undefined);
         if (res.success) setRooms(res.data || []);
     };
+
+    // LOBBY 상태에서도 새로운 메시지를 실시간으로 받기 위한 Supabase Subscription
+    useEffect(() => {
+        if (appState !== 'LOBBY' || !userId) return;
+
+        // 내가 참여한 방들의 ID 목록
+        const userRoomIds = rooms.map(r => r.id);
+        if (userRoomIds.length === 0) return;
+
+        const channel = supabase.channel(`lobby:${userId}`)
+            .on('postgres_changes', { 
+                event: 'INSERT', 
+                schema: 'public', 
+                table: 'foxtalk_messages'
+            }, async (payload) => {
+                const newMessage = payload.new as any;
+                if (!newMessage?.room_id) return;
+
+                // 내가 참여 중인 방에 새 메시지가 왔다면 목록 갱신
+                if (userRoomIds.includes(newMessage.room_id)) {
+                    loadRooms();
+                }
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [appState, userId, rooms.length]);
 
     // Save Profile
     const saveProfile = () => {
@@ -336,6 +411,15 @@ export function FoxTalkWidget() {
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'foxtalk_messages', filter: `room_id=eq.${currentRoom.id}` }, async (payload) => {
                 const newMessage = payload.new as Record<string, unknown> & { id?: string; participant_id?: string };
                 if (!newMessage?.id) return;
+                
+                // 상대방 메시지 수신 시 읽음 처리 수행
+                if (profile?.sessionId && currentRoom.type === '1ON1') {
+                    await OA_UPDATE_PARTICIPANT_READ({
+                        room_id: currentRoom.id,
+                        session_id: profile.sessionId
+                    });
+                }
+
                 let participant: Record<string, unknown> | null = null;
                 if (newMessage.participant_id) {
                     const { data: p } = await supabase
@@ -374,6 +458,14 @@ export function FoxTalkWidget() {
             content: maskedContent
         });
         setMsgInput('');
+
+        // 내가 메시지를 보냈으므로 내 읽음 상태 갱신
+        if (profile?.sessionId && currentRoom.type === '1ON1') {
+            await OA_UPDATE_PARTICIPANT_READ({
+                room_id: currentRoom.id,
+                session_id: profile.sessionId
+            });
+        }
     };
 
     const confirmLeaveRoom = async () => {
@@ -761,7 +853,7 @@ export function FoxTalkWidget() {
                                             <div className="flex justify-between items-start mb-0.5">
                                                 <h4 className="font-black text-[14px] text-gray-900 group-hover:text-primary transition-colors flex items-center gap-1.5 truncate">
                                                     {room.type === 'SECRET' && <Shield className="w-3.5 h-3.5 text-red-500 shrink-0" />}
-                                                    {room.title}
+                                                    {getRoomDisplayTitle(room)}
                                                 </h4>
                                             </div>
                                             <div className="flex items-center gap-2">
@@ -771,9 +863,14 @@ export function FoxTalkWidget() {
                                                     </span>
                                                 )}
                                                 {room.type === 'SECRET' && <span className="text-[10px] text-red-500 font-bold bg-red-50 px-1.5 py-0.5 rounded-full">비밀방</span>}
-                                                {room.type === '1ON1' && <span className="text-[11px] text-gray-500 font-medium truncate">최근 대화내용이 여기에 표시됩니다...</span>}
+                                                {room.type === '1ON1' && <span className="text-[11px] text-gray-500 font-medium truncate">{room.latest_message || '최근 대화내용이 여기에 표시됩니다...'}</span>}
                                             </div>
                                         </div>
+                                        {room.unread_count > 0 && (
+                                            <div className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center shrink-0 animate-pulse">
+                                                N
+                                            </div>
+                                        )}
                                     </button>
                                 </li>
                             ))}
@@ -832,7 +929,7 @@ export function FoxTalkWidget() {
                         <div className="bg-white px-4 py-2 border-b shadow-sm shrink-0 flex items-center justify-between">
                             <div className="font-black text-[13px] text-gray-800 flex items-center gap-1">
                                 {currentRoom.type === 'SECRET' && <Shield className="w-3.5 h-3.5 text-red-500" />}
-                                {currentRoom.title}
+                                {getRoomDisplayTitle(currentRoom)}
                             </div>
                             {currentRoom.type === 'SECRET' && (
                                 <span className="text-[9px] bg-red-100 text-red-600 font-bold px-2 py-1 rounded-full">

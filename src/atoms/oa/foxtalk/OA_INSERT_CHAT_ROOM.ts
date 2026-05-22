@@ -78,6 +78,50 @@ export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
         if (result.error) throw result.error;
         const room = result.data;
 
+        // 1:1 방 생성 시 참여자 2명 자동 등록 (안읽음 카운팅 등을 위해 참여자 레코드 선행 생성 필수)
+        if (data.type === '1ON1' && data.employer_id && data.seeker_id) {
+            try {
+                // 1. 업체 정보 조회
+                const { data: employerUser } = await supabaseAdmin
+                    .from('users')
+                    .select('nickname, business_name')
+                    .eq('id', data.employer_id)
+                    .single();
+
+                // 2. 구직자 정보 조회
+                const { data: seekerUser } = await supabaseAdmin
+                    .from('users')
+                    .select('nickname')
+                    .eq('id', data.seeker_id)
+                    .single();
+
+                const employerNick = employerUser?.business_name || employerUser?.nickname || '업체';
+                const seekerNick = seekerUser?.nickname || '구직자';
+
+                // 두 참여자 insert (upsert 활용하여 중복 삽입 에러 방지)
+                await supabaseAdmin
+                    .from('foxtalk_participants')
+                    .upsert([
+                        {
+                            room_id: room.id,
+                            session_id: data.employer_id,
+                            nickname: employerNick,
+                            avatar_type: 'fox1',
+                            joined_at: new Date().toISOString()
+                        },
+                        {
+                            room_id: room.id,
+                            session_id: data.seeker_id,
+                            nickname: seekerNick,
+                            avatar_type: 'fox2',
+                            joined_at: new Date().toISOString()
+                        }
+                    ], { onConflict: 'room_id, session_id' });
+            } catch (participantErr) {
+                console.error("1ON1 방 참여자 자동 등록 중 오류:", participantErr);
+            }
+        }
+
         // 1:1 방 생성 시 사장님에게 텔레그램 알림 전송
         if (data.type === '1ON1' && data.employer_id && data.seeker_id) {
             try {

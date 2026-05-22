@@ -347,7 +347,7 @@ export function SeekerDetailContent({
                 window.location.href = '/login';
                 return;
               }
-              if (session.user.role === 'SEEKER') {
+               if (session.user.role !== 'EMPLOYER') {
                 alert('구인회원(업소)만 대화를 신청할 수 있습니다.');
                 return;
               }
