@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { X, User2, Phone, Clock } from 'lucide-react';
+import { X, User2, Phone, Clock, Copy } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM';
 
 function formatIndustry(v: unknown): string {
   if (v == null || v === '') return '무관';
@@ -123,7 +124,7 @@ export function SeekerDetailContent({
         )}
       </div>
 
-      <div className="scrollbar-hide flex-1 space-y-5 overflow-y-auto p-4 sm:p-8">
+      <div className="scrollbar-hide flex-1 space-y-5 overflow-y-auto p-4 sm:p-8 pb-28">
         {/* 프로필 + 제목·메타·키워드 (한 행: 사진 좌, 텍스트 우) */}
         <div className="flex flex-row items-start gap-4">
           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 sm:h-28 sm:w-28">
@@ -198,29 +199,144 @@ export function SeekerDetailContent({
         {/* 연락처 및 SNS */}
         <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
           <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">연락처 및 SNS</h2>
-          <div className="space-y-2 text-sm font-bold text-gray-900 sm:text-[15px]">
-            <div className="flex items-center gap-2">
-              <Phone className="h-3.5 w-3.5 shrink-0 text-gray-400" />
-              <span className="shrink-0 font-black text-gray-700">연락처</span>
-              <span className="text-gray-400">:</span>
-              <span className="min-w-0 break-words">{contactLine}</span>
+          <div className="space-y-2.5 text-[16px] sm:text-[17px] font-bold text-gray-900">
+            {/* 연락처 */}
+            <div className="flex items-center justify-between gap-2 py-1 border-b border-gray-50/50 pb-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <Phone className="h-4 w-4 shrink-0 text-gray-400" />
+                <span className="shrink-0 font-black text-gray-700">연락처</span>
+                <span className="text-gray-400">:</span>
+                <span className="min-w-0 break-words text-gray-950 font-black">{contactLine}</span>
+              </div>
+              {is_contact_public && contact_number && (
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(contact_number).then(() => {
+                      alert(`연락처 '${contact_number}' 가 복사되었습니다!`);
+                    });
+                  }}
+                  className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded-lg text-[11px] font-bold shadow-sm active:scale-95 transition-all shrink-0 ml-auto flex items-center gap-1"
+                >
+                  <Copy className="h-3 w-3" /> 복사
+                </button>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-3.5 w-3.5 shrink-0 text-gray-400" />
+
+            {/* 연락가능시간 */}
+            <div className="flex items-center gap-2 py-1 border-b border-gray-50/50 pb-2">
+              <Clock className="h-4 w-4 shrink-0 text-gray-400" />
               <span className="shrink-0 font-black text-gray-700">연락가능시간</span>
               <span className="text-gray-400">:</span>
-              <span className="min-w-0 break-words">{timeLine}</span>
+              <span className="min-w-0 break-words text-gray-850">{timeLine}</span>
             </div>
-            <div className="flex items-start gap-2">
-              <span className="mt-[2px] h-3.5 w-3.5 shrink-0 text-gray-300">•</span>
-              <span className="shrink-0 font-black text-gray-700">SNS</span>
-              <span className="text-gray-400">:</span>
-              <span className="min-w-0 break-words text-gray-800">
-                {snsInline || '없음'}
-              </span>
+
+            {/* SNS */}
+            <div className="space-y-2">
+              {snsDisplayList.length > 0 ? (
+                snsDisplayList.map((sns, idx) => (
+                  <div key={idx} className="flex items-center justify-between gap-2 py-1 border-b border-gray-50 last:border-0 pb-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="h-3.5 w-3.5 shrink-0 text-gray-300 flex items-center justify-center">•</span>
+                      <span className="shrink-0 font-black text-gray-700">{sns.label}</span>
+                      <span className="text-gray-400">:</span>
+                      <span className="min-w-0 break-words text-gray-800">{sns.id}</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(sns.id).then(() => {
+                          alert(`'${sns.id}' 가 복사되었습니다!`);
+                        });
+                      }}
+                      className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded-lg text-[11px] font-bold shadow-sm active:scale-95 transition-all shrink-0 ml-auto flex items-center gap-1"
+                    >
+                      <Copy className="h-3 w-3" /> 복사
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-center gap-2 py-1">
+                  <span className="h-3.5 w-3.5 shrink-0 text-gray-300">•</span>
+                  <span className="shrink-0 font-black text-gray-700">SNS</span>
+                  <span className="text-gray-400">:</span>
+                  <span className="text-gray-500 font-medium">없음</span>
+                </div>
+              )}
             </div>
           </div>
         </section>
+      </div>
+
+      {/* 하단 고정 연락/대화 바 */}
+      <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-100 p-3 sm:p-4 flex gap-2 z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
+        <a
+          href={is_contact_public && contact_number ? `tel:${contact_number}` : '#'}
+          onClick={(e) => {
+            if (!is_contact_public || !contact_number) {
+              e.preventDefault();
+              alert('연락처가 비공개 상태입니다.');
+            }
+          }}
+          className="flex-1 h-[52px] bg-gray-50 hover:bg-gray-100 text-gray-800 font-black text-[14px] sm:text-[15px] flex items-center justify-center gap-1.5 rounded-2xl border border-gray-200 transition-all active:scale-[0.98] text-center"
+        >
+          <Phone className="w-4 h-4 text-gray-600" />
+          전화걸기
+        </a>
+        
+        <a
+          href={is_contact_public && contact_number ? `sms:${contact_number}` : '#'}
+          onClick={(e) => {
+            if (!is_contact_public || !contact_number) {
+              e.preventDefault();
+              alert('연락처가 비공개 상태입니다.');
+            }
+          }}
+          className="flex-1 h-[52px] bg-gray-50 hover:bg-gray-100 text-gray-800 font-black text-[14px] sm:text-[15px] flex items-center justify-center gap-1.5 rounded-2xl border border-gray-200 transition-all active:scale-[0.98] text-center"
+        >
+          <span className="text-[16px]">✉️</span>
+          문자보내기
+        </a>
+        
+        <button
+          onClick={async () => {
+            try {
+              const res = await fetch('/api/auth/session');
+              const session = await res.json();
+              if (!session?.user?.id) {
+                alert('로그인이 필요합니다.');
+                window.location.href = '/login';
+                return;
+              }
+              if (session.user.role === 'SEEKER') {
+                alert('구인회원(업소)만 대화를 신청할 수 있습니다.');
+                return;
+              }
+              
+              // 1:1 채팅방 생성
+              const createRes = await OA_INSERT_CHAT_ROOM({
+                title: `${maskedName} 님과의 대화방`,
+                type: '1ON1',
+                max_participants: 2,
+                created_by: session.user.id,
+                employer_id: session.user.id,
+                seeker_id: job.user_id
+              });
+              
+              if (createRes.success) {
+                alert('FoxTalk 대화방이 생성되었습니다.');
+                window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
+              } else {
+                alert(createRes.error || '채팅방을 생성하지 못했습니다.');
+              }
+            } catch (err) {
+              console.error(err);
+              alert('대화방 생성 도중 오류가 발생했습니다.');
+            }
+          }}
+          className="flex-[2] h-[52px] bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white font-black text-[14px] sm:text-[15px] shadow-lg flex items-center justify-center gap-1.5 rounded-2xl transition-all active:scale-[0.98] group"
+        >
+          <span className="text-primary text-[18px] mb-0.5">⚡</span>
+          FoxTalk 대화하기
+        </button>
       </div>
     </div>
   );

@@ -46,6 +46,30 @@ export async function QA_GET_SEEKER_AD_BY_ID(id: string): Promise<{ success: boo
       return { success: false, data: null, error: error.message };
     }
 
+    // 공통 코드 치환 (키워드)
+    if (data && data.resumes) {
+      try {
+        const { QA_GET_COMMON_CODES } = await import('@/src/atoms/qa/master/QA_GET_COMMON_CODES');
+        const { data: commonCodes } = await QA_GET_COMMON_CODES(undefined, true);
+        
+        if (commonCodes && Array.isArray(commonCodes)) {
+          const resolveTag = (code: string) => {
+            const match = commonCodes.find(
+              (c) =>
+                c.code_value === code &&
+                (c.list_type === 'KEYWORD' || c.list_type === 'AMENITY')
+            );
+            return match ? match.code_name : code;
+          };
+          if (Array.isArray(data.resumes.keywords)) {
+            data.resumes.keywords = data.resumes.keywords.map(resolveTag);
+          }
+        }
+      } catch (codeError) {
+        nvLog('FW', '⚠️ 공통 코드 치환 실패 (seeker_ads)', codeError);
+      }
+    }
+
     nvLog('AT', `✅ QA_GET_SEEKER_AD_BY_ID 성공: ${id}`);
     return { success: true, data, error: null };
   } catch (error: any) {
