@@ -210,17 +210,17 @@ export function SeekerDetailContent({
           <div className="space-y-2.5 text-sm leading-relaxed text-gray-800 sm:text-[15px]">
             <div className="flex items-start">
               <span className="font-bold text-gray-500 shrink-0">{formatLabel('지역')}</span>
-              <span className="text-gray-400 shrink-0"> : </span>
+              <span className="text-gray-400 shrink-0 mx-1.5">:</span>
               <span className="font-bold text-gray-900 flex-1">{desired_location?.trim() || '무관'}</span>
             </div>
             <div className="flex items-start">
               <span className="font-bold text-gray-500 shrink-0">{formatLabel('업종')}</span>
-              <span className="text-gray-400 shrink-0"> : </span>
+              <span className="text-gray-400 shrink-0 mx-1.5">:</span>
               <span className="font-bold text-gray-900 flex-1">{industryLine}</span>
             </div>
             <div className="flex items-start">
               <span className="font-bold text-gray-500 shrink-0">{formatLabel('급여')}</span>
-              <span className="text-gray-400 shrink-0"> : </span>
+              <span className="text-gray-400 shrink-0 mx-1.5">:</span>
               <span className="font-bold text-primary flex-1">{payText}</span>
             </div>
           </div>
@@ -247,7 +247,7 @@ export function SeekerDetailContent({
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-start min-w-0 flex-1">
                 <span className="font-bold text-gray-500 shrink-0">{formatLabel('연락처')}</span>
-                <span className="text-gray-400 shrink-0"> : </span>
+                <span className="text-gray-400 shrink-0 mx-1.5">:</span>
                 <span
                   onClick={() => is_contact_public && contact_number && handleCopy(contactLine, '연락처')}
                   className={`min-w-0 break-words text-gray-900 font-bold flex-1 ${
@@ -287,7 +287,7 @@ export function SeekerDetailContent({
               snsDisplayList.map((sns, idx) => (
                 <div key={idx} className="flex items-start min-w-0">
                   <span className="font-bold text-gray-500 shrink-0">{formatLabel(sns.label)}</span>
-                  <span className="text-gray-400 shrink-0"> : </span>
+                  <span className="text-gray-400 shrink-0 mx-1.5">:</span>
                   <span
                     onClick={() => handleCopy(sns.id, sns.label)}
                     className="min-w-0 break-words text-gray-900 font-bold flex-1 cursor-pointer hover:underline hover:text-primary transition-all"
@@ -300,7 +300,7 @@ export function SeekerDetailContent({
             ) : (
               <div className="flex items-start min-w-0">
                 <span className="font-bold text-gray-500 shrink-0">{formatLabel('SNS')}</span>
-                <span className="text-gray-400 shrink-0"> : </span>
+                <span className="text-gray-400 shrink-0 mx-1.5">:</span>
                 <span className="text-gray-500 font-bold flex-1">없음</span>
               </div>
             )}
@@ -308,7 +308,7 @@ export function SeekerDetailContent({
             {/* 연락가능시간 */}
             <div className="flex items-start min-w-0">
               <span className="font-bold text-gray-500 shrink-0">{formatLabel('연락가능시간')}</span>
-              <span className="text-gray-400 shrink-0"> : </span>
+              <span className="text-gray-400 shrink-0 mx-1.5">:</span>
               <span className="font-bold text-gray-900 flex-1">{timeLine}</span>
             </div>
           </div>
