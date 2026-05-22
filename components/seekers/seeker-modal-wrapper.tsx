@@ -37,7 +37,7 @@ export function SeekerModalWrapper({
         showCloseButton={false}
       >
          <DialogTitle className="sr-only">인재 상세 정보</DialogTitle>
-         <div className="relative w-full max-h-[90vh] overflow-y-auto bg-white sm:rounded-[32px] shadow-[0_0_50px_rgba(0,0,0,0.2)] flex flex-col scrollbar-hide">
+         <div className="relative w-full max-h-[90vh] overflow-y-auto bg-white rounded-[24px] sm:rounded-[32px] shadow-[0_0_50px_rgba(0,0,0,0.2)] flex flex-col scrollbar-hide">
             {displaySeeker && <SeekerDetailContent job={displaySeeker} isModal={true} onClose={handleClose} />}
          </div>
       </DialogContent>

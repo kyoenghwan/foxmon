@@ -138,20 +138,18 @@ export function SeekerDetailContent({
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-gray-100 px-4 py-4 sm:px-6">
         <h2 className="text-lg font-bold text-gray-800">이력서 상세</h2>
         {isModal ? (
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
             onClick={onClose}
-            className="shrink-0 rounded-full bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-900"
+            className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
           >
-            <X className="h-5 w-5" />
-          </Button>
+            닫기
+          </button>
         ) : (
           <Link
             href="/seekers"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-900"
+            className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0 flex items-center justify-center"
           >
-            <X className="h-5 w-5" />
+            닫기
           </Link>
         )}
       </div>
