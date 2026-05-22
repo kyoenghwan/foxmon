@@ -17,6 +17,7 @@ import { FoxTalkWidget } from "@/components/chat/foxtalk-widget";
 import { CsAgentDock } from "@/components/chat/cs-agent-dock";
 import { AutoLogoutWrapper } from "@/components/auth/auto-logout-wrapper";
 import { MaxWidthWrapper } from "@/src/components/layout/MaxWidthWrapper";
+import { ViewportScaler } from "@/components/layout/viewport-scaler";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -69,9 +70,42 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                function adjustViewport() {
+                  var w = window.innerWidth || document.documentElement.clientWidth || screen.width;
+                  if (w > 0 && w < 425) {
+                    var scale = w / 425;
+                    var meta = document.querySelector('meta[name="viewport"]');
+                    if (meta) {
+                      meta.setAttribute('content', 'width=425, initial-scale=' + scale + ', minimum-scale=' + scale + ', maximum-scale=' + scale + ', user-scalable=no');
+                    } else {
+                      meta = document.createElement('meta');
+                      meta.name = 'viewport';
+                      meta.setAttribute('content', 'width=425, initial-scale=' + scale + ', minimum-scale=' + scale + ', maximum-scale=' + scale + ', user-scalable=no');
+                      document.head.appendChild(meta);
+                    }
+                  } else {
+                    var meta = document.querySelector('meta[name="viewport"]');
+                    if (meta) {
+                      meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+                    }
+                  }
+                }
+                adjustViewport();
+                window.addEventListener('resize', adjustViewport);
+              })();
+            `
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f0f2f5]`}
       >
+        <ViewportScaler />
         <MaxWidthWrapper>
           <LanguageProvider>
             <AutoLogoutWrapper>

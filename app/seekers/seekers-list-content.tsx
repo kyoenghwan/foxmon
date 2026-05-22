@@ -200,7 +200,7 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                 
                 // 공백으로 연결하여 다중 검색어가 되도록 빌드
                 const combinedTerms = [
-                    regionText && regionText !== '전체' ? regionText : '', 
+                    regionText && regionText !== '전체' && regionText !== '전국' ? regionText : '', 
                     industryTerm && industryTerm !== '전체' ? industryTerm : '', 
                     keywordTerm,
                     qParam
