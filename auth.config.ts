@@ -26,10 +26,10 @@ export const authConfig = {
                 return true;
             }
 
-            if (!isLoggedIn) {
-                // All other routes require login for an adult-only site
-                return false; 
-            }
+            // if (!isLoggedIn) {
+            //     // All other routes require login for an adult-only site
+            //     // return false; 
+            // }
 
             return true;
         },

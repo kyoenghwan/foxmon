@@ -5,8 +5,8 @@ import { revalidatePath } from "next/cache";
 import { QA_GET_CS_MESSAGES } from "@/src/atoms/qa/support/QA_GET_CS_MESSAGES";
 import {
   QA_LIST_CS_ROOMS,
-  type CsRoomSearchFilters,
 } from "@/src/atoms/qa/support/QA_LIST_CS_ROOMS";
+import type { CsRoomSearchFilters } from "@/lib/cs-search";
 import { OA_INSERT_CS_MESSAGE } from "@/src/atoms/oa/support/OA_INSERT_CS_MESSAGE";
 import { getSiteSettings } from "@/actions/admin/siteSettings";
 import { isAdminRole } from "@/lib/normalize-user-role";

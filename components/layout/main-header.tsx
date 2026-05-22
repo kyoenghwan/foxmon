@@ -111,7 +111,8 @@ export function MainHeader({ session }: MainHeaderProps) {
         const trimmed = query.trim();
         if (!trimmed) return;
         FA_RECORD_SEARCH_KEYWORD_FLOW(trimmed).catch(console.error);
-        router.push(`/jobs?q=${encodeURIComponent(trimmed)}`);
+        const targetPath = pathname.startsWith('/seekers') || pathname.startsWith('/seeker') ? '/seekers' : '/jobs';
+        router.push(`${targetPath}?q=${encodeURIComponent(trimmed)}`);
     };
 
     const handleMouseEnter = () => {

@@ -20,7 +20,6 @@ export type CsRoomListItem = {
   has_unread: boolean;
 };
 
-export type { CsRoomSearchFilters };
 
 export async function QA_LIST_CS_ROOMS(
   csAdminUserId?: string | null,
