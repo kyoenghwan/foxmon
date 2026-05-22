@@ -200,21 +200,21 @@ export function SeekerDetailContent({
         <section className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-3.5">
           <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">희망 근무조건</h2>
           <div className="space-y-2.5 text-sm leading-relaxed text-gray-800 sm:text-[15px]">
-            <p>
-              <span className="font-bold text-gray-500">지역</span>
-              <span className="text-gray-400"> : </span>
-              <span className="font-bold">{desired_location?.trim() || '무관'}</span>
-            </p>
-            <p>
-              <span className="font-bold text-gray-500">업종</span>
-              <span className="text-gray-400"> : </span>
-              <span className="font-bold">{industryLine}</span>
-            </p>
-            <p>
-              <span className="font-bold text-gray-500">급여</span>
-              <span className="text-gray-400"> : </span>
-              <span className="font-bold text-primary">{payText}</span>
-            </p>
+            <div className="flex items-start">
+              <span className="font-bold text-gray-500 w-24 shrink-0">지역</span>
+              <span className="text-gray-400 shrink-0"> : </span>
+              <span className="font-bold text-gray-900 ml-1">{desired_location?.trim() || '무관'}</span>
+            </div>
+            <div className="flex items-start">
+              <span className="font-bold text-gray-500 w-24 shrink-0">업종</span>
+              <span className="text-gray-400 shrink-0"> : </span>
+              <span className="font-bold text-gray-900 ml-1">{industryLine}</span>
+            </div>
+            <div className="flex items-start">
+              <span className="font-bold text-gray-500 w-24 shrink-0">급여</span>
+              <span className="text-gray-400 shrink-0"> : </span>
+              <span className="font-bold text-primary ml-1">{payText}</span>
+            </div>
           </div>
         </section>
 
@@ -237,12 +237,12 @@ export function SeekerDetailContent({
           <div className="space-y-2.5 text-sm leading-relaxed text-gray-800 sm:text-[15px]">
             {/* 연락처 */}
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center min-w-0">
-                <span className="font-bold text-gray-500 shrink-0">연락처</span>
-                <span className="text-gray-400"> : </span>
+              <div className="flex items-start min-w-0 flex-1">
+                <span className="font-bold text-gray-500 w-24 shrink-0">연락처</span>
+                <span className="text-gray-400 shrink-0"> : </span>
                 <span
                   onClick={() => is_contact_public && contact_number && handleCopy(contactLine, '연락처')}
-                  className={`min-w-0 break-words text-gray-900 font-bold ${
+                  className={`min-w-0 break-words text-gray-900 font-bold ml-1 flex-1 ${
                     is_contact_public && contact_number
                       ? 'cursor-pointer hover:underline hover:text-primary transition-all'
                       : ''
@@ -277,12 +277,12 @@ export function SeekerDetailContent({
             {/* SNS */}
             {snsDisplayList.length > 0 ? (
               snsDisplayList.map((sns, idx) => (
-                <div key={idx} className="flex items-center min-w-0">
-                  <span className="font-bold text-gray-500 shrink-0">{sns.label}</span>
-                  <span className="text-gray-400"> : </span>
+                <div key={idx} className="flex items-start min-w-0">
+                  <span className="font-bold text-gray-500 w-24 shrink-0">{sns.label}</span>
+                  <span className="text-gray-400 shrink-0"> : </span>
                   <span
                     onClick={() => handleCopy(sns.id, sns.label)}
-                    className="min-w-0 break-words text-gray-900 font-bold cursor-pointer hover:underline hover:text-primary transition-all"
+                    className="min-w-0 break-words text-gray-900 font-bold ml-1 flex-1 cursor-pointer hover:underline hover:text-primary transition-all"
                     title="클릭 시 복사"
                   >
                     {sns.id}
@@ -290,18 +290,18 @@ export function SeekerDetailContent({
                 </div>
               ))
             ) : (
-              <div className="flex items-center min-w-0">
-                <span className="font-bold text-gray-500 shrink-0">SNS</span>
-                <span className="text-gray-400"> : </span>
-                <span className="text-gray-500 font-bold">없음</span>
+              <div className="flex items-start min-w-0">
+                <span className="font-bold text-gray-500 w-24 shrink-0">SNS</span>
+                <span className="text-gray-400 shrink-0"> : </span>
+                <span className="text-gray-500 font-bold ml-1">없음</span>
               </div>
             )}
 
             {/* 연락가능시간 */}
-            <div className="flex items-center min-w-0">
-              <span className="font-bold text-gray-500 shrink-0">연락가능시간</span>
-              <span className="text-gray-400"> : </span>
-              <span className="font-bold text-gray-900">{timeLine}</span>
+            <div className="flex items-start min-w-0">
+              <span className="font-bold text-gray-500 w-24 shrink-0">연락가능시간</span>
+              <span className="text-gray-400 shrink-0"> : </span>
+              <span className="font-bold text-gray-900 ml-1 flex-1">{timeLine}</span>
             </div>
           </div>
         </section>
