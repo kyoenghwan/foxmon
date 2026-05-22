@@ -426,15 +426,13 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllPremium && idx >= 10 ? 'hidden min-[425px]:block' : ''
-                                } ${
-                                    !showAllPremium && idx >= 15 ? 'min-[425px]:hidden md:block' : ''
+                                    !showAllPremium && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllPremium && idx >= 20 ? 'md:hidden lg:block' : ''
                                 } ${
-                                    !showAllPremium && idx >= 25 ? 'lg:hidden xl:block' : ''
+                                    !showAllPremium && idx >= 30 ? 'lg:hidden xl:block' : ''
                                 } ${
-                                    !showAllPremium && idx >= 30 ? 'xl:hidden' : ''
+                                    !showAllPremium && idx >= 40 ? 'xl:hidden' : ''
                                 }`}
                             >
                                 <PremiumJobCard 
@@ -487,15 +485,13 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllSpecial && idx >= 10 ? 'hidden min-[425px]:block' : ''
-                                } ${
-                                    !showAllSpecial && idx >= 15 ? 'min-[425px]:hidden md:block' : ''
+                                    !showAllSpecial && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllSpecial && idx >= 20 ? 'md:hidden lg:block' : ''
                                 } ${
-                                    !showAllSpecial && idx >= 25 ? 'lg:hidden xl:block' : ''
+                                    !showAllSpecial && idx >= 30 ? 'lg:hidden xl:block' : ''
                                 } ${
-                                    !showAllSpecial && idx >= 30 ? 'xl:hidden' : ''
+                                    !showAllSpecial && idx >= 40 ? 'xl:hidden' : ''
                                 }`}
                             >
                                 <PremiumJobCard 
@@ -547,15 +543,13 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllGeneral && idx >= 10 ? 'hidden min-[425px]:block' : ''
-                                } ${
-                                    !showAllGeneral && idx >= 15 ? 'min-[425px]:hidden md:block' : ''
+                                    !showAllGeneral && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllGeneral && idx >= 20 ? 'md:hidden lg:block' : ''
                                 } ${
-                                    !showAllGeneral && idx >= 25 ? 'lg:hidden xl:block' : ''
+                                    !showAllGeneral && idx >= 30 ? 'lg:hidden xl:block' : ''
                                 } ${
-                                    !showAllGeneral && idx >= 30 ? 'xl:hidden' : ''
+                                    !showAllGeneral && idx >= 40 ? 'xl:hidden' : ''
                                 }`}
                             >
                                 <PremiumJobCard 
