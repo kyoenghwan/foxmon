@@ -678,56 +678,57 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     )}
                 </div>
                 {generalJobs.length > 0 ? (
-                    <div className="bg-white border-t-2 border-gray-900 shadow-sm rounded-b-xl overflow-x-auto">
-                        <table className="w-full min-w-[800px] text-center text-[13px] md:text-[14px]">
-                            <thead className="border-b border-gray-200 text-gray-700 font-bold bg-white">
-                                <tr>
-                                    <th className="py-3 px-2 w-[15%] font-semibold">업체명</th>
-                                    <th className="py-3 px-4 w-[45%] text-left font-semibold">제목</th>
-                                    <th className="py-3 px-2 w-[15%] font-semibold text-gray-500">근무지역</th>
-                                    <th className="py-3 px-2 w-[15%] font-semibold text-gray-500">급여</th>
-                                    <th className="py-3 px-2 w-[10%] font-semibold text-gray-500">등록일</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {paginatedTableJobs.map((job) => (
-                                    <GeneralJobListRow key={job.id} {...(job as any)} />
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className="bg-white border-t-2 border-gray-900 shadow-sm rounded-b-xl">
+                        <div className="divide-y divide-gray-100">
+                            {paginatedTableJobs.map((job) => (
+                                <GeneralJobListRow key={job.id} {...(job as any)} />
+                            ))}
+                        </div>
                         
                         {/* Pagination Controls */}
-                        {totalPages > 1 && (
-                            <div className="flex justify-center items-center gap-1.5 py-6">
-                                <button 
-                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                    disabled={currentPage === 1}
-                                    className="px-3 py-1.5 border border-gray-200 rounded-md text-[13px] font-bold text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
-                                >
-                                    이전
-                                </button>
-                                {Array.from({ length: totalPages }).map((_, i) => (
+                        {(() => {
+                            const displayPages = Math.max(totalPages, 4);
+                            return (
+                                <div className="flex justify-center items-center gap-1.5 py-6">
                                     <button 
-                                        key={i}
-                                        onClick={() => setCurrentPage(i + 1)}
-                                        className={`w-8 h-8 flex items-center justify-center rounded-md text-[13px] font-bold transition-colors ${
-                                            currentPage === i + 1 
-                                                ? 'bg-gray-800 text-white border-transparent' 
-                                                : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
-                                        }`}
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={currentPage === 1}
+                                        className="px-3 py-1.5 border border-gray-200 rounded-md text-[13px] font-bold text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
                                     >
-                                        {i + 1}
+                                        이전
                                     </button>
-                                ))}
-                                <button 
-                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="px-3 py-1.5 border border-gray-200 rounded-md text-[13px] font-bold text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
-                                >
-                                    다음
-                                </button>
-                            </div>
-                        )}
+                                    {Array.from({ length: displayPages }).map((_, i) => {
+                                        const pageNum = i + 1;
+                                        return (
+                                            <button 
+                                                key={i}
+                                                onClick={() => {
+                                                    if (pageNum <= totalPages) {
+                                                        setCurrentPage(pageNum);
+                                                    } else {
+                                                        alert(`더미 페이지 ${pageNum} 입니다. (실제 데이터가 없습니다)`);
+                                                    }
+                                                }}
+                                                className={`w-8 h-8 flex items-center justify-center rounded-md text-[13px] font-bold transition-colors ${
+                                                    currentPage === pageNum 
+                                                        ? 'bg-gray-800 text-white border-transparent' 
+                                                        : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                {pageNum}
+                                            </button>
+                                        );
+                                    })}
+                                    <button 
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={currentPage === totalPages || totalPages === 0}
+                                        className="px-3 py-1.5 border border-gray-200 rounded-md text-[13px] font-bold text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
+                                    >
+                                        다음
+                                    </button>
+                                </div>
+                            );
+                        })()}
                     </div>
                 ) : (
                     <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">

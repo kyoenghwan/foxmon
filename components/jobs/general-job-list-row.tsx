@@ -16,45 +16,63 @@ export function GeneralJobListRow(job: AdItem) {
     const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
 
     return (
-        <tr 
+        <div 
             onClick={() => router.push(`/jobs/${id}`)}
-            className="hover:bg-gray-50/50 transition-colors group cursor-pointer"
+            className="p-4 hover:bg-gray-50/80 active:scale-[0.99] transition-all border-b border-gray-100 flex flex-col gap-2.5 cursor-pointer relative group"
         >
-            <td className="py-3 px-2 font-bold text-gray-800 text-center truncate max-w-[150px]">{company}</td>
-            
-            <td className="py-3 px-4 text-left">
-                <div className="flex flex-col gap-1 min-w-0">
-                    {hasIcons && (
-                        <div className="flex flex-wrap items-center gap-1.5">
-                            {option_general_icons?.map((icon, idx) => (
-                                <span key={idx} className="text-[11px] font-extrabold px-1.5 py-0.5 rounded bg-white text-gray-700 border border-gray-300 shadow-sm whitespace-nowrap">
-                                    {icon}
-                                </span>
-                            ))}
-                        </div>
+            {/* 1행: 업체명, 지역, 급여, 등록일 */}
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] sm:text-[13px]">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="font-extrabold text-gray-900 text-[14px] sm:text-[15px] shrink-0">
+                        {company}
+                    </span>
+                    <span className="text-gray-400 shrink-0">|</span>
+                    <span className="font-bold text-gray-500 shrink-0">
+                        📍 {shortLocation}
+                    </span>
+                    <span className="text-gray-400 shrink-0">|</span>
+                    <span className="bg-red-50 text-[#ff3b30] text-[11px] font-black px-2 py-0.5 rounded-full border border-red-100/50 shrink-0">
+                        {pay}
+                    </span>
+                    {time && (
+                        <>
+                            <span className="text-gray-400 shrink-0">|</span>
+                            <span className="font-bold text-gray-500 shrink-0">
+                                ⏱️ {time}
+                            </span>
+                        </>
                     )}
-                    <div className="truncate w-full mt-0.5">
-                        <span 
-                            className={`text-[15px] md:text-[16px] truncate tracking-tight transition-colors ${option_bold ? 'font-black' : 'font-bold'} ${!option_color_value && !option_highlight_value ? 'text-gray-900 group-hover:text-primary' : ''}`}
-                            style={{
-                                color: option_color_value || undefined,
-                                backgroundColor: option_highlight_value || undefined,
-                                padding: option_highlight_value ? '0 4px' : undefined,
-                            }}
-                        >
-                            {title}
-                        </span>
-                    </div>
                 </div>
-            </td>
-
-            <td className="py-3 px-2 text-gray-500 text-center">{shortLocation}</td>
+                <div className="text-gray-400 font-semibold shrink-0 text-[11px] sm:text-[12px] ml-auto">
+                    {dateStr}
+                </div>
+            </div>
             
-            <td className="py-3 px-2 text-center">
-                <span className="text-[15px] font-black text-[#ff3b30] tracking-tighter whitespace-nowrap">{pay}</span>
-            </td>
-
-            <td className="py-3 px-2 text-gray-400 font-medium text-center text-[13px]">{dateStr}</td>
-        </tr>
+            {/* 2행: 옵션 아이콘 배지 & 구인 공고 제목 */}
+            <div className="flex flex-col gap-1.5">
+                {hasIcons && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        {option_general_icons?.map((icon, idx) => (
+                            <span key={idx} className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-white text-gray-700 border border-gray-200 shadow-sm whitespace-nowrap">
+                                {icon}
+                            </span>
+                        ))}
+                    </div>
+                )}
+                <div className="flex items-start gap-2">
+                    <h3 
+                        className={`text-[14px] sm:text-[15px] leading-snug group-hover:text-primary transition-colors whitespace-pre-wrap break-all flex-1 ${option_bold ? 'font-black' : 'font-bold'} ${!option_color_value && !option_highlight_value ? 'text-gray-800' : ''}`}
+                        style={{
+                            color: option_color_value || undefined,
+                            backgroundColor: option_highlight_value || undefined,
+                            padding: option_highlight_value ? '2px 6px' : undefined,
+                            borderRadius: option_highlight_value ? '4px' : undefined,
+                        }}
+                    >
+                        {title}
+                    </h3>
+                </div>
+            </div>
+        </div>
     );
 }
