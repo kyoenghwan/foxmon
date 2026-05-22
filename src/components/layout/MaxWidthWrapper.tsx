@@ -1,11 +1,21 @@
+/**
+ * ⚠️ [프로젝트 특수 지침 보호 파일] ⚠️
+ * 규칙 문서: docs/project_rules/03_mobile_viewport_scaling.md
+ * 
+ * 이 파일은 모바일 세로모드(425px 미만) 뷰포트 스케일링의 유일한 소스(SSOT)입니다.
+ * MOBILE_TRIGGER(425) 값을 임의 변경하거나, 스케일링 로직을 제거/비활성화하는 것은
+ * 프로젝트 규칙에 의해 절대 금지됩니다.
+ * 
+ * 수정이 필요한 경우 반드시 사용자 승인을 받으십시오.
+ */
 'use client';
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-// 425px 미만에서 스케일링 발동
+// ❌ [절대 변경 금지] 425px 미만에서 스케일링 발동
 const MOBILE_TRIGGER = 425;
-// 실제 렌더링 기준 너비 (축소 비율 완화용)
+// ⚠️ [사용자 승인 필요] 실제 렌더링 기준 너비 (축소 비율 완화용)
 // 375px 기기: zoom 0.96 | 360px 기기: zoom 0.92 | 320px 기기: zoom 0.82
 const MOBILE_RENDER_WIDTH = 390;
 
