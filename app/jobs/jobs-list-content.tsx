@@ -300,15 +300,13 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllPremium && idx >= 20 ? 'hidden min-[425px]:block' : ''
-                                } ${
-                                    !showAllPremium && idx >= 25 ? 'min-[425px]:hidden md:block' : ''
+                                    !showAllPremium && idx >= 20 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllPremium && idx >= 30 ? 'md:hidden lg:block' : ''
                                 } ${
-                                    !showAllPremium && idx >= 35 ? 'lg:hidden xl:block' : ''
+                                    !showAllPremium && idx >= 40 ? 'lg:hidden xl:block' : ''
                                 } ${
-                                    !showAllPremium && idx >= 40 ? 'xl:hidden' : ''
+                                    !showAllPremium && idx >= 50 ? 'xl:hidden' : ''
                                 }`}
                             >
                                 <PremiumJobCard 
@@ -361,11 +359,9 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllSpecial && idx >= 10 ? 'hidden min-[425px]:block' : ''
+                                    !showAllSpecial && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
-                                    !showAllSpecial && idx >= 20 ? 'min-[425px]:hidden md:block' : ''
-                                } ${
-                                    !showAllSpecial && idx >= 25 ? 'md:hidden lg:block' : ''
+                                    !showAllSpecial && idx >= 20 ? 'md:hidden lg:block' : ''
                                 } ${
                                     !showAllSpecial && idx >= 30 ? 'lg:hidden xl:block' : ''
                                 } ${
@@ -421,11 +417,9 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllGeneral && idx >= 10 ? 'hidden min-[425px]:block' : ''
+                                    !showAllGeneral && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
-                                    !showAllGeneral && idx >= 20 ? 'min-[425px]:hidden md:block' : ''
-                                } ${
-                                    !showAllGeneral && idx >= 25 ? 'md:hidden lg:block' : ''
+                                    !showAllGeneral && idx >= 20 ? 'md:hidden lg:block' : ''
                                 } ${
                                     !showAllGeneral && idx >= 30 ? 'lg:hidden xl:block' : ''
                                 } ${
