@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { MarqueeText } from '@/components/ui/marquee-text';
 
 export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () => void }) {
     const router = useRouter();
@@ -58,9 +59,9 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
             }}
             className={`p-4 sm:p-5 hover:bg-gray-50/50 active:scale-[0.99] transition-all border border-gray-200/80 rounded-xl bg-white shadow-sm hover:shadow-md hover:border-primary/30 flex flex-col gap-2.5 cursor-pointer relative group ${isInactive ? 'opacity-50 grayscale' : ''}`}
         >
-            {/* 1행: [상태 배지] + [제목] + [작성일] */}
-            <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0 flex-1">
+            {/* 1행: [상태 배지] + [원하는 급여] + [제목] + [작성일] */}
+            <div className="flex items-center justify-between gap-2 overflow-hidden">
+                <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-black whitespace-nowrap shrink-0 ${
                         isInactive 
                             ? 'bg-gray-200 text-gray-600' 
@@ -68,9 +69,18 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
                     }`}>
                         {isInactive ? '구직 완료' : '구직 중'}
                     </span>
-                    <h3 className="font-extrabold text-[14px] sm:text-[15px] text-gray-800 leading-snug group-hover:text-primary transition-colors truncate flex-1">
-                        {displayTitle}
-                    </h3>
+                    <span className={`text-[11px] font-black px-2 py-0.5 rounded-full shrink-0 border ${
+                        isInactive 
+                            ? 'bg-gray-100 text-gray-400 border-gray-200/50' 
+                            : 'bg-orange-50 text-orange-600 border-orange-100/50'
+                    }`}>
+                        {payText}
+                    </span>
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                        <MarqueeText className="font-extrabold text-[14px] sm:text-[15px] text-gray-800 leading-snug group-hover:text-primary transition-colors text-left">
+                            {displayTitle}
+                        </MarqueeText>
+                    </div>
                 </div>
                 <div className="text-gray-400 font-semibold shrink-0 text-[11px] sm:text-[12px] ml-auto">
                     {dateStr}
@@ -94,14 +104,6 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
                 <span className="text-gray-300 shrink-0">|</span>
                 <span className="font-bold text-gray-500 shrink-0">
                     💼 {industry}
-                </span>
-                <span className="text-gray-300 shrink-0">|</span>
-                <span className={`text-[11px] font-black px-2 py-0.5 rounded-full shrink-0 border ${
-                    isInactive 
-                        ? 'bg-gray-100 text-gray-400 border-gray-200/50' 
-                        : 'bg-orange-50 text-orange-600 border-orange-100/50'
-                }`}>
-                    {payText}
                 </span>
             </div>
         </div>
