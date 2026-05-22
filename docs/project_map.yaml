@@ -260,6 +260,12 @@ pages:
     files: ["app/seekers/page.tsx"]
     db_tables: ["resumes"]
 
+  SEEKER_DETAIL_MODAL:
+    label: "구직자 이력서 상세 팝업"
+    keywords: ["이력서 상세", "구직자 상세", "seeker detail", "seeker-detail-content"]
+    files: ["components/seekers/seeker-detail-content.tsx"]
+    db_tables: ["resumes", "users"]
+
   # ── 커뮤니티 ──
   COMMUNITY_PAGE:
     label: "커뮤니티 게시판 페이지"

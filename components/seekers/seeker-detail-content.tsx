@@ -22,6 +22,26 @@ function formatIndustry(v: unknown): string {
   return String(v);
 }
 
+function formatPhoneNumber(phone: string): string {
+  if (!phone) return '';
+  const cleaned = phone.replace(/\D/g, '');
+  if (cleaned.length === 11) {
+    return cleaned.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+  }
+  if (cleaned.length === 10) {
+    if (cleaned.startsWith('02')) {
+      return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, '$1-$2-$3');
+    }
+    return cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+  }
+  if (cleaned.length === 9) {
+    if (cleaned.startsWith('02')) {
+      return cleaned.replace(/(\d{2})(\d{3})(\d{4})/, '$1-$2-$3');
+    }
+  }
+  return phone;
+}
+
 export function SeekerDetailContent({
   job,
   isModal = false,
@@ -91,8 +111,11 @@ export function SeekerDetailContent({
   }
 
   const industryLine = formatIndustry(desired_industry);
+  const formattedContact = is_contact_public && contact_number
+    ? formatPhoneNumber(contact_number)
+    : '미등록';
   const contactLine = is_contact_public
-    ? contact_number || '미등록'
+    ? formattedContact
     : '비공개 (업소 연락 시 공개)';
   const timeLine = is_anytime_contact ? '언제든지 가능' : contact_time || '무관';
 
@@ -101,8 +124,17 @@ export function SeekerDetailContent({
       ? snsDisplayList.map((s) => `${s.label} ${s.id}`).join(' · ')
       : null;
 
+  const handleCopy = (text: string, label: string) => {
+    if (!text || text === '미등록' || text.includes('비공개')) return;
+    navigator.clipboard.writeText(text).then(() => {
+      alert(`${label} '${text}'이(가) 복사되었습니다!`);
+    }).catch(err => {
+      console.error('복사 실패:', err);
+    });
+  };
+
   return (
-    <div className="flex h-full w-full flex-col bg-white text-gray-900 relative">
+    <div className="flex h-full w-full flex-col bg-white text-gray-900 relative rounded-[24px] overflow-hidden">
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-gray-100 px-4 py-4 sm:px-6">
         <h2 className="text-lg font-bold text-gray-800">이력서 상세</h2>
         {isModal ? (
@@ -198,7 +230,12 @@ export function SeekerDetailContent({
 
         {/* 연락처 및 SNS */}
         <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-          <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">연락처 및 SNS</h2>
+          <div className="mb-3 flex flex-wrap items-baseline gap-2">
+            <h2 className="text-[15px] font-black text-gray-900 sm:text-base">연락처 및 SNS</h2>
+            <span className="text-[11px] font-medium text-gray-400">
+              (연락처를 누르면 복사가 됩니다.)
+            </span>
+          </div>
           <div className="space-y-2.5 text-[16px] sm:text-[17px] font-bold text-gray-900">
             {/* 연락처 */}
             <div className="flex items-center justify-between gap-2 py-1 border-b border-gray-50/50 pb-2">
@@ -206,7 +243,17 @@ export function SeekerDetailContent({
                 <Phone className="h-4 w-4 shrink-0 text-gray-400" />
                 <span className="shrink-0 font-black text-gray-700">연락처</span>
                 <span className="text-gray-400">:</span>
-                <span className="min-w-0 break-words text-gray-950 font-black">{contactLine}</span>
+                <span
+                  onClick={() => is_contact_public && contact_number && handleCopy(contactLine, '연락처')}
+                  className={`min-w-0 break-words text-gray-950 font-black ${
+                    is_contact_public && contact_number
+                      ? 'cursor-pointer hover:underline hover:text-primary transition-all'
+                      : ''
+                  }`}
+                  title={is_contact_public && contact_number ? '클릭 시 복사' : undefined}
+                >
+                  {contactLine}
+                </span>
               </div>
               {is_contact_public && contact_number && (
                 <div className="flex items-center gap-1.5 shrink-0 ml-auto">
@@ -224,16 +271,6 @@ export function SeekerDetailContent({
                   >
                     <span className="text-[12px] leading-none font-bold">✉️</span>
                   </a>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(contact_number).then(() => {
-                        alert(`연락처 '${contact_number}' 가 복사되었습니다!`);
-                      });
-                    }}
-                    className="px-2.5 py-1 bg-gray-55 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded-lg text-[11px] font-bold shadow-sm active:scale-95 transition-all flex items-center gap-1"
-                  >
-                    <Copy className="h-3 w-3" /> 복사
-                  </button>
                 </div>
               )}
             </div>
@@ -255,18 +292,14 @@ export function SeekerDetailContent({
                       <span className="h-3.5 w-3.5 shrink-0 text-gray-300 flex items-center justify-center">•</span>
                       <span className="shrink-0 font-black text-gray-700">{sns.label}</span>
                       <span className="text-gray-400">:</span>
-                      <span className="min-w-0 break-words text-gray-800">{sns.id}</span>
+                      <span
+                        onClick={() => handleCopy(sns.id, sns.label)}
+                        className="min-w-0 break-words text-gray-800 cursor-pointer hover:underline hover:text-primary transition-all"
+                        title="클릭 시 복사"
+                      >
+                        {sns.id}
+                      </span>
                     </div>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(sns.id).then(() => {
-                          alert(`'${sns.id}' 가 복사되었습니다!`);
-                        });
-                      }}
-                      className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded-lg text-[11px] font-bold shadow-sm active:scale-95 transition-all shrink-0 ml-auto flex items-center gap-1"
-                    >
-                      <Copy className="h-3 w-3" /> 복사
-                    </button>
                   </div>
                 ))
               ) : (
@@ -283,7 +316,7 @@ export function SeekerDetailContent({
       </div>
 
       {/* 하단 고정 연락/대화 바 */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-100 p-3 sm:p-4 flex z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
+      <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-100 p-3 sm:p-4 flex z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] rounded-b-[24px]">
         <button
           onClick={async () => {
             try {
