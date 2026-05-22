@@ -154,7 +154,7 @@ export function SeekerDetailContent({
         )}
       </div>
 
-      <div className="scrollbar-hide flex-1 space-y-5 overflow-y-auto p-4 sm:p-8 pb-28">
+      <div className="scrollbar-hide flex-1 space-y-2.5 overflow-y-auto p-4 sm:p-5 pb-20">
         {/* 프로필 + 제목·메타·키워드 (한 행: 사진 좌, 텍스트 우) */}
         <div className="flex flex-row items-start gap-4">
           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 sm:h-28 sm:w-28">
@@ -197,7 +197,7 @@ export function SeekerDetailContent({
         </div>
 
         {/* 희망 근무조건 */}
-        <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-3.5">
           <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">희망 근무조건</h2>
           <div className="space-y-2.5 text-sm leading-relaxed text-gray-800 sm:text-[15px]">
             <p>
@@ -219,7 +219,7 @@ export function SeekerDetailContent({
         </section>
 
         {/* 자기소개 */}
-        <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-3.5">
           <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">자기소개</h2>
           <p className="whitespace-pre-wrap text-sm font-medium leading-relaxed text-gray-800 sm:text-[15px]">
             {self_introduction?.trim() || '등록된 자기소개가 없습니다.'}
@@ -227,7 +227,7 @@ export function SeekerDetailContent({
         </section>
 
         {/* 연락처 및 SNS */}
-        <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-3.5">
           <div className="mb-3 flex flex-wrap items-baseline gap-2">
             <h2 className="text-[15px] font-black text-gray-900 sm:text-base">연락처 및 SNS</h2>
             <span className="text-[11px] font-medium text-gray-400">
@@ -254,20 +254,22 @@ export function SeekerDetailContent({
                 </span>
               </div>
               {is_contact_public && contact_number && (
-                <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                <div className="flex items-center gap-3.5 shrink-0 ml-auto mr-1">
                   <a
                     href={`tel:${contact_number}`}
-                    className="p-1.5 bg-gray-55 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-900 rounded-lg shadow-sm active:scale-95 transition-all flex items-center justify-center"
+                    className="text-green-500 hover:text-green-600 hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
                     title="전화걸기"
                   >
-                    <Phone className="h-3.5 w-3.5" />
+                    <svg className="h-[22px] w-[22px] fill-current" viewBox="0 0 24 24">
+                      <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.57a1.003 1.003 0 00-1.01.24l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.59l2.2-2.21a.994.994 0 00.24-1c-.37-1.11-.57-2.3-.57-3.53C6.35 3.35 5.65 2.65 4.93 2.65H1.67C.95 2.65.25 3.35.25 4.07.25 15.07 9.18 24 20.18 24c.72 0 1.42-.7 1.42-1.42v-3.28c0-.72-.7-1.42-1.42-1.42z" />
+                    </svg>
                   </a>
                   <a
                     href={`sms:${contact_number}`}
-                    className="p-1.5 bg-gray-55 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-900 rounded-lg shadow-sm active:scale-95 transition-all flex items-center justify-center"
+                    className="text-gray-500 hover:text-gray-800 hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
                     title="문자보내기"
                   >
-                    <span className="text-[12px] leading-none font-bold">✉️</span>
+                    <span className="text-[22px] leading-none">✉️</span>
                   </a>
                 </div>
               )}
