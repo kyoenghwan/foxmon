@@ -12,7 +12,7 @@ import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMM
 import { useLanguage } from '@/components/providers/language-provider';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-import { GeneralSeekerListRow } from './GeneralSeekerListRow';
+import { GeneralSeekerListRow, GeneralSeekerListRowDesktop } from './GeneralSeekerListRow';
 import { getPublicSeekerAdsAction, getSeekerAdByIdAction } from '@/lib/actions';
 import { SeekerModalWrapper } from '@/components/seekers/seeker-modal-wrapper';
 import { buildFlatIndustryOptions, resumeMatchesIndustryFilter } from '@/lib/resume-industry';
@@ -876,7 +876,34 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                 </div>
                 {generalJobs.length > 0 ? (
                     <div className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-3">
+                        {/* PC 뷰 (테이블 형태) */}
+                        <div className="hidden md:block bg-white border-t-2 border-gray-900 shadow-sm rounded-b-xl overflow-x-auto">
+                            <table className="w-full min-w-[800px] text-center text-[13px] md:text-[14px]">
+                                <thead className="border-b border-gray-200 text-gray-700 font-bold bg-white">
+                                    <tr>
+                                        <th className="py-3 px-2 w-[10%] font-semibold">이름</th>
+                                        <th className="py-3 px-2 w-[10%] font-semibold">성별/나이</th>
+                                        <th className="py-3 px-4 w-[35%] text-left font-semibold">제목</th>
+                                        <th className="py-3 px-2 w-[15%] font-semibold text-gray-500">희망지역</th>
+                                        <th className="py-3 px-2 w-[10%] font-semibold text-gray-500">희망업종</th>
+                                        <th className="py-3 px-2 w-[12%] font-semibold text-gray-500">희망급여</th>
+                                        <th className="py-3 px-2 w-[8%] font-semibold text-gray-500">작성일</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {paginatedTableJobs.map((job) => (
+                                        <GeneralSeekerListRowDesktop 
+                                            key={job.id} 
+                                            job={job} 
+                                            onClick={() => handleOpenSeeker(job.id)} 
+                                        />
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* 모바일 뷰 (2줄 카드 형태) */}
+                        <div className="md:hidden flex flex-col gap-3">
                             {paginatedTableJobs.map((job) => (
                                 <GeneralSeekerListRow 
                                     key={job.id} 
