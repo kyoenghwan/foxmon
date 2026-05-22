@@ -300,7 +300,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllPremium && idx >= 20 ? 'hidden md:block' : ''
+                                    !showAllPremium && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllPremium && idx >= 30 ? 'md:hidden lg:block' : ''
                                 } ${
@@ -359,7 +359,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllSpecial && idx >= 20 ? 'hidden md:block' : ''
+                                    !showAllSpecial && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllSpecial && idx >= 20 ? 'md:hidden lg:block' : ''
                                 } ${
@@ -417,7 +417,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllGeneral && idx >= 20 ? 'hidden md:block' : ''
+                                    !showAllGeneral && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllGeneral && idx >= 20 ? 'md:hidden lg:block' : ''
                                 } ${
