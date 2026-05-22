@@ -83,11 +83,11 @@ export default function RootLayout({
                     var scale = w / 600;
                     var meta = document.querySelector('meta[name="viewport"]');
                     if (meta) {
-                      meta.setAttribute('content', 'width=600, initial-scale=' + scale + ', minimum-scale=' + scale + ', maximum-scale=' + scale + ', user-scalable=no');
+                      meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
                     } else {
                       meta = document.createElement('meta');
                       meta.name = 'viewport';
-                      meta.setAttribute('content', 'width=600, initial-scale=' + scale + ', minimum-scale=' + scale + ', maximum-scale=' + scale + ', user-scalable=no');
+                      meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
                       document.head.appendChild(meta);
                     }
                     if (document.body) {

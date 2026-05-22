@@ -19,7 +19,7 @@ export function ViewportScaler() {
                     meta.setAttribute('name', 'viewport');
                     document.head.appendChild(meta);
                 }
-                meta.setAttribute('content', `width=600, initial-scale=${scale}, minimum-scale=${scale}, maximum-scale=${scale}, user-scalable=no`);
+                meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
                 
                 // CSS zoom 및 고정 width 속성을 body에 주입하여 데스크톱 리사이즈 및 모바일 브라우저에서 즉시 비율 축소 처리
                 if (document.body) {
