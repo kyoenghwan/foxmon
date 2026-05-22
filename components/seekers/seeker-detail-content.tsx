@@ -368,6 +368,9 @@ export function SeekerDetailContent({
               
               if (createRes.success) {
                 alert('FoxTalk 대화방이 생성되었습니다.');
+                if (onClose) {
+                  onClose();
+                }
                 window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
               } else {
                 alert(createRes.error || '채팅방을 생성하지 못했습니다.');

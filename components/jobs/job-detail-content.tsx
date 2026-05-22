@@ -406,6 +406,9 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     });
                     if (createRes.success) {
                         handleRecordApplication();
+                        if (onClose) {
+                            onClose();
+                        }
                         window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
                     }
                     else alert('채팅방을 생성하지 못했습니다.');
