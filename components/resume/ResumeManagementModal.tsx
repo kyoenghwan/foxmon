@@ -615,15 +615,11 @@ export function ResumeManagementModal() {
                                 role="button"
                                 tabIndex={0}
                                 aria-label={`구직글 보기: ${ad.ad_title || '제목 없음'}`}
-                                onClick={() => {
-                                  setIsOpen(false);
-                                  router.push(`/seekers/${ad.id}`);
-                                }}
+                                onClick={() => handleOpenAdEdit(ad)}
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter' || e.key === ' ') {
                                     e.preventDefault();
-                                    setIsOpen(false);
-                                    router.push(`/seekers/${ad.id}`);
+                                    handleOpenAdEdit(ad);
                                   }
                                 }}
                               >
