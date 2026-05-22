@@ -69,21 +69,21 @@ export default auth((req) => {
 
     // 1.5 Global Authentication Check (Strict Private Mode as requested by user)
     // 로그인이 안 된 상태면 무조건 /login으로 리다이렉트 (회원가입, 로그인, 정적 파일 제외)
-    // if (!session?.user && !isLoginPage && !isRegisterPage && !isPublicStatic) {
-    //     return NextResponse.redirect(new URL('/login', nextUrl));
-    // }
+    if (!session?.user && !isLoginPage && !isRegisterPage && !isPublicStatic) {
+        return NextResponse.redirect(new URL('/login', nextUrl));
+    }
  
     // 2. Age Gate Check (Redirect all unverified users to /age-gate EXCEPT if they are trying to register, login, or access SEO pages)
-    // if (!isAgeVerified && !isAgeGatePage && !isRegisterPage && !isLoginPage && !isSeoPath && !isPublicStatic && !isAdminPath) {
-    //     return NextResponse.redirect(new URL('/age-gate', nextUrl));
-    // }
+    if (!isAgeVerified && !isAgeGatePage && !isRegisterPage && !isLoginPage && !isSeoPath && !isPublicStatic && !isAdminPath) {
+        return NextResponse.redirect(new URL('/age-gate', nextUrl));
+    }
  
     // 3. Already Verified handling: Don't show age-gate if already verified
-    // if (isAgeVerified && isAgeGatePage) {
-    //     // If they are logged in, go to home. If not, they are likely in the middle of registration, so go to /register.
-    //     const redirectTo = session?.user ? '/' : '/register';
-    //     return NextResponse.redirect(new URL(redirectTo, nextUrl));
-    // }
+    if (isAgeVerified && isAgeGatePage) {
+        // If they are logged in, go to home. If not, they are likely in the middle of registration, so go to /register.
+        const redirectTo = session?.user ? '/' : '/register';
+        return NextResponse.redirect(new URL(redirectTo, nextUrl));
+    }
  
     return NextResponse.next();
 });
