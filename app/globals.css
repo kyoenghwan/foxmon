@@ -242,14 +242,3 @@
     100% { transform: translateX(calc(-50% - 1.5rem)); }
   }
 }
-
-/* 425px 미만 스마트폰 세로모드 대응: 화면 비율에 맞춰 전체 레이아웃 줌 아웃 */
-@media (max-width: 424px) {
-  .mobile-ratio-fit {
-    width: 425px !important;
-    max-width: 425px !important;
-    zoom: calc(100vw / 425) !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-}
