@@ -30,7 +30,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
     }
 
     // 구식 Fabric.js JSON인 경우 (생 JSON 노출 방지 및 텍스트 폴백)
-    if (content.startsWith('{"version":') || content.includes('"objects":')) {
+    if (content.startsWith('{"version":') || content.includes('"objects":') || content.trim().startsWith('{"version":')) {
       try {
         const parsed = JSON.parse(content);
         const objects = parsed.objects || [];
@@ -40,14 +40,15 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
           .map((obj: any) => obj.text)
           .filter(Boolean);
         
-        if (texts.length > 0) {
-          return `<div class="p-6 bg-yellow-50/50 border border-yellow-200 rounded-xl space-y-4 text-center">
-            <div class="bg-yellow-100 text-yellow-800 text-[12px] font-bold px-3 py-1 rounded-md inline-block mb-4">
-              ⚠️ 구버전으로 저장된 공고 배너입니다. 수정 후 다시 저장하시면 고화질 이미지 배너로 변경됩니다.
-            </div>
-            <div class="text-gray-800 font-bold leading-relaxed whitespace-pre-wrap">${texts.join('\n\n')}</div>
-          </div>`;
-        }
+        return `<div class="p-6 bg-yellow-50/50 border border-yellow-200 rounded-xl space-y-4 text-center w-full">
+          <div class="bg-yellow-100 text-yellow-800 text-[12px] font-bold px-3 py-1 rounded-md inline-block mb-2">
+            ⚠️ 구버전으로 저장된 공고 배너입니다. 수정 후 다시 저장하시면 고화질 이미지 배너로 변경됩니다.
+          </div>
+          ${texts.length > 0 
+            ? `<div class="text-gray-800 font-bold leading-relaxed whitespace-pre-wrap">${texts.join('\n\n')}</div>` 
+            : `<div class="text-gray-400 font-medium">상세 이미지 배너를 불러오려면 수정 모드에서 다시 저장해 주세요.</div>`
+          }
+        </div>`;
       } catch (e) {
         return content;
       }
