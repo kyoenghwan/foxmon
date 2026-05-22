@@ -209,16 +209,32 @@ export function SeekerDetailContent({
                 <span className="min-w-0 break-words text-gray-950 font-black">{contactLine}</span>
               </div>
               {is_contact_public && contact_number && (
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(contact_number).then(() => {
-                      alert(`연락처 '${contact_number}' 가 복사되었습니다!`);
-                    });
-                  }}
-                  className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded-lg text-[11px] font-bold shadow-sm active:scale-95 transition-all shrink-0 ml-auto flex items-center gap-1"
-                >
-                  <Copy className="h-3 w-3" /> 복사
-                </button>
+                <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                  <a
+                    href={`tel:${contact_number}`}
+                    className="p-1.5 bg-gray-55 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-900 rounded-lg shadow-sm active:scale-95 transition-all flex items-center justify-center"
+                    title="전화걸기"
+                  >
+                    <Phone className="h-3.5 w-3.5" />
+                  </a>
+                  <a
+                    href={`sms:${contact_number}`}
+                    className="p-1.5 bg-gray-55 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-900 rounded-lg shadow-sm active:scale-95 transition-all flex items-center justify-center"
+                    title="문자보내기"
+                  >
+                    <span className="text-[12px] leading-none font-bold">✉️</span>
+                  </a>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(contact_number).then(() => {
+                        alert(`연락처 '${contact_number}' 가 복사되었습니다!`);
+                      });
+                    }}
+                    className="px-2.5 py-1 bg-gray-55 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded-lg text-[11px] font-bold shadow-sm active:scale-95 transition-all flex items-center gap-1"
+                  >
+                    <Copy className="h-3 w-3" /> 복사
+                  </button>
+                </div>
               )}
             </div>
 
@@ -267,35 +283,7 @@ export function SeekerDetailContent({
       </div>
 
       {/* 하단 고정 연락/대화 바 */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-100 p-3 sm:p-4 flex gap-2 z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
-        <a
-          href={is_contact_public && contact_number ? `tel:${contact_number}` : '#'}
-          onClick={(e) => {
-            if (!is_contact_public || !contact_number) {
-              e.preventDefault();
-              alert('연락처가 비공개 상태입니다.');
-            }
-          }}
-          className="flex-1 h-[52px] bg-gray-50 hover:bg-gray-100 text-gray-800 font-black text-[14px] sm:text-[15px] flex items-center justify-center gap-1.5 rounded-2xl border border-gray-200 transition-all active:scale-[0.98] text-center"
-        >
-          <Phone className="w-4 h-4 text-gray-600" />
-          전화걸기
-        </a>
-        
-        <a
-          href={is_contact_public && contact_number ? `sms:${contact_number}` : '#'}
-          onClick={(e) => {
-            if (!is_contact_public || !contact_number) {
-              e.preventDefault();
-              alert('연락처가 비공개 상태입니다.');
-            }
-          }}
-          className="flex-1 h-[52px] bg-gray-50 hover:bg-gray-100 text-gray-800 font-black text-[14px] sm:text-[15px] flex items-center justify-center gap-1.5 rounded-2xl border border-gray-200 transition-all active:scale-[0.98] text-center"
-        >
-          <span className="text-[16px]">✉️</span>
-          문자보내기
-        </a>
-        
+      <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-100 p-3 sm:p-4 flex z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
         <button
           onClick={async () => {
             try {
@@ -332,9 +320,9 @@ export function SeekerDetailContent({
               alert('대화방 생성 도중 오류가 발생했습니다.');
             }
           }}
-          className="flex-[2] h-[52px] bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white font-black text-[14px] sm:text-[15px] shadow-lg flex items-center justify-center gap-1.5 rounded-2xl transition-all active:scale-[0.98] group"
+          className="w-full h-[52px] bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white font-black text-[15px] sm:text-[16px] shadow-lg flex items-center justify-center gap-2 rounded-2xl transition-all active:scale-[0.98] group"
         >
-          <span className="text-primary text-[18px] mb-0.5">⚡</span>
+          <span className="text-primary text-[20px] mb-0.5">⚡</span>
           FoxTalk 대화하기
         </button>
       </div>
