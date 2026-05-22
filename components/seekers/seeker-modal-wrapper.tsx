@@ -20,6 +20,9 @@ export function SeekerModalWrapper({
   const handleClose = () => {
     if (onClose) {
       onClose();
+    } else if (typeof window !== 'undefined') {
+      const currentParams = new URLSearchParams(window.location.search);
+      router.replace(`/seekers?${currentParams.toString()}`, { scroll: false });
     } else {
       router.back();
     }
@@ -33,14 +36,11 @@ export function SeekerModalWrapper({
       }
     }}>
       <DialogContent 
-        className="max-w-[800px] w-[95vw] sm:w-[90vw] p-0 overflow-hidden border-none bg-transparent shadow-none focus:outline-none" 
+        className="max-w-[800px] w-[95vw] sm:w-[90vw] p-0 overflow-hidden border-none bg-white rounded-[24px] sm:rounded-[32px] shadow-2xl focus:outline-none max-h-[90vh] flex flex-col scrollbar-hide" 
         showCloseButton={false}
-        onPointerDownOutside={(e) => e.preventDefault()}
       >
          <DialogTitle className="sr-only">인재 상세 정보</DialogTitle>
-         <div className="relative w-full max-h-[90vh] overflow-y-auto bg-white rounded-[24px] sm:rounded-[32px] shadow-[0_0_50px_rgba(0,0,0,0.2)] flex flex-col scrollbar-hide">
-            {displaySeeker && <SeekerDetailContent job={displaySeeker} isModal={true} onClose={handleClose} />}
-         </div>
+         {displaySeeker && <SeekerDetailContent job={displaySeeker} isModal={true} onClose={handleClose} />}
       </DialogContent>
     </Dialog>
   )

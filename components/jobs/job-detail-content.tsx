@@ -148,26 +148,16 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
          {isModal ? (
            <button
              onClick={onClose}
-             className="focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
+             className="focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0 px-4 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] sm:text-[13px] font-black transition-all"
            >
-             <span className="hidden md:flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors">
-                 <X className="w-5 h-5" />
-             </span>
-             <span className="md:hidden inline-block px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all">
-                 닫기
-             </span>
+             닫기
            </button>
          ) : (
            <Link
              href="/jobs"
-             className="focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0 flex items-center justify-center"
+             className="focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0 px-4 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] sm:text-[13px] font-black transition-all flex items-center justify-center"
            >
-             <span className="hidden md:flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors">
-                 <X className="w-5 h-5" />
-             </span>
-             <span className="md:hidden inline-block px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all">
-                 닫기
-             </span>
+             닫기
            </Link>
          )}
       </div>
