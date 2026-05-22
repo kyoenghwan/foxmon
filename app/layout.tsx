@@ -70,47 +70,52 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f0f2f5]`}
+      >
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 function adjustViewport() {
                   var w = window.innerWidth || document.documentElement.clientWidth || screen.width;
-                  if (w > 0 && w < 425) {
-                    var scale = w / 425;
+                  if (w > 0 && w < 600) {
+                    var scale = w / 600;
                     var meta = document.querySelector('meta[name="viewport"]');
                     if (meta) {
-                      meta.setAttribute('content', 'width=425, initial-scale=' + scale + ', minimum-scale=' + scale + ', maximum-scale=' + scale + ', user-scalable=no');
+                      meta.setAttribute('content', 'width=600, initial-scale=' + scale + ', minimum-scale=' + scale + ', maximum-scale=' + scale + ', user-scalable=no');
                     } else {
                       meta = document.createElement('meta');
                       meta.name = 'viewport';
-                      meta.setAttribute('content', 'width=425, initial-scale=' + scale + ', minimum-scale=' + scale + ', maximum-scale=' + scale + ', user-scalable=no');
+                      meta.setAttribute('content', 'width=600, initial-scale=' + scale + ', minimum-scale=' + scale + ', maximum-scale=' + scale + ', user-scalable=no');
                       document.head.appendChild(meta);
                     }
-                    document.documentElement.style.zoom = scale;
-                    document.documentElement.style.width = '425px';
-                    document.documentElement.style.overflowX = 'hidden';
+                    if (document.body) {
+                      document.body.style.zoom = scale;
+                      document.body.style.width = '600px';
+                      document.body.style.margin = '0 auto';
+                      document.body.style.overflowX = 'hidden';
+                    }
                   } else {
                     var meta = document.querySelector('meta[name="viewport"]');
                     if (meta) {
                       meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
                     }
-                    document.documentElement.style.zoom = '';
-                    document.documentElement.style.width = '';
-                    document.documentElement.style.overflowX = '';
+                    if (document.body) {
+                      document.body.style.zoom = '';
+                      document.body.style.width = '';
+                      document.body.style.margin = '';
+                      document.body.style.overflowX = '';
+                    }
                   }
                 }
                 adjustViewport();
                 window.addEventListener('resize', adjustViewport);
+                window.addEventListener('DOMContentLoaded', adjustViewport);
               })();
             `
           }}
         />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f0f2f5]`}
-      >
         <ViewportScaler />
         <MaxWidthWrapper>
           <LanguageProvider>
