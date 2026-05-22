@@ -59,6 +59,16 @@ export function SeekerDetailContent({
   isModal?: boolean;
   onClose?: () => void;
 }) {
+  const [isMobileDevice, setIsMobileDevice] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+      const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+      setIsMobileDevice(isMobile);
+    }
+  }, []);
+
   const { ad_title, resumes, users } = job;
   const {
     nickname,
@@ -260,8 +270,8 @@ export function SeekerDetailContent({
                   {contactLine}
                 </span>
               </div>
-              {is_contact_public && contact_number && (
-                <div className="flex items-center gap-3.5 shrink-0 ml-auto mr-1">
+              {isMobileDevice && is_contact_public && contact_number && (
+                <div className="flex items-center gap-3.5 shrink-0 ml-auto mr-1 md:hidden">
                   <a
                     href={`tel:${contact_number}`}
                     className="text-green-500 hover:text-green-600 hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
