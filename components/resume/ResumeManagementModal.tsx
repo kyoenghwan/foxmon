@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { MarqueeText } from '@/components/ui/marquee-text';
 import { FileText, Plus, ArrowLeft, Loader2, Save, Upload, Trash2, Eye, EyeOff, Pencil } from 'lucide-react';
-import { manageResumeAction, manageSeekerAdAction } from '@/lib/actions';
+import { manageResumeAction, manageSeekerAdAction, getSeekerAdByIdAction } from '@/lib/actions';
+import { SeekerDetailContent } from '@/components/seekers/seeker-detail-content';
 import { ResumeData } from '@/src/atoms/oa/resume/OA_UPSERT_RESUME';
 
 type ResumeFormState = Partial<ResumeData> & { desired_industries?: string[] };
@@ -98,6 +99,10 @@ export function ResumeManagementModal() {
   const [formData, setFormData] = useState<ResumeFormState>({});
   const [adFormView, setAdFormView] = useState<boolean>(false);
   const [adFormData, setAdFormData] = useState<Partial<SeekerAdData>>({});
+  
+  // 구직글 미리보기 상태
+  const [previewData, setPreviewData] = useState<any | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   // Master Data
   const [regions, setRegions] = useState<CodeItem[]>([]);
@@ -440,6 +445,7 @@ export function ResumeManagementModal() {
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <button className="h-full w-max flex items-center gap-1.5 px-5 text-[13px] sm:text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap shrink-0 flex-nowrap" style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -615,11 +621,33 @@ export function ResumeManagementModal() {
                                 role="button"
                                 tabIndex={0}
                                 aria-label={`구직글 보기: ${ad.ad_title || '제목 없음'}`}
-                                onClick={() => handleOpenAdEdit(ad)}
-                                onKeyDown={(e) => {
+                                onClick={async () => {
+                                  setPreviewLoading(true);
+                                  try {
+                                    const res = await getSeekerAdByIdAction(ad.id);
+                                    if (res.success && res.data) {
+                                      setPreviewData(res.data);
+                                    } else {
+                                      alert('구직글 정보를 불러올 수 없습니다.');
+                                    }
+                                  } catch {
+                                    alert('오류가 발생했습니다.');
+                                  } finally {
+                                    setPreviewLoading(false);
+                                  }
+                                }}
+                                onKeyDown={async (e) => {
                                   if (e.key === 'Enter' || e.key === ' ') {
                                     e.preventDefault();
-                                    handleOpenAdEdit(ad);
+                                    setPreviewLoading(true);
+                                    try {
+                                      const res = await getSeekerAdByIdAction(ad.id);
+                                      if (res.success && res.data) {
+                                        setPreviewData(res.data);
+                                      }
+                                    } catch {} finally {
+                                      setPreviewLoading(false);
+                                    }
                                   }
                                 }}
                               >
@@ -1277,5 +1305,25 @@ export function ResumeManagementModal() {
         )}
       </DialogContent>
     </Dialog>
+
+      {/* 구직글 미리보기 오버레이 */}
+      {previewData && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-2 sm:p-4" onClick={() => setPreviewData(null)}>
+          <div className="relative w-full max-w-[1000px] max-h-[90vh] overflow-hidden bg-white rounded-2xl sm:rounded-[32px] shadow-[0_0_50px_rgba(0,0,0,0.2)] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <SeekerDetailContent job={previewData} isModal={true} onClose={() => setPreviewData(null)} />
+          </div>
+        </div>
+      )}
+
+      {/* 미리보기 로딩 */}
+      {previewLoading && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 shadow-xl flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="font-bold text-sm text-gray-600">구직글을 불러오는 중...</p>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
