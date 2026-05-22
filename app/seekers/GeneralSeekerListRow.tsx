@@ -47,7 +47,7 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
     const isInactive = job.status === 'INACTIVE';
 
     return (
-        <tr 
+        <div 
             onClick={() => {
                 if (isInactive) {
                     alert('구직 완료된 구직글입니다.');
@@ -56,26 +56,49 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
                 if (onClick) onClick();
                 else router.push(`/seekers/${job.id}`);
             }}
-            className={`hover:bg-gray-50/50 transition-colors group cursor-pointer ${isInactive ? 'opacity-50 grayscale' : ''}`}
+            className={`p-4 hover:bg-gray-50/80 active:scale-[0.99] transition-all border-b border-gray-100 flex flex-col gap-2.5 cursor-pointer relative group ${isInactive ? 'opacity-50 grayscale' : ''}`}
         >
-            <td className="py-3 px-2 font-bold text-gray-800 flex items-center justify-center gap-1">
+            {/* 1행: 이름, 성별/나이 및 메타 정보, 작성일 */}
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] sm:text-[13px]">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="font-extrabold text-gray-900 text-[14px] sm:text-[15px] shrink-0">
+                        {maskedName}
+                    </span>
+                    <span className="text-gray-400 shrink-0">|</span>
+                    <span className="font-bold text-gray-600 shrink-0">
+                        {genderAge}
+                    </span>
+                    <span className="text-gray-400 shrink-0">|</span>
+                    
+                    {/* 조건 데이터들 배지 형태로 정렬 */}
+                    <span className="font-bold text-gray-500 shrink-0">
+                        📍 {shortLocation}
+                    </span>
+                    <span className="text-gray-400 shrink-0">|</span>
+                    <span className="font-bold text-gray-500 shrink-0">
+                        💼 {industry}
+                    </span>
+                    <span className="text-gray-400 shrink-0">|</span>
+                    <span className="bg-orange-50 text-orange-600 text-[11px] font-black px-2 py-0.5 rounded-full border border-orange-100/50 shrink-0">
+                        {payText}
+                    </span>
+                </div>
+                <div className="text-gray-400 font-semibold shrink-0 text-[11px] sm:text-[12px] ml-auto">
+                    {dateStr}
+                </div>
+            </div>
+            
+            {/* 2행: 제목 (긴 텍스트가 잘리지 않고 말줄임표 없이 전부 보이도록 함) */}
+            <div className="flex items-start gap-2">
                 {isInactive && (
-                    <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-black whitespace-nowrap">구직 완료</span>
+                    <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-black whitespace-nowrap mt-0.5 shrink-0">
+                        구직 완료
+                    </span>
                 )}
-                {maskedName}
-            </td>
-            <td className="py-3 px-2 text-gray-600">{genderAge}</td>
-            <td className="py-3 px-4 text-left font-bold text-gray-800 group-hover:text-primary transition-colors truncate max-w-[250px] md:max-w-[400px]">
-                {displayTitle}
-            </td>
-            <td className="py-3 px-2 text-gray-500">{shortLocation}</td>
-            <td className="py-3 px-2 text-gray-500">{industry}</td>
-            <td className="py-3 px-2">
-                <span className="bg-gray-100 text-gray-500 text-[11px] md:text-[12px] font-bold px-2 py-1 rounded-full whitespace-nowrap">
-                    {payText}
-                </span>
-            </td>
-            <td className="py-3 px-2 text-gray-400 font-medium">{dateStr}</td>
-        </tr>
+                <h3 className="font-extrabold text-[14px] sm:text-[15px] text-gray-800 leading-snug group-hover:text-primary transition-colors whitespace-pre-wrap break-all flex-1">
+                    {displayTitle}
+                </h3>
+            </div>
+        </div>
     );
 }
