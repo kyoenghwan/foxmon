@@ -234,16 +234,15 @@ export function SeekerDetailContent({
               (연락처를 누르면 복사가 됩니다.)
             </span>
           </div>
-          <div className="space-y-2.5 text-[16px] sm:text-[17px] font-bold text-gray-900">
+          <div className="space-y-2.5 text-sm leading-relaxed text-gray-800 sm:text-[15px]">
             {/* 연락처 */}
-            <div className="flex items-center justify-between gap-2 py-1 border-b border-gray-50/50 pb-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <Phone className="h-4 w-4 shrink-0 text-gray-400" />
-                <span className="shrink-0 font-black text-gray-700">연락처</span>
-                <span className="text-gray-400">:</span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center min-w-0">
+                <span className="font-bold text-gray-500 shrink-0">연락처</span>
+                <span className="text-gray-400"> : </span>
                 <span
                   onClick={() => is_contact_public && contact_number && handleCopy(contactLine, '연락처')}
-                  className={`min-w-0 break-words text-gray-950 font-black ${
+                  className={`min-w-0 break-words text-gray-900 font-bold ${
                     is_contact_public && contact_number
                       ? 'cursor-pointer hover:underline hover:text-primary transition-all'
                       : ''
@@ -275,41 +274,34 @@ export function SeekerDetailContent({
               )}
             </div>
 
-            {/* 연락가능시간 */}
-            <div className="flex items-center gap-2 py-1 border-b border-gray-50/50 pb-2">
-              <Clock className="h-4 w-4 shrink-0 text-gray-400" />
-              <span className="shrink-0 font-black text-gray-700">연락가능시간</span>
-              <span className="text-gray-400">:</span>
-              <span className="min-w-0 break-words text-gray-850">{timeLine}</span>
-            </div>
-
             {/* SNS */}
-            <div className="space-y-2">
-              {snsDisplayList.length > 0 ? (
-                snsDisplayList.map((sns, idx) => (
-                  <div key={idx} className="flex items-center justify-between gap-2 py-1 border-b border-gray-50 last:border-0 pb-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="h-3.5 w-3.5 shrink-0 text-gray-300 flex items-center justify-center">•</span>
-                      <span className="shrink-0 font-black text-gray-700">{sns.label}</span>
-                      <span className="text-gray-400">:</span>
-                      <span
-                        onClick={() => handleCopy(sns.id, sns.label)}
-                        className="min-w-0 break-words text-gray-800 cursor-pointer hover:underline hover:text-primary transition-all"
-                        title="클릭 시 복사"
-                      >
-                        {sns.id}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="flex items-center gap-2 py-1">
-                  <span className="h-3.5 w-3.5 shrink-0 text-gray-300">•</span>
-                  <span className="shrink-0 font-black text-gray-700">SNS</span>
-                  <span className="text-gray-400">:</span>
-                  <span className="text-gray-500 font-medium">없음</span>
+            {snsDisplayList.length > 0 ? (
+              snsDisplayList.map((sns, idx) => (
+                <div key={idx} className="flex items-center min-w-0">
+                  <span className="font-bold text-gray-500 shrink-0">{sns.label}</span>
+                  <span className="text-gray-400"> : </span>
+                  <span
+                    onClick={() => handleCopy(sns.id, sns.label)}
+                    className="min-w-0 break-words text-gray-900 font-bold cursor-pointer hover:underline hover:text-primary transition-all"
+                    title="클릭 시 복사"
+                  >
+                    {sns.id}
+                  </span>
                 </div>
-              )}
+              ))
+            ) : (
+              <div className="flex items-center min-w-0">
+                <span className="font-bold text-gray-500 shrink-0">SNS</span>
+                <span className="text-gray-400"> : </span>
+                <span className="text-gray-500 font-bold">없음</span>
+              </div>
+            )}
+
+            {/* 연락가능시간 */}
+            <div className="flex items-center min-w-0">
+              <span className="font-bold text-gray-500 shrink-0">연락가능시간</span>
+              <span className="text-gray-400"> : </span>
+              <span className="font-bold text-gray-900">{timeLine}</span>
             </div>
           </div>
         </section>
