@@ -144,7 +144,9 @@ export function SeekerDetailContent({
   return (
     <div className="flex h-full w-full flex-col bg-white text-gray-900 relative rounded-[24px] overflow-hidden">
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-gray-100 px-4 py-4 sm:px-6">
-        <h2 className="text-lg font-bold text-gray-800">이력서 상세</h2>
+        <h2 className="text-lg font-bold text-gray-800 truncate mr-2" title={ad_title || title || '구직 중입니다.'}>
+          {ad_title || title || '구직 중입니다.'}
+        </h2>
         {isModal ? (
           <button
             onClick={onClose}
@@ -176,16 +178,14 @@ export function SeekerDetailContent({
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="mb-1.5 text-xl font-black leading-snug text-gray-900 sm:text-2xl">
-              {ad_title || title || '구직 중입니다.'}
+              {maskedName}
             </h1>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600 sm:text-base">
-              <span className="font-bold text-gray-800">{maskedName}</span>
-              <span className="h-1 w-1 rounded-full bg-gray-300" />
-              <span className="font-medium">{genderKr}</span>
+              <span className="font-medium text-gray-700">{genderKr}</span>
               {age ? (
                 <>
                   <span className="h-1 w-1 rounded-full bg-gray-300" />
-                  <span className="font-medium">{age}</span>
+                  <span className="font-medium text-gray-700">{age}</span>
                 </>
               ) : null}
             </div>
