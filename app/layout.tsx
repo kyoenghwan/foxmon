@@ -69,35 +69,6 @@ export default function RootLayout({
   }>) {
   return (
     <html lang="ko">
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                function updateViewport() {
-                  if (window.location.pathname.startsWith('/fox-office')) return;
-                  var width = window.innerWidth;
-                  var meta = document.querySelector('meta[name="viewport"]');
-                  if (width < 425) {
-                    var scale = width / 425;
-                    var content = 'width=425, initial-scale=' + scale + ', minimum-scale=' + scale + ', maximum-scale=' + scale + ', user-scalable=no';
-                    if (meta) {
-                      meta.setAttribute('content', content);
-                    } else {
-                      meta = document.createElement('meta');
-                      meta.setAttribute('name', 'viewport');
-                      meta.setAttribute('content', content);
-                      document.head.appendChild(meta);
-                    }
-                  }
-                }
-                updateViewport();
-                window.addEventListener('resize', updateViewport);
-              })();
-            `,
-          }}
-        />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f0f2f5]`}
       >
