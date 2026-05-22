@@ -88,11 +88,17 @@ export default function RootLayout({
                       meta.setAttribute('content', 'width=425, initial-scale=' + scale + ', minimum-scale=' + scale + ', maximum-scale=' + scale + ', user-scalable=no');
                       document.head.appendChild(meta);
                     }
+                    document.documentElement.style.zoom = scale;
+                    document.documentElement.style.width = '425px';
+                    document.documentElement.style.overflowX = 'hidden';
                   } else {
                     var meta = document.querySelector('meta[name="viewport"]');
                     if (meta) {
                       meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
                     }
+                    document.documentElement.style.zoom = '';
+                    document.documentElement.style.width = '';
+                    document.documentElement.style.overflowX = '';
                   }
                 }
                 adjustViewport();
