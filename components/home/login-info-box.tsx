@@ -3,13 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { User, FileText, Heart, Eye, Clock, LogIn, Mail, Settings, LogOut, Briefcase } from 'lucide-react';
+import { User, FileText, Heart, Eye, Clock, LogIn, Mail, Settings, LogOut, Briefcase, MessageCircle } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { useLanguage } from '@/components/providers/language-provider';
 import { SettingsModal } from '@/components/mypage/SettingsModal';
 import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
 import { MarqueeText } from '@/components/ui/marquee-text';
 import { userSettingsAction } from '@/lib/actions';
+import { supabase } from '@/lib/supabase';
+import { QA_GET_CHAT_ROOMS } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_ROOMS';
 
 interface SessionUser {
     id?: string;
@@ -26,6 +28,7 @@ interface LoginInfoBoxProps {
 export function LoginInfoBox({ session }: LoginInfoBoxProps) {
     const { t } = useLanguage();
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     // 프로필 이미지를 DB에서 가져오기
     const fetchProfile = () => {
@@ -38,8 +41,50 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         }
     };
 
+    const fetchUnreadCount = async () => {
+        const userId = session?.user?.id;
+        const userRole = session?.user?.role;
+        if (!userId) return;
+
+        const res = await QA_GET_CHAT_ROOMS(userId, userRole);
+        if (res.success && res.data) {
+            const total = res.data.reduce((sum: number, r: any) => sum + (r.unread_count || 0), 0);
+            setUnreadCount(total);
+        }
+    };
+
     useEffect(() => {
         fetchProfile();
+    }, [session?.user?.id]);
+
+    useEffect(() => {
+        const userId = session?.user?.id;
+        if (!userId) return;
+
+        fetchUnreadCount();
+
+        // 실시간 안읽은 카운트 감지를 위한 채널 구독
+        const channel = supabase.channel(`unread-count-box:${userId}`)
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'foxtalk_messages'
+            }, () => {
+                fetchUnreadCount();
+            })
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'foxtalk_participants',
+                filter: `session_id=eq.${userId}`
+            }, () => {
+                fetchUnreadCount();
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [session?.user?.id]);
 
     // 설정 모달에서 저장 시 즉시 프로필 이미지 갱신
@@ -129,7 +174,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                     </div>
                 </div>
 
-                {/* Bottom Icons - 4 핵심 기능 (스크랩, 최근 본 공고, 지원한 공고, 나를 본 업체) */}
+                {/* Bottom Icons - 5 핵심 기능 (스크랩, 최근 본 공고, 지원한 공고, 나를 본 업체, 폭스토크) */}
                 <div className="flex justify-around items-center pt-3 sm:pt-4 mt-3 lg:mt-auto px-1 sm:px-2">
                     <Link href="/mypage/scraps" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110 mx-auto">
@@ -155,6 +200,23 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                         </div>
                         <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">나를 본 업체</span>
                     </Link>
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            window.dispatchEvent(new CustomEvent('open_foxtalk'));
+                        }}
+                        className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1 relative"
+                    >
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110 mx-auto relative">
+                            <MessageCircle className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-1 -right-1 flex h-4 sm:h-4.5 min-w-[16px] sm:min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[8px] sm:text-[9px] font-black text-white border border-white animate-bounce">
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                            )}
+                        </div>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">폭스토크</span>
+                    </button>
                 </div>
             </div>
         );
