@@ -70,7 +70,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                     </div>
 
                     {/* 우측 정보 & 버튼 영역 (flex-col로 상하 배치) */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[4rem] sm:min-h-[5rem] pt-0.5 gap-1.5 sm:gap-2">
+                    <div className="flex-1 min-w-0 flex flex-col justify-start pt-0.5 gap-2 sm:gap-3">
                         {/* 1. 상단 인사말 및 설정 버튼 (설정 우측 정렬) */}
                         <div className="flex w-full min-w-0 items-center justify-between gap-1 sm:gap-2">
                             <div className="min-w-0 flex-1">
@@ -89,7 +89,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                 {showResumeMenu && (
                                     <div className="lg:hidden">
                                         {/* ResumeManagementModal 내부에 하드코딩된 button을 덮어쓰기 위해 CSS 적용 */}
-                                        <div className="h-7.5 sm:h-8 [&>button]:px-5 [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full">
+                                        <div className="h-9 sm:h-10 [&>button]:px-5.5 [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full [&>button]:text-[13px] sm:[&>button]:text-[15px]">
                                             <ResumeManagementModal />
                                         </div>
                                     </div>
@@ -98,9 +98,9 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                     <div className="lg:hidden">
                                         <Link 
                                             href="/biz" 
-                                            className="h-7.5 sm:h-8 flex items-center justify-center gap-1.5 px-5 text-[11px] sm:text-[12px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                                            className="h-9 sm:h-10 flex items-center justify-center gap-1.5 px-5.5 text-[13px] sm:text-[15px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
                                         >
-                                            <Briefcase className="w-3.5 h-3.5" />
+                                            <Briefcase className="w-4 h-4" />
                                             <span>업체관리</span>
                                         </Link>
                                     </div>
@@ -118,9 +118,9 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                         console.error(e);
                                     }
                                 }}
-                                className="shrink-0 flex items-center gap-0.5 sm:gap-1 font-black text-red-500 hover:text-red-700 transition-colors text-[10px] sm:text-xs ml-auto"
+                                className="shrink-0 flex items-center gap-1 sm:gap-1.5 font-black text-red-500 hover:text-red-700 hover:bg-red-50 px-3 h-9 sm:h-10 rounded-full transition-all active:scale-95 text-[12px] sm:text-[14px] ml-auto"
                             >
-                                <LogOut className="w-3.5 h-3.5 shrink-0" />
+                                <LogOut className="w-4 h-4 shrink-0" />
                                 <span className="hidden sm:inline">로그아웃</span>
                                 <span className="sm:hidden tracking-tight">LOGOUT</span>
                             </button>
