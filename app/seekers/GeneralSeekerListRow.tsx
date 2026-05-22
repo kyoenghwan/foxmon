@@ -88,7 +88,7 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
             </div>
             
             {/* 2행: 이름, 성별/나이 및 메타 정보 */}
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] sm:text-[13px]">
+            <div className="flex items-center gap-x-2 text-[12px] sm:text-[13px] overflow-hidden w-full">
                 <span className="font-extrabold text-gray-900 text-[13px] sm:text-[14px] shrink-0">
                     {maskedName}
                 </span>
@@ -98,13 +98,11 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
                 </span>
                 <span className="text-gray-300 shrink-0">|</span>
                 
-                <span className="font-bold text-gray-500 shrink-0">
-                    📍 {shortLocation}
-                </span>
-                <span className="text-gray-300 shrink-0">|</span>
-                <span className="font-bold text-gray-500 shrink-0">
-                    💼 {industry}
-                </span>
+                <div className="flex-1 min-w-0 overflow-hidden">
+                    <MarqueeText className="font-bold text-gray-500 text-left whitespace-nowrap">
+                        📍 {shortLocation} <span className="text-gray-300 mx-1">|</span> 💼 {industry}
+                    </MarqueeText>
+                </div>
             </div>
         </div>
     );
