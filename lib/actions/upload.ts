@@ -12,7 +12,7 @@ export async function uploadVerificationDocument(formData: FormData) {
 
         // Convert File to Buffer/ArrayBuffer for Supabase Storage
         const arrayBuffer = await file.arrayBuffer();
-        let buffer = Buffer.from(arrayBuffer);
+        let buffer: Buffer = Buffer.from(arrayBuffer);
         let contentType = file.type;
         let fileExt = file.name.split('.').pop() || 'png';
 
