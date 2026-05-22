@@ -295,14 +295,14 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {demoJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full">
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
                         {demoJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-full ${
-                                    !showAllPremium && idx >= 10 ? 'hidden xs:block' : ''
+                                className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
+                                    !showAllPremium && idx >= 10 ? 'hidden min-[425px]:block' : ''
                                 } ${
-                                    !showAllPremium && idx >= 15 ? 'xs:hidden md:block' : ''
+                                    !showAllPremium && idx >= 15 ? 'min-[425px]:hidden md:block' : ''
                                 } ${
                                     !showAllPremium && idx >= 20 ? 'md:hidden lg:block' : ''
                                 } ${
@@ -356,14 +356,14 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full">
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
                         {specialJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-full ${
-                                    !showAllSpecial && idx >= 10 ? 'hidden xs:block' : ''
+                                className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
+                                    !showAllSpecial && idx >= 10 ? 'hidden min-[425px]:block' : ''
                                 } ${
-                                    !showAllSpecial && idx >= 15 ? 'xs:hidden md:block' : ''
+                                    !showAllSpecial && idx >= 15 ? 'min-[425px]:hidden md:block' : ''
                                 } ${
                                     !showAllSpecial && idx >= 20 ? 'md:hidden lg:block' : ''
                                 } ${
@@ -416,14 +416,14 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 sm:gap-4 w-full">
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
                         {lineJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-full ${
-                                    !showAllGeneral && idx >= 10 ? 'hidden xs:block' : ''
+                                className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
+                                    !showAllGeneral && idx >= 10 ? 'hidden min-[425px]:block' : ''
                                 } ${
-                                    !showAllGeneral && idx >= 15 ? 'xs:hidden md:block' : ''
+                                    !showAllGeneral && idx >= 15 ? 'min-[425px]:hidden md:block' : ''
                                 } ${
                                     !showAllGeneral && idx >= 20 ? 'md:hidden lg:block' : ''
                                 } ${
