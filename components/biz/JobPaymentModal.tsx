@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Crown, X, Eye, CheckCircle2, DollarSign, Loader2, Clock, Zap } from 'lucide-react';
+import { Crown, X, Eye, CheckCircle2, DollarSign, Loader2, Clock, Zap, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdFormData } from '@/components/biz/AdEditorForm';
 import { getUserPointsAction } from '@/app/actions/pointActions';
@@ -270,7 +270,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                 <span>2. 주목도 100배! 추가 옵션</span>
                                 <span className="text-[12px] font-medium text-gray-400">선택한 기간({form.exposure_period}일) 적용</span>
                             </h4>
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-3">
                                 {[
                                     { id: 'bold', label: '굵은 글씨 (Bold)', desc: '제목을 굵게 표시하여 눈에 띄게', key: 'OPTION_PRICE_BOLD' },
                                     { id: 'color', label: '제목 컬러 (Color)', desc: '제목에 매력적인 브랜드 컬러 적용', key: 'OPTION_PRICE_COLOR' },
@@ -288,106 +288,123 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                     const finalPrice = isGeneralIcons && isChecked ? price * (form.option_general_icons?.length || 1) : price;
                                     
                                     return (
-                                        <div key={opt.id} className={`flex flex-col p-3.5 rounded-xl border transition-all ${isChecked ? 'border-primary bg-white shadow-sm' : 'border-gray-200 bg-gray-50/50 hover:bg-white'}`}>
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3 cursor-pointer flex-1" onClick={() => {
-                                                    const newVal = !isChecked;
-                                                    update(`option_${opt.id}` as keyof AdFormData, newVal);
-                                                    if (newVal) {
-                                                        update(periodKey, 30);
-                                                        if (opt.id === 'color' && !form.option_color_value) update('option_color_value', TITLE_COLORS[0]);
-                                                        if (opt.id === 'bg' && !form.option_bg_value) update('option_bg_value', BG_COLORS[0]);
-                                                        if (opt.id === 'highlight' && !form.option_highlight_value) update('option_highlight_value', HIGHLIGHT_COLORS[0]);
-                                                        if (opt.id === 'general_icons' && (!form.option_general_icons || form.option_general_icons.length === 0)) {
-                                                            update('option_general_icons', generalIcons.length > 0 ? [generalIcons[0]] : []);
-                                                        }
+                                        <div 
+                                            key={opt.id} 
+                                            onClick={() => {
+                                                const newVal = !isChecked;
+                                                update(`option_${opt.id}` as keyof AdFormData, newVal);
+                                                if (newVal) {
+                                                    update(periodKey, 30);
+                                                    if (opt.id === 'color' && !form.option_color_value) update('option_color_value', TITLE_COLORS[0]);
+                                                    if (opt.id === 'bg' && !form.option_bg_value) update('option_bg_value', BG_COLORS[0]);
+                                                    if (opt.id === 'highlight' && !form.option_highlight_value) update('option_highlight_value', HIGHLIGHT_COLORS[0]);
+                                                    if (opt.id === 'general_icons' && (!form.option_general_icons || form.option_general_icons.length === 0)) {
+                                                        update('option_general_icons', generalIcons.length > 0 ? [generalIcons[0]] : []);
                                                     }
-                                                }}>
-                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0 ${isChecked ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'}`}>
-                                                        {isChecked && <CheckCircle2 className="w-3.5 h-3.5" />}
-                                                    </div>
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className={`text-[14px] font-bold ${isChecked ? 'text-gray-900' : 'text-gray-700'}`}>{opt.label}</span>
-                                                        <span className="text-[12px] text-gray-500 font-medium hidden lg:inline-block">· {opt.desc}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2 shrink-0">
-                                                    {/* 색상 선택 (OS 기본 컬러 피커) */}
-                                                    {isChecked && (opt.id === 'color' || opt.id === 'highlight' || opt.id === 'bg') && (
-                                                        <div className="relative w-6 h-6 rounded-full overflow-hidden border border-gray-300 shadow-sm cursor-pointer transition-transform hover:scale-110 shrink-0" title="색상 변경">
-                                                            <input 
-                                                                type="color" 
-                                                                value={form[`option_${opt.id}_value` as keyof AdFormData] as string || '#ffffff'}
-                                                                onChange={(e) => update(`option_${opt.id}_value` as keyof AdFormData, e.target.value)}
-                                                                onClick={(e) => e.stopPropagation()}
-                                                                className="absolute -top-2 -left-2 w-10 h-10 cursor-pointer border-0 p-0"
-                                                            />
-                                                        </div>
-                                                    )}
-
-                                                    {/* 아이콘 팝오버 트리거 */}
-                                                    {isChecked && opt.id === 'general_icons' && (
-                                                        <div className="relative">
-                                                            <button 
-                                                                type="button" 
-                                                                onClick={(e) => { e.stopPropagation(); setActivePicker(activePicker === opt.id ? null : opt.id); }}
-                                                                className="px-2 py-1 rounded border border-gray-300 bg-white text-[12px] font-bold text-gray-700 hover:bg-gray-50 shadow-sm"
-                                                            >
-                                                                아이콘 선택
-                                                            </button>
-                                                            {activePicker === opt.id && (
-                                                                <div className="absolute top-full mt-2 right-0 bg-white border border-gray-200 shadow-2xl rounded-xl p-3 z-50 w-[240px]" onClick={e => e.stopPropagation()}>
-                                                                    <div className="text-[12px] font-bold text-gray-700 mb-3 flex justify-between items-center">
-                                                                        <span>아이콘 선택 (최대 2개)</span>
-                                                                        <button type="button" className="text-gray-400 hover:text-gray-600 text-[14px]" onClick={() => setActivePicker(null)}>✕</button>
-                                                                    </div>
-                                                                    <div className="flex flex-wrap gap-2">
-                                                                        {generalIcons.length === 0 ? (
-                                                                            <span className="text-gray-400 text-xs py-2">등록된 아이콘이 없습니다.</span>
-                                                                        ) : generalIcons.map(icon => {
-                                                                            const selected = form.option_general_icons?.includes(icon) || false;
-                                                                            return (
-                                                                                <button key={icon} type="button"
-                                                                                    onClick={() => {
-                                                                                        let current = form.option_general_icons || [];
-                                                                                        if (selected) {
-                                                                                            current = current.filter(x => x !== icon);
-                                                                                            if (current.length === 0) return; // 최소 1개는 유지
-                                                                                        } else {
-                                                                                            if (current.length >= 2) return alert('일반 아이콘은 최대 2개까지만 선택 가능합니다.');
-                                                                                            current = [...current, icon];
-                                                                                        }
-                                                                                        update('option_general_icons', current);
-                                                                                    }}
-                                                                                    className={`text-[12px] font-black px-2 py-1 rounded border transition-colors ${selected ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-                                                                                >
-                                                                                    {icon}
-                                                                                </button>
-                                                                            );
-                                                                        })}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
-
-                                                    {isChecked && (
-                                                        <select
-                                                            className="text-[12px] font-bold border border-gray-300 rounded px-2 py-1 outline-none focus:border-primary bg-white cursor-pointer"
-                                                            value={currentPeriod as number}
-                                                            onChange={(e) => update(periodKey, Number(e.target.value))}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            <option value={30}>30일</option>
-                                                            <option value={60}>60일 (-10%)</option>
-                                                            <option value={90}>90일 (-20%)</option>
-                                                        </select>
-                                                    )}
-                                                    <span className="text-[14px] font-bold text-indigo-600 min-w-[60px] text-right">+{finalPrice.toLocaleString()} P</span>
-                                                </div>
+                                                }
+                                            }}
+                                            className={`flex items-start gap-4 p-4 md:p-5 rounded-2xl border transition-all cursor-pointer select-none ${
+                                                isChecked 
+                                                    ? 'border-indigo-500 bg-white shadow-sm ring-1 ring-indigo-50/50' 
+                                                    : 'border-[#f1f1f5] bg-[#fafafc] hover:bg-white hover:border-gray-300'
+                                            }`}
+                                        >
+                                            {/* 좌측: 원형 체크박스 */}
+                                            <div className={`w-6 h-6 rounded-full border flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                                                isChecked 
+                                                    ? 'bg-indigo-600 border-indigo-600 text-white' 
+                                                    : 'border-gray-300 bg-white'
+                                            }`}>
+                                                {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                                             </div>
-                                            <span className="text-[12px] text-gray-500 font-medium sm:hidden mt-2 ml-8">{opt.desc}</span>
-                                            
+
+                                            {/* 우측: 텍스트 및 상세 도구 */}
+                                            <div className="flex-1 min-w-0">
+                                                {/* 상단 라인: 옵션 제목 & 가격 및 도구 */}
+                                                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                                                    <span className={`text-[15px] md:text-[16px] font-black tracking-tight ${isChecked ? 'text-gray-900' : 'text-gray-700'}`}>
+                                                        {opt.label}
+                                                    </span>
+                                                    
+                                                    <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                                        {/* 색상 선택 (OS 기본 컬러 피커) */}
+                                                        {isChecked && (opt.id === 'color' || opt.id === 'highlight' || opt.id === 'bg') && (
+                                                            <div className="relative w-6 h-6 rounded-full overflow-hidden border border-gray-300 shadow-sm cursor-pointer transition-transform hover:scale-110 shrink-0" title="색상 변경">
+                                                                <input 
+                                                                    type="color" 
+                                                                    value={form[`option_${opt.id}_value` as keyof AdFormData] as string || '#ffffff'}
+                                                                    onChange={(e) => update(`option_${opt.id}_value` as keyof AdFormData, e.target.value)}
+                                                                    className="absolute -top-2 -left-2 w-10 h-10 cursor-pointer border-0 p-0"
+                                                                />
+                                                            </div>
+                                                        )}
+
+                                                        {/* 일반 아이콘 팝오버 트리거 */}
+                                                        {isChecked && opt.id === 'general_icons' && (
+                                                            <div className="relative">
+                                                                <button 
+                                                                    type="button" 
+                                                                    onClick={(e) => { e.stopPropagation(); setActivePicker(activePicker === opt.id ? null : opt.id); }}
+                                                                    className="px-2.5 py-1 rounded-lg border border-gray-300 bg-white text-[12px] font-bold text-gray-700 hover:bg-gray-50 shadow-sm"
+                                                                >
+                                                                    아이콘 선택
+                                                                </button>
+                                                                {activePicker === opt.id && (
+                                                                    <div className="absolute bottom-full mb-2 right-0 bg-white border border-gray-200 shadow-2xl rounded-xl p-3 z-50 w-[240px]" onClick={e => e.stopPropagation()}>
+                                                                        <div className="text-[12px] font-bold text-gray-700 mb-3 flex justify-between items-center">
+                                                                            <span>아이콘 선택 (최대 2개)</span>
+                                                                            <button type="button" className="text-gray-400 hover:text-gray-600 text-[14px]" onClick={() => setActivePicker(null)}>✕</button>
+                                                                        </div>
+                                                                        <div className="flex flex-wrap gap-2">
+                                                                            {generalIcons.length === 0 ? (
+                                                                                <span className="text-gray-400 text-xs py-2">등록된 아이콘이 없습니다.</span>
+                                                                            ) : generalIcons.map(icon => {
+                                                                                const selected = form.option_general_icons?.includes(icon) || false;
+                                                                                return (
+                                                                                    <button key={icon} type="button"
+                                                                                        onClick={() => {
+                                                                                            let current = form.option_general_icons || [];
+                                                                                            if (selected) {
+                                                                                                current = current.filter(x => x !== icon);
+                                                                                                if (current.length === 0) return; // 최소 1개는 유지
+                                                                                            } else {
+                                                                                                if (current.length >= 2) return alert('일반 아이콘은 최대 2개까지만 선택 가능합니다.');
+                                                                                                current = [...current, icon];
+                                                                                            }
+                                                                                            update('option_general_icons', current);
+                                                                                        }}
+                                                                                        className={`text-[12px] font-black px-2 py-1 rounded border transition-colors ${selected ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                                                                                    >
+                                                                                        {icon}
+                                                                                    </button>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {isChecked && (
+                                                            <select
+                                                                className="text-[12px] font-bold border border-gray-300 rounded-lg px-2 py-1 outline-none focus:border-indigo-500 bg-white cursor-pointer"
+                                                                value={currentPeriod as number}
+                                                                onChange={(e) => update(periodKey, Number(e.target.value))}
+                                                            >
+                                                                <option value={30}>30일</option>
+                                                                <option value={60}>60일 (-10%)</option>
+                                                                <option value={90}>90일 (-20%)</option>
+                                                            </select>
+                                                        )}
+                                                        <span className="text-[15px] md:text-[16px] font-black text-indigo-600 min-w-[70px] text-right">+{finalPrice.toLocaleString()} P</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* 하단 라인: 부가 설명 */}
+                                                <p className="text-[12px] md:text-[13px] text-gray-400 font-medium mt-1 leading-relaxed">
+                                                    {opt.desc}
+                                                </p>
+                                            </div>
                                         </div>
                                     );
                                 })}

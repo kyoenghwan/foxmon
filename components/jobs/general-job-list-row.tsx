@@ -5,7 +5,13 @@ import { AdItem } from '@/lib/ad-service';
 
 export function GeneralJobListRow(job: AdItem) {
     const router = useRouter();
-    const { id, company, title, location, pay, time, option_bold, option_color_value, option_highlight_value, option_general_icons, created_at } = job;
+    const { 
+        id, company, title, location, pay, time, 
+        option_bold, option_color, option_color_value, 
+        option_highlight, option_highlight_value, 
+        option_bg, option_bg_value, option_icon, 
+        option_general_icons, created_at 
+    } = job;
     
     // 지역 축약
     const shortLocation = location?.split(' ').slice(0, 2).join(' ') || location || '지역무관';
@@ -15,10 +21,20 @@ export function GeneralJobListRow(job: AdItem) {
     const dateObj = created_at ? new Date(created_at) : new Date();
     const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
 
+    // 리스트 배경색 스타일
+    const hasBg = option_bg && option_bg_value;
+    const bgStyle = hasBg ? {
+        backgroundColor: option_bg_value,
+        borderColor: option_bg_value.replace('f', 'e'),
+    } : {};
+
     return (
         <div 
             onClick={() => router.push(`/jobs/${id}`)}
-            className="p-4 hover:bg-gray-50/80 active:scale-[0.99] transition-all border-b border-gray-100 flex flex-col gap-2.5 cursor-pointer relative group"
+            className={`p-4 active:scale-[0.99] transition-all border-b flex flex-col gap-2.5 cursor-pointer relative group ${
+                hasBg ? 'border-l-4' : 'hover:bg-gray-50/80 border-gray-100'
+            }`}
+            style={bgStyle}
         >
             {/* 1행: 업체명, 지역, 급여, 등록일 */}
             <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] sm:text-[13px]">
@@ -60,16 +76,23 @@ export function GeneralJobListRow(job: AdItem) {
                     </div>
                 )}
                 <div className="flex items-start gap-2">
-                    <h3 
-                        className={`text-[14px] sm:text-[15px] leading-snug group-hover:text-primary transition-colors whitespace-pre-wrap break-all flex-1 ${option_bold ? 'font-black' : 'font-bold'} ${!option_color_value && !option_highlight_value ? 'text-gray-800' : ''}`}
-                        style={{
-                            color: option_color_value || undefined,
-                            backgroundColor: option_highlight_value || undefined,
-                            padding: option_highlight_value ? '2px 6px' : undefined,
-                            borderRadius: option_highlight_value ? '4px' : undefined,
-                        }}
-                    >
-                        {title}
+                    {option_icon && (
+                        <span className="bg-red-500 text-white text-[10px] sm:text-[11px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 flex items-center gap-0.5 animate-pulse mt-0.5">
+                            🚨 급구
+                        </span>
+                    )}
+                    <h3 className={`text-[14px] sm:text-[15px] leading-snug group-hover:text-primary transition-colors whitespace-pre-wrap break-all flex-1 ${option_bold ? 'font-black' : 'font-bold'}`}>
+                        <span 
+                            style={{
+                                color: (option_color && option_color_value) ? option_color_value : undefined,
+                                backgroundColor: (option_highlight && option_highlight_value) ? option_highlight_value : undefined,
+                                padding: (option_highlight && option_highlight_value) ? '2px 6px' : undefined,
+                                borderRadius: (option_highlight && option_highlight_value) ? '4px' : undefined,
+                            }}
+                            className={(!option_color_value && !option_highlight_value) ? 'text-gray-800' : ''}
+                        >
+                            {title}
+                        </span>
                     </h3>
                 </div>
             </div>
