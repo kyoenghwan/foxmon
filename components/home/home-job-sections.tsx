@@ -239,7 +239,7 @@ export function HomeJobSections() {
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllSpecial && idx >= 20 ? 'hidden min-[425px]:block' : ''
+                                    !showAllSpecial && idx >= 10 ? 'hidden min-[425px]:block' : ''
                                 } ${
                                     !showAllSpecial && idx >= 30 ? 'min-[425px]:hidden md:block' : ''
                                 } ${
@@ -287,7 +287,7 @@ export function HomeJobSections() {
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllGeneral && idx >= 20 ? 'hidden min-[425px]:block' : ''
+                                    !showAllGeneral && idx >= 10 ? 'hidden min-[425px]:block' : ''
                                 } ${
                                     !showAllGeneral && idx >= 30 ? 'min-[425px]:hidden md:block' : ''
                                 } ${
