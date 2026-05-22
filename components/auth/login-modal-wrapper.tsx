@@ -20,9 +20,14 @@ export function LoginModalWrapper() {
          <div className="relative w-full overflow-hidden bg-white rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.2)] flex flex-col">
             <button 
                 onClick={() => router.back()}
-                className="absolute top-6 right-6 z-50 px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
+                className="absolute top-6 right-6 z-50 focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
             >
-                닫기
+                <span className="hidden md:flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors bg-white shadow-sm border border-gray-100">
+                    <X className="w-4 h-4" />
+                </span>
+                <span className="md:hidden inline-block px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all">
+                    닫기
+                </span>
             </button>
             <div className="bg-gradient-to-b from-purple-100 via-purple-50/50 to-white px-8 pt-10 pb-8 flex flex-col items-center gap-2 border-b border-gray-100 relative overflow-hidden">
                 <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>

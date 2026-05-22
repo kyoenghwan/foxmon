@@ -130,9 +130,14 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                     </h3>
                     <button
                         onClick={onClose}
-                        className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
+                        className="focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
                     >
-                        닫기
+                        <span className="hidden md:flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors">
+                            <X className="w-5 h-5" />
+                        </span>
+                        <span className="md:hidden inline-block px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all">
+                            닫기
+                        </span>
                     </button>
                 </div>
                 

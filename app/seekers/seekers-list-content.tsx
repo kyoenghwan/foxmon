@@ -72,7 +72,7 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
     const [showAllPremium, setShowAllPremium] = useState(false);
     const [showAllSpecial, setShowAllSpecial] = useState(false);
     const [showAllGeneral, setShowAllGeneral] = useState(false);
-    const [isFilterExpanded, setIsFilterExpanded] = useState(true);
+    const [isFilterExpanded, setIsFilterExpanded] = useState(false);
 
     const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
     const [specialJobs, setSpecialJobs] = useState<AdItem[]>([]);
@@ -393,7 +393,7 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
     const paginatedTableJobs = filteredGeneralJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     return (
-        <div className="space-y-12">
+        <div className="space-y-6 md:space-y-12">
             {/* Top 20 Premium Banners */}
             <section>
                 <div className="flex items-center justify-between mb-4 sm:mb-6 border-b pb-4">
@@ -576,7 +576,7 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                 {/* 검색 필터 헤더 */}
                 <div 
                     onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-                    className="p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl"
+                    className="p-5 flex items-center justify-between md:pointer-events-none md:cursor-default cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl"
                 >
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                         <div className="flex items-center gap-2">
@@ -589,15 +589,14 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                     </div>
                     <button 
                         type="button"
-                        className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary flex items-center gap-1 transition-colors shrink-0 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg"
+                        className="md:hidden text-xs sm:text-sm font-bold text-gray-500 hover:text-primary flex items-center gap-1 transition-colors shrink-0 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg"
                     >
                         {isFilterExpanded ? '필터 닫기' : '필터 열기'}
                         <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isFilterExpanded ? 'rotate-90' : 'rotate-0'}`} />
                     </button>
                 </div>
 
-                {isFilterExpanded && (
-                    <div className="p-6 pt-0 border-t border-gray-100 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className={`${isFilterExpanded ? 'block' : 'hidden md:block'} p-6 pt-0 border-t border-gray-100 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200`}>
                         {/* Region Selection */}
                         <div className="space-y-3">
                             <div className="flex items-center justify-between border-b pb-2">
@@ -858,7 +857,6 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                             </Button>
                         </div>
                     </div>
-                )}
             </section>
 
             {/* General Jobs List */}
@@ -892,11 +890,11 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                         {(() => {
                             const displayPages = Math.max(totalPages, 4);
                             return (
-                                <div className="flex justify-center items-center gap-1.5 py-4 bg-white border border-gray-200/60 rounded-xl sm:rounded-2xl shadow-sm mt-2">
+                                <div className="flex justify-center items-center gap-1.5 py-4 mt-2">
                                     <button 
                                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                         disabled={currentPage === 1}
-                                        className="px-3 py-1.5 border border-gray-200 rounded-md text-[13px] font-bold text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
+                                        className="px-3 py-1.5 text-[13px] font-bold text-gray-500 disabled:opacity-30 hover:text-gray-800 transition-colors bg-transparent"
                                     >
                                         이전
                                     </button>
@@ -915,7 +913,7 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                                                 className={`w-8 h-8 flex items-center justify-center rounded-md text-[13px] font-bold transition-colors ${
                                                     currentPage === pageNum 
                                                         ? 'bg-gray-800 text-white border-transparent' 
-                                                        : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                                        : 'text-gray-600 hover:bg-gray-100'
                                                 }`}
                                             >
                                                 {pageNum}
@@ -925,7 +923,7 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                                     <button 
                                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                         disabled={currentPage === totalPages || totalPages === 0}
-                                        className="px-3 py-1.5 border border-gray-200 rounded-md text-[13px] font-bold text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
+                                        className="px-3 py-1.5 text-[13px] font-bold text-gray-500 disabled:opacity-30 hover:text-gray-800 transition-colors bg-transparent"
                                     >
                                         다음
                                     </button>
