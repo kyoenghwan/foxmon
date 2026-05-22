@@ -379,6 +379,10 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     const session = await res.json();
                     if (!session?.user?.id) { alert('로그인이 필요합니다.'); window.location.href = '/login'; return; }
                     if (session.user.role === 'EMPLOYER') { alert('업체회원은 지원자만 대화를 걸 수 있습니다.'); return; }
+                    if (session.user.id === job.user_id) {
+                        alert('본인이 작성한 구인글에는 대화를 신청할 수 없습니다.');
+                        return;
+                    }
                     
                     const createRes = await OA_INSERT_CHAT_ROOM({
                         title: `${job.company_name || job.company || '업소명 미상'} - ${job.title || '구인구직 대화방'}`,

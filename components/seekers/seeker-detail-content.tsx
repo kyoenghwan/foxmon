@@ -341,6 +341,10 @@ export function SeekerDetailContent({
                 alert('구인회원(업소)만 대화를 신청할 수 있습니다.');
                 return;
               }
+              if (session.user.id === job.user_id) {
+                alert('본인이 작성한 이력서에는 대화를 신청할 수 없습니다.');
+                return;
+              }
               
               // 1:1 채팅방 생성
               const createRes = await OA_INSERT_CHAT_ROOM({
