@@ -16,6 +16,7 @@ import { GeneralSeekerListRow, GeneralSeekerListRowDesktop } from './GeneralSeek
 import { getPublicSeekerAdsAction, getSeekerAdByIdAction } from '@/lib/actions';
 import { SeekerModalWrapper } from '@/components/seekers/seeker-modal-wrapper';
 import { buildFlatIndustryOptions, resumeMatchesIndustryFilter } from '@/lib/resume-industry';
+import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
 
 function resolveRegion(param: string, list: CodeItem[]): string {
     if (!param || param === 'all') return 'all';
@@ -40,13 +41,24 @@ function resolveIndustry(param: string, list: CodeItem[]): string {
 
 interface SeekersListContentProps {
     isEmployer?: boolean;
+    session?: any;
     searchQuery?: string;
 }
 
-export function SeekersListContent({ isEmployer, searchQuery }: SeekersListContentProps) {
+export function SeekersListContent({ isEmployer, session, searchQuery }: SeekersListContentProps) {
     const { t } = useLanguage();
     const searchParams = useSearchParams();
     const router = useRouter();
+    const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+
+    const handleResumeRegisterClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (!session || !session.user) {
+            router.push('/login');
+            return;
+        }
+        setIsResumeModalOpen(true);
+    };
 
     const qParam = searchParams.get('q') || '';
     const regionParam = searchParams.get('region') || 'all';
@@ -406,11 +418,13 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                     <div className="flex items-center gap-1.5 sm:gap-3">
                         <AdPriceModal type="premium" title="Premium" />
                         {!isEmployer && (
-                            <Link href="/seeker/resume">
-                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white">
-                                    <Plus className="w-4 h-4 mr-1" /> 프리미엄 등록
-                                </Button>
-                            </Link>
+                            <Button 
+                                size="sm" 
+                                onClick={handleResumeRegisterClick}
+                                className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white"
+                            >
+                                <Plus className="w-4 h-4 mr-1" /> 프리미엄 등록
+                            </Button>
                         )}
                         <button 
                             onClick={() => setShowAllPremium(!showAllPremium)}
@@ -465,11 +479,13 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                     <div className="flex items-center gap-1.5 sm:gap-3">
                         <AdPriceModal type="special" title="Special" />
                         {!isEmployer && (
-                            <Link href="/seeker/resume">
-                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-black bg-yellow-400 hover:bg-yellow-500">
-                                    <Plus className="w-4 h-4 mr-1" /> 스페셜 등록
-                                </Button>
-                            </Link>
+                            <Button 
+                                size="sm" 
+                                onClick={handleResumeRegisterClick}
+                                className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-black bg-yellow-400 hover:bg-yellow-500"
+                            >
+                                <Plus className="w-4 h-4 mr-1" /> 스페셜 등록
+                            </Button>
                         )}
                         <button 
                             onClick={() => setShowAllSpecial(!showAllSpecial)}
@@ -523,11 +539,13 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                     <div className="flex items-center gap-1.5 sm:gap-3">
                         <AdPriceModal type="line" title="Line" />
                         {!isEmployer && (
-                            <Link href="/seeker/resume">
-                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-gray-700 bg-white border hover:bg-gray-50">
-                                    <Plus className="w-4 h-4 mr-1" /> 이력서 등록
-                                </Button>
-                            </Link>
+                            <Button 
+                                size="sm" 
+                                onClick={handleResumeRegisterClick}
+                                className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-gray-700 bg-white border hover:bg-gray-50"
+                            >
+                                <Plus className="w-4 h-4 mr-1" /> 이력서 등록
+                            </Button>
                         )}
                         <button 
                             onClick={() => setShowAllGeneral(!showAllGeneral)}
@@ -869,9 +887,12 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                         </h2>
                     </div>
                     {!isEmployer && (
-                        <Link href="/seeker/resume" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white text-[11px] font-black rounded-lg hover:bg-gray-700 transition-colors shadow-sm">
+                        <button 
+                            onClick={handleResumeRegisterClick}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white text-[11px] font-black rounded-lg hover:bg-gray-700 transition-colors shadow-sm cursor-pointer"
+                        >
                             <Plus className="w-3.5 h-3.5" /> 이력서 등록하기
-                        </Link>
+                        </button>
                     )}
                 </div>
                 {generalJobs.length > 0 ? (
@@ -984,6 +1005,11 @@ export function SeekersListContent({ isEmployer, searchQuery }: SeekersListConte
                     </div>
                 </div>
             )}
+
+            <ResumeManagementModal 
+                isOpen={isResumeModalOpen} 
+                onOpenChange={setIsResumeModalOpen} 
+            />
         </div>
     );
 }

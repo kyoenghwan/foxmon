@@ -84,9 +84,27 @@ function parsePayAmountInput(value: string): number | undefined {
   return Number.isNaN(num) ? undefined : num;
 }
 
-export function ResumeManagementModal() {
+interface ResumeManagementModalProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function ResumeManagementModal({
+  isOpen: controlledIsOpen,
+  onOpenChange: controlledOnOpenChange,
+}: ResumeManagementModalProps = {}) {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  const isControlled = controlledIsOpen !== undefined;
+  const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = (open: boolean) => {
+    if (isControlled) {
+      controlledOnOpenChange?.(open);
+    } else {
+      setInternalIsOpen(open);
+    }
+  };
   const [activeTab, setActiveTab] = useState<'RESUME' | 'AD'>('RESUME');
   const [viewMode, setViewMode] = useState<'LIST' | 'FORM'>('LIST');
   const [resumes, setResumes] = useState<ResumeData[]>([]);
@@ -447,12 +465,14 @@ export function ResumeManagementModal() {
   return (
     <>
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <button className="h-full w-max flex items-center gap-1.5 px-5 text-[13px] sm:text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap shrink-0 flex-nowrap" style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
-          <FileText className="w-4 h-4 shrink-0" />
-          <span style={{ whiteSpace: 'nowrap', wordBreak: 'keep-all' }}>이력서&nbsp;관리</span>
-        </button>
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <button className="h-full w-max flex items-center gap-1.5 px-5 text-[13px] sm:text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap shrink-0 flex-nowrap" style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
+            <FileText className="w-4 h-4 shrink-0" />
+            <span style={{ whiteSpace: 'nowrap', wordBreak: 'keep-all' }}>이력서&nbsp;관리</span>
+          </button>
+        </DialogTrigger>
+      )}
       
       <DialogContent className="sm:max-w-[700px] max-h-[85vh] flex flex-col bg-white overflow-hidden p-0">
         <DialogHeader className="px-6 py-5 border-b flex-shrink-0">

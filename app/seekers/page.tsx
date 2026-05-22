@@ -14,7 +14,7 @@ export default async function SeekersPage({ searchParams }: { searchParams: Prom
             description="우리 매장에 딱 맞는 인재를 찾아보세요."
             hideSearch={true}
         >
-            <SeekersListContent isEmployer={isEmployer} searchQuery={q} />
+            <SeekersListContent isEmployer={isEmployer} session={session} searchQuery={q} />
         </SubPageLayout>
     );
 }
