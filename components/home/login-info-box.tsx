@@ -70,7 +70,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                     </div>
 
                     {/* 우측 정보 & 버튼 영역 (flex-col로 상하 배치) */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-start pt-0.5 gap-2 sm:gap-3">
+                    <div className="flex-1 min-w-0 flex flex-col justify-start pt-0.5 gap-1 sm:gap-1.5">
                         {/* 1. 상단 인사말 및 설정 버튼 (설정 우측 정렬) */}
                         <div className="flex w-full min-w-0 items-center justify-between gap-1 sm:gap-2">
                             <div className="min-w-0 flex-1">
@@ -84,7 +84,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                         </div>
 
                         {/* 2. 하단 액션 버튼들 (이력서/업체 관리 좌측, 로그아웃 우측 정렬) */}
-                        <div className="flex items-center justify-between w-full mt-auto">
+                        <div className="flex items-center justify-between w-full">
                             <div className="flex items-center gap-1.5 sm:gap-2">
                                 {showResumeMenu && (
                                     <div className="lg:hidden">
