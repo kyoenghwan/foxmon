@@ -190,6 +190,22 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     )}
                                 />
                             </button>
+                            <span className="text-gray-300 shrink-0 mx-1">|</span>
+                            <button
+                                onClick={async () => {
+                                    document.body.style.opacity = '0.5';
+                                    try {
+                                        document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                        document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                        await signOut({ callbackUrl: '/login' });
+                                    } catch (e) {
+                                        console.error(e);
+                                    }
+                                }}
+                                className="font-black text-red-500 hover:text-red-700 transition-colors text-[10px] sm:text-[11px] whitespace-nowrap cursor-pointer ml-1"
+                            >
+                                로그아웃
+                            </button>
                         </div>
                     ) : null}
                 </div>
