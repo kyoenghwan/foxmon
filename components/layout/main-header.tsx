@@ -159,8 +159,8 @@ export function MainHeader({ session }: MainHeaderProps) {
                         <button onClick={() => alert('📱 아이폰: Safari 하단의 [공유] 아이콘을 누르고 [홈 화면에 추가]를 선택하세요.\n🤖 안드로이드: 브라우저 메뉴에서 [홈 화면에 추가]를 선택하세요.')} className="hover:text-primary transition-colors flex items-center gap-1 shrink-0">
                             📱 <span className="hidden sm:inline">폰에 앱 설치</span><span className="sm:hidden">앱 설치</span>
                         </button>
-                        <span className="text-gray-300 shrink-0">|</span>
-                        <Link href="/help" className="hover:text-primary transition-colors shrink-0">공지사항</Link>
+                        <span className="text-gray-300 shrink-0 hidden sm:inline">|</span>
+                        <Link href="/help" className="hover:text-primary transition-colors shrink-0 hidden sm:inline">공지사항</Link>
                     </div>
                     {session ? (
                         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pl-2">
