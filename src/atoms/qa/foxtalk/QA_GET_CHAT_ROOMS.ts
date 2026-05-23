@@ -1,3 +1,5 @@
+'use server';
+
 import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {

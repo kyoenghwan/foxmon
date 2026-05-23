@@ -1,12 +1,15 @@
 'use client';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { JobDetailContent } from "./job-detail-content";
 
 export function JobModalWrapper({ job }: { job: any }) {
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(true);
 
   const handleClose = () => {
+    setIsOpen(false);
     if (typeof window !== 'undefined') {
       const currentParams = new URLSearchParams(window.location.search);
       router.replace(`/jobs?${currentParams.toString()}`, { scroll: false });
@@ -16,7 +19,7 @@ export function JobModalWrapper({ job }: { job: any }) {
   };
 
   return (
-    <Dialog open={true} onOpenChange={(open) => {
+    <Dialog open={isOpen} onOpenChange={(open) => {
       if (!open) {
         handleClose();
         queueMicrotask(() => router.refresh());
