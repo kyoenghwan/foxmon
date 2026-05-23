@@ -296,7 +296,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {demoJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-full">
+                    <div className="grid grid-cols-2 md:grid-cols-3 min-[800px]:grid-cols-4 min-[980px]:grid-cols-5 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-full">
                         {demoJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
@@ -355,7 +355,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-full">
+                    <div className="grid grid-cols-2 md:grid-cols-3 min-[800px]:grid-cols-4 min-[980px]:grid-cols-5 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-full">
                         {specialJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
@@ -413,7 +413,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-full">
+                    <div className="grid grid-cols-2 md:grid-cols-3 min-[800px]:grid-cols-4 min-[980px]:grid-cols-5 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-full">
                         {lineJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
