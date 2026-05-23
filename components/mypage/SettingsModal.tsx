@@ -294,10 +294,11 @@ export function SettingsModal() {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <button 
-                    className="flex items-center justify-center w-9 h-9 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl text-gray-500 hover:text-gray-900 transition-all shadow-sm active:scale-95"
-                    title="설정"
+                    className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl text-gray-600 hover:text-gray-900 transition-all shadow-sm active:scale-95 text-[11px] sm:text-xs font-black cursor-pointer"
+                    title="프로필 설정"
                 >
-                    <Settings className="w-[18px] h-[18px]" />
+                    <Settings className="w-3.5 h-3.5" />
+                    <span>프로필 설정</span>
                 </button>
             </DialogTrigger>
             

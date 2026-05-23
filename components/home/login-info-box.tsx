@@ -130,8 +130,8 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             </div>
                         </div>
 
-                        {/* 2. 하단 액션 버튼들 (절반 높이인 h-[36px] sm:h-10) */}
-                        <div className="h-[36px] sm:h-10 flex items-center justify-between gap-2 w-full">
+                        {/* 2. 하단 액션 버튼들 (절반 높이인 h-[30px] sm:h-[34px]) */}
+                        <div className="h-[30px] sm:h-[34px] flex items-center justify-between gap-2 w-full">
                             <div className="flex items-center gap-1.5 sm:gap-2 h-full flex-1 min-w-0">
                                 {showResumeMenu && (
                                     <div className="md:hidden h-full">
@@ -156,9 +156,9 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             <button
                                 onClick={() => setIsOpen(!isOpen)}
                                 className="h-full px-3.5 hover:bg-gray-50 rounded-full text-gray-600 hover:text-gray-900 transition-all flex items-center justify-center shrink-0 border border-gray-200 cursor-pointer shadow-sm active:scale-95 text-[12px] sm:text-[13px] font-black"
-                                title={isOpen ? "메뉴 접기" : "메뉴 펼치기"}
+                                title={isOpen ? "메뉴 접기" : "더보기"}
                             >
-                                <span className="mr-1">{isOpen ? "접기" : "펼치기"}</span>
+                                <span className="mr-1">{isOpen ? "접기" : "더보기"}</span>
                                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
                             </button>
                         </div>

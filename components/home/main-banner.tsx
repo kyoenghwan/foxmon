@@ -24,24 +24,25 @@ export function MainBanner() {
             if (width < 640) {
                 setItemsPerView(1);
                 setCardWidth(0);
-            } else if (width < 1440) {
-                // 640px ~ 1439px 구간 (태블릿 및 lg/xl PC 920px 락 구간): 카드당 276px
-                setItemsPerView(2);
-                setCardWidth(276);
-            } else if (width < 1920) {
-                // 1440px ~ 1919px 구간 (2xl 1100px 락 구간): 카드당 352px
-                setItemsPerView(2);
-                setCardWidth(352);
             } else {
-                // 1920px 이상 구간 (3xl/4xl 1500px+ 락 구간): 카드당 400px
                 setItemsPerView(2);
-                setCardWidth(400);
+                const container = document.getElementById('main-banner-container');
+                if (container) {
+                    setCardWidth((container.clientWidth - 16) / 2);
+                } else {
+                    const approxWidth = width >= 1920 ? 816 : width >= 1440 ? 720 : 568;
+                    setCardWidth((approxWidth - 16) / 2);
+                }
             }
         };
         handleResize();
+        const timer = setTimeout(handleResize, 100);
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            clearTimeout(timer);
+        };
+    }, [ads]);
 
     // 1. Firestore에서 공정한 알고리즘이 적용된 광고 가져오기
     useEffect(() => {
@@ -112,6 +113,7 @@ export function MainBanner() {
 
     return (
         <div 
+            id="main-banner-container"
             className="relative w-full !h-full overflow-hidden rounded-xl"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -160,7 +162,7 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] sm:w-[276px] sm:h-[138px] sm:aspect-none min-[1440px]:w-[352px] min-[1440px]:h-[176px] min-[1920px]:w-[400px] min-[1920px]:h-[200px]`}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] sm:w-[calc(50%-8px)] sm:h-full sm:aspect-none`}
                             onClick={() => handleAdClick(banner.id)}
                         >
                             {isUploadMode && banner.image ? (
