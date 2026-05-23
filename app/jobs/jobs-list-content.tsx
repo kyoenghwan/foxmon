@@ -300,7 +300,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                         {demoJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-[180px] max-[424px]:w-[calc(50%-4px)] lg:w-[195px] shrink-0 ${
+                                className={`w-44 max-[424px]:w-[calc(50%-4px)] lg:w-48 flex-none ${
                                     !showAllPremium && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllPremium && idx >= 30 ? 'md:hidden lg:block' : ''
@@ -359,7 +359,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                         {specialJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-[180px] max-[424px]:w-[calc(50%-4px)] lg:w-[195px] shrink-0 ${
+                                className={`w-44 max-[424px]:w-[calc(50%-4px)] lg:w-48 flex-none ${
                                     !showAllSpecial && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllSpecial && idx >= 20 ? 'md:hidden lg:block' : ''
@@ -417,7 +417,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                         {lineJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-[180px] max-[424px]:w-[calc(50%-4px)] lg:w-[195px] shrink-0 ${
+                                className={`w-44 max-[424px]:w-[calc(50%-4px)] lg:w-48 flex-none ${
                                     !showAllGeneral && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllGeneral && idx >= 20 ? 'md:hidden lg:block' : ''

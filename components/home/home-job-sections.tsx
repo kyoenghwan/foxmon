@@ -190,7 +190,7 @@ export function HomeJobSections() {
                         {demoJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-[180px] max-[424px]:w-[calc(50%-4px)] lg:w-[195px] shrink-0 ${
+                                className={`w-44 max-[424px]:w-[calc(50%-4px)] lg:w-48 flex-none ${
                                     !showAllPremium && idx >= 18 ? 'hidden lg:block' : ''
                                 }`}
                             >
@@ -232,7 +232,7 @@ export function HomeJobSections() {
                         {specialJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-[180px] max-[424px]:w-[calc(50%-4px)] lg:w-[195px] shrink-0 ${
+                                className={`w-44 max-[424px]:w-[calc(50%-4px)] lg:w-48 flex-none ${
                                     !showAllSpecial && idx >= 18 ? 'hidden lg:block' : ''
                                 }`}
                             >
@@ -274,7 +274,7 @@ export function HomeJobSections() {
                         {lineJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-[180px] max-[424px]:w-[calc(50%-4px)] lg:w-[195px] shrink-0 ${
+                                className={`w-44 max-[424px]:w-[calc(50%-4px)] lg:w-48 flex-none ${
                                     !showAllGeneral && idx >= 18 ? 'hidden lg:block' : ''
                                 }`}
                             >
