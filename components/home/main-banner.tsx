@@ -146,7 +146,7 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] lg:w-[400px] lg:h-[200px] lg:aspect-none`}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full h-full`}
                             onClick={() => handleAdClick(banner.id)}
                         >
                             {isUploadMode && banner.image ? (
@@ -185,11 +185,11 @@ export function MainBanner() {
                                                         />
                                                     </div>
                                                 )}
-                                                <h3 className="text-white font-black text-[5vw] min-[375px]:text-[4.5vw] sm:text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform origin-left duration-300">
+                                                <h3 className="text-white font-black text-lg sm:text-xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform origin-left duration-300">
                                                     {banner.company}
                                                 </h3>
                                             </div>
-                                            <p className="text-white/95 text-[3.8vw] min-[375px]:text-[3.5vw] sm:text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
+                                            <p className="text-white/95 text-xs sm:text-sm font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
                                                 {banner.title}
                                             </p>
                                         </div>
@@ -202,7 +202,7 @@ export function MainBanner() {
                                                         {payType}
                                                     </span>
                                                 )}
-                                                <span className="text-white font-black text-[4.8vw] min-[375px]:text-[4.2vw] sm:text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                                <span className="text-white font-black text-base sm:text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
                                                     {payAmount}
                                                 </span>
                                             </div>
