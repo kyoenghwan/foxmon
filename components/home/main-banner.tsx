@@ -106,7 +106,7 @@ export function MainBanner() {
                 className={`flex gap-4 h-full ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
                 style={{
                     transform: itemsPerView === 2
-                        ? `translateX(-${currentIndex * 422}px)`
+                        ? `translateX(-${currentIndex * 416}px)`
                         : `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 16}px))`,
                 }}
             >
@@ -146,7 +146,7 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] lg:w-[406px] lg:h-[203px] lg:aspect-none`}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] lg:w-[400px] lg:h-[200px] lg:aspect-none`}
                             onClick={() => handleAdClick(banner.id)}
                         >
                             {isUploadMode && banner.image ? (
