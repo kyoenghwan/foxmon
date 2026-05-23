@@ -109,10 +109,10 @@ export function SideBanners() {
 
     return (
         <div className="fixed top-[220px] left-0 w-full z-20 pointer-events-none flex justify-center">
-            <div ref={containerRef} className="max-w-[425px] xl:max-w-[920px] 2xl:max-w-[1100px] 3xl:max-w-[1500px] 4xl:max-w-[2040px] mx-auto relative w-full h-0">
+            <div ref={containerRef} className="max-w-[920px] mx-auto relative w-full h-0">
                 {/* Left Wing */}
                 <div 
-                    className="hidden xl:flex flex-col gap-3 absolute top-0 right-full mr-4 pointer-events-auto transition-all duration-300 w-[130px]"
+                    className="hidden lg:flex flex-col gap-3 absolute top-0 right-full mr-4 pointer-events-auto transition-all duration-300 w-[130px]"
                 >
                     <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Special Pick</div>
                     {leftAds.map((ad) => (
@@ -128,7 +128,7 @@ export function SideBanners() {
 
                 {/* Right Wing */}
                 <div 
-                    className="hidden xl:flex flex-col gap-3 absolute top-0 left-full ml-4 pointer-events-auto transition-all duration-300 w-[130px]"
+                    className="hidden lg:flex flex-col gap-3 absolute top-0 left-full ml-4 pointer-events-auto transition-all duration-300 w-[130px]"
                 >
                     <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Premium Ad</div>
                     {rightAds.map((ad) => (
