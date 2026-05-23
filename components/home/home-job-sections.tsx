@@ -123,7 +123,7 @@ export function HomeJobSections() {
     }
 
     return (
-        <main className="container px-4 md:px-6 py-6 md:py-8 space-y-8 md:space-y-10">
+        <main className="container px-4 lg:px-6 py-6 md:py-8 space-y-8 md:space-y-10">
             {/* 1. Scrolling Notice Ticker */}
             <section className="bg-gray-50/60 border border-gray-100 rounded-2xl px-4 py-2.5 shadow-sm">
                 <div className="flex items-center gap-2 md:gap-3">
@@ -186,12 +186,12 @@ export function HomeJobSections() {
                 </div>
                 
                 {demoJobs.length > 0 ? (
-                    <div className="flex flex-wrap justify-center gap-2 sm:gap-4 w-full">
+                    <div className="flex flex-wrap justify-center gap-2 lg:gap-4 w-full">
                         {demoJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllPremium && idx >= 20 ? 'hidden lg:block' : ''
+                                    !showAllPremium && idx >= 18 ? 'hidden lg:block' : ''
                                 }`}
                             >
                                 <PremiumJobCard 
@@ -228,12 +228,12 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className="flex flex-wrap justify-center gap-1.5 sm:gap-4 w-full">
+                    <div className="flex flex-wrap justify-center gap-2 lg:gap-4 w-full">
                         {specialJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllSpecial && idx >= 20 ? 'hidden lg:block' : ''
+                                    !showAllSpecial && idx >= 18 ? 'hidden lg:block' : ''
                                 }`}
                             >
                                 <PremiumJobCard 
@@ -270,12 +270,12 @@ export function HomeJobSections() {
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className="flex flex-wrap justify-center gap-1.5 sm:gap-4 w-full">
+                    <div className="flex flex-wrap justify-center gap-2 lg:gap-4 w-full">
                         {lineJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
                                 className={`w-[calc(50%-4px)] min-[425px]:w-[180px] lg:w-[195px] shrink-0 ${
-                                    !showAllGeneral && idx >= 20 ? 'hidden lg:block' : ''
+                                    !showAllGeneral && idx >= 18 ? 'hidden lg:block' : ''
                                 }`}
                             >
                                 <PremiumJobCard 

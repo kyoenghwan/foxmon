@@ -33,7 +33,8 @@ export function MaxWidthWrapper({ children }: { children: React.ReactNode }) {
   // 서버 사이드 렌더링 시에는 기본값(클라이언트 너비 알기 전)으로 null 리턴 또는 w-full 렌더
   const isMounted = viewportWidth !== null;
   const needsZoom = !isAdmin && isMounted && viewportWidth < MOBILE_TRIGGER;
-  const isMobileLocked = !isAdmin && isMounted && viewportWidth >= MOBILE_TRIGGER && viewportWidth < PC_TRIGGER;
+  const isMobileLocked = !isAdmin && isMounted && viewportWidth >= MOBILE_TRIGGER && viewportWidth < 640;
+  const isTabletLocked = !isAdmin && isMounted && viewportWidth >= 640 && viewportWidth < PC_TRIGGER;
   const isPcLocked = !isAdmin && isMounted && viewportWidth >= PC_TRIGGER;
 
   let dynamicStyle: React.CSSProperties | undefined = undefined;
@@ -51,6 +52,13 @@ export function MaxWidthWrapper({ children }: { children: React.ReactNode }) {
       dynamicStyle = {
         width: '425px',
         maxWidth: '425px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+      };
+    } else if (isTabletLocked) {
+      dynamicStyle = {
+        width: '600px',
+        maxWidth: '600px',
         marginLeft: 'auto',
         marginRight: 'auto',
       };
