@@ -24,12 +24,18 @@ export function MainBanner() {
             if (width < 640) {
                 setItemsPerView(1);
                 setCardWidth(0);
-            } else if (width < 1024) {
+            } else if (width < 1440) {
+                // 640px ~ 1439px 구간 (태블릿 및 lg/xl PC 920px 락 구간): 카드당 276px
                 setItemsPerView(2);
-                setCardWidth(276); // 태블릿 600px 락 구간: 카드당 276px
+                setCardWidth(276);
+            } else if (width < 1920) {
+                // 1440px ~ 1919px 구간 (2xl 1100px 락 구간): 카드당 352px
+                setItemsPerView(2);
+                setCardWidth(352);
             } else {
+                // 1920px 이상 구간 (3xl/4xl 1500px+ 락 구간): 카드당 400px
                 setItemsPerView(2);
-                setCardWidth(400); // PC 920px 락 구간: 카드당 400px
+                setCardWidth(400);
             }
         };
         handleResize();
@@ -154,7 +160,7 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] sm:w-[276px] sm:h-[138px] sm:aspect-none lg:w-[400px] lg:h-[200px]`}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] sm:w-[276px] sm:h-[138px] sm:aspect-none min-[1440px]:w-[352px] min-[1440px]:h-[176px] min-[1920px]:w-[400px] min-[1920px]:h-[200px]`}
                             onClick={() => handleAdClick(banner.id)}
                         >
                             {isUploadMode && banner.image ? (
