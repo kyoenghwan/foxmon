@@ -42,7 +42,7 @@ export function MaxWidthWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div 
       className={`mx-auto bg-white min-h-screen relative shadow-[0_0_40px_rgba(0,0,0,0.05)] flex flex-col transition-all duration-300 ${
-        isAdmin ? 'w-full' : 'max-w-[1280px] 2xl:max-w-[1096px] 3xl:max-w-[1280px]'
+        isAdmin ? 'w-full' : 'max-w-[425px] xl:max-w-[920px] 2xl:max-w-[1100px] 3xl:max-w-[1500px] 4xl:max-w-[2040px]'
       }`}
       style={needsZoom ? {
         width: `${MOBILE_RENDER_WIDTH}px`,
