@@ -48,26 +48,10 @@ export function MaxWidthWrapper({ children }: { children: React.ReactNode }) {
         marginLeft: 0,
         marginRight: 0,
       };
-    } else if (isMobileLocked) {
+    } else {
       dynamicStyle = {
-        width: '425px',
-        maxWidth: '425px',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-      };
-    } else if (isTabletLocked) {
-      dynamicStyle = {
-        width: '600px',
-        maxWidth: '600px',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-      };
-    } else if (isPcLocked) {
-      dynamicStyle = {
-        width: '920px',
-        maxWidth: '920px',
-        marginLeft: 'auto',
-        marginRight: 'auto',
+        width: '100%',
+        maxWidth: '100%',
       };
     }
   }
