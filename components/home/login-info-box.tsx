@@ -125,21 +125,14 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                     <span className="text-primary">{displayName}</span>님 반갑습니다!
                                 </MarqueeText>
                             </div>
-                            <div className="shrink-0 scale-90 sm:scale-100 origin-right flex items-center gap-1">
+                            <div className="shrink-0 scale-90 sm:scale-100 origin-right flex items-center">
                                 <SettingsModal />
-                                <button
-                                    onClick={() => setIsOpen(!isOpen)}
-                                    className="p-1 hover:bg-gray-50 rounded-lg text-gray-500 hover:text-gray-900 transition-colors flex items-center justify-center shrink-0 border border-gray-100 cursor-pointer"
-                                    title={isOpen ? "메뉴 접기" : "메뉴 펼치기"}
-                                >
-                                    <ChevronDown className={`w-4.5 h-4.5 transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
-                                </button>
                             </div>
                         </div>
 
                         {/* 2. 하단 액션 버튼들 (절반 높이인 h-[36px] sm:h-10) */}
-                        <div className="h-[36px] sm:h-10 flex items-center justify-between w-full">
-                            <div className="flex items-center gap-1.5 sm:gap-2 h-full">
+                        <div className="h-[36px] sm:h-10 flex items-center justify-between gap-2 w-full">
+                            <div className="flex items-center gap-1.5 sm:gap-2 h-full flex-1 min-w-0">
                                 {showResumeMenu && (
                                     <div className="md:hidden h-full">
                                         {/* ResumeManagementModal 내부에 하드코딩된 button을 덮어쓰기 위해 CSS 적용 */}
@@ -161,22 +154,12 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                 )}
                             </div>
                             <button
-                                type="button"
-                                onClick={async () => {
-                                    document.body.style.opacity = '0.5';
-                                    try {
-                                        document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                                        document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                                        await signOut({ callbackUrl: '/login' });
-                                    } catch (e) {
-                                        console.error(e);
-                                    }
-                                }}
-                                className="md:hidden shrink-0 flex items-center justify-center gap-1 sm:gap-1.5 font-black text-red-500 hover:text-red-700 hover:bg-red-50 px-3 h-full rounded-full transition-all active:scale-95 text-[12px] sm:text-[14px] ml-auto"
+                                onClick={() => setIsOpen(!isOpen)}
+                                className="h-full px-3.5 hover:bg-gray-50 rounded-full text-gray-600 hover:text-gray-900 transition-all flex items-center justify-center shrink-0 border border-gray-200 cursor-pointer shadow-sm active:scale-95 text-[12px] sm:text-[13px] font-black"
+                                title={isOpen ? "메뉴 접기" : "메뉴 펼치기"}
                             >
-                                <LogOut className="w-4 h-4 shrink-0" />
-                                <span className="hidden sm:inline">로그아웃</span>
-                                <span className="sm:hidden tracking-tight">LOGOUT</span>
+                                <span className="mr-1">{isOpen ? "접기" : "펼치기"}</span>
+                                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
                             </button>
                         </div>
                     </div>
