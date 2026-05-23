@@ -296,11 +296,11 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {demoJobs.length > 0 ? (
-                    <div className="flex flex-wrap justify-center gap-2 lg:gap-4 w-full">
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-full">
                         {demoJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-44 max-[424px]:w-[calc(50%-4px)] lg:w-48 flex-none ${
+                                className={`w-full ${
                                     !showAllPremium && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllPremium && idx >= 30 ? 'md:hidden lg:block' : ''
@@ -355,11 +355,11 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className="flex flex-wrap justify-center gap-2 lg:gap-4 w-full">
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-full">
                         {specialJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-44 max-[424px]:w-[calc(50%-4px)] lg:w-48 flex-none ${
+                                className={`w-full ${
                                     !showAllSpecial && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllSpecial && idx >= 20 ? 'md:hidden lg:block' : ''
@@ -413,11 +413,11 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className="flex flex-wrap justify-center gap-2 lg:gap-4 w-full">
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-full">
                         {lineJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
-                                className={`w-44 max-[424px]:w-[calc(50%-4px)] lg:w-48 flex-none ${
+                                className={`w-full ${
                                     !showAllGeneral && idx >= 10 ? 'hidden md:block' : ''
                                 } ${
                                     !showAllGeneral && idx >= 20 ? 'md:hidden lg:block' : ''
