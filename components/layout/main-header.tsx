@@ -414,7 +414,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                         </div>
 
                         {/* 우측 끝 맞춤형 관리 메뉴 */}
-                        <div className="hidden lg:flex items-center h-full py-2.5 gap-2 shrink-0">
+                        <div className="hidden min-[980px]:flex items-center h-full py-2.5 gap-2 shrink-0">
                             {showResumeMenu && (
                                 <ResumeManagementModal />
                             )}
