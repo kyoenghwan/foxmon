@@ -160,7 +160,7 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] sm:w-[276px] sm:h-[138px] sm:aspect-none min-[1440px]:w-[352px] min-[1440px]:h-[176px] min-[1920px]:w-[400px] min-[1920px]:h-[200px]`}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full max-[639px]:w-[310px] max-[639px]:h-[155px] max-[639px]:aspect-none aspect-[2/1] sm:w-[276px] sm:h-[138px] sm:aspect-none min-[1440px]:w-[352px] min-[1440px]:h-[176px] min-[1920px]:w-[400px] min-[1920px]:h-[200px]`}
                             onClick={() => handleAdClick(banner.id)}
                         >
                             {isUploadMode && banner.image ? (

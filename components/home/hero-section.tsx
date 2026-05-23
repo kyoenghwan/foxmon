@@ -16,16 +16,16 @@ export function HeroSection({ session }: HeroSectionProps) {
     return (
         <section className="bg-gray-50 py-6 border-b">
             <div className="container px-4">
-                <div className="flex flex-col min-[980px]:flex-row gap-6 items-center min-[980px]:items-stretch justify-center min-[980px]:justify-between max-w-[970px] min-[1440px]:max-w-[1100px] min-[1920px]:max-w-[1500px] min-[2560px]:max-w-[2040px] mx-auto">
+                <div className="flex flex-col md:flex-row gap-6 items-center md:items-stretch justify-center md:justify-between max-w-[970px] min-[1440px]:max-w-[1100px] min-[1920px]:max-w-[1500px] min-[2560px]:max-w-[2040px] mx-auto">
                     {/* 상단/좌측: 메인 공고 배너 슬라이더 */}
-                    <div className="w-full min-[980px]:w-auto flex justify-center max-[639px]:aspect-[2/1] sm:h-[138px] min-[1440px]:h-[176px] min-[1920px]:h-[200px] flex-shrink-0">
-                        <div className="w-full max-w-[568px] min-[1440px]:max-w-[720px] min-[1920px]:max-w-[816px] h-full">
+                    <div className="w-full md:w-auto flex justify-center max-[639px]:w-[310px] max-[639px]:h-[155px] max-[639px]:aspect-none sm:h-[138px] min-[1440px]:h-[176px] min-[1920px]:h-[200px] flex-shrink-0">
+                        <div className="w-full max-[639px]:w-[310px] max-[639px]:h-[155px] max-w-[568px] min-[1440px]:max-w-[720px] min-[1920px]:max-w-[816px] h-full">
                             <MainBanner />
                         </div>
                     </div>
 
                     {/* 하단/우측: 유저 로그인/커뮤니티 정보 박스 */}
-                    <div className="w-full min-[980px]:max-w-[296px] min-[1440px]:max-w-[320px] max-w-[425px] sm:max-w-[320px] flex-shrink-0 flex items-center justify-center min-[980px]:items-stretch min-[980px]:self-stretch">
+                    <div className="w-full md:max-w-[296px] min-[1440px]:max-w-[320px] max-w-[425px] sm:max-w-[320px] flex-shrink-0 flex items-center justify-center md:items-stretch md:self-stretch">
                         <LoginInfoBox session={session} />
                     </div>
                 </div>

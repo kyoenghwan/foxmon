@@ -133,7 +133,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                         <div className="h-[36px] sm:h-10 flex items-center justify-between w-full">
                             <div className="flex items-center gap-1.5 sm:gap-2 h-full">
                                 {showResumeMenu && (
-                                    <div className="min-[980px]:hidden h-full">
+                                    <div className="md:hidden h-full">
                                         {/* ResumeManagementModal 내부에 하드코딩된 button을 덮어쓰기 위해 CSS 적용 */}
                                         <div className="h-full [&>button]:px-[22px] [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full [&>button]:text-[13px] sm:[&>button]:text-[15px]">
                                             <ResumeManagementModal />
@@ -141,7 +141,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                     </div>
                                 )}
                                 {isEmployer && (
-                                    <div className="min-[980px]:hidden h-full">
+                                    <div className="md:hidden h-full">
                                         <Link 
                                             href="/biz" 
                                             className="h-full flex items-center justify-center gap-1.5 px-[22px] text-[13px] sm:text-[15px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
@@ -152,6 +152,24 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                     </div>
                                 )}
                             </div>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    document.body.style.opacity = '0.5';
+                                    try {
+                                        document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                        document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                        await signOut({ callbackUrl: '/login' });
+                                    } catch (e) {
+                                        console.error(e);
+                                    }
+                                }}
+                                className="md:hidden shrink-0 flex items-center justify-center gap-1 sm:gap-1.5 font-black text-red-500 hover:text-red-700 hover:bg-red-50 px-3 h-full rounded-full transition-all active:scale-95 text-[12px] sm:text-[14px] ml-auto"
+                            >
+                                <LogOut className="w-4 h-4 shrink-0" />
+                                <span className="hidden sm:inline">로그아웃</span>
+                                <span className="sm:hidden tracking-tight">LOGOUT</span>
+                            </button>
                         </div>
                     </div>
                 </div>
