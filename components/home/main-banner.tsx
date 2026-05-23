@@ -15,13 +15,21 @@ export function MainBanner() {
     const [isHovered, setIsHovered] = useState(false);
     const [itemsPerView, setItemsPerView] = useState(1);
 
-    // 반응형 배너 갯수 조절
+    const [cardWidth, setCardWidth] = useState(400);
+
+    // 반응형 배너 갯수 및 카드 너비 조절
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth < 1024) {
+            const width = window.innerWidth;
+            if (width < 640) {
                 setItemsPerView(1);
+                setCardWidth(0);
+            } else if (width < 1024) {
+                setItemsPerView(2);
+                setCardWidth(276); // 태블릿 600px 락 구간: 카드당 276px
             } else {
                 setItemsPerView(2);
+                setCardWidth(400); // PC 920px 락 구간: 카드당 400px
             }
         };
         handleResize();
@@ -106,7 +114,7 @@ export function MainBanner() {
                 className={`flex gap-4 h-full ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
                 style={{
                     transform: itemsPerView === 2
-                        ? `translateX(-${currentIndex * 416}px)`
+                        ? `translateX(-${currentIndex * (cardWidth + 16)}px)`
                         : `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 16}px))`,
                 }}
             >
@@ -146,7 +154,7 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full h-full`}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] sm:w-[276px] sm:h-[138px] sm:aspect-none lg:w-[400px] lg:h-[200px]`}
                             onClick={() => handleAdClick(banner.id)}
                         >
                             {isUploadMode && banner.image ? (

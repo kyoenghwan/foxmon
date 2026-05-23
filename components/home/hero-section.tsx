@@ -16,14 +16,16 @@ export function HeroSection({ session }: HeroSectionProps) {
     return (
         <section className="bg-gray-50 py-6 border-b">
             <div className="container px-4">
-                <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 items-stretch justify-center">
-                    {/* 좌측: 메인 공고 배너 슬라이더 */}
-                    <div className="w-full max-[639px]:aspect-[2/1] sm:w-[310px] sm:h-[155px] lg:w-[400px] lg:h-[200px] flex-shrink-0">
-                        <MainBanner />
+                <div className="flex flex-col gap-6 items-center">
+                    {/* 상단: 메인 공고 배너 슬라이더 */}
+                    <div className="w-full flex justify-center max-[639px]:aspect-[2/1] sm:h-[138px] lg:h-[200px] flex-shrink-0">
+                        <div className="w-full max-w-[568px] lg:max-w-[816px] h-full">
+                            <MainBanner />
+                        </div>
                     </div>
 
-                    {/* 우측: 유저 로그인/커뮤니티 정보 박스 */}
-                    <div className="w-full sm:w-[240px] sm:h-[155px] lg:w-[320px] lg:h-[200px] flex-shrink-0">
+                    {/* 하단: 유저 로그인/커뮤니티 정보 박스 */}
+                    <div className="w-full max-w-[425px] sm:max-w-[320px] flex-shrink-0">
                         <LoginInfoBox session={session} />
                     </div>
                 </div>
