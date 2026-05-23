@@ -19,9 +19,9 @@ export function MainBanner() {
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth < 1024) {
-                setItemsPerView(1.25);
-            } else {
                 setItemsPerView(1);
+            } else {
+                setItemsPerView(2);
             }
         };
         handleResize();
