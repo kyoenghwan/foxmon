@@ -394,7 +394,9 @@ export function MainHeader({ session }: MainHeaderProps) {
                             {/* 개별 메뉴 리스트 */}
                             <div className="flex items-center justify-start gap-x-4 sm:gap-x-6 lg:gap-x-8 h-auto lg:h-full py-2 lg:py-0 flex-1 overflow-x-auto scrollbar-hide">
                                 {menuItems.map((item) => {
-                                    const isActive = pathname === item.href;
+                                    const isActive = item.href === '/'
+                                        ? pathname === '/'
+                                        : pathname === item.href || pathname.startsWith(item.href + '/');
                                     return (
                                         <Link
                                             key={item.href}

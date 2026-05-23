@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { SeekerDetailContent } from "./seeker-detail-content";
@@ -18,15 +18,21 @@ export function SeekerModalWrapper({
   const router = useRouter();
   const displaySeeker = seeker || job;
   const [activeOpen, setActiveOpen] = useState(isOpen);
+  const isClosingRef = useRef(false);
 
   useEffect(() => {
     setActiveOpen(isOpen);
   }, [isOpen]);
 
   const handleClose = () => {
+    if (isClosingRef.current) return;
+    isClosingRef.current = true;
     setActiveOpen(false);
+    
     if (onClose) {
       onClose();
+    } else if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
     } else if (typeof window !== 'undefined') {
       const currentParams = new URLSearchParams(window.location.search);
       router.replace(`/seekers?${currentParams.toString()}`, { scroll: false });

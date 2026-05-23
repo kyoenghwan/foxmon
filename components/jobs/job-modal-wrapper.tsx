@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { JobDetailContent } from "./job-detail-content";
@@ -7,10 +7,16 @@ import { JobDetailContent } from "./job-detail-content";
 export function JobModalWrapper({ job }: { job: any }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
+  const isClosingRef = useRef(false);
 
   const handleClose = () => {
+    if (isClosingRef.current) return;
+    isClosingRef.current = true;
     setIsOpen(false);
-    if (typeof window !== 'undefined') {
+
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+    } else if (typeof window !== 'undefined') {
       const currentParams = new URLSearchParams(window.location.search);
       router.replace(`/jobs?${currentParams.toString()}`, { scroll: false });
     } else {
