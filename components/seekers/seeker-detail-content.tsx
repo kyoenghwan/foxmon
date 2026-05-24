@@ -174,155 +174,163 @@ export function SeekerDetailContent({
         )}
       </div>
 
-      <div className="scrollbar-hide flex-1 space-y-2.5 overflow-y-auto p-4 sm:p-5 pb-20">
-        {/* 프로필 + 제목·메타·키워드 (한 행: 사진 좌, 텍스트 우) */}
-        <div className="flex flex-row items-start gap-4">
-          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 sm:h-28 sm:w-28">
-            {photo_url ? (
-              <Image src={photo_url} alt="프로필" fill className="object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-gray-300">
-                <User2 className="h-12 w-12" />
+      <div className="flex-1 space-y-2.5 overflow-y-auto p-4 sm:p-5 pb-28">
+        <div className="flex flex-col md:flex-row gap-6 md:items-stretch">
+          {/* 좌측 열: 프로필 및 희망 근무조건 */}
+          <div className="w-full md:w-1/2 space-y-3">
+            {/* 프로필 + 제목·메타·키워드 (한 행: 사진 좌, 텍스트 우) */}
+            <div className="flex flex-row items-start gap-4">
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 sm:h-28 sm:w-28">
+                {photo_url ? (
+                  <Image src={photo_url} alt="프로필" fill className="object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-gray-300">
+                    <User2 className="h-12 w-12" />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="mb-1.5 text-xl font-black leading-snug text-gray-900 sm:text-2xl">
-              {maskedName}
-            </h1>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600 sm:text-base">
-              <span className="font-medium text-gray-700">{genderKr}</span>
-              {age ? (
-                <>
-                  <span className="h-1 w-1 rounded-full bg-gray-300" />
-                  <span className="font-medium text-gray-700">{age}</span>
-                </>
-              ) : null}
-            </div>
-            {keywords && keywords.length > 0 ? (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {keywords.map((kw: string, i: number) => (
-                  <span
-                    key={i}
-                    className="rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600"
-                  >
-                    #{kw}
-                  </span>
-                ))}
+              <div className="min-w-0 flex-1">
+                <h1 className="mb-1.5 text-xl font-black leading-snug text-gray-900 sm:text-2xl">
+                  {maskedName}
+                </h1>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600 sm:text-base">
+                  <span className="font-medium text-gray-700">{genderKr}</span>
+                  {age ? (
+                    <>
+                      <span className="h-1 w-1 rounded-full bg-gray-300" />
+                      <span className="font-medium text-gray-700">{age}</span>
+                    </>
+                  ) : null}
+                </div>
+                {keywords && keywords.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {keywords.map((kw: string, i: number) => (
+                      <span
+                        key={i}
+                        className="rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600"
+                      >
+                        #{kw}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
-            ) : null}
-          </div>
-        </div>
-
-        {/* 희망 근무조건 */}
-        <section className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-3.5">
-          <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">희망 근무조건</h2>
-          <div className="space-y-2.5 text-sm leading-relaxed text-gray-800 sm:text-[15px]">
-            <div className="flex items-start">
-              <span className="font-bold text-gray-500 shrink-0">{formatLabel('지역')}</span>
-              <span className="text-gray-400 shrink-0 mx-1.5">:</span>
-              <span className="font-bold text-gray-900 flex-1">{desired_location?.trim() || '무관'}</span>
             </div>
-            <div className="flex items-start">
-              <span className="font-bold text-gray-500 shrink-0">{formatLabel('업종')}</span>
-              <span className="text-gray-400 shrink-0 mx-1.5">:</span>
-              <span className="font-bold text-gray-900 flex-1">{industryLine}</span>
-            </div>
-            <div className="flex items-start">
-              <span className="font-bold text-gray-500 shrink-0">{formatLabel('급여')}</span>
-              <span className="text-gray-400 shrink-0 mx-1.5">:</span>
-              <span className="font-bold text-primary flex-1">{payText}</span>
-            </div>
-          </div>
-        </section>
 
-        {/* 자기소개 */}
-        <section className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-3.5">
-          <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">자기소개</h2>
-          <p className="whitespace-pre-wrap text-sm font-medium leading-relaxed text-gray-800 sm:text-[15px]">
-            {self_introduction?.trim() || '등록된 자기소개가 없습니다.'}
-          </p>
-        </section>
-
-        {/* 연락처 및 SNS */}
-        <section className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-3.5">
-          <div className="mb-3 flex flex-wrap items-baseline gap-2">
-            <h2 className="text-[15px] font-black text-gray-900 sm:text-base">연락처 및 SNS</h2>
-            <span className="text-[11px] font-medium text-gray-400">
-              (연락처를 누르면 복사가 됩니다.)
-            </span>
+            {/* 희망 근무조건 */}
+            <section className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-3.5 h-auto md:min-h-[160px]">
+              <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">희망 근무조건</h2>
+              <div className="space-y-2.5 text-sm leading-relaxed text-gray-800 sm:text-[15px]">
+                <div className="flex items-start">
+                  <span className="font-bold text-gray-500 shrink-0">{formatLabel('지역')}</span>
+                  <span className="text-gray-400 shrink-0 mx-1.5">:</span>
+                  <span className="font-bold text-gray-900 flex-1">{desired_location?.trim() || '무관'}</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="font-bold text-gray-500 shrink-0">{formatLabel('업종')}</span>
+                  <span className="text-gray-400 shrink-0 mx-1.5">:</span>
+                  <span className="font-bold text-gray-900 flex-1">{industryLine}</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="font-bold text-gray-500 shrink-0">{formatLabel('급여')}</span>
+                  <span className="text-gray-400 shrink-0 mx-1.5">:</span>
+                  <span className="font-bold text-primary flex-1">{payText}</span>
+                </div>
+              </div>
+            </section>
           </div>
-          <div className="space-y-2.5 text-sm leading-relaxed text-gray-800 sm:text-[15px]">
-            {/* 연락처 */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-start min-w-0 flex-1">
-                <span className="font-bold text-gray-500 shrink-0">{formatLabel('연락처')}</span>
-                <span className="text-gray-400 shrink-0 mx-1.5">:</span>
-                <span
-                  onClick={() => is_contact_public && contact_number && handleCopy(contactLine, '연락처')}
-                  className={`min-w-0 break-words text-gray-900 font-bold flex-1 ${
-                    is_contact_public && contact_number
-                      ? 'cursor-pointer hover:underline hover:text-primary transition-all'
-                      : ''
-                  }`}
-                  title={is_contact_public && contact_number ? '클릭 시 복사' : undefined}
-                >
-                  {contactLine}
+
+          {/* 우측 열: 자기소개 및 연락처/SNS */}
+          <div className="w-full md:w-1/2 space-y-3">
+            {/* 자기소개 */}
+            <section className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-3.5 h-auto md:min-h-[120px]">
+              <h2 className="mb-3 text-[15px] font-black text-gray-900 sm:text-base">자기소개</h2>
+              <p className="whitespace-pre-wrap text-sm font-medium leading-relaxed text-gray-800 sm:text-[15px]">
+                {self_introduction?.trim() || '등록된 자기소개가 없습니다.'}
+              </p>
+            </section>
+
+            {/* 연락처 및 SNS */}
+            <section className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:p-3.5">
+              <div className="mb-3 flex flex-wrap items-baseline gap-2">
+                <h2 className="text-[15px] font-black text-gray-900 sm:text-base">연락처 및 SNS</h2>
+                <span className="text-[11px] font-medium text-gray-400">
+                  (연락처를 누르면 복사가 됩니다.)
                 </span>
               </div>
-              {isMobileDevice && is_contact_public && contact_number && (
-                <div className="flex items-center gap-3.5 shrink-0 ml-auto mr-1 md:hidden">
-                  <a
-                    href={`tel:${contact_number}`}
-                    className="text-green-500 hover:text-green-600 hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
-                    title="전화걸기"
-                  >
-                    <svg className="h-[22px] w-[22px] fill-current" viewBox="0 0 24 24">
-                      <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.57a1.003 1.003 0 00-1.01.24l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.59l2.2-2.21a.994.994 0 00.24-1c-.37-1.11-.57-2.3-.57-3.53C6.35 3.35 5.65 2.65 4.93 2.65H1.67C.95 2.65.25 3.35.25 4.07.25 15.07 9.18 24 20.18 24c.72 0 1.42-.7 1.42-1.42v-3.28c0-.72-.7-1.42-1.42-1.42z" />
-                    </svg>
-                  </a>
-                  <a
-                    href={`sms:${contact_number}`}
-                    className="text-gray-500 hover:text-gray-800 hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
-                    title="문자보내기"
-                  >
-                    <span className="text-[22px] leading-none">✉️</span>
-                  </a>
+              <div className="space-y-2.5 text-sm leading-relaxed text-gray-800 sm:text-[15px]">
+                {/* 연락처 */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-start min-w-0 flex-1">
+                    <span className="font-bold text-gray-500 shrink-0">{formatLabel('연락처')}</span>
+                    <span className="text-gray-400 shrink-0 mx-1.5">:</span>
+                    <span
+                      onClick={() => is_contact_public && contact_number && handleCopy(contactLine, '연락처')}
+                      className={`min-w-0 break-words text-gray-900 font-bold flex-1 ${
+                        is_contact_public && contact_number
+                          ? 'cursor-pointer hover:underline hover:text-primary transition-all'
+                          : ''
+                      }`}
+                      title={is_contact_public && contact_number ? '클릭 시 복사' : undefined}
+                    >
+                      {contactLine}
+                    </span>
+                  </div>
+                  {isMobileDevice && is_contact_public && contact_number && (
+                    <div className="flex items-center gap-3.5 shrink-0 ml-auto mr-1 md:hidden">
+                      <a
+                        href={`tel:${contact_number}`}
+                        className="text-green-500 hover:text-green-600 hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
+                        title="전화걸기"
+                      >
+                        <svg className="h-[22px] w-[22px] fill-current" viewBox="0 0 24 24">
+                          <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.57a1.003 1.003 0 00-1.01.24l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.59l2.2-2.21a.994.994 0 00.24-1c-.37-1.11-.57-2.3-.57-3.53C6.35 3.35 5.65 2.65 4.93 2.65H1.67C.95 2.65.25 3.35.25 4.07.25 15.07 9.18 24 20.18 24c.72 0 1.42-.7 1.42-1.42v-3.28c0-.72-.7-1.42-1.42-1.42z" />
+                        </svg>
+                      </a>
+                      <a
+                        href={`sms:${contact_number}`}
+                        className="text-gray-500 hover:text-gray-800 hover:scale-110 active:scale-95 transition-all flex items-center justify-center"
+                        title="문자보내기"
+                      >
+                        <span className="text-[22px] leading-none">✉️</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* SNS */}
-            {snsDisplayList.length > 0 ? (
-              snsDisplayList.map((sns, idx) => (
-                <div key={idx} className="flex items-start min-w-0">
-                  <span className="font-bold text-gray-500 shrink-0">{formatLabel(sns.label)}</span>
+                {/* SNS */}
+                {snsDisplayList.length > 0 ? (
+                  snsDisplayList.map((sns, idx) => (
+                    <div key={idx} className="flex items-start min-w-0">
+                      <span className="font-bold text-gray-500 shrink-0">{formatLabel(sns.label)}</span>
+                      <span className="text-gray-400 shrink-0 mx-1.5">:</span>
+                      <span
+                        onClick={() => handleCopy(sns.id, sns.label)}
+                        className="min-w-0 break-words text-gray-900 font-bold flex-1 cursor-pointer hover:underline hover:text-primary transition-all"
+                        title="클릭 시 복사"
+                      >
+                        {sns.id}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-start min-w-0">
+                    <span className="font-bold text-gray-500 shrink-0">{formatLabel('SNS')}</span>
+                    <span className="text-gray-400 shrink-0 mx-1.5">:</span>
+                    <span className="text-gray-500 font-bold flex-1">없음</span>
+                  </div>
+                )}
+
+                {/* 연락가능시간 */}
+                <div className="flex items-start min-w-0">
+                  <span className="font-bold text-gray-500 shrink-0">{formatLabel('연락가능시간')}</span>
                   <span className="text-gray-400 shrink-0 mx-1.5">:</span>
-                  <span
-                    onClick={() => handleCopy(sns.id, sns.label)}
-                    className="min-w-0 break-words text-gray-900 font-bold flex-1 cursor-pointer hover:underline hover:text-primary transition-all"
-                    title="클릭 시 복사"
-                  >
-                    {sns.id}
-                  </span>
+                  <span className="font-bold text-gray-900 flex-1">{timeLine}</span>
                 </div>
-              ))
-            ) : (
-              <div className="flex items-start min-w-0">
-                <span className="font-bold text-gray-500 shrink-0">{formatLabel('SNS')}</span>
-                <span className="text-gray-400 shrink-0 mx-1.5">:</span>
-                <span className="text-gray-500 font-bold flex-1">없음</span>
               </div>
-            )}
-
-            {/* 연락가능시간 */}
-            <div className="flex items-start min-w-0">
-              <span className="font-bold text-gray-500 shrink-0">{formatLabel('연락가능시간')}</span>
-              <span className="text-gray-400 shrink-0 mx-1.5">:</span>
-              <span className="font-bold text-gray-900 flex-1">{timeLine}</span>
-            </div>
+            </section>
           </div>
-        </section>
+        </div>
       </div>
 
       {/* 하단 고정 연락/대화 바 */}

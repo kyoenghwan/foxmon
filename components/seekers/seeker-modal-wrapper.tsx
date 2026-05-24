@@ -49,7 +49,7 @@ export function SeekerModalWrapper({
       }
     }}>
       <DialogContent 
-        className="max-w-[800px] w-[95vw] sm:w-[90vw] p-0 overflow-hidden border-none bg-white rounded-[24px] sm:rounded-[32px] shadow-2xl focus:outline-none max-h-[90vh] flex flex-col scrollbar-hide" 
+        className="max-w-[800px] w-[95vw] sm:w-[90vw] p-0 overflow-hidden border-none bg-white rounded-[24px] sm:rounded-[32px] shadow-2xl focus:outline-none max-h-[90vh] flex flex-col" 
         showCloseButton={false}
       >
          <DialogTitle className="sr-only">인재 상세 정보</DialogTitle>
