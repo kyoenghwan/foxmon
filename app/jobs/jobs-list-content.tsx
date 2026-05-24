@@ -478,7 +478,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                             <h2 className="text-[16px] sm:text-[17px] font-black text-gray-800 tracking-tight">상세 검색 필터</h2>
                         </div>
                         <span className="text-[11px] sm:text-xs text-gray-400 font-semibold sm:mt-1">
-                            원하는 조건의 구인정보를 더욱 빠르고 스마트하게 검색해보세요.
+                            조건에 맞는 구인공고를 빠르게 찾아보세요.
                         </span>
                     </div>
                     <button 
@@ -709,7 +709,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
 
             {/* General Jobs List */}
             <section>
-                <div className="mb-4 flex items-center justify-between border-b pb-2">
+                <div className="mb-2 flex items-center justify-between pb-1">
                     <div className="flex items-center gap-2">
                         <h2 className="text-[15px] font-black text-gray-800 tracking-tight flex items-center gap-1.5">
                             <span className="bg-[#ff8a00] text-white w-4 h-4 flex items-center justify-center rounded-sm text-[10px] shadow-sm tracking-tighter shrink-0 pt-[1px] pl-[1px]">&gt;</span> 
