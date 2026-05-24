@@ -200,8 +200,15 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
         setIsSeekerLoading(true);
         const res = await getSeekerAdByIdAction(id);
         if (res.success && res.data) {
-            setSelectedSeekerData(res.data);
-            setSelectedSeekerId(id);
+            if (res.data.status === 'INACTIVE') {
+                alert('구직 완료된 구직글입니다.');
+                setGeneralJobs(prev => prev.map(job => 
+                    job.id === id ? { ...job, status: 'INACTIVE' } : job
+                ));
+            } else {
+                setSelectedSeekerData(res.data);
+                setSelectedSeekerId(id);
+            }
         } else {
             alert('이력서 정보를 불러오는데 실패했습니다.');
         }
