@@ -15,8 +15,8 @@ interface HeroSectionProps {
 export function HeroSection({ session }: HeroSectionProps) {
     return (
         <section className="bg-gray-50 py-6 border-b">
-            <div className="container px-4">
-                <div className="flex flex-col md:flex-row gap-6 items-center md:items-stretch justify-center md:justify-between md:max-w-[1172px] mx-auto">
+            <div className="w-full max-w-[1172px] mx-auto px-4">
+                <div className="flex flex-col md:flex-row gap-6 items-center md:items-stretch justify-center md:justify-between">
                     {/* 상단/좌측: 메인 공고 배너 슬라이더 (PC: 828px * 203px 고정) */}
                     <div className="w-full md:w-[828px] h-auto md:h-[203px] flex justify-center max-[639px]:aspect-[2/1] flex-shrink-0">
                         <div className="w-full h-full">

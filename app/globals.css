@@ -111,22 +111,22 @@
   }
   @media (min-width: 1280px) {
     .container {
-      max-width: 920px !important;
+      max-width: 876px !important; /* 4열 고정: 195*4 + 16*3 + 48 = 876px */
     }
   }
   @media (min-width: 1440px) {
     .container {
-      max-width: 1100px !important;
+      max-width: 1087px !important; /* 5열 고정: 195*5 + 16*4 + 48 = 1087px */
     }
   }
   @media (min-width: 1920px) {
     .container {
-      max-width: 1500px !important;
+      max-width: 1298px !important; /* 6열 고정: 195*6 + 16*5 + 48 = 1298px */
     }
   }
   @media (min-width: 2560px) {
     .container {
-      max-width: 2040px !important;
+      max-width: 1720px !important; /* 8열 고정: 195*8 + 16*7 + 48 = 1720px */
     }
   }
 }
