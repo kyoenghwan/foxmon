@@ -45,6 +45,8 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
 export function HomeJobSections() {
     const { data: session } = useSession();
     const isEmployer = (session?.user as any)?.role === 'EMPLOYER';
+    const isBusinessVerified = (session?.user as any)?.business_number ? true : false;
+    const showAdRegisterButtons = isEmployer && isBusinessVerified;
     const { t } = useLanguage();
     const [noticeIndex, setNoticeIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
@@ -192,21 +194,40 @@ export function HomeJobSections() {
 
             {/* --- Tier 1: Premium Jobs (Demo: 50 Cards) --- */}
             <section>
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <div className="flex items-center gap-1 sm:gap-2">
-                        <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-primary fill-primary animate-bounce" />
-                        <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap">
-                            {t.sections.premiumJobsTitle}
-                        </h2>
-                    </div>
-                    <div className="flex items-center gap-1.5 sm:gap-3">
-                        {isEmployer && (
-                            <Link href="/biz/ads">
-                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white">
-                                     <Plus className="w-4 h-4 mr-1" /> {t.sections.postPremium}
-                                </Button>
-                            </Link>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2 border-b pb-4">
+                    <div className="flex flex-row flex-wrap items-center gap-x-3 gap-y-2">
+                        <div className="flex items-center gap-1 sm:gap-2">
+                            <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-primary fill-primary animate-bounce" />
+                            <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap">
+                                {t.sections.premiumJobsTitle}
+                            </h2>
+                        </div>
+                        {showAdRegisterButtons && (
+                            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
+                                <Link href="/biz/ads?tier=premium">
+                                    <span className="text-[10px] sm:text-xs font-black bg-primary text-black px-2 py-1 rounded-md shadow-sm hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap">
+                                        프리미엄 등록
+                                    </span>
+                                </Link>
+                                <Link href="/biz/ads?tier=special">
+                                    <span className="text-[10px] sm:text-xs font-black bg-yellow-400 text-black px-2 py-1 rounded-md shadow-sm hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap">
+                                        스페셜 등록
+                                    </span>
+                                </Link>
+                                <Link href="/biz/ads?tier=general">
+                                    <span className="text-[10px] sm:text-xs font-black bg-white text-gray-700 border px-2 py-1 rounded-md shadow-sm hover:bg-gray-50 hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap">
+                                        일반 등록
+                                    </span>
+                                </Link>
+                                <Link href="/biz/ads?tier=side">
+                                    <span className="text-[10px] sm:text-xs font-black bg-gray-800 text-white px-2 py-1 rounded-md shadow-sm hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap">
+                                        사이드배너 등록
+                                    </span>
+                                </Link>
+                            </div>
                         )}
+                    </div>
+                    <div className="flex items-center gap-1.5 sm:gap-3 ml-auto">
                         <button 
                             onClick={() => setShowAllPremium(!showAllPremium)}
                             className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
