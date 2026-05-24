@@ -620,7 +620,7 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                     </button>
                 </div>
 
-                <div className={`${isFilterExpanded ? 'block' : 'hidden md:block'} p-6 pt-0 border-t border-gray-100 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200`}>
+                <div className={`${isFilterExpanded ? 'block' : 'hidden md:block'} p-6 pt-6 border-t border-gray-100 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200`}>
                         {/* Region Selection */}
                         <div className="space-y-3">
                             <div className="flex items-center justify-between border-b pb-2">
