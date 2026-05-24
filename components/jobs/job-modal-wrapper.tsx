@@ -16,11 +16,20 @@ export function JobModalWrapper({ job }: { job: any }) {
 
     if (typeof window !== 'undefined' && window.history.length > 1) {
       router.back();
+      setTimeout(() => {
+        router.refresh();
+      }, 50);
     } else if (typeof window !== 'undefined') {
       const currentParams = new URLSearchParams(window.location.search);
       router.replace(`/jobs?${currentParams.toString()}`, { scroll: false });
+      setTimeout(() => {
+        router.refresh();
+      }, 50);
     } else {
       router.back();
+      setTimeout(() => {
+        router.refresh();
+      }, 50);
     }
   };
 

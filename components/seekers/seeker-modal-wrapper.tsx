@@ -22,6 +22,9 @@ export function SeekerModalWrapper({
 
   useEffect(() => {
     setActiveOpen(isOpen);
+    if (isOpen) {
+      isClosingRef.current = false;
+    }
   }, [isOpen]);
 
   const handleClose = () => {
@@ -31,13 +34,25 @@ export function SeekerModalWrapper({
     
     if (onClose) {
       onClose();
+      queueMicrotask(() => {
+        router.refresh();
+      });
     } else if (typeof window !== 'undefined' && window.history.length > 1) {
       router.back();
+      setTimeout(() => {
+        router.refresh();
+      }, 50);
     } else if (typeof window !== 'undefined') {
       const currentParams = new URLSearchParams(window.location.search);
       router.replace(`/seekers?${currentParams.toString()}`, { scroll: false });
+      setTimeout(() => {
+        router.refresh();
+      }, 50);
     } else {
       router.back();
+      setTimeout(() => {
+        router.refresh();
+      }, 50);
     }
   };
 
