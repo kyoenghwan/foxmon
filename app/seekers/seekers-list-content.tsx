@@ -17,6 +17,7 @@ import { getPublicSeekerAdsAction, getSeekerAdByIdAction } from '@/lib/actions';
 import { SeekerModalWrapper } from '@/components/seekers/seeker-modal-wrapper';
 import { buildFlatIndustryOptions, resumeMatchesIndustryFilter } from '@/lib/resume-industry';
 import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
+import { cn } from '@/lib/utils';
 
 function resolveRegion(param: string, list: CodeItem[]): string {
     if (!param || param === 'all') return 'all';
