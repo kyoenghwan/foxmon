@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Loader2, Plus, Crown, Zap, ChevronRight, ChevronLeft, Filter, Search } from 'lucide-react';
+import { Loader2, Plus, Crown, Zap, ChevronRight, ChevronLeft, Filter, Search, RotateCw, Briefcase } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
@@ -100,6 +101,15 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
     const [generalJobs, setGeneralJobs] = useState<AdItem[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const [refreshKey, setRefreshKey] = useState(0);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const handleRefresh = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setRefreshing(true);
+        setRefreshKey(prev => prev + 1);
+    };
+
     // Pagination state for the list table
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 20;
@@ -170,7 +180,9 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
 
     useEffect(() => {
         async function fetchJobs() {
-            setLoading(true);
+            if (!refreshing) {
+                setLoading(true);
+            }
             try {
                 // 시/도 및 시/군/구 코드를 한글 텍스트 검색어로 변환
                 let regionText = '';
@@ -217,11 +229,13 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                 setGeneralJobs(g);
             } catch (error) {
                 console.error("Failed to fetch jobs:", error);
+            } finally {
+                setLoading(false);
+                setRefreshing(false);
             }
-            setLoading(false);
         }
         fetchJobs();
-    }, [qParam, regionParam, industryParam, keywordParam, dbRegions1, dbRegions2, dbIndustries, dbKeywords]);
+    }, [qParam, regionParam, industryParam, keywordParam, dbRegions1, dbRegions2, dbIndustries, dbKeywords, refreshKey]);
 
     const handleSearchClick = () => {
         const params = new URLSearchParams();
@@ -402,6 +416,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
             <section>
                 <div className="flex items-center justify-between mb-4 sm:mb-6 border-b pb-4">
                     <div className="flex items-center gap-1 sm:gap-2">
+                        <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                         <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap">
                             {t.sections.generalJobsTitle}
                         </h2>
@@ -700,6 +715,14 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                             <span className="bg-[#ff8a00] text-white w-4 h-4 flex items-center justify-center rounded-sm text-[10px] shadow-sm tracking-tighter shrink-0 pt-[1px] pl-[1px]">&gt;</span> 
                             구인정보 리스트
                         </h2>
+                        <button
+                            onClick={handleRefresh}
+                            disabled={loading || refreshing}
+                            className="p-1 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-primary active:scale-95 disabled:opacity-50 shrink-0"
+                            title="새로고침"
+                        >
+                            <RotateCw className={cn("w-4 h-4", (loading || refreshing) && "animate-spin")} />
+                        </button>
                     </div>
                     {isEmployer && (
                         <Link href="/biz/ads/new" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white text-[11px] font-black rounded-lg hover:bg-gray-700 transition-colors shadow-sm">

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Megaphone, Plus, Zap, Crown, Loader2, ChevronLeft } from 'lucide-react';
+import { ChevronRight, Megaphone, Plus, Zap, Crown, Loader2, ChevronLeft, Briefcase } from 'lucide-react';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { useLanguage } from '@/components/providers/language-provider';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
@@ -295,8 +295,8 @@ export function HomeJobSections() {
             {/* --- Tier 3: General Jobs --- */}
             <section>
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap">
-                        {t.sections.generalJobsTitle}
+                    <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap flex items-center gap-1 sm:gap-2">
+                        <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" /> {t.sections.generalJobsTitle}
                     </h2>
                     <div className="flex items-center gap-1.5 sm:gap-3">
                         {isEmployer && (

@@ -33,7 +33,7 @@ export default async function SubPageLayout({ title, description, hideSearch = f
                 </div>
 
                 {/* Page Title - More compact */}
-                <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4">
+                <div className="flex flex-row flex-wrap items-baseline gap-x-2 gap-y-1">
                     <h1 className="text-2xl font-bold tracking-tight text-gray-900 shrink-0">{title}</h1>
                     {description && <p className="text-sm text-gray-500 break-keep">{description}</p>}
                 </div>

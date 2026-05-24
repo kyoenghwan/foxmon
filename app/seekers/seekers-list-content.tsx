@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Loader2, Plus, Crown, Zap, ChevronRight, ChevronLeft, Filter, Search, RotateCw } from 'lucide-react';
+import { Loader2, Plus, Crown, Zap, ChevronRight, ChevronLeft, Filter, Search, RotateCw, Briefcase } from 'lucide-react';
 import Link from 'next/link';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
@@ -77,9 +77,11 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
     const router = useRouter();
     const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
+    const [refreshing, setRefreshing] = useState(false);
 
     const handleRefresh = (e: React.MouseEvent) => {
         e.preventDefault();
+        setRefreshing(true);
         setRefreshKey(prev => prev + 1);
     };
 
@@ -225,7 +227,9 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
 
     useEffect(() => {
         async function fetchJobs() {
-            setLoading(true);
+            if (!refreshing) {
+                setLoading(true);
+            }
             try {
                 // 시/도 및 시/군/구 코드를 한글 텍스트 검색어로 변환
                 let regionText = '';
@@ -276,8 +280,10 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                 }
             } catch (error) {
                 console.error("Failed to fetch jobs:", error);
+            } finally {
+                setLoading(false);
+                setRefreshing(false);
             }
-            setLoading(false);
         }
         fetchJobs();
     }, [qParam, regionParam, industryParam, keywordParam, dbRegions1, dbRegions2, dbIndustries, dbKeywords, refreshKey]);
@@ -560,6 +566,7 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
             <section>
                 <div className="flex items-center justify-between mb-4 sm:mb-6 border-b pb-4">
                     <div className="flex items-center gap-1 sm:gap-2">
+                        <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                         <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap">
                             {t.sections.generalJobsTitle}
                         </h2>
@@ -909,11 +916,11 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                         </h2>
                         <button
                             onClick={handleRefresh}
-                            disabled={loading}
+                            disabled={loading || refreshing}
                             className="p-1 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-primary active:scale-95 disabled:opacity-50 shrink-0"
                             title="새로고침"
                         >
-                            <RotateCw className={cn("w-4 h-4", loading && "animate-spin")} />
+                            <RotateCw className={cn("w-4 h-4", (loading || refreshing) && "animate-spin")} />
                         </button>
                     </div>
                     {!isEmployer && (
