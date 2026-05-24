@@ -175,8 +175,8 @@ export function GeneralSeekerListRowDesktop({ job, onClick }: { job: any; onClic
                 <span className="font-bold text-gray-800 shrink-0">{maskedName}</span>
             </td>
             <td className="py-4 px-2 text-gray-600 text-center">{genderAge}</td>
-            <td className="py-4 px-4 text-left font-bold text-gray-800 group-hover:text-primary transition-colors max-w-[200px] md:max-w-[300px] overflow-hidden">
-                <MarqueeText className="font-bold text-gray-800 text-left">
+            <td className="py-4 px-4 text-center font-bold text-gray-800 group-hover:text-primary transition-colors max-w-[200px] md:max-w-[300px] overflow-hidden">
+                <MarqueeText className="font-bold text-gray-800 text-center">
                     {displayTitle}
                 </MarqueeText>
             </td>
