@@ -1017,6 +1017,7 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
             <ResumeManagementModal 
                 isOpen={isResumeModalOpen} 
                 onOpenChange={setIsResumeModalOpen} 
+                defaultTab="AD"
             />
         </div>
     );

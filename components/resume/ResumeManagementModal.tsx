@@ -87,11 +87,13 @@ function parsePayAmountInput(value: string): number | undefined {
 interface ResumeManagementModalProps {
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  defaultTab?: 'RESUME' | 'AD';
 }
 
 export function ResumeManagementModal({
   isOpen: controlledIsOpen,
   onOpenChange: controlledOnOpenChange,
+  defaultTab = 'RESUME',
 }: ResumeManagementModalProps = {}) {
   const router = useRouter();
   const [internalIsOpen, setInternalIsOpen] = useState(false);
@@ -208,6 +210,7 @@ export function ResumeManagementModal({
 
   useEffect(() => {
     if (isOpen) {
+      setActiveTab(defaultTab);
       fetchResumes();
       fetchAds();
     } else {
@@ -218,9 +221,9 @@ export function ResumeManagementModal({
       setSelectedSigungus([]);
       setOtherIndustryText('');
       setSnsRows([{ type: '', value: '' }]);
-      setActiveTab('RESUME');
+      setActiveTab(defaultTab);
     }
-  }, [isOpen]);
+  }, [isOpen, defaultTab]);
 
   const fetchResumes = async () => {
     setLoading(true);
