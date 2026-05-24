@@ -65,7 +65,7 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-black whitespace-nowrap shrink-0 ${
                         isInactive 
                             ? 'bg-gray-200 text-gray-600' 
-                            : 'bg-orange-100 text-primary border border-orange-200'
+                            : 'bg-blue-100 text-blue-600 border border-blue-200'
                     }`}>
                         {isInactive ? '구직 완료' : '구직 중'}
                     </span>
@@ -169,7 +169,7 @@ export function GeneralSeekerListRowDesktop({ job, onClick }: { job: any; onClic
                     {isInactive ? (
                         <span className="text-[10px] bg-gray-200 text-gray-600 border border-transparent py-0.5 rounded font-black whitespace-nowrap shrink-0 w-[55px] text-center inline-block">구직 완료</span>
                     ) : (
-                        <span className="text-[10px] bg-orange-100 text-primary border border-orange-200 py-0.5 rounded font-black whitespace-nowrap shrink-0 w-[55px] text-center inline-block">구직중</span>
+                        <span className="text-[10px] bg-blue-100 text-blue-600 border border-blue-200 py-0.5 rounded font-black whitespace-nowrap shrink-0 w-[55px] text-center inline-block">구직중</span>
                     )}
                     <span className="font-bold text-gray-800 shrink-0">{maskedName}</span>
                 </div>
