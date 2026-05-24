@@ -164,25 +164,17 @@ export function GeneralSeekerListRowDesktop({ job, onClick }: { job: any; onClic
             }}
             className={`hover:bg-gray-50/50 transition-colors group cursor-pointer border-b border-gray-100 ${isInactive ? 'opacity-50 grayscale' : ''}`}
         >
-            <td className="py-4 px-2 font-bold text-gray-800 text-center max-w-[150px] overflow-hidden">
-                <div className="flex items-center justify-center gap-1.5 w-full min-w-0">
+            <td className="py-4 px-2 font-bold text-gray-800 text-center">
+                <div className="flex items-center justify-center gap-1.5">
                     {isInactive ? (
-                        <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-black whitespace-nowrap shrink-0">구직 완료</span>
+                        <span className="text-[10px] bg-gray-200 text-gray-600 border border-transparent py-0.5 rounded font-black whitespace-nowrap shrink-0 w-[55px] text-center inline-block">구직 완료</span>
                     ) : (
-                        <span className="text-[10px] bg-orange-100 text-primary border border-orange-200 px-1.5 py-0.5 rounded font-black whitespace-nowrap shrink-0">구직중</span>
+                        <span className="text-[10px] bg-orange-100 text-primary border border-orange-200 py-0.5 rounded font-black whitespace-nowrap shrink-0 w-[55px] text-center inline-block">구직중</span>
                     )}
-                    <div className="flex-1 min-w-0">
-                        <MarqueeText className="font-bold text-gray-800 text-center">
-                            {maskedName}
-                        </MarqueeText>
-                    </div>
+                    <span className="font-bold text-gray-800 shrink-0">{maskedName}</span>
                 </div>
             </td>
-            <td className="py-4 px-2 text-gray-600 text-center max-w-[100px] overflow-hidden">
-                <MarqueeText className="text-gray-600 text-center">
-                    {genderAge}
-                </MarqueeText>
-            </td>
+            <td className="py-4 px-2 text-gray-600 text-center">{genderAge}</td>
             <td className="py-4 px-4 text-left font-bold text-gray-800 group-hover:text-primary transition-colors max-w-[200px] md:max-w-[300px] overflow-hidden">
                 <MarqueeText className="font-bold text-gray-800 text-left">
                     {displayTitle}
@@ -198,18 +190,12 @@ export function GeneralSeekerListRowDesktop({ job, onClick }: { job: any; onClic
                     {industry}
                 </MarqueeText>
             </td>
-            <td className="py-4 px-2 text-center max-w-[150px] overflow-hidden">
-                <MarqueeText className="text-center">
-                    <span className="bg-gray-100 text-gray-500 text-[11px] md:text-[12px] font-bold px-2 py-1 rounded-full whitespace-nowrap">
-                        {payText}
-                    </span>
-                </MarqueeText>
+            <td className="py-4 px-2 text-center">
+                <span className="bg-gray-100 text-gray-500 text-[11px] md:text-[12px] font-bold px-2 py-1 rounded-full whitespace-nowrap">
+                    {payText}
+                </span>
             </td>
-            <td className="py-4 px-2 text-gray-400 font-medium text-center max-w-[100px] overflow-hidden">
-                <MarqueeText className="text-gray-400 font-medium text-center">
-                    {dateStr}
-                </MarqueeText>
-            </td>
+            <td className="py-4 px-2 text-gray-400 font-medium text-center">{dateStr}</td>
         </tr>
     );
 }
