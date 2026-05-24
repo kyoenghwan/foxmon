@@ -77,11 +77,7 @@ const DialogContent = React.forwardRef<
             {children}
             {showCloseButton ? (
             <DialogPrimitive.Close className="absolute right-4 top-4 focus:outline-none disabled:pointer-events-none">
-                <span className="hidden md:flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors">
-                    <X className="h-4 w-4" />
-                    <span className="sr-only">Close</span>
-                </span>
-                <span className="md:hidden inline-block px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0">
+                <span className="inline-block px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0">
                     닫기
                 </span>
             </DialogPrimitive.Close>
