@@ -11,11 +11,11 @@ export function MainBanner() {
     const [ads, setAds] = useState<AdItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [cardWidth, setCardWidth] = useState(400);
+    const [cardHeight, setCardHeight] = useState(200);
     const [isTransitioning, setIsTransitioning] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
     const [itemsPerView, setItemsPerView] = useState(1);
-
-    const [cardWidth, setCardWidth] = useState(400);
 
     // 반응형 배너 갯수 및 카드 너비 조절 (PC에서는 중앙 채용 배너 2개 크기인 406px 고정)
     useEffect(() => {
@@ -23,13 +23,16 @@ export function MainBanner() {
             const width = window.innerWidth;
             if (width < 800) {
                 setItemsPerView(1.5);
-                setCardWidth(0);
+                setCardWidth(310);
+                setCardHeight(155);
             } else if (width >= 800 && width < 1024) {
                 setItemsPerView(1);
-                setCardWidth(0);
+                setCardWidth(406);
+                setCardHeight(203);
             } else {
                 setItemsPerView(2);
                 setCardWidth(406); // (195px * 2) + 16px = 406px 고정
+                setCardHeight(203);
             }
         };
         handleResize();
@@ -40,6 +43,7 @@ export function MainBanner() {
             clearTimeout(timer);
         };
     }, [ads]);
+
 
     // 1. Firestore에서 공정한 알고리즘이 적용된 광고 가져오기
     useEffect(() => {
@@ -118,11 +122,7 @@ export function MainBanner() {
             <div
                 className={`flex gap-4 h-full ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
                 style={{
-                    transform: itemsPerView === 2
-                        ? `translateX(-${currentIndex * (cardWidth + 16)}px)`
-                        : itemsPerView === 1.5
-                        ? `translateX(calc(-${currentIndex * (100 / 1.5)}% - ${currentIndex * (16 / 3)}px))`
-                        : `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 16}px))`,
+                    transform: `translateX(-${currentIndex * (cardWidth + 16)}px)`,
                 }}
             >
                 {extendedBanners.map((banner, idx) => {
@@ -161,13 +161,10 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] min-[800px]:h-full min-[800px]:aspect-none`}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer`}
                             style={{ 
-                                width: itemsPerView === 2 
-                                    ? `${cardWidth}px` 
-                                    : itemsPerView === 1.5 
-                                    ? 'calc((100% - 16px) / 1.5)' 
-                                    : '100%' 
+                                width: `${cardWidth}px`,
+                                height: `${cardHeight}px`
                             }}
                             onClick={() => handleAdClick(banner.id)}
                         >

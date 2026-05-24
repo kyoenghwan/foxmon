@@ -18,14 +18,14 @@ export function HeroSection({ session }: HeroSectionProps) {
             <div className="w-full container lg:max-w-[1172px] lg:!max-w-[1172px] mx-auto px-4">
                 <div className="flex flex-col min-[800px]:flex-row gap-6 items-center min-[800px]:items-stretch justify-center min-[800px]:justify-between">
                     {/* 상단/좌측: 메인 공고 배너 슬라이더 (PC: 828px * 203px 고정) */}
-                    <div className="w-full min-[800px]:w-[calc(50%-12px)] lg:w-[828px] h-auto min-[800px]:h-[203px] flex justify-center max-[639px]:aspect-[2/1] flex-shrink-0">
+                    <div className="w-full max-w-[481px] min-[800px]:max-w-[406px] lg:max-w-[828px] h-[155px] min-[800px]:h-[203px] flex justify-center flex-shrink-0">
                         <div className="w-full h-full">
                             <MainBanner />
                         </div>
                     </div>
 
                     {/* 하단/우측: 유저 로그인/커뮤니티 정보 박스 (PC: 320px * 203px 고정) */}
-                    <div className="w-full min-[800px]:w-[calc(50%-12px)] lg:w-[320px] min-[800px]:h-[203px] max-w-[425px] sm:max-w-[320px] min-[800px]:max-w-none flex-shrink-0 flex items-center justify-center min-[800px]:items-stretch min-[800px]:self-stretch">
+                    <div className="w-full max-w-[320px] min-[800px]:max-w-[320px] h-auto min-[800px]:h-[203px] flex-shrink-0 flex items-center justify-center min-[800px]:items-stretch min-[800px]:self-stretch">
                         <LoginInfoBox session={session} />
                     </div>
                 </div>
