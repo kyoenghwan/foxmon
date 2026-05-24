@@ -105,9 +105,9 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
             <div className="h-full w-full bg-white rounded-2xl border p-4 sm:p-5 flex flex-col justify-between shadow-sm">
                 
                 {/* Top Section: Avatar & Welcome text (New Layout) */}
-                <div className="flex items-start gap-2.5 sm:gap-4">
-                    {/* 프로필 이미지 - 모바일 h-[72px](72px), sm h-20(80px)으로 정밀 제어 */}
-                    <div className="h-[72px] w-[72px] sm:h-20 sm:w-20 rounded-xl sm:rounded-[1rem] bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden border border-orange-100">
+                <div className="flex items-center gap-3 sm:gap-4">
+                    {/* 프로필 이미지 - 모바일 h-16(64px), sm h-20(80px)으로 세로 대칭 조정 */}
+                    <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl sm:rounded-[1rem] bg-orange-50 flex items-center justify-center text-primary shadow-inner shrink-0 overflow-hidden border border-orange-100">
                         {profileImageUrl ? (
                             <img src={profileImageUrl} alt="프로필" className="w-full h-full object-cover" />
                         ) : (
@@ -115,58 +115,55 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                         )}
                     </div>
 
-                    {/* 우측 정보 & 버튼 영역 (프로필 이미지 높이와 완전히 일치하도록 h-[72px] sm:h-20 적용) */}
-                    <div className="flex-1 min-w-0 h-[72px] sm:h-20 flex flex-col justify-between">
-                        {/* 1. 상단 인사말 및 설정 버튼 (절반 높이인 h-[36px] sm:h-10) */}
-                        <div className="h-[36px] sm:h-10 flex w-full min-w-0 items-center justify-between gap-1 sm:gap-2">
-                            <div className="min-w-0 flex-1">
-                                <MarqueeText className="font-black text-[13px] min-[375px]:text-[15px] sm:text-base text-gray-900 leading-tight">
-                                    <span className="text-primary">{displayName}</span>님 반갑습니다!
-                                </MarqueeText>
-                            </div>
-                            <div className="shrink-0 scale-90 sm:scale-100 origin-right flex items-center">
-                                <SettingsModal />
-                            </div>
+                    {/* 우측 정보 & 버튼 영역 (세로 레이아웃 개편) */}
+                    <div className="flex-1 min-w-0 flex flex-col gap-1.5 justify-center">
+                        {/* 1. 상단 인사말 */}
+                        <div className="min-w-0">
+                            <MarqueeText className="font-black text-[13px] min-[375px]:text-[15px] sm:text-base text-gray-900 leading-tight text-left">
+                                <span className="text-primary">{displayName}</span>님 반갑습니다!
+                            </MarqueeText>
                         </div>
 
-                        {/* 2. 하단 액션 버튼들 (절반 높이인 h-[30px] sm:h-[34px]) */}
-                        <div className="h-[30px] sm:h-[34px] flex items-center justify-between gap-2 w-full">
-                            <div className="flex items-center gap-1.5 sm:gap-2 h-full flex-1 min-w-0">
-                                {showResumeMenu && (
-                                    <div className="md:hidden h-full">
-                                        {/* ResumeManagementModal 내부에 하드코딩된 button을 덮어쓰기 위해 CSS 적용 */}
-                                        <div className="h-full [&>button]:px-[22px] [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full [&>button]:text-[13px] sm:[&>button]:text-[15px]">
-                                            <ResumeManagementModal />
-                                        </div>
-                                    </div>
-                                )}
-                                {isEmployer && (
-                                    <div className="md:hidden h-full">
-                                        <Link 
-                                            href="/biz" 
-                                            className="h-full flex items-center justify-center gap-1.5 px-[22px] text-[13px] sm:text-[15px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
-                                        >
-                                            <Briefcase className="w-4 h-4" />
-                                            <span>업체관리</span>
-                                        </Link>
-                                    </div>
-                                )}
+                        {/* 2. 프로필 설정 버튼 */}
+                        <div className="flex items-center justify-between w-full">
+                            <div className="scale-90 sm:scale-100 origin-left shrink-0">
+                                <SettingsModal />
                             </div>
+                            
+                            {/* 모바일 접기 버튼 (더보기) */}
                             <button
                                 onClick={() => setIsOpen(!isOpen)}
-                                className="h-full px-3.5 hover:bg-gray-50 rounded-full text-gray-600 hover:text-gray-900 transition-all flex items-center justify-center shrink-0 border border-gray-200 cursor-pointer shadow-sm active:scale-95 text-[12px] sm:text-[13px] font-black md:hidden"
+                                className="px-3 py-1 hover:bg-gray-50 rounded-full text-gray-600 hover:text-gray-900 transition-all flex items-center justify-center shrink-0 border border-gray-200 cursor-pointer shadow-sm active:scale-95 text-[11px] sm:text-[12px] font-black md:hidden ml-auto"
                                 title={isOpen ? "메뉴 접기" : "더보기"}
                             >
                                 <span className="mr-1">{isOpen ? "접기" : "더보기"}</span>
                                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
                             </button>
                         </div>
+                        
+                        {/* 3. 모바일 전용 이력서 관리 / 업체 관리 */}
+                        <div className="flex items-center gap-1.5 sm:gap-2 w-full md:hidden">
+                            {showResumeMenu && (
+                                <div className="h-8 [&>button]:px-4 [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full [&>button]:text-[12px] sm:[&>button]:text-[14px]">
+                                    <ResumeManagementModal />
+                                </div>
+                            )}
+                            {isEmployer && (
+                                <Link 
+                                    href="/biz" 
+                                    className="h-8 flex items-center justify-center gap-1.5 px-4 text-[12px] sm:text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                                >
+                                    <Briefcase className="w-3.5 h-3.5" />
+                                    <span>업체관리</span>
+                                </Link>
+                             )}
+                        </div>
                     </div>
                 </div>
 
                 {/* Bottom Icons - 5 핵심 기능 (PC에서는 항상 열림 적용) */}
-                <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 pt-3 sm:pt-4 mt-3 lg:mt-auto border-t border-gray-100' : 'grid-rows-[0fr] opacity-0 overflow-hidden md:grid-rows-[1fr] md:opacity-100 md:pt-4 md:mt-auto md:border-t md:border-gray-100 md:overflow-visible'}`}>
-                    <div className="overflow-hidden flex justify-around items-center px-1 sm:px-2">
+                <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 pt-3 sm:pt-4 mt-3 lg:mt-auto' : 'grid-rows-[0fr] opacity-0 overflow-hidden md:grid-rows-[1fr] md:opacity-100 md:pt-4 md:mt-auto md:overflow-visible'}`}>
+                    <div className="overflow-hidden flex justify-between items-center px-0.5">
                         <Link href="/mypage/scraps" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
                             <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110 mx-auto">
                                 <Heart className="h-4.5 w-4.5 sm:h-5 sm:w-5 fill-current" />
