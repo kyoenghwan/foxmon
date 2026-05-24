@@ -17,6 +17,30 @@ interface Notice {
     isHot?: boolean;
 }
 
+function getResponsiveHideClass(idx: number, maxRows: number): string {
+  if (maxRows === 6) {
+    let classes = '';
+    if (idx >= 12) classes += ' max-md:hidden';
+    if (idx >= 18) classes += ' md:max-[799px]:hidden';
+    if (idx >= 24) classes += ' min-[800px]:max-[979px]:hidden lg:max-2xl:hidden';
+    if (idx >= 25) classes += ' min-[980px]:max-lg:hidden 2xl:max-3xl:hidden';
+    if (idx >= 36) classes += ' 3xl:max-4xl:hidden';
+    if (idx >= 48) classes += ' 4xl:hidden';
+    return classes.trim();
+  }
+  if (maxRows === 3) {
+    let classes = '';
+    if (idx >= 6) classes += ' max-md:hidden';
+    if (idx >= 9) classes += ' md:max-[799px]:hidden';
+    if (idx >= 12) classes += ' min-[800px]:max-[979px]:hidden lg:max-2xl:hidden';
+    if (idx >= 15) classes += ' min-[980px]:max-lg:hidden 2xl:max-3xl:hidden';
+    if (idx >= 18) classes += ' 3xl:max-4xl:hidden';
+    if (idx >= 24) classes += ' 4xl:hidden';
+    return classes.trim();
+  }
+  return '';
+}
+
 export function HomeJobSections() {
     const { t } = useLanguage();
     const [noticeIndex, setNoticeIndex] = useState(0);
@@ -191,7 +215,7 @@ export function HomeJobSections() {
                             <div 
                                 key={job.id} 
                                 className={`w-full ${
-                                    !showAllPremium && idx >= 18 ? 'hidden lg:block' : ''
+                                    !showAllPremium ? getResponsiveHideClass(idx, 6) : ''
                                 }`}
                             >
                                 <PremiumJobCard 
@@ -233,7 +257,7 @@ export function HomeJobSections() {
                             <div 
                                 key={job.id} 
                                 className={`w-full ${
-                                    !showAllSpecial && idx >= 18 ? 'hidden lg:block' : ''
+                                    !showAllSpecial ? getResponsiveHideClass(idx, 6) : ''
                                 }`}
                             >
                                 <PremiumJobCard 
@@ -275,7 +299,7 @@ export function HomeJobSections() {
                             <div 
                                 key={job.id} 
                                 className={`w-full ${
-                                    !showAllGeneral && idx >= 18 ? 'hidden lg:block' : ''
+                                    !showAllGeneral ? getResponsiveHideClass(idx, 6) : ''
                                 }`}
                             >
                                 <PremiumJobCard 

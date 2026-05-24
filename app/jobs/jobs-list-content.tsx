@@ -38,6 +38,30 @@ function resolveIndustry(param: string, list: CodeItem[]): string {
     return found ? found.code_value : 'all';
 }
 
+function getResponsiveHideClass(idx: number, maxRows: number): string {
+  if (maxRows === 6) {
+    let classes = '';
+    if (idx >= 12) classes += ' max-md:hidden';
+    if (idx >= 18) classes += ' md:max-[799px]:hidden';
+    if (idx >= 24) classes += ' min-[800px]:max-[979px]:hidden lg:max-2xl:hidden';
+    if (idx >= 25) classes += ' min-[980px]:max-lg:hidden 2xl:max-3xl:hidden';
+    if (idx >= 36) classes += ' 3xl:max-4xl:hidden';
+    if (idx >= 48) classes += ' 4xl:hidden';
+    return classes.trim();
+  }
+  if (maxRows === 3) {
+    let classes = '';
+    if (idx >= 6) classes += ' max-md:hidden';
+    if (idx >= 9) classes += ' md:max-[799px]:hidden';
+    if (idx >= 12) classes += ' min-[800px]:max-[979px]:hidden lg:max-2xl:hidden';
+    if (idx >= 15) classes += ' min-[980px]:max-lg:hidden 2xl:max-3xl:hidden';
+    if (idx >= 18) classes += ' 3xl:max-4xl:hidden';
+    if (idx >= 24) classes += ' 4xl:hidden';
+    return classes.trim();
+  }
+  return '';
+}
+
 export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProps) {
     const { t } = useLanguage();
     const searchParams = useSearchParams();
@@ -301,13 +325,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                             <div 
                                 key={job.id} 
                                 className={`w-full ${
-                                    !showAllPremium && idx >= 10 ? 'hidden md:block' : ''
-                                } ${
-                                    !showAllPremium && idx >= 30 ? 'md:hidden lg:block' : ''
-                                } ${
-                                    !showAllPremium && idx >= 40 ? 'lg:hidden xl:block' : ''
-                                } ${
-                                    !showAllPremium && idx >= 50 ? 'xl:hidden' : ''
+                                    !showAllPremium ? getResponsiveHideClass(idx, 3) : ''
                                 }`}
                             >
                                 <PremiumJobCard 
@@ -360,13 +378,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                             <div 
                                 key={job.id} 
                                 className={`w-full ${
-                                    !showAllSpecial && idx >= 10 ? 'hidden md:block' : ''
-                                } ${
-                                    !showAllSpecial && idx >= 20 ? 'md:hidden lg:block' : ''
-                                } ${
-                                    !showAllSpecial && idx >= 30 ? 'lg:hidden xl:block' : ''
-                                } ${
-                                    !showAllSpecial && idx >= 40 ? 'xl:hidden' : ''
+                                    !showAllSpecial ? getResponsiveHideClass(idx, 3) : ''
                                 }`}
                             >
                                 <PremiumJobCard 
@@ -418,13 +430,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                             <div 
                                 key={job.id} 
                                 className={`w-full ${
-                                    !showAllGeneral && idx >= 10 ? 'hidden md:block' : ''
-                                } ${
-                                    !showAllGeneral && idx >= 20 ? 'md:hidden lg:block' : ''
-                                } ${
-                                    !showAllGeneral && idx >= 30 ? 'lg:hidden xl:block' : ''
-                                } ${
-                                    !showAllGeneral && idx >= 40 ? 'xl:hidden' : ''
+                                    !showAllGeneral ? getResponsiveHideClass(idx, 3) : ''
                                 }`}
                             >
                                 <PremiumJobCard 
