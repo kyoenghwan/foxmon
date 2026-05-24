@@ -32,7 +32,7 @@ export function JobModalWrapper({ job }: { job: any }) {
       }
     }}>
       <DialogContent 
-        className="max-w-[1000px] w-[95vw] sm:w-[90vw] p-0 overflow-hidden border-none bg-white rounded-[24px] sm:rounded-[32px] shadow-2xl focus:outline-none max-h-[90vh] flex flex-col" 
+        className="max-w-[800px] w-[95vw] sm:w-[85vw] p-0 overflow-hidden border-none bg-white rounded-[24px] sm:rounded-[32px] shadow-2xl focus:outline-none max-h-[90vh] flex flex-col" 
         showCloseButton={false}
       >
          <DialogTitle className="sr-only">채용 상세 정보</DialogTitle>
