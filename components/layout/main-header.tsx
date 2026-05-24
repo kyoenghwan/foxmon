@@ -164,6 +164,25 @@ export function MainHeader({ session }: MainHeaderProps) {
                     </div>
                     {session ? (
                         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pl-2">
+                            {/* 회원 등급/역할 뱃지 */}
+                            <span className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-bold text-gray-600 mr-1 sm:mr-2">
+                                <span className={`shrink-0 text-[8px] sm:text-[9px] px-1.5 py-0.2 rounded-full font-black text-white ${
+                                    session.user?.role === 'SUPER_ADMIN' ? 'bg-red-500' :
+                                    session.user?.role === 'ADMIN' ? 'bg-purple-600' :
+                                    session.user?.role === 'EMPLOYER' ? 'bg-primary' : 'bg-blue-500'
+                                }`}>
+                                    {session.user?.role === 'SUPER_ADMIN' ? 'S' :
+                                     session.user?.role === 'ADMIN' ? 'A' :
+                                     session.user?.role === 'EMPLOYER' ? 'B' : 'U'}
+                                </span>
+                                <span className="text-primary font-black ml-0.5 truncate">
+                                    {session.user?.role === 'SUPER_ADMIN' ? '최고 관리자' :
+                                     session.user?.role === 'ADMIN' ? '일반 관리자' :
+                                     session.user?.role === 'EMPLOYER' ? '업체회원' : '개인회원'}
+                                </span>
+                            </span>
+                            <span className="text-gray-300 shrink-0 mr-1.5">|</span>
+
                             <span className="text-[10px] sm:text-[11px] font-bold text-gray-600 whitespace-nowrap">
                                 로그인 유지
                             </span>
@@ -190,6 +209,14 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     )}
                                 />
                             </button>
+                            
+                            {(session.user?.role === 'ADMIN' || session.user?.role === 'SUPER_ADMIN') && (
+                                <>
+                                    <span className="text-gray-300 shrink-0 mx-1">|</span>
+                                    <Link href="/fox-office" className="hover:text-primary transition-colors text-[10px] sm:text-[11px] shrink-0 font-bold">관리자홈</Link>
+                                </>
+                            )}
+
                             <span className="text-gray-300 shrink-0 mx-1">|</span>
                             <button
                                 onClick={async () => {
@@ -333,48 +360,7 @@ export function MainHeader({ session }: MainHeaderProps) {
 
                     {/* 우측: 회원정보 / 로그인 버튼 (데스크톱에서만 노출) */}
                     <div className="hidden md:flex items-center gap-3 shrink-0 text-[12px] sm:text-[13px] font-bold text-gray-500">
-                        {session ? (
-                            <div className="flex items-center gap-2">
-                                <span className="flex items-center gap-1.5 text-[11px] sm:text-[13px] font-bold text-gray-600">
-                                    <span className={`shrink-0 text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full font-black text-white ${
-                                        session.user?.role === 'SUPER_ADMIN' ? 'bg-red-500' :
-                                        session.user?.role === 'ADMIN' ? 'bg-purple-600' :
-                                        session.user?.role === 'EMPLOYER' ? 'bg-primary' : 'bg-blue-500'
-                                    }`}>
-                                        {session.user?.role === 'SUPER_ADMIN' ? 'S' :
-                                         session.user?.role === 'ADMIN' ? 'A' :
-                                         session.user?.role === 'EMPLOYER' ? 'B' : 'U'}
-                                    </span>
-                                    <span className="text-primary font-black ml-0.5 hidden sm:inline truncate">
-                                        {session.user?.role === 'SUPER_ADMIN' ? '최고 관리자' :
-                                         session.user?.role === 'ADMIN' ? '일반 관리자' :
-                                         session.user?.role === 'EMPLOYER' ? '업체회원' : '개인회원'}
-                                    </span>
-                                </span>
-                                {(session.user?.role === 'ADMIN' || session.user?.role === 'SUPER_ADMIN') && (
-                                    <>
-                                        <span className="text-gray-300 shrink-0">|</span>
-                                        <Link href="/fox-office" className="hover:text-primary transition-colors text-[12px] shrink-0">관리자홈</Link>
-                                    </>
-                                )}
-                                <span className="text-gray-300 shrink-0">|</span>
-                                <button
-                                    onClick={async () => {
-                                        document.body.style.opacity = '0.5';
-                                        try {
-                                            document.cookie = 'foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                                            document.cookie = 'foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                                            await signOut({ callbackUrl: '/login' });
-                                        } catch (e) {
-                                            console.error(e);
-                                        }
-                                    }}
-                                    className="font-black text-red-500 hover:text-red-700 transition-colors whitespace-nowrap shrink-0"
-                                >
-                                    로그아웃
-                                </button>
-                            </div>
-                        ) : (
+                        {session ? null : (
                             <div className="flex items-center gap-2.5 whitespace-nowrap">
                                 <Link href="/login" className="hover:text-gray-900 transition-colors">로그인</Link>
                                 <span className="text-gray-300">|</span>
