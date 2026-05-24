@@ -454,7 +454,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                 {/* 검색 필터 헤더 */}
                 <div 
                     onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-                    className="p-5 flex items-center justify-between md:pointer-events-none md:cursor-default cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl"
+                    className="p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl"
                 >
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                         <div className="flex items-center gap-2">
@@ -467,14 +467,14 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                     <button 
                         type="button"
-                        className="md:hidden text-xs sm:text-sm font-bold text-gray-500 hover:text-primary flex items-center gap-1 transition-colors shrink-0 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg"
+                        className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary flex items-center gap-1 transition-colors shrink-0 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg"
                     >
                         {isFilterExpanded ? '필터 닫기' : '필터 열기'}
                         <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isFilterExpanded ? 'rotate-90' : 'rotate-0'}`} />
                     </button>
                 </div>
 
-                <div className={`${isFilterExpanded ? 'block' : 'hidden md:block'} p-6 pt-6 border-t border-gray-100 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200`}>
+                <div className={`${isFilterExpanded ? 'block' : 'hidden'} p-6 pt-6 border-t border-gray-100 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200`}>
                 {/* Region Selection */}
                 <div className="space-y-3">
                     <div className="flex items-center justify-between border-b pb-2">
