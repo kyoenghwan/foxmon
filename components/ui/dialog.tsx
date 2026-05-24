@@ -7,9 +7,14 @@ import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const Dialog = ({ open, onOpenChange, preventPopState = false, ...props }: DialogPrimitive.DialogProps & { preventPopState?: boolean }) => {
+    const onOpenChangeRef = React.useRef(onOpenChange);
+    React.useEffect(() => {
+        onOpenChangeRef.current = onOpenChange;
+    }, [onOpenChange]);
+
     React.useEffect(() => {
         if (preventPopState) return;
-        if (!open || !onOpenChange) return;
+        if (!open) return;
 
         const modalStateKey = `modal-${Math.random().toString(36).substring(2, 11)}`;
 
@@ -17,7 +22,7 @@ const Dialog = ({ open, onOpenChange, preventPopState = false, ...props }: Dialo
         window.history.pushState({ modalKey: modalStateKey }, '');
 
         const handlePopState = () => {
-            onOpenChange(false);
+            onOpenChangeRef.current?.(false);
         };
 
         window.addEventListener('popstate', handlePopState);
@@ -29,7 +34,7 @@ const Dialog = ({ open, onOpenChange, preventPopState = false, ...props }: Dialo
                 window.history.back();
             }
         };
-    }, [open, onOpenChange]);
+    }, [open, preventPopState]);
 
     return <DialogPrimitive.Root open={open} onOpenChange={onOpenChange} {...props} />;
 }

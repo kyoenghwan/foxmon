@@ -77,6 +77,7 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
 
     const handleResumeRegisterClick = (e: React.MouseEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         if (!session || !session.user) {
             router.push('/login');
             return;
