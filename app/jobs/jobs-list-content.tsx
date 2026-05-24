@@ -42,8 +42,8 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
   if (maxRows === 6) {
     let classes = '';
     if (idx >= 12) classes += ' max-md:hidden';
-    if (idx >= 18) classes += ' md:max-xl:hidden';
-    if (idx >= 24) classes += ' xl:max-2xl:hidden';
+    if (idx >= 18) classes += ' md:max-[799px]:hidden';
+    if (idx >= 24) classes += ' min-[800px]:max-2xl:hidden';
     if (idx >= 30) classes += ' 2xl:max-3xl:hidden';
     if (idx >= 36) classes += ' 3xl:max-4xl:hidden';
     if (idx >= 48) classes += ' 4xl:hidden';
@@ -52,8 +52,8 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
   if (maxRows === 3) {
     let classes = '';
     if (idx >= 6) classes += ' max-md:hidden';
-    if (idx >= 9) classes += ' md:max-xl:hidden';
-    if (idx >= 12) classes += ' xl:max-2xl:hidden';
+    if (idx >= 9) classes += ' md:max-[799px]:hidden';
+    if (idx >= 12) classes += ' min-[800px]:max-2xl:hidden';
     if (idx >= 15) classes += ' 2xl:max-3xl:hidden';
     if (idx >= 18) classes += ' 3xl:max-4xl:hidden';
     if (idx >= 24) classes += ' 4xl:hidden';
@@ -61,6 +61,7 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
   }
   return '';
 }
+
 
 export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProps) {
     const { t } = useLanguage();
@@ -319,7 +320,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {demoJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-fit mx-auto">
+                    <div className="grid grid-cols-2 md:grid-cols-3 min-[800px]:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-fit mx-auto">
                         {demoJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
@@ -371,7 +372,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {specialJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-fit mx-auto">
+                    <div className="grid grid-cols-2 md:grid-cols-3 min-[800px]:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-fit mx-auto">
                         {specialJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
@@ -422,7 +423,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-fit mx-auto">
+                    <div className="grid grid-cols-2 md:grid-cols-3 min-[800px]:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-8 gap-2 lg:gap-4 w-fit mx-auto">
                         {lineJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 

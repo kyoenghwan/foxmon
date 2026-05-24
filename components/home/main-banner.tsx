@@ -21,8 +21,11 @@ export function MainBanner() {
     useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
-            if (width < 1024) {
+            if (width < 800) {
                 setItemsPerView(1.5);
+                setCardWidth(0);
+            } else if (width >= 800 && width < 1024) {
+                setItemsPerView(1);
                 setCardWidth(0);
             } else {
                 setItemsPerView(2);
@@ -158,7 +161,7 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] lg:h-full lg:aspect-none`}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] min-[800px]:h-full min-[800px]:aspect-none`}
                             style={{ 
                                 width: itemsPerView === 2 
                                     ? `${cardWidth}px` 
