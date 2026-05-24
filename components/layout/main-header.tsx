@@ -150,22 +150,22 @@ export function MainHeader({ session }: MainHeaderProps) {
         <header className="bg-white border-b sticky top-0 z-50 relative">
             {/* 상단 툴바 (Top Utility Bar) */}
             <div className="bg-gray-50 border-b border-gray-100">
-                <div className="container mx-auto px-4 lg:px-8 h-9 flex items-center justify-between text-[11px] sm:text-xs font-bold text-gray-500 overflow-x-auto scrollbar-hide whitespace-nowrap">
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div className="container mx-auto px-1.5 sm:px-4 lg:px-8 h-9 flex items-center justify-between text-[11px] sm:text-xs font-bold text-gray-500 overflow-x-auto scrollbar-hide whitespace-nowrap">
+                    <div className="flex items-center gap-1 sm:gap-3 lg:gap-4 min-w-0">
                         <button onClick={() => alert('💻 PC: [Ctrl + D] (Mac은 Cmd + D)를 누르시면 즐겨찾기에 등록됩니다!')} className="hover:text-primary transition-colors flex items-center gap-1 shrink-0">
                             ⭐️ 즐겨찾기
                         </button>
                         <span className="text-gray-300 shrink-0">|</span>
-                        <button onClick={() => alert('📱 아이폰: Safari 하단의 [공유] 아이콘을 누르고 [홈 화면에 추가]를 선택하세요.\n🤖 안드로이드: 브라우저 메뉴에서 [홈 화면에 추가]를 선택하세요.')} className="hover:text-primary transition-colors flex items-center gap-1 shrink-0">
+                        <button onClick={() => alert('📱 아이폰: Safari 하단의 [공유] icon을 누르고 [홈 화면에 추가]를 선택하세요.\n🤖 안드로이드: 브라우저 메뉴에서 [홈 화면에 추가]를 선택하세요.')} className="hover:text-primary transition-colors flex items-center gap-1 shrink-0">
                             📱 <span className="hidden sm:inline">폰에 앱 설치</span><span className="hidden min-[375px]:inline sm:hidden">앱 설치</span><span className="min-[375px]:hidden">앱</span>
                         </button>
                         <span className="text-gray-300 shrink-0 hidden sm:inline">|</span>
                         <Link href="/help" className="hover:text-primary transition-colors shrink-0 hidden sm:inline">공지사항</Link>
                     </div>
                     {session ? (
-                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pl-2">
+                        <div className="flex items-center gap-1 sm:gap-2 shrink-0 pl-1 sm:pl-2">
                             {/* 회원 등급/역할 뱃지 */}
-                            <span className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-bold text-gray-600 mr-1 sm:mr-2 max-[424px]:hidden">
+                            <span className="flex items-center gap-0.5 sm:gap-1.5 text-[10px] sm:text-[11px] font-bold text-gray-600 mr-0.5 sm:mr-2">
                                 <span className={`shrink-0 text-[8px] sm:text-[9px] px-1.5 py-0.2 rounded-full font-black text-white ${
                                     session.user?.role === 'SUPER_ADMIN' ? 'bg-red-500' :
                                     session.user?.role === 'ADMIN' ? 'bg-purple-600' :
@@ -181,9 +181,9 @@ export function MainHeader({ session }: MainHeaderProps) {
                                      session.user?.role === 'EMPLOYER' ? '업체회원' : '개인회원'}
                                 </span>
                             </span>
-                            <span className="text-gray-300 shrink-0 mr-1.5 max-[424px]:hidden">|</span>
+                            <span className="text-gray-300 shrink-0 mr-0.5 sm:mr-1.5">|</span>
 
-                            <span className="text-[10px] sm:text-[11px] font-bold text-gray-600 whitespace-nowrap max-[424px]:hidden">
+                            <span className="text-[10px] sm:text-[11px] font-bold text-gray-600 whitespace-nowrap">
                                 로그인 유지
                             </span>
                             <button
@@ -217,7 +217,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 </>
                             )}
 
-                            <span className="text-gray-300 shrink-0 mx-1">|</span>
+                            <span className="text-gray-300 shrink-0 mx-0.5 sm:mx-1">|</span>
                             <button
                                 onClick={async () => {
                                     document.body.style.opacity = '0.5';
@@ -229,7 +229,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                         console.error(e);
                                     }
                                 }}
-                                className="font-black text-red-500 hover:text-red-700 transition-colors text-[10px] sm:text-[11px] whitespace-nowrap cursor-pointer ml-1"
+                                className="font-black text-red-500 hover:text-red-700 transition-colors text-[10px] sm:text-[11px] whitespace-nowrap cursor-pointer ml-0.5 sm:ml-1"
                             >
                                 로그아웃
                             </button>
