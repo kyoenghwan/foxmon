@@ -164,11 +164,11 @@ export function MainBanner() {
                         <div
                             key={`${banner.id}`}
                             className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer ${
-                                itemsPerView === 1.5 ? 'w-full aspect-[2/1]' : ''
+                                itemsPerView === 1.5 ? 'w-full h-full aspect-[2/1]' : ''
                             }`}
                             style={{ 
                                 width: itemsPerView === 1.5 ? 'calc((100% - 16px) / 1.5)' : `${cardWidth}px`,
-                                height: itemsPerView === 1.5 ? 'auto' : `${cardHeight}px`
+                                height: itemsPerView === 1.5 ? '100%' : `${cardHeight}px`
                             }}
                             onClick={() => handleAdClick(banner.id)}
                         >
