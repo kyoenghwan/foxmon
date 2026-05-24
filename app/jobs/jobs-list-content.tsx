@@ -303,9 +303,8 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                         </h2>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        <AdPriceModal type="premium" title="Premium" />
                         {isEmployer && (
-                            <Link href="/biz/ads/new">
+                            <Link href="/biz/ads">
                                 <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white">
                                     <Plus className="w-4 h-4 mr-1" /> 프리미엄 등록
                                 </Button>
@@ -356,9 +355,8 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                         </h2>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        <AdPriceModal type="special" title="Special" />
                         {isEmployer && (
-                            <Link href="/biz/ads/new">
+                            <Link href="/biz/ads">
                                 <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-black bg-yellow-400 hover:bg-yellow-500">
                                     <Plus className="w-4 h-4 mr-1" /> 스페셜 등록
                                 </Button>
@@ -408,9 +406,8 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                         </h2>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        <AdPriceModal type="line" title="Line" />
                         {isEmployer && (
-                            <Link href="/biz/ads/new">
+                            <Link href="/biz/ads">
                                 <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-gray-700 bg-white border hover:bg-gray-50">
                                     <Plus className="w-4 h-4 mr-1" /> 일반 등록
                                 </Button>

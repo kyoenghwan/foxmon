@@ -6,8 +6,8 @@ import { ChevronRight, Megaphone, Plus, Zap, Crown, Loader2, ChevronLeft } from 
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { useLanguage } from '@/components/providers/language-provider';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
-import { AdPriceModal } from '@/components/jobs/AdPriceModal';
 import { Button } from '@/components/ui/button';
+import { useSession } from 'next-auth/react';
 
 interface Notice {
     id: string;
@@ -42,6 +42,8 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
 }
 
 export function HomeJobSections() {
+    const { data: session } = useSession();
+    const isEmployer = (session?.user as any)?.role === 'EMPLOYER';
     const { t } = useLanguage();
     const [noticeIndex, setNoticeIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
@@ -197,9 +199,13 @@ export function HomeJobSections() {
                         </h2>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white">
-                             <Plus className="w-4 h-4 mr-1" /> {t.sections.postPremium}
-                        </Button>
+                        {isEmployer && (
+                            <Link href="/biz/ads">
+                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white">
+                                     <Plus className="w-4 h-4 mr-1" /> {t.sections.postPremium}
+                                </Button>
+                            </Link>
+                        )}
                         <button 
                             onClick={() => setShowAllPremium(!showAllPremium)}
                             className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
@@ -243,6 +249,13 @@ export function HomeJobSections() {
                         <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500 animate-pulse" /> {t.sections.specialJobsTitle}
                     </h2>
                     <div className="flex items-center gap-1.5 sm:gap-3">
+                        {isEmployer && (
+                            <Link href="/biz/ads">
+                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-black bg-yellow-400 hover:bg-yellow-500">
+                                     <Plus className="w-4 h-4 mr-1" /> 스페셜 등록
+                                </Button>
+                            </Link>
+                        )}
                         <button 
                             onClick={() => setShowAllSpecial(!showAllSpecial)}
                             className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
@@ -285,6 +298,13 @@ export function HomeJobSections() {
                         {t.sections.generalJobsTitle}
                     </h2>
                     <div className="flex items-center gap-1.5 sm:gap-3">
+                        {isEmployer && (
+                            <Link href="/biz/ads">
+                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-gray-700 bg-white border hover:bg-gray-50">
+                                     <Plus className="w-4 h-4 mr-1" /> 일반 등록
+                                </Button>
+                            </Link>
+                        )}
                         <button 
                             onClick={() => setShowAllGeneral(!showAllGeneral)}
                             className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"

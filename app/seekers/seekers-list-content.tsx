@@ -440,15 +440,15 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                         </h2>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        <AdPriceModal type="premium" title="Premium" />
-                        {!isEmployer && (
-                            <Button 
-                                size="sm" 
-                                onClick={handleResumeRegisterClick}
-                                className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white"
-                            >
-                                <Plus className="w-4 h-4 mr-1" /> 프리미엄 등록
-                            </Button>
+                        {isEmployer && (
+                            <Link href="/biz/ads">
+                                <Button 
+                                    size="sm" 
+                                    className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-white"
+                                >
+                                    <Plus className="w-4 h-4 mr-1" /> 프리미엄 등록
+                                </Button>
+                            </Link>
                         )}
                         <button 
                             onClick={() => setShowAllPremium(!showAllPremium)}
@@ -495,15 +495,15 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                         </h2>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        <AdPriceModal type="special" title="Special" />
-                        {!isEmployer && (
-                            <Button 
-                                size="sm" 
-                                onClick={handleResumeRegisterClick}
-                                className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-black bg-yellow-400 hover:bg-yellow-500"
-                            >
-                                <Plus className="w-4 h-4 mr-1" /> 스페셜 등록
-                            </Button>
+                        {isEmployer && (
+                            <Link href="/biz/ads">
+                                <Button 
+                                    size="sm" 
+                                    className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-black bg-yellow-400 hover:bg-yellow-500"
+                                >
+                                    <Plus className="w-4 h-4 mr-1" /> 스페셜 등록
+                                </Button>
+                            </Link>
                         )}
                         <button 
                             onClick={() => setShowAllSpecial(!showAllSpecial)}
@@ -549,15 +549,15 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                         </h2>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        <AdPriceModal type="line" title="Line" />
-                        {!isEmployer && (
-                            <Button 
-                                size="sm" 
-                                onClick={handleResumeRegisterClick}
-                                className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-gray-700 bg-white border hover:bg-gray-50"
-                            >
-                                <Plus className="w-4 h-4 mr-1" /> 이력서 등록
-                            </Button>
+                        {isEmployer && (
+                            <Link href="/biz/ads">
+                                <Button 
+                                    size="sm" 
+                                    className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-gray-700 bg-white border hover:bg-gray-50"
+                                >
+                                    <Plus className="w-4 h-4 mr-1" /> 일반 등록
+                                </Button>
+                            </Link>
                         )}
                         <button 
                             onClick={() => setShowAllGeneral(!showAllGeneral)}
@@ -897,7 +897,7 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                             onClick={handleResumeRegisterClick}
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white text-[11px] font-black rounded-lg hover:bg-gray-700 transition-colors shadow-sm cursor-pointer"
                         >
-                            <Plus className="w-3.5 h-3.5" /> 이력서 등록하기
+                            <Plus className="w-3.5 h-3.5" /> 등록하기
                         </button>
                     )}
                 </div>
