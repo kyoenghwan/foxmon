@@ -973,8 +973,8 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                         </div>
                         
                         {/* Pagination Controls */}
-                        {(() => {
-                            const displayPages = Math.max(totalPages, 4);
+                        {totalPages > 0 && (() => {
+                            const displayPages = totalPages;
                             return (
                                 <div className="flex justify-center items-center gap-1.5 py-4 mt-2">
                                     <button 
@@ -990,11 +990,7 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                                             <button 
                                                 key={i}
                                                 onClick={() => {
-                                                    if (pageNum <= totalPages) {
-                                                        setCurrentPage(pageNum);
-                                                    } else {
-                                                        alert(`더미 페이지 ${pageNum} 입니다. (실제 데이터가 없습니다)`);
-                                                    }
+                                                    setCurrentPage(pageNum);
                                                 }}
                                                 className={`w-8 h-8 flex items-center justify-center rounded-md text-[13px] font-bold transition-colors ${
                                                     currentPage === pageNum 

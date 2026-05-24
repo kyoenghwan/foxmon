@@ -726,7 +726,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                     </div>
                     {isEmployer && (
                         <Link href="/biz/ads/new" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white text-[11px] font-black rounded-lg hover:bg-gray-700 transition-colors shadow-sm">
-                            <Plus className="w-3.5 h-3.5" /> 구인구직 글 올리기
+                            <Plus className="w-3.5 h-3.5" /> 등록하기
                         </Link>
                     )}
                 </div>
@@ -756,17 +756,17 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                         </div>
 
                         {/* 모바일 뷰 (2줄 카드 형태) */}
-                        <div className="md:hidden bg-white border-t-2 border-gray-900 shadow-sm rounded-b-xl">
-                            <div className="divide-y divide-gray-100">
-                                {paginatedTableJobs.map((job) => (
-                                    <GeneralJobListRow key={job.id} {...(job as any)} />
-                                ))}
-                            </div>
+                        <div className="md:hidden flex flex-col gap-3">
+                            {paginatedTableJobs.map((job) => (
+                                <div key={job.id} className="bg-white border border-gray-200/80 rounded-xl shadow-sm hover:shadow-md transition-all">
+                                    <GeneralJobListRow {...(job as any)} />
+                                </div>
+                            ))}
                         </div>
                         
                         {/* Pagination Controls */}
-                        {(() => {
-                            const displayPages = Math.max(totalPages, 4);
+                        {totalPages > 0 && (() => {
+                            const displayPages = totalPages;
                             return (
                                 <div className="flex justify-center items-center gap-1.5 py-6">
                                     <button 
@@ -782,11 +782,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
                                             <button 
                                                 key={i}
                                                 onClick={() => {
-                                                    if (pageNum <= totalPages) {
-                                                        setCurrentPage(pageNum);
-                                                    } else {
-                                                        alert(`더미 페이지 ${pageNum} 입니다. (실제 데이터가 없습니다)`);
-                                                    }
+                                                    setCurrentPage(pageNum);
                                                 }}
                                                 className={`w-8 h-8 flex items-center justify-center rounded-md text-[13px] font-bold transition-colors ${
                                                     currentPage === pageNum 
