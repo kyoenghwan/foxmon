@@ -117,8 +117,8 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
 
                     {/* 우측 정보 & 버튼 영역 (세로 레이아웃 개편) */}
                     <div className="flex-1 min-w-0 flex flex-col gap-1.5 justify-center">
-                        {/* 1. md 이상 (우측 배치 - PC) 레이아웃 */}
-                        <div className="hidden md:flex flex-col gap-1.5">
+                        {/* 1. lg 이상 (우측 배치 - PC) 레이아웃 */}
+                        <div className="hidden lg:flex flex-col gap-1.5">
                             {/* 상단 인사말 */}
                             <div className="min-w-0">
                                 <MarqueeText className="font-black text-base text-gray-900 leading-tight text-left">
@@ -131,8 +131,8 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             </div>
                         </div>
 
-                        {/* 2. md 미만 (아래쪽 배치 - 모바일) 레이아웃 */}
-                        <div className="flex md:hidden flex-col gap-2 w-full">
+                        {/* 2. lg 미만 (아래쪽 배치 - 모바일) 레이아웃 */}
+                        <div className="flex lg:hidden flex-col gap-2 w-full">
                             {/* 1행: 인사말 + 프로필 설정 */}
                             <div className="flex items-center justify-between w-full gap-2">
                                 <div className="min-w-0 flex-1">
@@ -178,7 +178,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                 </div>
 
                 {/* Bottom Icons - 5 핵심 기능 (PC에서는 항상 열림 적용) */}
-                <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 pt-3 sm:pt-4 mt-3 lg:mt-auto' : 'grid-rows-[0fr] opacity-0 overflow-hidden md:grid-rows-[1fr] md:opacity-100 md:pt-4 md:mt-auto md:overflow-visible'}`}>
+                <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 pt-3 sm:pt-4 mt-3 lg:mt-auto' : 'grid-rows-[0fr] opacity-0 overflow-hidden lg:grid-rows-[1fr] lg:opacity-100 lg:pt-4 lg:mt-auto lg:overflow-visible'}`}>
                     <div className="overflow-hidden flex justify-between items-center px-0.5">
                         <Link href="/mypage/scraps" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
                             <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110 mx-auto">

@@ -21,8 +21,8 @@ export function MainBanner() {
     useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
-            if (width < 768) {
-                setItemsPerView(1);
+            if (width < 1024) {
+                setItemsPerView(1.5);
                 setCardWidth(0);
             } else {
                 setItemsPerView(2);
@@ -117,6 +117,8 @@ export function MainBanner() {
                 style={{
                     transform: itemsPerView === 2
                         ? `translateX(-${currentIndex * (cardWidth + 16)}px)`
+                        : itemsPerView === 1.5
+                        ? `translateX(calc(-${currentIndex * (100 / 1.5)}% - ${currentIndex * (16 / 3)}px))`
                         : `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 16}px))`,
                 }}
             >
@@ -156,8 +158,14 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] md:h-full md:aspect-none`}
-                            style={{ width: itemsPerView === 2 ? `${cardWidth}px` : '100%' }}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] lg:h-full lg:aspect-none`}
+                            style={{ 
+                                width: itemsPerView === 2 
+                                    ? `${cardWidth}px` 
+                                    : itemsPerView === 1.5 
+                                    ? 'calc((100% - 16px) / 1.5)' 
+                                    : '100%' 
+                            }}
                             onClick={() => handleAdClick(banner.id)}
                         >
                             {isUploadMode && banner.image ? (
