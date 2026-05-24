@@ -23,8 +23,8 @@ export function MainBanner() {
             const width = window.innerWidth;
             if (width < 800) {
                 setItemsPerView(1.5);
-                setCardWidth(310);
-                setCardHeight(155);
+                setCardWidth(0);
+                setCardHeight(0);
             } else if (width >= 800 && width < 1024) {
                 setItemsPerView(1);
                 setCardWidth(406);
@@ -122,7 +122,9 @@ export function MainBanner() {
             <div
                 className={`flex gap-4 h-full ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
                 style={{
-                    transform: `translateX(-${currentIndex * (cardWidth + 16)}px)`,
+                    transform: itemsPerView === 1.5
+                        ? `translateX(calc(-${currentIndex * (100 / 1.5)}% - ${currentIndex * (16 / 3)}px))`
+                        : `translateX(-${currentIndex * (cardWidth + 16)}px)`,
                 }}
             >
                 {extendedBanners.map((banner, idx) => {
@@ -160,11 +162,13 @@ export function MainBanner() {
 
                     return (
                         <div
-                            key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer`}
+                            key={`${banner.id}`}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer ${
+                                itemsPerView === 1.5 ? 'w-full aspect-[2/1]' : ''
+                            }`}
                             style={{ 
-                                width: `${cardWidth}px`,
-                                height: `${cardHeight}px`
+                                width: itemsPerView === 1.5 ? 'calc((100% - 16px) / 1.5)' : `${cardWidth}px`,
+                                height: itemsPerView === 1.5 ? 'auto' : `${cardHeight}px`
                             }}
                             onClick={() => handleAdClick(banner.id)}
                         >
