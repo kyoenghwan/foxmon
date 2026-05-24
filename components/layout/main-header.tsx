@@ -163,7 +163,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                         <Link href="/help" className="hover:text-primary transition-colors shrink-0 hidden sm:inline">공지사항</Link>
                     </div>
                     {session ? (
-                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pl-2">
+                        <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 shrink-0 pl-2">
                             <span className="text-[10px] sm:text-[11px] font-bold text-gray-600 whitespace-nowrap">
                                 로그인 유지
                             </span>
