@@ -205,7 +205,12 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
     const wrapperAnimClass = (!isOverlayAnim && actualAction !== 'rainbow-border') ? animClass : '';
 
     return (
-        <div className={`relative ${isBig ? 'h-full min-h-[292px]' : isSide ? 'aspect-[2/3]' : hideLogo ? 'aspect-[17/8]' : 'aspect-[3/2]'} w-full min-w-0 max-sm:min-w-0 sm:min-w-[150px] group p-[3px]`}>
+        <div className={`relative ${
+            isBig ? 'h-full min-h-[292px] w-full' : 
+            isSide ? 'aspect-[2/3] sm:w-[130px]' : 
+            hideLogo ? 'aspect-[17/8] sm:w-[195px]' : 
+            'aspect-[3/2] sm:w-[195px]'
+        } w-full min-w-0 group p-[3px]`}>
             
             {/* --- [배로 아래 배경 레이어] --- */}
             {isImpact && (
@@ -286,7 +291,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                             <>우수업체</>
                                         )}
                                     </div>
-                                    <MarqueeText className={`font-black text-[14px] lg:text-[15px] tracking-tight transition-colors line-clamp-2 leading-tight ${isCyber ? 'text-green-400 font-mono' : config.color}`} style={tier === 'GENERAL' && customColor ? { color: customColor } : {}}>
+                                    <MarqueeText className={`font-black text-[12px] sm:text-[13px] tracking-tight transition-colors line-clamp-2 leading-tight ${isCyber ? 'text-green-400 font-mono' : config.color}`} style={tier === 'GENERAL' && customColor ? { color: customColor } : {}}>
                                         {displayName}
                                     </MarqueeText>
                                 </div>
@@ -312,22 +317,22 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                 </div>
                                 <div className="w-full relative overflow-hidden flex items-center gap-1">
                                     {category && (
-                                        <span className={`shrink-0 border px-1 py-[1px] max-[424px]:px-0.5 max-[424px]:py-0 rounded-[2px] text-[10px] lg:text-[11px] max-[424px]:text-[2.2vw] font-black ${
+                                        <span className={`shrink-0 border px-1 py-[1px] max-[424px]:px-0.5 max-[424px]:py-0 rounded-[2px] text-[10px] sm:text-[11px] max-[424px]:text-[2.2vw] font-black ${
                                             isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
                                         }`}>
                                             {category}
                                         </span>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <MarqueeText className={`text-[15px] sm:text-[16px] lg:text-[17px] max-[424px]:text-[3.5vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' : isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` : 'text-gray-800 bg-green-200/50'}`}>
+                                        <MarqueeText className={`text-[13px] sm:text-[14px] max-[424px]:text-[3.5vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' : isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` : 'text-gray-800 bg-green-200/50'}`}>
                                             {title}
                                         </MarqueeText>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between w-full pt-1 border-t border-dashed border-gray-200">
-                                    <div className="flex items-center text-[13px] sm:text-[14px] lg:text-[15px] max-[424px]:text-[3vw] font-bold text-gray-900 truncate tracking-tight gap-1.5 flex-1 min-w-0">
+                                    <div className="flex items-center text-[12px] sm:text-[13px] max-[424px]:text-[3vw] font-bold text-gray-900 truncate tracking-tight gap-1.5 flex-1 min-w-0">
                                         {payType && (
-                                            <span className={`shrink-0 text-white text-[9.5px] sm:text-[10px] lg:text-[11px] max-[424px]:text-[2.2vw] px-1.5 py-[1px] max-[424px]:px-1 max-[424px]:py-[0.5px] rounded-sm shadow-sm ${isImpact ? config.bg : 'bg-[#805ad5]'}`}>
+                                            <span className={`shrink-0 text-white text-[9.5px] sm:text-[10px] max-[424px]:text-[2.2vw] px-1.5 py-[1px] max-[424px]:px-1 max-[424px]:py-[0.5px] rounded-sm shadow-sm ${isImpact ? config.bg : 'bg-[#805ad5]'}`}>
                                                 {payType}
                                             </span>
                                         )}
@@ -445,7 +450,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                 {/* 상호명 영역 (지역명 위, 상호명 아래) */}
                                 <div className={`flex-1 min-w-0 flex flex-col justify-center space-y-1`}>
                                     <div className="flex items-center w-full min-w-0">
-                                <div className={`flex items-center gap-1 shrink-0 border px-1.5 py-[2px] leading-normal font-black rounded-[4px] text-[10px] sm:text-[11px] lg:text-[12px] max-[424px]:text-[2.5vw] w-full overflow-hidden ${
+                                <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-normal font-black rounded-[4px] text-[9px] sm:text-[10px] max-[424px]:text-[2.5vw] w-full overflow-hidden ${
                                             isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
                                         }`}>
                                             <span className="shrink-0">{sido}</span>
@@ -466,7 +471,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                             )}
                                         </div>
                                     </div>
-                                    <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] max-[424px]:text-[3.2vw] tracking-tight transition-colors line-clamp-2 leading-tight ${
+                                    <MarqueeText className={`font-black text-[11px] sm:text-[12px] max-[424px]:text-[3.2vw] tracking-tight transition-colors line-clamp-2 leading-tight ${
                                         isCyber ? 'text-green-400 font-mono' : config.color
                                     }`}>
                                         {displayName}
@@ -484,7 +489,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                     </span>
                                 )}
                                 <div className="flex-1 min-w-0">
-                                    <MarqueeText className={`text-[15px] sm:text-[16px] lg:text-[17px] max-[424px]:text-[3.5vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${
+                                    <MarqueeText className={`text-[13px] sm:text-[14px] max-[424px]:text-[3.5vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${
                                         isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
                                         isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
                                         'text-gray-800 bg-green-200/50'
@@ -496,9 +501,9 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
 
                             {/* 하단: 급여 및 뱃지 */}
                             <div className="flex items-end justify-between w-full shrink-0">
-                                <div className="flex items-center text-[13px] sm:text-[14px] lg:text-[15px] max-[424px]:text-[3.2vw] font-bold text-gray-900 truncate tracking-tight gap-1 sm:gap-1.5">
+                                <div className="flex items-center text-[12px] sm:text-[13px] max-[424px]:text-[3.2vw] font-bold text-gray-900 truncate tracking-tight gap-1 sm:gap-1.5">
                                     {payType && (
-                                        <span className={`shrink-0 text-white text-[9px] sm:text-[10px] lg:text-[11px] max-[424px]:text-[2.2vw] px-1 sm:px-1.5 max-[424px]:px-1 py-[1px] sm:py-0.5 max-[424px]:py-0 rounded-sm shadow-sm ${
+                                        <span className={`shrink-0 text-white text-[9px] sm:text-[10px] max-[424px]:text-[2.2vw] px-1 sm:px-1.5 max-[424px]:px-1 py-[1px] sm:py-0.5 max-[424px]:py-0 rounded-sm shadow-sm ${
                                             isImpact ? config.bg : 'bg-[#805ad5]'
                                         }`}>
                                             {payType}
@@ -508,7 +513,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         {payAmount}
                                     </span>
                                 </div>
-                                <div className={`shrink-0 flex items-center px-1 sm:px-1.5 py-[1px] sm:py-0.5 rounded-sm text-[10px] lg:text-[11px] max-[424px]:text-[2.5vw] font-black shadow-sm ${
+                                <div className={`shrink-0 flex items-center px-1 sm:px-1.5 py-[1px] sm:py-0.5 rounded-sm text-[9px] sm:text-[10px] max-[424px]:text-[2.5vw] font-black shadow-sm ${
                                     isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
                                     isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
                                     'bg-gray-100 text-gray-700 border border-gray-300'
@@ -519,7 +524,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         </>
                                     ) : (
                                         <>
-                                            <Star className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-gray-500" /> 우수업체
+                                            <Star className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-gray-500" /> 우수
                                         </>
                                     )}
                                 </div>
