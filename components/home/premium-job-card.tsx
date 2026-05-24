@@ -207,10 +207,10 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
     return (
         <div className={`relative ${
             isBig ? 'h-full min-h-[292px] w-full' : 
-            isSide ? 'aspect-[2/3] sm:w-[130px]' : 
-            hideLogo ? 'aspect-[17/8] sm:w-[195px]' : 
-            'aspect-[3/2] sm:w-[195px]'
-        } w-full min-w-0 group p-[3px]`}>
+            isSide ? 'aspect-[2/3] w-full sm:w-[130px]' : 
+            hideLogo ? 'aspect-[17/8] w-full sm:w-[195px]' : 
+            'aspect-[3/2] w-full sm:w-[195px]'
+        } min-w-0 group p-[3px]`}>
             
             {/* --- [배로 아래 배경 레이어] --- */}
             {isImpact && (

@@ -109,6 +109,26 @@
       max-width: 920px !important;
     }
   }
+  @media (min-width: 1280px) {
+    .container {
+      max-width: 920px !important;
+    }
+  }
+  @media (min-width: 1440px) {
+    .container {
+      max-width: 1100px !important;
+    }
+  }
+  @media (min-width: 1920px) {
+    .container {
+      max-width: 1500px !important;
+    }
+  }
+  @media (min-width: 2560px) {
+    .container {
+      max-width: 2040px !important;
+    }
+  }
 }
 
 /* Responsive 2-Row Grid Limiters (Bulletproof CSS) */
