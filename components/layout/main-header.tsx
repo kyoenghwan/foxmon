@@ -157,7 +157,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                         </button>
                         <span className="text-gray-300 shrink-0">|</span>
                         <button onClick={() => alert('📱 아이폰: Safari 하단의 [공유] 아이콘을 누르고 [홈 화면에 추가]를 선택하세요.\n🤖 안드로이드: 브라우저 메뉴에서 [홈 화면에 추가]를 선택하세요.')} className="hover:text-primary transition-colors flex items-center gap-1 shrink-0">
-                            📱 <span className="hidden sm:inline">폰에 앱 설치</span><span className="sm:hidden">앱 설치</span>
+                            📱 <span className="hidden sm:inline">폰에 앱 설치</span><span className="hidden min-[375px]:inline sm:hidden">앱 설치</span><span className="min-[375px]:hidden">앱</span>
                         </button>
                         <span className="text-gray-300 shrink-0 hidden sm:inline">|</span>
                         <Link href="/help" className="hover:text-primary transition-colors shrink-0 hidden sm:inline">공지사항</Link>
@@ -165,7 +165,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                     {session ? (
                         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pl-2">
                             {/* 회원 등급/역할 뱃지 */}
-                            <span className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-bold text-gray-600 mr-1 sm:mr-2">
+                            <span className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-bold text-gray-600 mr-1 sm:mr-2 max-[424px]:hidden">
                                 <span className={`shrink-0 text-[8px] sm:text-[9px] px-1.5 py-0.2 rounded-full font-black text-white ${
                                     session.user?.role === 'SUPER_ADMIN' ? 'bg-red-500' :
                                     session.user?.role === 'ADMIN' ? 'bg-purple-600' :
@@ -181,9 +181,9 @@ export function MainHeader({ session }: MainHeaderProps) {
                                      session.user?.role === 'EMPLOYER' ? '업체회원' : '개인회원'}
                                 </span>
                             </span>
-                            <span className="text-gray-300 shrink-0 mr-1.5">|</span>
+                            <span className="text-gray-300 shrink-0 mr-1.5 max-[424px]:hidden">|</span>
 
-                            <span className="text-[10px] sm:text-[11px] font-bold text-gray-600 whitespace-nowrap">
+                            <span className="text-[10px] sm:text-[11px] font-bold text-gray-600 whitespace-nowrap max-[424px]:hidden">
                                 로그인 유지
                             </span>
                             <button
@@ -280,11 +280,11 @@ export function MainHeader({ session }: MainHeaderProps) {
                         </div>
 
                         {/* 2. 키워드 롤링 & 드롭다운 */}
-                        <div className="flex items-center gap-4 px-2 text-[12px] font-bold text-gray-500 w-full relative z-30">
+                        <div className="flex items-center gap-1.5 sm:gap-4 px-1 sm:px-2 text-[12px] font-bold text-gray-500 w-full relative z-30">
                             <span className="text-primary text-[11px] shrink-0">키워드</span>
                             
                             {/* 롤링 검색어 영역 */}
-                            <div className="flex-1 overflow-hidden h-5 relative cursor-pointer" onClick={() => {
+                            <div className="flex-1 min-w-0 overflow-hidden h-5 relative cursor-pointer" onClick={() => {
                                 if (popularKeywords[currentRankIndex]) {
                                     handleSearch(popularKeywords[currentRankIndex].keyword);
                                 }
@@ -311,7 +311,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                             </div>
 
                             {/* 전체 순위 드롭다운 버튼 & 레이어 */}
-                            <div className="relative" ref={dropdownRef}>
+                            <div className="relative shrink-0" ref={dropdownRef}>
                                 <button
                                     onClick={() => setShowRankDropdown(!showRankDropdown)}
                                     className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-900 transition-colors font-bold px-2 py-0.5 border border-gray-200 rounded bg-white shadow-xs"
