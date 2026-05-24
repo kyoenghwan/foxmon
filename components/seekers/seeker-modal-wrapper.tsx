@@ -42,7 +42,7 @@ export function SeekerModalWrapper({
   };
 
   return (
-    <Dialog open={activeOpen} onOpenChange={(open) => {
+    <Dialog open={activeOpen} preventPopState={true} onOpenChange={(open) => {
       if (!open) {
         handleClose();
         queueMicrotask(() => router.refresh());

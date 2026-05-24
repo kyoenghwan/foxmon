@@ -25,7 +25,7 @@ export function JobModalWrapper({ job }: { job: any }) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
+    <Dialog open={isOpen} preventPopState={true} onOpenChange={(open) => {
       if (!open) {
         handleClose();
         queueMicrotask(() => router.refresh());

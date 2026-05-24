@@ -6,8 +6,9 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Dialog = ({ open, onOpenChange, ...props }: DialogPrimitive.DialogProps) => {
+const Dialog = ({ open, onOpenChange, preventPopState = false, ...props }: DialogPrimitive.DialogProps & { preventPopState?: boolean }) => {
     React.useEffect(() => {
+        if (preventPopState) return;
         if (!open || !onOpenChange) return;
 
         const modalStateKey = `modal-${Math.random().toString(36).substring(2, 11)}`;
