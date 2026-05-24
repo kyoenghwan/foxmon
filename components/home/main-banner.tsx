@@ -19,12 +19,28 @@ export function MainBanner() {
 
     // 반응형 배너 갯수 및 카드 너비 조절 (PC에서는 중앙 채용 배너 2개 크기인 406px 고정)
     useEffect(() => {
+        const container = document.getElementById('main-banner-container');
         const handleResize = () => {
             const width = window.innerWidth;
             if (width < 800) {
                 setItemsPerView(1.5);
-                setCardWidth(0);
-                setCardHeight(0);
+                if (container) {
+                    const parentWidth = container.clientWidth;
+                    // 중앙배너 1개 너비 = (부모너비 - 16px) / 2
+                    const subWidth = (parentWidth - 16) / 2;
+                    // 메인배너 1개 너비 = 중앙배너 1.5개 너비
+                    const mWidth = subWidth * 1.5;
+                    const mHeight = mWidth / 2; // 2:1 비율
+                    setCardWidth(mWidth);
+                    setCardHeight(mHeight);
+                } else {
+                    // Fallback
+                    const parentWidth = Math.min(width - 32, 425 - 32);
+                    const subWidth = (parentWidth - 16) / 2;
+                    const mWidth = subWidth * 1.5;
+                    setCardWidth(mWidth);
+                    setCardHeight(mWidth / 2);
+                }
             } else if (width >= 800 && width < 1024) {
                 setItemsPerView(1);
                 setCardWidth(406);
@@ -35,12 +51,23 @@ export function MainBanner() {
                 setCardHeight(203);
             }
         };
+
         handleResize();
-        const timer = setTimeout(handleResize, 100);
+        
+        let resizeObserver: ResizeObserver | null = null;
+        if (container && typeof window !== 'undefined' && 'ResizeObserver' in window) {
+            resizeObserver = new ResizeObserver(() => {
+                handleResize();
+            });
+            resizeObserver.observe(container);
+        }
+
         window.addEventListener('resize', handleResize);
         return () => {
             window.removeEventListener('resize', handleResize);
-            clearTimeout(timer);
+            if (resizeObserver && container) {
+                resizeObserver.unobserve(container);
+            }
         };
     }, [ads]);
 
@@ -115,16 +142,15 @@ export function MainBanner() {
     return (
         <div 
             id="main-banner-container"
-            className="relative w-full !h-full overflow-hidden rounded-xl"
+            className="relative w-full overflow-hidden rounded-xl"
+            style={{ height: `${cardHeight}px` }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             <div
-                className={`flex gap-4 h-full ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
+                className={`flex gap-4 items-center h-full ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
                 style={{
-                    transform: itemsPerView === 1.5
-                        ? `translateX(calc(-${currentIndex * (100 / 1.5)}% - ${currentIndex * (16 / 3)}px))`
-                        : `translateX(-${currentIndex * (cardWidth + 16)}px)`,
+                    transform: `translateX(-${currentIndex * (cardWidth + 16)}px)`,
                 }}
             >
                 {extendedBanners.map((banner, idx) => {
@@ -163,12 +189,10 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer ${
-                                itemsPerView === 1.5 ? 'w-full h-full aspect-[2/1]' : ''
-                            }`}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer`}
                             style={{ 
-                                width: itemsPerView === 1.5 ? 'calc((100% - 16px) / 1.5)' : `${cardWidth}px`,
-                                height: itemsPerView === 1.5 ? '100%' : `${cardHeight}px`
+                                width: `${cardWidth}px`,
+                                height: `${cardHeight}px`
                             }}
                             onClick={() => handleAdClick(banner.id)}
                         >
