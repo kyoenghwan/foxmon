@@ -17,22 +17,16 @@ export function MainBanner() {
 
     const [cardWidth, setCardWidth] = useState(400);
 
-    // 반응형 배너 갯수 및 카드 너비 조절
+    // 반응형 배너 갯수 및 카드 너비 조절 (PC에서는 중앙 채용 배너 2개 크기인 406px 고정)
     useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
-            if (width < 640) {
+            if (width < 768) {
                 setItemsPerView(1);
                 setCardWidth(0);
             } else {
                 setItemsPerView(2);
-                const container = document.getElementById('main-banner-container');
-                if (container) {
-                    setCardWidth((container.clientWidth - 16) / 2);
-                } else {
-                    const approxWidth = width >= 1920 ? 816 : width >= 1440 ? 720 : 568;
-                    setCardWidth((approxWidth - 16) / 2);
-                }
+                setCardWidth(406); // (195px * 2) + 16px = 406px 고정
             }
         };
         handleResize();
@@ -162,7 +156,7 @@ export function MainBanner() {
                     return (
                         <div
                             key={`${banner.id}-${idx}`}
-                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] sm:h-full sm:aspect-none`}
+                            className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer w-full aspect-[2/1] md:h-full md:aspect-none`}
                             style={{ width: itemsPerView === 2 ? `${cardWidth}px` : '100%' }}
                             onClick={() => handleAdClick(banner.id)}
                         >

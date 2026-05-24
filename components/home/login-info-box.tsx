@@ -102,9 +102,8 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         const showResumeMenu = session.user.role !== 'EMPLOYER';
         
         return (
-            <div className="h-full w-full bg-white rounded-2xl border p-4 sm:p-5 flex flex-col shadow-sm">
+            <div className="h-full w-full bg-white rounded-2xl border p-4 sm:p-5 flex flex-col justify-between shadow-sm">
                 
-                {/* Top Section: Avatar & Welcome text (New Layout) */}
                 {/* Top Section: Avatar & Welcome text (New Layout) */}
                 <div className="flex items-start gap-2.5 sm:gap-4">
                     {/* 프로필 이미지 - 모바일 h-[72px](72px), sm h-20(80px)으로 정밀 제어 */}
@@ -155,7 +154,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             </div>
                             <button
                                 onClick={() => setIsOpen(!isOpen)}
-                                className="h-full px-3.5 hover:bg-gray-50 rounded-full text-gray-600 hover:text-gray-900 transition-all flex items-center justify-center shrink-0 border border-gray-200 cursor-pointer shadow-sm active:scale-95 text-[12px] sm:text-[13px] font-black"
+                                className="h-full px-3.5 hover:bg-gray-50 rounded-full text-gray-600 hover:text-gray-900 transition-all flex items-center justify-center shrink-0 border border-gray-200 cursor-pointer shadow-sm active:scale-95 text-[12px] sm:text-[13px] font-black md:hidden"
                                 title={isOpen ? "메뉴 접기" : "더보기"}
                             >
                                 <span className="mr-1">{isOpen ? "접기" : "더보기"}</span>
@@ -165,8 +164,8 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                     </div>
                 </div>
 
-                {/* Bottom Icons - 5 핵심 기능 (스크랩, 최근 본 공고, 지원한 공고, 나를 본 업체, 폭스토크) */}
-                <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 pt-3 sm:pt-4 mt-3 lg:mt-auto border-t border-gray-100' : 'grid-rows-[0fr] opacity-0 overflow-hidden'}`}>
+                {/* Bottom Icons - 5 핵심 기능 (PC에서는 항상 열림 적용) */}
+                <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 pt-3 sm:pt-4 mt-3 lg:mt-auto border-t border-gray-100' : 'grid-rows-[0fr] opacity-0 overflow-hidden md:grid-rows-[1fr] md:opacity-100 md:pt-4 md:mt-auto md:border-t md:border-gray-100 md:overflow-visible'}`}>
                     <div className="overflow-hidden flex justify-around items-center px-1 sm:px-2">
                         <Link href="/mypage/scraps" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
                             <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110 mx-auto">
@@ -217,13 +216,13 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
 
     // Logged Out State
     return (
-        <div className="h-full w-full bg-white rounded-2xl border p-6 flex flex-col justify-center items-center shadow-sm text-center">
-            <h3 className="text-xl font-black text-gray-900 mb-6 tracking-tight">
+        <div className="h-full w-full bg-white rounded-2xl border p-5 sm:p-6 flex flex-col justify-center items-center shadow-sm text-center">
+            <h3 className="text-lg sm:text-xl font-black text-gray-900 mb-4 tracking-tight">
                 {t.loginBox.loginTitle}
             </h3>
 
-            <Link href="/login" className="w-full mb-4">
-                <Button size="lg" className="w-full font-black bg-primary hover:bg-primary/90 text-sm h-12 shadow-md">
+            <Link href="/login" className="w-full mb-3">
+                <Button size="lg" className="w-full font-black bg-primary hover:bg-primary/90 text-sm h-11 shadow-md">
                     <LogIn className="w-4 h-4 mr-2" /> {t.common.login}
                 </Button>
             </Link>
