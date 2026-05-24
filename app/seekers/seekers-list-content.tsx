@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Loader2, Plus, Crown, Zap, ChevronRight, ChevronLeft, Filter, Search } from 'lucide-react';
+import { Loader2, Plus, Crown, Zap, ChevronRight, ChevronLeft, Filter, Search, RotateCw } from 'lucide-react';
 import Link from 'next/link';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
@@ -74,6 +74,12 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
     const searchParams = useSearchParams();
     const router = useRouter();
     const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const handleRefresh = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setRefreshKey(prev => prev + 1);
+    };
 
     const handleResumeRegisterClick = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -272,7 +278,7 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
             setLoading(false);
         }
         fetchJobs();
-    }, [qParam, regionParam, industryParam, keywordParam, dbRegions1, dbRegions2, dbIndustries, dbKeywords]);
+    }, [qParam, regionParam, industryParam, keywordParam, dbRegions1, dbRegions2, dbIndustries, dbKeywords, refreshKey]);
 
     const handleSearchClick = () => {
         const params = new URLSearchParams();
@@ -899,6 +905,14 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                             <span className="bg-[#ff8a00] text-white w-4 h-4 flex items-center justify-center rounded-sm text-[10px] shadow-sm tracking-tighter shrink-0 pt-[1px] pl-[1px]">&gt;</span> 
                             인재정보 리스트
                         </h2>
+                        <button
+                            onClick={handleRefresh}
+                            disabled={loading}
+                            className="p-1 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-primary active:scale-95 disabled:opacity-50 shrink-0"
+                            title="새로고침"
+                        >
+                            <RotateCw className={cn("w-4 h-4", loading && "animate-spin")} />
+                        </button>
                     </div>
                     {!isEmployer && (
                         <button 
