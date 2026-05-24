@@ -28,9 +28,10 @@ export function MarqueeText({ children, className = '', style }: MarqueeTextProp
     }, [children]);
 
     const displayClass = className.replace(/truncate|line-clamp-\d/g, '').trim();
+    const isCenter = className.includes('text-center');
 
     return (
-        <div ref={containerRef} className="w-full min-w-0 overflow-hidden relative flex items-center" style={style}>
+        <div ref={containerRef} className={`w-full min-w-0 overflow-hidden relative flex items-center ${isCenter ? 'justify-center' : ''}`} style={style}>
             {/* 항상 마운트되는 측정용 텍스트 (레이아웃에 영향 없음) */}
             <span
                 ref={measureRef}

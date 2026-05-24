@@ -908,9 +908,10 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                             <table className="w-full min-w-[800px] text-center text-[13px] md:text-[14px]">
                                 <thead className="border-b border-gray-200 text-gray-700 font-bold bg-white">
                                     <tr>
-                                        <th className="py-3 px-2 w-[15%] font-semibold">이름</th>
+                                        <th className="py-3 px-2 w-[8%] font-semibold">상태</th>
+                                        <th className="py-3 px-2 w-[10%] font-semibold">이름</th>
                                         <th className="py-3 px-2 w-[6%] font-semibold">성별/나이</th>
-                                        <th className="py-3 px-4 w-[24%] text-left font-semibold">제목</th>
+                                        <th className="py-3 px-4 w-[21%] text-left font-semibold">제목</th>
                                         <th className="py-3 px-2 w-[20%] font-semibold text-gray-500">희망지역</th>
                                         <th className="py-3 px-2 w-[15%] font-semibold text-gray-500">희망업종</th>
                                         <th className="py-3 px-2 w-[12%] font-semibold text-gray-500">희망급여</th>
