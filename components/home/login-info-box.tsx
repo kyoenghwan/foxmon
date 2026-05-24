@@ -117,46 +117,62 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
 
                     {/* 우측 정보 & 버튼 영역 (세로 레이아웃 개편) */}
                     <div className="flex-1 min-w-0 flex flex-col gap-1.5 justify-center">
-                        {/* 1. 상단 인사말 */}
-                        <div className="min-w-0">
-                            <MarqueeText className="font-black text-[13px] min-[375px]:text-[15px] sm:text-base text-gray-900 leading-tight text-left">
-                                <span className="text-primary">{displayName}</span>님 반갑습니다!
-                            </MarqueeText>
-                        </div>
-
-                        {/* 2. 프로필 설정 버튼 */}
-                        <div className="flex items-center justify-between w-full">
-                            <div className="scale-90 sm:scale-100 origin-left shrink-0">
+                        {/* 1. md 이상 (우측 배치 - PC) 레이아웃 */}
+                        <div className="hidden md:flex flex-col gap-1.5">
+                            {/* 상단 인사말 */}
+                            <div className="min-w-0">
+                                <MarqueeText className="font-black text-base text-gray-900 leading-tight text-left">
+                                    <span className="text-primary">{displayName}</span>님 반갑습니다!
+                                </MarqueeText>
+                            </div>
+                            {/* 프로필 설정 버튼 */}
+                            <div className="scale-100 origin-left shrink-0">
                                 <SettingsModal />
                             </div>
-                            
-                            {/* 모바일 접기 버튼 (더보기) */}
-                            <button
-                                onClick={() => setIsOpen(!isOpen)}
-                                className="px-3 py-1 hover:bg-gray-50 rounded-full text-gray-600 hover:text-gray-900 transition-all flex items-center justify-center shrink-0 border border-gray-200 cursor-pointer shadow-sm active:scale-95 text-[11px] sm:text-[12px] font-black md:hidden ml-auto"
-                                title={isOpen ? "메뉴 접기" : "더보기"}
-                            >
-                                <span className="mr-1">{isOpen ? "접기" : "더보기"}</span>
-                                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
-                            </button>
                         </div>
-                        
-                        {/* 3. 모바일 전용 이력서 관리 / 업체 관리 */}
-                        <div className="flex items-center gap-1.5 sm:gap-2 w-full md:hidden">
-                            {showResumeMenu && (
-                                <div className="h-8 [&>button]:px-4 [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full [&>button]:text-[12px] sm:[&>button]:text-[14px]">
-                                    <ResumeManagementModal />
+
+                        {/* 2. md 미만 (아래쪽 배치 - 모바일) 레이아웃 */}
+                        <div className="flex md:hidden flex-col gap-2 w-full">
+                            {/* 1행: 인사말 + 프로필 설정 */}
+                            <div className="flex items-center justify-between w-full gap-2">
+                                <div className="min-w-0 flex-1">
+                                    <MarqueeText className="font-black text-[13px] min-[375px]:text-[15px] sm:text-base text-gray-900 leading-tight text-left">
+                                        <span className="text-primary">{displayName}</span>님 반갑습니다!
+                                    </MarqueeText>
                                 </div>
-                            )}
-                            {isEmployer && (
-                                <Link 
-                                    href="/biz" 
-                                    className="h-8 flex items-center justify-center gap-1.5 px-4 text-[12px] sm:text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                                <div className="scale-90 min-[375px]:scale-95 origin-right shrink-0">
+                                    <SettingsModal />
+                                </div>
+                            </div>
+
+                            {/* 2행: 이력서/업체 관리 + 더보기(접기/열기) */}
+                            <div className="flex items-center justify-between w-full gap-2">
+                                <div className="flex items-center gap-1.5">
+                                    {showResumeMenu && (
+                                        <div className="h-8 [&>button]:px-4 [&>button]:h-full [&>button]:justify-center [&>button]:rounded-full [&>button]:text-[12px] sm:[&>button]:text-[14px]">
+                                            <ResumeManagementModal />
+                                        </div>
+                                    )}
+                                    {isEmployer && (
+                                        <Link 
+                                            href="/biz" 
+                                            className="h-8 flex items-center justify-center gap-1.5 px-4 text-[12px] sm:text-[14px] font-black text-white bg-primary hover:bg-orange-600 rounded-full transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                                        >
+                                            <Briefcase className="w-3.5 h-3.5" />
+                                            <span>업체관리</span>
+                                        </Link>
+                                     )}
+                                </div>
+                                
+                                <button
+                                    onClick={() => setIsOpen(!isOpen)}
+                                    className="px-3 py-1 hover:bg-gray-50 rounded-full text-gray-600 hover:text-gray-900 transition-all flex items-center justify-center shrink-0 border border-gray-200 cursor-pointer shadow-sm active:scale-95 text-[11px] sm:text-[12px] font-black"
+                                    title={isOpen ? "메뉴 접기" : "더보기"}
                                 >
-                                    <Briefcase className="w-3.5 h-3.5" />
-                                    <span>업체관리</span>
-                                </Link>
-                             )}
+                                    <span className="mr-1">{isOpen ? "접기" : "더보기"}</span>
+                                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
