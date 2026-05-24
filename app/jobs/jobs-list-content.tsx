@@ -52,7 +52,7 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
   }
   if (maxRows === 3) {
     let classes = '';
-    if (idx >= 6) classes += ' max-md:hidden';
+    if (idx >= 10) classes += ' max-md:hidden';
     if (idx >= 9) classes += ' md:max-[799px]:hidden';
     if (idx >= 12) classes += ' min-[800px]:max-2xl:hidden';
     if (idx >= 15) classes += ' 2xl:max-3xl:hidden';
