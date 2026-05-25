@@ -360,8 +360,8 @@ export function SettingsModal() {
                                     <h3 className="font-extrabold text-[#333] text-[13px] mb-3 flex items-center gap-1.5">
                                         <User className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 프로필 기본 정보
                                     </h3>
-                                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col sm:flex-row gap-5">
-                                        <div className="flex flex-col items-center shrink-0">
+                                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-row items-center sm:items-start gap-4 sm:gap-5">
+                                        <div className="flex flex-col items-center justify-center shrink-0">
                                             <div className="relative group cursor-pointer w-[90px] h-[90px] bg-gray-50 rounded-2xl overflow-hidden border border-gray-200 flex flex-col items-center justify-center transition-all hover:border-primary">
                                                 {profileUrl ? (
                                                     <img src={profileUrl} alt="Profile" className="w-full h-full object-contain" />

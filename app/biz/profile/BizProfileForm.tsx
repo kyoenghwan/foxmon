@@ -310,8 +310,8 @@ export default function BizProfileForm() {
                             <h3 className="font-extrabold text-[#333333] text-[14px] mb-4 flex items-center gap-1.5">
                                 <User className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 회원 기본 정보
                             </h3>
-                            <div className="flex flex-col sm:flex-row gap-6 items-center">
-                                <div className="flex flex-col items-center shrink-0 sm:w-[110px]">
+                            <div className="flex flex-row items-center sm:items-start gap-4 sm:gap-6">
+                                <div className="flex flex-col items-center justify-center shrink-0">
                                     <div className="relative group flex-shrink-0 cursor-pointer w-[100px] h-[100px] bg-[#F8F9FA] rounded-2xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center transition-colors hover:border-[#F26E22]">
                                         {profileUrl ? (
                                             <img src={profileUrl} alt="Profile" className="w-full h-full object-contain" />
