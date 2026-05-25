@@ -190,11 +190,11 @@ export function SettingsModal() {
     const handleSavePassword = async () => {
         if (!currentPassword || !newPassword || !confirmPassword) {
             setPwError('비밀번호를 모두 입력해주세요.');
-            return;
+            return false;
         }
         if (newPassword !== confirmPassword) {
             setPwError('새 비밀번호와 확인이 일치하지 않습니다.');
-            return;
+            return false;
         }
         
         setSavingPassword(true);
@@ -211,11 +211,14 @@ export function SettingsModal() {
                 setCurrentPassword('');
                 setNewPassword('');
                 setConfirmPassword('');
+                return true;
             } else {
                 setPwError(result.message);
+                return false;
             }
         } catch (err: any) {
             setPwError('비밀번호 변경 중 오류가 발생했습니다.');
+            return false;
         } finally {
             setSavingPassword(false);
         }
@@ -321,6 +324,25 @@ export function SettingsModal() {
                         >
                             {savingProfile && <Loader2 className="w-3 h-3 animate-spin mr-1.5" />}
                             기본 정보 저장
+                        </Button>
+                    )}
+                    {activeTab === 'settings' && (
+                        <Button 
+                            onClick={async () => {
+                                if (currentPassword || newPassword || confirmPassword) {
+                                    const success = await handleSavePassword();
+                                    if (success) {
+                                        setIsOpen(false);
+                                    }
+                                } else {
+                                    setIsOpen(false);
+                                }
+                            }}
+                            disabled={savingPassword || loadingData} 
+                            className="bg-[#1A1F2C] hover:bg-black text-white px-5 font-bold rounded-lg h-9 shadow-sm shrink-0"
+                        >
+                            {savingPassword && <Loader2 className="w-3 h-3 animate-spin mr-1.5" />}
+                            설정 저장
                         </Button>
                     )}
                 </DialogHeader>
