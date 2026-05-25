@@ -394,9 +394,14 @@ export function SettingsModal() {
 
                                 {/* 동적 SNS 연결 */}
                                 <section>
-                                    <h3 className="font-extrabold text-[#333] text-[13px] mb-3 flex items-center gap-1.5">
-                                        <Link2 className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 연락처 / SNS 계정
-                                    </h3>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="font-extrabold text-[#333] text-[13px] flex items-center gap-1.5">
+                                            <Link2 className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 연락처 / SNS 계정
+                                        </h3>
+                                        <Button type="button" onClick={handleAddSns} variant="secondary" className="h-7 w-7 p-0 rounded-md font-bold shadow-sm" title="SNS 계정 추가">
+                                            <Plus className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                     <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-3">
                                         {snsLinks.map((sns, index) => (
                                             <div key={index} className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100">
@@ -424,7 +429,7 @@ export function SettingsModal() {
                                         ))}
                                         
                                         {/* SNS 추가 폼 */}
-                                        <div className="flex items-center gap-2 pt-2 border-t border-dashed border-gray-200">
+                                        <div className="flex items-center gap-2">
                                             <select 
                                                 value={newSnsType} 
                                                 onChange={e => setNewSnsType(e.target.value)}
@@ -440,9 +445,6 @@ export function SettingsModal() {
                                                 placeholder="아이디 또는 URL 입력"
                                                 className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none focus:border-primary"
                                             />
-                                            <Button onClick={handleAddSns} variant="secondary" className="px-3 h-9 rounded-lg font-bold">
-                                                <Plus className="w-4 h-4" />
-                                            </Button>
                                         </div>
                                     </div>
                                 </section>

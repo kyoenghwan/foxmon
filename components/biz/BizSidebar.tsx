@@ -28,7 +28,7 @@ export function BizSidebar({ isMobile = false }: { isMobile?: boolean }) {
     
     if (isMobile) {
         return (
-            <div className="w-full bg-white py-2">
+            <div className="w-full bg-white py-1">
                 <div className="flex flex-wrap gap-1.5">
                     {sections[0].items.map((item) => {
                         const isActive = activeId === item.id || activeId === item.href;
@@ -36,7 +36,7 @@ export function BizSidebar({ isMobile = false }: { isMobile?: boolean }) {
                             <Link
                                 key={item.id}
                                 href={item.href || '#'}
-                                className={`px-4 py-2 rounded-full text-[13px] font-bold transition-all whitespace-nowrap ${
+                                className={`px-3 py-1.5 rounded-full text-[13px] font-bold transition-all whitespace-nowrap ${
                                     isActive
                                         ? 'bg-primary text-white shadow-md'
                                         : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
