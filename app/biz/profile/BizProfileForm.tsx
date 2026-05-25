@@ -466,7 +466,7 @@ export default function BizProfileForm() {
                             </h3>
                             <div className="flex flex-col gap-3">
                                 {role === 'EMPLOYER' && (
-                                    <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                    <div className="flex flex-col bg-gray-50 p-3 rounded-lg gap-2">
                                         <div className="flex flex-col">
                                             <span className="text-[12px] font-bold text-gray-800">텔레그램 실시간 알림 연동</span>
                                             <span className="text-[10px] text-gray-500 font-medium">지원자 알림 등을 텔레그램으로 즉시 받습니다.</span>
