@@ -138,7 +138,10 @@ export function SettingsModal() {
     };
 
     const handleAddSns = () => {
-        if (!newSnsValue.trim()) return;
+        if (!newSnsValue.trim()) {
+            alert('아이디 또는 URL을 입력해주세요.');
+            return;
+        }
         setSnsLinks([...snsLinks, { type: newSnsType, value: newSnsValue.trim() }]);
         setNewSnsValue('');
     };
@@ -398,9 +401,14 @@ export function SettingsModal() {
                                         <h3 className="font-extrabold text-[#333] text-[13px] flex items-center gap-1.5">
                                             <Link2 className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 연락처 / SNS 계정
                                         </h3>
-                                        <Button type="button" onClick={handleAddSns} variant="secondary" className="h-7 w-7 p-0 rounded-md font-bold shadow-sm" title="SNS 계정 추가">
+                                        <button 
+                                            type="button" 
+                                            onClick={handleAddSns} 
+                                            className="h-7 w-7 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md font-bold shadow-sm transition-colors active:scale-95 cursor-pointer" 
+                                            title="SNS 계정 추가"
+                                        >
                                             <Plus className="w-4 h-4" />
-                                        </Button>
+                                        </button>
                                     </div>
                                     <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-3">
                                         {snsLinks.map((sns, index) => (
