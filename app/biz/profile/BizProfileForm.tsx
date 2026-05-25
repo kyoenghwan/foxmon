@@ -452,22 +452,11 @@ export default function BizProfileForm() {
                                 <Settings className="w-4 h-4 text-gray-400 stroke-[2]" /> 환경 설정
                             </h3>
                             <div className="flex flex-col gap-3">
-                                <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                                    <div className="flex flex-col">
-                                        <span className="text-[12px] font-bold text-gray-800">자동 로그인</span>
-                                        <span className="text-[10px] text-gray-500 font-medium">브라우저를 닫아도 로그인이 유지됩니다.</span>
-                                    </div>
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                      <input type="checkbox" className="sr-only peer" checked={autoLogin} onChange={(e) => handleAutoLoginToggle(e.target.checked)} />
-                                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                                    </label>
-                                </div>
-
                                 {role === 'EMPLOYER' && (
                                     <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                                         <div className="flex flex-col">
-                                            <span className="text-[12px] font-bold text-gray-800">텔레그램 연동</span>
-                                            <span className="text-[10px] text-gray-500 font-medium">지원자 알림 등을 실시간으로 수신합니다.</span>
+                                            <span className="text-[12px] font-bold text-gray-800">텔레그램 실시간 알림 연동</span>
+                                            <span className="text-[10px] text-gray-500 font-medium">지원자 알림 등을 텔레그램으로 즉시 받습니다.</span>
                                         </div>
                                         {userId ? (
                                             <TelegramConnectButton userId={userId} botUsername={botUsername} isLinked={!!telegramChatId} />
@@ -476,6 +465,17 @@ export default function BizProfileForm() {
                                         )}
                                     </div>
                                 )}
+
+                                <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                    <div className="flex flex-col">
+                                        <span className="text-[12px] font-bold text-gray-800">자동 로그인 유지</span>
+                                        <span className="text-[10px] text-gray-500 font-medium">브라우저를 닫아도 로그인이 유지됩니다.</span>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                      <input type="checkbox" className="sr-only peer" checked={autoLogin} onChange={(e) => handleAutoLoginToggle(e.target.checked)} />
+                                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
