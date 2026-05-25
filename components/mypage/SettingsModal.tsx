@@ -376,18 +376,18 @@ export function SettingsModal() {
                                         </div>
                                         
                                         <div className="flex-1 space-y-2.5 w-full">
-                                            <div className="flex flex-col gap-1">
-                                                <label className="text-[11px] font-bold text-gray-500">닉네임</label>
-                                                <input type="text" value={nickname} onChange={e => setNickname(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] font-bold focus:border-primary transition-colors" />
+                                            <div className="flex items-center gap-2">
+                                                <label className="text-[11px] font-bold text-gray-500 w-[60px] sm:w-[80px] shrink-0">닉네임</label>
+                                                <input type="text" value={nickname} onChange={e => setNickname(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] font-bold focus:border-primary transition-colors flex-1" />
                                             </div>
-                                            <div className="flex flex-col gap-1">
-                                                <label className="text-[11px] font-bold text-gray-500">이메일</label>
-                                                <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] font-medium focus:border-primary transition-colors" />
+                                            <div className="flex items-center gap-2">
+                                                <label className="text-[11px] font-bold text-gray-500 w-[60px] sm:w-[80px] shrink-0">이메일</label>
+                                                <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] font-medium focus:border-primary transition-colors flex-1" />
                                             </div>
-                                            <div className="flex flex-col gap-1">
-                                                <label className="text-[11px] font-bold text-gray-500">휴대폰 번호 (본인인증)</label>
-                                                <div className="flex gap-2">
-                                                    <input type="text" value={phoneNumber} readOnly className="w-full px-2.5 py-1.5 border border-gray-200 bg-gray-50 text-gray-500 rounded-md outline-none text-[13px] font-bold" />
+                                            <div className="flex items-center gap-2">
+                                                <label className="text-[11px] font-bold text-gray-500 w-[60px] sm:w-[80px] shrink-0">전화번호</label>
+                                                <div className="flex gap-2 flex-1">
+                                                    <input type="text" value={phoneNumber} readOnly className="w-full px-2.5 py-1.5 border border-gray-200 bg-gray-50 text-gray-500 rounded-md outline-none text-[13px] font-bold flex-1" />
                                                     <button type="button" onClick={() => alert("준비 중인 기능입니다.")} className="shrink-0 px-2.5 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-md text-[11px] font-bold hover:bg-gray-50">재인증</button>
                                                 </div>
                                             </div>
@@ -471,25 +471,23 @@ export function SettingsModal() {
                                             )}
                                         </div>
                                         <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100/50 space-y-3">
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="flex flex-col gap-1">
-                                                    <label className="text-[11px] font-bold text-gray-500">상호명</label>
-                                                    <input type="text" value={verifiedBizName} onChange={e => setVerifiedBizName(e.target.value)} readOnly={isBizVerified} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold ${isBizVerified ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} />
-                                                </div>
-                                                <div className="flex flex-col gap-1">
-                                                    <label className="text-[11px] font-bold text-gray-500">대표자명</label>
-                                                    <input type="text" value={ceoName} onChange={e => setCeoName(e.target.value)} readOnly={isBizVerified} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold ${isBizVerified ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} />
-                                                </div>
+                                            <div className="flex items-center gap-2">
+                                                <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">상호명</label>
+                                                <input type="text" value={verifiedBizName} onChange={e => setVerifiedBizName(e.target.value)} readOnly={isBizVerified} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} />
                                             </div>
-                                            <div className="flex flex-col gap-1">
-                                                <label className="text-[11px] font-bold text-gray-500">사업자등록번호</label>
-                                                <div className="flex gap-2">
-                                                    <input type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)} readOnly={isBizVerified} maxLength={10} className={`flex-1 px-2.5 py-1.5 border rounded-md text-[13px] font-bold ${isBizVerified ? 'bg-gray-50 text-gray-500' : 'bg-white'}`} placeholder="숫자 10자리" />
+                                            <div className="flex items-center gap-2">
+                                                <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">대표자명</label>
+                                                <input type="text" value={ceoName} onChange={e => setCeoName(e.target.value)} readOnly={isBizVerified} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} />
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">사업자등록번호</label>
+                                                <div className="flex gap-2 flex-1">
+                                                    <input type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)} readOnly={isBizVerified} maxLength={10} className={`flex-1 px-2.5 py-1.5 border rounded-md text-[13px] font-bold ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} placeholder="숫자 10자리" />
                                                     {!isBizVerified && (
-                                                        <Button type="button" onClick={() => { setIsBizVerified(true); alert('가승인되었습니다.'); }} className="h-8 px-3 text-[11px] font-bold">인증하기</Button>
+                                                        <Button type="button" onClick={() => { setIsBizVerified(true); alert('가승인되었습니다.'); }} className="h-8 px-3 text-[11px] font-bold shrink-0">인증하기</Button>
                                                     )}
                                                     {isBizVerified && (
-                                                        <Button type="button" variant="outline" onClick={() => setIsBizVerified(false)} className="h-8 px-3 text-[11px] font-bold text-red-500">해제</Button>
+                                                        <Button type="button" variant="outline" onClick={() => setIsBizVerified(false)} className="h-8 px-3 text-[11px] font-bold text-red-500 shrink-0">해제</Button>
                                                     )}
                                                 </div>
                                             </div>
@@ -539,19 +537,19 @@ export function SettingsModal() {
                                         {pwMessage && <div className="bg-green-50 text-green-700 p-2 rounded text-[11px] font-bold">{pwMessage}</div>}
                                         {pwError && <div className="bg-red-50 text-red-700 p-2 rounded text-[11px] font-bold">{pwError}</div>}
                                         
-                                        <div className="flex flex-col gap-1">
-                                            <label className="text-[11px] font-bold text-gray-500">현재 비밀번호</label>
-                                            <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-2.5 py-2 border border-gray-200 rounded-md outline-none text-[13px]" />
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">현재 비밀번호</label>
+                                            <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
                                         </div>
-                                        <div className="flex flex-col gap-1">
-                                            <label className="text-[11px] font-bold text-gray-500">새 비밀번호</label>
-                                            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full px-2.5 py-2 border border-gray-200 rounded-md outline-none text-[13px]" />
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">새 비밀번호</label>
+                                            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
                                         </div>
-                                        <div className="flex flex-col gap-1">
-                                            <label className="text-[11px] font-bold text-gray-500">새 비밀번호 확인</label>
-                                            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full px-2.5 py-2 border border-gray-200 rounded-md outline-none text-[13px]" />
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">새 비밀번호 확인</label>
+                                            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
                                         </div>
-                                        <Button onClick={handleSavePassword} disabled={savingPassword} variant="outline" className="w-full mt-2 font-bold h-9">
+                                        <Button onClick={handleSavePassword} disabled={savingPassword} className="w-full mt-2 font-bold h-9 bg-[#1A1F2C] hover:bg-black text-white border-none shadow-sm rounded-lg">
                                             {savingPassword ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Check className="w-3 h-3 mr-1.5" />} 비밀번호 변경하기
                                         </Button>
                                     </div>

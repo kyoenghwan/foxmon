@@ -432,17 +432,17 @@ export default function BizProfileForm() {
                                         {pwMessage && <div className="bg-green-50 text-green-700 p-2 rounded text-[11px] font-bold">{pwMessage}</div>}
                                         {pwError && <div className="bg-red-50 text-red-700 p-2 rounded text-[11px] font-bold">{pwError}</div>}
                                         
-                                        <div>
-                                            <label className="text-[11px] font-bold text-[#333] mb-1 block">기존 비밀번호</label>
-                                            <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded outline-none text-xs focus:border-[#F26E22]" />
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-[11px] font-bold text-[#333] w-[95px] shrink-0">기존 비밀번호</label>
+                                            <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded outline-none text-xs flex-1 focus:border-[#F26E22]" />
                                         </div>
-                                        <div>
-                                            <label className="text-[11px] font-bold text-[#333] mb-1 block">새 비밀번호</label>
-                                            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded outline-none text-xs focus:border-[#F26E22]" />
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-[11px] font-bold text-[#333] w-[95px] shrink-0">새 비밀번호</label>
+                                            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded outline-none text-xs flex-1 focus:border-[#F26E22]" />
                                         </div>
-                                        <div>
-                                            <label className="text-[11px] font-bold text-[#333] mb-1 block">새 비밀번호 확인</label>
-                                            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded outline-none text-xs focus:border-[#F26E22]" />
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-[11px] font-bold text-[#333] w-[95px] shrink-0">새 비밀번호 확인</label>
+                                            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded outline-none text-xs flex-1 focus:border-[#F26E22]" />
                                         </div>
                                         
                                         <Button onClick={handleSavePassword} disabled={savingPassword} className="w-full bg-[#1A1F2C] hover:bg-black text-white text-[12px] font-bold rounded h-8 mt-2">
@@ -506,15 +506,15 @@ export default function BizProfileForm() {
                                 
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2">
-                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">대표자명</label>
-                                        <input type="text" value={ceoName} onChange={e => setCeoName(e.target.value)} className={`w-full px-2.5 py-1.5 border rounded-md outline-none text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 text-gray-800 focus:border-primary'}`} readOnly={isBizVerified} />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">상호명</label>
+                                        <label className="text-[12px] font-bold text-gray-500 w-[90px] shrink-0">상호명</label>
                                         <input type="text" value={verifiedBizName} onChange={e => setVerifiedBizName(e.target.value)} className={`w-full px-2.5 py-1.5 border rounded-md outline-none text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 text-gray-800 focus:border-primary'}`} readOnly={isBizVerified} />
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <label className="text-[12px] font-bold text-gray-500 w-[60px] shrink-0">사업자번호</label>
+                                        <label className="text-[12px] font-bold text-gray-500 w-[90px] shrink-0">대표자명</label>
+                                        <input type="text" value={ceoName} onChange={e => setCeoName(e.target.value)} className={`w-full px-2.5 py-1.5 border rounded-md outline-none text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 text-gray-800 focus:border-primary'}`} readOnly={isBizVerified} />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-[12px] font-bold text-gray-500 w-[90px] shrink-0">사업자등록번호</label>
                                         <div className="flex items-center gap-1.5 flex-1 w-full">
                                             <input type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)} className={`w-full px-2.5 py-1.5 border rounded-md outline-none text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 text-gray-800 focus:border-primary'}`} readOnly={isBizVerified} maxLength={10} />
                                             {!isBizVerified && (
