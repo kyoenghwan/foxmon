@@ -110,8 +110,9 @@ export default async function BizJobsPage() {
                     </Link>
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                    <table className="w-full">
+                <div className="bg-transparent md:bg-white rounded-2xl md:border md:border-gray-100 md:shadow-sm overflow-hidden">
+                    {/* 데스크톱용 테이블 뷰 */}
+                    <table className="w-full hidden md:table">
                         <thead>
                             <tr className="border-b border-gray-100 bg-gray-50">
                                 <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500">광고명</th>
@@ -166,6 +167,53 @@ export default async function BizJobsPage() {
                             ))}
                         </tbody>
                     </table>
+
+                    {/* 모바일용 카드 리스트 뷰 */}
+                    <div className="md:hidden space-y-3.5">
+                        {mockAds.map((ad) => (
+                            <div key={ad.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3.5">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex items-center gap-3">
+                                        {ad.image && (
+                                            <img src={ad.image} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0 border border-gray-100" />
+                                        )}
+                                        <div>
+                                            <div className="flex flex-wrap items-center gap-1 text-[11px] font-bold text-gray-500">
+                                                <span>{ad.company}</span>
+                                                <span className="text-gray-300">|</span>
+                                                <span>{ad.location}</span>
+                                            </div>
+                                            <h4 className="font-extrabold text-[14px] text-gray-900 mt-1.5 leading-snug">{ad.title}</h4>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                                        <StatusBadge expiresAt={ad.expires_at} />
+                                        <AdStatusBadge status={ad.status} />
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between border-t border-gray-50 pt-3 text-[11px] font-bold text-gray-500">
+                                    <div className="flex items-center gap-3">
+                                        <span className="flex items-center gap-1 text-gray-600">
+                                            <Eye className="w-3.5 h-3.5 text-gray-400" />
+                                            조회 {ad.view_count?.toLocaleString() || 0}
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                            <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                            만료: {ad.expires_at ? new Date(ad.expires_at).toLocaleDateString() : '무기한'}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <PaymentModalTrigger ad={ad} />
+                                        <Link href={`/biz/jobs/${ad.id}`} className="p-2 bg-gray-50 hover:bg-gray-100 border border-gray-200/60 rounded-xl transition-colors" title="수정">
+                                            <Pencil className="w-3.5 h-3.5 text-gray-600" />
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
