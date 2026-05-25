@@ -311,7 +311,7 @@ export default function BizProfileForm() {
                                 <User className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 회원 기본 정보
                             </h3>
                             <div className="flex flex-row items-center sm:items-start gap-4 sm:gap-6">
-                                <div className="flex flex-col items-center justify-center shrink-0">
+                                <div className="flex flex-col items-center justify-center shrink-0 gap-1.5">
                                     <div className="relative group flex-shrink-0 cursor-pointer w-[100px] h-[100px] bg-[#F8F9FA] rounded-2xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col items-center justify-center transition-colors hover:border-[#F26E22]">
                                         {profileUrl ? (
                                             <img src={profileUrl} alt="Profile" className="w-full h-full object-contain" />
@@ -323,6 +323,7 @@ export default function BizProfileForm() {
                                         )}
                                         <input type="file" accept="image/*" onChange={handlePhotoUpload} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" />
                                     </div>
+                                    <span className="text-[11px] font-bold text-gray-400 select-none pointer-events-none">이미지 변경</span>
                                 </div>
                                 <div className="flex-1 space-y-2 w-full">
                                     <div className="flex items-center gap-2">
