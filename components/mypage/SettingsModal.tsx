@@ -316,35 +316,43 @@ export function SettingsModal() {
                             <User className="w-4 h-4 text-[#F26E22]" /> 회원 설정
                         </DialogTitle>
                     </div>
-                    {activeTab === 'profile' && (
-                        <Button 
-                            onClick={handleSaveProfile} 
-                            disabled={savingProfile || loadingData} 
-                            className="bg-[#1A1F2C] hover:bg-black text-white px-5 font-bold rounded-lg h-9 shadow-sm shrink-0"
-                        >
-                            {savingProfile && <Loader2 className="w-3 h-3 animate-spin mr-1.5" />}
-                            기본 정보 저장
-                        </Button>
-                    )}
-                    {activeTab === 'settings' && (
-                        <Button 
-                            onClick={async () => {
-                                if (currentPassword || newPassword || confirmPassword) {
-                                    const success = await handleSavePassword();
-                                    if (success) {
+                    <div className="flex items-center gap-2 shrink-0">
+                        {activeTab === 'profile' ? (
+                            <Button 
+                                onClick={handleSaveProfile} 
+                                disabled={savingProfile || loadingData} 
+                                className="bg-[#1A1F2C] hover:bg-black text-white px-4 font-bold rounded-lg h-9 shadow-sm"
+                            >
+                                {savingProfile && <Loader2 className="w-3 h-3 animate-spin mr-1.5" />}
+                                저장
+                            </Button>
+                        ) : (
+                            <Button 
+                                onClick={async () => {
+                                    if (currentPassword || newPassword || confirmPassword) {
+                                        const success = await handleSavePassword();
+                                        if (success) {
+                                            setIsOpen(false);
+                                        }
+                                    } else {
                                         setIsOpen(false);
                                     }
-                                } else {
-                                    setIsOpen(false);
-                                }
-                            }}
-                            disabled={savingPassword || loadingData} 
-                            className="bg-[#1A1F2C] hover:bg-black text-white px-5 font-bold rounded-lg h-9 shadow-sm shrink-0"
+                                }}
+                                disabled={savingPassword || loadingData} 
+                                className="bg-[#1A1F2C] hover:bg-black text-white px-4 font-bold rounded-lg h-9 shadow-sm"
+                            >
+                                {savingPassword && <Loader2 className="w-3 h-3 animate-spin mr-1.5" />}
+                                저장
+                            </Button>
+                        )}
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setIsOpen(false)} 
+                            className="border-gray-200 text-gray-600 px-4 font-bold rounded-lg h-9 hover:bg-gray-50 hover:text-gray-900"
                         >
-                            {savingPassword && <Loader2 className="w-3 h-3 animate-spin mr-1.5" />}
-                            설정 저장
+                            닫기
                         </Button>
-                    )}
+                    </div>
                 </DialogHeader>
 
                 {/* Tabs */}
