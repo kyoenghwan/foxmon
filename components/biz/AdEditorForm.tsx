@@ -1752,7 +1752,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 )}
                                 
                                 {form.design_mode === 'canvas' ? (
-                                    <div className="animate-in fade-in zoom-in-95 duration-300">
+                                    <div className="animate-in fade-in zoom-in-95 duration-300 w-full overflow-x-auto pb-4">
                                         <AdCanvasEditor
                                             ref={canvasRef}
                                             value={form.detail_content}
