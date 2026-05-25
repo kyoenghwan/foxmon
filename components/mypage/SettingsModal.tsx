@@ -371,9 +371,14 @@ export function SettingsModal() {
                                                         <span className="text-[10px] font-bold">이미지 등록</span>
                                                     </div>
                                                 )}
-                                                <input type="file" accept="image/*" onChange={handlePhotoUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                                                <input type="file" id="profile-upload-input-modal" accept="image/*" onChange={handlePhotoUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
                                             </div>
-                                            <span className="text-[11px] font-bold text-gray-400 select-none pointer-events-none">이미지 변경</span>
+                                            <label 
+                                                htmlFor="profile-upload-input-modal" 
+                                                className="px-2 py-1 bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 rounded-md text-[11px] font-bold shadow-sm transition-all active:scale-95 cursor-pointer text-center select-none"
+                                            >
+                                                이미지 변경
+                                            </label>
                                         </div>
                                         
                                         <div className="flex-1 space-y-2.5 w-full">

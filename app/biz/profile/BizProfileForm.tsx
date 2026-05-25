@@ -321,9 +321,14 @@ export default function BizProfileForm() {
                                                 <span className="text-[10px] font-bold leading-tight">프로필 이미지<br/>등록</span>
                                             </div>
                                         )}
-                                        <input type="file" accept="image/*" onChange={handlePhotoUpload} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" />
+                                        <input type="file" id="profile-upload-input-form" accept="image/*" onChange={handlePhotoUpload} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" />
                                     </div>
-                                    <span className="text-[11px] font-bold text-gray-400 select-none pointer-events-none">이미지 변경</span>
+                                    <label 
+                                        htmlFor="profile-upload-input-form" 
+                                        className="px-2 py-1 bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 rounded-md text-[11px] font-bold shadow-sm transition-all active:scale-95 cursor-pointer text-center select-none"
+                                    >
+                                        이미지 변경
+                                    </label>
                                 </div>
                                 <div className="flex-1 space-y-2 w-full">
                                     <div className="flex items-center gap-2">
