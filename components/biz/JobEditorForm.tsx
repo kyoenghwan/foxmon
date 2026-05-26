@@ -438,7 +438,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                             }));
                         }
                     } else {
-                        console.error("❌ [JobEditorForm] fetchUserProfile failed:", res.error);
+                        console.error("❌ [JobEditorForm] fetchUserProfile failed:", res.message);
                     }
                 }
             } catch (err) {

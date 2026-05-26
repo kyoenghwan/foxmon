@@ -540,7 +540,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             }));
                         }
                     } else {
-                        console.error("❌ [AdEditorForm] fetchUserProfile failed:", res.error);
+                        console.error("❌ [AdEditorForm] fetchUserProfile failed:", res.message);
                     }
                 }
             } catch (err) {
@@ -569,7 +569,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     setTierGroups(updatedGroups);
                     setTierOptions(updatedGroups.flatMap(g => g.options));
                 } else {
-                    console.error("❌ [AdEditorForm] fetchTierPrices failed:", res.error);
+                    console.error("❌ [AdEditorForm] fetchTierPrices failed:", res.message);
                 }
             } catch (err) {
                 console.error("❌ [AdEditorForm] fetchTierPrices exception:", err);
