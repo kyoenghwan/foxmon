@@ -3,7 +3,6 @@ import { auth } from '@/auth';
 import { 
     Coins, 
     Megaphone, 
-    Users, 
     TrendingUp, 
     Plus, 
     ArrowRight,
@@ -144,18 +143,6 @@ export default async function BizDashboardPage() {
                                 <Megaphone className="w-3 h-3" /> <span className="hidden sm:inline">광고 등록</span><span className="sm:hidden">광고</span>
                             </Link>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-gray-50">
-                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-green-50 flex items-center justify-center shrink-0">
-                            <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-bold text-[13px] md:text-[14px] text-gray-800">3단계: 지원자 확인</p>
-                            <p className="text-[11px] md:text-[12px] text-gray-500 mt-0.5 line-clamp-1 md:line-clamp-none">지원자 이력서를 확인하고 연락하세요.</p>
-                        </div>
-                        <Link href="/biz/seekers" className="shrink-0 px-3 md:px-4 py-1.5 md:py-2 bg-green-500 text-white text-[11px] md:text-[12px] font-black rounded-lg hover:bg-green-600 transition-colors">
-                            확인하기
-                        </Link>
                     </div>
                 </div>
             </div>
