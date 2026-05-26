@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { LoginForm } from '@/src/components/auth/LoginForm';
 import { AgeVerificationBox } from '@/src/components/auth/AgeVerificationBox';
@@ -9,10 +9,20 @@ import { cn } from '@/lib/utils';
 import { ShieldAlert, Info, Lock, X } from 'lucide-react';
 import { nvLog } from '@/lib/logger';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 function LoginCombinedContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
+
+    useEffect(() => {
+        if (searchParams?.get('session_expired') === '1') {
+            nvLog('FW', 'Login Gate: 세션 만료로 인한 강제 로그아웃 파괴 작동');
+            signOut({ redirect: false }).then(() => {
+                router.replace('/login');
+            });
+        }
+    }, [searchParams, router]);
 
     const handleVerifySuccess = () => {
         nvLog('FW', 'Login Gate: 방문자 성인 인증 성공');
