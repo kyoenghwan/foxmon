@@ -43,20 +43,11 @@ export function MainBanner() {
                 }
             } else if (width >= 800 && width < 1024) {
                 setItemsPerView(1);
-                if (container) {
-                    setCardWidth(container.clientWidth);
-                } else {
-                    setCardWidth(406);
-                }
+                setCardWidth(406);
                 setCardHeight(203);
             } else {
                 setItemsPerView(2);
-                if (container) {
-                    const parentWidth = container.clientWidth;
-                    setCardWidth((parentWidth - 16) / 2);
-                } else {
-                    setCardWidth(406); // (195px * 2) + 16px = 406px
-                }
+                setCardWidth(406); // PC 환경에서는 배너 카드 크기를 406px로 고정
                 setCardHeight(203);
             }
         };
