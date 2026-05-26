@@ -17,7 +17,7 @@ export function MainBanner() {
     const [isHovered, setIsHovered] = useState(false);
     const [itemsPerView, setItemsPerView] = useState(1);
 
-    // 반응형 배너 갯수 및 카드 너비 조절 (PC에서는 중앙 채용 배너 2개 크기인 406px 고정)
+    // 반응형 배너 갯수 및 카드 너비 조절 (컨테이너 크기에 맞춰 동적 계산)
     useEffect(() => {
         const container = document.getElementById('main-banner-container');
         const handleResize = () => {
@@ -43,11 +43,20 @@ export function MainBanner() {
                 }
             } else if (width >= 800 && width < 1024) {
                 setItemsPerView(1);
-                setCardWidth(406);
+                if (container) {
+                    setCardWidth(container.clientWidth);
+                } else {
+                    setCardWidth(406);
+                }
                 setCardHeight(203);
             } else {
                 setItemsPerView(2);
-                setCardWidth(406); // (195px * 2) + 16px = 406px 고정
+                if (container) {
+                    const parentWidth = container.clientWidth;
+                    setCardWidth((parentWidth - 16) / 2);
+                } else {
+                    setCardWidth(406); // (195px * 2) + 16px = 406px
+                }
                 setCardHeight(203);
             }
         };
