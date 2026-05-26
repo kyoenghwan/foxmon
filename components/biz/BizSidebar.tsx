@@ -27,19 +27,32 @@ export function BizSidebar({ isMobile = false }: { isMobile?: boolean }) {
 
     
     if (isMobile) {
+        // 사용자가 요청한 3줄 순서로 재배열
+        // 1줄: 대시보드(0), 업체 정보(5)
+        // 2줄: 광고 관리(1), 구인 관리(2)
+        // 3줄: 포인트 관리(3), 지원자 관리(4)
+        const mobileItems = [
+            sections[0].items[0],
+            sections[0].items[5],
+            sections[0].items[1],
+            sections[0].items[2],
+            sections[0].items[3],
+            sections[0].items[4],
+        ];
+
         return (
             <div className="w-full bg-white py-1">
-                <div className="flex flex-wrap gap-1.5">
-                    {sections[0].items.map((item) => {
+                <div className="grid grid-cols-2 gap-2">
+                    {mobileItems.map((item) => {
                         const isActive = activeId === item.id || activeId === item.href;
                         return (
                             <Link
                                 key={item.id}
                                 href={item.href || '#'}
-                                className={`px-3 py-1.5 rounded-full text-[13px] font-bold transition-all whitespace-nowrap ${
+                                className={`px-3 py-2.5 rounded-xl text-[13px] font-bold transition-all text-center ${
                                     isActive
-                                        ? 'bg-primary text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                        ? 'bg-primary text-white shadow-sm'
+                                        : 'bg-gray-50 text-gray-500 border border-gray-100 hover:bg-gray-100'
                                 }`}
                             >
                                 {item.label}
