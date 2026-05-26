@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 // Fabric.js v6: named imports
-import { Canvas, FabricText, Textbox, FabricImage, Rect, Pattern, Shadow } from 'fabric';
+import { Canvas, FabricText, Textbox, FabricImage, Rect, Pattern, Shadow, Gradient } from 'fabric';
 
 export interface AdCanvasEditorRef {
     saveLatest: () => string;
@@ -40,13 +40,13 @@ const TEXT_COLORS = [
 ];
 
 const BG_PRESETS = [
-    { label: '없음', value: '' },
-    { label: '그라데이션 1', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-    { label: '그라데이션 2', value: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-    { label: '그라데이션 3', value: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
-    { label: '다크', value: '#1a1a2e' },
-    { label: '화이트', value: '#ffffff' },
-    { label: '웜', value: '#ffecd2' },
+    { label: '없음', value: '', type: 'clear' },
+    { label: '그라데이션 1', value: 'linear', type: 'gradient', colors: ['#667eea', '#764ba2'] },
+    { label: '그라데이션 2', value: 'linear', type: 'gradient', colors: ['#f093fb', '#f5576c'] },
+    { label: '그라데이션 3', value: 'linear', type: 'gradient', colors: ['#4facfe', '#00f2fe'] },
+    { label: '다크', value: '#1a1a2e', type: 'color' },
+    { label: '화이트', value: '#ffffff', type: 'color' },
+    { label: '웜', value: '#ffecd2', type: 'color' },
 ];
 
 interface ThemeOption {
@@ -568,7 +568,7 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
             const titleText = new Textbox('상호명/제목을 입력하세요', {
                 left: width / 2, top: topH / 2,
                 originX: 'center', originY: 'center',
-                fontFamily: 'Black Han Sans', fontSize: 52, fill: titleColor,
+                fontFamily: 'Black Han Sans', fontSize: 60, fill: titleColor,
                 shadow: titleShadow,
                 width: 480,
                 textAlign: 'center',
@@ -578,25 +578,26 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
             const bodyBox = new Rect({
                 left: width / 2, top: topH + 50,
                 originX: 'center', originY: 'top',
-                width: 480, height: 280,
+                width: 480, height: 350,
                 fill: 'rgba(0,0,0,0.75)', rx: 15, ry: 15,
                 stroke: themeStyle.strokeColor, strokeWidth: 2,
                 shadow: new Shadow({ color: themeStyle.shadowColor, blur: 15, offsetX: 0, offsetY: 0 })
             });
 
             const bodyText = new Textbox('✔ 모집부문: 00명\n✔ 급여조건: 월 000만원\n✔ 근무시간: 19:00 ~ 03:00\n✔ 자격요건: 20세 이상 누구나\n\n[더블클릭하여 필수 내용을 수정하세요]', {
-                left: width / 2, top: topH + 80,
+                left: width / 2, top: topH + 70,
                 originX: 'center', originY: 'top',
-                fontFamily: 'Noto Sans KR', fontSize: 24, fill: '#FFFFFF',
+                fontFamily: 'Noto Sans KR', fontSize: 28, fill: '#FFFFFF',
                 textAlign: 'center', fontWeight: 'bold',
                 width: 450,
+                lineHeight: 1.3,
                 editable: true
             } as any);
 
             const footerText = new Textbox('편하게 연락주세요! ☎ 010-0000-0000', {
                 left: width / 2, top: initialHeight - (botH / 2),
                 originX: 'center', originY: 'center',
-                fontFamily: 'Black Han Sans', fontSize: 32, fill: '#FFFFFF',
+                fontFamily: 'Black Han Sans', fontSize: 36, fill: '#FFFFFF',
                 shadow: new Shadow({ color: 'rgba(0,0,0,0.9)', blur: 10, offsetX: 2, offsetY: 2 }),
                 width: 500,
                 textAlign: 'center',
@@ -936,30 +937,41 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
                         <button
                             key={preset.label}
                             onClick={() => {
-                                if (!preset.value) {
-                                    setBgUrl('');
-                                    onBgImageChange?.('');
-                                    const canvas = fabricRef.current;
-                                    if (canvas) {
-                                        canvas.set('backgroundImage', undefined);
-                                        canvas.set('backgroundColor', '#ffffff');
-                                        canvas.renderAll();
-                                    }
-                                } else if (preset.value.startsWith('#')) {
-                                    setBgUrl('');
-                                    onBgImageChange?.('');
-                                    const canvas = fabricRef.current;
-                                    if (canvas) {
-                                        canvas.set('backgroundImage', undefined);
-                                        canvas.set('backgroundColor', preset.value);
-                                        canvas.renderAll();
-                                    }
+                                const canvas = fabricRef.current;
+                                if (!canvas) return;
+
+                                setBgUrl('');
+                                onBgImageChange?.('');
+                                canvas.set('backgroundImage', undefined);
+
+                                if (preset.type === 'clear') {
+                                    canvas.set('backgroundColor', '#ffffff');
+                                } else if (preset.type === 'color') {
+                                    canvas.set('backgroundColor', preset.value);
+                                } else if (preset.type === 'gradient' && preset.colors) {
+                                    const grad = new Gradient({
+                                        type: 'linear',
+                                        coords: { x1: 0, y1: 0, x2: width, y2: canvasHeight },
+                                        colorStops: [
+                                            { offset: 0, color: preset.colors[0] },
+                                            { offset: 1, color: preset.colors[1] }
+                                        ]
+                                    });
+                                    canvas.set('backgroundColor', grad as any);
                                 }
+                                canvas.renderAll();
+                                emitChange(canvas);
                             }}
                             className="px-2 py-1 rounded-md text-[10px] font-bold text-gray-600 bg-white hover:bg-gray-50 transition-all border border-gray-200 shadow-sm"
-                            style={preset.value.startsWith('linear') ? { background: preset.value } : preset.value.startsWith('#') ? { backgroundColor: preset.value, color: preset.label === '다크' ? '#fff' : '#000' } : {}}
+                            style={
+                                preset.type === 'gradient' && preset.colors
+                                    ? { background: `linear-gradient(135deg, ${preset.colors[0]} 0%, ${preset.colors[1]} 100%)` }
+                                    : preset.type === 'color'
+                                    ? { backgroundColor: preset.value, color: preset.label === '다크' ? '#fff' : '#000' }
+                                    : {}
+                            }
                         >
-                            {!preset.value.startsWith('linear') && !preset.value.startsWith('#') ? preset.label : ''}
+                            {preset.type === 'clear' ? preset.label : ''}
                         </button>
                     ))}
                 </div>
