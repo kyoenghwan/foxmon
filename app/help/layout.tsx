@@ -27,20 +27,13 @@ export default async function HelpLayout({ children }: { children: React.ReactNo
 
             {/* 메인 콘텐츠 */}
             <div className="container px-4 md:px-6 py-6 flex-1">
-                <div className="lg:hidden mb-4 sticky top-[136px] z-20 bg-white border-b pb-2">
+                <div className="mb-4 sticky top-[136px] z-20 bg-white border-b pb-2">
                     <Suspense fallback={<div className="h-10" />}>
                         <HelpSidebar isMobile />
                     </Suspense>
                 </div>
-                <div className="flex gap-6 items-start">
-                    <div className="w-52 shrink-0 sticky top-[130px] hidden lg:block">
-                        <Suspense fallback={<div className="w-52" />}>
-                            <HelpSidebar />
-                        </Suspense>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        {children}
-                    </div>
+                <div className="min-w-0">
+                    {children}
                 </div>
             </div>
             <MainFooter />
