@@ -96,17 +96,17 @@ export function CommunityClient({
     return (
         <div className="flex flex-col gap-4 w-full">
             {/* 상단 메뉴 — 두 줄 그리드 (한눈에 보기) */}
-            <div className="w-full bg-white sticky top-[130px] z-20 border-b border-gray-100 shadow-sm space-y-2 px-2 py-2.5">
+            <div className="w-full bg-white sticky top-[130px] z-20 border-b border-gray-100 shadow-sm space-y-2.5 px-2 sm:px-4 py-2.5 sm:py-4">
                 {sidebarSections.map((section) => (
                     <div key={section.title}>
-                        <p className="text-[10px] font-black text-gray-400 mb-1 px-0.5">{section.title}</p>
-                        <div className="flex flex-wrap gap-1.5">
+                        <p className="text-[10px] sm:text-[12px] font-black text-gray-400 mb-1 px-0.5 sm:px-1">{section.title}</p>
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
                             {section.items.map((item) => (
                                 <button
                                     key={item.id}
                                     type="button"
                                     onClick={() => handleTabChange(item.id)}
-                                    className={`min-h-[32px] px-2.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition-all whitespace-nowrap ${
+                                    className={`min-h-[32px] sm:min-h-[38px] px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-full text-[10px] sm:text-[13px] font-bold transition-all whitespace-nowrap ${
                                         activeTab === item.id
                                             ? 'bg-primary text-white shadow-md'
                                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
