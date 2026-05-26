@@ -49,12 +49,90 @@ const BG_PRESETS = [
     { label: '웜', value: '#ffecd2' },
 ];
 
-const THEME_OPTIONS = [
+interface ThemeOption {
+    value:
+        | 'gold_bar'
+        | 'neon_nightclub'
+        | 'black_diamon'
+        | 'champagne_gl'
+        | 'dark_modern_club'
+        | 'purple_VIP_room'
+        | 'red_velvet'
+        | 'rose_gold_lo'
+        | 'silver_mist';
+    label: string;
+    emoji: string;
+    disabled?: boolean;
+}
+
+const THEME_OPTIONS: ThemeOption[] = [
     { value: 'gold_bar', label: '골드 바 테마', emoji: '👑' },
     { value: 'neon_nightclub', label: '네온 나이트클럽', emoji: '✨' },
-    { value: 'red_fire', label: '레드 파이어 테마 (준비중)', emoji: '🔥', disabled: true },
-    { value: 'ocean_blue', label: '오션 블루 테마 (준비중)', emoji: '🌊', disabled: true },
+    { value: 'black_diamon', label: '블랙 다이아몬드 테마', emoji: '💎' },
+    { value: 'champagne_gl', label: '샴페인 골드 테마', emoji: '🥂' },
+    { value: 'dark_modern_club', label: '다크 모던 클럽 테마', emoji: '🌃' },
+    { value: 'purple_VIP_room', label: '퍼플 VIP 룸 테마', emoji: '🔮' },
+    { value: 'red_velvet', label: '레드 벨벳 테마', emoji: '🌹' },
+    { value: 'rose_gold_lo', label: '로즈 골드 테마', emoji: '🏵️' },
+    { value: 'silver_mist', label: '실버 미스트 테마', emoji: '🌫️' },
 ];
+
+const THEME_STYLES: Record<string, { titleColor: string; titleShadowColor: string; strokeColor: string; shadowColor: string }> = {
+    gold_bar: {
+        titleColor: '#FDE047',
+        titleShadowColor: 'rgba(0,0,0,0.8)',
+        strokeColor: '#EAB308',
+        shadowColor: '#CA8A04',
+    },
+    neon_nightclub: {
+        titleColor: '#FFFFFF',
+        titleShadowColor: '#ec4899',
+        strokeColor: '#3B82F6',
+        shadowColor: '#3B82F6',
+    },
+    black_diamon: {
+        titleColor: '#FFFFFF',
+        titleShadowColor: 'rgba(0,0,0,0.8)',
+        strokeColor: '#4B5563',
+        shadowColor: '#9CA3AF',
+    },
+    champagne_gl: {
+        titleColor: '#FDE047',
+        titleShadowColor: 'rgba(0,0,0,0.8)',
+        strokeColor: '#FBBF24',
+        shadowColor: '#F59E0B',
+    },
+    dark_modern_club: {
+        titleColor: '#E2E8F0',
+        titleShadowColor: 'rgba(0,0,0,0.8)',
+        strokeColor: '#10B981',
+        shadowColor: '#059669',
+    },
+    purple_VIP_room: {
+        titleColor: '#E9D5FF',
+        titleShadowColor: 'rgba(0,0,0,0.8)',
+        strokeColor: '#A855F7',
+        shadowColor: '#7E22CE',
+    },
+    red_velvet: {
+        titleColor: '#FCA5A5',
+        titleShadowColor: 'rgba(0,0,0,0.8)',
+        strokeColor: '#EF4444',
+        shadowColor: '#B91C1C',
+    },
+    rose_gold_lo: {
+        titleColor: '#FEE2E2',
+        titleShadowColor: 'rgba(0,0,0,0.8)',
+        strokeColor: '#F43F5E',
+        shadowColor: '#E11D48',
+    },
+    silver_mist: {
+        titleColor: '#F3F4F6',
+        titleShadowColor: 'rgba(0,0,0,0.8)',
+        strokeColor: '#9CA3AF',
+        shadowColor: '#4B5563',
+    },
+};
 
 // ─── 메인 컴포넌트 ───
 const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
@@ -419,7 +497,18 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
     }, []);
 
     // ── 전체 테마 템플릿 적용 ──
-    const applyFullTheme = async (themeName: 'gold_bar' | 'neon_nightclub' | 'red_fire' | 'ocean_blue') => {
+    const applyFullTheme = async (
+        themeName:
+            | 'gold_bar'
+            | 'neon_nightclub'
+            | 'black_diamon'
+            | 'champagne_gl'
+            | 'dark_modern_club'
+            | 'purple_VIP_room'
+            | 'red_velvet'
+            | 'rose_gold_lo'
+            | 'silver_mist'
+    ) => {
         const canvas = fabricRef.current;
         if (!canvas) return;
 
@@ -467,9 +556,14 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
 
             canvas.add(img1, rect, img3);
 
+            // 테마별 상세 스타일 정의 맵 적용
+            const themeStyle = THEME_STYLES[themeName] || THEME_STYLES.gold_bar;
+
             // 텍스트 블록 추가
-            const titleColor = themeName === 'gold_bar' ? '#FDE047' : '#FFFFFF';
-            const titleShadow = themeName === 'gold_bar' ? new Shadow({ color: 'rgba(0,0,0,0.8)', blur: 10, offsetX: 2, offsetY: 2 }) : new Shadow({ color: '#ec4899', blur: 20, offsetX: 0, offsetY: 0 });
+            const titleColor = themeStyle.titleColor;
+            const titleShadow = themeName === 'neon_nightclub'
+                ? new Shadow({ color: themeStyle.titleShadowColor, blur: 20, offsetX: 0, offsetY: 0 })
+                : new Shadow({ color: themeStyle.titleShadowColor, blur: 10, offsetX: 2, offsetY: 2 });
             
             const titleText = new Textbox('상호명/제목을 입력하세요', {
                 left: width / 2, top: topH / 2,
@@ -486,8 +580,8 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
                 originX: 'center', originY: 'top',
                 width: 480, height: 280,
                 fill: 'rgba(0,0,0,0.75)', rx: 15, ry: 15,
-                stroke: themeName === 'gold_bar' ? '#EAB308' : '#3B82F6', strokeWidth: 2,
-                shadow: new Shadow({ color: themeName === 'gold_bar' ? '#CA8A04' : '#3B82F6', blur: 15, offsetX: 0, offsetY: 0 })
+                stroke: themeStyle.strokeColor, strokeWidth: 2,
+                shadow: new Shadow({ color: themeStyle.shadowColor, blur: 15, offsetX: 0, offsetY: 0 })
             });
 
             const bodyText = new Textbox('✔ 모집부문: 00명\n✔ 급여조건: 월 000만원\n✔ 근무시간: 19:00 ~ 03:00\n✔ 자격요건: 20세 이상 누구나\n\n[더블클릭하여 필수 내용을 수정하세요]', {
