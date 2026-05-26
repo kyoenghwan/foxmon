@@ -429,12 +429,29 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                     const res = await userSettingsAction('GET_PROFILE');
                     if (res.success && res.data) {
                         const profile = res.data;
+                        
+                        // 연락처 파싱 (010 시작 시 핸드폰, 그 외 일반전화)
+                        const phone = profile.phone_number || '';
+                        const isMobile = phone.startsWith('010');
+
                         if (profile.is_business_verified) {
                             setIsBizVerified(true);
                             setForm(prev => ({
                                 ...prev,
                                 business_name: profile.verified_business_name,
                                 company: profile.verified_business_name, // 하위 호환성
+                                phone_type: isMobile ? 'mobile' : 'landline',
+                                contact_phone: phone,
+                                kakao_id: profile.sns_kakao || '',
+                                telegram_id: profile.sns_telegram || '',
+                            }));
+                        } else {
+                            setForm(prev => ({
+                                ...prev,
+                                phone_type: isMobile ? 'mobile' : 'landline',
+                                contact_phone: phone,
+                                kakao_id: profile.sns_kakao || '',
+                                telegram_id: profile.sns_telegram || '',
                             }));
                         }
                     } else {

@@ -587,12 +587,39 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     const res = await userSettingsAction('GET_PROFILE');
                     if (res.success && res.data) {
                         const profile = res.data;
+                        
+                        // 연락처 파싱 (010 시작 시 핸드폰, 그 외 일반전화)
+                        const phone = profile.phone_number || '';
+                        const isMobile = phone.startsWith('010');
+                        
+                        // 메신저 정보 변환 및 로컬 snsLinks 주입
+                        const fetchedSns = [];
+                        if (profile.sns_kakao) fetchedSns.push({ type: 'kakao', value: profile.sns_kakao });
+                        if (profile.sns_instagram) fetchedSns.push({ type: 'instagram', value: profile.sns_instagram });
+                        if (profile.sns_telegram) fetchedSns.push({ type: 'telegram', value: profile.sns_telegram });
+                        
+                        if (fetchedSns.length > 0) {
+                            setSnsLinks(fetchedSns);
+                        }
+
                         if (profile.is_business_verified) {
                             setIsBizVerified(true);
                             setForm(prev => ({
                                 ...prev,
                                 business_name: profile.verified_business_name,
                                 company: profile.verified_business_name, // 하위 호환성
+                                phone_type: isMobile ? 'mobile' : 'landline',
+                                contact_phone: phone,
+                                kakao_id: profile.sns_kakao || '',
+                                telegram_id: profile.sns_telegram || '',
+                            }));
+                        } else {
+                            setForm(prev => ({
+                                ...prev,
+                                phone_type: isMobile ? 'mobile' : 'landline',
+                                contact_phone: phone,
+                                kakao_id: profile.sns_kakao || '',
+                                telegram_id: profile.sns_telegram || '',
                             }));
                         }
                     } else {
