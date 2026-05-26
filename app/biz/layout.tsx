@@ -5,6 +5,7 @@ import { BizSidebar } from '@/components/biz/BizSidebar';
 import { SideBanners } from '@/components/home/side-banners';
 import Link from 'next/link';
 import { MainFooter } from '@/components/layout/main-footer';
+import { HeroSection } from '@/components/home/hero-section';
 
 export default async function BizLayout({ children }: { children: React.ReactNode }) {
     const session = await auth();
@@ -22,6 +23,9 @@ export default async function BizLayout({ children }: { children: React.ReactNod
             <SideBanners />
             {/* 기존 메인 헤더 재사용 */}
             <MainHeader session={session} />
+
+            {/* Hero Section: 배너 및 로그인 정보 (공통 컴포넌트 적용) */}
+            <HeroSection session={session} />
 
             {/* 공지사항 스타일 서브 헤더 */}
             <div className="bg-gray-50 border-b border-gray-200">
