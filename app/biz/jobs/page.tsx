@@ -70,22 +70,22 @@ export default async function BizJobsPage() {
     return (
         <div className="space-y-6">
             {/* 페이지 헤더 */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
                 <div>
                     <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
                         <Briefcase className="w-5 h-5 text-primary" />
                         구인 관리
                     </h2>
                     <p className="text-[13px] text-gray-500 font-medium mt-1">
-                        등록한 구인 공고를 확인하고 수정·관리하세요.
+                        등록한 구인공고를 관리하세요.
                     </p>
                 </div>
                 <Link 
                     href="/biz/jobs/new"
-                    className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95 shrink-0"
                 >
                     <Plus className="w-4 h-4" />
-                    새 구인 공고 등록
+                    새 공고 등록
                 </Link>
             </div>
 
