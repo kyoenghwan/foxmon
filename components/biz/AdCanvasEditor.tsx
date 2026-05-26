@@ -49,6 +49,13 @@ const BG_PRESETS = [
     { label: '웜', value: '#ffecd2' },
 ];
 
+const THEME_OPTIONS = [
+    { value: 'gold_bar', label: '골드 바 테마', emoji: '👑' },
+    { value: 'neon_nightclub', label: '네온 나이트클럽', emoji: '✨' },
+    { value: 'red_fire', label: '레드 파이어 테마 (준비중)', emoji: '🔥', disabled: true },
+    { value: 'ocean_blue', label: '오션 블루 테마 (준비중)', emoji: '🌊', disabled: true },
+];
+
 // ─── 메인 컴포넌트 ───
 const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
     value,
@@ -412,7 +419,7 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
     }, []);
 
     // ── 전체 테마 템플릿 적용 ──
-    const applyFullTheme = async (themeName: 'gold_bar' | 'neon_nightclub') => {
+    const applyFullTheme = async (themeName: 'gold_bar' | 'neon_nightclub' | 'red_fire' | 'ocean_blue') => {
         const canvas = fabricRef.current;
         if (!canvas) return;
 
@@ -754,19 +761,33 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
             <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4 space-y-4">
                 
                 {/* Row 0: 전체 테마 템플릿 */}
-                <div className="flex items-center gap-2 flex-wrap border-b border-gray-100 pb-4">
-                    <span className="text-[13px] font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-pink-500 mr-2">👑 풀세트 테마 템플릿</span>
-                    <button onClick={() => applyFullTheme('gold_bar')}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-yellow-600 to-yellow-800 hover:from-yellow-500 hover:to-yellow-700 text-white rounded-lg text-[13px] font-bold transition-all shadow-lg border border-yellow-500/50">
-                        <Crown className="w-4 h-4" /> 골드 바 테마
-                    </button>
-                    <button onClick={() => applyFullTheme('neon_nightclub')}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-800 hover:from-purple-500 hover:to-blue-700 text-white rounded-lg text-[13px] font-bold transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)] border border-purple-500/50">
-                        <Paintbrush className="w-4 h-4" /> 네온 나이트클럽
-                    </button>
+                <div className="flex items-center gap-3 flex-wrap border-b border-gray-100 pb-4">
+                    <span className="text-[13px] font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-pink-500">👑 풀세트 테마 템플릿</span>
+                    
+                    <div className="relative">
+                        <select
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val) {
+                                    applyFullTheme(val as any);
+                                }
+                                e.target.value = ''; // 선택 후 드롭다운 선택값을 다시 초기 상태로 리셋
+                            }}
+                            className="px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 rounded-lg text-[12.5px] font-bold outline-none cursor-pointer shadow-sm transition-all focus:border-primary pr-8"
+                            defaultValue=""
+                        >
+                            <option value="" disabled>✨ 적용할 테마 선택</option>
+                            {THEME_OPTIONS.map(theme => (
+                                <option key={theme.value} value={theme.value} disabled={theme.disabled}>
+                                    {theme.emoji} {theme.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                     <div className="flex-1" />
-                    <button onClick={clearCanvas} title="전체 초기화"
-                        className="flex items-center gap-1.5 px-3 py-2 bg-red-600/80 hover:bg-red-500 text-white rounded-lg transition-all text-[12px] font-bold">
+                    <button type="button" onClick={clearCanvas} title="전체 초기화"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600/80 hover:bg-red-500 text-white rounded-lg transition-all text-[12px] font-bold">
                         <RotateCcw className="w-4 h-4" /> 리셋
                     </button>
                 </div>
