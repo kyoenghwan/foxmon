@@ -4,8 +4,14 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { getRotatedAds, recordAdExposure, AdItem } from '@/lib/ad-service';
+import { useSession } from 'next-auth/react';
 
 export function SideBanners() {
+    const { data: session } = useSession();
+    const isEmployer = (session?.user as any)?.role === 'EMPLOYER';
+    const isBusinessVerified = (session?.user as any)?.business_number ? true : false;
+    const showAdRegister = isEmployer && isBusinessVerified;
+
     const [leftAds, setLeftAds] = useState<AdItem[]>([]);
     const [rightAds, setRightAds] = useState<AdItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -114,32 +120,34 @@ export function SideBanners() {
                 <div 
                     className="hidden xl:flex flex-col gap-3 absolute top-0 right-full mr-4 pointer-events-auto transition-all duration-300 w-[130px]"
                 >
-                    <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Special Pick</div>
                     {leftAds.map((ad) => (
                         <BannerCard key={ad.id} ad={ad} />
                     ))}
-                    <Link
-                        href="/biz/ads/new"
-                        className="w-full py-2.5 bg-primary hover:bg-orange-600 text-white text-[11px] font-black rounded-xl text-center transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1"
-                    >
-                        + 광고등록
-                    </Link>
+                    {showAdRegister && (
+                        <Link
+                            href="/biz/ads/new"
+                            className="w-full py-2.5 bg-primary hover:bg-orange-600 text-white text-[11px] font-black rounded-xl text-center transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1"
+                        >
+                            + 광고등록
+                        </Link>
+                    )}
                 </div>
 
                 {/* Right Wing */}
                 <div 
                     className="hidden xl:flex flex-col gap-3 absolute top-0 left-full ml-4 pointer-events-auto transition-all duration-300 w-[130px]"
                 >
-                    <div className="text-[10px] font-black text-gray-400 mb-1 ml-1 uppercase tracking-widest">Premium Ad</div>
                     {rightAds.map((ad) => (
                         <BannerCard key={ad.id} ad={ad} />
                     ))}
-                    <Link
-                        href="/biz/ads/new"
-                        className="w-full py-2.5 bg-primary hover:bg-orange-600 text-white text-[11px] font-black rounded-xl text-center transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1"
-                    >
-                        + 광고등록
-                    </Link>
+                    {showAdRegister && (
+                        <Link
+                            href="/biz/ads/new"
+                            className="w-full py-2.5 bg-primary hover:bg-orange-600 text-white text-[11px] font-black rounded-xl text-center transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1"
+                        >
+                            + 광고등록
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>
