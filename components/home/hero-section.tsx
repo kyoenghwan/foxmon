@@ -18,7 +18,7 @@ export function HeroSection({ session }: HeroSectionProps) {
             <div className="w-full container lg:max-w-[1172px] lg:!max-w-[1172px] mx-auto px-4">
                 <div className="flex flex-col min-[800px]:flex-row gap-6 items-center min-[800px]:items-stretch justify-center min-[800px]:justify-between">
                     {/* 상단/좌측: 메인 공고 배너 슬라이더 (PC: 828px * 203px 고정) */}
-                    <div className="w-full min-[800px]:max-w-[406px] lg:max-w-[828px] min-[800px]:h-[203px] flex justify-center flex-shrink-0">
+                    <div className="w-full min-[800px]:flex-1 lg:max-w-[828px] min-[800px]:h-[203px] flex justify-center overflow-hidden">
                         <div className="w-full h-full">
                             <MainBanner />
                         </div>
