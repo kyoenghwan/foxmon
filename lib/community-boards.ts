@@ -59,9 +59,9 @@ export function canAccessCommunityBoard(boardId: string, role?: string | null): 
 
   switch (board.audience) {
     case 'all':
-      return r === 'USER' || r === 'EMPLOYER';
+      return r === 'GENERAL' || r === 'EMPLOYER';
     case 'women':
-      return r === 'USER';
+      return r === 'GENERAL';
     case 'employer':
       return r === 'EMPLOYER';
     default:
@@ -102,9 +102,9 @@ export function getAllowedRolesForBoard(boardId: string): string[] | null {
   if (!board) return null;
   switch (board.audience) {
     case 'all':
-      return ['USER', 'EMPLOYER', 'ADMIN', 'SUPER_ADMIN'];
+      return ['GENERAL', 'EMPLOYER', 'ADMIN', 'SUPER_ADMIN'];
     case 'women':
-      return ['USER', 'ADMIN', 'SUPER_ADMIN'];
+      return ['GENERAL', 'ADMIN', 'SUPER_ADMIN'];
     case 'employer':
       return ['EMPLOYER', 'ADMIN', 'SUPER_ADMIN'];
     default:
