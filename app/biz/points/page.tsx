@@ -22,6 +22,21 @@ export default async function BizPointsPage() {
         
     const transactions = txData || [];
 
+    // DB에서 입금 계좌 설정 조회
+    const { data: settingsData } = await supabase
+        .from('site_settings')
+        .select('key_name, key_value')
+        .in('key_name', ['bank_name', 'account_number', 'account_holder']);
+
+    const settingsMap = (settingsData || []).reduce((acc, row) => {
+        acc[row.key_name] = row.key_value;
+        return acc;
+    }, {} as Record<string, string>);
+
+    const bankName = settingsMap['bank_name'] || '국민은행';
+    const accountNumber = settingsMap['account_number'] || '123456-78-901234';
+    const accountHolder = settingsMap['account_holder'] || '폭스몬 주식회사';
+
     return (
         <div className="space-y-6">
             <div>
@@ -65,8 +80,8 @@ export default async function BizPointsPage() {
                         </p>
                         <div className="mt-3 bg-white rounded-lg p-3 border border-blue-100">
                             <p className="text-[13px] font-bold text-gray-800">입금 계좌</p>
-                            <p className="text-[15px] font-black text-gray-900 mt-1">국민은행 123456-78-901234</p>
-                            <p className="text-[12px] text-gray-500">(예금주: 폭스몬 주식회사)</p>
+                            <p className="text-[15px] font-black text-gray-900 mt-1">{bankName} {accountNumber}</p>
+                            <p className="text-[12px] text-gray-500">(예금주: {accountHolder})</p>
                         </div>
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Save, Key, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Save, Key, AlertCircle, Loader2, Eye, EyeOff, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getSiteSettings, updateSiteSettings } from '@/actions/admin/siteSettings';
 
@@ -11,7 +11,10 @@ export default function AdminSettingsPage() {
     const [settings, setSettings] = useState({
         openai_api_key: '',
         telegram_bot_token: '',
-        telegram_bot_username: ''
+        telegram_bot_username: '',
+        bank_name: '',
+        account_number: '',
+        account_holder: ''
     });
     
     // Toggle States for passwords
@@ -25,7 +28,10 @@ export default function AdminSettingsPage() {
                 setSettings({
                     openai_api_key: data.openai_api_key || '',
                     telegram_bot_token: data.telegram_bot_token || '',
-                    telegram_bot_username: data.telegram_bot_username || ''
+                    telegram_bot_username: data.telegram_bot_username || '',
+                    bank_name: data.bank_name || '',
+                    account_number: data.account_number || '',
+                    account_holder: data.account_holder || ''
                 });
             }
             setLoading(false);
@@ -124,6 +130,67 @@ export default function AdminSettingsPage() {
                         </p>
                     </div>
 
+                </div>
+
+                <div className="bg-gray-50 p-4 border-t border-gray-200 flex justify-end">
+                    <Button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="bg-gray-900 hover:bg-gray-800 text-white font-bold h-10 px-6 gap-2"
+                    >
+                        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                        {saving ? '저장 중...' : '저장하기'}
+                    </Button>
+                </div>
+            </div>
+
+            {/* 무통장 입금 계좌 설정 */}
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="bg-gray-50 p-4 border-b border-gray-200 flex items-center gap-2">
+                    <Coins className="w-5 h-5 text-gray-700" />
+                    <h2 className="text-[16px] font-bold text-gray-800">무통장 입금 계좌 설정</h2>
+                </div>
+
+                <div className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* 은행명 */}
+                        <div>
+                            <label className="block text-[14px] font-bold text-gray-800 mb-2">은행명</label>
+                            <input
+                                type="text"
+                                value={settings.bank_name}
+                                onChange={(e) => setSettings({ ...settings, bank_name: e.target.value })}
+                                placeholder="예: 국민은행"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-medium"
+                            />
+                        </div>
+                        {/* 계좌번호 */}
+                        <div>
+                            <label className="block text-[14px] font-bold text-gray-800 mb-2">계좌번호</label>
+                            <input
+                                type="text"
+                                value={settings.account_number}
+                                onChange={(e) => setSettings({ ...settings, account_number: e.target.value })}
+                                placeholder="예: 123456-78-901234"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-medium"
+                            />
+                        </div>
+                        {/* 예금주 */}
+                        <div>
+                            <label className="block text-[14px] font-bold text-gray-800 mb-2">예금주</label>
+                            <input
+                                type="text"
+                                value={settings.account_holder}
+                                onChange={(e) => setSettings({ ...settings, account_holder: e.target.value })}
+                                placeholder="예: 폭스몬 주식회사"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-medium"
+                            />
+                        </div>
+                    </div>
+                    <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
+                        <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                        사업자 회원이 포인트 충전 신청을 할 때 입금할 무통장 계좌 정보를 설정합니다.
+                    </p>
                 </div>
 
                 <div className="bg-gray-50 p-4 border-t border-gray-200 flex justify-end">
