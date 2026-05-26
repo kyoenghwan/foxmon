@@ -1615,27 +1615,17 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         <Briefcase className="w-3 h-3" /> 직종 <span className="text-red-500">*</span>
                                     </label>
                                     <select
-                                        value={form.category_2 || form.category_1 || ''}
+                                        value={form.category_1 || ''}
                                         onChange={e => {
                                             const val = e.target.value;
-                                            const selectedC2 = categories2.find(c => c.code_value === val);
-                                            if (selectedC2) {
-                                                update('category_1', selectedC2.parent_code_value);
-                                                update('category_2', selectedC2.code_value);
-                                            } else {
-                                                update('category_1', val);
-                                                update('category_2', '');
-                                            }
+                                            update('category_1', val);
+                                            update('category_2', '');
                                         }}
                                         className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
                                     >
                                         <option value="">직종 선택</option>
                                         {categories1.map(c1 => (
-                                            <optgroup key={c1.code_value} label={c1.code_name}>
-                                                {categories2.filter(c2 => c2.parent_code_value === c1.code_value).map(c2 => (
-                                                    <option key={c2.code_value} value={c2.code_value}>{c2.code_name}</option>
-                                                ))}
-                                            </optgroup>
+                                            <option key={c1.code_value} value={c1.code_name}>{c1.code_name}</option>
                                         ))}
                                     </select>
                                 </div>
