@@ -1523,18 +1523,21 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     )}
                                     <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
-                                <div className="flex-1 w-full">
+                                <div className="flex-1 w-full flex gap-2 items-center">
                                     <input
                                         type="text" value={form.company || ''} 
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none bg-gray-50 text-gray-600 cursor-not-allowed"
-                                        placeholder={isBizVerified ? "인증된 상호명" : "하단의 '직접 입력하기'를 이용해주세요"}
+                                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none bg-gray-50 text-gray-600 cursor-not-allowed"
+                                        placeholder={isBizVerified ? "인증된 상호명" : "직접 입력하기를 이용해주세요"}
                                         readOnly={true}
                                     />
                                     {!isBizVerified && (
-                                        <p className="text-[11px] font-medium text-gray-400 mt-1.5 flex items-center justify-between">
-                                            <span>사업자 등록이 아직 안 되어있다면?</span> 
-                                            <button type="button" className="text-primary hover:underline font-bold" onClick={() => setIsManualEntryOpen(true)}>직접 입력하기</button>
-                                        </p>
+                                        <button 
+                                            type="button" 
+                                            className="px-3 py-2 bg-primary hover:bg-orange-600 text-white font-bold text-[12px] rounded-lg transition-colors shrink-0 shadow-sm" 
+                                            onClick={() => setIsManualEntryOpen(true)}
+                                        >
+                                            직접 입력하기
+                                        </button>
                                     )}
                                 </div>
                             </div>
@@ -1605,23 +1608,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </div>
                                 <div className="flex-1 w-full space-y-3">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="text-[11px] text-gray-400 font-bold">지원 가능한 메신저 연결</span>
-                                        <button 
-                                            type="button" 
-                                            onClick={() => {
-                                                if (!newSnsValue.trim()) return alert('아이디 또는 URL을 입력해주세요.');
-                                                const updated = [...snsLinks, { type: newSnsType, value: newSnsValue.trim() }];
-                                                setSnsLinks(updated);
-                                                syncSnsToForm(updated);
-                                                setNewSnsValue('');
-                                            }} 
-                                            className="h-7 w-7 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md font-bold shadow-sm transition-colors active:scale-95 cursor-pointer" 
-                                        >
-                                            <Plus className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                    
                                     <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm space-y-3">
                                         {snsLinks.map((sns, index) => (
                                             <div key={index} className="flex items-center gap-2 bg-white p-2 rounded-lg border border-gray-200">
@@ -1682,6 +1668,20 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                 placeholder="아이디 또는 URL 입력"
                                                 className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none bg-white"
                                             />
+                                            <button 
+                                                type="button" 
+                                                onClick={() => {
+                                                    if (!newSnsValue.trim()) return alert('아이디 또는 URL을 입력해주세요.');
+                                                    const updated = [...snsLinks, { type: newSnsType, value: newSnsValue.trim() }];
+                                                    setSnsLinks(updated);
+                                                    syncSnsToForm(updated);
+                                                    setNewSnsValue('');
+                                                }} 
+                                                className="h-9 w-9 flex items-center justify-center bg-primary hover:bg-orange-600 text-white rounded-lg font-bold shadow-sm transition-colors active:scale-95 cursor-pointer shrink-0" 
+                                                title="SNS 계정 추가"
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
