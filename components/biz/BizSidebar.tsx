@@ -41,7 +41,7 @@ export function BizSidebar({ isMobile = false }: { isMobile?: boolean }) {
         ];
 
         return (
-            <div className="w-full bg-white py-1">
+            <div className="w-full bg-white">
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                     {mobileItems.map((item) => {
                         const isActive = activeId === item.id || activeId === item.href;

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, Building2, X, FileText, Key } from 'lucide-react';
+import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, Building2, X, FileText, Key, Trash2, Instagram, Send, Link2, Clock, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
@@ -352,6 +352,52 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
     const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | 'mainDesign' | null>(null);
     
+    // 동적 SNS 계정 연결 상태 (업체 프로필과 연동)
+    const [snsLinks, setSnsLinks] = useState<{type: string; value: string}[]>([]);
+    const [newSnsType, setNewSnsType] = useState('kakao');
+    const [newSnsValue, setNewSnsValue] = useState('');
+
+    // SNS 아이콘 헬퍼
+    const getSnsIcon = (type: string) => {
+        switch (type) {
+            case 'kakao': return <span className="bg-[#FBE54D] text-black text-[9px] px-1 rounded font-black">TALK</span>;
+            case 'instagram': return <Instagram className="w-3.5 h-3.5 text-pink-500" />;
+            case 'telegram': return <Send className="w-3.5 h-3.5 text-blue-500" />;
+            case 'line': return <span className="bg-[#00B900] text-white text-[9px] px-1 rounded font-black">LINE</span>;
+            case 'wechat': return <span className="bg-[#00B900] text-white text-[9px] px-1 rounded font-black">위챗</span>;
+            default: return <Link2 className="w-3.5 h-3.5 text-gray-500" />;
+        }
+    };
+
+    const snsOptions = [
+        { value: 'kakao', label: '카카오톡' },
+        { value: 'line', label: '라인' },
+        { value: 'telegram', label: '텔레그램' },
+        { value: 'wechat', label: '위챗' }
+    ];
+
+    // snsLinks 데이터가 변동될 때 form 상태와 동기화
+    const syncSnsToForm = (links: {type: string; value: string}[]) => {
+        setForm(prev => {
+            const fields = {
+                kakao_id: '',
+                line_id: '',
+                telegram_id: '',
+                wechat_id: ''
+            };
+            links.forEach(link => {
+                if (link.type === 'kakao') fields.kakao_id = link.value;
+                if (link.type === 'line') fields.line_id = link.value;
+                if (link.type === 'telegram') fields.telegram_id = link.value;
+                if (link.type === 'wechat') fields.wechat_id = link.value;
+            });
+            return {
+                ...prev,
+                ...fields
+            };
+        });
+    };
+    
     // HTML 모드 전용 상태
     const [htmlEditorHeight, setHtmlEditorHeight] = useState(450);
     const [previewHtml, setPreviewHtml] = useState(false);
@@ -506,6 +552,16 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     // DB에서 동적으로 불러온 등급 가격 상태
     const [tierGroups, setTierGroups] = useState(TIER_GROUPS);
     const [tierOptions, setTierOptions] = useState(TIER_OPTIONS);
+
+    // 초기 데이터 로드 시 기존 form에 있는 SNS 정보를 snsLinks 배열로 변환
+    useEffect(() => {
+        const initialSns = [];
+        if (initialData?.kakao_id) initialSns.push({ type: 'kakao', value: initialData.kakao_id });
+        if (initialData?.line_id) initialSns.push({ type: 'line', value: initialData.line_id });
+        if (initialData?.telegram_id) initialSns.push({ type: 'telegram', value: initialData.telegram_id });
+        if (initialData?.wechat_id) initialSns.push({ type: 'wechat', value: initialData.wechat_id });
+        setSnsLinks(initialSns);
+    }, [initialData]);
 
     // 초기 데이터 로딩 시 마스터 데이터 전체 로딩
     useEffect(() => {
@@ -1454,78 +1510,180 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             <Info className="w-4 h-4 text-primary" />
                             상세 업소 정보
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 flex items-center gap-2">
-                                    상호명
+                        <div className="flex flex-col gap-1">
+                            {/* 상호명 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <Building2 className="w-4 h-4 text-gray-400" />
+                                    <span>상호명</span>
                                     {isBizVerified && (
                                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-black bg-green-100 text-green-700">
-                                            <CheckCircle2 className="w-3 h-3 stroke-[3]" /> 인증된 업체
+                                            <CheckCircle2 className="w-3 h-3 stroke-[3]" /> 인증됨
                                         </span>
                                     )}
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
-                                <input
-                                    type="text" value={form.company || ''} 
-                                    className={`w-full px-3 py-2.5 border rounded-lg text-[14px] font-medium outline-none bg-gray-50 border-gray-200 text-gray-600 cursor-not-allowed`}
-                                    placeholder={isBizVerified ? "인증된 상호명" : "하단의 '직접 입력하기'를 이용해주세요"}
-                                    readOnly={true}
-                                />
-                                {!isBizVerified && (
-                                    <p className="text-[11px] font-medium text-gray-400 mt-1.5 flex items-center justify-between">
-                                        <span>사업자 등록이 아직 안 되어있다면?</span> 
-                                        <button type="button" className="text-primary hover:underline font-bold" onClick={() => setIsManualEntryOpen(true)}>직접 입력하기</button>
-                                    </p>
-                                )}
+                                <div className="flex-1 w-full">
+                                    <input
+                                        type="text" value={form.company || ''} 
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none bg-gray-50 text-gray-600 cursor-not-allowed"
+                                        placeholder={isBizVerified ? "인증된 상호명" : "하단의 '직접 입력하기'를 이용해주세요"}
+                                        readOnly={true}
+                                    />
+                                    {!isBizVerified && (
+                                        <p className="text-[11px] font-medium text-gray-400 mt-1.5 flex items-center justify-between">
+                                            <span>사업자 등록이 아직 안 되어있다면?</span> 
+                                            <button type="button" className="text-primary hover:underline font-bold" onClick={() => setIsManualEntryOpen(true)}>직접 입력하기</button>
+                                        </p>
+                                    )}
+                                </div>
                             </div>
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                    <User className="w-3 h-3" /> 담당자 <span className="text-red-500">*</span>
+
+                            {/* 담당자 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <User className="w-4 h-4 text-gray-400" />
+                                    <span>담당자</span>
+                                    <span className="text-red-500">*</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
-                                <input
-                                    type="text" value={form.manager_name || ''} onChange={e => update('manager_name', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                    placeholder="예: 김실장"
-                                />
+                                <div className="flex-1 w-full">
+                                    <input
+                                        type="text" value={form.manager_name || ''} onChange={e => update('manager_name', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                        placeholder="예: 김실장"
+                                    />
+                                </div>
                             </div>
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                    <Phone className="w-3 h-3" /> 담당자 연락처 <span className="text-red-500">*</span>
+
+                            {/* 담당자 연락처 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <Phone className="w-4 h-4 text-gray-400" />
+                                    <span>담당자 연락처</span>
+                                    <span className="text-red-500">*</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
-                                <div className="flex gap-2">
+                                <div className="flex-1 w-full flex gap-2">
                                     <select
                                         value={form.phone_type || 'mobile'}
                                         onChange={e => update('phone_type', e.target.value)}
-                                        className="w-1/3 px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                        className="w-[100px] sm:w-[120px] px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white"
                                     >
                                         <option value="mobile">핸드폰</option>
                                         <option value="landline">일반전화</option>
                                     </select>
                                     <input
                                         type="text" value={form.contact_phone || ''} onChange={e => update('contact_phone', e.target.value)}
-                                        className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
                                         placeholder="010-0000-0000"
                                     />
                                 </div>
                             </div>
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">상세 주소 (선택)</label>
-                                <input type="text" value={form.address} onChange={e => update('address', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary"
-                                    placeholder="예: 서울시 강남구 역삼동 123-4" />
-                            </div>
-                            <div className="md:col-span-2 space-y-3">
-                                <label className="text-[12px] font-bold text-gray-600 block flex items-center gap-1">
-                                    <MessageCircle className="w-3 h-3" /> 메신저 ID
+
+                            {/* 상세 주소 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <MapPin className="w-4 h-4 text-gray-400" />
+                                    <span>상세 주소</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    <input type="text" value={form.kakao_id || ''} onChange={e => update('kakao_id', e.target.value)}
-                                        className="w-full px-3 py-2 border border-yellow-200 bg-yellow-50/30 rounded-lg text-[13px] font-medium outline-none focus:border-yellow-400 placeholder:text-yellow-700/50" placeholder="카카오톡 ID" />
-                                    <input type="text" value={form.line_id || ''} onChange={e => update('line_id', e.target.value)}
-                                        className="w-full px-3 py-2 border border-green-200 bg-green-50/30 rounded-lg text-[13px] font-medium outline-none focus:border-green-400 placeholder:text-green-700/50" placeholder="라인 ID" />
-                                    <input type="text" value={form.telegram_id || ''} onChange={e => update('telegram_id', e.target.value)}
-                                        className="w-full px-3 py-2 border border-blue-200 bg-blue-50/30 rounded-lg text-[13px] font-medium outline-none focus:border-blue-400 placeholder:text-blue-700/50" placeholder="텔레그램 ID" />
-                                    <input type="text" value={form.wechat_id || ''} onChange={e => update('wechat_id', e.target.value)}
-                                        className="w-full px-3 py-2 border border-green-200 bg-green-50/30 rounded-lg text-[13px] font-medium outline-none focus:border-green-500 placeholder:text-green-800/50" placeholder="위챗 ID" />
+                                <div className="flex-1 w-full">
+                                    <input 
+                                        type="text" value={form.address || ''} onChange={e => update('address', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                        placeholder="예: 서울시 강남구 역삼동 123-4" 
+                                    />
+                                </div>
+                            </div>
+
+                            {/* 메신저 ID (동적 연동) */}
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 py-3">
+                                <div className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5 sm:mt-2">
+                                    <MessageCircle className="w-4 h-4 text-gray-400" />
+                                    <span>메신저 ID</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
+                                </div>
+                                <div className="flex-1 w-full space-y-3">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="text-[11px] text-gray-400 font-bold">지원 가능한 메신저 연결</span>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => {
+                                                if (!newSnsValue.trim()) return alert('아이디 또는 URL을 입력해주세요.');
+                                                const updated = [...snsLinks, { type: newSnsType, value: newSnsValue.trim() }];
+                                                setSnsLinks(updated);
+                                                syncSnsToForm(updated);
+                                                setNewSnsValue('');
+                                            }} 
+                                            className="h-7 w-7 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md font-bold shadow-sm transition-colors active:scale-95 cursor-pointer" 
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm space-y-3">
+                                        {snsLinks.map((sns, index) => (
+                                            <div key={index} className="flex items-center gap-2 bg-white p-2 rounded-lg border border-gray-200">
+                                                <div className="w-[85px] flex items-center gap-1.5 shrink-0 pl-1">
+                                                    {getSnsIcon(sns.type)}
+                                                    <span className="text-[11px] font-bold text-gray-600">
+                                                        {snsOptions.find(o => o.value === sns.type)?.label || '기타'}
+                                                    </span>
+                                                </div>
+                                                <input 
+                                                    type="text" 
+                                                    value={sns.value} 
+                                                    onChange={e => {
+                                                        const newLinks = [...snsLinks];
+                                                        newLinks[index].value = e.target.value;
+                                                        setSnsLinks(newLinks);
+                                                        syncSnsToForm(newLinks);
+                                                    }}
+                                                    className="flex-1 bg-transparent border-none outline-none text-[13px] font-medium text-gray-800"
+                                                    placeholder="아이디 또는 URL"
+                                                />
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const updated = snsLinks.filter((_, i) => i !== index);
+                                                        setSnsLinks(updated);
+                                                        syncSnsToForm(updated);
+                                                    }} 
+                                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        
+                                        <div className="flex items-center gap-2">
+                                            <select 
+                                                value={newSnsType} 
+                                                onChange={e => setNewSnsType(e.target.value)}
+                                                className="w-[95px] px-2 py-2 border border-gray-200 rounded-lg text-[12px] font-bold outline-none bg-white"
+                                            >
+                                                {snsOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                                            </select>
+                                            <input 
+                                                type="text" 
+                                                value={newSnsValue} 
+                                                onChange={e => setNewSnsValue(e.target.value)}
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        if (!newSnsValue.trim()) return alert('아이디 또는 URL을 입력해주세요.');
+                                                        const updated = [...snsLinks, { type: newSnsType, value: newSnsValue.trim() }];
+                                                        setSnsLinks(updated);
+                                                        syncSnsToForm(updated);
+                                                        setNewSnsValue('');
+                                                    }
+                                                }}
+                                                placeholder="아이디 또는 URL 입력"
+                                                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none bg-white"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1536,12 +1694,16 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             <Briefcase className="w-4 h-4 text-primary" />
                             채용 조건
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div>
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                        <Briefcase className="w-3 h-3" /> 직종 <span className="text-red-500">*</span>
-                                    </label>
+                        <div className="flex flex-col gap-1">
+                            {/* 직종 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <Briefcase className="w-4 h-4 text-gray-400" />
+                                    <span>직종</span>
+                                    <span className="text-red-500">*</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
+                                </label>
+                                <div className="flex-1 w-full">
                                     <select
                                         value={form.category_1 || ''}
                                         onChange={e => {
@@ -1549,7 +1711,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             update('category_1', val);
                                             update('category_2', '');
                                         }}
-                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white"
                                     >
                                         <option value="">직종 선택</option>
                                         {categories1.map(c1 => (
@@ -1557,11 +1719,21 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         ))}
                                     </select>
                                 </div>
-                                <div>
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">근무 시간</label>
-                                    <input type="text" value={form.work_hours} onChange={e => update('work_hours', e.target.value)}
-                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary"
-                                        placeholder="예: 오전 10시 ~ 오후 8시" />
+                            </div>
+
+                            {/* 근무 시간 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <Clock className="w-4 h-4 text-gray-400" />
+                                    <span>근무 시간</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
+                                </label>
+                                <div className="flex-1 w-full">
+                                    <input 
+                                        type="text" value={form.work_hours || ''} onChange={e => update('work_hours', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                        placeholder="예: 오전 10시 ~ 오후 8시" 
+                                    />
                                 </div>
                             </div>
                         </div>
