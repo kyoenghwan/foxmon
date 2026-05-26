@@ -34,7 +34,7 @@ export default async function BizLayout({ children }: { children: React.ReactNod
                         🏢 업체관리
                     </span>
                     <span className="text-[11px] md:text-[13px] text-gray-500 font-medium truncate">
-                        광고 · 포인트 · 지원자를 한 곳에서 관리하세요.
+                        광고 · 포인트 · 내 업체를 한 곳에서 관리하세요.
                     </span>
                 </div>
             </div>

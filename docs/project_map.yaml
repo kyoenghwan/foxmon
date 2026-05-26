@@ -243,13 +243,6 @@ pages:
       - "FA_GET_REFUND_SIMULATION"
     db_tables: ["biz_point_ledger", "biz_point_recharge_requests"]
 
-  BIZ_SEEKERS_PAGE:
-    label: "사업자 구직자 검색"
-    keywords: ["구직자 검색", "인재 검색", "seekers 검색"]
-    files: ["app/biz/seekers/page.tsx", "src/components/employer/SearchPage.tsx"]
-    flows: ["QA_SEARCH_RESUMES"]
-    db_tables: ["resumes"]
-
   ADMIN_SETTINGS_PAGE:
     label: "관리자 시스템 환경설정 페이지"
     keywords: ["시스템 설정", "환경설정", "API 키 설정", "입금 계좌 설정", "admin settings"]
