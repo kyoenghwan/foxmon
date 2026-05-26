@@ -922,7 +922,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                         </h3>
                             <div className="flex flex-col gap-1">
                                 {/* 닉네임 (업체명) */}
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3">
                                     <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
                                         <Building2 className="w-4 h-4 text-gray-400" />
                                         <span>닉네임 (업체명)</span>
@@ -939,7 +939,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                 </div>
 
                                 {/* 지역 */}
-                                <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 py-3">
                                     <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5 sm:mt-2.5">
                                         <MapPin className="w-4 h-4 text-gray-400" />
                                         <span>지역</span>
@@ -1008,7 +1008,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                 </div>
 
                                 {/* 채용(공고) 제목 */}
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3">
                                     <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
                                         <Type className="w-4 h-4 text-gray-400" />
                                         <span>채용(공고) 제목</span>
@@ -1026,7 +1026,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                 </div>
 
                                 {/* 급여조건 */}
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3">
                                     <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
                                         <DollarSign className="w-4 h-4 text-gray-400" />
                                         <span>급여조건</span>
@@ -1202,7 +1202,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                         </h3>
                         <div className="flex flex-col gap-1">
                             {/* 상호명 */}
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3">
                                 <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
                                     <Building2 className="w-4 h-4 text-gray-400" />
                                     <span>상호명</span>
@@ -1227,7 +1227,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                             </div>
 
                             {/* 담당자 */}
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3">
                                 <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
                                     <User className="w-4 h-4 text-gray-400" />
                                     <span>담당자</span>
@@ -1244,7 +1244,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                             </div>
 
                             {/* 담당자 연락처 */}
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3">
                                 <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
                                     <Phone className="w-4 h-4 text-gray-400" />
                                     <span>담당자 연락처</span>
@@ -1269,7 +1269,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                             </div>
 
                             {/* 상세 주소 */}
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3">
                                 <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
                                     <MapPin className="w-4 h-4 text-gray-400" />
                                     <span>상세 주소</span>
