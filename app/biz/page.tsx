@@ -45,10 +45,10 @@ export default async function BizDashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-5">
                 {/* 총 포인트 */}
                 <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm flex flex-col justify-between">
-                    <div className="flex items-start justify-between mb-4 md:mb-6">
-                        <div className="flex items-baseline gap-1.5 md:gap-2">
-                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500">보유 포인트</span>
-                            <span className="text-2xl md:text-3xl font-black text-gray-900">{totalPoints.toLocaleString()}P</span>
+                    <div className="flex items-start justify-between mb-4 md:mb-6 gap-3">
+                        <div className="flex flex-col">
+                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500 whitespace-nowrap">보유 포인트</span>
+                            <span className="text-2xl md:text-3xl font-black text-gray-900 mt-1 md:mt-2">{totalPoints.toLocaleString()}P</span>
                         </div>
                         <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-50 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
                             <Coins className="w-4 h-4 md:w-5 md:h-5 text-primary" />
@@ -71,10 +71,10 @@ export default async function BizDashboardPage() {
 
                 {/* 진행 중 배너 광고 */}
                 <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm flex flex-col justify-between">
-                    <div className="flex items-start justify-between mb-4 md:mb-6">
-                        <div className="flex items-baseline gap-1.5 md:gap-2">
-                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500">진행 중 배너 광고</span>
-                            <span className="text-2xl md:text-3xl font-black text-gray-900">{adCount || 0}개</span>
+                    <div className="flex items-start justify-between mb-4 md:mb-6 gap-3">
+                        <div className="flex flex-col">
+                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500 whitespace-nowrap">진행 중 배너 광고</span>
+                            <span className="text-2xl md:text-3xl font-black text-gray-900 mt-1 md:mt-2">{adCount || 0}개</span>
                         </div>
                         <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-50 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
                             <Megaphone className="w-4 h-4 md:w-5 md:h-5 text-purple-500" />
@@ -90,10 +90,10 @@ export default async function BizDashboardPage() {
 
                 {/* 진행 중 구인 공고 */}
                 <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm flex flex-col justify-between">
-                    <div className="flex items-start justify-between mb-4 md:mb-6">
-                        <div className="flex items-baseline gap-1.5 md:gap-2">
-                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500">진행 중 구인 공고</span>
-                            <span className="text-2xl md:text-3xl font-black text-gray-900">{jobCount || 0}개</span>
+                    <div className="flex items-start justify-between mb-4 md:mb-6 gap-3">
+                        <div className="flex flex-col">
+                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500 whitespace-nowrap">진행 중 구인 공고</span>
+                            <span className="text-2xl md:text-3xl font-black text-gray-900 mt-1 md:mt-2">{jobCount || 0}개</span>
                         </div>
                         <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-50 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
                             <Briefcase className="w-4 h-4 md:w-5 md:h-5 text-primary" />
@@ -109,10 +109,10 @@ export default async function BizDashboardPage() {
 
                 {/* 이번 달 지원자 */}
                 <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 shadow-sm flex flex-col justify-between">
-                    <div className="flex items-start justify-between mb-4 md:mb-6">
-                        <div className="flex items-baseline gap-1.5 md:gap-2">
-                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500">이번 달 지원자</span>
-                            <span className="text-2xl md:text-3xl font-black text-gray-900">0명</span>
+                    <div className="flex items-start justify-between mb-4 md:mb-6 gap-3">
+                        <div className="flex flex-col">
+                            <span className="text-[13px] md:text-[14px] font-bold text-gray-500 whitespace-nowrap">이번 달 지원자</span>
+                            <span className="text-2xl md:text-3xl font-black text-gray-900 mt-1 md:mt-2">0명</span>
                         </div>
                         <div className="w-8 h-8 md:w-10 md:h-10 bg-green-50 rounded-lg md:rounded-xl flex items-center justify-center shrink-0">
                             <Users className="w-4 h-4 md:w-5 md:h-5 text-green-500" />
