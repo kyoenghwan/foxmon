@@ -569,7 +569,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     setTierGroups(updatedGroups);
                     setTierOptions(updatedGroups.flatMap(g => g.options));
                 } else {
-                    console.error("❌ [AdEditorForm] fetchTierPrices failed:", res.message);
+                    console.error("❌ [AdEditorForm] fetchTierPrices failed:", (res as any).message || (res as any).error);
                 }
             } catch (err) {
                 console.error("❌ [AdEditorForm] fetchTierPrices exception:", err);
