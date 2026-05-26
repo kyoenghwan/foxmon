@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { 
     Coins, 
     Megaphone, 
+    Users, 
     TrendingUp, 
     Plus, 
     ArrowRight,
