@@ -119,7 +119,8 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 option_double_slot: !!payload.option_double_slot,
                 option_jump: !!payload.option_jump,
                 total_points: totalPoints,
-                expires_at: expiresAt.toISOString()
+                expires_at: expiresAt.toISOString(),
+                claim_code: payload.claim_code || null
             };
 
             const { data, error } = await supabase
@@ -260,6 +261,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 theme: payload.premium_banner_mode === 'upload' ? 'UPLOAD' : (payload.theme || null),
                 effect_intensity: payload.effect_intensity || null,
                 color: payload.color || null,
+                claim_code: payload.claim_code !== undefined ? (payload.claim_code || null) : undefined,
                 updated_at: new Date().toISOString()
             };
 

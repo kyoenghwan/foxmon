@@ -239,3 +239,56 @@ export async function getJobsByIdsAction(ids: string[]) {
     }
 }
 
+export async function claimBizAdByCodeAction(claimCode: string) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { success: false, message: '로그인이 필요합니다.' };
+    }
+
+    const code = claimCode?.trim()?.toUpperCase();
+    if (!code) {
+        return { success: false, message: '올바른 핀코드를 입력해주세요.' };
+    }
+
+    try {
+        // 1. 해당 코드를 가진 광고 조회
+        const { data: ad, error: selectError } = await supabaseAdmin
+            .from('biz_ads')
+            .select('id, company_name, title, user_id')
+            .eq('claim_code', code)
+            .maybeSingle();
+
+        if (selectError) {
+            console.error('Claim query error:', selectError);
+            return { success: false, message: 'DB 조회 중 오류가 발생했습니다.' };
+        }
+
+        if (!ad) {
+            return { success: false, message: '일치하는 광고가 없거나 이미 수령이 완료되었습니다.' };
+        }
+
+        // 2. 소유주 업데이트 및 핀코드 제거
+        const { error: updateError } = await supabaseAdmin
+            .from('biz_ads')
+            .update({
+                user_id: session.user.id,
+                claim_code: null
+            })
+            .eq('id', ad.id);
+
+        if (updateError) {
+            console.error('Claim update error:', updateError);
+            return { success: false, message: '소유권 양도 중 오류가 발생했습니다.' };
+        }
+
+        revalidatePath('/biz/ads');
+        return { 
+            success: true, 
+            message: `[${ad.company_name || '업체'}] ${ad.title || '광고'}의 소유권이 성공적으로 이전되었습니다!` 
+        };
+    } catch (e: any) {
+        console.error('claimBizAdByCodeAction error:', e);
+        return { success: false, message: e.message || '서버 오류가 발생했습니다.' };
+    }
+}
+

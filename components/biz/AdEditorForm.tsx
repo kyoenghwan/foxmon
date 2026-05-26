@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, Building2, X, FileText } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, Building2, X, FileText, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
@@ -104,6 +105,9 @@ export interface AdFormData {
     
     // 결제 업데이트 플래그
     _isPayment?: boolean;
+    
+    // 소유권 양도용 핀코드
+    claim_code?: string;
 }
 
 // 프리미엄 테마 목록 (premium-job-card.tsx THEME_CONFIG 기반)
@@ -447,6 +451,9 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
     const { effect_intensity: _ignore, color: _ignoreColor, ...restInitialData } = initialData || {};
 
+    const { data: session } = useSession();
+    const isAgent = session?.user?.name === 'foxmon_ad' || (session?.user as any)?.role === 'ADMIN' || (session?.user as any)?.role === 'SUPER_ADMIN';
+
     const [form, setForm] = useState<AdFormData>({
         ...restInitialData,
         company: initialData?.company || (initialData as any)?.company_name || '',
@@ -482,6 +489,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         design_mode: initialDesignMode,
         amenities: initialData?.amenities || [],
         keywords: initialData?.keywords || [],
+        claim_code: initialData?.claim_code || '',
     });
 
     const [regions, setRegions] = useState<CodeItem[]>([]);
@@ -1253,6 +1261,43 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             </div>
                         )}
                         </>
+                    )}
+                    
+                    {/* 대행 계정 전용: 소유권 양도 핀코드 설정 */}
+                    {isAgent && (
+                        <div className="bg-orange-50/60 rounded-2xl border border-orange-200 p-5 space-y-4">
+                            <h3 className="font-black text-[15px] text-orange-950 flex items-center gap-2">
+                                <Key className="w-4 h-4 text-primary" />
+                                🔐 대행 등록 전용: 소유권 양도 핀코드 (Claim Code) 설정
+                            </h3>
+                            <p className="text-[12px] text-orange-700 font-medium">
+                                나중에 업체가 가입한 후 이 코드를 마이페이지에 기입하면 본 광고의 소유권을 즉시 안전하게 귀속(양도)해갈 수 있습니다.
+                            </p>
+                            <div className="flex gap-2 max-w-md">
+                                <input
+                                    type="text"
+                                    value={form.claim_code || ''}
+                                    onChange={e => update('claim_code', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                                    className="flex-1 px-3 py-2.5 border border-orange-200 rounded-lg text-[14px] font-black outline-none focus:border-primary bg-white uppercase text-center tracking-wider"
+                                    placeholder="예: FX99AA (대문자/숫자)"
+                                    maxLength={10}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                                        let code = '';
+                                        for (let i = 0; i < 6; i++) {
+                                            code += chars.charAt(Math.floor(Math.random() * chars.length));
+                                        }
+                                        update('claim_code', code);
+                                    }}
+                                    className="px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold text-[13px] rounded-lg transition-colors border border-orange-200 shadow-sm"
+                                >
+                                    🎲 자동 생성
+                                </button>
+                            </div>
+                        </div>
                     )}
                     </div>
 

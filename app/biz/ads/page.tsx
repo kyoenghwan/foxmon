@@ -5,6 +5,7 @@ import { manageBizAdAction } from '@/lib/actions';
 import { auth } from '@/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import BizAdsList from './BizAdsList';
+import { ClaimAdButton } from '@/components/biz/ClaimAdButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,13 +37,16 @@ export default async function BizAdsPage() {
                         등록한 광고를 관리하세요.
                     </p>
                 </div>
-                <Link 
-                    href="/biz/ads/new"
-                    className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95 shrink-0"
-                >
-                    <Plus className="w-4 h-4" />
-                    새 광고 등록
-                </Link>
+                <div className="flex items-center gap-3 shrink-0">
+                    <ClaimAdButton />
+                    <Link 
+                        href="/biz/ads/new"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95 shrink-0"
+                    >
+                        <Plus className="w-4 h-4" />
+                        새 광고 등록
+                    </Link>
+                </div>
             </div>
 
             {/* 광고 목록 */}
@@ -57,13 +61,16 @@ export default async function BizAdsPage() {
                             첫 광고를 등록하고 구직자에게 업체를 알려보세요!
                         </p>
                     </div>
-                    <Link 
-                        href="/biz/ads/new"
-                        className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-md"
-                    >
-                        <Plus className="w-4 h-4" />
-                        첫 광고 등록하기
-                    </Link>
+                    <div className="flex flex-wrap items-center justify-center gap-3">
+                        <ClaimAdButton />
+                        <Link 
+                            href="/biz/ads/new"
+                            className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-md"
+                        >
+                            <Plus className="w-4 h-4" />
+                            첫 광고 등록하기
+                        </Link>
+                    </div>
                 </div>
             ) : (
                 <BizAdsList initialAds={ads} isVerified={isVerified} />
