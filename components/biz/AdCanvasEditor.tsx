@@ -217,6 +217,22 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
         emitChange(canvas);
     };
 
+    // ── 외부 bgImage props 변경을 내부 bgUrl 및 isPattern 상태로 동기화 ──
+    useEffect(() => {
+        if (bgImage) {
+            if (bgImage.startsWith('PATTERN|')) {
+                setBgUrl(bgImage.replace('PATTERN|', ''));
+                setIsPattern(true);
+            } else {
+                setBgUrl(bgImage);
+                setIsPattern(false);
+            }
+        } else {
+            setBgUrl('');
+            setIsPattern(false);
+        }
+    }, [bgImage]);
+
     // ── 캔버스 초기화 ──
     useEffect(() => {
         if (!canvasRef.current) return;
