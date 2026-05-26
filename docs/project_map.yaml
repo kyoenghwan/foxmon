@@ -208,6 +208,12 @@ pages:
     label: "사업자 대시보드 메인"
     keywords: ["사업자", "biz", "광고주", "업체"]
     files: ["app/biz/page.tsx", "components/biz/BizSidebar.tsx"]
+    ui_elements:
+      - name: "POINT_DETAIL_BADGES"
+        keywords: ["상세 포인트", "유료 포인트", "보너스 포인트", "포인트 뱃지"]
+        selector: "div.flex.items-center.justify-center.mt-auto.pt-3.border-t.border-gray-50.w-full"
+        type: "wrapper"
+
 
   BIZ_ADS_PAGE:
     label: "사업자 광고 관리"

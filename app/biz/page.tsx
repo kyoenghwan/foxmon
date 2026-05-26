@@ -59,8 +59,8 @@ export default async function BizDashboardPage() {
                     <div className="flex justify-center items-center my-auto py-2">
                         <span className="text-2xl md:text-3xl font-black text-gray-900">{totalPoints.toLocaleString()}P</span>
                     </div>
-                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50 w-full">
-                        <div className="flex items-center gap-1 text-[10px] md:text-[11px] font-bold">
+                    <div className="flex items-center justify-center mt-auto pt-3 border-t border-gray-50 w-full">
+                        <div className="flex items-center justify-center gap-1.5 text-[10px] md:text-[11px] font-bold">
                             <span className="text-blue-600 bg-blue-50 px-1.5 md:px-2 py-0.5 rounded-full whitespace-nowrap">
                                 유료 {paidPoints.toLocaleString()}P
                             </span>
@@ -69,6 +69,7 @@ export default async function BizDashboardPage() {
                             </span>
                         </div>
                     </div>
+
                 </div>
 
                 {/* 진행 중 배너 광고 */}
