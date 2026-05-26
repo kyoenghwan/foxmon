@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, X, Megaphone } from 'lucide-react';
+import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, X, Megaphone, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
@@ -920,25 +920,38 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                 내 광고 본문 불러오기
                             </button>
                         </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div>
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">닉네임 (업체명) <span className="text-red-500">*</span></label>
-                                    <input
-                                        type="text" value={form.company} onChange={e => update('company', e.target.value)}
-                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                        placeholder="예: 강남 스웨디시"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                        <MapPin className="w-3 h-3" /> 지역 <span className="text-red-500">*</span>
+                            <div className="flex flex-col gap-1">
+                                {/* 닉네임 (업체명) */}
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                    <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                        <Building2 className="w-4 h-4 text-gray-400" />
+                                        <span>닉네임 (업체명)</span>
+                                        <span className="text-red-500">*</span>
+                                        <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                     </label>
-                                    <div className="flex flex-col gap-2 relative">
+                                    <div className="flex-1 w-full">
+                                        <input
+                                            type="text" value={form.company} onChange={e => update('company', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                            placeholder="예: 강남 스웨디시"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* 지역 */}
+                                <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                    <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5 sm:mt-2.5">
+                                        <MapPin className="w-4 h-4 text-gray-400" />
+                                        <span>지역</span>
+                                        <span className="text-red-500">*</span>
+                                        <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
+                                    </label>
+                                    <div className="flex-1 w-full flex flex-col gap-2 relative">
                                         <div className="flex gap-2">
                                             <select
                                                 value={selectedSido}
                                                 onChange={handleSidoChange}
-                                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white"
                                             >
                                                 <option value="">시/도 선택</option>
                                                 {regions.filter(r => r.list_type === 'JOB_REGION_1').map(sido => (
@@ -956,14 +969,14 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                                     update('location', `${selectedSido} ${val}`.trim());
                                                 }}
                                                 placeholder="국가 및 지역 입력 (예: 미국)"
-                                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary mt-2"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
                                             />
                                         ) : selectedSido ? (
-                                            <div className="relative mt-2">
+                                            <div className="relative">
                                                 <button
                                                     type="button"
                                                     onClick={() => setIsSigunguOpen(!isSigunguOpen)}
-                                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none text-left bg-white focus:border-primary flex justify-between items-center"
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none text-left bg-white focus:border-primary flex justify-between items-center"
                                                 >
                                                     <span className={selectedSigungus.length > 0 ? "text-gray-900" : "text-gray-400"}>
                                                         {selectedSigungus.length > 0 ? selectedSigungus.join(', ') : '시/군/구 선택 (여러 개 가능)'}
@@ -993,26 +1006,38 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                         ) : null}
                                     </div>
                                 </div>
-                                <div className="md:col-span-2">
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                        <Type className="w-3 h-3" /> 채용(공고) 제목 <span className="text-red-500">*</span>
+
+                                {/* 채용(공고) 제목 */}
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                    <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                        <Type className="w-4 h-4 text-gray-400" />
+                                        <span>채용(공고) 제목</span>
+                                        <span className="text-red-500">*</span>
+                                        <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                     </label>
-                                    <input
-                                        type="text" value={form.title} onChange={e => update('title', e.target.value)}
-                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                        placeholder="예: 최고 대우 보장! 초보 환영합니다 (40자 제한)"
-                                        maxLength={40}
-                                    />
+                                    <div className="flex-1 w-full">
+                                        <input
+                                            type="text" value={form.title} onChange={e => update('title', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                            placeholder="예: 최고 대우 보장! 초보 환영합니다 (40자 제한)"
+                                            maxLength={40}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="md:col-span-2">
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                        <DollarSign className="w-3 h-3" /> 급여조건 <span className="text-red-500">*</span>
+
+                                {/* 급여조건 */}
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                    <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                        <DollarSign className="w-4 h-4 text-gray-400" />
+                                        <span>급여조건</span>
+                                        <span className="text-red-500">*</span>
+                                        <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                     </label>
-                                    <div className="flex gap-2">
+                                    <div className="flex-1 w-full flex gap-2">
                                         <select
                                             value={form.pay_type}
                                             onChange={e => handlePayChange(e.target.value, form.pay_amount || '')}
-                                            className="w-[120px] px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                            className="w-[100px] sm:w-[120px] px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white"
                                         >
                                             <option value="시급">시급</option>
                                             <option value="일급">일급</option>
@@ -1026,51 +1051,57 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                             <input
                                                 type="text" value={form.pay_amount || ''} 
                                                 onChange={e => handlePayChange(form.pay_type || '월급', e.target.value)}
-                                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary pr-8"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary pr-8"
                                                 placeholder="금액 또는 조건 입력"
                                             />
-                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[14px] text-gray-500 font-medium">원</span>
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-gray-500 font-medium">원</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="md:col-span-2">
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">
-                                        로고 이미지
+
+                                {/* 로고 이미지 */}
+                                <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 py-3">
+                                    <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5 sm:mt-2.5">
+                                        <ImageIcon className="w-4 h-4 text-gray-400" />
+                                        <span>로고 이미지</span>
+                                        <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                     </label>
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex-1 relative">
-                                            <input
-                                                type="text" value={form.image || ''} readOnly
-                                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] h-10 font-medium outline-none bg-gray-50 text-gray-500"
-                                                placeholder="우측 버튼을 눌러 이미지를 업로드하세요"
-                                            />
-                                        </div>
-                                        <label className="cursor-pointer bg-white hover:bg-gray-50 px-4 py-2 rounded-lg border border-gray-300 text-[13px] font-bold text-gray-700 transition-all flex items-center gap-2 h-10 shadow-sm shrink-0">
-                                            <Upload className="w-4 h-4" /> 사진 선택
-                                            <input 
-                                                type="file" 
-                                                accept="image/*" 
-                                                className="hidden" 
-                                                onChange={async (e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if(file) {
-                                                        try {
-                                                            const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 300, quality: 0.9, format: 'image/png' });
-                                                            update('image', compressedBase64);
-                                                        } catch (error) {
-                                                            console.error('이미지 압축 실패:', error);
-                                                            alert('이미지 처리 중 오류가 발생했습니다.');
+                                    <div className="flex-1 w-full flex flex-col gap-2">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex-1 relative">
+                                                <input
+                                                    type="text" value={form.image || ''} readOnly
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] h-9 font-medium outline-none bg-gray-50 text-gray-500"
+                                                    placeholder="우측 버튼을 눌러 이미지를 업로드하세요"
+                                                />
+                                            </div>
+                                            <label className="cursor-pointer bg-white hover:bg-gray-50 px-4 py-2 rounded-lg border border-gray-300 text-[12px] font-bold text-gray-700 transition-all flex items-center gap-2 h-9 shadow-sm shrink-0">
+                                                <Upload className="w-4 h-4" /> 사진 선택
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    className="hidden" 
+                                                    onChange={async (e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if(file) {
+                                                            try {
+                                                                const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 300, quality: 0.9, format: 'image/png' });
+                                                                update('image', compressedBase64);
+                                                            } catch (error) {
+                                                                console.error('이미지 압축 실패:', error);
+                                                                alert('이미지 처리 중 오류가 발생했습니다.');
+                                                            }
                                                         }
-                                                    }
-                                                }}
-                                            />
-                                        </label>
-                                    </div>
-                                    {form.image && form.image.startsWith('data:image') && (
-                                        <div className="mt-3 relative w-24 h-24 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                                            <img src={form.image} alt="Logo Preview" className="w-full h-full object-cover" />
+                                                    }}
+                                                />
+                                            </label>
                                         </div>
-                                    )}
+                                        {form.image && form.image.startsWith('data:image') && (
+                                            <div className="mt-2 relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                                                <img src={form.image} alt="Logo Preview" className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1169,67 +1200,96 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                             <Info className="w-4 h-4 text-primary" />
                             상세 업소 정보
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 flex items-center gap-2">
-                                    상호명
+                        <div className="flex flex-col gap-1">
+                            {/* 상호명 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <Building2 className="w-4 h-4 text-gray-400" />
+                                    <span>상호명</span>
                                     {isBizVerified && (
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-black bg-green-100 text-green-700">
-                                            <CheckCircle2 className="w-3 h-3 stroke-[3]" /> 인증된 업체
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black bg-green-100 text-green-700 whitespace-nowrap">
+                                            <CheckCircle2 className="w-2.5 h-2.5 stroke-[3]" /> 인증
                                         </span>
                                     )}
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
-                                <input
-                                    type="text" value={form.business_name || ''} 
-                                    onChange={e => {
-                                        update('business_name', e.target.value);
-                                        update('company', e.target.value);
-                                    }}
-                                    className={`w-full px-3 py-2.5 border rounded-lg text-[14px] font-medium outline-none border-gray-200 focus:border-primary bg-white`}
-                                    placeholder="상호명을 입력해주세요"
-                                />
+                                <div className="flex-1 w-full">
+                                    <input
+                                        type="text" value={form.business_name || ''} 
+                                        onChange={e => {
+                                            update('business_name', e.target.value);
+                                            update('company', e.target.value);
+                                        }}
+                                        className={`w-full px-3 py-2 border rounded-lg text-[13px] font-medium outline-none border-gray-200 focus:border-primary bg-white`}
+                                        placeholder="상호명을 입력해주세요"
+                                    />
+                                </div>
                             </div>
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                    <User className="w-3 h-3" /> 담당자 <span className="text-red-500">*</span>
+
+                            {/* 담당자 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <User className="w-4 h-4 text-gray-400" />
+                                    <span>담당자</span>
+                                    <span className="text-red-500">*</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
-                                <input
-                                    type="text" value={form.manager_name || ''} onChange={e => update('manager_name', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                    placeholder="예: 김실장"
-                                />
+                                <div className="flex-1 w-full">
+                                    <input
+                                        type="text" value={form.manager_name || ''} onChange={e => update('manager_name', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                        placeholder="예: 김실장"
+                                    />
+                                </div>
                             </div>
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                    <Phone className="w-3 h-3" /> 담당자 연락처 <span className="text-red-500">*</span>
+
+                            {/* 담당자 연락처 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <Phone className="w-4 h-4 text-gray-400" />
+                                    <span>담당자 연락처</span>
+                                    <span className="text-red-500">*</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
-                                <div className="flex gap-2">
+                                <div className="flex-1 w-full flex gap-2">
                                     <select
                                         value={form.phone_type || 'mobile'}
                                         onChange={e => update('phone_type', e.target.value)}
-                                        className="w-1/3 px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                        className="w-[100px] sm:w-[120px] px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white"
                                     >
                                         <option value="mobile">핸드폰</option>
                                         <option value="landline">일반전화</option>
                                     </select>
                                     <input
                                         type="text" value={form.contact_phone || ''} onChange={e => update('contact_phone', e.target.value)}
-                                        className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
                                         placeholder="010-0000-0000"
                                     />
                                 </div>
                             </div>
-                            <div>
-                                <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">상세 주소 (선택)</label>
-                                <input type="text" value={form.address} onChange={e => update('address', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary"
-                                    placeholder="예: 서울시 강남구 역삼동 123-4" />
-                            </div>
-                            <div className="md:col-span-2 space-y-3">
-                                <label className="text-[12px] font-bold text-gray-600 block flex items-center gap-1">
-                                    <MessageCircle className="w-3 h-3" /> 메신저 ID
+
+                            {/* 상세 주소 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-gray-100">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <MapPin className="w-4 h-4 text-gray-400" />
+                                    <span>상세 주소</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div className="flex-1 w-full">
+                                    <input type="text" value={form.address} onChange={e => update('address', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none focus:border-primary bg-white"
+                                        placeholder="예: 서울시 강남구 역삼동 123-4" />
+                                </div>
+                            </div>
+
+                            {/* 메신저 ID */}
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 py-3">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5 sm:mt-2">
+                                    <MessageCircle className="w-4 h-4 text-gray-400" />
+                                    <span>메신저 ID</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
+                                </label>
+                                <div className="flex-1 w-full grid grid-cols-2 md:grid-cols-4 gap-3">
                                     <input type="text" value={form.kakao_id || ''} onChange={e => update('kakao_id', e.target.value)}
                                         className="w-full px-3 py-2 border border-yellow-200 bg-yellow-50/30 rounded-lg text-[13px] font-medium outline-none focus:border-yellow-400 placeholder:text-yellow-700/50" placeholder="카카오톡 ID" />
                                     <input type="text" value={form.line_id || ''} onChange={e => update('line_id', e.target.value)}
