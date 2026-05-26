@@ -1014,6 +1014,24 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
 
                                 {/* 오른쪽 기본 정보 입력 영역 */}
                                 <div className="flex-1 w-full flex flex-col gap-1">
+                                    {/* 채용(공고) 제목 */}
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-1.5">
+                                        <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                            <Type className="w-4 h-4 text-gray-400" />
+                                            <span>채용(공고) 제목</span>
+                                            <span className="text-red-500">*</span>
+                                            <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
+                                        </label>
+                                        <div className="flex-1 w-full">
+                                            <input
+                                                type="text" value={form.title} onChange={e => update('title', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                                placeholder="예: 최고 대우 보장! 초보 환영합니다 (40자 제한)"
+                                                maxLength={40}
+                                            />
+                                        </div>
+                                    </div>
+
                                     {/* 닉네임 (업체명) */}
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-1.5">
                                         <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
@@ -1024,7 +1042,11 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                         </label>
                                         <div className="flex-1 w-full">
                                             <input
-                                                type="text" value={form.company} onChange={e => update('company', e.target.value)}
+                                                type="text" value={form.company} onChange={e => {
+                                                    const val = e.target.value;
+                                                    update('company', val);
+                                                    update('business_name', val);
+                                                }}
                                                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
                                                 placeholder="예: 강남 스웨디시"
                                             />
@@ -1097,24 +1119,6 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                                     )}
                                                 </div>
                                             ) : null}
-                                        </div>
-                                    </div>
-
-                                    {/* 채용(공고) 제목 */}
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-1.5">
-                                        <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
-                                            <Type className="w-4 h-4 text-gray-400" />
-                                            <span>채용(공고) 제목</span>
-                                            <span className="text-red-500">*</span>
-                                            <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
-                                        </label>
-                                        <div className="flex-1 w-full">
-                                            <input
-                                                type="text" value={form.title} onChange={e => update('title', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
-                                                placeholder="예: 최고 대우 보장! 초보 환영합니다 (40자 제한)"
-                                                maxLength={40}
-                                            />
                                         </div>
                                     </div>
 
@@ -1421,16 +1425,20 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                     </div>
 
                     <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-                        <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
-                            <Briefcase className="w-4 h-4 text-primary" />
+                        <h3 className="text-[14px] font-black text-gray-900 pb-3 border-b mb-5 flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                             채용 조건
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div>
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                        <Briefcase className="w-3 h-3" /> 직종 <span className="text-red-500">*</span>
-                                    </label>
+                        <div className="flex flex-col gap-1">
+                            {/* 직종 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-1.5">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <Briefcase className="w-4 h-4 text-gray-400" />
+                                    <span>직종</span>
+                                    <span className="text-red-500">*</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
+                                </label>
+                                <div className="flex-1 w-full">
                                     <select
                                         value={form.category_1 || ''}
                                         onChange={e => {
@@ -1438,7 +1446,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                             update('category_1', val);
                                             update('category_2', '');
                                         }}
-                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white"
                                     >
                                         <option value="">직종 선택</option>
                                         {categories1.map(c1 => (
@@ -1446,10 +1454,18 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                         ))}
                                     </select>
                                 </div>
-                                <div>
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">근무 시간</label>
+                            </div>
+
+                            {/* 근무 시간 */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-1.5">
+                                <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                    <Clock className="w-4 h-4 text-gray-400" />
+                                    <span>근무 시간</span>
+                                    <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
+                                </label>
+                                <div className="flex-1 w-full">
                                     <input type="text" value={form.work_hours} onChange={e => update('work_hours', e.target.value)}
-                                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
                                         placeholder="예: 오전 10시 ~ 오후 8시" />
                                 </div>
                             </div>

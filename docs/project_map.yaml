@@ -218,7 +218,7 @@ pages:
   BIZ_ADS_PAGE:
     label: "사업자 광고 관리"
     keywords: ["광고 관리", "내 광고", "biz ads", "광고 등급", "프리미엄", "스페셜", "테마", "자동연장", "리치 텍스트"]
-    files: ["app/biz/ads/page.tsx", "app/biz/ads/new/page.tsx", "components/biz/AdEditorForm.tsx"]
+    files: ["app/biz/ads/page.tsx", "app/biz/ads/new/page.tsx", "components/biz/AdEditorForm.tsx", "components/biz/JobEditorForm.tsx"]
     flows: ["FA_DEDUCT_POINT_FOR_AD"]
     db_tables: ["jobs", "biz_point_ledger"]
     ui_features:
