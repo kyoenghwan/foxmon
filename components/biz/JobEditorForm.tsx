@@ -1350,7 +1350,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                             value={form.detail_bg_image || ''} 
                                             onChange={e => update('detail_bg_image', e.target.value)}
                                             className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-[13px] outline-none focus:border-indigo-500 bg-white" 
-                                            placeholder="배경 이미지 URL을 입력하거나 우측 버튼으로 내 PC에서 직접 불러오세요"
+                                            placeholder="배경 이미지를 입력하거나 우측 버튼으로 내 PC에서 직접 불러오세요"
                                         />
                                         <label className="cursor-pointer bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-300 text-[12px] font-bold text-gray-700 transition-all flex items-center gap-1.5 shadow-sm">
                                             <Upload className="w-3.5 h-3.5" /> 내 PC에서 사진 첨부

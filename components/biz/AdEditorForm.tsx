@@ -1627,7 +1627,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                         syncSnsToForm(newLinks);
                                                     }}
                                                     className="flex-1 bg-transparent border-none outline-none text-[13px] font-medium text-gray-800"
-                                                    placeholder="아이디 또는 URL"
+                                                    placeholder="아이디"
                                                 />
                                                 <button 
                                                     type="button"
@@ -1658,20 +1658,20 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                 onKeyDown={e => {
                                                     if (e.key === 'Enter') {
                                                         e.preventDefault();
-                                                        if (!newSnsValue.trim()) return alert('아이디 또는 URL을 입력해주세요.');
+                                                        if (!newSnsValue.trim()) return alert('아이디를 입력해주세요.');
                                                         const updated = [...snsLinks, { type: newSnsType, value: newSnsValue.trim() }];
                                                         setSnsLinks(updated);
                                                         syncSnsToForm(updated);
                                                         setNewSnsValue('');
                                                     }
                                                 }}
-                                                placeholder="아이디 또는 URL 입력"
+                                                placeholder="아이디 입력"
                                                 className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none bg-white"
                                             />
                                             <button 
                                                 type="button" 
                                                 onClick={() => {
-                                                    if (!newSnsValue.trim()) return alert('아이디 또는 URL을 입력해주세요.');
+                                                    if (!newSnsValue.trim()) return alert('아이디를 입력해주세요.');
                                                     const updated = [...snsLinks, { type: newSnsType, value: newSnsValue.trim() }];
                                                     setSnsLinks(updated);
                                                     syncSnsToForm(updated);
@@ -1828,7 +1828,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             value={form.detail_bg_image || ''} 
                                             onChange={e => update('detail_bg_image', e.target.value)}
                                             className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-[13px] outline-none focus:border-indigo-500 bg-white" 
-                                            placeholder="배경 이미지 URL을 입력하거나 우측 버튼으로 내 PC에서 직접 불러오세요"
+                                            placeholder="배경 이미지를 입력하거나 우측 버튼으로 내 PC에서 직접 불러오세요"
                                         />
                                         <label className="cursor-pointer bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-300 text-[12px] font-bold text-gray-700 transition-all flex items-center gap-1.5 shadow-sm">
                                             <Upload className="w-3.5 h-3.5" /> 내 PC에서 사진 첨부
