@@ -510,51 +510,69 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     // 초기 데이터 로딩 시 마스터 데이터 전체 로딩
     useEffect(() => {
         const fetchMasterData = async () => {
-            const res = await QA_GET_COMMON_CODES(undefined, true);
-            if (res.success && res.data) {
-                setRegions(res.data.filter(c => c.list_type === 'JOB_REGION_1' || c.list_type === 'JOB_REGION_2'));
-                setCategories1(res.data.filter(c => c.list_type === 'CATEGORY_1'));
-                setCategories2(res.data.filter(c => c.list_type === 'CATEGORY_2'));
-                setTagsList(buildUnifiedTagOptions(res.data));
-                setEmploymentTypes(res.data.filter(c => c.list_type === 'EMPLOYMENT_TYPE'));
+            try {
+                const res = await QA_GET_COMMON_CODES(undefined, true);
+                if (res.success && res.data) {
+                    setRegions(res.data.filter(c => c.list_type === 'JOB_REGION_1' || c.list_type === 'JOB_REGION_2'));
+                    setCategories1(res.data.filter(c => c.list_type === 'CATEGORY_1'));
+                    setCategories2(res.data.filter(c => c.list_type === 'CATEGORY_2'));
+                    setTagsList(buildUnifiedTagOptions(res.data));
+                    setEmploymentTypes(res.data.filter(c => c.list_type === 'EMPLOYMENT_TYPE'));
+                } else {
+                    console.error("❌ [AdEditorForm] fetchMasterData failed:", res.error);
+                }
+            } catch (err) {
+                console.error("❌ [AdEditorForm] fetchMasterData exception:", err);
             }
         };
         const fetchUserProfile = async () => {
-            if (isNew) {
-                const res = await userSettingsAction('GET_PROFILE');
-                if (res.success && res.data) {
-                    const profile = res.data;
-                    if (profile.is_business_verified) {
-                        setIsBizVerified(true);
-                        setForm(prev => ({
-                            ...prev,
-                            business_name: profile.verified_business_name,
-                            company: profile.verified_business_name, // 하위 호환성
-                        }));
+            try {
+                if (isNew) {
+                    const res = await userSettingsAction('GET_PROFILE');
+                    if (res.success && res.data) {
+                        const profile = res.data;
+                        if (profile.is_business_verified) {
+                            setIsBizVerified(true);
+                            setForm(prev => ({
+                                ...prev,
+                                business_name: profile.verified_business_name,
+                                company: profile.verified_business_name, // 하위 호환성
+                            }));
+                        }
+                    } else {
+                        console.error("❌ [AdEditorForm] fetchUserProfile failed:", res.error);
                     }
                 }
+            } catch (err) {
+                console.error("❌ [AdEditorForm] fetchUserProfile exception:", err);
             }
         };
 
         const fetchTierPrices = async () => {
-            const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
-            const res = await GET_POINT_POLICIES();
-            if (res.success && res.data) {
-                const getPrice = (key: string, def: number) => res.data.find(p => p.config_key === key)?.config_value ?? def;
-                
-                const updatedGroups = TIER_GROUPS.map(group => ({
-                    ...group,
-                    options: group.options.map(opt => {
-                        const price = getPrice(`TIER_PRICE_${opt.value}`, opt.price);
-                        return {
-                            ...opt,
-                            price,
-                            priceLabel: price.toLocaleString() + 'P'
-                        };
-                    })
-                }));
-                setTierGroups(updatedGroups);
-                setTierOptions(updatedGroups.flatMap(g => g.options));
+            try {
+                const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
+                const res = await GET_POINT_POLICIES();
+                if (res.success && res.data) {
+                    const getPrice = (key: string, def: number) => res.data.find(p => p.config_key === key)?.config_value ?? def;
+                    
+                    const updatedGroups = TIER_GROUPS.map(group => ({
+                        ...group,
+                        options: group.options.map(opt => {
+                            const price = getPrice(`TIER_PRICE_${opt.value}`, opt.price);
+                            return {
+                                ...opt,
+                                price,
+                                priceLabel: price.toLocaleString() + 'P'
+                            };
+                        })
+                    }));
+                    setTierGroups(updatedGroups);
+                    setTierOptions(updatedGroups.flatMap(g => g.options));
+                } else {
+                    console.error("❌ [AdEditorForm] fetchTierPrices failed:", res.error);
+                }
+            } catch (err) {
+                console.error("❌ [AdEditorForm] fetchTierPrices exception:", err);
             }
         };
 

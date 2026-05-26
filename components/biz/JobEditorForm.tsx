@@ -408,29 +408,41 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
     // 초기 데이터 로딩 시 마스터 데이터 전체 로딩
     useEffect(() => {
         const fetchMasterData = async () => {
-            const res = await QA_GET_COMMON_CODES(undefined, true);
-            if (res.success && res.data) {
-                setRegions(res.data.filter(c => c.list_type === 'JOB_REGION_1' || c.list_type === 'JOB_REGION_2'));
-                setCategories1(res.data.filter(c => c.list_type === 'CATEGORY_1'));
-                setCategories2(res.data.filter(c => c.list_type === 'CATEGORY_2'));
-                setTagsList(buildUnifiedTagOptions(res.data));
-                setEmploymentTypes(res.data.filter(c => c.list_type === 'EMPLOYMENT_TYPE'));
+            try {
+                const res = await QA_GET_COMMON_CODES(undefined, true);
+                if (res.success && res.data) {
+                    setRegions(res.data.filter(c => c.list_type === 'JOB_REGION_1' || c.list_type === 'JOB_REGION_2'));
+                    setCategories1(res.data.filter(c => c.list_type === 'CATEGORY_1'));
+                    setCategories2(res.data.filter(c => c.list_type === 'CATEGORY_2'));
+                    setTagsList(buildUnifiedTagOptions(res.data));
+                    setEmploymentTypes(res.data.filter(c => c.list_type === 'EMPLOYMENT_TYPE'));
+                } else {
+                    console.error("❌ [JobEditorForm] fetchMasterData failed:", res.error);
+                }
+            } catch (err) {
+                console.error("❌ [JobEditorForm] fetchMasterData exception:", err);
             }
         };
         const fetchUserProfile = async () => {
-            if (isNew) {
-                const res = await userSettingsAction('GET_PROFILE');
-                if (res.success && res.data) {
-                    const profile = res.data;
-                    if (profile.is_business_verified) {
-                        setIsBizVerified(true);
-                        setForm(prev => ({
-                            ...prev,
-                            business_name: profile.verified_business_name,
-                            company: profile.verified_business_name, // 하위 호환성
-                        }));
+            try {
+                if (isNew) {
+                    const res = await userSettingsAction('GET_PROFILE');
+                    if (res.success && res.data) {
+                        const profile = res.data;
+                        if (profile.is_business_verified) {
+                            setIsBizVerified(true);
+                            setForm(prev => ({
+                                ...prev,
+                                business_name: profile.verified_business_name,
+                                company: profile.verified_business_name, // 하위 호환성
+                            }));
+                        }
+                    } else {
+                        console.error("❌ [JobEditorForm] fetchUserProfile failed:", res.error);
                     }
                 }
+            } catch (err) {
+                console.error("❌ [JobEditorForm] fetchUserProfile exception:", err);
             }
         };
 
