@@ -82,21 +82,21 @@ function MerchantTierBadge({ tier }: { tier: 'VIP' | 'VVIP' | 'VVVIP' }) {
     if (tier === 'VIP') {
         return (
             <span className="inline-flex items-center gap-0.5 px-1 py-[0.5px] rounded text-[8px] font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-amber-950 border border-amber-300/40 shadow-[0_0_6px_rgba(245,158,11,0.4)] shrink-0 ml-1 select-none">
-                🎖️ VIP
+                🎖️ 우수
             </span>
         );
     }
     if (tier === 'VVIP') {
         return (
             <span className="inline-flex items-center gap-0.5 px-1 py-[0.5px] rounded text-[8px] font-black bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 text-white border border-fuchsia-400/40 shadow-[0_0_8px_rgba(168,85,247,0.6)] shrink-0 ml-1 select-none animate-pulse">
-                🏆 VVIP
+                🏆 으뜸
             </span>
         );
     }
     if (tier === 'VVVIP') {
         return (
             <span className="inline-flex items-center gap-0.5 px-1 py-[0.5px] rounded text-[8px] font-black bg-gradient-to-r from-rose-500 via-amber-400 to-blue-600 text-white border border-amber-300/50 shadow-[0_0_12px_rgba(239,68,68,0.7)] shrink-0 ml-1 select-none animate-bounce">
-                👑 VVVIP
+                👑 명가
             </span>
         );
     }
