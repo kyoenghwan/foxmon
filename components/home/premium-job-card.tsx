@@ -476,7 +476,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                             )}
                                         </div>
                                     </div>
-                                    <MarqueeText className={`font-black text-[11px] sm:text-[12px] max-[424px]:text-[3.2vw] tracking-tight transition-colors line-clamp-2 leading-tight ${
+                                    <MarqueeText className={`font-black text-[13px] sm:text-[14px] max-[424px]:text-[3.5vw] tracking-tight transition-colors line-clamp-2 leading-tight ${
                                         isCyber ? 'text-green-400 font-mono' : config.color
                                     }`}>
                                         {displayName}

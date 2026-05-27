@@ -1109,7 +1109,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                         category={form.category_1}
                                                         pay={form.pay || '급여 정보'}
                                                         image={form.logo_url || form.image}
-                                                        impactType={isGeneral ? 'none' : ((form.theme as any) || 'gold')}
+                                                        impactType={(form.theme as any) || 'gold'}
                                                         effectIntensity={isSpecial || isGeneral || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'shimmer'}`}
                                                         isSide={isSide}
                                                         hideLogo={isGeneral}
@@ -1185,7 +1185,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             
                             {mode === 'AD' && !(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
                                 <>
-                                    {(form.tier === 'PREMIUM' || form.tier === 'SPECIAL' || form.tier === 'PREMIUM_MAIN') && (
+                                    {(form.tier === 'PREMIUM' || form.tier === 'SPECIAL' || form.tier === 'PREMIUM_MAIN' || form.tier === 'GENERAL' || form.tier === 'AD_GENERAL') && (
                                         <button type="button" onClick={() => setActiveModal(activeModal === 'theme' ? null : 'theme')} className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${activeModal === 'theme' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-100 bg-white hover:border-yellow-500 hover:bg-yellow-50'}`}>
                                             <Crown className={`w-6 h-6 transition-colors ${activeModal === 'theme' ? 'text-yellow-500' : 'text-gray-400 group-hover:text-yellow-500'}`} />
                                             <span className={`text-[13px] font-bold ${activeModal === 'theme' ? 'text-yellow-600' : 'text-gray-700 group-hover:text-yellow-600'}`}>테마 설정</span>
@@ -1436,8 +1436,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         <div className="bg-white rounded-2xl border border-yellow-500/50 p-6 space-y-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-black text-[18px] text-gray-800 flex items-center gap-2">
-                                    <Crown className={`w-5 h-5 ${form.tier === 'PREMIUM' ? 'text-yellow-500' : 'text-purple-500'}`} />
-                                    {form.tier === 'PREMIUM' ? '프리미엄' : '스페셜'} 테마 설정
+                                    <Crown className={`w-5 h-5 ${form.tier === 'PREMIUM' ? 'text-yellow-500' : form.tier === 'SPECIAL' ? 'text-purple-500' : 'text-gray-500'}`} />
+                                    {form.tier === 'PREMIUM' ? '프리미엄' : form.tier === 'SPECIAL' ? '스페셜' : '일반 광고'} 테마 설정
                                 </h3>
                                 <button type="button" onClick={() => setActiveModal(null)} className="text-gray-400 hover:text-gray-600">
                                     <X className="w-5 h-5" />
