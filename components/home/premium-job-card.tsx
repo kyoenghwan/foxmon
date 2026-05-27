@@ -188,7 +188,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
         finalBgOpacity = parts[1] || bgOpacity;
     }
 
-    const parsedOpacity = parseInt(finalBgOpacity || (tier === 'GENERAL' ? '5' : '0'), 10);
+    const parsedOpacity = parseInt(finalBgOpacity || ((tier === 'GENERAL' || tier === 'AD_GENERAL') ? '5' : '0'), 10);
     const validOpacity = isNaN(parsedOpacity) ? 0 : Math.max(0, Math.min(100, parsedOpacity));
     const hexOpacity = Math.round((validOpacity / 100) * 255).toString(16).padStart(2, '0').toUpperCase();
 
@@ -278,25 +278,25 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                     <div className={`shrink-0 flex items-center justify-center px-1.5 py-[2px] rounded-sm text-[9px] font-black shadow-sm ${
                                         isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
                                         isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
-                                        tier === 'GENERAL' && customColor ? 'bg-white' :
+                                        (tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? 'bg-white' :
                                         'bg-gray-100 text-gray-700 border border-gray-300'
-                                    }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                    }`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor, borderColor: customColor } : {}}>
                                         {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
                                             <>VVIP</>
                                         ) : tier === 'SPECIAL' ? (
                                             <>스페셜</>
-                                        ) : tier === 'GENERAL' || tier === 'LINE' ? (
+                                        ) : tier === 'GENERAL' || tier === 'AD_GENERAL' || tier === 'LINE' ? (
                                             <>일반업체</>
                                         ) : (
                                             <>우수업체</>
                                         )}
                                     </div>
-                                    <MarqueeText className={`font-black text-[12px] sm:text-[13px] tracking-tight transition-colors line-clamp-2 leading-tight ${isCyber ? 'text-green-400 font-mono' : config.color}`} style={tier === 'GENERAL' && customColor ? { color: customColor } : {}}>
+                                    <MarqueeText className={`font-black text-[12px] sm:text-[13px] tracking-tight transition-colors line-clamp-2 leading-tight ${isCyber ? 'text-green-400 font-mono' : config.color}`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor } : {}}>
                                         {displayName}
                                     </MarqueeText>
                                 </div>
                                 <div className="flex items-center gap-1 text-[10px] max-[424px]:text-[2.2vw] text-gray-500 w-full min-w-0">
-                                    <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] overflow-hidden w-full ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : tier === 'GENERAL' && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                    <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] overflow-hidden w-full ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : (tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor, borderColor: customColor } : {}}>
                                         <span className="shrink-0">{sido}</span>
                                         {sigungus && (
                                             <>
@@ -351,9 +351,9 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                 <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] text-[10px] lg:text-[11px] max-[424px]:text-[2.2vw] overflow-hidden ${
                                     isCyber ? 'text-black bg-cyan-400 border-none' : 
                                     isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
-                                    tier === 'GENERAL' && customColor ? 'bg-white' :
+                                    (tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? 'bg-white' :
                                     'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
-                                }`} style={tier === 'GENERAL' && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                }`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor, borderColor: customColor } : {}}>
                                     <span className="shrink-0">{sido}</span>
                                     {sigungus && (
                                         <>
@@ -373,7 +373,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                 </div>
                                 <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] max-[424px]:text-[3vw] tracking-tight transition-colors line-clamp-1 leading-tight ${
                                     isCyber ? 'text-green-400 font-mono' : config.color
-                                }`} style={tier === 'GENERAL' && customColor ? { color: customColor } : {}}>
+                                }`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor } : {}}>
                                     {displayName}
                                 </MarqueeText>
                             </div>
@@ -423,7 +423,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-amber-500" /> VVIP</>
                                     ) : tier === 'SPECIAL' ? (
                                         <><Zap className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-yellow-500" /> 스페셜</>
-                                    ) : tier === 'GENERAL' || tier === 'LINE' ? (
+                                    ) : tier === 'GENERAL' || tier === 'AD_GENERAL' || tier === 'LINE' ? (
                                         <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-gray-500" /> 일반업체</>
                                     ) : (
                                         <><Star className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-gray-500" /> 우수업체</>

@@ -815,7 +815,9 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const sigunguOptions = sidoCode ? regions.filter(r => r.parent_code_value === sidoCode) : [];
 
     const handleLogoRequest = () => {
-        alert('로고 제작 대행 문의는 카카오톡 고객센터(@foxmon)로 상호명과 함께 연락해 주세요.\n전문 디자이너가 원장님만의 맞춤형 타이포그래피 로고를 제작해 드립니다!');
+        if (confirm('로고 제작 대행 문의는 폭스톡 고객센터 또는 폭스몬 1:1 고객문의로 상호명과 함께 신청하실 수 있습니다.\n\n폭스몬 1:1 고객문의 페이지로 지금 이동하시겠습니까?')) {
+            window.location.href = '/help/inquiry';
+        }
     };
 
     const handleLoadJobData = (jobData: any) => {
@@ -985,7 +987,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             const isPremium = form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN';
                                             const isSide = form.tier === 'SIDE';
                                             const isSpecial = form.tier === 'SPECIAL';
-                                            const isGeneral = form.tier === 'GENERAL';
+                                            const isGeneral = form.tier === 'GENERAL' || form.tier === 'AD_GENERAL';
                                             
                                             // PREMIUM_MAIN 이면서 직접 업로드 모드일 때
                                             if (form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') {
