@@ -419,19 +419,21 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         {payAmount}
                                     </span>
                                 </div>
-                                <div className={`shrink-0 flex items-center px-1.5 py-0.5 rounded-sm text-[10px] lg:text-[11px] max-[424px]:text-[2.2vw] font-black shadow-sm ${
-                                    isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
-                                    isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
-                                    'bg-gray-100 text-gray-700 border border-gray-300'
+                                <div className={`shrink-0 flex items-center px-1.5 py-0.5 rounded-[4px] text-[10px] lg:text-[11px] max-[424px]:text-[2.2vw] font-black shadow-[0_1px_3px_rgba(0,0,0,0.1)] border transition-all ${
+                                    isCyber ? 'bg-cyan-900 text-cyan-200 border-cyan-700 shadow-[0_0_8px_rgba(34,211,238,0.3)]' :
+                                    (tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier)) ? 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 text-white border-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)] animate-pulse' : 
+                                    (tier === 'SPECIAL') ? 'bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white border-fuchsia-400 shadow-[0_0_10px_rgba(168,85,247,0.4)]' :
+                                    (tier === 'GENERAL' || tier === 'AD_GENERAL' || tier === 'LINE') ? 'bg-slate-100 text-slate-500 border-slate-200/80 shadow-none' :
+                                    'bg-slate-100 text-slate-600 border-slate-200/80 shadow-none'
                                 }`}>
                                     {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
-                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-amber-500" /> VVIP</>
+                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-white animate-bounce" /> VVIP</>
                                     ) : tier === 'SPECIAL' ? (
-                                        <><Zap className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-yellow-500" /> 스페셜</>
+                                        <><Zap className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-yellow-200" /> 스페셜</>
                                     ) : tier === 'GENERAL' || tier === 'AD_GENERAL' || tier === 'LINE' ? (
-                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-gray-500" /> 일반업체</>
+                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-slate-400" /> 일반업체</>
                                     ) : (
-                                        <><Star className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-gray-500" /> 우수업체</>
+                                        <><Star className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-slate-400" /> 우수업체</>
                                     )}
                                 </div>
                             </div>
@@ -518,18 +520,23 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         {payAmount}
                                     </span>
                                 </div>
-                                <div className={`shrink-0 flex items-center px-1 sm:px-1.5 py-[1px] sm:py-0.5 rounded-sm text-[9px] sm:text-[10px] max-[424px]:text-[2.5vw] font-black shadow-sm ${
-                                    isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
-                                    isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
-                                    'bg-gray-100 text-gray-700 border border-gray-300'
+                                <div className={`shrink-0 flex items-center px-1 sm:px-1.5 py-[1px] sm:py-0.5 rounded-[4px] text-[9px] sm:text-[10px] max-[424px]:text-[2.5vw] font-black shadow-[0_1px_3px_rgba(0,0,0,0.1)] border transition-all ${
+                                    isCyber ? 'bg-cyan-900 text-cyan-200 border-cyan-700 shadow-[0_0_8px_rgba(34,211,238,0.3)]' :
+                                    (tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier)) ? 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 text-white border-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)] animate-pulse' : 
+                                    (tier === 'SPECIAL') ? 'bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white border-fuchsia-400 shadow-[0_0_10px_rgba(168,85,247,0.4)]' :
+                                    'bg-slate-100 text-slate-500 border-slate-200/80 shadow-none'
                                 }`}>
-                                    {isImpact ? (
+                                    {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
                                         <>
-                                            <Crown className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-amber-500" /> VVIP
+                                            <Crown className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-white animate-bounce" /> VVIP
+                                        </>
+                                    ) : tier === 'SPECIAL' ? (
+                                        <>
+                                            <Zap className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-yellow-200" /> 스페셜
                                         </>
                                     ) : (
                                         <>
-                                            <Star className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-gray-500" /> 우수
+                                            <Star className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-slate-400" /> 우수
                                         </>
                                     )}
                                 </div>
