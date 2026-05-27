@@ -7,6 +7,34 @@ import { ShieldAlert, LogIn, UserPlus, FileText, Coins, RotateCcw, Building } fr
 export function AgeGateFacade() {
   const [activeTab, setActiveTab] = useState<'terms' | 'privacy' | 'refund' | 'pricing' | null>(null);
 
+  // 다날 휴대폰 본인인증(성인인증) 호출 핸들러
+  const handleCertification = () => {
+    const { IMP } = window as any;
+    if (!IMP) {
+      alert('본인인증 모듈이 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+
+    // 대표님 포트원 고객사 식별코드로 초기화
+    IMP.init('imp13555262');
+
+    IMP.certification({
+      pg: 'danal',
+      merchant_uid: `cert_${Date.now()}`,
+      popup: true // PC 환경에서 팝업 레이어 띄우기 활성화
+    }, function (rsp: any) {
+      if (rsp.success) {
+        alert('🎉 본인인증(성인인증) 성공! 회원가입 페이지로 이동합니다.');
+        // 1. 미들웨어 성인인증 감지 통과용 임시 쿠키 주입 (1시간 유효)
+        document.cookie = "age_verified=true; path=/; max-age=3600";
+        // 2. 가입 페이지로 이동
+        window.location.href = '/register';
+      } else {
+        alert(`본인인증 실패: ${rsp.error_msg}`);
+      }
+    });
+  };
+
   // 임시 고지용 텍스트 리소스 정의
   const docContents = {
     terms: {
@@ -99,13 +127,13 @@ export function AgeGateFacade() {
             <LogIn className="w-5 h-5" />
             <span>회원 로그인</span>
           </Link>
-          <Link
-            href="/register"
-            className="flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 px-6 rounded-xl border border-slate-700 transition duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+          <button
+            onClick={handleCertification}
+            className="flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 px-6 rounded-xl border border-slate-700 transition duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
           >
             <UserPlus className="w-5 h-5" />
             <span>성인 본인인증 회원가입</span>
-          </Link>
+          </button>
         </div>
 
         {/* 6대 검증 요건 노출용 탭 컨테이너 (포트원 사전검증 통과 핵심) */}

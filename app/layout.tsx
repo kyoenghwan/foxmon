@@ -17,6 +17,7 @@ import { FoxTalkWidget } from "@/components/chat/foxtalk-widget";
 import { CsAgentDock } from "@/components/chat/cs-agent-dock";
 import { AutoLogoutWrapper } from "@/components/auth/auto-logout-wrapper";
 import { MaxWidthWrapper } from "@/src/components/layout/MaxWidthWrapper";
+import Script from "next/script";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -82,6 +83,7 @@ export default function RootLayout({
             </AutoLogoutWrapper>
           </LanguageProvider>
         </MaxWidthWrapper>
+        <Script src="https://cdn.iamport.kr/v1/iamport.js" strategy="lazyOnload" />
       </body>
     </html>
   );
