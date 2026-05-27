@@ -75,6 +75,32 @@ interface PremiumJobCardProps {
     customColor?: string;
     bgOpacity?: string;
     status?: string;
+    merchant_tier?: 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP';
+}
+
+function MerchantTierBadge({ tier }: { tier: 'VIP' | 'VVIP' | 'VVVIP' }) {
+    if (tier === 'VIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1 py-[0.5px] rounded text-[8px] font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-amber-950 border border-amber-300/40 shadow-[0_0_6px_rgba(245,158,11,0.4)] shrink-0 ml-1 select-none">
+                🎖️ VIP
+            </span>
+        );
+    }
+    if (tier === 'VVIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1 py-[0.5px] rounded text-[8px] font-black bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 text-white border border-fuchsia-400/40 shadow-[0_0_8px_rgba(168,85,247,0.6)] shrink-0 ml-1 select-none animate-pulse">
+                🏆 VVIP
+            </span>
+        );
+    }
+    if (tier === 'VVVIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1 py-[0.5px] rounded text-[8px] font-black bg-gradient-to-r from-rose-500 via-amber-400 to-blue-600 text-white border border-amber-300/50 shadow-[0_0_12px_rgba(239,68,68,0.7)] shrink-0 ml-1 select-none animate-bounce">
+                👑 VVVIP
+            </span>
+        );
+    }
+    return null;
 }
 
 // 테마별 설정을 관리하는 매핑 객체 - 원래의 역동적인(Dynamic) 스타일로 복구
@@ -104,7 +130,7 @@ const THEME_CONFIG: Record<string, any> = {
     none: { label: 'HIT', color: 'text-gray-900', bg: 'bg-purple-700', border: 'border-gray-200', icon: Crown, animClass: '' }
 };
 
-export function PremiumJobCard({ company, title, location, category, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', hideLogo = false, tier, id, customColor, bgOpacity, status }: PremiumJobCardProps) {
+export function PremiumJobCard({ company, title, location, category, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', hideLogo = false, tier, id, customColor, bgOpacity, status, merchant_tier = 'NORMAL' }: PremiumJobCardProps) {
     const { t } = useLanguage();
     
     // 1. 업체명 파싱
@@ -282,17 +308,20 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         'bg-gray-100 text-gray-700 border border-gray-300'
                                     }`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor, borderColor: customColor } : {}}>
                                         {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
-                                            <>VVIP</>
+                                            <>프리미엄</>
                                         ) : tier === 'SPECIAL' ? (
                                             <>스페셜</>
                                         ) : tier === 'GENERAL' || tier === 'AD_GENERAL' || tier === 'LINE' ? (
-                                            <>일반업체</>
+                                            <>일반</>
                                         ) : (
-                                            <>우수업체</>
+                                            <>우수</>
                                         )}
                                     </div>
                                     <MarqueeText className={`font-black text-[12px] sm:text-[13px] tracking-tight transition-colors line-clamp-2 leading-tight ${isCyber ? 'text-green-400 font-mono' : config.color}`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor } : {}}>
-                                        {displayName}
+                                        <span className="inline-flex items-center flex-wrap">
+                                            {displayName}
+                                            {merchant_tier && merchant_tier !== 'NORMAL' && <MerchantTierBadge tier={merchant_tier} />}
+                                        </span>
                                     </MarqueeText>
                                 </div>
                                 <div className="flex items-center gap-1 text-[10px] max-[424px]:text-[2.2vw] text-gray-500 w-full min-w-0">
@@ -353,7 +382,10 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                     <MarqueeText className={`font-black text-[12px] sm:text-[13px] lg:text-[14px] max-[424px]:text-[2.8vw] tracking-tight transition-colors line-clamp-1 leading-tight ${
                                         isCyber ? 'text-green-400 font-mono' : config.color
                                     }`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor } : {}}>
-                                        {displayName}
+                                        <span className="inline-flex items-center flex-wrap">
+                                            {displayName}
+                                            {merchant_tier && merchant_tier !== 'NORMAL' && <MerchantTierBadge tier={merchant_tier} />}
+                                        </span>
                                     </MarqueeText>
                                 </div>
                                 
@@ -427,13 +459,13 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                     'bg-slate-100 text-slate-600 border-slate-200/80 shadow-none'
                                 }`}>
                                     {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
-                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-white animate-bounce" /> VVIP</>
+                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-white animate-bounce" /> 프리미엄</>
                                     ) : tier === 'SPECIAL' ? (
                                         <><Zap className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-yellow-200" /> 스페셜</>
                                     ) : tier === 'GENERAL' || tier === 'AD_GENERAL' || tier === 'LINE' ? (
-                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-slate-400" /> 일반업체</>
+                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-slate-400" /> 일반</>
                                     ) : (
-                                        <><Star className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-slate-400" /> 우수업체</>
+                                        <><Star className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-slate-400" /> 우수</>
                                     )}
                                 </div>
                             </div>
@@ -481,7 +513,10 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                     <MarqueeText className={`font-black text-[13px] sm:text-[14px] max-[424px]:text-[3.5vw] tracking-tight transition-colors line-clamp-2 leading-tight ${
                                         isCyber ? 'text-green-400 font-mono' : config.color
                                     }`}>
-                                        {displayName}
+                                        <span className="inline-flex items-center flex-wrap">
+                                            {displayName}
+                                            {merchant_tier && merchant_tier !== 'NORMAL' && <MerchantTierBadge tier={merchant_tier} />}
+                                        </span>
                                     </MarqueeText>
                                 </div>
                             </div>
@@ -528,11 +563,15 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                 }`}>
                                     {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
                                         <>
-                                            <Crown className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-white animate-bounce" /> VVIP
+                                            <Crown className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-white animate-bounce" /> 프리미엄
                                         </>
                                     ) : tier === 'SPECIAL' ? (
                                         <>
                                             <Zap className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-yellow-200" /> 스페셜
+                                        </>
+                                    ) : tier === 'GENERAL' || tier === 'AD_GENERAL' || tier === 'LINE' ? (
+                                        <>
+                                            <Crown className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-slate-400" /> 일반
                                         </>
                                     ) : (
                                         <>

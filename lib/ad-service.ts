@@ -40,6 +40,7 @@ export interface AdItem {
     option_double_slot?: boolean;
     option_jump?: boolean;
     isRealAd?: boolean; // 실제 DB 연동 광고 여부
+    merchant_tier?: 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP';
 }
 
 const IS_SUPABASE_ENABLED = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -91,6 +92,9 @@ let MOCK_ADS: AdItem[] = Array.from({ length: 150 }).map((_, i) => {
     const isNew = Math.random() < 0.1;
     const ageMs = isNew ? Math.random() * 600000 : 600000 + (Math.random() * 86400000);
 
+    const merchantTiers: ('NORMAL' | 'VIP' | 'VVIP' | 'VVVIP')[] = ['NORMAL', 'VIP', 'VVIP', 'VVVIP'];
+    const merchant_tier = merchantTiers[i % merchantTiers.length];
+
     return {
         id: `mock-${i}`,
         company: `${company} ${category}`,
@@ -105,6 +109,7 @@ let MOCK_ADS: AdItem[] = Array.from({ length: 150 }).map((_, i) => {
         created_at: new Date(Date.now() - ageMs).toISOString(),
         color: ['orange', 'blue', 'purple', 'emerald'][i % 4],
         image: `https://picsum.photos/seed/fox-${i}/400/300`,
+        merchant_tier: merchant_tier,
     };
 });
 
@@ -144,7 +149,7 @@ export async function getRotatedAds(
 
         let queryBuilder = supabaseAdmin
             .from(targetTable)
-            .select('*')
+            .select('*, users(merchant_tier)')
             .eq('tier', tier);
 
         if (searchQuery) {
@@ -160,13 +165,24 @@ export async function getRotatedAds(
             return getMockAds(tier, limitCount, searchQuery);
         }
 
-        let ads: AdItem[] = data.map((item: any) => ({
-            ...item,
-            company: item.company || item.company_name || '업체명 없음',
-            pay: item.pay || (item.salary_type ? `[${item.salary_type}] ${item.salary_amount}` : item.salary_amount) || '급여협의',
-            image: item.image || item.logo_url || '',
-            isRealAd: true
-        })) as AdItem[];
+        let ads: AdItem[] = data.map((item: any) => {
+            let merchant_tier = 'NORMAL';
+            if (item.users) {
+                if (Array.isArray(item.users)) {
+                    merchant_tier = item.users[0]?.merchant_tier || 'NORMAL';
+                } else {
+                    merchant_tier = item.users.merchant_tier || 'NORMAL';
+                }
+            }
+            return {
+                ...item,
+                company: item.company || item.company_name || '업체명 없음',
+                pay: item.pay || (item.salary_type ? `[${item.salary_type}] ${item.salary_amount}` : item.salary_amount) || '급여협의',
+                image: item.image || item.logo_url || '',
+                merchant_tier: merchant_tier as 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP',
+                isRealAd: true
+            };
+        }) as AdItem[];
         
         if (ads.length < limitCount) {
             const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
