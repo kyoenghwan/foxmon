@@ -83,7 +83,7 @@ export default function RootLayout({
             </AutoLogoutWrapper>
           </LanguageProvider>
         </MaxWidthWrapper>
-        <Script src="https://cdn.iamport.kr/v1/iamport.js" strategy="lazyOnload" />
+        <Script src="https://cdn.iamport.kr/v1/iamport.js" strategy="afterInteractive" />
       </body>
     </html>
   );
