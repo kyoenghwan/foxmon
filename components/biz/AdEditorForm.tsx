@@ -1155,6 +1155,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             );
                                         })()}
                                     </div>
+                                    </div>
 
                                     {/* 업체 등급 산정 기준 안내 카드 */}
                                     <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100 p-5 w-full sm:w-[280px] shrink-0 space-y-3 flex flex-col justify-between">
@@ -1193,7 +1194,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             ※ 조건 충족 시 매월 1일 자정 등급이 자동 반영됩니다.
                                         </p>
                                     </div>
-                                </div>
 
                                 {/* 로고 업로드 (PREMIUM_MAIN 이고 upload 모드일 때는 로고 업로드 숨김) */}
                                 {form.tier !== 'GENERAL' && form.tier !== 'AD_GENERAL' && !(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
