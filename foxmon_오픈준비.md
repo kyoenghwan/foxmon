@@ -12,6 +12,7 @@
   - **처리 지청**: 중부지방고용노동청 부천지청 (032-320-8900)
   - **소요 시간**: 영업일 기준 5~7일 소요 (접수일: 2026-05-27)
   - **완료 조건**: 발급된 신고필증에서 **직업정보제공사업 신고번호** 확인.
+  https://www.work24.go.kr/cm/d/b/0000/selectCvplRqutList.do?cvplPrssStcd=&cvplRqutRoutDtalCdGrp=W&currentPageNo=1&recordCountPerPage=10
 - [ ] **통신판매업 신고 진행**
   - **수행 주체**: 대표자 (정부24 온라인 신청 또는 김포시청/구청 방문)
   - **준비물**: 
