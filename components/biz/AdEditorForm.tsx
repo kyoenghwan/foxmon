@@ -690,7 +690,15 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     }, [initialData?.location]);
 
     const update = (key: keyof AdFormData, value: any) => {
-        setForm(prev => ({ ...prev, [key]: value }));
+        setForm(prev => {
+            const next = { ...prev, [key]: value };
+            if (key === 'company') {
+                next.business_name = value;
+            } else if (key === 'business_name') {
+                next.company = value;
+            }
+            return next;
+        });
     };
 
     // 지역 선택 핸들러
@@ -1230,14 +1238,31 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 </div>
                                  <div className="flex flex-col gap-4">
-                                     <input
-                                         type="text"
-                                         value={form.title}
-                                         onChange={e => update('title', e.target.value)}
-                                         className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                         placeholder="예: 최고 대우 보장! 초보 환영합니다 (40자 제한)"
-                                         maxLength={40}
-                                     />
+                                     <div>
+                                         <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
+                                             <Building2 className="w-3.5 h-3.5" /> 업체명 및 닉네임 <span className="text-red-500">*</span>
+                                         </label>
+                                         <input
+                                             type="text"
+                                             value={form.company || ''}
+                                             onChange={e => update('company', e.target.value)}
+                                             className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                             placeholder="업체명 또는 닉네임을 입력하세요"
+                                         />
+                                     </div>
+                                     <div>
+                                         <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
+                                             <Briefcase className="w-3.5 h-3.5" /> 광고 제목 <span className="text-red-500">*</span>
+                                         </label>
+                                         <input
+                                             type="text"
+                                             value={form.title}
+                                             onChange={e => update('title', e.target.value)}
+                                             className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
+                                             placeholder="예: 최고 대우 보장! 초보 환영합니다 (40자 제한)"
+                                             maxLength={40}
+                                         />
+                                     </div>
                                  </div>
                                 <div className="md:col-span-3">
                                     <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
@@ -1554,20 +1579,12 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 </label>
                                 <div className="flex-1 w-full flex gap-2 items-center">
                                     <input
-                                        type="text" value={form.company || ''} 
-                                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none bg-gray-50 text-gray-600 cursor-not-allowed"
-                                        placeholder={isBizVerified ? "인증된 상호명" : "직접 입력하기를 이용해주세요"}
-                                        readOnly={true}
+                                        type="text"
+                                        value={form.company || ''} 
+                                        onChange={e => update('company', e.target.value)}
+                                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white text-gray-800"
+                                        placeholder="상호명을 입력해주세요"
                                     />
-                                    {!isBizVerified && (
-                                        <button 
-                                            type="button" 
-                                            className="px-3 py-2 bg-primary hover:bg-orange-600 text-white font-bold text-[12px] rounded-lg transition-colors shrink-0 shadow-sm" 
-                                            onClick={() => setIsManualEntryOpen(true)}
-                                        >
-                                            직접 입력하기
-                                        </button>
-                                    )}
                                 </div>
                             </div>
 

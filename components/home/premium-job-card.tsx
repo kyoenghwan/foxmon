@@ -348,11 +348,21 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                             {/* --- 로고 없는 컴팩트 레이아웃 (일반 배너 등) --- */}
                             {/* 상단: 지역 + 업체명 */}
                             <div className="flex items-center gap-1.5 pb-1 w-full overflow-hidden">
-                                <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] text-[10px] lg:text-[11px] max-[424px]:text-[2.2vw] overflow-hidden ${
-                                    isCyber ? 'text-black bg-cyan-400 border-none' : 
+                                {/* 1. 업체명 / 닉네임 (왼쪽 배치) */}
+                                <div className="flex-1 min-w-0">
+                                    <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] max-[424px]:text-[3vw] tracking-tight transition-colors line-clamp-1 leading-tight ${
+                                        isCyber ? 'text-green-400 font-mono' : config.color
+                                    }`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor } : {}}>
+                                        {displayName}
+                                    </MarqueeText>
+                                </div>
+                                
+                                {/* 2. 지역 뱃지 (오른쪽 배치, 타 배너와 동일한 폰트/스타일) */}
+                                <div className={`flex items-center gap-1 shrink-0 border px-1.5 py-[2px] leading-normal font-black rounded-[4px] text-[9px] sm:text-[10px] max-[424px]:text-[2.5vw] overflow-hidden ${
+                                    isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 
                                     isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : 
-                                    (tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? 'bg-white' :
-                                    'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'
+                                    (tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? 'bg-white text-gray-600' :
+                                    'bg-gray-100 text-gray-600 border-gray-200'
                                 }`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor, borderColor: customColor } : {}}>
                                     <span className="shrink-0">{sido}</span>
                                     {sigungus && (
@@ -371,11 +381,6 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         </>
                                     )}
                                 </div>
-                                <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] max-[424px]:text-[3vw] tracking-tight transition-colors line-clamp-1 leading-tight ${
-                                    isCyber ? 'text-green-400 font-mono' : config.color
-                                }`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor } : {}}>
-                                    {displayName}
-                                </MarqueeText>
                             </div>
 
                             {/* 중간: 광고 제목 */}

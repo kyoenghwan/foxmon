@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CommunitySidebar } from '@/components/community/CommunitySidebar';
 import { PostDetailModal } from '@/components/community/PostDetailModal';
