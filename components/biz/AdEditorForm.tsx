@@ -1092,36 +1092,39 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                                 />
                                                             )}
                                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
-                                                            <div className="relative z-20 h-full flex flex-col justify-between pointer-events-auto">
-                                                                <div className="space-y-3">
-                                                                    <div className="flex items-center gap-3 mb-1">
-                                                                        {hasLogo && (
-                                                                            <div className="w-[60px] h-[40px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
-                                                                                <div className="w-full h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoUrl})` }} />
-                                                                            </div>
-                                                                        )}
+                                                            <div className="relative z-20 h-full flex gap-4 items-center pointer-events-auto">
+                                                                {/* 좌측: 로고 영역 (전체 높이 대비) */}
+                                                                {hasLogo && (
+                                                                    <div className="w-[100px] h-[100px] bg-white rounded-xl p-2 shadow-md shrink-0 flex items-center justify-center overflow-hidden">
+                                                                        <div className="w-full h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoUrl})` }} />
+                                                                    </div>
+                                                                )}
+
+                                                                {/* 우측: 정보 영역 */}
+                                                                <div className="flex-1 min-w-0 h-full flex flex-col justify-between py-1">
+                                                                    <div className="space-y-2">
                                                                         <h3 className="text-white font-black text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] flex items-center">
                                                                             {form.company || '업체명'}
                                                                             {userMerchantTier && userMerchantTier !== 'NORMAL' && (
                                                                                 <MerchantTierBadge tier={userMerchantTier} />
                                                                             )}
                                                                         </h3>
+                                                                        <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[95%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
+                                                                            {form.title || '광고 제목을 입력하세요'}
+                                                                        </p>
                                                                     </div>
-                                                                    <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
-                                                                        {form.title || '광고 제목을 입력하세요'}
-                                                                    </p>
-                                                                </div>
-                                                                <div className="flex flex-col gap-1.5 mt-auto">
-                                                                    <p className="text-white/70 text-[11px] font-bold tracking-wider">{form.location || '전지역'}</p>
-                                                                    <div className="flex items-center gap-2">
-                                                                        {payType && (
-                                                                            <span className="px-2 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[11px] font-black tracking-wide border border-white/10 shadow-sm">
-                                                                                {payType}
+                                                                    <div className="flex flex-col gap-1 mt-auto">
+                                                                        <p className="text-white/70 text-[11px] font-bold tracking-wider">{form.location || '전지역'}</p>
+                                                                        <div className="flex items-center gap-2">
+                                                                            {payType && (
+                                                                                <span className="px-2 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[11px] font-black tracking-wide border border-white/10 shadow-sm">
+                                                                                    {payType}
+                                                                                </span>
+                                                                            )}
+                                                                            <span className="text-white font-black text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                                                                {payAmount}
                                                                             </span>
-                                                                        )}
-                                                                        <span className="text-white font-black text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                                                                            {payAmount}
-                                                                        </span>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
