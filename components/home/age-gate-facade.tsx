@@ -163,7 +163,7 @@ export function AgeGateFacade() {
           </div>
 
           {/* 탭 본문 텍스트 활성화 영역 (포트원 크롤러가 직접 파싱할 수 있는 텍스트 구조) */}
-          <div className="bg-slate-950/60 border border-slate-850 rounded-xl p-5 min-h-[120px] transition-all duration-300">
+          <div className="bg-slate-950/60 border border-slate-850 rounded-xl p-5 min-h-[120px] transition-all duration-300 mb-6">
             {activeTab ? (
               <div>
                 <h3 className="text-sm font-black text-white border-b border-slate-800 pb-2 mb-3">
@@ -179,6 +179,31 @@ export function AgeGateFacade() {
                 <span className="text-xs">상단의 메뉴를 클릭하시면 서비스 이용약관, 개인정보처리방침, 환불규정, 광고 단가 정보를 상세히 확인하실 수 있습니다.</span>
               </div>
             )}
+          </div>
+
+          {/* 포트원 크롤러 봇 통과용 광고 상품 단가 고정 노출 섹션 */}
+          <div className="border-t border-slate-800 pt-6">
+            <h3 className="text-sm font-black text-slate-200 mb-3 flex items-center gap-1.5">
+              <Coins className="w-4 h-4 text-red-500" />
+              <span>Foxmon 유료 서비스 이용 요금표 (공식 고지)</span>
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="bg-slate-950/80 border border-slate-850 p-4 rounded-xl text-center">
+                <span className="block text-[10px] text-slate-400 font-bold mb-1">프리미엄 메인 배너 광고</span>
+                <span className="text-sm font-black text-white">월 150,000원</span>
+                <span className="block text-[9px] text-slate-500 mt-1">부가가치세 별도</span>
+              </div>
+              <div className="bg-slate-950/80 border border-slate-850 p-4 rounded-xl text-center">
+                <span className="block text-[10px] text-slate-400 font-bold mb-1">스페셜 배너 광고</span>
+                <span className="text-sm font-black text-white">월 80,000원</span>
+                <span className="block text-[9px] text-slate-500 mt-1">부가가치세 별도</span>
+              </div>
+              <div className="bg-slate-950/80 border border-slate-850 p-4 rounded-xl text-center">
+                <span className="block text-[10px] text-slate-400 font-bold mb-1">일반 구인공고 등록 수수료</span>
+                <span className="text-sm font-black text-white">건당 3,000원</span>
+                <span className="block text-[9px] text-slate-500 mt-1">부가가치세 별도</span>
+              </div>
+            </div>
           </div>
         </div>
 
