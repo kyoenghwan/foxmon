@@ -302,23 +302,26 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                             <div className="flex-1 flex flex-col justify-between py-1">
                                 <div className="flex items-center gap-1.5 w-full">
                                     <div className={`shrink-0 flex items-center justify-center px-1.5 py-[2px] rounded-sm text-[9px] font-black shadow-sm ${
-                                        isCyber ? 'bg-cyan-900 text-cyan-200 border-cyan-700' :
+                                        isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
                                         isImpact ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-200' : 
                                         (tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? 'bg-white' :
                                         'bg-gray-100 text-gray-700 border border-gray-300'
                                     }`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                        {merchant_tier === 'VVVIP' ? (
-                                            <>명가</>
-                                        ) : merchant_tier === 'VVIP' ? (
-                                            <>으뜸</>
-                                        ) : merchant_tier === 'VIP' ? (
-                                            <>우수</>
-                                        ) : (
+                                        {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
+                                            <>프리미엄</>
+                                        ) : tier === 'SPECIAL' ? (
+                                            <>스페셜</>
+                                        ) : tier === 'GENERAL' || tier === 'AD_GENERAL' || tier === 'LINE' ? (
                                             <>일반</>
+                                        ) : (
+                                            <>우수</>
                                         )}
                                     </div>
                                     <MarqueeText className={`font-black text-[12px] sm:text-[13px] tracking-tight transition-colors line-clamp-2 leading-tight ${isCyber ? 'text-green-400 font-mono' : config.color}`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor } : {}}>
-                                        {displayName}
+                                        <span className="inline-flex items-center flex-wrap">
+                                            {displayName}
+                                            {merchant_tier && merchant_tier !== 'NORMAL' && <MerchantTierBadge tier={merchant_tier} />}
+                                        </span>
                                     </MarqueeText>
                                 </div>
                                 <div className="flex items-center gap-1 text-[10px] max-[424px]:text-[2.2vw] text-gray-500 w-full min-w-0">
@@ -450,133 +453,132 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                 </div>
                                 <div className={`shrink-0 flex items-center px-1.5 py-0.5 rounded-[4px] text-[10px] lg:text-[11px] max-[424px]:text-[2.2vw] font-black shadow-[0_1px_3px_rgba(0,0,0,0.1)] border transition-all ${
                                     isCyber ? 'bg-cyan-900 text-cyan-200 border-cyan-700 shadow-[0_0_8px_rgba(34,211,238,0.3)]' :
-                                    merchant_tier === 'VVVIP' ? 'bg-gradient-to-r from-rose-500 via-amber-400 to-blue-600 text-white border-amber-300 shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-bounce' : 
-                                    merchant_tier === 'VVIP' ? 'bg-gradient-to-r from-violet-600 to-pink-500 text-white border-fuchsia-400 shadow-[0_0_10px_rgba(168,85,247,0.4)] animate-pulse' :
-                                    merchant_tier === 'VIP' ? 'bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-amber-950 border-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]' :
-                                    'bg-slate-100 text-slate-500 border-slate-200/80 shadow-none'
+                                    (tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier)) ? 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 text-white border-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)] animate-pulse' : 
+                                    (tier === 'SPECIAL') ? 'bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white border-fuchsia-400 shadow-[0_0_10px_rgba(168,85,247,0.4)]' :
+                                    (tier === 'GENERAL' || tier === 'AD_GENERAL' || tier === 'LINE') ? 'bg-slate-100 text-slate-500 border-slate-200/80 shadow-none' :
+                                    'bg-slate-100 text-slate-600 border-slate-200/80 shadow-none'
                                 }`}>
-                                    {merchant_tier === 'VVVIP' ? (
-                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-white animate-bounce" /> 명가</>
-                                    ) : merchant_tier === 'VVIP' ? (
-                                        <><Zap className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-yellow-200" /> 으뜸</>
-                                    ) : merchant_tier === 'VIP' ? (
-                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-amber-800" /> 우수</>
+                                    {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
+                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-white animate-bounce" /> 프리미엄</>
+                                    ) : tier === 'SPECIAL' ? (
+                                        <><Zap className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-yellow-200" /> 스페셜</>
+                                    ) : tier === 'GENERAL' || tier === 'AD_GENERAL' || tier === 'LINE' ? (
+                                        <><Crown className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-slate-400" /> 일반</>
                                     ) : (
-                                        <><Star className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-slate-400" /> 일반</>
+                                        <><Star className="w-3 h-3 max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] justify-center mr-1 text-slate-400" /> 우수</>
                                     )}
                                 </div>
                             </div>
                         </>
                     ) : (
-                        <div className="flex w-full h-full gap-2.5 pb-0.5 pointer-events-auto">
-                            {/* 좌측: 로고 영역 (전체 높이 대비) */}
-                            <div className="w-[32%] h-full bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0">
-                                {image ? (
-                                    <div 
-                                        className="w-full h-full bg-contain bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
-                                        style={{ backgroundImage: `url(${image})` }} 
-                                    />
-                                ) : (
-                                    <div className="text-gray-300 font-black text-[10px] sm:text-[11px] bg-gray-100 w-full h-full flex items-center justify-center tracking-widest text-center leading-[1.1]">NO<br/>LOGO</div>
-                                )}
-                            </div>
-
-                            {/* 우측: 정보 영역 */}
-                            <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                                {/* 상단: 상호명 및 지역 */}
-                                <div className="flex flex-col gap-0.5">
+                        <div className="flex flex-col w-full h-full justify-between pb-0.5">
+                            {/* 상단: 로고 50%, 상호명 50% */}
+                            <div className="flex w-full h-[45%] gap-2 shrink-0">
+                                {/* 로고 영역 (1.5:1 비율) */}
+                                <div className="flex-1 min-w-0 bg-gray-50 flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden shrink-0">
+                                    {image ? (
+                                        <div 
+                                            className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
+                                            style={{ backgroundImage: `url(${image})` }} 
+                                        />
+                                    ) : (
+                                        <div className="text-gray-300 font-black text-[10px] sm:text-[11px] bg-gray-100 w-full h-full flex items-center justify-center tracking-widest text-center leading-[1.1]">NO<br/>LOGO</div>
+                                    )}
+                                </div>
+                                
+                                {/* 상호명 영역 (지역명 위, 상호명 아래) */}
+                                <div className={`flex-1 min-w-0 flex flex-col justify-center space-y-1`}>
                                     <div className="flex items-center w-full min-w-0">
-                                        <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-normal font-black rounded-[4px] text-[8px] sm:text-[9px] max-[424px]:text-[2.2vw] w-full overflow-hidden ${
-                                             isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
-                                         }`}>
-                                             <span className="shrink-0">{sido}</span>
-                                             {sigungus && (
-                                                 <>
-                                                     <span className="shrink-0 opacity-50">|</span>
-                                                     {isMultiSigungu ? (
-                                                         <div className="flex-1 overflow-hidden relative flex items-center h-full">
-                                                             <div className="whitespace-nowrap inline-block animate-[marquee-scroll_6s_linear_infinite]">
-                                                                 <span className="mr-6">{sigungus}</span>
-                                                                 <span className="mr-6">{sigungus}</span>
-                                                             </div>
-                                                         </div>
-                                                     ) : (
-                                                         <span className="truncate">{sigungus}</span>
-                                                     )}
-                                                 </>
-                                             )}
-                                         </div>
-                                     </div>
-                                     <MarqueeText className={`font-black text-[12px] sm:text-[13px] max-[424px]:text-[3.2vw] tracking-tight transition-colors line-clamp-1 leading-tight ${
-                                         isCyber ? 'text-green-400 font-mono' : config.color
-                                     }`}>
+                                <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-normal font-black rounded-[4px] text-[9px] sm:text-[10px] max-[424px]:text-[2.5vw] w-full overflow-hidden ${
+                                            isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
+                                        }`}>
+                                            <span className="shrink-0">{sido}</span>
+                                            {sigungus && (
+                                                <>
+                                                    <span className="shrink-0 opacity-50">|</span>
+                                                    {isMultiSigungu ? (
+                                                        <div className="flex-1 overflow-hidden relative flex items-center h-full">
+                                                            <div className="whitespace-nowrap inline-block animate-[marquee-scroll_6s_linear_infinite]">
+                                                                <span className="mr-6">{sigungus}</span>
+                                                                <span className="mr-6">{sigungus}</span>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="truncate">{sigungus}</span>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <MarqueeText className={`font-black text-[13px] sm:text-[14px] max-[424px]:text-[3.5vw] tracking-tight transition-colors line-clamp-2 leading-tight ${
+                                        isCyber ? 'text-green-400 font-mono' : config.color
+                                    }`}>
                                         <span className="inline-flex items-center flex-wrap">
                                             {displayName}
                                             {merchant_tier && merchant_tier !== 'NORMAL' && <MerchantTierBadge tier={merchant_tier} />}
                                         </span>
-                                     </MarqueeText>
-                                 </div>
+                                    </MarqueeText>
+                                </div>
+                            </div>
 
-                                 {/* 중간: 광고글 (멘트) */}
-                                 <div className="w-full relative overflow-hidden flex items-center gap-1 shrink-0 my-0.5">
-                                     {category && (
-                                         <span className={`shrink-0 border px-1 py-[1px] rounded-[2px] text-[9px] sm:text-[10px] max-[424px]:text-[2vw] font-black ${
-                                             isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
-                                         }`}>
-                                             {category}
-                                         </span>
-                                     )}
-                                     <div className="flex-1 min-w-0">
-                                         <MarqueeText className={`text-[12px] sm:text-[13px] max-[424px]:text-[3vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${
-                                             isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
-                                             isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
-                                             'text-gray-800 bg-green-200/50'
-                                         }`}>
-                                             {title}
-                                         </MarqueeText>
-                                     </div>
-                                 </div>
+                            {/* 중간: 광고글 (멘트) */}
+                            <div className="w-full relative overflow-hidden flex items-center gap-1.5 shrink-0">
+                                {category && (
+                                    <span className={`shrink-0 border px-1 py-[1px] rounded-[2px] text-[10px] sm:text-[11px] max-[424px]:text-[2.2vw] font-black ${
+                                        isCyber ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'
+                                    }`}>
+                                        {category}
+                                    </span>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                    <MarqueeText className={`text-[13px] sm:text-[14px] max-[424px]:text-[3.5vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${
+                                        isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
+                                        isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
+                                        'text-gray-800 bg-green-200/50'
+                                    }`}>
+                                        {title}
+                                    </MarqueeText>
+                                </div>
+                            </div>
 
-                                 {/* 하단: 급여 및 뱃지 */}
-                                 <div className="flex items-end justify-between w-full shrink-0 pt-0.5 border-t border-dashed border-gray-100">
-                                     <div className="flex items-center text-[11px] sm:text-[12px] max-[424px]:text-[2.8vw] font-bold text-gray-900 truncate tracking-tight gap-1">
-                                         {payType && (
-                                             <span className={`shrink-0 text-white text-[9px] sm:text-[9.5px] max-[424px]:text-[2vw] px-1 py-[0.5px] rounded-sm shadow-sm ${
-                                                 isImpact ? config.bg : 'bg-[#805ad5]'
-                                             }`}>
-                                                 {payType}
-                                             </span>
-                                         )}
-                                         <span className={`text-gray-800 ${isCyber ? 'text-white' : ''} truncate`}>
-                                             {payAmount}
-                                         </span>
-                                     </div>
-                                     <div className={`shrink-0 flex items-center px-1.5 py-[1px] rounded-[4px] text-[8px] sm:text-[9px] max-[424px]:text-[2.2vw] font-black shadow-[0_1px_3px_rgba(0,0,0,0.1)] border transition-all ${
-                                         isCyber ? 'bg-cyan-900 text-cyan-200 border-cyan-700 shadow-[0_0_8px_rgba(34,211,238,0.3)]' :
-                                         merchant_tier === 'VVVIP' ? 'bg-gradient-to-r from-rose-500 via-amber-400 to-blue-600 text-white border-amber-300 shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-bounce' : 
-                                         merchant_tier === 'VVIP' ? 'bg-gradient-to-r from-violet-600 to-pink-500 text-white border-fuchsia-400 shadow-[0_0_10px_rgba(168,85,247,0.4)] animate-pulse' :
-                                         merchant_tier === 'VIP' ? 'bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-amber-950 border-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]' :
-                                         'bg-slate-100 text-slate-500 border-slate-200/80 shadow-none'
-                                     }`}>
-                                         {merchant_tier === 'VVVIP' ? (
-                                             <>
-                                                 <Crown className="w-2.5 h-2.5 max-[424px]:w-[2vw] max-[424px]:h-[2vw] justify-center mr-0.5 text-white animate-bounce" /> 명가
-                                             </>
-                                         ) : merchant_tier === 'VVIP' ? (
-                                             <>
-                                                 <Zap className="w-2.5 h-2.5 max-[424px]:w-[2vw] max-[424px]:h-[2vw] justify-center mr-0.5 text-yellow-200" /> 으뜸
-                                             </>
-                                         ) : merchant_tier === 'VIP' ? (
-                                             <>
-                                                 <Crown className="w-2.5 h-2.5 max-[424px]:w-[2vw] max-[424px]:h-[2vw] justify-center mr-0.5 text-amber-800" /> 우수
-                                             </>
-                                         ) : (
-                                             <>
-                                                 <Star className="w-2.5 h-2.5 max-[424px]:w-[2vw] max-[424px]:h-[2vw] justify-center mr-0.5 text-slate-400" /> 일반
-                                             </>
-                                         )}
-                                     </div>
-                                 </div>
+                            {/* 하단: 급여 및 뱃지 */}
+                            <div className="flex items-end justify-between w-full shrink-0">
+                                <div className="flex items-center text-[12px] sm:text-[13px] max-[424px]:text-[3.2vw] font-bold text-gray-900 truncate tracking-tight gap-1 sm:gap-1.5">
+                                    {payType && (
+                                        <span className={`shrink-0 text-white text-[9px] sm:text-[10px] max-[424px]:text-[2.2vw] px-1 sm:px-1.5 max-[424px]:px-1 py-[1px] sm:py-0.5 max-[424px]:py-0 rounded-sm shadow-sm ${
+                                            isImpact ? config.bg : 'bg-[#805ad5]'
+                                        }`}>
+                                            {payType}
+                                        </span>
+                                    )}
+                                    <span className={`text-gray-800 ${isCyber ? 'text-white' : ''}`}>
+                                        {payAmount}
+                                    </span>
+                                </div>
+                                <div className={`shrink-0 flex items-center px-1 sm:px-1.5 py-[1px] sm:py-0.5 rounded-[4px] text-[9px] sm:text-[10px] max-[424px]:text-[2.5vw] font-black shadow-[0_1px_3px_rgba(0,0,0,0.1)] border transition-all ${
+                                    isCyber ? 'bg-cyan-900 text-cyan-200 border-cyan-700 shadow-[0_0_8px_rgba(34,211,238,0.3)]' :
+                                    (tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier)) ? 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 text-white border-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)] animate-pulse' : 
+                                    (tier === 'SPECIAL') ? 'bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white border-fuchsia-400 shadow-[0_0_10px_rgba(168,85,247,0.4)]' :
+                                    'bg-slate-100 text-slate-500 border-slate-200/80 shadow-none'
+                                }`}>
+                                    {tier === 'PREMIUM_MAIN' || tier === 'PREMIUM' || (isImpact && !tier) ? (
+                                        <>
+                                            <Crown className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-white animate-bounce" /> 프리미엄
+                                        </>
+                                    ) : tier === 'SPECIAL' ? (
+                                        <>
+                                            <Zap className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-yellow-200" /> 스페셜
+                                        </>
+                                    ) : tier === 'GENERAL' || tier === 'AD_GENERAL' || tier === 'LINE' ? (
+                                        <>
+                                            <Crown className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-slate-400" /> 일반
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Star className="w-[10px] h-[10px] max-[424px]:w-[2.5vw] max-[424px]:h-[2.5vw] sm:w-3 sm:h-3 justify-center mr-0.5 sm:mr-1 text-slate-400" /> 우수
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
@@ -598,4 +600,4 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
             </Link>
         </div>
     );
-}
+}  

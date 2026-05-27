@@ -1012,108 +1012,146 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
                                 <div className="flex flex-wrap justify-center gap-6">
                                     
-                                    {/* 배너 미리보기 영역 */}
-                                    <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                                    <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center">
-                                        <Image className="w-4 h-4 text-primary" />
-                                        배너 미리보기
-                                    </h3>
-
-                                    <div className="w-full flex justify-center pointer-events-none">
-                                        {(() => {
-                                            const isPremium = form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN';
-                                            const isSide = form.tier === 'SIDE';
-                                            const isSpecial = form.tier === 'SPECIAL';
-                                            const isGeneral = form.tier === 'GENERAL' || form.tier === 'AD_GENERAL';
+                                    {/* ① 업체 로고 업로드 카드 (PREMIUM_MAIN 이고 upload 모드일 때는 로고 업로드 숨김) */}
+                                    {form.tier !== 'GENERAL' && form.tier !== 'AD_GENERAL' && !(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
+                                        <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center mx-auto sm:mx-0 h-full shrink-0">
+                                            <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center w-full">
+                                                <Image className="w-4 h-4 text-primary" />
+                                                업체 로고
+                                            </h3>
                                             
-                                            // PREMIUM_MAIN 이면서 직접 업로드 모드일 때
-                                            if (form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') {
-                                                return (
-                                                    <label className="w-[800px] max-w-full aspect-[2/1] rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary hover:bg-blue-50/50 transition-all pointer-events-auto">
-                                                        {form.image ? (
-                                                            <img src={form.image} alt="배너 이미지" className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="flex flex-col items-center gap-2 p-6 text-center">
-                                                                <Upload className="w-10 h-10 text-gray-400 group-hover:text-primary transition-colors" />
-                                                                <span className="text-gray-500 font-bold">여기를 클릭하여 메인 배너를 업로드하세요</span>
-                                                                <span className="text-[12px] text-gray-400">권장 사이즈: 가로 800px, 세로 400px (2:1 비율)</span>
-                                                            </div>
-                                                        )}
-                                                        <input type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
-                                                    </label>
-                                                );
-                                            }
+                                            <label className="relative group cursor-pointer w-full flex justify-center mt-auto">
+                                                <div className="w-[100px] h-[100px] rounded-2xl border-2 border-dashed overflow-hidden bg-gray-50 flex items-center justify-center transition-all border-gray-300 group-hover:border-primary group-hover:bg-blue-50/50">
+                                                    {form.logo_url ? (
+                                                        <img src={form.logo_url} alt="로고" className="w-full h-full object-contain" />
+                                                    ) : (
+                                                        <div className="flex flex-col items-center">
+                                                            <Upload className="w-7 h-7 text-gray-300 group-hover:text-primary transition-colors mb-1" />
+                                                            <span className="text-[11px] font-bold text-gray-400 group-hover:text-primary">
+                                                                직접 업로드
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                                            </label>
 
-                                            // 기존 템플릿 모드 및 다른 등급 배너
-                                            if (form.tier === 'PREMIUM_MAIN') {
-                                                const hasLogo = !!form.logo_url;
-                                                const logoUrl = form.logo_url;
+                                            <p className="text-[10px] text-gray-400 mt-2 text-center leading-relaxed mb-auto">
+                                                PNG/JPG 지원<br/>
+                                                가로 형태(1.5:1 비율) 권장
+                                            </p>
+
+                                            <button 
+                                                type="button"
+                                                onClick={handleLogoRequest}
+                                                className="mt-3 w-full py-2 rounded-lg bg-gray-900 hover:bg-black text-white text-[12px] flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                                            >
+                                                <Paintbrush className="w-4 h-4 text-blue-200" />
+                                                <span className="font-bold">제작문의</span>
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* ② 배너 미리보기 영역 */}
+                                    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                                        <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center">
+                                            <Image className="w-4 h-4 text-primary" />
+                                            배너 미리보기
+                                        </h3>
+
+                                        <div className="w-full flex justify-center pointer-events-none">
+                                            {(() => {
+                                                const isPremium = form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN';
+                                                const isSide = form.tier === 'SIDE';
+                                                const isSpecial = form.tier === 'SPECIAL';
+                                                const isGeneral = form.tier === 'GENERAL' || form.tier === 'AD_GENERAL';
                                                 
-                                                let payType = '';
-                                                let payAmount = form.pay || '급여 정보';
-                                                if (typeof payAmount === 'string' && payAmount.includes(']') && payAmount.startsWith('[')) {
-                                                    const splitIndex = payAmount.indexOf(']');
-                                                    payType = payAmount.substring(1, splitIndex).trim();
-                                                    payAmount = payAmount.substring(splitIndex + 1).trim();
-                                                } else if (payAmount === '추후협의') {
-                                                    payType = '협의';
-                                                    payAmount = '추후협의';
-                                                } else {
-                                                    const parts = payAmount.split(' ');
-                                                    if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0])) {
-                                                        payType = parts[0];
-                                                        payAmount = parts.slice(1).join(' ');
-                                                    }
+                                                // PREMIUM_MAIN 이면서 직접 업로드 모드일 때
+                                                if (form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') {
+                                                    return (
+                                                        <label className="w-[800px] max-w-full aspect-[2/1] rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary hover:bg-blue-50/50 transition-all pointer-events-auto">
+                                                            {form.image ? (
+                                                                <img src={form.image} alt="배너 이미지" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="flex flex-col items-center gap-2 p-6 text-center">
+                                                                    <Upload className="w-10 h-10 text-gray-400 group-hover:text-primary transition-colors" />
+                                                                    <span className="text-gray-500 font-bold">여기를 클릭하여 메인 배너를 업로드하세요</span>
+                                                                    <span className="text-[12px] text-gray-400">권장 사이즈: 가로 800px, 세로 400px (2:1 비율)</span>
+                                                                </div>
+                                                            )}
+                                                            <input type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
+                                                        </label>
+                                                    );
                                                 }
 
-                                                // fallback 그라데이션 대신 선택한 테마에 맞춰 매핑 (선택되지 않으면 기본 인디고)
-                                                const themeMap: Record<string, string> = {
-                                                    gold: 'from-yellow-900 via-orange-900 to-black',
-                                                    platinum: 'from-slate-700 via-gray-900 to-black',
-                                                    diamond: 'from-cyan-900 via-blue-900 to-black',
-                                                    ruby: 'from-rose-900 via-red-900 to-black',
-                                                    sapphire: 'from-blue-900 via-indigo-900 to-black',
-                                                    emerald: 'from-emerald-900 via-green-900 to-black',
-                                                    amethyst: 'from-purple-900 via-fuchsia-900 to-black',
-                                                    obsidian: 'from-gray-900 via-black to-black'
-                                                };
-                                                const bgGradient = form.theme && form.theme !== 'none' && themeMap[form.theme] 
-                                                    ? `bg-gradient-to-br ${themeMap[form.theme]}` 
-                                                    : 'bg-gradient-to-br from-indigo-900 via-purple-900 to-black';
+                                                // 기존 템플릿 모드 및 다른 등급 배너
+                                                if (form.tier === 'PREMIUM_MAIN') {
+                                                    const hasLogo = !!form.logo_url;
+                                                    const logoUrl = form.logo_url;
+                                                    
+                                                    let payType = '';
+                                                    let payAmount = form.pay || '급여 정보';
+                                                    if (typeof payAmount === 'string' && payAmount.includes(']') && payAmount.startsWith('[')) {
+                                                        const splitIndex = payAmount.indexOf(']');
+                                                        payType = payAmount.substring(1, splitIndex).trim();
+                                                        payAmount = payAmount.substring(splitIndex + 1).trim();
+                                                    } else if (payAmount === '추후협의') {
+                                                        payType = '협의';
+                                                        payAmount = '추후협의';
+                                                    } else {
+                                                        const parts = payAmount.split(' ');
+                                                        if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0])) {
+                                                            payType = parts[0];
+                                                            payAmount = parts.slice(1).join(' ');
+                                                        }
+                                                    }
 
-                                                return (
-                                                    <div className="flex justify-center">
-                                                        <div className={`flex-shrink-0 w-[400px] max-w-full h-[180px] rounded-2xl ${bgGradient} p-6 shadow-md relative overflow-hidden group`}>
-                                                            {/* 템플릿 모드 배경 이미지 */}
-                                                            {form.image && (
-                                                                <div 
-                                                                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 mix-blend-overlay opacity-60"
-                                                                    style={{ backgroundImage: `url(${form.image})` }}
-                                                                />
-                                                            )}
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
-                                                            <div className="relative z-20 h-full flex gap-4 items-center pointer-events-auto">
-                                                                {/* 좌측: 로고 영역 (전체 높이 대비) */}
-                                                                {hasLogo && (
-                                                                    <div className="w-[100px] h-[100px] bg-white rounded-xl p-2 shadow-md shrink-0 flex items-center justify-center overflow-hidden">
-                                                                        <div className="w-full h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoUrl})` }} />
-                                                                    </div>
+                                                    // fallback 그라데이션 대신 선택한 테마에 맞춰 매핑 (선택되지 않으면 기본 인디고)
+                                                    const themeMap: Record<string, string> = {
+                                                        gold: 'from-yellow-900 via-orange-900 to-black',
+                                                        platinum: 'from-slate-700 via-gray-900 to-black',
+                                                        diamond: 'from-cyan-900 via-blue-900 to-black',
+                                                        ruby: 'from-rose-900 via-red-900 to-black',
+                                                        sapphire: 'from-blue-900 via-indigo-900 to-black',
+                                                        emerald: 'from-emerald-900 via-green-900 to-black',
+                                                        amethyst: 'from-purple-900 via-fuchsia-900 to-black',
+                                                        obsidian: 'from-gray-900 via-black to-black'
+                                                    };
+                                                    const bgGradient = form.theme && form.theme !== 'none' && themeMap[form.theme] 
+                                                        ? `bg-gradient-to-br ${themeMap[form.theme]}` 
+                                                        : 'bg-gradient-to-br from-indigo-900 via-purple-900 to-black';
+
+                                                    return (
+                                                        <div className="flex justify-center">
+                                                            <div className={`flex-shrink-0 w-[400px] max-w-full h-[180px] rounded-2xl ${bgGradient} p-6 shadow-md relative overflow-hidden group`}>
+                                                                {/* 템플릿 모드 배경 이미지 */}
+                                                                {form.image && (
+                                                                    <div 
+                                                                        className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 mix-blend-overlay opacity-60"
+                                                                        style={{ backgroundImage: `url(${form.image})` }}
+                                                                    />
                                                                 )}
-
-                                                                {/* 우측: 정보 영역 */}
-                                                                <div className="flex-1 min-w-0 h-full flex flex-col justify-between py-1">
-                                                                    <div className="space-y-2">
-                                                                        <h3 className="text-white font-black text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] flex items-center">
-                                                                            {form.company || '업체명'}
-                                                                            {userMerchantTier && userMerchantTier !== 'NORMAL' && (
-                                                                                <MerchantTierBadge tier={userMerchantTier} />
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
+                                                                <div className="relative z-20 h-full flex flex-col justify-between pointer-events-auto">
+                                                                    <div className="space-y-3">
+                                                                        <div className="flex items-center gap-3 mb-1">
+                                                                            {hasLogo && (
+                                                                                <div className="w-[60px] h-[40px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
+                                                                                    <div className="w-full h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoUrl})` }} />
+                                                                                </div>
                                                                             )}
-                                                                        </h3>
-                                                                        <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[95%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
+                                                                            <h3 className="text-white font-black text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] flex items-center">
+                                                                                {form.company || '업체명'}
+                                                                                {userMerchantTier && userMerchantTier !== 'NORMAL' && (
+                                                                                    <MerchantTierBadge tier={userMerchantTier} />
+                                                                                )}
+                                                                            </h3>
+                                                                        </div>
+                                                                        <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
                                                                             {form.title || '광고 제목을 입력하세요'}
                                                                         </p>
                                                                     </div>
-                                                                    <div className="flex flex-col gap-1 mt-auto">
+                                                                    <div className="flex flex-col gap-1.5 mt-auto">
                                                                         <p className="text-white/70 text-[11px] font-bold tracking-wider">{form.location || '전지역'}</p>
                                                                         <div className="flex items-center gap-2">
                                                                             {payType && (
@@ -1129,38 +1167,37 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <div className="w-full flex justify-center">
+                                                        <div style={{ width: (isSide ? '150px' : '200px'), maxWidth: '100%' }}>
+                                                        <PremiumJobCard
+                                                            id="preview"
+                                                            company={form.company || '업체명'}
+                                                            title={form.title || '광고 제목을 입력하세요'}
+                                                            location={form.location || '전지역'}
+                                                            category={form.category_1}
+                                                            pay={form.pay || '급여 정보'}
+                                                            image={form.logo_url || form.image}
+                                                            impactType={(form.theme as any) || 'gold'}
+                                                            effectIntensity={isSpecial || isGeneral || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'shimmer'}`}
+                                                            isSide={isSide}
+                                                            hideLogo={isGeneral}
+                                                            tier={form.tier}
+                                                            customColor={form.color}
+                                                            bgOpacity={form.bg_opacity}
+                                                            merchant_tier={userMerchantTier}
+                                                        />
+                                                        </div>
                                                     </div>
                                                 );
-                                            }
-
-                                            return (
-                                                <div className="w-full flex justify-center">
-                                                    <div style={{ width: (isSide ? '150px' : '200px'), maxWidth: '100%' }}>
-                                                    <PremiumJobCard
-                                                        id="preview"
-                                                        company={form.company || '업체명'}
-                                                        title={form.title || '광고 제목을 입력하세요'}
-                                                        location={form.location || '전지역'}
-                                                        category={form.category_1}
-                                                        pay={form.pay || '급여 정보'}
-                                                        image={form.logo_url || form.image}
-                                                        impactType={(form.theme as any) || 'gold'}
-                                                        effectIntensity={isSpecial || isGeneral || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'shimmer'}`}
-                                                        isSide={isSide}
-                                                        hideLogo={isGeneral}
-                                                        tier={form.tier}
-                                                        customColor={form.color}
-                                                        bgOpacity={form.bg_opacity}
-                                                        merchant_tier={userMerchantTier}
-                                                    />
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
-                                    </div>
+                                            })()}
+                                        </div>
                                     </div>
 
-                                    {/* 업체 등급 산정 기준 안내 카드 */}
+                                    {/* ③ 업체 등급 산정 기준 안내 카드 */}
                                     <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100 p-5 w-full sm:w-[280px] shrink-0 space-y-3 flex flex-col justify-between">
                                         <div className="space-y-3">
                                             <h4 className="font-black text-[14px] text-gray-800 flex items-center gap-1.5 border-b pb-2">
@@ -1197,47 +1234,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             ※ 조건 충족 시 매월 1일 자정 등급이 자동 반영됩니다.
                                         </p>
                                     </div>
-
-                                {/* 로고 업로드 (PREMIUM_MAIN 이고 upload 모드일 때는 로고 업로드 숨김) */}
-                                {form.tier !== 'GENERAL' && form.tier !== 'AD_GENERAL' && !(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
-                                    <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center mx-auto sm:mx-0 h-full">
-                                        <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center w-full">
-                                            <Image className="w-4 h-4 text-primary" />
-                                            업체 로고
-                                        </h3>
-                                        
-                                        <label className="relative group cursor-pointer w-full flex justify-center mt-auto">
-                                            <div className="w-[100px] h-[100px] rounded-2xl border-2 border-dashed overflow-hidden bg-gray-50 flex items-center justify-center transition-all border-gray-300 group-hover:border-primary group-hover:bg-blue-50/50">
-                                                {form.logo_url ? (
-                                                    <img src={form.logo_url} alt="로고" className="w-full h-full object-contain" />
-                                                ) : (
-                                                    <div className="flex flex-col items-center">
-                                                        <Upload className="w-7 h-7 text-gray-300 group-hover:text-primary transition-colors mb-1" />
-                                                        <span className="text-[11px] font-bold text-gray-400 group-hover:text-primary">
-                                                            직접 업로드
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-                                        </label>
-
-                                        <p className="text-[10px] text-gray-400 mt-2 text-center leading-relaxed mb-auto">
-                                            PNG/JPG 지원<br/>
-                                            가로 형태(1.5:1 비율) 권장
-                                        </p>
-
-                                        <button 
-                                            type="button"
-                                            onClick={handleLogoRequest}
-                                            className="mt-3 w-full py-2 rounded-lg bg-gray-900 hover:bg-black text-white text-[12px] flex items-center justify-center gap-1.5 shadow-sm transition-all"
-                                        >
-                                            <Paintbrush className="w-4 h-4 text-blue-200" />
-                                            <span className="font-bold">제작문의</span>
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                                </div>
                             </>
                         )}
 
