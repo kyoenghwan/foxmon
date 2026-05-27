@@ -15,6 +15,38 @@ interface TierConfig {
   bonus_ratio: number;
 }
 
+function MerchantTierBadge({ tier }: { tier: string }) {
+    if (tier === 'VIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-[1.5px] rounded text-[8px] font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-amber-950 border border-amber-300/40 shadow-[0_0_6px_rgba(245,158,11,0.4)] shrink-0 select-none">
+                🎖️ 우수
+            </span>
+        );
+    }
+    if (tier === 'VVIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-[1.5px] rounded text-[8px] font-black bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 text-white border border-fuchsia-400/40 shadow-[0_0_8px_rgba(168,85,247,0.6)] shrink-0 select-none animate-pulse">
+                🏆 으뜸
+            </span>
+        );
+    }
+    if (tier === 'VVVIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-[1.5px] rounded text-[8px] font-black bg-gradient-to-r from-rose-500 via-amber-400 to-blue-600 text-white border border-amber-300/50 shadow-[0_0_12px_rgba(239,68,68,0.7)] shrink-0 select-none animate-bounce">
+                👑 명가
+            </span>
+        );
+    }
+    if (tier === 'NORMAL') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-[1.5px] rounded text-[8px] font-black bg-slate-100 text-slate-500 border border-slate-200 select-none">
+                일반
+            </span>
+        );
+    }
+    return null;
+}
+
 /**
  * [Admin Component] TierConfigEditor
  * 업체 등급(VIP, VVIP, VVVIP)별 승급 기준 및 혜택을 실시간으로 수정하는 관리자 도구입니다.
@@ -75,7 +107,10 @@ export function TierConfigEditor() {
             <tbody className="divide-y">
               {tierConfigs.map((tier, idx) => (
                 <tr key={tier.tier_name} className={idx === 0 ? "bg-muted/10 opacity-60" : "hover:bg-muted/20 transition-colors"}>
-                  <td className="px-6 py-4 font-black">{tier.tier_name}</td>
+                  <td className="px-6 py-4 font-black flex items-center gap-3">
+                    <span className="w-16">{tier.tier_name}</span>
+                    <MerchantTierBadge tier={tier.tier_name} />
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <Input 
