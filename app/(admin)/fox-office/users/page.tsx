@@ -41,6 +41,7 @@ export default async function UsersManagementPage() {
                                 <th className="p-4">유저 아이디</th>
                                 <th className="p-4">이름 / 닉네임</th>
                                 <th className="p-4">권한</th>
+                                <th className="p-4">업체 등급</th>
                                 <th className="p-4">휴대폰 번호</th>
                                 <th className="p-4">성인인증</th>
                                 <th className="p-4 text-center">가입일</th>
@@ -66,6 +67,17 @@ export default async function UsersManagementPage() {
                                             <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-[11px] px-2 py-0.5">업체회원</Badge>
                                         ) : (
                                             <Badge variant="outline" className="text-gray-600 border-gray-200 text-[11px] px-2 py-0.5"><User className="w-3 h-3 mr-1" /> 일반회원</Badge>
+                                        )}
+                                    </td>
+                                    <td className="p-4">
+                                        {user.merchant_tier === 'VIP' ? (
+                                            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-[11px] px-2 py-0.5">🎖️ 우수</Badge>
+                                        ) : user.merchant_tier === 'VVIP' ? (
+                                            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-[11px] px-2 py-0.5">🏆 으뜸</Badge>
+                                        ) : user.merchant_tier === 'VVVIP' ? (
+                                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-[11px] px-2 py-0.5">👑 명가</Badge>
+                                        ) : (
+                                            <Badge variant="outline" className="text-gray-400 border-gray-200 text-[11px] px-2 py-0.5">일반</Badge>
                                         )}
                                     </td>
                                     <td className="p-4 font-medium text-gray-600 text-[13px]">

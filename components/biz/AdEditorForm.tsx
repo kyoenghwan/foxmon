@@ -26,6 +26,31 @@ const SunEditor = dynamic(() => import('suneditor-react'), {
 });
 import 'suneditor/dist/css/suneditor.min.css';
 
+function MerchantTierBadge({ tier }: { tier: 'VIP' | 'VVIP' | 'VVVIP' }) {
+    if (tier === 'VIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1 py-[0.5px] rounded text-[8px] font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-amber-950 border border-amber-300/40 shadow-[0_0_6px_rgba(245,158,11,0.4)] shrink-0 ml-1 select-none">
+                🎖️ 우수
+            </span>
+        );
+    }
+    if (tier === 'VVIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1 py-[0.5px] rounded text-[8px] font-black bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 text-white border border-fuchsia-400/40 shadow-[0_0_8px_rgba(168,85,247,0.6)] shrink-0 ml-1 select-none animate-pulse">
+                🏆 으뜸
+            </span>
+        );
+    }
+    if (tier === 'VVVIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1 py-[0.5px] rounded text-[8px] font-black bg-gradient-to-r from-rose-500 via-amber-400 to-blue-600 text-white border border-amber-300/50 shadow-[0_0_12px_rgba(239,68,68,0.7)] shrink-0 ml-1 select-none animate-bounce">
+                👑 명가
+            </span>
+        );
+    }
+    return null;
+}
+
 export interface AdFormData {
     id?: string;
     company: string;
@@ -351,6 +376,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
     const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | 'mainDesign' | null>(null);
+    const [userMerchantTier, setUserMerchantTier] = useState<'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP'>('NORMAL');
     
     // 동적 SNS 계정 연결 상태 (업체 프로필과 연동)
     const [snsLinks, setSnsLinks] = useState<{type: string; value: string}[]>([]);
@@ -583,25 +609,28 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         };
         const fetchUserProfile = async () => {
             try {
-                if (isNew) {
-                    const res = await userSettingsAction('GET_PROFILE');
-                    if (res.success && res.data) {
-                        const profile = res.data;
-                        
-                        // 연락처 파싱 (010 시작 시 핸드폰, 그 외 일반전화)
-                        const phone = profile.phone_number || '';
-                        const isMobile = phone.startsWith('010');
-                        
-                        // 메신저 정보 변환 및 로컬 snsLinks 주입
-                        const fetchedSns = [];
-                        if (profile.sns_kakao) fetchedSns.push({ type: 'kakao', value: profile.sns_kakao });
-                        if (profile.sns_instagram) fetchedSns.push({ type: 'instagram', value: profile.sns_instagram });
-                        if (profile.sns_telegram) fetchedSns.push({ type: 'telegram', value: profile.sns_telegram });
-                        
-                        if (fetchedSns.length > 0) {
-                            setSnsLinks(fetchedSns);
-                        }
+                const res = await userSettingsAction('GET_PROFILE');
+                if (res.success && res.data) {
+                    const profile = res.data;
+                    if (profile.merchant_tier) {
+                        setUserMerchantTier(profile.merchant_tier);
+                    }
+                    
+                    // 연락처 파싱 (010 시작 시 핸드폰, 그 외 일반전화)
+                    const phone = profile.phone_number || '';
+                    const isMobile = phone.startsWith('010');
+                    
+                    // 메신저 정보 변환 및 로컬 snsLinks 주입
+                    const fetchedSns = [];
+                    if (profile.sns_kakao) fetchedSns.push({ type: 'kakao', value: profile.sns_kakao });
+                    if (profile.sns_instagram) fetchedSns.push({ type: 'instagram', value: profile.sns_instagram });
+                    if (profile.sns_telegram) fetchedSns.push({ type: 'telegram', value: profile.sns_telegram });
+                    
+                    if (fetchedSns.length > 0) {
+                        setSnsLinks(fetchedSns);
+                    }
 
+                    if (isNew) {
                         if (profile.is_business_verified) {
                             setIsBizVerified(true);
                             setForm(prev => ({
@@ -622,9 +651,9 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 telegram_id: profile.sns_telegram || '',
                             }));
                         }
-                    } else {
-                        console.error("❌ [AdEditorForm] fetchUserProfile failed:", res.message);
                     }
+                } else {
+                    console.error("❌ [AdEditorForm] fetchUserProfile failed:", res.message);
                 }
             } catch (err) {
                 console.error("❌ [AdEditorForm] fetchUserProfile exception:", err);
@@ -1071,8 +1100,11 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                                                 <div className="w-full h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoUrl})` }} />
                                                                             </div>
                                                                         )}
-                                                                        <h3 className="text-white font-black text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                                                                        <h3 className="text-white font-black text-2xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] flex items-center">
                                                                             {form.company || '업체명'}
+                                                                            {userMerchantTier && userMerchantTier !== 'NORMAL' && (
+                                                                                <MerchantTierBadge tier={userMerchantTier} />
+                                                                            )}
                                                                         </h3>
                                                                     </div>
                                                                     <p className="text-white/95 text-base font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
@@ -1116,11 +1148,50 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                         tier={form.tier}
                                                         customColor={form.color}
                                                         bgOpacity={form.bg_opacity}
+                                                        merchant_tier={userMerchantTier}
                                                     />
                                                     </div>
                                                 </div>
                                             );
                                         })()}
+                                    </div>
+
+                                    {/* 업체 등급 산정 기준 안내 카드 */}
+                                    <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100 p-5 w-full sm:w-[280px] shrink-0 space-y-3 flex flex-col justify-between">
+                                        <div className="space-y-3">
+                                            <h4 className="font-black text-[14px] text-gray-800 flex items-center gap-1.5 border-b pb-2">
+                                                🎖️ 업체 등급(인증 메달) 안내
+                                            </h4>
+                                            <p className="text-[11px] text-gray-500 leading-relaxed font-medium">
+                                                광고 상품 등급과 무관하게, Foxmon에서 꾸준히 신뢰를 쌓아온 우수 업체를 우대해 드리는 상생 인증 마크입니다.
+                                            </p>
+                                            <div className="space-y-2.5 pt-1">
+                                                <div className="flex items-start gap-2">
+                                                    <span className="inline-flex items-center justify-center text-[10px] font-black bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 px-1.5 py-0.5 rounded shadow-sm shrink-0 w-[50px] h-[18px]">🎖️ 우수</span>
+                                                    <div className="text-[10px] leading-snug">
+                                                        <p className="font-extrabold text-gray-700">연속 광고 3개월 이상</p>
+                                                        <p className="text-gray-400">또는 누적 현금 결제 100만 원 이상</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-start gap-2">
+                                                    <span className="inline-flex items-center justify-center text-[10px] font-black bg-gradient-to-r from-violet-600 to-pink-500 text-white px-1.5 py-0.5 rounded shadow-sm shrink-0 w-[50px] h-[18px]">🏆 으뜸</span>
+                                                    <div className="text-[10px] leading-snug">
+                                                        <p className="font-extrabold text-gray-700">연속 광고 6개월 이상</p>
+                                                        <p className="text-gray-400">또는 누적 현금 결제 300만 원 이상</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-start gap-2">
+                                                    <span className="inline-flex items-center justify-center text-[10px] font-black bg-gradient-to-r from-rose-500 via-amber-400 to-blue-600 text-white px-1.5 py-0.5 rounded shadow-sm shrink-0 w-[50px] h-[18px]">👑 명가</span>
+                                                    <div className="text-[10px] leading-snug">
+                                                        <p className="font-extrabold text-gray-700">연속 광고 12개월 이상</p>
+                                                        <p className="text-gray-400">또는 누적 현금 결제 500만 원 이상</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p className="text-[9px] text-gray-400 leading-normal pt-1.5 border-t border-dashed mt-3">
+                                            ※ 조건 충족 시 매월 1일 자정 등급이 자동 반영됩니다.
+                                        </p>
                                     </div>
                                 </div>
 
