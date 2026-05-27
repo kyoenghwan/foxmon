@@ -133,7 +133,12 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                         </div>
 
                         {/* Post Content */}
-                        <div className="min-h-[150px]">
+                        <div className="min-h-[150px] space-y-4">
+                            {post.thumbnail && (
+                                <div className="max-w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm max-h-[400px] flex items-center justify-center bg-gray-50">
+                                    <img src={post.thumbnail} alt="첨부 이미지" className="max-w-full max-h-[400px] object-contain" />
+                                </div>
+                            )}
                             <div 
                                 className="sun-editor-editable ProseMirror custom-prose text-gray-800 text-[14px] md:text-[15px] leading-loose whitespace-pre-wrap break-words"
                                 dangerouslySetInnerHTML={{ __html: post.content }}

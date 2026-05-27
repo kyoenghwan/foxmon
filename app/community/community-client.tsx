@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CommunitySidebar } from '@/components/community/CommunitySidebar';
 import { PostDetailModal } from '@/components/community/PostDetailModal';
 import { maskName } from '@/lib/utils';
-import { Pencil, MessageSquare } from 'lucide-react';
+import { Pencil, MessageSquare, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import {
     COMMUNITY_AUDIENCE_LABELS,
@@ -39,7 +39,34 @@ export function CommunityClient({
     const [selectedPost, setSelectedPost] = useState<any>(null);
     const [writeTitle, setWriteTitle] = useState('');
     const [writeContent, setWriteContent] = useState('');
+    const [writeThumbnail, setWriteThumbnail] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (!showWriteModal) {
+            setWriteTitle('');
+            setWriteContent('');
+            setWriteThumbnail(null);
+        }
+    }, [showWriteModal]);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        try {
+            const { compressImageFile } = await import('@/lib/image-utils');
+            const compressedBase64 = await compressImageFile(file, { 
+                maxWidthOrHeight: 800, 
+                quality: 0.85, 
+                format: 'image/jpeg' 
+            });
+            setWriteThumbnail(compressedBase64);
+        } catch (error) {
+            console.error('이미지 처리 실패:', error);
+            alert('이미지 처리 중 오류가 발생했습니다.');
+        }
+    };
 
     const handleTabChange = (tabId: string) => {
         router.push(`/community?tab=${tabId}`);
@@ -75,13 +102,15 @@ export function CommunityClient({
             const res = await createCommunityPost({
                 board_id: activeTab,
                 title: writeTitle,
-                content: writeContent
+                content: writeContent,
+                thumbnail: writeThumbnail
             });
             if (res.success) {
                 alert('게시글이 등록되었습니다.');
                 setShowWriteModal(false);
                 setWriteTitle('');
                 setWriteContent('');
+                setWriteThumbnail(null);
                 router.refresh(); // Refresh server component
             } else {
                 alert(res.message);
@@ -282,6 +311,35 @@ export function CommunityClient({
                                     maxLength={2000}
                                 />
                             </div>
+                            {activeTab === 'business' && (
+                                <div className="space-y-2">
+                                    <label className="text-[12px] font-bold text-gray-500 block">이미지 첨부 (선택)</label>
+                                    <div className="flex items-center gap-3">
+                                        <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 hover:bg-gray-50 cursor-pointer transition-all shadow-sm">
+                                            <Upload className="w-4 h-4 text-gray-500" />
+                                            사진 올리기
+                                            <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                className="hidden" 
+                                                onChange={handleImageUpload}
+                                            />
+                                        </label>
+                                        {writeThumbnail && (
+                                            <div className="relative w-12 h-12 border border-gray-200 rounded-xl overflow-hidden shadow-sm shrink-0">
+                                                <img src={writeThumbnail} alt="첨부 이미지" className="w-full h-full object-cover" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setWriteThumbnail(null)}
+                                                    className="absolute top-0.5 right-0.5 bg-black/75 hover:bg-black text-white w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* 모달 푸터 (버튼) */}
