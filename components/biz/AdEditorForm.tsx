@@ -1237,65 +1237,86 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                         </button>
                                     </div>
                                 </div>
-                                 <div className="flex flex-col gap-4">
-                                     <div>
-                                         <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                             <Building2 className="w-3.5 h-3.5" /> 업체명 및 닉네임 <span className="text-red-500">*</span>
+                                 <div className="flex flex-col gap-1">
+                                     {/* 업체명 및 닉네임 */}
+                                     <div className="flex flex-row items-center gap-2 sm:gap-4 py-1.5">
+                                         <label className="w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                             <Building2 className="w-3.5 h-3.5 text-gray-400" />
+                                             <span>업체명 및 닉네임</span>
+                                             <span className="text-red-500">*</span>
+                                             <span className="text-gray-300 ml-auto mr-1">-</span>
                                          </label>
-                                         <input
-                                             type="text"
-                                             value={form.company || ''}
-                                             onChange={e => update('company', e.target.value)}
-                                             className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                             placeholder="업체명 또는 닉네임을 입력하세요"
-                                         />
+                                         <div className="flex-1">
+                                             <input
+                                                 type="text"
+                                                 value={form.company || ''}
+                                                 onChange={e => update('company', e.target.value)}
+                                                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                                 placeholder="업체명 또는 닉네임을 입력하세요"
+                                                 id="basic_info_company"
+                                             />
+                                         </div>
                                      </div>
-                                     <div>
-                                         <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                             <Briefcase className="w-3.5 h-3.5" /> 광고 제목 <span className="text-red-500">*</span>
+
+                                     {/* 광고 제목 */}
+                                     <div className="flex flex-row items-center gap-2 sm:gap-4 py-1.5">
+                                         <label className="w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                             <Briefcase className="w-3.5 h-3.5 text-gray-400" />
+                                             <span>광고 제목</span>
+                                             <span className="text-red-500">*</span>
+                                             <span className="text-gray-300 ml-auto mr-1">-</span>
                                          </label>
-                                         <input
-                                             type="text"
-                                             value={form.title}
-                                             onChange={e => update('title', e.target.value)}
-                                             className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                             placeholder="예: 최고 대우 보장! 초보 환영합니다 (40자 제한)"
-                                             maxLength={40}
-                                         />
+                                         <div className="flex-1">
+                                             <input
+                                                 type="text"
+                                                 value={form.title}
+                                                 onChange={e => update('title', e.target.value)}
+                                                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                                 placeholder="예: 최고 대우 보장! 초보 환영합니다 (40자 제한)"
+                                                 maxLength={40}
+                                                 id="basic_info_title"
+                                             />
+                                         </div>
+                                     </div>
+
+                                     {/* 급여조건 */}
+                                     <div className="flex flex-row items-center gap-2 sm:gap-4 py-1.5">
+                                         <label className="w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                             <DollarSign className="w-3.5 h-3.5 text-gray-400" />
+                                             <span>급여조건</span>
+                                             <span className="text-red-500">*</span>
+                                             <span className="text-gray-300 ml-auto mr-1">-</span>
+                                         </label>
+                                         <div className="flex-1 flex gap-2">
+                                             <select
+                                                 value={form.pay_type}
+                                                 onChange={e => handlePayChange(e.target.value, form.pay_amount || '')}
+                                                 className="w-[110px] px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white"
+                                             >
+                                                 <option value="시급">시급</option>
+                                                 <option value="일급">일급</option>
+                                                 <option value="주급">주급</option>
+                                                 <option value="월급">월급</option>
+                                                 <option value="건당">건당</option>
+                                                 <option value="협의">협의</option>
+                                                 <option value="기타">기타</option>
+                                             </select>
+                                             <div className="flex-1 relative">
+                                                 <input
+                                                     type="text" 
+                                                     value={form.pay_amount || ''} 
+                                                     onChange={e => handlePayChange(form.pay_type || '월급', e.target.value)}
+                                                     disabled={form.pay_type === '협의'}
+                                                     className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary pr-8 disabled:bg-gray-100 disabled:text-gray-400"
+                                                     placeholder={form.pay_type === '협의' ? "입력 불필요" : "금액 또는 조건 입력"}
+                                                 />
+                                                 {form.pay_type !== '협의' && (
+                                                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-gray-500 font-medium">원</span>
+                                                 )}
+                                             </div>
+                                         </div>
                                      </div>
                                  </div>
-                                <div className="md:col-span-3">
-                                    <label className="text-[12px] font-bold text-gray-600 mb-1.5 block flex items-center gap-1">
-                                        <DollarSign className="w-3 h-3" /> 급여조건 <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="flex gap-2">
-                                        <select
-                                            value={form.pay_type}
-                                            onChange={e => handlePayChange(e.target.value, form.pay_amount || '')}
-                                            className="w-[120px] px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary"
-                                        >
-                                            <option value="시급">시급</option>
-                                            <option value="일급">일급</option>
-                                            <option value="주급">주급</option>
-                                            <option value="월급">월급</option>
-                                            <option value="건당">건당</option>
-                                            <option value="협의">협의</option>
-                                            <option value="기타">기타</option>
-                                        </select>
-                                        <div className="flex-1 relative">
-                                            <input
-                                                type="text" value={form.pay_amount || ''} 
-                                                onChange={e => handlePayChange(form.pay_type || '월급', e.target.value)}
-                                                disabled={form.pay_type === '협의'}
-                                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] font-medium outline-none focus:border-primary pr-8 disabled:bg-gray-100 disabled:text-gray-400"
-                                                placeholder={form.pay_type === '협의' ? "입력 불필요" : "금액 또는 조건 입력"}
-                                            />
-                                            {form.pay_type !== '협의' && (
-                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[14px] text-gray-500 font-medium">원</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         )}
                         </>

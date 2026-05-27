@@ -26,15 +26,9 @@ async function checkCodes() {
 
         console.log(`Total active codes fetched: ${data.length}`);
         
-        const categories1 = data.filter(c => c.list_type === 'CATEGORY_1');
-        console.log(`\n--- CATEGORY_1 items (${categories1.length}) ---`);
-        categories1.forEach(c => {
-            console.log(`- ${c.code_name} (Value: ${c.code_value}, Parent: ${c.parent_code_value})`);
-        });
-
-        const categories2 = data.filter(c => c.list_type === 'CATEGORY_2');
-        console.log(`\n--- CATEGORY_2 items (${categories2.length}) ---`);
-        categories2.forEach(c => {
+        const salaryTypes = data.filter(c => c.list_type === 'SALARY_TYPE');
+        console.log(`\n--- SALARY_TYPE items (${salaryTypes.length}) ---`);
+        salaryTypes.forEach(c => {
             console.log(`- ${c.code_name} (Value: ${c.code_value}, Parent: ${c.parent_code_value})`);
         });
 
