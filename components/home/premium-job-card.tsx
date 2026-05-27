@@ -350,7 +350,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                             <div className="flex items-center gap-1.5 pb-1 w-full overflow-hidden">
                                 {/* 1. 업체명 / 닉네임 (왼쪽 배치) */}
                                 <div className="flex-1 min-w-0">
-                                    <MarqueeText className={`font-black text-[13px] sm:text-[14px] lg:text-[15px] max-[424px]:text-[3vw] tracking-tight transition-colors line-clamp-1 leading-tight ${
+                                    <MarqueeText className={`font-black text-[12px] sm:text-[13px] lg:text-[14px] max-[424px]:text-[2.8vw] tracking-tight transition-colors line-clamp-1 leading-tight ${
                                         isCyber ? 'text-green-400 font-mono' : config.color
                                     }`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor } : {}}>
                                         {displayName}
@@ -394,7 +394,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         </span>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <MarqueeText className={`text-[15px] sm:text-[16px] lg:text-[17px] max-[424px]:text-[3.5vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${
+                                        <MarqueeText className={`text-[14px] sm:text-[15px] lg:text-[16px] max-[424px]:text-[3.2vw] leading-[1.3] font-black tracking-tight px-1 rounded-[2px] ${
                                             isCyber ? 'text-yellow-300 border-l-2 border-yellow-300 pl-1' :
                                             isImpact ? `${config.color.replace('text-', 'text-')} ${config.bg}/5` :
                                             'text-gray-800'
@@ -407,7 +407,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
 
                             {/* 하단: 급여 및 뱃지 */}
                             <div className="flex items-end justify-between mt-auto w-full pt-1 pb-0.5">
-                                <div className="flex items-center text-[13px] sm:text-[14px] lg:text-[15px] max-[424px]:text-[3vw] font-bold text-gray-900 truncate tracking-tight gap-1.5">
+                                <div className="flex items-center text-[11px] sm:text-[12px] lg:text-[13px] max-[424px]:text-[2.5vw] font-bold text-gray-900 truncate tracking-tight gap-1.5">
                                     {payType && (
                                         <span className={`shrink-0 text-white text-[9.5px] sm:text-[10px] lg:text-[11px] max-[424px]:text-[2.2vw] px-1.5 py-0.5 rounded-sm shadow-sm ${
                                             isImpact ? config.bg : 'bg-[#805ad5]'

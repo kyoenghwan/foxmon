@@ -954,8 +954,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     {/* ② 배너 미리보기 & 로고 (상단) / 기본정보 (하단) */}
                     <div className="flex flex-col gap-6">
                         
-                        {/* 상단: 미리보기 + 로고 (mode === 'AD'일 때만) */}
-                        {mode === 'AD' && (
+                        {/* 상단: 미리보기 + 로고 (mode === 'AD'이고 일반 광고가 아닐 때만) */}
+                        {mode === 'AD' && form.tier !== 'GENERAL' && form.tier !== 'AD_GENERAL' && (
                             <>
                                 {/* PREMIUM_MAIN 전용: 배너 제작 방식 선택 토글 */}
                                 {form.tier === 'PREMIUM_MAIN' && (
@@ -995,7 +995,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             const isPremium = form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN';
                                             const isSide = form.tier === 'SIDE';
                                             const isSpecial = form.tier === 'SPECIAL';
-                                            const isGeneral = form.tier === 'GENERAL' || form.tier === 'AD_GENERAL';
+                                            const isGeneral = false;
                                             
                                             // PREMIUM_MAIN 이면서 직접 업로드 모드일 때
                                             if (form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') {
@@ -1125,7 +1125,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 </div>
 
                                 {/* 로고 업로드 (PREMIUM_MAIN 이고 upload 모드일 때는 로고 업로드 숨김) */}
-                                {form.tier !== 'GENERAL' && !(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
+                                {!(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
                                     <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center mx-auto sm:mx-0 h-full">
                                         <h3 className="font-black text-[15px] text-gray-800 mb-4 flex items-center gap-2 justify-center w-full">
                                             <Image className="w-4 h-4 text-primary" />
