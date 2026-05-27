@@ -1,11 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ShieldAlert, LogIn, UserPlus, FileText, Coins, RotateCcw, Building } from 'lucide-react';
 
 export function AgeGateFacade() {
   const [activeTab, setActiveTab] = useState<'terms' | 'privacy' | 'refund' | 'pricing' | null>(null);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+
+  // 실시간 오늘 방문자 수 로드 및 기록
+  useEffect(() => {
+    fetch('/api/visitor')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setVisitorCount(data.count);
+        }
+      })
+      .catch((err) => console.error('방문자 통계 로딩 에러:', err));
+  }, []);
 
   // 다날 휴대폰 본인인증(성인인증) 호출 핸들러
   const handleCertification = () => {
@@ -134,6 +147,22 @@ export function AgeGateFacade() {
             <UserPlus className="w-5 h-5" />
             <span>성인 본인인증 회원가입</span>
           </button>
+        </div>
+
+        {/* 오늘 방문자 수 실시간 표출 (럭셔리 네온 뱃지) */}
+        <div className="w-full max-w-md mb-8 bg-slate-900/40 border border-red-500/20 rounded-xl p-4 flex items-center justify-center gap-3 backdrop-blur-md shadow-[0_0_15px_rgba(239,68,68,0.07)] select-none">
+          <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping relative">
+            <div className="absolute inset-0 rounded-full bg-red-500 opacity-75"></div>
+          </div>
+          <span className="text-xs sm:text-sm text-slate-350 font-medium tracking-wide">
+            {visitorCount !== null ? (
+              <>
+                오늘 <span className="text-red-500 font-black text-sm sm:text-base animate-pulse">{visitorCount.toLocaleString()}</span>명의 성인이 Foxmon을 방문했습니다.
+              </>
+            ) : (
+              <span className="text-slate-500">실시간 실명인증 방문자 집계 중...</span>
+            )}
+          </span>
         </div>
 
         {/* 6대 검증 요건 노출용 탭 컨테이너 (포트원 사전검증 통과 핵심) */}
