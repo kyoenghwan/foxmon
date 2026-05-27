@@ -15,8 +15,8 @@ export function AgeGateFacade() {
       return;
     }
 
-    // 대표님 포트원 고객사 식별코드로 초기화
-    IMP.init('imp13555262');
+    // 대표님 다날 본인인증 미승인(심사 중) 상태이므로, 테스트를 위해 공용 테스트 식별코드로 임시 우회
+    IMP.init('imp00000000');
 
     IMP.certification({
       pg: 'danal',
