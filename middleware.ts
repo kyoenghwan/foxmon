@@ -41,8 +41,7 @@ export default auth((req) => {
                 return response;
             }
 
-            const url = new URL('/login', nextUrl);
-            url.searchParams.set('session_expired', '1');
+            const url = new URL('/', nextUrl);
             const response = NextResponse.redirect(url);
             response.cookies.set({ name: 'authjs.session-token', value: '', maxAge: 0, path: '/' });
             response.cookies.set({ name: '__Secure-authjs.session-token', value: '', maxAge: 0, path: '/', secure: true });
