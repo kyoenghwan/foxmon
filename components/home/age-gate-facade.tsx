@@ -286,7 +286,7 @@ export function AgeGateFacade() {
               <span><strong>대표자</strong>: 민경환</span>
               <span className="sm:col-span-2"><strong>주소</strong>: 경기도 김포시 고촌읍 신곡로 29번길 57, 가동 501호</span>
               <span><strong>전화번호</strong>: 070-7954-6146</span>
-              <span><strong>이메일</strong>: kyoenghwan@naver.com</span>
+              <span><strong>이메일</strong>: foxmon_support@gmail.com</span>
               <span><strong>사업자등록번호</strong>: 147-38-00941</span>
               <span><strong>직업정보제공사업 신고번호</strong>: [고용노동부 부천지청 심사 진행 중]</span>
               <span><strong>통신판매업 신고번호</strong>: [발급 대기 중]</span>
