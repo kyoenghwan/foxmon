@@ -20,42 +20,12 @@ export function AgeGateFacade() {
       .catch((err) => console.error('방문자 통계 로딩 에러:', err));
   }, []);
 
-  // 다날 휴대폰 본인인증(성인인증) 호출 핸들러
-  const handleCertification = () => {
-    const { IMP } = window as any;
-    if (!IMP) {
-      alert('본인인증 모듈이 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.');
-      return;
+  // 회원가입 화면으로 즉시 전환 (현재 URL 쿼리 파라미터가 있으면 유지)
+  const handleRegisterRedirect = () => {
+    if (typeof window !== 'undefined') {
+      const search = window.location.search;
+      window.location.href = `/register${search}`;
     }
-
-    // 대표님의 실제 가맹점 식별코드로 초기화 (테스트 채널이 포트원 콘솔에 등록되어 있으므로 정상 작동함)
-    const userImpCode = process.env.NEXT_PUBLIC_PORTONE_IMP_CODE || 'imp13555262';
-    IMP.init(userImpCode);
-
-    IMP.certification({
-      pg: 'danal',
-      merchant_uid: `cert_${Date.now()}`,
-      popup: true // PC 환경에서 팝업 레이어 띄우기 활성화
-    }, function (rsp: any) {
-      if (rsp.success) {
-        alert('🎉 본인인증(성인인증) 성공! 회원가입 페이지로 이동합니다.');
-        // 1. 미들웨어 성인인증 감지 통과용 임시 쿠키 주입 (1시간 유효, SameSite/Secure 명시)
-        document.cookie = "age_verified=true; path=/; max-age=3600; SameSite=Lax; Secure";
-        // 2. 본인인증 데이터를 세션 스토리지에 임시 저장하여 /register 에서 사용할 수 있게 함
-        const mockVerifiedData = {
-          name: '심사자',
-          birthDate: '19900101',
-          gender: 'MALE',
-          phoneNumber: '01012345678',
-          nationality: 'KOREAN' as const
-        };
-        sessionStorage.setItem('foxmon_verified_user', JSON.stringify(mockVerifiedData));
-        // 3. 가입 페이지로 이동
-        window.location.href = '/register';
-      } else {
-        alert(`본인인증 실패: ${rsp.error_msg}`);
-      }
-    });
   };
 
   // 임시 고지용 텍스트 리소스 정의
@@ -151,7 +121,7 @@ export function AgeGateFacade() {
             <span>회원 로그인</span>
           </Link>
           <button
-            onClick={handleCertification}
+            onClick={handleRegisterRedirect}
             className="flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 px-6 rounded-xl border border-slate-700 transition duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
           >
             <UserPlus className="w-5 h-5" />
