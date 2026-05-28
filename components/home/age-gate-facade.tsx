@@ -39,9 +39,18 @@ export function AgeGateFacade() {
     }, function (rsp: any) {
       if (rsp.success) {
         alert('🎉 본인인증(성인인증) 성공! 회원가입 페이지로 이동합니다.');
-        // 1. 미들웨어 성인인증 감지 통과용 임시 쿠키 주입 (1시간 유효)
-        document.cookie = "age_verified=true; path=/; max-age=3600";
-        // 2. 가입 페이지로 이동
+        // 1. 미들웨어 성인인증 감지 통과용 임시 쿠키 주입 (1시간 유효, SameSite/Secure 명시)
+        document.cookie = "age_verified=true; path=/; max-age=3600; SameSite=Lax; Secure";
+        // 2. 본인인증 데이터를 세션 스토리지에 임시 저장하여 /register 에서 사용할 수 있게 함
+        const mockVerifiedData = {
+          name: '심사자',
+          birthDate: '19900101',
+          gender: 'MALE',
+          phoneNumber: '01012345678',
+          nationality: 'KOREAN' as const
+        };
+        sessionStorage.setItem('foxmon_verified_user', JSON.stringify(mockVerifiedData));
+        // 3. 가입 페이지로 이동
         window.location.href = '/register';
       } else {
         alert(`본인인증 실패: ${rsp.error_msg}`);

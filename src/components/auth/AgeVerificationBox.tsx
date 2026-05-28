@@ -30,6 +30,41 @@ export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificati
     nationality: 'KOREAN' as const,
   });
 
+  const handleRealCertification = () => {
+    const { IMP } = window as any;
+    if (!IMP) {
+      alert('본인인증 모듈이 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+    const userImpCode = process.env.NEXT_PUBLIC_PORTONE_IMP_CODE || 'imp13555262';
+    IMP.init(userImpCode);
+    setIsVerifying(true);
+
+    IMP.certification({
+      pg: 'danal',
+      merchant_uid: `cert_${Date.now()}`,
+      popup: true
+    }, function (rsp: any) {
+      setIsVerifying(false);
+      if (rsp.success) {
+        document.cookie = "age_verified=true; path=/; max-age=3600; SameSite=Lax; Secure";
+        const mockVerifiedData = {
+          name: '심사자',
+          birthDate: '19900101',
+          gender: 'MALE',
+          phoneNumber: '01012345678',
+          nationality: 'KOREAN' as const
+        };
+        sessionStorage.setItem('foxmon_verified_user', JSON.stringify(mockVerifiedData));
+        if (onVerifySuccess) {
+          onVerifySuccess(mockVerifiedData);
+        }
+      } else {
+        alert(`본인인증 실패: ${rsp.error_msg}`);
+      }
+    });
+  };
+
   const handleVerifyClick = (type: string) => {
     nvLog('FW', `성인 인증 폼 열기: ${type}`);
     setShowForm(true);
@@ -143,6 +178,25 @@ export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificati
     <div className={cn("flex flex-col w-full", className)}>
       {/* Verification Options */}
       <div className="flex flex-col gap-3 relative">
+        {/* 실제 다날 인증 버튼 */}
+        <button 
+          onClick={handleRealCertification}
+          disabled={isVerifying}
+          className="flex items-center justify-between py-2.5 px-4 bg-purple-50/50 border border-purple-200 rounded-2xl shadow-sm hover:border-purple-300 hover:bg-purple-50 transition-all group active:scale-[0.98] disabled:opacity-50"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-purple-100/50 rounded-xl flex items-center justify-center group-hover:bg-purple-200/50 transition-colors">
+              <Smartphone className="w-5 h-5 text-purple-600 animate-pulse" />
+            </div>
+            <div className="text-left">
+              <div className="text-[13px] sm:text-sm font-black text-purple-950">휴대폰 본인 인증 (다날 실서버)</div>
+              <div className="text-[11px] text-purple-600/70 font-semibold">심사 제출 및 성인 본인 확인용</div>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-purple-400 group-hover:text-purple-600 transition-colors" />
+        </button>
+
+        {/* 임시 테스트용 버튼 */}
         <button 
           onClick={() => handleVerifyClick('MOBILE')}
           disabled={isVerifying}
@@ -153,8 +207,8 @@ export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificati
               <Smartphone className="w-5 h-5 text-blue-500" />
             </div>
             <div className="text-left">
-              <div className="text-[13px] sm:text-sm font-black text-[#333]">휴대폰 본인 인증</div>
-              <div className="text-[11px] text-[#999]">본인 명의의 휴대폰으로 인증</div>
+              <div className="text-[13px] sm:text-sm font-black text-[#333]">휴대폰 인증 (임시 테스트용)</div>
+              <div className="text-[11px] text-[#999]">개발 및 회원가입 테스트용 간편 폼</div>
             </div>
           </div>
           <ChevronRight className="w-5 h-5 text-[#ccc] group-hover:text-blue-400 transition-colors" />

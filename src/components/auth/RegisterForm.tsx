@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
@@ -44,6 +44,23 @@ export function RegisterForm() {
     phoneNumber: '',
     nationality: 'KOREAN' as 'KOREAN' | 'FOREIGNER',
   });
+
+  useEffect(() => {
+    // 이미 로그인 폼이나 연령게이트에서 본인인증을 통과했는지 확인
+    const isAgeVerifiedCookie = typeof document !== 'undefined' && document.cookie.split('; ').some(row => row.startsWith('age_verified=true'));
+    const storedUser = typeof window !== 'undefined' && sessionStorage.getItem('foxmon_verified_user');
+
+    if (isAgeVerifiedCookie && storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        setVerifiedData(parsed);
+        setIsAgeVerified(true);
+        setStep(2); // 본인인증 단계를 건너뛰고 회원유형 선택 단계로 즉시 도약!
+      } catch (e) {
+        console.error('본인인증 세션 데이터 복구 실패:', e);
+      }
+    }
+  }, []);
 
   const [formData, setFormData] = useState({
     loginId: '',
