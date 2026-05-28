@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Smartphone, ShieldCheck, ChevronRight, X } from 'lucide-react';
 import { nvLog } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -19,7 +20,10 @@ interface AgeVerificationBoxProps {
   className?: string;
 }
 
-export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificationBoxProps) {
+function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificationBoxProps) {
+  const searchParams = useSearchParams();
+  const isTestMode = searchParams?.get('test') === '1' || searchParams?.get('bypass') === '1' || searchParams?.get('mock') === '1';
+
   const [isVerifying, setIsVerifying] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -196,6 +200,26 @@ export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificati
           <ChevronRight className="w-5 h-5 text-purple-400 group-hover:text-purple-600 transition-colors" />
         </button>
 
+        {/* 임시 테스트용 버튼 (URL 쿼리 ?test=1 혹은 ?mock=1 진입 시에만 제한적으로 노출) */}
+        {isTestMode && (
+          <button 
+            onClick={() => handleVerifyClick('MOBILE')}
+            disabled={isVerifying}
+            className="flex items-center justify-between py-2.5 px-4 bg-white border border-[#eee] rounded-2xl shadow-sm hover:border-blue-200 hover:bg-blue-50/30 transition-all group active:scale-[0.98] disabled:opacity-50 w-full"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                <Smartphone className="w-5 h-5 text-blue-500" />
+              </div>
+              <div className="text-left">
+                <div className="text-[13px] sm:text-sm font-black text-[#333]">휴대폰 인증 (임시 테스트용)</div>
+                <div className="text-[11px] text-[#999]">개발 및 회원가입 테스트용 간편 폼</div>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-[#ccc] group-hover:text-blue-400 transition-colors" />
+          </button>
+        )}
+
         {isVerifying && (
           <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] rounded-2xl flex items-center justify-center z-10 animate-in fade-in duration-300">
             <div className="flex flex-col items-center gap-2">
@@ -210,5 +234,13 @@ export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificati
         ※ 내국인 및 국내 체류 외국인 모두 동일하게 인증 가능합니다.
       </p>
     </div>
+  );
+}
+
+export function AgeVerificationBox(props: AgeVerificationBoxProps) {
+  return (
+    <Suspense fallback={<div className="h-20 flex items-center justify-center text-xs text-gray-400">로딩 중...</div>}>
+      <AgeVerificationBoxContent {...props} />
+    </Suspense>
   );
 }
