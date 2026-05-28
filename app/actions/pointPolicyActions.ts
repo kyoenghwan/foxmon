@@ -15,11 +15,11 @@ export interface PointPolicyItem {
 // 기본 유료 광고 설정값 (최초 삽입용 30/60/90일 개별 기준 및 등급별 기본료)
 const DEFAULT_POLICIES = [
     // 광고 등급(Tier) 단일 기본료 (레거시, 필요시 유지)
-    { config_key: 'TIER_PRICE_PREMIUM_MAIN', config_value: 500000 },
-    { config_key: 'TIER_PRICE_SIDE', config_value: 200000 },
+    { config_key: 'TIER_PRICE_PREMIUM_MAIN', config_value: 800000 },
+    { config_key: 'TIER_PRICE_SIDE', config_value: 500000 },
     { config_key: 'TIER_PRICE_PREMIUM', config_value: 300000 },
-    { config_key: 'TIER_PRICE_SPECIAL', config_value: 150000 },
-    { config_key: 'TIER_PRICE_GENERAL', config_value: 50000 },
+    { config_key: 'TIER_PRICE_SPECIAL', config_value: 200000 },
+    { config_key: 'TIER_PRICE_GENERAL', config_value: 100000 },
     
     // 기간별 패키지 요금 (구인 공고용)
     { config_key: 'OPTION_PRICE_BASE_PERIOD_30', config_value: 70000 },
@@ -126,7 +126,7 @@ export async function GET_POINT_POLICIES() {
     }
 }
 
-export async function UPDATE_POINT_POLICIES(policies: { config_key: string, config_value: number }[]) {
+export async function UPDATE_POINT_POLICIES(policies: PointPolicyItem[]) {
     nvLog('AT', '▶️ UPDATE_POINT_POLICIES 시작');
     try {
         // 기존 데이터를 전부 읽어와서 비교 후 업데이트 (간단히 루프 돌림)
@@ -134,11 +134,12 @@ export async function UPDATE_POINT_POLICIES(policies: { config_key: string, conf
             const { error } = await supabaseAdmin
                 .from('point_policies')
                 .upsert({
+                    id: policy.id,
                     config_key: policy.config_key,
                     config_value: policy.config_value,
-                    start_at: new Date().toISOString(),
-                    end_at: '9999-12-31 23:59:59'
-                }, { onConflict: 'config_key' });
+                    start_at: policy.start_at || new Date().toISOString(),
+                    end_at: policy.end_at || '9999-12-31 23:59:59'
+                });
                 
             if (error) {
                 nvLog('AT', `❌ 업데이트 에러 (${policy.config_key})`, error.message);

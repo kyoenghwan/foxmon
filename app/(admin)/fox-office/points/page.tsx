@@ -166,10 +166,7 @@ export default function AdminPointsPolicyPage() {
 
   const handleSavePricing = async () => {
     setIsLoading(true);
-    const res = await UPDATE_POINT_POLICIES(pricingOptions.map(p => ({
-      config_key: p.config_key,
-      config_value: p.config_value
-    })));
+    const res = await UPDATE_POINT_POLICIES(pricingOptions);
     if (res.success) {
       alert('저장되었습니다.');
     } else {
