@@ -81,34 +81,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
   // 회원가입 전 본인인증 선제 실행 핸들러
   const handleRegisterClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    const { IMP } = window as any;
-    if (!IMP) {
-      alert('본인인증 모듈이 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.');
-      return;
-    }
-    const userImpCode = process.env.NEXT_PUBLIC_PORTONE_IMP_CODE || 'imp13555262';
-    IMP.init(userImpCode);
-    IMP.certification({
-      pg: 'danal',
-      merchant_uid: `cert_${Date.now()}`,
-      popup: true
-    }, function (rsp: any) {
-      if (rsp.success) {
-        document.cookie = "age_verified=true; path=/; max-age=3600; SameSite=Lax; Secure";
-        // 본인인증 통과 데이터를 세션 스토리지에 임시 저장하여 회원가입 폼이 바로 연동될 수 있도록 유도
-        const mockVerifiedData = {
-          name: '심사자',
-          birthDate: '19900101',
-          gender: 'MALE',
-          phoneNumber: '01012345678',
-          nationality: 'KOREAN' as const
-        };
-        sessionStorage.setItem('foxmon_verified_user', JSON.stringify(mockVerifiedData));
-        window.location.href = '/register';
-      } else {
-        alert(`본인인증 실패: ${rsp.error_msg}`);
-      }
-    });
+    router.push('/register');
   };
 
   // --- 1. [Age-Gate 용] Simple Style (Compact & Unified) ---

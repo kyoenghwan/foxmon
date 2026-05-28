@@ -196,23 +196,7 @@ export function AgeVerificationBox({ onVerifySuccess, className }: AgeVerificati
           <ChevronRight className="w-5 h-5 text-purple-400 group-hover:text-purple-600 transition-colors" />
         </button>
 
-        {/* 임시 테스트용 버튼 */}
-        <button 
-          onClick={() => handleVerifyClick('MOBILE')}
-          disabled={isVerifying}
-          className="flex items-center justify-between py-2.5 px-4 bg-white border border-[#eee] rounded-2xl shadow-sm hover:border-blue-200 hover:bg-blue-50/30 transition-all group active:scale-[0.98] disabled:opacity-50"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-              <Smartphone className="w-5 h-5 text-blue-500" />
-            </div>
-            <div className="text-left">
-              <div className="text-[13px] sm:text-sm font-black text-[#333]">휴대폰 인증 (임시 테스트용)</div>
-              <div className="text-[11px] text-[#999]">개발 및 회원가입 테스트용 간편 폼</div>
-            </div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-[#ccc] group-hover:text-blue-400 transition-colors" />
-        </button>
+
 
         <button 
           onClick={() => handleVerifyClick('IPIN')}
