@@ -71,16 +71,24 @@ export function AgeGateFacade() {
       title: '광고 상품 및 이용 요금 안내',
       content: `Foxmon의 구인 배너 및 공고 등록 요금 체계는 아래와 같이 투명하게 운영됩니다.
 
-1. 프리미엄 메인 배너 광고 (PREMIUM)
+1. 프리미엄 메인 배너 광고 (PREMIUM MAIN)
 - 노출 위치: 메인 페이지 최상단 핵심 영역
-- 단가: 월 150,000원 (VAT 별도)
+- 단가: 월 800,000원 (VAT 별도)
 
-2. 스페셜 배너 광고 (SPECIAL)
+2. 사이드 배너 광고 (SIDE)
+- 노출 위치: 우측 사이드 세로 영역
+- 단가: 월 500,000원 (VAT 별도)
+
+3. 프리미엄 배너 광고 (PREMIUM)
+- 노출 위치: 본문 최상단 목록 강조 노출
+- 단가: 월 300,000원 (VAT 별도)
+
+4. 스페셜 배너 광고 (SPECIAL)
 - 노출 위치: 메인 페이지 중간 그리드 영역
-- 단가: 월 80,000원 (VAT 별도)
+- 단가: 월 200,000원 (VAT 별도)
 
-3. 일반 구인공고 등록 (GENERAL)
-- 등록 수수료: 건당 3,000원 (VAT 별도)
+5. 일반 구인공고 등록 (GENERAL)
+- 등록 수수료: 월 100,000원 (VAT 별도)
 - 노출 위치: 메인 페이지 하단 일반 구인 정보 목록`
     }
   };
@@ -224,21 +232,31 @@ export function AgeGateFacade() {
               <Coins className="w-4 h-4 text-red-500" />
               <span>Foxmon 유료 서비스 이용 요금표 (공식 고지)</span>
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="bg-slate-950/80 border border-slate-850 p-4 rounded-xl text-center">
-                <span className="block text-[10px] text-slate-400 font-bold mb-1">프리미엄 메인 배너 광고</span>
-                <span className="text-sm font-black text-white">월 150,000원</span>
-                <span className="block text-[9px] text-slate-500 mt-1">부가가치세 별도</span>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div className="bg-slate-950/80 border border-slate-850 p-3 rounded-xl text-center flex flex-col justify-between">
+                <span className="block text-[10px] text-slate-400 font-bold mb-1">프리미엄 메인</span>
+                <span className="text-xs sm:text-sm font-black text-white">월 800,000원</span>
+                <span className="block text-[9px] text-slate-500 mt-1">부가세 별도</span>
               </div>
-              <div className="bg-slate-950/80 border border-slate-850 p-4 rounded-xl text-center">
-                <span className="block text-[10px] text-slate-400 font-bold mb-1">스페셜 배너 광고</span>
-                <span className="text-sm font-black text-white">월 80,000원</span>
-                <span className="block text-[9px] text-slate-500 mt-1">부가가치세 별도</span>
+              <div className="bg-slate-950/80 border border-slate-850 p-3 rounded-xl text-center flex flex-col justify-between">
+                <span className="block text-[10px] text-slate-400 font-bold mb-1">사이드</span>
+                <span className="text-xs sm:text-sm font-black text-white">월 500,000원</span>
+                <span className="block text-[9px] text-slate-500 mt-1">부가세 별도</span>
               </div>
-              <div className="bg-slate-950/80 border border-slate-850 p-4 rounded-xl text-center">
-                <span className="block text-[10px] text-slate-400 font-bold mb-1">일반 구인공고 등록 수수료</span>
-                <span className="text-sm font-black text-white">건당 3,000원</span>
-                <span className="block text-[9px] text-slate-500 mt-1">부가가치세 별도</span>
+              <div className="bg-slate-950/80 border border-slate-850 p-3 rounded-xl text-center flex flex-col justify-between">
+                <span className="block text-[10px] text-slate-400 font-bold mb-1">프리미엄</span>
+                <span className="text-xs sm:text-sm font-black text-white">월 300,000원</span>
+                <span className="block text-[9px] text-slate-500 mt-1">부가세 별도</span>
+              </div>
+              <div className="bg-slate-950/80 border border-slate-850 p-3 rounded-xl text-center flex flex-col justify-between">
+                <span className="block text-[10px] text-slate-400 font-bold mb-1">스페셜</span>
+                <span className="text-xs sm:text-sm font-black text-white">월 200,000원</span>
+                <span className="block text-[9px] text-slate-500 mt-1">부가세 별도</span>
+              </div>
+              <div className="bg-slate-950/80 border border-slate-850 p-3 rounded-xl text-center flex flex-col justify-between">
+                <span className="block text-[10px] text-slate-400 font-bold mb-1">일반</span>
+                <span className="text-xs sm:text-sm font-black text-white">월 100,000원</span>
+                <span className="block text-[9px] text-slate-500 mt-1">부가세 별도</span>
               </div>
             </div>
           </div>
