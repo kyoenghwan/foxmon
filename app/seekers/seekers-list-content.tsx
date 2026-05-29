@@ -12,7 +12,7 @@ import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMM
 import { useLanguage } from '@/components/providers/language-provider';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-import { GeneralSeekerListRow, GeneralSeekerListRowDesktop } from './GeneralSeekerListRow';
+import { GeneralSeekerListRow, GeneralSeekerListRowDesktop, SeekerJobType } from './GeneralSeekerListRow';
 import { getPublicSeekerAdsAction, getSeekerAdByIdAction } from '@/lib/actions';
 import { SeekerModalWrapper } from '@/components/seekers/seeker-modal-wrapper';
 import { buildFlatIndustryOptions, resumeMatchesIndustryFilter } from '@/lib/resume-industry';
@@ -448,7 +448,7 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
 
     // Pagination logic
     const totalPages = Math.ceil(filteredGeneralJobs.length / ITEMS_PER_PAGE);
-    const paginatedTableJobs = filteredGeneralJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+    const paginatedTableJobs = filteredGeneralJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE) as SeekerJobType[];
 
     return (
         <div className="space-y-6 md:space-y-12">
@@ -941,12 +941,11 @@ export function SeekersListContent({ isEmployer, session, searchQuery }: Seekers
                                     <tr>
                                         <th className="py-3 px-2 w-[8%] font-semibold">상태</th>
                                         <th className="py-3 px-2 w-[10%] font-semibold">이름</th>
-                                        <th className="py-3 px-2 w-[6%] font-semibold">성별/나이</th>
-                                        <th className="py-3 px-4 w-[21%] text-center font-semibold">제목</th>
+                                        <th className="py-3 px-2 w-[8%] font-semibold">성별/나이</th>
+                                        <th className="py-3 px-4 w-[27%] text-center font-semibold">제목</th>
                                         <th className="py-3 px-2 w-[20%] font-semibold text-gray-500">희망지역</th>
                                         <th className="py-3 px-2 w-[15%] font-semibold text-gray-500">희망업종</th>
                                         <th className="py-3 px-2 w-[12%] font-semibold text-gray-500">희망급여</th>
-                                        <th className="py-3 px-2 w-[8%] font-semibold text-gray-500">작성일</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">

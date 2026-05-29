@@ -3,7 +3,17 @@
 import { useRouter } from 'next/navigation';
 import { MarqueeText } from '@/components/ui/marquee-text';
 
-export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () => void }) {
+export interface SeekerJobType {
+    id: string;
+    created_at: string;
+    status?: string;
+    ad_title?: string;
+    resumes?: any;
+    users?: any;
+    [key: string]: any;
+}
+
+export function GeneralSeekerListRow({ job, onClick }: { job: SeekerJobType; onClick?: () => void }) {
     const router = useRouter();
     const { ad_title, created_at, resumes, users } = job;
     const { desired_location, nickname, gender, title, desired_industry, desired_pay_amount, desired_pay_type } = resumes || {};
@@ -41,9 +51,10 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
         payText = `${typeStr} ${desired_pay_amount.toLocaleString()}원`;
     }
 
-    // 7. 작성일
-    const dateObj = new Date(created_at);
-    const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+    // 7. 신규 여부 판별 (24시간 이내 등록)
+    const createdDate = new Date(created_at);
+    const now = new Date();
+    const isNew = (now.getTime() - createdDate.getTime()) <= 24 * 60 * 60 * 1000;
 
     const isInactive = job.status === 'INACTIVE';
 
@@ -59,7 +70,7 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
             }}
             className={`p-4 sm:p-5 hover:bg-gray-50/50 active:scale-[0.99] transition-all border border-gray-200/80 rounded-xl bg-white shadow-sm hover:shadow-md hover:border-primary/30 flex flex-col gap-2.5 cursor-pointer relative group ${isInactive ? 'opacity-50 grayscale' : ''}`}
         >
-            {/* 1행: [상태 배지] + [원하는 급여] + [제목] + [작성일] */}
+            {/* 1행: [상태 배지] + [원하는 급여] + [제목] */}
             <div className="flex items-center justify-between gap-2 overflow-hidden">
                 <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-black whitespace-nowrap shrink-0 ${
@@ -79,11 +90,11 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
                     <div className="flex-1 min-w-0 overflow-hidden">
                         <MarqueeText className="font-extrabold text-[14px] sm:text-[15px] text-gray-800 leading-snug group-hover:text-primary transition-colors text-left">
                             {displayTitle}
+                            {isNew && (
+                                <span className="text-red-600 font-black text-[12px] ml-1 shrink-0 select-none animate-pulse">N</span>
+                            )}
                         </MarqueeText>
                     </div>
-                </div>
-                <div className="text-gray-400 font-semibold shrink-0 text-[11px] sm:text-[12px] ml-auto">
-                    {dateStr}
                 </div>
             </div>
             
@@ -108,7 +119,7 @@ export function GeneralSeekerListRow({ job, onClick }: { job: any; onClick?: () 
     );
 }
 
-export function GeneralSeekerListRowDesktop({ job, onClick }: { job: any; onClick?: () => void }) {
+export function GeneralSeekerListRowDesktop({ job, onClick }: { job: SeekerJobType; onClick?: () => void }) {
     const router = useRouter();
     const { ad_title, created_at, resumes, users } = job;
     const { desired_location, nickname, gender, title, desired_industry, desired_pay_amount, desired_pay_type } = resumes || {};
@@ -146,9 +157,10 @@ export function GeneralSeekerListRowDesktop({ job, onClick }: { job: any; onClic
         payText = `${typeStr} ${desired_pay_amount.toLocaleString()}원`;
     }
 
-    // 7. 작성일
-    const dateObj = new Date(created_at);
-    const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+    // 7. 신규 여부 판별 (24시간 이내 등록)
+    const createdDate = new Date(created_at);
+    const now = new Date();
+    const isNew = (now.getTime() - createdDate.getTime()) <= 24 * 60 * 60 * 1000;
 
     const isInactive = job.status === 'INACTIVE';
 
@@ -178,6 +190,9 @@ export function GeneralSeekerListRowDesktop({ job, onClick }: { job: any; onClic
             <td className="py-4 px-4 text-center font-bold text-gray-800 group-hover:text-primary transition-colors max-w-[200px] md:max-w-[300px] overflow-hidden">
                 <MarqueeText className="font-bold text-gray-800 text-center">
                     {displayTitle}
+                    {isNew && (
+                        <span className="text-red-600 font-black text-[12px] ml-1 shrink-0 inline-block animate-pulse">N</span>
+                    )}
                 </MarqueeText>
             </td>
             <td className="py-4 px-2 text-gray-500 text-center max-w-[150px] overflow-hidden">
@@ -195,7 +210,6 @@ export function GeneralSeekerListRowDesktop({ job, onClick }: { job: any; onClic
                     {payText}
                 </span>
             </td>
-            <td className="py-4 px-2 text-gray-400 font-medium text-center">{dateStr}</td>
         </tr>
     );
 }
