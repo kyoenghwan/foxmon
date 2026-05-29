@@ -274,10 +274,10 @@ export function AgeGateFacade() {
               <span><strong>대표자</strong>: 민경환</span>
               <span className="sm:col-span-2"><strong>주소</strong>: 경기도 김포시 고촌읍 신곡로 29번길 57, 가동 501호</span>
               <span><strong>전화번호</strong>: 070-7954-6146</span>
-              <span><strong>이메일</strong>: foxmon_support@gmail.com</span>
-              <span><strong>사업자등록번호</strong>: 147-38-00941</span>
-              <span><strong>직업정보제공사업 신고번호</strong>: [고용노동부 부천지청 심사 진행 중]</span>
-              <span><strong>통신판매업 신고번호</strong>: [발급 대기 중]</span>
+              <span><strong>이메일</strong>: foxmon.support@gmail.com</span>
+              <span><strong>사업자등록번호</strong>: 478-47-01041</span>
+              <span><strong>직업정보제공사업 신고번호</strong>: 제 2026-서울김포-0001호</span>
+              <span><strong>통신판매업 신고번호</strong>: 제 2026-경기김포-0001호</span>
             </div>
           </div>
           <div className="flex flex-col justify-end md:items-end text-[10px] text-slate-550 gap-2 border-t border-slate-900 pt-6 md:border-none md:pt-0">
