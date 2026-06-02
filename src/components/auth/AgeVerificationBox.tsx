@@ -48,22 +48,40 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       pg: 'danal',
       merchant_uid: `cert_${Date.now()}`,
       popup: true
-    }, function (rsp: any) {
-      setIsVerifying(false);
+    }, async function (rsp: any) {
       if (rsp.success) {
-        document.cookie = "age_verified=true; path=/; max-age=3600; SameSite=Lax; Secure";
-        const mockVerifiedData = {
-          name: '심사자',
-          birthDate: '19900101',
-          gender: 'MALE',
-          phoneNumber: '01012345678',
-          nationality: 'KOREAN' as const
-        };
-        sessionStorage.setItem('foxmon_verified_user', JSON.stringify(mockVerifiedData));
-        if (onVerifySuccess) {
-          onVerifySuccess(mockVerifiedData);
+        try {
+          nvLog('FW', '포트원 본인인증 성공. 백엔드 실서버 검증 요청 진행', { imp_uid: rsp.imp_uid });
+          const response = await fetch('/api/auth/guest', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              authMethod: 'MOBILE',
+              userRawData: {
+                imp_uid: rsp.imp_uid
+              }
+            }),
+          });
+
+          const result = await response.json();
+          setIsVerifying(false);
+
+          if (response.ok && result.success) {
+            document.cookie = "age_verified=true; path=/; max-age=3600; SameSite=Lax; Secure";
+            sessionStorage.setItem('foxmon_verified_user', JSON.stringify(result.data));
+            if (onVerifySuccess) {
+              onVerifySuccess(result.data);
+            }
+          } else {
+            alert(`본인인증 검증 실패: ${result.message || '인증 정보를 가져올 수 없습니다.'}`);
+          }
+        } catch (err) {
+          setIsVerifying(false);
+          alert('본인인증 서버 검증 중 오류가 발생했습니다.');
         }
       } else {
+        setIsVerifying(false);
+        nvLog('FW', '포트원 본인인증 취소 또는 오류', rsp.error_msg);
         alert(`본인인증 실패: ${rsp.error_msg}`);
       }
     });

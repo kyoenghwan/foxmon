@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
         nvLog('FW', '비회원 인증 성공. 임시 세션 발급 완료', { authMethod });
         return NextResponse.json(
-            { success: true, message: result.message },
+            { success: true, message: result.message, data: result.data },
             { status: 200 }
         );
 

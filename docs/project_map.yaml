@@ -133,8 +133,7 @@ pages:
     label: "성인 인증 게이트 페이지"
     keywords: ["성인 인증", "나이 확인", "age gate"]
     files: ["app/(auth)/age-gate/page.tsx", "src/components/auth/AgeVerificationBox.tsx"]
-    flows: ["FA_VERIFY_AGE_FLOW"]
-
+    flows: ["FA_VERIFY_AGE_FLOW", "FA_GUEST_AUTH", "QA_PORTONE_GET_CERTIFICATION"]
   LOGIN_PAGE:
     label: "로그인 페이지/모달"
     keywords: ["로그인", "로그인창", "회원 로그인", "sign in"]
