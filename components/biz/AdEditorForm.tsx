@@ -529,6 +529,27 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const { data: session } = useSession();
     const isAgent = (session?.user as any)?.login_id === 'foxmon_ad' || (session?.user as any)?.login_id === 'mon_ad' || (session?.user as any)?.role === 'ADMIN' || (session?.user as any)?.role === 'SUPER_ADMIN';
 
+    // 오늘 날짜 기준 1달 뒤 yyyy-MM-dd 계산 헬퍼
+    const getOneMonthLaterDate = () => {
+        const d = new Date();
+        d.setMonth(d.getMonth() + 1);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const date = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${date}`;
+    };
+
+    const getInitialExpiresAt = () => {
+        if (!initialData?.expires_at) {
+            return getOneMonthLaterDate();
+        }
+        const year = new Date(initialData.expires_at).getFullYear();
+        if (year === 2000) {
+            return getOneMonthLaterDate();
+        }
+        return initialData.expires_at;
+    };
+
     const [form, setForm] = useState<AdFormData>({
         ...restInitialData,
         company: initialData?.company || (initialData as any)?.company_name || '',
@@ -565,7 +586,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         amenities: initialData?.amenities || [],
         keywords: initialData?.keywords || [],
         claim_code: initialData?.claim_code || '',
-        expires_at: initialData?.expires_at || '',
+        expires_at: getInitialExpiresAt(),
     });
 
 
