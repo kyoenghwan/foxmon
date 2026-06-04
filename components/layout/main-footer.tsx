@@ -28,6 +28,14 @@ export function MainFooter() {
         }
     };
 
+    const handleKBAuthMark = () => {
+        window.open(
+            'https://okbfex.kbstar.com/quics?page=C021590&cc=b034066:b035526&mHValue=d0d24f11ddc024928bfb7aa87c54d391',
+            'KB_AUTHMARK',
+            'height=604, width=648, status=yes, toolbar=no, menubar=no, location=no'
+        );
+    };
+
     return (
         <>
             <footer className="bg-gray-50 border-t py-12 mt-auto">
@@ -59,17 +67,33 @@ export function MainFooter() {
                     <div className="border-t border-gray-200 my-8"></div>
 
                     {/* Bottom: Legal Info */}
-                    <div className="flex flex-col gap-4 text-[11px] text-gray-400 leading-relaxed font-medium">
-                        <p>
-                            상호명: 폭스몬 | 대표: 민경환 | 개인정보관리책임자: 민경환 <br/>
-                            사업장 주소: 경기도 김포시 고촌읍 신곡로29번길 57, 가동 501호 <br/>
-                            사업자등록번호: 478-47-01041 | 직업정보제공사업 신고번호:  | 통신판매업신고:  <br/>
-                        </p>
-                        <p className="opacity-70">
-                            폭스몬은 통신판매중개자이며 통신판매의 당사자가 아닙니다. 따라서 폭스몬은 상품·거래정보 및 거래에 대하여 책임을 지지 않습니다.
-                            <br/>
-                            Copyright © Foxmon Inc. All rights reserved.
-                        </p>
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-[11px] text-gray-400 leading-relaxed font-medium">
+                        <div className="flex-1">
+                            <p>
+                                상호명: 폭스몬 | 대표: 민경환 | 개인정보관리책임자: 민경환 <br/>
+                                사업장 주소: 경기도 김포시 고촌읍 신곡로29번길 57, 가동 501호 <br/>
+                                사업자등록번호: 478-47-01041 | 직업정보제공사업 신고번호:  | 통신판매업신고:  <br/>
+                            </p>
+                            <p className="opacity-70 mt-2">
+                                폭스몬은 통신판매중개자이며 통신판매의 당사자가 아닙니다. 따라서 폭스몬은 상품·거래정보 및 거래에 대하여 책임을 지지 않습니다.
+                                <br/>
+                                Copyright © Foxmon Inc. All rights reserved.
+                            </p>
+                        </div>
+                        {/* KB Escrow Badge */}
+                        <div className="flex flex-col items-start md:items-end gap-1">
+                            <button 
+                                onClick={handleKBAuthMark}
+                                className="transition-all hover:scale-[1.03] active:scale-[0.98] outline-none"
+                                title="KB에스크로 이체 서비스 가입사실 확인"
+                            >
+                                <img 
+                                    src="https://img1.kbstar.com/img/escrow/escrowcmark.gif" 
+                                    alt="KB에스크로이체 가입 확인" 
+                                    className="h-12 w-auto object-contain"
+                                />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </footer>
