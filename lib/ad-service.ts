@@ -146,11 +146,19 @@ export async function getRotatedAds(
 
     try {
         const targetTable = tier === 'GENERAL' ? 'jobs' : 'biz_ads';
+        let queryBuilder;
 
-        let queryBuilder = supabaseAdmin
-            .from(targetTable)
-            .select('*, users(merchant_tier)')
-            .eq('tier', tier);
+        if (targetTable === 'jobs') {
+            queryBuilder = supabaseAdmin
+                .from('jobs')
+                .select('*, users(merchant_tier)')
+                .eq('tier', tier);
+        } else {
+            queryBuilder = supabaseAdmin
+                .from('biz_ads')
+                .select('*')
+                .eq('tier', tier);
+        }
 
         if (searchQuery) {
             const terms = searchQuery.trim().split(/\s+/).filter(Boolean);
@@ -165,13 +173,49 @@ export async function getRotatedAds(
             return getMockAds(tier, limitCount, searchQuery);
         }
 
-        let ads: AdItem[] = data.map((item: any) => {
+        let rawAds = data;
+        let userMap: Record<string, string> = {};
+
+        if (targetTable === 'biz_ads') {
+            const userIds = Array.from(new Set(data.map((item: any) => item.user_id).filter(Boolean)));
+            if (userIds.length > 0) {
+                const { data: usersData } = await supabaseAdmin
+                    .from('users')
+                    .select('id, merchant_tier')
+                    .in('id', userIds);
+                if (usersData) {
+                    usersData.forEach((u: any) => {
+                        userMap[u.id] = u.merchant_tier || 'NORMAL';
+                    });
+                }
+            }
+        }
+
+        // 실제 광고 노출 가용 조건 필터링
+        const now = new Date();
+        const activeRealAds = rawAds.filter((item: any) => {
+            // status 검사 (ACTIVE 또는 CLAIM_PENDING 허용)
+            const isValidStatus = item.status === 'ACTIVE' || item.status === 'CLAIM_PENDING';
+            if (!isValidStatus) return false;
+
+            // expires_at 검사
+            if (!item.expires_at) return true; // 무기한 광고 허용
+            const expireDate = new Date(item.expires_at);
+            if (expireDate.getFullYear() === 2000) return false; // 결제 대기중 제외
+            return expireDate > now; // 만료되지 않음
+        });
+
+        let ads: AdItem[] = activeRealAds.map((item: any) => {
             let merchant_tier = 'NORMAL';
-            if (item.users) {
-                if (Array.isArray(item.users)) {
-                    merchant_tier = item.users[0]?.merchant_tier || 'NORMAL';
-                } else {
-                    merchant_tier = item.users.merchant_tier || 'NORMAL';
+            if (targetTable === 'biz_ads') {
+                merchant_tier = userMap[item.user_id] || 'NORMAL';
+            } else {
+                if (item.users) {
+                    if (Array.isArray(item.users)) {
+                        merchant_tier = item.users[0]?.merchant_tier || 'NORMAL';
+                    } else {
+                        merchant_tier = item.users.merchant_tier || 'NORMAL';
+                    }
                 }
             }
             return {
