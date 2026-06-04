@@ -1310,13 +1310,13 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             
                             {mode === 'AD' && !(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
                                 <>
-                                    {(form.tier === 'PREMIUM' || form.tier === 'SPECIAL' || form.tier === 'PREMIUM_MAIN' || form.tier === 'GENERAL' || form.tier === 'AD_GENERAL') && (
+                                    {(form.tier === 'PREMIUM' || form.tier === 'SPECIAL' || form.tier === 'PREMIUM_MAIN' || form.tier === 'GENERAL' || form.tier === 'AD_GENERAL' || form.tier === 'SIDE') && (
                                         <button type="button" onClick={() => setActiveModal(activeModal === 'theme' ? null : 'theme')} className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${activeModal === 'theme' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-100 bg-white hover:border-yellow-500 hover:bg-yellow-50'}`}>
                                             <Crown className={`w-6 h-6 transition-colors ${activeModal === 'theme' ? 'text-yellow-500' : 'text-gray-400 group-hover:text-yellow-500'}`} />
                                             <span className={`text-[13px] font-bold ${activeModal === 'theme' ? 'text-yellow-600' : 'text-gray-700 group-hover:text-yellow-600'}`}>테마 설정</span>
                                         </button>
                                     )}
-                                    {(form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN') && (
+                                    {(form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN' || form.tier === 'SIDE') && (
                                         <button type="button" onClick={() => setActiveModal(activeModal === 'animation' ? null : 'animation')} className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${activeModal === 'animation' ? 'border-purple-500 bg-purple-50' : 'border-gray-100 bg-white hover:border-purple-500 hover:bg-purple-50'}`}>
                                             <span className="text-[24px]">✨</span>
                                             <span className={`text-[13px] font-bold ${activeModal === 'animation' ? 'text-purple-600' : 'text-gray-700 group-hover:text-purple-600'}`}>애니메이션 설정</span>

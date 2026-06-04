@@ -300,6 +300,29 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                 )}
                             </div>
                             <div className="flex-1 flex flex-col justify-between py-1">
+                                {/* 1. 지역 영역 */}
+                                <div className="flex items-center gap-1 text-[10px] max-[424px]:text-[2.2vw] text-gray-500 w-full min-w-0">
+                                    <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] overflow-hidden w-full ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : (tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor, borderColor: customColor } : {}}>
+                                        <span className="shrink-0">{sido}</span>
+                                        {sigungus && (
+                                            <>
+                                                <span className="shrink-0 opacity-50">|</span>
+                                                {isMultiSigungu ? (
+                                                    <div className="flex-1 overflow-hidden relative flex items-center h-full">
+                                                        <div className="whitespace-nowrap inline-block animate-[marquee-scroll_6s_linear_infinite]">
+                                                            <span className="mr-6">{sigungus}</span>
+                                                            <span className="mr-6">{sigungus}</span>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="truncate">{sigungus}</span>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* 2. 상호 영역 */}
                                 <div className="flex items-center gap-1.5 w-full">
                                     <div className={`shrink-0 flex items-center justify-center px-1.5 py-[2px] rounded-sm text-[9px] font-black shadow-sm ${
                                         isCyber ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' :
@@ -321,26 +344,8 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         {displayName}
                                     </MarqueeText>
                                 </div>
-                                <div className="flex items-center gap-1 text-[10px] max-[424px]:text-[2.2vw] text-gray-500 w-full min-w-0">
-                                    <div className={`flex items-center gap-1 shrink-0 border px-1 py-[1px] leading-[1.1] font-bold rounded-[2px] overflow-hidden w-full ${isCyber ? 'text-black bg-cyan-400 border-none' : isImpact ? `${config.color} ${config.bg.replace('bg-', 'bg-')}/10 ${config.border}` : (tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? 'bg-white' : 'text-[#2b6cb0] border-[#2b6cb0] bg-[#ebf8ff]'}`} style={(tier === 'GENERAL' || tier === 'AD_GENERAL') && customColor ? { color: customColor, borderColor: customColor } : {}}>
-                                        <span className="shrink-0">{sido}</span>
-                                        {sigungus && (
-                                            <>
-                                                <span className="shrink-0 opacity-50">|</span>
-                                                {isMultiSigungu ? (
-                                                    <div className="flex-1 overflow-hidden relative flex items-center h-full">
-                                                        <div className="whitespace-nowrap inline-block animate-[marquee-scroll_6s_linear_infinite]">
-                                                            <span className="mr-6">{sigungus}</span>
-                                                            <span className="mr-6">{sigungus}</span>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <span className="truncate">{sigungus}</span>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
+
+                                {/* 3. 제목 영역 */}
                                 <div className="w-full relative overflow-hidden flex items-center gap-1">
                                     {category && (
                                         <span className={`shrink-0 border px-1 py-[1px] max-[424px]:px-0.5 max-[424px]:py-0 rounded-[2px] text-[10px] sm:text-[11px] max-[424px]:text-[2.2vw] font-black ${
@@ -355,6 +360,8 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                         </MarqueeText>
                                     </div>
                                 </div>
+
+                                {/* 4. 급여 영역 */}
                                 <div className="flex items-center justify-between w-full pt-1 border-t border-dashed border-gray-200">
                                     <div className="flex items-center text-[12px] sm:text-[13px] max-[424px]:text-[3vw] font-bold text-gray-900 truncate tracking-tight gap-1.5 flex-1 min-w-0">
                                         {payType && (
@@ -363,7 +370,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                                             </span>
                                         )}
                                         <span className={`text-[#e53e3e] truncate font-black ${isCyber ? 'text-[#ff5555]' : ''}`}>
-                                            {payAmount} <span className="text-[10px] max-[424px]:text-[2.2vw] ml-0.5 mt-auto pb-[1px]">↑</span>
+                                            {payAmount}
                                         </span>
                                     </div>
                                 </div>

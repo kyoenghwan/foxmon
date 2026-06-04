@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { getRotatedAds, recordAdExposure, AdItem } from '@/lib/ad-service';
 import { useSession } from 'next-auth/react';
+import { PremiumJobCard } from './premium-job-card';
 
 export function SideBanners() {
     const { data: session } = useSession();
@@ -43,72 +44,28 @@ export function SideBanners() {
     if (loading) return null; // 사이드 배너 로딩 시에는 공간만 비워둠 (혹은 심플한 스켈레톤)
 
     const BannerCard = ({ ad }: { ad: AdItem }) => {
-        // 업체명 및 업종 파싱
-        let displayName = ad.company;
-        let category = '유흥';
-        if (ad.company?.includes('(') && ad.company?.includes(')')) {
-            const match = ad.company.match(/(.*)\((.*)\)/);
-            if (match) {
-                displayName = match[1].trim();
-                category = match[2].trim();
-            }
-        }
-        
-        // 급여 파싱
-        let payAmount = ad.pay;
-        if (ad.pay?.includes(']')) {
-            const parts = ad.pay.split(']');
-            payAmount = parts[1].trim();
-        }
-
         return (
             <Link
                 key={ad.id}
                 href={`/jobs/${ad.id}`}
                 onClick={() => handleAdClick(ad.id)}
-                className="group relative flex flex-col w-full min-h-0 min-w-[93px] aspect-[2/3] bg-white rounded-xl border border-gray-200 hover:border-purple-600 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 p-1.5"
+                className="block pointer-events-auto w-full transition-transform hover:scale-[1.02]"
             >
-                {/* --- 상단 42%: 로고 --- */}
-                <div className="w-full h-[42%] rounded-[0.25rem] overflow-hidden bg-gray-50 flex items-center justify-center border border-gray-100 flex-shrink-0 mb-1 relative">
-                    {ad.image ? (
-                        <div 
-                            className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
-                            style={{ backgroundImage: `url(${ad.image})` }} 
-                        />
-                    ) : (
-                        <span className="text-[11px] font-black text-gray-300 tracking-widest leading-none text-center">NO<br/>LOGO</span>
-                    )}
-                </div>
-
-                {/* --- 하단 58%: 텍스트 정보 --- */}
-                <div className="flex flex-col h-[58%] w-full pt-0.5 justify-between">
-                    <div className="flex flex-col space-y-0.5 mb-1">
-                        <h3 className="font-extrabold text-[12px] md:text-[13px] text-gray-900 group-hover:text-purple-600 transition-colors truncate tracking-tight">
-                            {displayName}
-                        </h3>
-                        <div className="text-[9px] md:text-[10px] text-gray-500 font-bold truncate tracking-tighter flex items-center">
-                            <span className="text-[#2b6cb0] border border-[#2b6cb0] px-1 py-[0.5px] bg-[#ebf8ff] mr-1 rounded-[2px] leading-tight shrink-0">
-                                {ad.location.split(' ')[0] || '전국'}
-                            </span>
-                            <span className="truncate">{category}</span>
-                        </div>
-                    </div>
-                    
-                    <div className="mb-1 flex-1 overflow-hidden">
-                        <p className="text-[10px] md:text-[11px] text-gray-800 line-clamp-2 leading-[1.2] font-bold tracking-tight bg-green-200/50 inline-block rounded-[2px] px-1">
-                            {ad.title}
-                        </p>
-                    </div>
-
-                    <div className="mt-auto pt-1 border-t border-dashed border-gray-200 flex items-center justify-between w-full">
-                        <span className="text-[#e53e3e] text-[12px] md:text-[13px] font-black tracking-tighter flex items-center">
-                            {payAmount} <span className="text-[#e53e3e] text-[9px] ml-0.5 mt-auto pb-[1px]">↑</span>
-                        </span>
-                        <div className="bg-[#805ad5] text-white text-[9px] md:text-[10px] font-bold px-1.5 py-[0.5px] rounded-sm shrink-0">
-                            스페셜
-                        </div>
-                    </div>
-                </div>
+                <PremiumJobCard
+                    id={ad.id}
+                    company={ad.company}
+                    title={ad.title}
+                    location={ad.location}
+                    category={ad.category || ad.category1}
+                    pay={ad.pay}
+                    image={ad.logo_url || ad.image || ''}
+                    isSide={true}
+                    impactType={(ad.theme as any) || 'none'}
+                    effectIntensity={ad.effect_intensity}
+                    customColor={ad.color}
+                    bgOpacity={ad.bg_opacity}
+                    merchant_tier={ad.merchant_tier}
+                />
             </Link>
         );
     };
