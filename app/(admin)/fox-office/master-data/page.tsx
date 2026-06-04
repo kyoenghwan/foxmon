@@ -39,7 +39,23 @@ export default function MasterDataPage() {
         loadData();
     }, []);
 
-    const typedCodes = codes.filter(c => c.list_type === selectedType).sort((a,b) => a.sort_order - b.sort_order);
+    const typedCodes = codes.filter(c => {
+        if (selectedType === 'JOB_REGION') {
+            return c.list_type === 'JOB_REGION_1' || c.list_type === 'JOB_REGION_2';
+        }
+        return c.list_type === selectedType;
+    }).sort((a,b) => {
+        if (selectedType === 'JOB_REGION') {
+            if (a.list_type !== b.list_type) {
+                return a.list_type.localeCompare(b.list_type);
+            }
+            if (a.list_type === 'JOB_REGION_2' && b.list_type === 'JOB_REGION_2') {
+                const parentComp = (a.parent_code_value || '').localeCompare(b.parent_code_value || '');
+                if (parentComp !== 0) return parentComp;
+            }
+        }
+        return a.sort_order - b.sort_order;
+    });
 
     const handleToggleActive = async (code: CodeItem) => {
         await OA_UPSERT_COMMON_CODE({
@@ -71,8 +87,18 @@ export default function MasterDataPage() {
     };
 
     const saveEdit = async (code: CodeItem) => {
+        let targetType = code.list_type;
+        if (code.list_type === 'JOB_REGION_1' || code.list_type === 'JOB_REGION_2') {
+            targetType = formVal.parent_code_value ? 'JOB_REGION_2' : 'JOB_REGION_1';
+        }
+
+        // 복합 키가 변경되는 경우 이전 레코드 삭제 후 새 레코드 생성
+        if (code.list_type !== targetType || code.code_value !== formVal.code_value) {
+            await OA_DELETE_COMMON_CODE(code.list_type, code.code_value);
+        }
+
         const res = await OA_UPSERT_COMMON_CODE({
-            list_type: code.list_type,
+            list_type: targetType,
             code_value: formVal.code_value,
             parent_code_value: formVal.parent_code_value || null,
             code_name: formVal.code_name,
@@ -90,8 +116,14 @@ export default function MasterDataPage() {
 
     const saveNew = async () => {
         if (!newFormVal.code_value || !newFormVal.code_name) return alert('코드값과 표시명칭을 입력하세요.');
+        
+        let targetType = selectedType;
+        if (selectedType === 'JOB_REGION') {
+            targetType = newFormVal.parent_code_value ? 'JOB_REGION_2' : 'JOB_REGION_1';
+        }
+
         const res = await OA_UPSERT_COMMON_CODE({
-            list_type: selectedType,
+            list_type: targetType,
             code_value: newFormVal.code_value,
             parent_code_value: newFormVal.parent_code_value || null,
             code_name: newFormVal.code_name,
@@ -231,7 +263,20 @@ export default function MasterDataPage() {
                                                 ) : (
                                                     <>
                                                         <td className="px-5 py-3 font-bold text-gray-500 text-center">{code.sort_order}</td>
-                                                        <td className="px-5 py-3 font-black text-gray-700">{code.code_value}</td>
+                                                        <td className="px-5 py-3 font-black text-gray-700">
+                                                            <div className="flex items-center gap-1.5">
+                                                                {selectedType === 'JOB_REGION' && (
+                                                                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                                                                        code.list_type === 'JOB_REGION_1' 
+                                                                            ? 'bg-blue-50 text-blue-600 border border-blue-200' 
+                                                                            : 'bg-indigo-50 text-indigo-600 border border-indigo-200'
+                                                                    }`}>
+                                                                        {code.list_type === 'JOB_REGION_1' ? '1차' : '2차'}
+                                                                    </span>
+                                                                )}
+                                                                <span>{code.code_value}</span>
+                                                            </div>
+                                                        </td>
                                                         <td className="px-5 py-3 font-bold text-gray-400 text-xs">
                                                             {code.parent_code_value ? <span className="bg-gray-100 px-2 py-1 rounded border border-gray-200">↳ {code.parent_code_value}</span> : '-'}
                                                         </td>
