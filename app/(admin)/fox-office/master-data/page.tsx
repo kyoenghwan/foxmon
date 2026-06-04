@@ -88,19 +88,22 @@ export default function MasterDataPage() {
 
     const saveEdit = async (code: CodeItem) => {
         let targetType = code.list_type;
+        const targetParentCodeValue = formVal.parent_code_value ? formVal.parent_code_value.toUpperCase() : null;
         if (code.list_type === 'JOB_REGION_1' || code.list_type === 'JOB_REGION_2') {
-            targetType = formVal.parent_code_value ? 'JOB_REGION_2' : 'JOB_REGION_1';
+            targetType = targetParentCodeValue ? 'JOB_REGION_2' : 'JOB_REGION_1';
         }
 
+        const targetCodeValue = formVal.code_value.toUpperCase();
+
         // 복합 키가 변경되는 경우 이전 레코드 삭제 후 새 레코드 생성
-        if (code.list_type !== targetType || code.code_value !== formVal.code_value) {
+        if (code.list_type !== targetType || code.code_value !== targetCodeValue) {
             await OA_DELETE_COMMON_CODE(code.list_type, code.code_value);
         }
 
         const res = await OA_UPSERT_COMMON_CODE({
             list_type: targetType,
-            code_value: formVal.code_value,
-            parent_code_value: formVal.parent_code_value || null,
+            code_value: targetCodeValue,
+            parent_code_value: targetParentCodeValue,
             code_name: formVal.code_name,
             sort_order: formVal.sort_order,
             description: formVal.description,
@@ -117,15 +120,18 @@ export default function MasterDataPage() {
     const saveNew = async () => {
         if (!newFormVal.code_value || !newFormVal.code_name) return alert('코드값과 표시명칭을 입력하세요.');
         
+        const targetCodeValue = newFormVal.code_value.toUpperCase();
+        const targetParentCodeValue = newFormVal.parent_code_value ? newFormVal.parent_code_value.toUpperCase() : null;
+
         let targetType = selectedType;
         if (selectedType === 'JOB_REGION') {
-            targetType = newFormVal.parent_code_value ? 'JOB_REGION_2' : 'JOB_REGION_1';
+            targetType = targetParentCodeValue ? 'JOB_REGION_2' : 'JOB_REGION_1';
         }
 
         const res = await OA_UPSERT_COMMON_CODE({
             list_type: targetType,
-            code_value: newFormVal.code_value,
-            parent_code_value: newFormVal.parent_code_value || null,
+            code_value: targetCodeValue,
+            parent_code_value: targetParentCodeValue,
             code_name: newFormVal.code_name,
             sort_order: newFormVal.sort_order,
             description: newFormVal.description,
@@ -214,10 +220,10 @@ export default function MasterDataPage() {
                                                 <input type="number" value={newFormVal.sort_order} onChange={e=>setNewFormVal({...newFormVal, sort_order: Number(e.target.value)})} className="w-16 p-1.5 border rounded text-center font-bold" />
                                             </td>
                                             <td className="px-5 py-3">
-                                                <input type="text" placeholder="예: SEOUL" value={newFormVal.code_value} onChange={e=>setNewFormVal({...newFormVal, code_value: e.target.value})} className="w-full p-1.5 border rounded font-bold uppercase" />
+                                                <input type="text" placeholder="예: SEOUL" value={newFormVal.code_value} onChange={e=>setNewFormVal({...newFormVal, code_value: e.target.value.toUpperCase()})} className="w-full p-1.5 border rounded font-bold uppercase" />
                                             </td>
                                             <td className="px-5 py-3">
-                                                <input type="text" placeholder="예: 상위코드(선택)" value={newFormVal.parent_code_value} onChange={e=>setNewFormVal({...newFormVal, parent_code_value: e.target.value})} className="w-full p-1.5 border rounded uppercase" />
+                                                <input type="text" placeholder="예: 상위코드(선택)" value={newFormVal.parent_code_value} onChange={e=>setNewFormVal({...newFormVal, parent_code_value: e.target.value.toUpperCase()})} className="w-full p-1.5 border rounded uppercase" />
                                             </td>
                                             <td className="px-5 py-3">
                                                 <input type="text" placeholder="예: 강남구" value={newFormVal.code_name} onChange={e=>setNewFormVal({...newFormVal, code_name: e.target.value})} className="w-full p-1.5 border rounded font-bold" />
@@ -248,8 +254,8 @@ export default function MasterDataPage() {
                                                 {isEditing ? (
                                                     <>
                                                         <td className="px-5 py-3"><input type="number" value={formVal.sort_order} onChange={e=>setFormVal({...formVal, sort_order: Number(e.target.value)})} className="w-16 p-1.5 border rounded text-center font-bold" /></td>
-                                                        <td className="px-5 py-3"><input type="text" value={formVal.code_value} onChange={e=>setFormVal({...formVal, code_value: e.target.value})} className="w-full p-1.5 border rounded font-bold uppercase" /></td>
-                                                        <td className="px-5 py-3"><input type="text" value={formVal.parent_code_value} onChange={e=>setFormVal({...formVal, parent_code_value: e.target.value})} className="w-full p-1.5 border rounded uppercase text-gray-500" /></td>
+                                                        <td className="px-5 py-3"><input type="text" value={formVal.code_value} onChange={e=>setFormVal({...formVal, code_value: e.target.value.toUpperCase()})} className="w-full p-1.5 border rounded font-bold uppercase" /></td>
+                                                        <td className="px-5 py-3"><input type="text" value={formVal.parent_code_value} onChange={e=>setFormVal({...formVal, parent_code_value: e.target.value.toUpperCase()})} className="w-full p-1.5 border rounded uppercase text-gray-500" /></td>
                                                         <td className="px-5 py-3"><input type="text" value={formVal.code_name} onChange={e=>setFormVal({...formVal, code_name: e.target.value})} className="w-full p-1.5 border rounded font-bold" /></td>
                                                         <td className="px-5 py-3 text-gray-500 font-bold">{code.is_active ? 'ON' : 'OFF'}</td>
                                                         <td className="px-5 py-3"><input type="text" value={formVal.description} onChange={e=>setFormVal({...formVal, description: e.target.value})} className="w-full p-1.5 border rounded text-xs" /></td>
