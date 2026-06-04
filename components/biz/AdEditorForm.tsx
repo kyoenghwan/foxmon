@@ -1049,7 +1049,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             </h3>
                                             
                                             <label className="relative group cursor-pointer w-full flex justify-center mt-auto">
-                                                <div className="w-[100px] h-[100px] rounded-2xl border-2 border-dashed overflow-hidden bg-gray-50 flex items-center justify-center transition-all border-gray-300 group-hover:border-primary group-hover:bg-blue-50/50">
+                                                <div className="w-[120px] h-[80px] rounded-2xl border-2 border-dashed overflow-hidden bg-gray-50 flex items-center justify-center transition-all border-gray-300 group-hover:border-primary group-hover:bg-blue-50/50">
                                                     {form.logo_url ? (
                                                         <img src={form.logo_url} alt="로고" className="w-full h-full object-contain" />
                                                     ) : (
