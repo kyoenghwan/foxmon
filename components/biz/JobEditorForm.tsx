@@ -981,7 +981,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                         </div>
                                         
                                         <label className="relative group cursor-pointer w-full flex justify-center">
-                                            <div className="w-[100px] h-[100px] rounded-2xl border-2 border-dashed overflow-hidden bg-gray-50 flex items-center justify-center transition-all border-gray-300 group-hover:border-primary group-hover:bg-blue-50/50">
+                                            <div className="w-[120px] h-[80px] rounded-2xl border-2 border-dashed overflow-hidden bg-gray-50 flex items-center justify-center transition-all border-gray-300 group-hover:border-primary group-hover:bg-blue-50/50">
                                                 {form.logo_url ? (
                                                     <img src={form.logo_url} alt="로고" className="w-full h-full object-contain" />
                                                 ) : (
@@ -996,7 +996,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                             <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                                         </label>
 
-                                        <p className="text-[10px] text-gray-400 mt-2 text-center leading-relaxed">PNG/JPG 지원<br/>가로 형태(2:1 비율) 권장</p>
+                                        <p className="text-[10px] text-gray-400 mt-2 text-center leading-relaxed">PNG/JPG 지원<br/>가로 형태(1.5:1 비율) 권장</p>
                                     </div>
                                 )}
                             </div>
