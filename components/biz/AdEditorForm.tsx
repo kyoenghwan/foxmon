@@ -757,30 +757,52 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     };
 
     const handleRandomDesign = () => {
-        // 1. 테마 무작위 선택
-        const randomTheme = PREMIUM_THEMES[Math.floor(Math.random() * PREMIUM_THEMES.length)];
-        
-        // 2. 컬러 무작위 선택
-        const randomColor = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
-        
-        // 3. 투명도 무작위 선택 (0% 제외하고 연하게~조금진하게 위주로 무작위)
-        const validOpacities = BG_OPACITY_OPTIONS.filter(o => o.value !== '0');
-        const randomOpacity = validOpacities[Math.floor(Math.random() * validOpacities.length)];
-        
-        // 4. 애니메이션 효과 무작위 선택 ('none' 제외)
-        const validActions = ACTION_OPTIONS.filter(a => a.value !== 'none');
-        const randomAction = validActions[Math.floor(Math.random() * validActions.length)];
-        
-        // 5. 애니메이션 강도 무작위 선택
-        const randomEffect = EFFECT_OPTIONS[Math.floor(Math.random() * EFFECT_OPTIONS.length)];
+        const isThemeVisible = form.tier === 'PREMIUM' || form.tier === 'SPECIAL' || form.tier === 'PREMIUM_MAIN' || form.tier === 'GENERAL' || form.tier === 'AD_GENERAL' || form.tier === 'SIDE';
+        const isAnimVisible = form.tier === 'PREMIUM' || form.tier === 'PREMIUM_MAIN' || form.tier === 'SIDE';
+        const isColorVisible = form.tier !== 'PREMIUM_MAIN';
+
+        let theme = form.theme || 'none';
+        let color = form.color || '#FF6B35';
+        let bg_opacity = form.bg_opacity || '10';
+        let action_type = form.action_type || 'none';
+        let effect_intensity = form.effect_intensity || 'medium';
+
+        if (isThemeVisible) {
+            const randomTheme = PREMIUM_THEMES[Math.floor(Math.random() * PREMIUM_THEMES.length)];
+            theme = randomTheme.key;
+        } else {
+            theme = 'none';
+        }
+
+        if (isColorVisible) {
+            color = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
+            const validOpacities = BG_OPACITY_OPTIONS.filter(o => o.value !== '0');
+            const randomOpacity = validOpacities[Math.floor(Math.random() * validOpacities.length)];
+            bg_opacity = randomOpacity.value;
+        } else {
+            color = '#FF6B35';
+            bg_opacity = '10';
+        }
+
+        if (isAnimVisible) {
+            const validActions = ACTION_OPTIONS.filter(a => a.value !== 'none');
+            const randomAction = validActions[Math.floor(Math.random() * validActions.length)];
+            action_type = randomAction.value;
+            
+            const randomEffect = EFFECT_OPTIONS[Math.floor(Math.random() * EFFECT_OPTIONS.length)];
+            effect_intensity = randomEffect.value;
+        } else {
+            action_type = 'none';
+            effect_intensity = 'none';
+        }
 
         setForm(prev => ({
             ...prev,
-            theme: randomTheme.key,
-            color: randomColor,
-            bg_opacity: randomOpacity.value,
-            action_type: randomAction.value,
-            effect_intensity: randomEffect.value
+            theme,
+            color,
+            bg_opacity,
+            action_type,
+            effect_intensity
         }));
     };
 

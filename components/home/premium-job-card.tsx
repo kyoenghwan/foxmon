@@ -239,9 +239,9 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
         } min-w-0 group p-[3px]`}>
             
             {/* --- [배로 아래 배경 레이어] --- */}
-            {isImpact && (
+            {(isImpact || wrapperAnimClass) && (
                 <div className={`absolute inset-0 overflow-hidden rounded-xl z-0 ${wrapperAnimClass}`}>
-                    {!isCrazy && !isCyber && action !== 'rainbow-border' && (
+                    {!isCrazy && !isCyber && action !== 'rainbow-border' && isImpact && (
                         <div className={`absolute inset-0 ${opacityClass} blur-[1px] ${config.bg}`} />
                     )}
                     {/* 크레이지 테마이거나 액션이 무지개 테두리일 때 */}
@@ -268,7 +268,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                     />
                 )}
                 {/* --- [오버레이 효과 레이어 (글자 뒤)] --- */}
-                {isImpact && !isCrazy && isOverlayAnim && (
+                {!isCrazy && isOverlayAnim && (
                     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[calc(0.75rem-3px)]">
                         {/* Shimmer / Diamond 효과는 별도의 백그라운드 그라디언트가 필요함 */}
                         {(actualAction === 'shimmer' || actualAction === 'diamond') && (
@@ -276,7 +276,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                         )}
                         
                         {/* 자체 배경이 있는 오버레이 애니메이션 (emerald, matrix, ocean, platinum 등) */}
-                        {actualAction !== 'shimmer' && actualAction !== 'diamond' && actualAction !== 'rainbow-border' && (
+                        {actualAction !== 'shimmer' && actualAction !== 'diamond' && actualAction !== 'rainbow-border' && isImpact && (
                             <div className={`absolute inset-0 ${animClass} opacity-30 mix-blend-overlay`} />
                         )}
                     </div>
