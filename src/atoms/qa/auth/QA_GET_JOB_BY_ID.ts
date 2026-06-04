@@ -32,25 +32,17 @@ export async function QA_GET_JOB_BY_ID(jobId: string) {
       };
     }
 
-    let { data, error } = await supabase
-      .from('jobs')
-      .select('*')
-      .eq('id', jobId)
-      .single();
+    const [jobsRes, bizAdsRes] = await Promise.all([
+      supabase.from('jobs').select('*').eq('id', jobId).maybeSingle(),
+      supabase.from('biz_ads').select('*').eq('id', jobId).maybeSingle()
+    ]);
 
-    if (error || !data) {
-      // jobs에서 못 찾으면 biz_ads에서 검색
-      const { data: bizData, error: bizError } = await supabase
-        .from('biz_ads')
-        .select('*')
-        .eq('id', jobId)
-        .single();
-        
-      if (bizError || !bizData) {
-         nvLog('AT', '❌ QA_GET_JOB_BY_ID 에러', error?.message || bizError?.message);
-         return { success: false, error: error?.message || bizError?.message };
-      }
-      data = bizData;
+    let data = jobsRes.data || bizAdsRes.data;
+
+    if (!data) {
+      const errMsg = jobsRes.error?.message || bizAdsRes.error?.message || '공고를 찾을 수 없습니다.';
+      nvLog('AT', '❌ QA_GET_JOB_BY_ID 에러', errMsg);
+      return { success: false, error: errMsg };
     }
 
     // 공통 코드 치환 (편의사항 및 키워드)

@@ -20,28 +20,48 @@ export interface CodeItem {
  */
 import { unstable_noStore as noStore } from 'next/cache';
 
+// 서버 인메모리 캐싱 변수
+let cachedCommonCodes: CodeItem[] | null = null;
+let lastFetchedTime = 0;
+const CACHE_TTL_MS = 60 * 1000; // 60초 캐시 유지
+
 export async function QA_GET_COMMON_CODES(listType?: string, activeOnly: boolean = true) {
     noStore();
+    const now = Date.now();
     try {
-        let query = supabase.from('common_codes').select('*');
+        let allCodes: CodeItem[];
+
+        // 캐시 유효 시 DB 쿼리 생략
+        if (cachedCommonCodes && (now - lastFetchedTime < CACHE_TTL_MS)) {
+            allCodes = cachedCommonCodes;
+        } else {
+            // 모든 활성 마스터 코드를 한 번에 가져옴
+            let query = supabase.from('common_codes').select('*');
+            if (activeOnly) {
+                query = query.eq('is_active', true);
+            }
+            
+            query = query.order('list_type', { ascending: true })
+                         .order('sort_order', { ascending: true })
+                         .order('created_at', { ascending: false });
+
+            const { data, error } = await query;
+            if (error) {
+                console.error('QA_GET_COMMON_CODES error:', error);
+                return { success: false, error: error.message };
+            }
+            allCodes = data as CodeItem[];
+            cachedCommonCodes = allCodes;
+            lastFetchedTime = now;
+        }
+
+        // 특정 list_type 필터링은 메모리에서 처리
+        let filteredData = allCodes;
         if (listType) {
-            query = query.eq('list_type', listType);
-        }
-        if (activeOnly) {
-            query = query.eq('is_active', true);
-        }
-        
-        query = query.order('list_type', { ascending: true })
-                     .order('sort_order', { ascending: true })
-                     .order('created_at', { ascending: false });
-
-        const { data, error } = await query;
-        if (error) {
-            console.error('QA_GET_COMMON_CODES error:', error);
-            return { success: false, error: error.message };
+            filteredData = allCodes.filter(c => c.list_type === listType);
         }
 
-        return { success: true, data: data as CodeItem[] };
+        return { success: true, data: filteredData };
     } catch (e: any) {
         return { success: false, error: e.message };
     }
