@@ -524,7 +524,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const { effect_intensity: _ignore, color: _ignoreColor, ...restInitialData } = initialData || {};
 
     const { data: session } = useSession();
-    const isAgent = session?.user?.name === 'foxmon_ad' || session?.user?.name === 'mon_ad' || (session?.user as any)?.role === 'ADMIN' || (session?.user as any)?.role === 'SUPER_ADMIN';
+    const isAgent = (session?.user as any)?.login_id === 'foxmon_ad' || (session?.user as any)?.login_id === 'mon_ad' || (session?.user as any)?.role === 'ADMIN' || (session?.user as any)?.role === 'SUPER_ADMIN';
 
     const [form, setForm] = useState<AdFormData>({
         ...restInitialData,
