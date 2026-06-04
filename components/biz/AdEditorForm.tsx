@@ -524,7 +524,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const { effect_intensity: _ignore, color: _ignoreColor, ...restInitialData } = initialData || {};
 
     const { data: session } = useSession();
-    const isAgent = session?.user?.name === 'foxmon_ad' || (session?.user as any)?.role === 'ADMIN' || (session?.user as any)?.role === 'SUPER_ADMIN';
+    const isAgent = session?.user?.name === 'foxmon_ad' || session?.user?.name === 'mon_ad' || (session?.user as any)?.role === 'ADMIN' || (session?.user as any)?.role === 'SUPER_ADMIN';
 
     const [form, setForm] = useState<AdFormData>({
         ...restInitialData,
@@ -728,6 +728,34 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             }
             return next;
         });
+    };
+
+    const handleRandomDesign = () => {
+        // 1. 테마 무작위 선택
+        const randomTheme = PREMIUM_THEMES[Math.floor(Math.random() * PREMIUM_THEMES.length)];
+        
+        // 2. 컬러 무작위 선택
+        const randomColor = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
+        
+        // 3. 투명도 무작위 선택 (0% 제외하고 연하게~조금진하게 위주로 무작위)
+        const validOpacities = BG_OPACITY_OPTIONS.filter(o => o.value !== '0');
+        const randomOpacity = validOpacities[Math.floor(Math.random() * validOpacities.length)];
+        
+        // 4. 애니메이션 효과 무작위 선택 ('none' 제외)
+        const validActions = ACTION_OPTIONS.filter(a => a.value !== 'none');
+        const randomAction = validActions[Math.floor(Math.random() * validActions.length)];
+        
+        // 5. 애니메이션 강도 무작위 선택
+        const randomEffect = EFFECT_OPTIONS[Math.floor(Math.random() * EFFECT_OPTIONS.length)];
+
+        setForm(prev => ({
+            ...prev,
+            theme: randomTheme.key,
+            color: randomColor,
+            bg_opacity: randomOpacity.value,
+            action_type: randomAction.value,
+            effect_intensity: randomEffect.value
+        }));
     };
 
     // 지역 선택 핸들러
@@ -1242,7 +1270,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         {!(form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') && (
                             <>
                                 {/* 설정 버튼 그룹 */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                             <button 
                                 type="button" 
                                 onClick={() => setActiveModal(activeModal === 'basic' ? null : 'basic')} 
@@ -1281,6 +1309,15 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                             <span className={`text-[13px] font-bold ${activeModal === 'color' ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>배경색 설정</span>
                                         </button>
                                     )}
+                                    <button 
+                                        type="button" 
+                                        onClick={handleRandomDesign}
+                                        className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50/50 hover:border-orange-500 hover:bg-orange-50 transition-all group active:scale-95"
+                                        title="테마, 배경색, 애니메이션을 무작위로 매칭합니다."
+                                    >
+                                        <span className="text-[24px] group-hover:animate-bounce">🎨</span>
+                                        <span className="text-[13px] font-bold text-orange-700">랜덤 디자인</span>
+                                    </button>
                                 </>
                             )}
                         </div>
