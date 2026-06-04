@@ -812,8 +812,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             return;
         }
 
-        if (!form.manager_name || !form.contact_phone) {
-            alert('담당자 이름과 연락처는 필수 입력 항목입니다. (광고 상세 내용 탭)');
+        if (!form.manager_name) {
+            alert('담당자 이름은 필수 입력 항목입니다. (광고 상세 내용 탭)');
             return;
         }
 
@@ -1739,7 +1739,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
                                     <Phone className="w-4 h-4 text-gray-400" />
                                     <span>담당자 연락처</span>
-                                    <span className="text-red-500">*</span>
                                     <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
                                 <div className="flex-1 w-full flex gap-2">
