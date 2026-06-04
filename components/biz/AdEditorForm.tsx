@@ -1387,6 +1387,75 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                          </div>
                                      </div>
 
+                                     {/* 지역 선택 */}
+                                     <div className="flex flex-row items-start gap-2 sm:gap-4 py-1.5">
+                                         <label className="w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5 mt-2">
+                                             <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                                             <span>지역</span>
+                                             <span className="text-red-500">*</span>
+                                             <span className="text-gray-300 ml-auto mr-1">-</span>
+                                         </label>
+                                         <div className="flex-1 flex flex-col gap-2 relative">
+                                             <div className="flex gap-2">
+                                                 <select
+                                                     value={selectedSido}
+                                                     onChange={handleSidoChange}
+                                                     className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white cursor-pointer"
+                                                 >
+                                                     <option value="">시/도 선택</option>
+                                                     {regions.filter(r => r.list_type === 'JOB_REGION_1').map(sido => (
+                                                         <option key={sido.code_value} value={sido.code_name}>{sido.code_name}</option>
+                                                     ))}
+                                                 </select>
+                                             </div>
+                                             {selectedSido === '해외' ? (
+                                                 <input
+                                                     type="text"
+                                                     value={selectedSigungus[0] || ''}
+                                                     onChange={(e) => {
+                                                         const val = e.target.value;
+                                                         setSelectedSigungus(val ? [val] : []);
+                                                         update('location', `${selectedSido} ${val}`.trim());
+                                                     }}
+                                                     placeholder="국가 및 지역 입력 (예: 미국)"
+                                                     className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
+                                                 />
+                                             ) : selectedSido ? (
+                                                 <div className="relative">
+                                                     <button
+                                                         type="button"
+                                                         onClick={() => setIsSigunguOpen(!isSigunguOpen)}
+                                                         className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none text-left bg-white focus:border-primary flex justify-between items-center"
+                                                     >
+                                                         <span className={selectedSigungus.length > 0 ? "text-gray-900" : "text-gray-400"}>
+                                                             {selectedSigungus.length > 0 ? selectedSigungus.join(', ') : '시/군/구 선택 (여러 개 가능)'}
+                                                         </span>
+                                                         <span className="text-gray-400 text-[10px]">▼</span>
+                                                     </button>
+                                                     
+                                                     {isSigunguOpen && (
+                                                         <div className="absolute z-10 w-full mt-1 p-3 bg-white border border-gray-200 shadow-xl rounded-lg max-h-[200px] overflow-y-auto grid grid-cols-2 gap-2">
+                                                             {regions.filter(r => {
+                                                                 const sido = regions.find(s => s.code_name === selectedSido && s.list_type === 'JOB_REGION_1');
+                                                                 return r.list_type === 'JOB_REGION_2' && r.parent_code_value === sido?.code_value;
+                                                             }).map(sigungu => (
+                                                                 <label key={sigungu.code_value} className="flex items-center gap-2 cursor-pointer text-[13px] text-gray-700 hover:text-primary">
+                                                                     <input
+                                                                         type="checkbox"
+                                                                         checked={selectedSigungus?.includes(sigungu.code_name)}
+                                                                         onChange={() => handleSigunguChange(sigungu.code_name)}
+                                                                         className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300"
+                                                                     />
+                                                                     <span className="truncate">{sigungu.code_name}</span>
+                                                                 </label>
+                                                             ))}
+                                                         </div>
+                                                     )}
+                                                 </div>
+                                             ) : null}
+                                         </div>
+                                     </div>
+
                                      {/* 급여조건 */}
                                      <div className="flex flex-row items-center gap-2 sm:gap-4 py-1.5">
                                          <label className="w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
