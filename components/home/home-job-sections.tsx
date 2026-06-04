@@ -258,6 +258,7 @@ export function HomeJobSections() {
                                     customColor={(job as any).customColor}
                                     bgOpacity={(job as any).bgOpacity}
                                     tier="PREMIUM"
+                                    rawAd={job}
                                 />
                             </div>
                         ))}
@@ -312,6 +313,7 @@ export function HomeJobSections() {
                                     tier="SPECIAL" 
                                     customColor={(job as any).color} 
                                     bgOpacity={(job as any).bg_opacity}
+                                    rawAd={job}
                                 />
                             </div>
                         ))}
@@ -367,6 +369,7 @@ export function HomeJobSections() {
                                     tier="GENERAL" 
                                     customColor={(job as any).color} 
                                     bgOpacity={(job as any).bg_opacity}
+                                    rawAd={job}
                                 />
                             </div>
                         ))}

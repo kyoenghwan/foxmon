@@ -45,10 +45,8 @@ export function SideBanners() {
 
     const BannerCard = ({ ad }: { ad: AdItem }) => {
         return (
-            <Link
+            <div
                 key={ad.id}
-                href={`/jobs/${ad.id}`}
-                onClick={() => handleAdClick(ad.id)}
                 className="block pointer-events-auto w-full transition-transform hover:scale-[1.02]"
             >
                 <PremiumJobCard
@@ -65,8 +63,10 @@ export function SideBanners() {
                     customColor={ad.color}
                     bgOpacity={ad.bg_opacity}
                     merchant_tier={ad.merchant_tier}
+                    rawAd={ad}
+                    onClick={() => handleAdClick(ad.id)}
                 />
-            </Link>
+            </div>
         );
     };
 

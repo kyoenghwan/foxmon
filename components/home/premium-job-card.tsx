@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/language-provider';
+import { useJobModal } from '@/hooks/use-job-modal';
 
 function MarqueeText({ children, className, style }: { children: React.ReactNode, className: string, style?: React.CSSProperties }) {
     const textRef = React.useRef<HTMLDivElement>(null);
@@ -76,6 +77,8 @@ interface PremiumJobCardProps {
     bgOpacity?: string;
     status?: string;
     merchant_tier?: 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP';
+    rawAd?: any;
+    onClick?: (e: React.MouseEvent) => void;
 }
 
 function MerchantTierBadge({ tier }: { tier: 'VIP' | 'VVIP' | 'VVVIP' }) {
@@ -130,8 +133,9 @@ const THEME_CONFIG: Record<string, any> = {
     none: { label: 'HIT', color: 'text-gray-900', bg: 'bg-purple-700', border: 'border-gray-200', icon: Crown, animClass: '' }
 };
 
-export function PremiumJobCard({ company, title, location, category, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', hideLogo = false, tier, id, customColor, bgOpacity, status, merchant_tier = 'NORMAL' }: PremiumJobCardProps) {
+export function PremiumJobCard({ company, title, location, category, pay, image, tags, isBig, isSide, impactType = 'none', effectIntensity = 'medium', hideLogo = false, tier, id, customColor, bgOpacity, status, merchant_tier = 'NORMAL', rawAd, onClick }: PremiumJobCardProps) {
     const { t } = useLanguage();
+    const { openModal } = useJobModal();
     
     // 1. 업체명 파싱
     let displayName = company;
@@ -253,6 +257,22 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
 
             <Link 
                 href={`/jobs/${id}`} 
+                prefetch={false}
+                onClick={(e) => {
+                    if (onClick) {
+                        onClick(e);
+                    }
+                    if (rawAd) {
+                        e.preventDefault();
+                        const jobDataForModal = {
+                            ...rawAd,
+                            content: rawAd.detail_content || rawAd.content || '',
+                            employer_name: rawAd.company || rawAd.company_name || '폭스몬',
+                            image_url: rawAd.image || rawAd.logo_url || ''
+                        };
+                        openModal(jobDataForModal);
+                    }
+                }}
                 className={`relative h-full w-full rounded-[calc(0.75rem-3px)] overflow-hidden shadow-sm transition-all duration-300 ${isSide ? 'p-1' : 'p-1 sm:p-1.5 lg:p-1.5'} flex flex-col justify-between z-10 ${
                     isCyber ? 'bg-black/95 text-white' : 'bg-white'
                 }`}

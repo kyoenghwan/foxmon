@@ -8,6 +8,7 @@ import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM'
 
 export function JobDetailContent({ job, isModal = false, onClose }: { job: any, isModal?: boolean, onClose?: () => void }) {
   const [isScrapped, setIsScrapped] = React.useState(false);
+  const [displayJob, setDisplayJob] = React.useState(job);
 
   // detail_content의 캔버스 데이터 여부 검증 헬퍼
   const isCanvasData = (content?: string) => {
@@ -85,6 +86,39 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
     }
   }, [job?.id]);
 
+  // 클라이언트 사이드 공통 코드 치환 로직
+  React.useEffect(() => {
+    setDisplayJob(job);
+    if (!job) return;
+
+    const hasCodes = 
+      (Array.isArray(job.keywords) && job.keywords.some((k: string) => k && (k.startsWith('KW_') || k.startsWith('AM_')))) ||
+      (Array.isArray(job.amenities) && job.amenities.some((a: string) => a && (a.startsWith('KW_') || a.startsWith('AM_'))));
+
+    if (hasCodes) {
+      import('@/src/atoms/qa/master/QA_GET_COMMON_CODES').then(async ({ QA_GET_COMMON_CODES }) => {
+        const res = await QA_GET_COMMON_CODES(undefined, true);
+        if (res.success && Array.isArray(res.data)) {
+          const codeMap: Record<string, string> = {};
+          res.data.forEach((item: any) => {
+            codeMap[item.code_value] = item.code_name;
+          });
+
+          const mapTags = (tags: any) => {
+            if (!Array.isArray(tags)) return tags;
+            return tags.map((t: string) => codeMap[t] || t);
+          };
+
+          setDisplayJob((prev: any) => ({
+            ...prev,
+            keywords: mapTags(prev.keywords),
+            amenities: mapTags(prev.amenities)
+          }));
+        }
+      }).catch(err => console.error("Failed to load common codes:", err));
+    }
+  }, [job]);
+
   const handleToggleScrap = () => {
     if (!job?.id) return;
     try {
@@ -134,10 +168,10 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
 
   // DB에 없는 부가 정보들 하드코딩 대체 (실제 job 데이터 사용, 없으면 비공개/기본값)
   const contact = {
-    nickname: job.nickname || '비공개',
-    phone: job.contact_phone || '비공개',
-    kakao: job.kakao_id || '비공개',
-    manager: job.contact_name || job.company_name || job.company || '담당자'
+    nickname: displayJob.nickname || '비공개',
+    phone: displayJob.contact_phone || '비공개',
+    kakao: displayJob.kakao_id || '비공개',
+    manager: displayJob.contact_name || displayJob.company_name || displayJob.company || '담당자'
   };
 
   return (
@@ -181,10 +215,10 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                             {/* 로고 영역 */}
                             <div className="w-full md:w-[280px] shrink-0 flex flex-col gap-3">
                                 <div className="w-full aspect-[3/2] bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center overflow-hidden">
-                                    {(job.logo_url || job.image) ? (
-                                        <img src={job.logo_url || job.image} alt="로고" className="w-full h-full object-contain bg-white" />
+                                    {(displayJob.logo_url || displayJob.image) ? (
+                                        <img src={displayJob.logo_url || displayJob.image} alt="로고" className="w-full h-full object-contain bg-white" />
                                     ) : (
-                                        <div className="font-black text-gray-800 text-lg">{(job.company_name || job.company)}</div>
+                                        <div className="font-black text-gray-800 text-lg">{(displayJob.company_name || displayJob.company)}</div>
                                     )}
                                 </div>
                                 <div className="flex items-center justify-between px-1">
@@ -203,7 +237,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                                     
                                     {/* 업체명 (닉네임 위) */}
                                     <div className="text-gray-400 font-medium flex items-center">업체명</div>
-                                    <div className="font-black text-gray-900 text-[15px]">{job.company_name || job.company || '업체명 미상'}</div>
+                                    <div className="font-black text-gray-900 text-[15px]">{displayJob.company_name || displayJob.company || '업체명 미상'}</div>
 
                                     {/* 닉네임 */}
                                     <div className="text-gray-400 font-medium flex items-center">닉네임</div>
@@ -216,7 +250,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                                     {/* 업체주소 */}
                                     <div className="text-gray-400 font-medium flex items-center">업체주소</div>
                                     <div className="font-bold text-gray-900 flex items-center gap-1">
-                                        <span className="text-[11px] opacity-70">📍</span> {job.address || job.location || '주소 미상'}
+                                        <span className="text-[11px] opacity-70">📍</span> {displayJob.address || displayJob.location || '주소 미상'}
                                     </div>
                                     
                                     <div className="col-span-2 my-1 border-t border-dashed border-gray-100"></div>
@@ -236,8 +270,8 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                                     </div>
                                     
                                     {/* SNS Links */}
-                                    {Array.isArray(job.sns_links) && job.sns_links.length > 0 ? (
-                                        job.sns_links.map((sns: any, idx: number) => (
+                                    {Array.isArray(displayJob.sns_links) && displayJob.sns_links.length > 0 ? (
+                                        displayJob.sns_links.map((sns: any, idx: number) => (
                                             <React.Fragment key={idx}>
                                                 <div className="text-gray-400 font-medium flex items-center capitalize">{sns.type}</div>
                                                 <div className="font-bold text-gray-900 flex items-center justify-between group">
@@ -282,13 +316,13 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 </section>
                 
                 {/* 2. 업소 이미지 */}
-                {Array.isArray(job.gallery_images || job.images) && (job.gallery_images || job.images).length > 0 && (
+                {Array.isArray(displayJob.gallery_images || displayJob.images) && (displayJob.gallery_images || displayJob.images).length > 0 && (
                 <section>
                     <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
                        <span className="w-1 h-5 bg-primary rounded-full"></span> 업소 이미지
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {(job.gallery_images || job.images).map((imgUrl: string, idx: number) => (
+                        {(displayJob.gallery_images || displayJob.images).map((imgUrl: string, idx: number) => (
                         <div key={idx} className="aspect-[4/3] bg-gray-50/80 border border-gray-100 rounded-2xl flex flex-col items-center justify-center overflow-hidden transition-all hover:shadow-sm group">
                             <img src={imgUrl} alt="업소 이미지" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                         </div>
@@ -305,23 +339,23 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden p-5 md:p-6">
                         <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[100px_1fr] gap-y-4 text-[13px] sm:text-[14px]">
                             <div className="text-gray-400 font-medium flex items-center">업무내용</div>
-                            <div className="font-bold text-gray-900">{job.title || '노래주점 - TC'}</div>
+                            <div className="font-bold text-gray-900">{displayJob.title || '노래주점 - TC'}</div>
                             
                             <div className="text-gray-400 font-medium flex items-center">고용형태</div>
                             <div className="font-bold text-gray-900">단기 / 정규직</div>
                             
                             <div className="text-gray-400 font-medium flex items-center">급여조건</div>
                             <div className="font-black text-pink-600 flex items-center gap-2">
-                                {job.pay || (job.salary_type ? `[${job.salary_type}] ${job.salary_amount}원` : '협의')}
+                                {displayJob.pay || (displayJob.salary_type ? `[${displayJob.salary_type}] ${displayJob.salary_amount}원` : '협의')}
                                 <span className="bg-pink-50 text-pink-500 px-1.5 py-0.5 rounded text-[10px] uppercase font-black border border-pink-100">당일 지급</span>
                             </div>
                             
                             <div className="text-gray-400 font-medium flex items-center">마감일자</div>
-                            <div className="font-bold text-gray-900">{job.deadline || '상시 모집'}</div>
+                            <div className="font-bold text-gray-900">{displayJob.deadline || '상시 모집'}</div>
                             
                             <div className="text-gray-400 font-medium flex items-center">근무지역</div>
                             <div className="font-bold text-gray-900 flex items-center gap-1">
-                                <span className="text-[11px] opacity-70">📍</span> {job.location || '지역 미상'}
+                                <span className="text-[11px] opacity-70">📍</span> {displayJob.location || '지역 미상'}
                             </div>
                             
                             <div className="col-span-2 my-2 border-t border-dashed border-gray-100"></div>
@@ -331,8 +365,8 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                                 {(() => {
                                     const tags = [
                                         ...new Set([
-                                            ...(Array.isArray(job.keywords) ? job.keywords : []),
-                                            ...(Array.isArray(job.amenities) ? job.amenities : []),
+                                            ...(Array.isArray(displayJob.keywords) ? displayJob.keywords : []),
+                                            ...(Array.isArray(displayJob.amenities) ? displayJob.amenities : []),
                                         ]),
                                     ];
                                     return tags.length > 0 ? (
@@ -363,8 +397,6 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     </div>
                 </div>
 
-
-
                 {/* 4. 상세 채용 정보 및 포스터 */}
                 <section className="pt-8 border-t border-gray-100 mt-8">
                     <div className="flex flex-col items-center">
@@ -373,27 +405,27 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                         </h3>
 
                         <div className="w-full bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden p-6 md:p-10 flex flex-col items-center">
-                            {job.detail_content ? (
+                            {displayJob.detail_content ? (
                                 <div 
                                     className="w-full rounded-xl overflow-hidden shadow-sm border border-gray-200 min-h-[400px] flex justify-center"
-                                    style={isCanvasData(job.detail_content) ? {} : {
-                                        backgroundColor: job.detail_bg_color || 'transparent',
-                                        backgroundImage: job.detail_bg_image ? `url(${job.detail_bg_image.replace('PATTERN|', '')})` : 'none',
-                                        backgroundSize: job.detail_bg_image?.startsWith('PATTERN|') ? 'auto' : 'cover',
-                                        backgroundRepeat: job.detail_bg_image?.startsWith('PATTERN|') ? 'repeat' : 'no-repeat',
+                                    style={isCanvasData(displayJob.detail_content) ? {} : {
+                                        backgroundColor: displayJob.detail_bg_color || 'transparent',
+                                        backgroundImage: displayJob.detail_bg_image ? `url(${displayJob.detail_bg_image.replace('PATTERN|', '')})` : 'none',
+                                        backgroundSize: displayJob.detail_bg_image?.startsWith('PATTERN|') ? 'auto' : 'cover',
+                                        backgroundRepeat: displayJob.detail_bg_image?.startsWith('PATTERN|') ? 'repeat' : 'no-repeat',
                                         backgroundPosition: 'top center'
                                     }}
                                 >
                                      <div 
-                                         className={isCanvasData(job.detail_content) ? "w-full min-h-full" : "w-full max-w-4xl min-h-full"}
-                                         style={isCanvasData(job.detail_content) ? {} : { backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
-                                         dangerouslySetInnerHTML={{ __html: renderDetailContent(job.detail_content) }} 
+                                         className={isCanvasData(displayJob.detail_content) ? "w-full min-h-full" : "w-full max-w-4xl min-h-full"}
+                                         style={isCanvasData(displayJob.detail_content) ? {} : { backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+                                         dangerouslySetInnerHTML={{ __html: renderDetailContent(displayJob.detail_content) }} 
                                      />
                                 </div>
-                            ) : (job.logo_url || job.image) ? (
+                            ) : (displayJob.logo_url || displayJob.image) ? (
                                 <div className="w-full flex justify-center group">
                                     <div className="relative rounded-xl overflow-hidden shadow-sm border border-gray-200">
-                                        <img src={job.logo_url || job.image} className="w-full max-w-4xl object-contain bg-white" alt="채용 전단지" />
+                                        <img src={displayJob.logo_url || displayJob.image} className="w-full max-w-4xl object-contain bg-white" alt="채용 전단지" />
                                         <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-xl"></div>
                                     </div>
                                 </div>
@@ -408,7 +440,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 </section>
 
                 <div className="mt-12 pt-6 border-t border-gray-100 text-center text-[11px] text-gray-400 leading-relaxed font-medium pb-4 px-4">
-                    본 정보는 <b className="text-gray-500">{job.company_name || job.company || '해당 업체'}</b>에서 제공한 자료이며, 폭스몬은 기재된 내용에 대한 오류와 사용자가 이를 신뢰하여 취한 조치에 대해 책임을 지지 않습니다.<br className="hidden sm:block"/>
+                    본 정보는 <b className="text-gray-500">{displayJob.company_name || displayJob.company || '해당 업체'}</b>에서 제공한 자료이며, 폭스몬은 기재된 내용에 대한 오류와 사용자가 이를 신뢰하여 취한 조치에 대해 책임을 지지 않습니다.<br className="hidden sm:block"/>
                     또한 누구든 본 정보를 폭스몬의 사전 동의 없이 무단 전재 및 크롤링, 재배포 할 수 없습니다.
                 </div>
             </div>
@@ -433,14 +465,14 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     const session = await res.json();
                     if (!session?.user?.id) { alert('로그인이 필요합니다.'); window.location.href = '/login'; return; }
                     if (session.user.role === 'EMPLOYER') { alert('업체회원은 지원자만 대화를 걸 수 있습니다.'); return; }
-                    if (session.user.id === job.user_id) {
+                    if (session.user.id === displayJob.user_id) {
                         alert('본인이 작성한 구인글에는 대화를 신청할 수 없습니다.');
                         return;
                     }
                     
                     const createRes = await OA_INSERT_CHAT_ROOM({
-                        title: `${job.company_name || job.company || '업소명 미상'} - ${job.title || '구인구직 대화방'}`,
-                        type: '1ON1', max_participants: 2, created_by: session.user.id, job_id: job.id, employer_id: job.user_id, seeker_id: session.user.id
+                        title: `${displayJob.company_name || displayJob.company || '업소명 미상'} - ${displayJob.title || '구인구직 대화방'}`,
+                        type: '1ON1', max_participants: 2, created_by: session.user.id, job_id: displayJob.id, employer_id: displayJob.user_id, seeker_id: session.user.id
                     });
                     if (createRes.success) {
                         handleRecordApplication();
