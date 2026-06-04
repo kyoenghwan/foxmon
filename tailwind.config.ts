@@ -10,6 +10,13 @@ const config = {
         './src/**/*.{ts,tsx}',
     ],
     prefix: "",
+    safelist: [
+        'animate-shimmer', 'animate-neon', 'animate-flicker', 'animate-fire', 'animate-ice',
+        'animate-emerald', 'animate-glitch', 'animate-forest', 'animate-ocean', 'animate-sakura',
+        'animate-galaxy', 'animate-sun', 'animate-lava', 'animate-matrix', 'animate-retro',
+        'animate-diamond', 'animate-platinum', 'animate-aura', 'animate-candy', 'animate-royal',
+        'animate-autumn', 'animate-toxic', 'animate-storm', 'animate-ghost', 'animate-rainbow-border'
+    ],
     theme: {
         screens: {
             "xs": "425px",
