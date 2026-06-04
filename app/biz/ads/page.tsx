@@ -24,6 +24,14 @@ export default async function BizAdsPage() {
         isVerified = !!profile?.is_business_verified;
     }
 
+    const isAgent = session?.user 
+        ? ((session.user as any).login_id === 'foxmon_ad' || 
+           (session.user as any).login_id === 'mon_ad' || 
+           (session.user as any).role === 'ADMIN' || 
+           (session.user as any).role === 'SUPER_ADMIN')
+        : false;
+
+
     return (
         <div className="space-y-6">
             {/* 페이지 헤더 */}
@@ -73,7 +81,7 @@ export default async function BizAdsPage() {
                     </div>
                 </div>
             ) : (
-                <BizAdsList initialAds={ads} isVerified={isVerified} />
+                <BizAdsList initialAds={ads} isVerified={isVerified} isAgent={isAgent} />
             )}
         </div>
     );

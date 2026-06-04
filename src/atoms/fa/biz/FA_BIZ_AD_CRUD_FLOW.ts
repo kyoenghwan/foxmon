@@ -58,7 +58,15 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             }
 
             // 2. 포인트 차감 진행 (무조건 자동 차감, 단 isDraft면 생략)
-            if (!isDraft && totalPoints > 0) {
+            // + 대행사/관리자 계정이거나 claim_code가 기입된 대행 광고 등록 시 포인트 차감 생략
+            const isAgent = userId ? await (async () => {
+                const { data: user } = await supabase.from('users').select('role, login_id').eq('id', userId).single();
+                return user?.login_id === 'foxmon_ad' || user?.login_id === 'mon_ad' || user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+            })() : false;
+
+            const skipDeduction = isDraft || isAgent || !!payload.claim_code;
+
+            if (!skipDeduction && totalPoints > 0) {
                 const { FA_DEDUCT_POINT_FOR_AD } = await import('@/src/atoms/fa/points/FA_DEDUCT_POINT_FOR_AD');
                 const deductResult = await FA_DEDUCT_POINT_FOR_AD({
                     userId,
@@ -72,12 +80,20 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             }
 
             // 3. 만료일 계산
-            const expiresAt = new Date();
-            if (!isDraft) {
-                expiresAt.setDate(expiresAt.getDate() + p);
+            let expiresAtStr = '';
+            if (payload.expires_at) {
+                const rawDate = new Date(payload.expires_at);
+                rawDate.setHours(23, 59, 59, 999);
+                expiresAtStr = rawDate.toISOString();
             } else {
-                // Draft 모드면 즉시 만료 (노출 안됨)
-                expiresAt.setFullYear(2000);
+                const expiresAt = new Date();
+                if (!isDraft) {
+                    expiresAt.setDate(expiresAt.getDate() + p);
+                } else {
+                    // Draft 모드면 즉시 만료 (노출 안됨)
+                    expiresAt.setFullYear(2000);
+                }
+                expiresAtStr = expiresAt.toISOString();
             }
 
             const dbPayload = {
@@ -118,8 +134,8 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 is_subscription: !!payload.is_subscription,
                 option_double_slot: !!payload.option_double_slot,
                 option_jump: !!payload.option_jump,
-                total_points: totalPoints,
-                expires_at: expiresAt.toISOString(),
+                total_points: skipDeduction ? 0 : totalPoints,
+                expires_at: expiresAtStr,
                 claim_code: payload.claim_code || null
             };
 
@@ -264,6 +280,20 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 claim_code: payload.claim_code !== undefined ? (payload.claim_code || null) : undefined,
                 updated_at: new Date().toISOString()
             };
+
+            // 만약 payload.expires_at이 명시적으로 주어졌을 경우 만료일 직접 갱신 처리
+            if (payload.expires_at !== undefined) {
+                if (payload.expires_at) {
+                    const rawDate = new Date(payload.expires_at);
+                    rawDate.setHours(23, 59, 59, 999);
+                    updatePayload.expires_at = rawDate.toISOString();
+                } else {
+                    const date2000 = new Date();
+                    date2000.setFullYear(2000);
+                    updatePayload.expires_at = date2000.toISOString();
+                }
+            }
+
 
             // 결제 연장인 경우 만료일 및 옵션 갱신
             if (isPaymentUpdate) {

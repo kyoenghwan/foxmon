@@ -32,8 +32,15 @@ const StatusBadge = ({ ad, isVerified }: { ad: any, isVerified: boolean }) => {
     const isPending = new Date(ad.expires_at).getFullYear() === 2000;
     const isExpired = new Date(ad.expires_at) < new Date() && !isPending;
     
+    // claim_code가 있다면 업체 광고 수락 대기 상태 (수락 대기중)
+    const hasClaimCode = !!ad.claim_code;
+    
     // 사업자 검증이 안 되었으면서 결제 대기 상태인 경우
-    const status = (isPending || isExpired) && !isVerified ? 'UNVERIFIED' : isPending ? 'PENDING' : isExpired ? 'EXPIRED' : 'ACTIVE';
+    let status = (isPending || isExpired) && !isVerified ? 'UNVERIFIED' : isPending ? 'PENDING' : isExpired ? 'EXPIRED' : 'ACTIVE';
+
+    if (hasClaimCode) {
+        status = 'CLAIM_PENDING';
+    }
 
     const styles: Record<string, string> = {
         ACTIVE: 'bg-green-100 text-green-700',
@@ -41,6 +48,7 @@ const StatusBadge = ({ ad, isVerified }: { ad: any, isVerified: boolean }) => {
         EXPIRED: 'bg-red-100 text-red-600',
         PENDING: 'bg-yellow-100 text-yellow-700 border border-yellow-300',
         UNVERIFIED: 'bg-red-50 text-red-600 border border-red-200',
+        CLAIM_PENDING: 'bg-purple-100 text-purple-700 border border-purple-300',
     };
     const labels: Record<string, string> = {
         ACTIVE: '진행 중',
@@ -48,16 +56,18 @@ const StatusBadge = ({ ad, isVerified }: { ad: any, isVerified: boolean }) => {
         EXPIRED: '만료',
         PENDING: '결제 대기중',
         UNVERIFIED: '사업자 검증 중',
+        CLAIM_PENDING: '수락 대기중',
     };
     return (
         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${styles[status] || ''}`}>
             {status === 'ACTIVE' && <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />}
+            {status === 'CLAIM_PENDING' && <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />}
             {labels[status] || status}
         </span>
     );
 };
 
-export default function BizAdsList({ initialAds, isVerified }: { initialAds: any[], isVerified?: boolean }) {
+export default function BizAdsList({ initialAds, isVerified, isAgent }: { initialAds: any[], isVerified?: boolean, isAgent?: boolean }) {
     const router = useRouter();
     const [ads, setAds] = useState(initialAds);
     const [paymentAd, setPaymentAd] = useState<any | null>(null);
@@ -112,7 +122,11 @@ export default function BizAdsList({ initialAds, isVerified }: { initialAds: any
                                     <td className="px-4 py-4 text-center whitespace-nowrap">
                                         <span className="flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500">
                                             <Clock className="w-3.5 h-3.5" />
-                                            {ad.expires_at && new Date(ad.expires_at).getFullYear() !== 2000 ? new Date(ad.expires_at).toLocaleDateString() : '결제 대기'}
+                                            {ad.expires_at && new Date(ad.expires_at).getFullYear() !== 2000 
+                                                ? new Date(ad.expires_at).toLocaleDateString() 
+                                                : ad.claim_code 
+                                                    ? '수락 대기' 
+                                                    : '결제 대기'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-center whitespace-nowrap">
@@ -121,14 +135,15 @@ export default function BizAdsList({ initialAds, isVerified }: { initialAds: any
                                                 <button 
                                                     onClick={(e) => { 
                                                         e.stopPropagation(); 
-                                                        if (!isVerified) {
+                                                        const canPay = isVerified || isAgent || !!ad.claim_code;
+                                                        if (!canPay) {
                                                             alert("사업자 정보 검증이 완료된 업체만 결제 및 광고 노출이 가능합니다.\n진행 중인 검증이 끝날 때까지 잠시만 기다려주세요.");
                                                             return;
                                                         }
                                                         setPaymentAd(ad); 
                                                     }}
                                                     className={`text-[11px] font-black px-2.5 py-1.5 rounded flex items-center gap-1 transition-colors ${
-                                                        !isVerified 
+                                                        !(isVerified || isAgent || !!ad.claim_code)
                                                             ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
                                                             : 'bg-gray-900 text-white hover:bg-black'
                                                     }`}

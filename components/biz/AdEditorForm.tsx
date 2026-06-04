@@ -133,7 +133,10 @@ export interface AdFormData {
     
     // 소유권 양도용 핀코드
     claim_code?: string;
+    // 임의 광고 노출 만료일
+    expires_at?: string;
 }
+
 
 // 프리미엄 테마 목록 (premium-job-card.tsx THEME_CONFIG 기반)
 const PREMIUM_THEMES = [
@@ -562,7 +565,9 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         amenities: initialData?.amenities || [],
         keywords: initialData?.keywords || [],
         claim_code: initialData?.claim_code || '',
+        expires_at: initialData?.expires_at || '',
     });
+
 
     const [regions, setRegions] = useState<CodeItem[]>([]);
     const [categories1, setCategories1] = useState<CodeItem[]>([]);
@@ -1532,6 +1537,34 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 >
                                     🎲 자동 생성
                                 </button>
+                            </div>
+                            
+                            {/* 노출 만료일 직접 지정 */}
+                            <div className="border-t border-orange-200/60 pt-4 space-y-2">
+                                <h4 className="font-black text-[13px] text-orange-950 flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-primary" />
+                                    📅 임의 광고 노출 기간 (만료일) 설정
+                                </h4>
+                                <p className="text-[12px] text-orange-700 font-medium">
+                                    결제 여부와 상관없이 지정된 만료일까지 광고를 웹사이트에 즉시 강제 노출할 수 있습니다. (설정하지 않으면 결제 대기 상태로 등록됩니다)
+                                </p>
+                                <div className="flex items-center gap-2 max-w-md">
+                                    <input
+                                        type="date"
+                                        value={form.expires_at ? form.expires_at.substring(0, 10) : ''}
+                                        onChange={e => update('expires_at', e.target.value)}
+                                        className="flex-1 px-3 py-2.5 border border-orange-200 rounded-lg text-[14px] font-black outline-none focus:border-primary bg-white text-center"
+                                    />
+                                    {form.expires_at && form.expires_at !== '2000-01-01T00:00:00.000Z' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => update('expires_at', '')}
+                                            className="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[13px] rounded-lg transition-colors border border-gray-200"
+                                        >
+                                            초기화 (결제 대기)
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
