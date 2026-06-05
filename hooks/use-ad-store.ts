@@ -83,12 +83,24 @@ export const useAdStore = create<AdState>((set, get) => ({
         }
     },
 
-    // 클라이언트 메모리 내에서 배너 순서 순환 회전 (서버 재페치 배제)
+    // 클라이언트 메모리 내에서 배너 순서 순환 회전 (고정과 일반 광고를 격리하여 회전)
     rotateSideAds: () => {
         const ads = get().sideAds;
         if (ads.length <= 1) return;
-        const rotated = [...ads.slice(1), ads[0]];
-        set({ sideAds: rotated });
+        
+        // 1. 중복 제거된 원본 광고 리스트 추출
+        const uniqueAds = ads.filter(ad => !ad.id.includes('_repeat_'));
+        
+        // 2. 고정과 일반 광고 분리
+        const fixedAds = uniqueAds.filter(ad => ad.is_fixed);
+        const rollingAds = uniqueAds.filter(ad => !ad.is_fixed);
+        
+        // 3. 각각 개별적으로 로테이션 회전
+        const rotatedFixed = fixedAds.length > 1 ? [...fixedAds.slice(1), fixedAds[0]] : fixedAds;
+        const rotatedRolling = rollingAds.length > 1 ? [...rollingAds.slice(1), rollingAds[0]] : rollingAds;
+        
+        // 4. 다시 합쳐서 스토어 상태에 저장
+        set({ sideAds: [...rotatedFixed, ...rotatedRolling] });
     },
 
     rotateJobs: () => {

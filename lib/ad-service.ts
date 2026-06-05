@@ -40,6 +40,7 @@ export interface AdItem {
     option_double_slot?: boolean;
     option_jump?: boolean;
     isRealAd?: boolean; // 실제 DB 연동 광고 여부
+    is_fixed?: boolean; // 고정 배너 여부
     merchant_tier?: 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP';
 }
 
@@ -110,6 +111,7 @@ let MOCK_ADS: AdItem[] = Array.from({ length: 150 }).map((_, i) => {
         color: ['orange', 'blue', 'purple', 'emerald'][i % 4],
         image: `https://picsum.photos/seed/fox-${i}/400/300`,
         merchant_tier: merchant_tier,
+        is_fixed: i % 15 === 0, // 데모용 고정 광고 모킹
     };
 });
 
@@ -236,7 +238,8 @@ export async function getRotatedAds(
                 pay: item.pay || (item.salary_type ? `[${item.salary_type}] ${item.salary_amount}` : item.salary_amount) || '급여협의',
                 image: item.image_url || item.image || item.logo_url || '',
                 merchant_tier: merchant_tier as 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP',
-                isRealAd: true
+                isRealAd: true,
+                is_fixed: item.is_fixed || false
             };
         }) as AdItem[];
         

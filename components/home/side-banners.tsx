@@ -19,11 +19,27 @@ export function SideBanners() {
     const [loading, setLoading] = useState(!isSideAdsLoaded);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // 등록된 사이드 배너가 8개 미만일 때, 비어 보이지 않도록 8개의 공간을 순환 반복하여 채움
+    // 1. 중복 제거된 원본 광고 리스트 추출 (서버 중복 데이터가 섞여올 시 원천 정제)
+    const uniqueAds = sideAds.filter(ad => !ad.id.includes('_repeat_'));
+    
+    // 2. 고정과 일반 광고 분리
+    const fixedAds = uniqueAds.filter(ad => ad.is_fixed);
+    const rollingAds = uniqueAds.filter(ad => !ad.is_fixed);
+    
+    // 3. 8개의 화면 슬롯 배치 구성
     const filledAds: AdItem[] = [];
-    if (sideAds.length > 0) {
-        for (let i = 0; i < 8; i++) {
-            filledAds.push(sideAds[i % sideAds.length]);
+    
+    // 3-1. 고정 광고 배치 (최대 4개)
+    const activeFixedCount = Math.min(fixedAds.length, 4);
+    for (let i = 0; i < activeFixedCount; i++) {
+        filledAds.push(fixedAds[i]);
+    }
+    
+    // 3-2. 남은 슬롯을 일반 광고의 순환 반복으로 채움 (비어보이지 않게 보장)
+    const remainingSlots = 8 - activeFixedCount;
+    if (rollingAds.length > 0) {
+        for (let i = 0; i < remainingSlots; i++) {
+            filledAds.push(rollingAds[i % rollingAds.length]);
         }
     }
 
