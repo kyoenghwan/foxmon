@@ -30,11 +30,7 @@ export async function getAdRankingSimulation(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PR
         })) as AdItem[];
     }
 
-    // 실제 홈페이지 화면과 동일하게 가상 배너(Mock Data)로 50개 슬롯을 채움
-    if (rawAds.length < 50) {
-        const mockAdsForTier = await getRawMockAds(tier);
-        rawAds = [...rawAds, ...mockAdsForTier.slice(0, 50 - rawAds.length)];
-    }
+    // 실제 등록된 광고로만 보이도록 가상 배너(Mock Data)를 채우는 로직을 제거함
 
     // 시뮬레이션을 위한 기준 시간
     const nowMs = Date.now();
