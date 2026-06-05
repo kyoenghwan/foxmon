@@ -53,18 +53,7 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
 }
 
 
-interface HomeJobSectionsProps {
-    initialData?: {
-        sideAds: AdItem[];
-        premiumMainAds: AdItem[];
-        premiumJobs: AdItem[];
-        specialJobs: AdItem[];
-        lineJobs: AdItem[];
-        generalJobs: AdItem[];
-    };
-}
-
-export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
+export function HomeJobSections() {
     const { data: session } = useSession();
     const isEmployer = (session?.user as any)?.role === 'EMPLOYER';
     const isBusinessVerified = (session?.user as any)?.business_number ? true : false;
@@ -77,15 +66,6 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
     const [showAllGeneral, setShowAllGeneral] = useState(false);
 
     // Zustand 글로벌 광고 데이터 상태 연동
-    const store = useAdStore();
-    const initializedRef = React.useRef(false);
-
-    // 컴포넌트 마운트 전 렌더 패스(Render Pass) 단에서 동기식 스토어 주입 (Race Condition 방지)
-    if (initialData && !initializedRef.current && !store.isJobsLoaded) {
-        store.setInitialData(initialData);
-        initializedRef.current = true;
-    }
-
     const { 
         premiumJobs, 
         specialJobs, 
@@ -94,13 +74,13 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
         isJobsLoaded, 
         fetchJobs,
         rotateJobs
-    } = store;
+    } = useAdStore();
 
-    const [loading, setLoading] = useState(initialData ? false : !isJobsLoaded);
+    const [loading, setLoading] = useState(!isJobsLoaded);
     const [notices, setNotices] = useState<Notice[]>([]);
 
     useEffect(() => {
-        if (!isJobsLoaded && !initialData) {
+        if (!isJobsLoaded) {
             setLoading(true);
             fetchJobs().then(() => setLoading(false));
         }
@@ -112,7 +92,7 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                 }
             });
         });
-    }, [isJobsLoaded, fetchJobs, initialData]);
+    }, [isJobsLoaded, fetchJobs]);
 
     useEffect(() => {
         if (isPaused || notices.length === 0) return;
