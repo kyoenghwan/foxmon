@@ -117,44 +117,32 @@ let MOCK_ADS: AdItem[] = Array.from({ length: 150 }).map((_, i) => {
 
 
 
-/**
- * Fair Ad Rotation Service (Supabase)
- */
-export async function getRotatedAds(
-    tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL', 
-    limitCount: number = 20,
-    searchQuery?: string
-): Promise<AdItem[]> {
-    const filterBySearch = (items: AdItem[], query?: string) => {
-        if (!query) return items;
-        const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-        return items.filter(item => {
-            return terms.every(term => {
-                const inTitle = item.title?.toLowerCase().includes(term);
-                const inCompany = (item.company || item.company_name)?.toLowerCase().includes(term);
-                const inLocation = item.location?.toLowerCase().includes(term);
-                const inCategory = (item.category || item.category1 || item.category2)?.toLowerCase().includes(term);
-                const inKeywords = Array.isArray(item.keywords) && item.keywords.some(kw => String(kw).toLowerCase().includes(term));
-                return inTitle || inCompany || inLocation || inCategory || inKeywords;
-            });
-        });
-    };
+// 전역 캐시 인터페이스 및 캐시 맵 정의
+interface AdCache {
+    ads: AdItem[];
+    lastFetched: number;
+    isFetching: boolean;
+}
 
+const adCache: Record<string, AdCache> = {};
+const CACHE_TTL_MS = 60 * 1000; // 60초 캐시 (1분)
+
+/**
+ * DB에서 직접 특정 티어의 활성 광고 데이터를 가져오는 내부 헬퍼 함수
+ */
+async function fetchAdsFromDB(
+    tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL'
+): Promise<AdItem[]> {
     if (!IS_SUPABASE_ENABLED) {
-        const filtered = MOCK_ADS.filter(ad => ad.tier === tier);
-        const searched = filterBySearch(filtered, searchQuery);
-        return applyRollingLogic(searched, limitCount);
+        return MOCK_ADS.filter(ad => ad.tier === tier);
     }
 
     try {
         const targetTable = tier === 'GENERAL' ? 'jobs' : 'biz_ads';
-        let queryBuilder;
-
-        // detail_content는 대용량이므로 초기 로딩 속도 향상을 위해 쿼리 필드에서 제외
         const jobsSelectFields = 'id, author_id, company_id, company_name, title, content, category, location, pay, image_url, tier, is_big, exposure_count, last_exposed_at, created_at, user_id, status, expires_at, view_count, detail_images, work_type, work_hours, benefits, contact_info, address, updated_at, source_origin, salary_type, salary_amount, logo_url, contact_name, contact_phone, kakao_id, line_id, telegram_id, wechat_id, employment_type, category1, category2, work_time, amenities, keywords, design_mode, detail_bg_color, detail_bg_image, exposure_period, option_bold, option_color, option_bg, option_icon, option_jump, total_points, option_color_value, option_bg_value, option_bold_expires_at, option_color_expires_at, option_bg_expires_at, option_icon_expires_at, option_jump_expires_at, option_highlight, option_highlight_value, option_highlight_expires_at, option_general_icons, option_general_icons_expires_at, is_subscription';
-
         const bizAdsSelectFields = 'id, author_id, company_id, company_name, title, content, category, location, pay, image_url, tier, is_big, exposure_count, last_exposed_at, created_at, user_id, status, expires_at, view_count, detail_images, work_type, work_hours, benefits, contact_info, address, updated_at, source_origin, salary_type, salary_amount, logo_url, contact_name, contact_phone, kakao_id, line_id, telegram_id, wechat_id, employment_type, category1, category2, work_time, amenities, keywords, design_mode, detail_bg_color, detail_bg_image, exposure_period, option_bold, option_color, option_bg, option_icon, option_jump, total_points, option_color_value, option_bg_value, option_bold_expires_at, option_color_expires_at, option_bg_expires_at, option_icon_expires_at, option_jump_expires_at, option_highlight, option_highlight_value, option_highlight_expires_at, option_general_icons, option_general_icons_expires_at, color, bg_opacity, theme, effect_intensity, is_subscription, option_double_slot, option_double_slot_expires_at, claim_code';
 
+        let queryBuilder;
         if (targetTable === 'jobs') {
             queryBuilder = supabaseAdmin
                 .from('jobs')
@@ -167,21 +155,13 @@ export async function getRotatedAds(
                 .eq('tier', tier);
         }
 
-        if (searchQuery) {
-            const terms = searchQuery.trim().split(/\s+/).filter(Boolean);
-            for (const term of terms) {
-                queryBuilder = queryBuilder.or(`title.ilike.%${term}%,location.ilike.%${term}%,company_name.ilike.%${term}%,category1.ilike.%${term}%,category2.ilike.%${term}%`);
-            }
-        }
-
         const { data, error } = await queryBuilder;
 
         if (error || !data || data.length === 0) {
             if (error) {
-                console.error(`[getRotatedAds] Supabase error for tier ${tier}:`, error);
+                console.error(`[fetchAdsFromDB] Supabase error for tier ${tier}:`, error);
             }
-            if (tier === 'SIDE') return [];
-            return getMockAds(tier, limitCount, searchQuery);
+            return [];
         }
 
         let rawAds = data;
@@ -195,7 +175,7 @@ export async function getRotatedAds(
                     .select('id, merchant_tier')
                     .in('id', userIds);
                 if (usersError) {
-                    console.error("[getRotatedAds] Error fetching users for merchant_tier:", usersError);
+                    console.error("[fetchAdsFromDB] Error fetching users for merchant_tier:", usersError);
                 }
                 if (usersData) {
                     usersData.forEach((u: any) => {
@@ -205,21 +185,18 @@ export async function getRotatedAds(
             }
         }
 
-        // 실제 광고 노출 가용 조건 필터링
         const now = new Date();
         const activeRealAds = rawAds.filter((item: any) => {
-            // status 검사 (ACTIVE 또는 CLAIM_PENDING 허용)
             const isValidStatus = item.status === 'ACTIVE' || item.status === 'CLAIM_PENDING';
             if (!isValidStatus) return false;
 
-            // expires_at 검사
-            if (!item.expires_at) return true; // 무기한 광고 허용
+            if (!item.expires_at) return true;
             const expireDate = new Date(item.expires_at);
-            if (expireDate.getFullYear() === 2000) return false; // 결제 대기중 제외
-            return expireDate > now; // 만료되지 않음
+            if (expireDate.getFullYear() === 2000) return false;
+            return expireDate > now;
         });
 
-        let ads: AdItem[] = activeRealAds.map((item: any) => {
+        const ads: AdItem[] = activeRealAds.map((item: any) => {
             let merchant_tier = 'NORMAL';
             if (targetTable === 'biz_ads') {
                 merchant_tier = userMap[item.user_id] || 'NORMAL';
@@ -241,54 +218,54 @@ export async function getRotatedAds(
                 isRealAd: true,
                 is_fixed: item.is_fixed || false
             };
-        }) as AdItem[];
-        
-        // 롤링 알고리즘을 실제 쿼리된 광고 리스트에 먼저 적용하여 롤링 순서를 정함
-        let rolledAds = applyRollingLogic(ads, ads.length);
+        });
 
-        if (rolledAds.length > 0 && rolledAds.length < limitCount) {
-            if (tier === 'SIDE') {
-                // SIDE 배너의 경우, 실제 등록된 배너들만 순환 반복하여 limitCount를 꽉 채움
-                const originalAds = [...rolledAds];
-                while (rolledAds.length < limitCount) {
-                    rolledAds = [...rolledAds, ...originalAds.map(ad => ({
-                        ...ad,
-                        id: `${ad.id}_repeat_${rolledAds.length}`
-                    }))];
-                }
-                rolledAds = rolledAds.slice(0, limitCount);
-            } else {
-                // 타 등급은 기존대로 mock 광고를 추가하여 채워 넣음
-                const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
-                const filteredMock = filterBySearch(mockAdsForTier, searchQuery);
-                rolledAds = [...rolledAds, ...filteredMock.slice(0, limitCount - rolledAds.length)];
-                // 보충된 전체에 대해 다시 롤링 알고리즘 적용
-                rolledAds = applyRollingLogic(rolledAds, limitCount);
-            }
-        } else if (rolledAds.length === 0 && tier === 'SIDE') {
-            return [];
-        }
-
-        return rolledAds.slice(0, limitCount);
-    } catch (error) {
-        console.error(`[getRotatedAds] Exception for tier ${tier}:`, error);
-        if (tier === 'SIDE') return [];
-        return getMockAds(tier, limitCount, searchQuery);
+        return ads;
+    } catch (err) {
+        console.error(`[fetchAdsFromDB] Exception in fetch for tier ${tier}:`, err);
+        return [];
     }
 }
 
 /**
- * Internal Helper for Fallback Mocking
+ * 캐시 유효성을 검사하고 백그라운드 패치를 진행하는 내부 헬퍼 함수
  */
-function getMockAds(
+async function fetchAndCacheAds(
+    tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL'
+): Promise<AdItem[]> {
+    if (!adCache[tier]) {
+        adCache[tier] = { ads: [], lastFetched: 0, isFetching: false };
+    }
+
+    if (adCache[tier].isFetching) {
+        return adCache[tier].ads;
+    }
+
+    adCache[tier].isFetching = true;
+    try {
+        const ads = await fetchAdsFromDB(tier);
+        adCache[tier].ads = ads;
+        adCache[tier].lastFetched = Date.now();
+        return ads;
+    } catch (err) {
+        console.error(`[fetchAndCacheAds] Exception for tier ${tier}:`, err);
+        return adCache[tier].ads;
+    } finally {
+        adCache[tier].isFetching = false;
+    }
+}
+
+/**
+ * Fair Ad Rotation Service (Supabase + Memory Cache)
+ */
+export async function getRotatedAds(
     tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL', 
-    count: number,
+    limitCount: number = 20,
     searchQuery?: string
-): AdItem[] {
-    const filtered = MOCK_ADS.filter(ad => ad.tier === tier);
-    const filterBySearch = (items: AdItem[], q?: string) => {
-        if (!q) return items;
-        const terms = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+): Promise<AdItem[]> {
+    const filterBySearch = (items: AdItem[], query?: string) => {
+        if (!query) return items;
+        const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
         return items.filter(item => {
             return terms.every(term => {
                 const inTitle = item.title?.toLowerCase().includes(term);
@@ -300,8 +277,65 @@ function getMockAds(
             });
         });
     };
-    const searched = filterBySearch(filtered, searchQuery);
-    return applyRollingLogic(searched, count);
+
+    const now = Date.now();
+    const cache = adCache[tier];
+
+    // 캐시가 없거나 만료된 경우 업데이트 트리거
+    if (!cache || now - cache.lastFetched > CACHE_TTL_MS) {
+        if (!cache) {
+            // 최초 패치는 동기적으로 수행하여 빈 화면이 노출되지 않도록 함
+            await fetchAndCacheAds(tier);
+        } else {
+            // 캐시가 만료된 경우 백그라운드 비동기 갱신 수행 (대기 시간 0ms)
+            fetchAndCacheAds(tier);
+        }
+    }
+
+    let cachedAds = [...(adCache[tier]?.ads || [])];
+
+    // 로컬 환경 등에서 DB 연결이 비활성화되거나 데이터가 아예 없는 경우 폴백
+    if (cachedAds.length === 0 && !IS_SUPABASE_ENABLED) {
+        const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
+        cachedAds = mockAdsForTier;
+    }
+
+    // 메모리 내 검색 필터링
+    let ads = filterBySearch(cachedAds, searchQuery);
+
+    // 롤링 알고리즘 적용
+    let rolledAds = applyRollingLogic(ads, ads.length);
+
+    if (rolledAds.length > 0 && rolledAds.length < limitCount) {
+        if (tier === 'SIDE') {
+            // SIDE 배너의 경우, 실제 등록된 배너들만 순환 반복하여 limitCount를 꽉 채움
+            const originalAds = [...rolledAds];
+            while (rolledAds.length < limitCount) {
+                rolledAds = [...rolledAds, ...originalAds.map(ad => ({
+                    ...ad,
+                    id: `${ad.id}_repeat_${rolledAds.length}`
+                }))];
+            }
+            rolledAds = rolledAds.slice(0, limitCount);
+        } else {
+            // 타 등급은 기존대로 mock 광고를 추가하여 채워 넣음
+            const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
+            const filteredMock = filterBySearch(mockAdsForTier, searchQuery);
+            rolledAds = [...rolledAds, ...filteredMock.slice(0, limitCount - rolledAds.length)];
+            // 보충된 전체에 대해 다시 롤링 알고리즘 적용
+            rolledAds = applyRollingLogic(rolledAds, limitCount);
+        }
+    } else if (rolledAds.length === 0) {
+        if (tier === 'SIDE') {
+            return [];
+        } else {
+            const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
+            const filteredMock = filterBySearch(mockAdsForTier, searchQuery);
+            rolledAds = applyRollingLogic(filteredMock, limitCount);
+        }
+    }
+
+    return rolledAds.slice(0, limitCount);
 }
 
 /**
