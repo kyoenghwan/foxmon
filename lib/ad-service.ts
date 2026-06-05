@@ -125,7 +125,7 @@ interface AdCache {
 }
 
 const adCache: Record<string, AdCache> = {};
-const CACHE_TTL_MS = 60 * 1000; // 60초 캐시 (1분)
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5분 캐시 (300초)
 
 /**
  * DB에서 직접 특정 티어의 활성 광고 데이터를 가져오는 내부 헬퍼 함수
