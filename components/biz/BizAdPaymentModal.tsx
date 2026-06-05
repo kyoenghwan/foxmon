@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { AdFormData } from '@/components/biz/AdEditorForm';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { getUserPointsAction } from '@/app/actions/pointActions';
-import { manageBizAdAction } from '@/lib/actions';
+import { manageBizAdAction, getActiveFixedAdCountAction } from '@/lib/actions';
 import { GET_POINT_POLICIES } from '@/app/actions/pointPolicyActions';
 
 interface BizAdPaymentModalProps {
-    initialData: Partial<AdFormData> & { isPaid?: boolean };
+    initialData: Partial<AdFormData> & { isPaid?: boolean; is_fixed?: boolean };
     jobId: string;
     onClose: () => void;
     onSuccess: () => void;
@@ -21,16 +21,18 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
     const [userPoints, setUserPoints] = useState<number>(0);
     const [loadingPoints, setLoadingPoints] = useState(true);
     const [policies, setPolicies] = useState<Record<string, number>>({});
+    const [fixedAdCount, setFixedAdCount] = useState<number>(0); // 현재 활성 고정 배너 수
 
-    const [form, setForm] = useState<Partial<AdFormData>>({
+    const [form, setForm] = useState<Partial<AdFormData> & { option_fixed?: boolean }>({
         ...initialData,
         exposure_period: initialData.exposure_period || 30,
         is_subscription: initialData.is_subscription || false,
         option_double_slot: initialData.option_double_slot || false,
-        option_jump: initialData.option_jump || false
+        option_fixed: initialData.is_fixed || false,
+        option_highlight: initialData.option_highlight || false
     });
 
-    const update = (field: keyof AdFormData, value: any) => {
+    const update = (field: string, value: any) => {
         setForm(prev => ({ ...prev, [field]: value }));
     };
 
@@ -49,6 +51,12 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                         policyMap[p.config_key] = p.config_value;
                     });
                     setPolicies(policyMap);
+                }
+
+                // 고정 배너 개수 조회
+                const fixedRes = await getActiveFixedAdCountAction();
+                if (fixedRes.success) {
+                    setFixedAdCount(fixedRes.count);
                 }
             } catch (err) {
                 console.error("데이터 로드 실패", err);
@@ -76,8 +84,12 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
             total *= 2;
         }
 
-        if (form.option_jump) {
-            total += policies[`OPTION_PRICE_BIZ_JUMP_${p}`] || 0;
+        if (form.option_fixed) {
+            total *= 3; // 스마트 고정 노출 3배 단가 적용
+        }
+
+        if (form.option_highlight) {
+            total += 30000; // 스페셜 테마 이펙트 30,000 P 추가
         }
 
         if (form.option_double_slot) {
@@ -90,7 +102,13 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
     const handleFinalSubmit = async () => {
         setSaving(true);
         try {
-            const res = await manageBizAdAction('UPDATE', { ...form, _isPayment: true }, jobId);
+            const finalForm = {
+                ...form,
+                is_fixed: form.option_fixed,
+                option_highlight: form.option_highlight,
+                _isPayment: true
+            };
+            const res = await manageBizAdAction('UPDATE', finalForm, jobId);
             if (!res.success) {
                 throw new Error(res.message);
             }
@@ -162,8 +180,8 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                                 category={form.category1 || form.category || '일반'}
                                                 pay={form.pay || (form.salary_type ? `[${form.salary_type}] ${form.salary_amount}` : form.salary_amount) || (form.pay_amount ? `${form.pay_type} ${form.pay_amount}` : '급여 협의')}
                                                 image={form.logo_url || form.image}
-                                                impactType={isGeneral ? 'none' : ((form.theme as any) || 'gold')}
-                                                effectIntensity={isSpecial || isGeneral || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'shimmer'}`}
+                                                impactType={isGeneral ? 'none' : (form.option_highlight ? ((form.theme as any) || 'gold') : 'none')}
+                                                effectIntensity={isSpecial || isGeneral || !form.option_highlight || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'shimmer'}`}
                                                 isSide={isSide}
                                                 hideLogo={isGeneral}
                                                 tier={form.tier as any}
@@ -290,21 +308,85 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                     </div>
                                 </div>
                                 
-                                {/* 자동 점프 */}
-                                <div className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${form.option_jump ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'} ${initialData.isPaid ? 'opacity-70 cursor-default' : 'cursor-pointer hover:border-gray-300'}`} onClick={() => { if (!initialData.isPaid) update('option_jump', !form.option_jump); }}>
+                                {/* 스마트 고정 노출 (Fix Slot) - 사이드 배너 전용 */}
+                                {form.tier === 'SIDE' && (() => {
+                                    const isLimitReached = fixedAdCount >= 4;
+                                    const isAlreadyFixed = !!initialData.is_fixed;
+                                    const isSelectDisabled = isLimitReached && !isAlreadyFixed;
+
+                                    return (
+                                        <div 
+                                            className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${
+                                                form.option_fixed ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'
+                                            } ${
+                                                initialData.isPaid || isSelectDisabled 
+                                                    ? 'opacity-65 bg-gray-50/50 cursor-not-allowed' 
+                                                    : 'cursor-pointer hover:border-gray-300'
+                                            }`} 
+                                            onClick={() => { 
+                                                if (initialData.isPaid) return;
+                                                if (isSelectDisabled) {
+                                                    alert("죄송합니다. 사이드 배너 고정 옵션은 선착순 4구좌가 모두 마감되었습니다.");
+                                                    return;
+                                                }
+                                                update('option_fixed', !form.option_fixed); 
+                                            }}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${form.option_fixed ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                                        <Zap className="w-4 h-4" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <h5 className="font-black text-[14px] text-gray-900">스마트 고정 노출 (Fix Slot)</h5>
+                                                            {isLimitReached && (
+                                                                <span className="text-[10px] font-black bg-red-100 text-red-600 px-2 py-0.5 rounded-full border border-red-200">
+                                                                    선착순 마감 ({fixedAdCount}/4)
+                                                                </span>
+                                                            )}
+                                                            {!isLimitReached && (
+                                                                <span className="text-[10px] font-black bg-green-100 text-green-600 px-2 py-0.5 rounded-full border border-green-200">
+                                                                    신청 가능 ({fixedAdCount}/4)
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-[12px] font-medium text-gray-500">배너 1~4번 명당 영역에 상시 고정 노출! (롤링 제외)</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-[14px] font-black text-indigo-600">기본 요금 3배 부과</div>
+                                                    <div className="text-[11px] font-medium text-gray-400">(Fix Slot 프리미엄)</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                                
+                                {/* 스페셜 테마 이펙트 (Theme Effect) */}
+                                <div 
+                                    className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${
+                                        form.option_highlight ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'
+                                    } ${
+                                        initialData.isPaid ? 'opacity-70 cursor-default' : 'cursor-pointer hover:border-gray-300'
+                                    }`} 
+                                    onClick={() => { 
+                                        if (!initialData.isPaid) update('option_highlight', !form.option_highlight); 
+                                    }}
+                                >
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${form.option_jump ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                                <Zap className="w-4 h-4" />
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${form.option_highlight ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                                <Eye className="w-4 h-4" />
                                             </div>
                                             <div>
-                                                <h5 className="font-black text-[14px] text-gray-900">스마트 자동 점프 (Auto Jump)</h5>
-                                                <p className="text-[12px] font-medium text-gray-500">내 광고가 100위권 밖으로 밀려나면 상위권으로 끌어올림!</p>
+                                                <h5 className="font-black text-[14px] text-gray-900">스페셜 테마 이펙트 (Theme Effect)</h5>
+                                                <p className="text-[12px] font-medium text-gray-500">배너 테두리에 화려한 네온, 골드 효과 등을 적용해 시선 강탈!</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
                                             <div className="text-[14px] font-black text-indigo-600">
-                                                +{policies[`OPTION_PRICE_BIZ_JUMP_${form.exposure_period || 30}`]?.toLocaleString() || 0} P
+                                                +30,000 P
                                             </div>
                                         </div>
                                     </div>

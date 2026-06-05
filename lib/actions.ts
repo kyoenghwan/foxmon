@@ -292,3 +292,20 @@ export async function claimBizAdByCodeAction(claimCode: string) {
     }
 }
 
+export async function getActiveFixedAdCountAction() {
+    try {
+        const { count, error } = await supabaseAdmin
+            .from('biz_ads')
+            .select('*', { count: 'exact', head: true })
+            .eq('tier', 'SIDE')
+            .eq('status', 'ACTIVE')
+            .eq('is_fixed', true);
+            
+        if (error) throw error;
+        return { success: true, count: count || 0 };
+    } catch (e: any) {
+        console.error('getActiveFixedAdCountAction error:', e);
+        return { success: false, count: 0 };
+    }
+}
+
