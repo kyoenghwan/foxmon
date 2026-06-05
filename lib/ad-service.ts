@@ -300,8 +300,8 @@ export async function getRotatedAds(
         cachedAds = mockAdsForTier;
     }
 
-    // 메모리 내 검색 필터링
-    let ads = filterBySearch(cachedAds, searchQuery);
+    // 일반 구인공고(GENERAL) 티어만 검색어 필터링을 수행하고, 배너 광고 등급은 검색어와 무관하게 무조건 전체 노출
+    let ads = (tier === 'GENERAL') ? filterBySearch(cachedAds, searchQuery) : cachedAds;
 
     // 롤링 알고리즘 적용
     let rolledAds = applyRollingLogic(ads, ads.length);
@@ -320,7 +320,7 @@ export async function getRotatedAds(
         } else {
             // 타 등급은 기존대로 mock 광고를 추가하여 채워 넣음
             const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
-            const filteredMock = filterBySearch(mockAdsForTier, searchQuery);
+            const filteredMock = (tier === 'GENERAL') ? filterBySearch(mockAdsForTier, searchQuery) : mockAdsForTier;
             rolledAds = [...rolledAds, ...filteredMock.slice(0, limitCount - rolledAds.length)];
             // 보충된 전체에 대해 다시 롤링 알고리즘 적용
             rolledAds = applyRollingLogic(rolledAds, limitCount);
@@ -330,7 +330,7 @@ export async function getRotatedAds(
             return [];
         } else {
             const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
-            const filteredMock = filterBySearch(mockAdsForTier, searchQuery);
+            const filteredMock = (tier === 'GENERAL') ? filterBySearch(mockAdsForTier, searchQuery) : mockAdsForTier;
             rolledAds = applyRollingLogic(filteredMock, limitCount);
         }
     }
