@@ -68,7 +68,7 @@ export function MainFooter() {
                                 </Link>
                             </div>
                             <Link 
-                                href="https://www.moel.go.kr/info/public/publicList.do" 
+                                href="https://www.moel.go.kr/info/defaulter/defaulterList.do" 
                                 target="_blank" 
                                 className="text-[11px] font-bold text-gray-600 hover:text-purple-600 transition-colors mt-1 hover:underline"
                             >
