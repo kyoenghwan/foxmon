@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/components/providers/language-provider';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
+import { useAdStore } from '@/hooks/use-ad-store';
 
 interface JobsListContentProps {
     isEmployer?: boolean;
@@ -68,6 +69,15 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
     const { t } = useLanguage();
     const searchParams = useSearchParams();
     const router = useRouter();
+
+    const {
+        premiumJobs: cachedPremiumJobs,
+        specialJobs: cachedSpecialJobs,
+        lineJobs: cachedLineJobs,
+        generalJobs: cachedGeneralJobs,
+        isJobsLoaded,
+        fetchJobs: fetchStoreJobs
+    } = useAdStore();
 
     const qParam = searchParams.get('q') || '';
     const regionParam = searchParams.get('region') || 'all';
@@ -180,53 +190,74 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
 
     useEffect(() => {
         async function fetchJobs() {
+            // 시/도 및 시/군/구 코드를 한글 텍스트 검색어로 변환
+            let regionText = '';
+            if (dbRegions2.length > 0) {
+                const sigungu = dbRegions2.find(r => r.code_value.toLowerCase() === regionParam.toLowerCase());
+                if (sigungu) {
+                    const sido = dbRegions1.find(r => r.code_value === sigungu.parent_code_value);
+                    const sidoName = sido ? sido.code_name : '';
+                    const sigunguName = sigungu.code_name !== '전체' ? sigungu.code_name : '';
+                    regionText = [sidoName, sigunguName].filter(Boolean).join(' ');
+                } else {
+                    const sido = dbRegions1.find(r => r.code_value.toLowerCase() === regionParam.toLowerCase());
+                    if (sido) {
+                        regionText = sido.code_name;
+                    }
+                }
+            }
+
+            const resolvedInd = resolveIndustry(industryParam, dbIndustries);
+            const industryTerm = dbIndustries.find(i => i.code_value === resolvedInd)?.code_name || '';
+
+            const keywordItem = dbKeywords.find(k => k.code_value.toLowerCase() === keywordParam.toLowerCase());
+            const keywordTerm = keywordItem ? keywordItem.code_name : '';
+            
+            // 공백으로 연결하여 다중 검색어가 되도록 빌드
+            const combinedTerms = [
+                regionText && regionText !== '전체' && regionText !== '전국' ? regionText : '', 
+                industryTerm && industryTerm !== '전체' ? industryTerm : '', 
+                keywordTerm,
+                qParam
+            ]
+                .filter(Boolean)
+                .join(' ');
+
+            // 1. 검색 조건이 없는 기본 조회이며 이미 캐시가 존재하는 경우 -> 스피너 없이 즉시 캐시 적용
+            if (combinedTerms === '' && isJobsLoaded && !refreshing) {
+                setPremiumJobs(cachedPremiumJobs);
+                setSpecialJobs(cachedSpecialJobs);
+                setLineJobs(cachedLineJobs);
+                setGeneralJobs(cachedGeneralJobs);
+                setLoading(false);
+                setRefreshing(false);
+                return;
+            }
+
+            // 2. 캐시가 없거나 검색 필터가 활성화된 경우 -> 로딩 활성화 후 비동기 페칭 수행
             if (!refreshing) {
                 setLoading(true);
             }
             try {
-                // 시/도 및 시/군/구 코드를 한글 텍스트 검색어로 변환
-                let regionText = '';
-                if (dbRegions2.length > 0) {
-                    const sigungu = dbRegions2.find(r => r.code_value.toLowerCase() === regionParam.toLowerCase());
-                    if (sigungu) {
-                        const sido = dbRegions1.find(r => r.code_value === sigungu.parent_code_value);
-                        const sidoName = sido ? sido.code_name : '';
-                        const sigunguName = sigungu.code_name !== '전체' ? sigungu.code_name : '';
-                        regionText = [sidoName, sigunguName].filter(Boolean).join(' ');
-                    } else {
-                        const sido = dbRegions1.find(r => r.code_value.toLowerCase() === regionParam.toLowerCase());
-                        if (sido) {
-                            regionText = sido.code_name;
-                        }
-                    }
+                // 만약 검색 조건이 없는 기본 조회인데 단지 캐시가 없어서 조회를 돌린 경우라면 Zustand에도 캐싱해줌
+                if (combinedTerms === '') {
+                    await fetchStoreJobs(refreshKey > 0);
+                    setPremiumJobs(useAdStore.getState().premiumJobs);
+                    setSpecialJobs(useAdStore.getState().specialJobs);
+                    setLineJobs(useAdStore.getState().lineJobs);
+                    setGeneralJobs(useAdStore.getState().generalJobs);
+                } else {
+                    const [p, s, l, g] = await Promise.all([
+                        getRotatedAds('PREMIUM', 50, combinedTerms),
+                        getRotatedAds('SPECIAL', 50, combinedTerms),
+                        getRotatedAds('AD_GENERAL', 50, combinedTerms),
+                        getRotatedAds('GENERAL', 50, combinedTerms)
+                    ]);
+                    setPremiumJobs(p);
+                    setSpecialJobs(s);
+                    setLineJobs(l);
+                    setGeneralJobs(g);
                 }
-
-                const resolvedInd = resolveIndustry(industryParam, dbIndustries);
-                const industryTerm = dbIndustries.find(i => i.code_value === resolvedInd)?.code_name || '';
-
-                const keywordItem = dbKeywords.find(k => k.code_value.toLowerCase() === keywordParam.toLowerCase());
-                const keywordTerm = keywordItem ? keywordItem.code_name : '';
-                
-                // 공백으로 연결하여 다중 검색어가 되도록 빌드
-                const combinedTerms = [
-                    regionText && regionText !== '전체' && regionText !== '전국' ? regionText : '', 
-                    industryTerm && industryTerm !== '전체' ? industryTerm : '', 
-                    keywordTerm,
-                    qParam
-                ]
-                    .filter(Boolean)
-                    .join(' ');
-
-                const [p, s, l, g] = await Promise.all([
-                    getRotatedAds('PREMIUM', 50, combinedTerms),
-                    getRotatedAds('SPECIAL', 50, combinedTerms),
-                    getRotatedAds('AD_GENERAL', 50, combinedTerms),
-                    getRotatedAds('GENERAL', 50, combinedTerms)
-                ]);
-                setPremiumJobs(p);
-                setSpecialJobs(s);
-                setLineJobs(l);
-                setGeneralJobs(g);
             } catch (error) {
                 console.error("Failed to fetch jobs:", error);
             } finally {
@@ -235,7 +266,7 @@ export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProp
             }
         }
         fetchJobs();
-    }, [qParam, regionParam, industryParam, keywordParam, dbRegions1, dbRegions2, dbIndustries, dbKeywords, refreshKey]);
+    }, [qParam, regionParam, industryParam, keywordParam, dbRegions1, dbRegions2, dbIndustries, dbKeywords, refreshKey, isJobsLoaded, cachedPremiumJobs, cachedSpecialJobs, cachedLineJobs, cachedGeneralJobs, fetchStoreJobs]);
 
     const handleSearchClick = () => {
         const params = new URLSearchParams();

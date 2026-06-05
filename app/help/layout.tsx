@@ -1,22 +1,9 @@
 import { Suspense } from 'react';
-import { MainHeader } from '@/components/layout/main-header';
 import { HelpSidebar } from '@/components/help/HelpSidebar';
-import { SideBanners } from '@/components/home/side-banners';
-import { auth } from '@/auth';
-import { MainFooter } from '@/components/layout/main-footer';
-import { HeroSection } from '@/components/home/hero-section';
 
-export default async function HelpLayout({ children }: { children: React.ReactNode }) {
-    const session = await auth();
-
+export default function HelpLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex flex-col min-h-screen bg-white relative">
-            <MainHeader session={session} />
-            <SideBanners />
-
-            {/* Hero Section: 배너 및 로그인 정보 (공통 컴포넌트 적용) */}
-            <HeroSection session={session} />
-
+        <>
             {/* 서브 헤더 */}
             <div className="bg-gray-50 border-b border-gray-200">
                 <div className="container px-4 md:px-6 py-3 flex items-center gap-2">
@@ -30,7 +17,7 @@ export default async function HelpLayout({ children }: { children: React.ReactNo
             </div>
 
             {/* 메인 콘텐츠 */}
-            <div className="container px-4 md:px-6 py-6 flex-1">
+            <div className="container px-4 md:px-6 py-6 flex-1 text-black">
                 <div className="mb-4 sticky top-[136px] z-20 bg-white border-b pb-2">
                     <Suspense fallback={<div className="h-10" />}>
                         <HelpSidebar isMobile />
@@ -40,7 +27,6 @@ export default async function HelpLayout({ children }: { children: React.ReactNo
                     {children}
                 </div>
             </div>
-            <MainFooter />
-        </div>
+        </>
     );
 }

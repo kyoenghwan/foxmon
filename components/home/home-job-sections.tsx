@@ -8,6 +8,7 @@ import { useLanguage } from '@/components/providers/language-provider';
 import { getRotatedAds, AdItem } from '@/lib/ad-service';
 import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
+import { useAdStore } from '@/hooks/use-ad-store';
 
 interface Notice {
     id: string;
@@ -54,36 +55,29 @@ export function HomeJobSections() {
     const [showAllSpecial, setShowAllSpecial] = useState(false);
     const [showAllGeneral, setShowAllGeneral] = useState(false);
 
-    // Firestore 데이터 상태
-    const [premiumJobs, setPremiumJobs] = useState<AdItem[]>([]);
-    const [specialJobs, setSpecialJobs] = useState<AdItem[]>([]);
-    const [lineJobs, setLineJobs] = useState<AdItem[]>([]);
-    const [generalJobs, setGeneralJobs] = useState<AdItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    // Zustand 글로벌 광고 데이터 상태 연동
+    const { 
+        premiumJobs, 
+        specialJobs, 
+        lineJobs, 
+        generalJobs, 
+        isJobsLoaded, 
+        fetchJobs 
+    } = useAdStore();
 
+    const [loading, setLoading] = useState(!isJobsLoaded);
     const [notices, setNotices] = useState<Notice[]>([]);
 
-    const fetchAllJobs = async (isInitial = false) => {
-        if (isInitial) setLoading(true);
-        try {
-            const [p, s, l, g] = await Promise.all([
-                getRotatedAds('PREMIUM', 50),
-                getRotatedAds('SPECIAL', 50),
-                getRotatedAds('AD_GENERAL', 50),
-                getRotatedAds('GENERAL', 50)
-            ]);
-            setPremiumJobs(p);
-            setSpecialJobs(s);
-            setLineJobs(l);
-            setGeneralJobs(g);
-        } catch (error) {
-            console.error("Failed to fetch jobs:", error);
-        }
-        if (isInitial) setLoading(false);
-    };
-
     useEffect(() => {
-        fetchAllJobs(true);
+        async function initJobs() {
+            if (!isJobsLoaded) {
+                setLoading(true);
+                await fetchJobs();
+                setLoading(false);
+            }
+        }
+        initJobs();
+
         import('@/lib/actions/help').then(({ getHomeNotices }) => {
             getHomeNotices(5).then((rows) => {
                 if (rows.length) {
@@ -91,7 +85,7 @@ export function HomeJobSections() {
                 }
             });
         });
-    }, []);
+    }, [isJobsLoaded, fetchJobs]);
 
     useEffect(() => {
         if (isPaused || notices.length === 0) return;
@@ -101,13 +95,13 @@ export function HomeJobSections() {
         return () => clearInterval(interval);
     }, [isPaused, notices.length]);
 
-    // 1분(60초)마다 서버에 요청하여 모든 유저가 동일한 순위를 보도록 강제 동기화
+    // 1분(60초)마다 백그라운드에서 데이터를 강제 조용히 최신화
     useEffect(() => {
         const adInterval = setInterval(() => {
-            fetchAllJobs();
+            fetchJobs(true);
         }, 60000); // 60초 주기
         return () => clearInterval(adInterval);
-    }, []);
+    }, [fetchJobs]);
 
     // 🎨 [IMPACT DEMO] 22종 테마 전체 적용 (50개 카드)
     const impacts: any[] = [

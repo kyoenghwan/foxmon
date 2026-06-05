@@ -6,16 +6,20 @@ import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getRotatedAds, recordAdExposure, AdItem } from '@/lib/ad-service';
 
+import { useAdStore } from '@/hooks/use-ad-store';
+
 // 메인 배너 컴포넌트
 export function MainBanner() {
-    const [ads, setAds] = useState<AdItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { premiumMainAds, isPremiumMainAdsLoaded, fetchPremiumMainAds } = useAdStore();
+    const [loading, setLoading] = useState(!isPremiumMainAdsLoaded);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [cardWidth, setCardWidth] = useState(400);
     const [cardHeight, setCardHeight] = useState(200);
     const [isTransitioning, setIsTransitioning] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
     const [itemsPerView, setItemsPerView] = useState(1);
+    
+    const ads = premiumMainAds;
 
     // 반응형 배너 갯수 및 카드 너비 조절 (컨테이너 크기에 맞춰 동적 계산)
     useEffect(() => {
@@ -74,15 +78,15 @@ export function MainBanner() {
 
     // 1. Firestore에서 공정한 알고리즘이 적용된 광고 가져오기
     useEffect(() => {
-        async function fetchAds() {
-            setLoading(true);
-            // VVIP (메인 롤링) 티어만 조회
-            const rotatedAds = await getRotatedAds('PREMIUM_MAIN', 5);
-            setAds(rotatedAds);
-            setLoading(false);
+        async function initAds() {
+            if (!isPremiumMainAdsLoaded) {
+                setLoading(true);
+                await fetchPremiumMainAds();
+                setLoading(false);
+            }
         }
-        fetchAds();
-    }, []);
+        initAds();
+    }, [isPremiumMainAdsLoaded, fetchPremiumMainAds]);
 
     const originalLength = ads.length;
     const extendedBanners = [...ads, ...ads, ...ads];

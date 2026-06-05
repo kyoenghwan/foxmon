@@ -7,46 +7,38 @@ import { getRotatedAds, recordAdExposure, AdItem } from '@/lib/ad-service';
 import { useSession } from 'next-auth/react';
 import { PremiumJobCard } from './premium-job-card';
 
+import { useAdStore } from '@/hooks/use-ad-store';
+
 export function SideBanners() {
     const { data: session } = useSession();
     const isEmployer = (session?.user as any)?.role === 'EMPLOYER';
     const isBusinessVerified = (session?.user as any)?.business_number ? true : false;
     const showAdRegister = isEmployer && isBusinessVerified;
 
-    const [leftAds, setLeftAds] = useState<AdItem[]>([]);
-    const [rightAds, setRightAds] = useState<AdItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { sideAds, isSideAdsLoaded, fetchSideAds } = useAdStore();
+    const [loading, setLoading] = useState(!isSideAdsLoaded);
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const leftAds = sideAds.slice(0, 4);
+    const rightAds = sideAds.slice(4, 8);
+
     useEffect(() => {
-        async function fetchSideAds(showSpinner = true) {
-            if (showSpinner) setLoading(true);
-            try {
-                // SIDE 티어 광고 8개를 단일 쿼리로 순서대로 조회
-                const allSideAds = await getRotatedAds('SIDE', 8);
-                if (allSideAds && allSideAds.length > 0) {
-                    // 1234번은 좌측, 5678번은 우측 배치
-                    setLeftAds(allSideAds.slice(0, 4));
-                    setRightAds(allSideAds.slice(4, 8));
-                } else {
-                    setLeftAds([]);
-                    setRightAds([]);
-                }
-            } catch (error) {
-                console.error("Failed to fetch side ads:", error);
+        async function initSideAds() {
+            if (!isSideAdsLoaded) {
+                setLoading(true);
+                await fetchSideAds();
+                setLoading(false);
             }
-            if (showSpinner) setLoading(false);
         }
+        initSideAds();
 
-        fetchSideAds(true);
-
-        // 1분(60초)마다 배너 순서 순환을 위해 비동기 백그라운드 재호출
+        // 1분(60초)마다 배너 순서 순환을 위해 비동기 백그라운드 강제 재호출
         const intervalId = setInterval(() => {
-            fetchSideAds(false);
+            fetchSideAds(true);
         }, 60000);
 
         return () => clearInterval(intervalId);
-    }, []);
+    }, [isSideAdsLoaded, fetchSideAds]);
 
     const handleAdClick = (adId: string) => {
         recordAdExposure(adId);

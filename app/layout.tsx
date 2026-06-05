@@ -18,6 +18,7 @@ import { CsAgentDock } from "@/components/chat/cs-agent-dock";
 import { AutoLogoutWrapper } from "@/components/auth/auto-logout-wrapper";
 import { MaxWidthWrapper } from "@/src/components/layout/MaxWidthWrapper";
 import { JobGlobalModal } from "@/components/jobs/job-global-modal";
+import { MainLayoutWrapper } from "@/components/layout/main-layout-wrapper";
 import Script from "next/script";
 
 export const viewport: Viewport = {
@@ -77,7 +78,9 @@ export default function RootLayout({
         <MaxWidthWrapper>
           <LanguageProvider>
             <AutoLogoutWrapper>
-              {children}
+              <MainLayoutWrapper>
+                {children}
+              </MainLayoutWrapper>
               {modal}
               <FoxTalkWidget />
               <CsAgentDock />
