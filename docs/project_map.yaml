@@ -81,6 +81,21 @@ global_components:
 # ─────────────────────────────────────────────
 pages:
 
+  # ── 새 광고 등록 ──
+  BIZ_AD_NEW_PAGE:
+    label: "새 광고 등록 화면"
+    keywords: ["새 광고 등록", "광고 에디터", "ad editor"]
+    files: ["components/biz/AdEditorForm.tsx"]
+    flows: ["FA_BIZ_AD_CRUD_FLOW"]
+    db_tables: ["biz_ads", "point_policies"]
+    project_rule: null
+    ui_elements:
+      - name: "AD_TIER_SELECTION_CARDS"
+        keywords: ["광고 등급 선택", "배너 프리미엄", "사이드 배너", "등급 선택 카드"]
+        selector: "form section:contains('광고 등급 선택')"
+        type: "card-group"
+
+
   # ── 메인 홈 ──
   HOME_PAGE:
     label: "메인 홈 페이지"

@@ -696,7 +696,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     const updatedGroups = TIER_GROUPS.map(group => ({
                         ...group,
                         options: group.options.map(opt => {
-                            const price = getPrice(`TIER_PRICE_${opt.value}`, opt.price);
+                            const price = getPrice(`TIER_PRICE_${opt.value}_30`, getPrice(`TIER_PRICE_${opt.value}`, opt.price));
                             return {
                                 ...opt,
                                 price,

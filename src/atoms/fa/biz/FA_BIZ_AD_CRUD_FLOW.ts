@@ -38,7 +38,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
 
             const p = (payload.exposure_period || 30) as 30 | 60 | 90;
             const t = payload.tier || 'GENERAL';
-            const priceTier = t === 'AD_GENERAL' ? 'GENERAL' : t;
+            const priceTier = t;
             
             // 티어 기본료 (기간별)
             let totalPoints = getPrice(`TIER_PRICE_${priceTier}_${p}`, 0);
@@ -214,7 +214,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
 
                 const p = payload.exposure_period as 30 | 60 | 90;
                 const t = payload.tier || 'GENERAL';
-                const priceTier = t === 'AD_GENERAL' ? 'GENERAL' : t;
+                const priceTier = t;
                 
                 totalPoints = getPrice(`TIER_PRICE_${priceTier}_${p}`, 0);
                 
