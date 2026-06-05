@@ -401,6 +401,11 @@ pages:
     keywords: ["광고 가격", "광고 비용", "ad price", "요금 안내"]
     files: ["components/jobs/AdPriceModal.tsx"]
 
+  BIZ_AD_PAYMENT_MODAL:
+    label: "광고 결제 및 노출 옵션 선택 모달"
+    keywords: ["광고 결제", "옵션 선택", "잔액 부족", "포인트 충전", "BizAdPaymentModal"]
+    files: ["components/biz/BizAdPaymentModal.tsx"]
+
   GENERAL_JOB_LIST_ROW:
     label: "일반 공고 목록 행 컴포넌트 (jobs 리스트 페이지)"
     keywords: ["일반 공고 행", "공고 리스트 아이템", "job list row"]
