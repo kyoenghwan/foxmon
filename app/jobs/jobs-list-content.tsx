@@ -13,6 +13,7 @@ import { useLanguage } from '@/components/providers/language-provider';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { useAdStore } from '@/hooks/use-ad-store';
+import { useSession } from 'next-auth/react';
 
 interface JobsListContentProps {
     isEmployer?: boolean;
@@ -65,10 +66,12 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
 }
 
 
-export function JobsListContent({ isEmployer, searchQuery }: JobsListContentProps) {
+export function JobsListContent({ isEmployer: propIsEmployer, searchQuery }: JobsListContentProps) {
     const { t } = useLanguage();
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { data: session } = useSession();
+    const isEmployer = propIsEmployer !== undefined ? propIsEmployer : (session?.user as any)?.role === 'EMPLOYER';
 
     const {
         premiumJobs: cachedPremiumJobs,

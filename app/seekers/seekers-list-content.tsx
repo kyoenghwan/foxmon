@@ -19,6 +19,7 @@ import { buildFlatIndustryOptions, resumeMatchesIndustryFilter } from '@/lib/res
 import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
 import { cn } from '@/lib/utils';
 import { useAdStore } from '@/hooks/use-ad-store';
+import { useSession } from 'next-auth/react';
 
 function resolveRegion(param: string, list: CodeItem[]): string {
     if (!param || param === 'all') return 'all';
@@ -72,10 +73,13 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
 }
 
 
-export function SeekersListContent({ isEmployer, session, searchQuery }: SeekersListContentProps) {
+export function SeekersListContent({ isEmployer: propIsEmployer, session: propSession, searchQuery }: SeekersListContentProps) {
     const { t } = useLanguage();
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { data: sessionData } = useSession();
+    const session = propSession || sessionData;
+    const isEmployer = propIsEmployer !== undefined ? propIsEmployer : (session?.user as any)?.role === 'EMPLOYER';
 
     const {
         premiumJobs: cachedPremiumJobs,
