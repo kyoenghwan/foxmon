@@ -2,6 +2,7 @@
 
 import { supabase, supabaseAdmin } from './supabase';
 import { applyRollingLogic } from './ad-rolling-logic';
+import { unstable_cache } from 'next/cache';
 
 export interface AdItem {
     id: string;
@@ -130,7 +131,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5분 캐시 (300초)
 /**
  * DB에서 직접 특정 티어의 활성 광고 데이터를 가져오는 내부 헬퍼 함수
  */
-async function fetchAdsFromDB(
+async function fetchAdsFromDBInternal(
     tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL'
 ): Promise<AdItem[]> {
     const dbLabel = `  🖥️  [Performance] DB Query for tier: ${tier}`;
@@ -235,6 +236,21 @@ async function fetchAdsFromDB(
     } finally {
         console.timeEnd(dbLabel);
     }
+}
+
+// unstable_cache 래핑 영구 공유 캐싱 (5분 캐시)
+const fetchAdsFromDBCached = unstable_cache(
+    async (tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL') => {
+        return fetchAdsFromDBInternal(tier);
+    },
+    ['ads-db-query'],
+    { revalidate: 300, tags: ['ads'] }
+);
+
+async function fetchAdsFromDB(
+    tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL'
+): Promise<AdItem[]> {
+    return fetchAdsFromDBCached(tier);
 }
 
 /**

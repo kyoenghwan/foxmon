@@ -1,34 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
+import { unstable_cache } from 'next/cache';
 
-interface BannerCache {
-    data: any[];
-    lastFetched: number;
-    isFetching: boolean;
-}
-
-const bannerCache: Record<string, BannerCache> = {};
-const CACHE_TTL_MS = 60 * 1000; // 60초 캐시 (1분)
-
-export async function QA_GET_ACTIVE_BANNERS(type: 'POPUP' | 'MAIN_BANNER' = 'POPUP') {
-    const now = Date.now();
-    const cache = bannerCache[type];
-
-    // 캐시가 존재하고 TTL 만료 전인 경우 즉시 캐시 데이터 반환
-    if (cache && (now - cache.lastFetched < CACHE_TTL_MS)) {
-        return cache.data;
-    }
-
-    // 이미 백그라운드나 다른 요청에서 패칭 중인 경우 기존 캐시 데이터 반환 (없으면 빈 배열)
-    if (cache && cache.isFetching) {
-        return cache.data;
-    }
-
-    if (!bannerCache[type]) {
-        bannerCache[type] = { data: [], lastFetched: 0, isFetching: false };
-    }
-
-    bannerCache[type].isFetching = true;
-
+async function QA_GET_ACTIVE_BANNERS_INTERNAL(type: 'POPUP' | 'MAIN_BANNER' = 'POPUP') {
     try {
         const supabase = await createClient();
         const nowStr = new Date().toISOString();
@@ -48,17 +21,26 @@ export async function QA_GET_ACTIVE_BANNERS(type: 'POPUP' | 'MAIN_BANNER' = 'POP
 
         if (error) {
             console.error('QA_GET_ACTIVE_BANNERS 에러:', error.message);
-            return bannerCache[type].data || []; // 에러 시 기존 캐시 반환
+            return [];
         }
 
-        bannerCache[type].data = data || [];
-        bannerCache[type].lastFetched = Date.now();
-        return bannerCache[type].data;
+        return data || [];
     } catch (e: any) {
         console.error('QA_GET_ACTIVE_BANNERS 시스템 에러:', e.message);
-        return bannerCache[type].data || [];
-    } finally {
-        bannerCache[type].isFetching = false;
+        return [];
     }
+}
+
+// unstable_cache 래핑 영구 공유 캐싱 (1분 캐시)
+const getCachedBanners = unstable_cache(
+    async (type: 'POPUP' | 'MAIN_BANNER') => {
+        return QA_GET_ACTIVE_BANNERS_INTERNAL(type);
+    },
+    ['active-banners-query'],
+    { revalidate: 60, tags: ['banners'] }
+);
+
+export async function QA_GET_ACTIVE_BANNERS(type: 'POPUP' | 'MAIN_BANNER' = 'POPUP') {
+    return getCachedBanners(type);
 }
 
