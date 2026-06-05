@@ -156,11 +156,11 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                         <div key={`preview-${keyPostfix}`} style={{ width: (isSide ? '150px' : '200px'), maxWidth: '100%', opacity: keyPostfix === 'double' ? 0.9 : 1 }}>
                                             <PremiumJobCard
                                                 id={`preview-${keyPostfix}`}
-                                                company={form.company || form.business_name || '테스트상호'}
+                                                company={form.company_name || form.company || form.business_name || '테스트상호'}
                                                 title={form.title || '배너 제목이 표시됩니다'}
                                                 location={form.location || '지역'}
-                                                category={form.category_1}
-                                                pay={form.pay || (form.pay_amount ? `${form.pay_type} ${form.pay_amount}` : '급여 협의')}
+                                                category={form.category1 || form.category || '일반'}
+                                                pay={form.pay || (form.salary_type ? `[${form.salary_type}] ${form.salary_amount}` : form.salary_amount) || (form.pay_amount ? `${form.pay_type} ${form.pay_amount}` : '급여 협의')}
                                                 image={form.logo_url || form.image}
                                                 impactType={isGeneral ? 'none' : ((form.theme as any) || 'gold')}
                                                 effectIntensity={isSpecial || isGeneral || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'shimmer'}`}
