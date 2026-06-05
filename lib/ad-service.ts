@@ -145,17 +145,22 @@ async function fetchAdsFromDB(
         const jobsSelectFields = 'id, author_id, company_id, company_name, title, content, category, location, pay, image_url, tier, is_big, exposure_count, last_exposed_at, created_at, user_id, status, expires_at, view_count, detail_images, work_type, work_hours, benefits, contact_info, address, updated_at, source_origin, salary_type, salary_amount, logo_url, contact_name, contact_phone, kakao_id, line_id, telegram_id, wechat_id, employment_type, category1, category2, work_time, amenities, keywords, design_mode, detail_bg_color, detail_bg_image, exposure_period, option_bold, option_color, option_bg, option_icon, option_jump, total_points, option_color_value, option_bg_value, option_bold_expires_at, option_color_expires_at, option_bg_expires_at, option_icon_expires_at, option_jump_expires_at, option_highlight, option_highlight_value, option_highlight_expires_at, option_general_icons, option_general_icons_expires_at, is_subscription';
         const bizAdsSelectFields = 'id, author_id, company_id, company_name, title, content, category, location, pay, image_url, tier, is_big, exposure_count, last_exposed_at, created_at, user_id, status, expires_at, view_count, detail_images, work_type, work_hours, benefits, contact_info, address, updated_at, source_origin, salary_type, salary_amount, logo_url, contact_name, contact_phone, kakao_id, line_id, telegram_id, wechat_id, employment_type, category1, category2, work_time, amenities, keywords, design_mode, detail_bg_color, detail_bg_image, exposure_period, option_bold, option_color, option_bg, option_icon, option_jump, total_points, option_color_value, option_bg_value, option_bold_expires_at, option_color_expires_at, option_bg_expires_at, option_icon_expires_at, option_jump_expires_at, option_highlight, option_highlight_value, option_highlight_expires_at, option_general_icons, option_general_icons_expires_at, color, bg_opacity, theme, effect_intensity, is_subscription, option_double_slot, option_double_slot_expires_at, claim_code';
 
+        const nowStr = new Date().toISOString();
         let queryBuilder;
         if (targetTable === 'jobs') {
             queryBuilder = supabaseAdmin
                 .from('jobs')
                 .select(`${jobsSelectFields}, users(merchant_tier)`)
-                .eq('tier', tier);
+                .eq('tier', tier)
+                .in('status', ['ACTIVE', 'CLAIM_PENDING'])
+                .or(`expires_at.is.null,expires_at.gt.${nowStr}`);
         } else {
             queryBuilder = supabaseAdmin
                 .from('biz_ads')
                 .select(bizAdsSelectFields)
-                .eq('tier', tier);
+                .eq('tier', tier)
+                .in('status', ['ACTIVE', 'CLAIM_PENDING'])
+                .or(`expires_at.is.null,expires_at.gt.${nowStr}`);
         }
 
         const { data, error } = await queryBuilder;

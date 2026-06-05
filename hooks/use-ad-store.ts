@@ -4,8 +4,10 @@ import { getRotatedAds, AdItem } from '@/lib/ad-service';
 interface AdState {
     sideAds: AdItem[];
     isSideAdsLoaded: boolean;
+    isFetchingSideAds: boolean;
     premiumMainAds: AdItem[];
     isPremiumMainAdsLoaded: boolean;
+    isFetchingPremiumMainAds: boolean;
     
     // 추가: 공고 그리드 데이터 캐시
     premiumJobs: AdItem[];
@@ -13,6 +15,7 @@ interface AdState {
     lineJobs: AdItem[];
     generalJobs: AdItem[];
     isJobsLoaded: boolean;
+    isFetchingJobs: boolean;
     
     fetchSideAds: () => Promise<void>;
     fetchPremiumMainAds: () => Promise<void>;
@@ -26,17 +29,21 @@ interface AdState {
 export const useAdStore = create<AdState>((set, get) => ({
     sideAds: [],
     isSideAdsLoaded: false,
+    isFetchingSideAds: false,
     premiumMainAds: [],
     isPremiumMainAdsLoaded: false,
+    isFetchingPremiumMainAds: false,
     
     premiumJobs: [],
     specialJobs: [],
     lineJobs: [],
     generalJobs: [],
     isJobsLoaded: false,
+    isFetchingJobs: false,
 
     fetchSideAds: async () => {
-        if (get().isSideAdsLoaded) return;
+        if (get().isSideAdsLoaded || get().isFetchingSideAds) return;
+        set({ isFetchingSideAds: true });
         const start = performance.now();
         console.log(`[Store Performance] fetchSideAds started...`);
         try {
@@ -45,11 +52,14 @@ export const useAdStore = create<AdState>((set, get) => ({
             console.log(`[Store Performance] fetchSideAds completed in ${(performance.now() - start).toFixed(2)}ms`);
         } catch (error) {
             console.error("Store failed to fetch side ads:", error);
+        } finally {
+            set({ isFetchingSideAds: false });
         }
     },
 
     fetchPremiumMainAds: async () => {
-        if (get().isPremiumMainAdsLoaded) return;
+        if (get().isPremiumMainAdsLoaded || get().isFetchingPremiumMainAds) return;
+        set({ isFetchingPremiumMainAds: true });
         const start = performance.now();
         console.log(`[Store Performance] fetchPremiumMainAds started...`);
         try {
@@ -58,11 +68,14 @@ export const useAdStore = create<AdState>((set, get) => ({
             console.log(`[Store Performance] fetchPremiumMainAds completed in ${(performance.now() - start).toFixed(2)}ms`);
         } catch (error) {
             console.error("Store failed to fetch premium main ads:", error);
+        } finally {
+            set({ isFetchingPremiumMainAds: false });
         }
     },
 
     fetchJobs: async (searchTerms = '') => {
-        if (searchTerms === '' && get().isJobsLoaded) return;
+        if (searchTerms === '' && (get().isJobsLoaded || get().isFetchingJobs)) return;
+        set({ isFetchingJobs: true });
         const start = performance.now();
         console.log(`[Store Performance] fetchJobs (general/premium/special) started...`);
         try {
@@ -85,6 +98,8 @@ export const useAdStore = create<AdState>((set, get) => ({
             console.log(`[Store Performance] fetchJobs completed in ${(performance.now() - start).toFixed(2)}ms`);
         } catch (error) {
             console.error("Store failed to fetch jobs:", error);
+        } finally {
+            set({ isFetchingJobs: false });
         }
     },
 
