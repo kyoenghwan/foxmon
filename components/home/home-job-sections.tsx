@@ -29,6 +29,16 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
     if (idx >= 48) classes += ' 4xl:hidden';
     return classes.trim();
   }
+  if (maxRows === 5) {
+    let classes = '';
+    if (idx >= 10) classes += ' max-md:hidden';
+    if (idx >= 15) classes += ' md:max-[799px]:hidden';
+    if (idx >= 20) classes += ' min-[800px]:max-2xl:hidden';
+    if (idx >= 25) classes += ' 2xl:max-3xl:hidden';
+    if (idx >= 30) classes += ' 3xl:max-4xl:hidden';
+    if (idx >= 40) classes += ' 4xl:hidden';
+    return classes.trim();
+  }
   if (maxRows === 3) {
     let classes = '';
     if (idx >= 6) classes += ' max-md:hidden';
@@ -243,7 +253,7 @@ export function HomeJobSections() {
                             <div 
                                 key={job.id} 
                                 className={`w-full ${
-                                    !showAllPremium ? getResponsiveHideClass(idx, 6) : ''
+                                    !showAllPremium ? getResponsiveHideClass(idx, 5) : ''
                                 }`}
                             >
                                 <PremiumJobCard 
@@ -298,7 +308,7 @@ export function HomeJobSections() {
                             <div 
                                 key={job.id} 
                                 className={`w-full ${
-                                    !showAllSpecial ? getResponsiveHideClass(idx, 6) : ''
+                                    !showAllSpecial ? getResponsiveHideClass(idx, 5) : ''
                                 }`}
                             >
                                 <PremiumJobCard 
@@ -353,7 +363,7 @@ export function HomeJobSections() {
                             <div 
                                 key={job.id} 
                                 className={`w-full ${
-                                    !showAllGeneral ? getResponsiveHideClass(idx, 6) : ''
+                                    !showAllGeneral ? getResponsiveHideClass(idx, 5) : ''
                                 }`}
                             >
                                 <PremiumJobCard 
