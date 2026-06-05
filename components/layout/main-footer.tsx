@@ -54,6 +54,28 @@ export function MainFooter() {
                             </div>
                         </div>
 
+                        {/* Center: Minimum Wage Info (법적 의무 고지) */}
+                        <div className="flex flex-col items-start gap-2 text-gray-500">
+                            <h4 className="font-extrabold text-gray-700">2026년 최저임금</h4>
+                            <div className="flex items-baseline gap-1.5">
+                                <p className="text-2xl font-black text-purple-900 tracking-tighter">10,320원</p>
+                                <Link 
+                                    href="https://www.minimumwage.go.kr" 
+                                    target="_blank" 
+                                    className="text-[11px] font-bold text-gray-400 hover:text-purple-600 transition-colors"
+                                >
+                                    더보기 &gt;
+                                </Link>
+                            </div>
+                            <Link 
+                                href="https://www.moel.go.kr/info/public/publicList.do" 
+                                target="_blank" 
+                                className="text-[11px] font-bold text-gray-600 hover:text-purple-600 transition-colors mt-1 hover:underline"
+                            >
+                                임금체불사업주 명단 확인하기 &gt;
+                            </Link>
+                        </div>
+
                         {/* Right: CS Center */}
                         <div className="flex flex-col items-start md:items-end gap-2 text-gray-500">
                             <h4 className="font-extrabold text-gray-700">고객센터</h4>
