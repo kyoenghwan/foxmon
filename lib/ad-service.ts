@@ -133,7 +133,10 @@ const CACHE_TTL_MS = 60 * 1000; // 60초 캐시 (1분)
 async function fetchAdsFromDB(
     tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL'
 ): Promise<AdItem[]> {
+    const dbLabel = `  🖥️  [Performance] DB Query for tier: ${tier}`;
+    console.time(dbLabel);
     if (!IS_SUPABASE_ENABLED) {
+        console.timeEnd(dbLabel);
         return MOCK_ADS.filter(ad => ad.tier === tier);
     }
 
@@ -224,6 +227,8 @@ async function fetchAdsFromDB(
     } catch (err) {
         console.error(`[fetchAdsFromDB] Exception in fetch for tier ${tier}:`, err);
         return [];
+    } finally {
+        console.timeEnd(dbLabel);
     }
 }
 
@@ -242,6 +247,8 @@ async function fetchAndCacheAds(
     }
 
     adCache[tier].isFetching = true;
+    const cacheFetchLabel = `♻️ [Performance] Fetch and cache ads for tier: ${tier}`;
+    console.time(cacheFetchLabel);
     try {
         const ads = await fetchAdsFromDB(tier);
         adCache[tier].ads = ads;
@@ -251,6 +258,7 @@ async function fetchAndCacheAds(
         console.error(`[fetchAndCacheAds] Exception for tier ${tier}:`, err);
         return adCache[tier].ads;
     } finally {
+        console.timeEnd(cacheFetchLabel);
         adCache[tier].isFetching = false;
     }
 }
@@ -263,6 +271,9 @@ export async function getRotatedAds(
     limitCount: number = 20,
     searchQuery?: string
 ): Promise<AdItem[]> {
+    const apiLabel = `⚡ [Performance] getRotatedAds API (Server Action) for tier: ${tier}`;
+    console.time(apiLabel);
+
     const filterBySearch = (items: AdItem[], query?: string) => {
         if (!query) return items;
         const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -327,6 +338,7 @@ export async function getRotatedAds(
         }
     } else if (rolledAds.length === 0) {
         if (tier === 'SIDE') {
+            console.timeEnd(apiLabel);
             return [];
         } else {
             const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
@@ -335,6 +347,7 @@ export async function getRotatedAds(
         }
     }
 
+    console.timeEnd(apiLabel);
     return rolledAds.slice(0, limitCount);
 }
 

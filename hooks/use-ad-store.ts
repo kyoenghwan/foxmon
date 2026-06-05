@@ -36,30 +36,35 @@ export const useAdStore = create<AdState>((set, get) => ({
     isJobsLoaded: false,
 
     fetchSideAds: async () => {
-        // 이미 로드되었다면 절대로 서버에 재접속하지 않음 (고정 유지)
         if (get().isSideAdsLoaded) return;
+        const start = performance.now();
+        console.log(`[Store Performance] fetchSideAds started...`);
         try {
             const ads = await getRotatedAds('SIDE', 8);
             set({ sideAds: ads, isSideAdsLoaded: true });
+            console.log(`[Store Performance] fetchSideAds completed in ${(performance.now() - start).toFixed(2)}ms`);
         } catch (error) {
             console.error("Store failed to fetch side ads:", error);
         }
     },
 
     fetchPremiumMainAds: async () => {
-        // 이미 로드되었다면 절대로 서버에 재접속하지 않음 (고정 유지)
         if (get().isPremiumMainAdsLoaded) return;
+        const start = performance.now();
+        console.log(`[Store Performance] fetchPremiumMainAds started...`);
         try {
             const ads = await getRotatedAds('PREMIUM_MAIN', 5);
             set({ premiumMainAds: ads, isPremiumMainAdsLoaded: true });
+            console.log(`[Store Performance] fetchPremiumMainAds completed in ${(performance.now() - start).toFixed(2)}ms`);
         } catch (error) {
             console.error("Store failed to fetch premium main ads:", error);
         }
     },
 
     fetchJobs: async (searchTerms = '') => {
-        // 검색 조건이 없고 이미 로드되어 있다면 절대로 서버에 재접속하지 않음 (고정 유지)
         if (searchTerms === '' && get().isJobsLoaded) return;
+        const start = performance.now();
+        console.log(`[Store Performance] fetchJobs (general/premium/special) started...`);
         try {
             const [p, s, l, g] = await Promise.all([
                 getRotatedAds('PREMIUM', 50, searchTerms),
@@ -68,7 +73,6 @@ export const useAdStore = create<AdState>((set, get) => ({
                 getRotatedAds('GENERAL', 50, searchTerms)
             ]);
             
-            // 검색 조건이 없는 기본 목록만 글로벌 캐시로 영구 저장
             if (searchTerms === '') {
                 set({ 
                     premiumJobs: p, 
@@ -78,6 +82,7 @@ export const useAdStore = create<AdState>((set, get) => ({
                     isJobsLoaded: true 
                 });
             }
+            console.log(`[Store Performance] fetchJobs completed in ${(performance.now() - start).toFixed(2)}ms`);
         } catch (error) {
             console.error("Store failed to fetch jobs:", error);
         }
