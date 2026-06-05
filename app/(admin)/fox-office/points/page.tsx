@@ -25,14 +25,6 @@ import { PolicyFormModal } from '@/components/admin/points/PolicyFormModal';
 import { TierConfigEditor } from '@/components/admin/points/TierConfigEditor';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-const TIER_OPTIONS = [
-    { key: 'TIER_PRICE_PREMIUM_MAIN', title: '👑 프리미엄 메인', desc: '최상단 롤링 배너 (AI 배경 생성 제공)' },
-    { key: 'TIER_PRICE_SIDE', title: '🚀 사이드', desc: '우측 사이드 세로 배너' },
-    { key: 'TIER_PRICE_PREMIUM', title: '💎 프리미엄', desc: '본문 최상단 테마 강조 노출' },
-    { key: 'TIER_PRICE_SPECIAL', title: '⭐ 스페셜', desc: '프리미엄 하단 우선 노출' },
-    { key: 'TIER_PRICE_GENERAL', title: '📋 일반', desc: '기본 리스트 노출' },
-];
-
 const BASE_OPTIONS = [
     { key: 'OPTION_PRICE_BASE_PERIOD', title: '기본 패키지', desc: '구인광고 기본 노출 요금입니다.' },
     { key: 'OPTION_PRICE_BOLD', title: '제목 굵게', desc: '제목을 굵게 표시하여 눈에 띄게' },
@@ -44,9 +36,34 @@ const BASE_OPTIONS = [
     { key: 'OPTION_PRICE_JUMP', title: '스마트 자동 점프 (Auto Jump)', desc: '구인공고가 밀려나면 자동으로 리스트 최상단 끌어올림' },
 ];
 
-const BIZ_OPTIONS = [
-    { key: 'OPTION_PRICE_BIZ_JUMP', title: '스마트 자동 점프 (Auto Jump)', desc: '배너가 100위 밖으로 밀려나면 자동으로 상위권 끌어올림' },
+const OTHER_TIER_OPTIONS = [
+    { key: 'TIER_PRICE_PREMIUM', title: '💎 프리미엄 배너', desc: '본문 최상단 테마 강조 노출' },
+    { key: 'TIER_PRICE_SPECIAL', title: '⭐ 스페셜 배너', desc: '프리미엄 하단 우선 노출' },
+    { key: 'TIER_PRICE_GENERAL', title: '📋 일반 배너', desc: '기본 리스트 노출' },
+    { key: 'TIER_PRICE_AD_GENERAL', title: '💼 배너 (일반)', desc: '배너 카테고리 일반 노출 요금' }
 ];
+
+function SingleConfigCard({ configKey, title, desc, unit, pricingOptions, setPricingOptions }: any) {
+    const val = pricingOptions.find((p: PointPolicyItem) => p.config_key === configKey)?.config_value || 0;
+
+    const handleValueChange = (value: number) => {
+        setPricingOptions((prev: PointPolicyItem[]) => prev.map(p => p.config_key === configKey ? { ...p, config_value: value } : p));
+    };
+
+    return (
+        <div className="p-5 border border-amber-100 rounded-2xl bg-amber-50/20 hover:border-amber-300 transition-all shadow-sm">
+            <div className="text-[12px] font-black text-amber-600 opacity-80 uppercase tracking-widest">{configKey}</div>
+            <div className="font-bold text-[16px] text-gray-900 mt-1">{title}</div>
+            <p className="text-[12px] text-gray-500 mt-1 mb-4 h-8">{desc}</p>
+            
+            <div className="flex items-center gap-2">
+                <span className="text-[13px] font-bold text-gray-600 whitespace-nowrap">설정값</span>
+                <input type="number" value={val} onChange={e => handleValueChange(parseInt(e.target.value) || 0)} className="flex-1 min-w-0 px-3 py-2 border-2 border-amber-200 rounded-lg text-right font-black text-lg focus:border-amber-500 outline-none transition-colors" />
+                <span className="text-gray-400 font-black text-sm shrink-0">{unit}</span>
+            </div>
+        </div>
+    );
+}
 
 function OptionCard({ baseOpt, pricingOptions, setPricingOptions }: any) {
     const val30 = pricingOptions.find((p: PointPolicyItem) => p.config_key === `${baseOpt.key}_30`)?.config_value || 0;
@@ -157,7 +174,12 @@ export default function AdminPointsPolicyPage() {
     const fetchData = async () => {
       const res = await GET_POINT_POLICIES();
       if (res.success && res.data) {
-        setPricingOptions(res.data.filter(p => p.config_key.startsWith('OPTION_PRICE_') || p.config_key.startsWith('TIER_PRICE_')));
+        setPricingOptions(res.data.filter(p => 
+          p.config_key.startsWith('OPTION_PRICE_') || 
+          p.config_key.startsWith('TIER_PRICE_') ||
+          p.config_key.startsWith('LIMIT_') ||
+          p.config_key.startsWith('DISCOUNT_')
+        ));
       }
       setIsLoading(false);
     };
@@ -231,60 +253,140 @@ export default function AdminPointsPolicyPage() {
               <div>
                 <h2 className="text-xl font-black flex items-center gap-2">
                   <Coins className="text-primary h-6 w-6" />
-                  일반 구인공고 부가 옵션 요금표
+                  유료 광고 및 옵션 포인트 요금표
                 </h2>
-                <p className="text-[13px] text-gray-500 font-medium mt-1">구인공고 등록 시 차감되는 옵션별 기본 포인트를 설정합니다.</p>
+                <p className="text-[13px] text-gray-500 font-medium mt-1">플랫폼 내 구인공고 및 배너별 노출 요금, 추가 구좌 제한을 세부적으로 관리합니다.</p>
               </div>
               <Button onClick={handleSavePricing} disabled={isLoading} className="font-bold gap-2"><Save className="w-4 h-4" /> 일괄 저장</Button>
             </div>
             
-            <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 mt-6">
-              {BASE_OPTIONS.map(baseOpt => (
-                <OptionCard 
-                  key={baseOpt.key} 
-                  baseOpt={baseOpt} 
-                  pricingOptions={pricingOptions} 
-                  setPricingOptions={setPricingOptions} 
-                />
-              ))}
-            </div>
-
-            <div className="mt-8 pt-8 border-t border-gray-100">
-              <h3 className="text-lg font-black flex items-center gap-2 mb-1">
-                <Badge variant="outline" className="bg-indigo-50 text-indigo-600 border-indigo-200">배너</Badge>
-                유료 배너 광고 요금표
-              </h3>
-              <p className="text-[13px] text-gray-500 font-medium mb-5">유료 배너(광고) 등록 시 등급(Tier)별 및 부가 옵션별로 부과되는 기본 요금을 설정합니다.</p>
-              
-              <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 mb-6">
-                {TIER_OPTIONS.map(tierOpt => (
-                  <TierCard 
-                    key={tierOpt.key} 
-                    tierOpt={tierOpt} 
-                    pricingOptions={pricingOptions} 
-                    setPricingOptions={setPricingOptions} 
-                  />
-                ))}
+            <Tabs defaultValue="job_ad" className="w-full">
+              <div className="bg-gray-100/60 p-1.5 rounded-xl border mb-6 inline-block">
+                <TabsList className="bg-transparent gap-1 h-auto">
+                  <TabsTrigger value="job_ad" className="px-4 py-2 rounded-lg font-bold text-[13px] data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm">
+                    📋 일반 구인공고
+                  </TabsTrigger>
+                  <TabsTrigger value="premium_main_ad" className="px-4 py-2 rounded-lg font-bold text-[13px] data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm">
+                    👑 프리미엄 메인
+                  </TabsTrigger>
+                  <TabsTrigger value="side_ad" className="px-4 py-2 rounded-lg font-bold text-[13px] data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm">
+                    🚀 사이드 배너
+                  </TabsTrigger>
+                  <TabsTrigger value="other_ads" className="px-4 py-2 rounded-lg font-bold text-[13px] data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm">
+                    💎 기타 배너들
+                  </TabsTrigger>
+                </TabsList>
               </div>
 
-              <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
-                {BIZ_OPTIONS.map(bizOpt => (
-                  <OptionCard 
-                    key={bizOpt.key} 
-                    baseOpt={bizOpt} 
-                    pricingOptions={pricingOptions} 
-                    setPricingOptions={setPricingOptions} 
-                  />
-                ))}
-                
-                {/* 더블 슬롯 할인율 카드는 정책 쪽에 두거나 별도로 관리할 수 있지만, 현재는 요금표에 하드코딩된 것을 설명으로 추가 */}
-                <div className="p-5 border border-indigo-100 rounded-2xl bg-indigo-50/30 hover:border-indigo-300 transition-all shadow-sm flex flex-col justify-center">
-                    <div className="text-[12px] font-black text-indigo-500 opacity-80 uppercase tracking-widest">DISCOUNT_RATIO_BIZ_DOUBLE_SLOT</div>
-                    <div className="font-bold text-[16px] text-gray-900 mt-1">연속 노출 (더블 슬롯) 할인율</div>
-                    <p className="text-[12px] text-gray-500 mt-1 mb-4">현재 더블 슬롯은 기본 요금 2배에서 <strong className="text-indigo-600">5% 할인</strong>으로 고정 적용되어 있습니다. (추후 정책 탭에서 제어 가능하도록 확장 예정)</p>
+              {/* 서브탭 1: 일반 구인공고 */}
+              <TabsContent value="job_ad" className="mt-0 space-y-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+                  {BASE_OPTIONS.map(baseOpt => (
+                    <OptionCard 
+                      key={baseOpt.key} 
+                      baseOpt={baseOpt} 
+                      pricingOptions={pricingOptions} 
+                      setPricingOptions={setPricingOptions} 
+                    />
+                  ))}
                 </div>
-              </div>
-            </div>
+              </TabsContent>
+
+              {/* 서브탭 2: 프리미엄 메인 배너 */}
+              <TabsContent value="premium_main_ad" className="mt-0 space-y-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+                  {/* 최대 구좌수 설정 */}
+                  <SingleConfigCard
+                    configKey="LIMIT_PREMIUM_MAIN_SLOTS"
+                    title="최대 구좌수 (슬롯 제한)"
+                    desc="프리미엄 메인 배너 영역에 등록 가능한 최대 광고 구좌의 수입니다."
+                    unit="구좌"
+                    pricingOptions={pricingOptions}
+                    setPricingOptions={setPricingOptions}
+                  />
+                  {/* 프리미엄 메인 기본요금 (30/60/90일) */}
+                  <OptionCard 
+                    baseOpt={{ key: 'TIER_PRICE_PREMIUM_MAIN', title: '프리미엄 메인 기본 요금', desc: '프리미엄 메인 배너의 기본 노출 포인트 가격입니다.' }}
+                    pricingOptions={pricingOptions} 
+                    setPricingOptions={setPricingOptions} 
+                  />
+                  {/* 스페셜 테마 이펙트 요금 */}
+                  <OptionCard 
+                    baseOpt={{ key: 'OPTION_PRICE_BIZ_THEME_EFFECT', title: '스페셜 테마 이펙트 요금', desc: '배너 테두리에 화려한 네온, 골드 효과 등을 적용하는 요금입니다.' }}
+                    pricingOptions={pricingOptions} 
+                    setPricingOptions={setPricingOptions} 
+                  />
+                </div>
+              </TabsContent>
+
+              {/* 서브탭 3: 사이드 배너 */}
+              <TabsContent value="side_ad" className="mt-0 space-y-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+                  {/* 최대 구좌수 설정 */}
+                  <SingleConfigCard
+                    configKey="LIMIT_SIDE_SLOTS"
+                    title="최대 구좌수 (전체 슬롯 제한)"
+                    desc="사이드 배너 영역에 노출될 수 있는 전체 광고 구좌의 수입니다."
+                    unit="구좌"
+                    pricingOptions={pricingOptions}
+                    setPricingOptions={setPricingOptions}
+                  />
+                  {/* 고정 구좌수 설정 */}
+                  <SingleConfigCard
+                    configKey="LIMIT_SIDE_FIXED_SLOTS"
+                    title="고정 구좌수 (Fix Slot 제한)"
+                    desc="사이드 배너 상단에 롤링 없이 고정 노출되는 최대 구좌 수입니다."
+                    unit="구좌"
+                    pricingOptions={pricingOptions}
+                    setPricingOptions={setPricingOptions}
+                  />
+                  {/* 사이드 기본 요금 */}
+                  <OptionCard 
+                    baseOpt={{ key: 'TIER_PRICE_SIDE', title: '사이드 배너 기본 요금', desc: '사이드 배너의 기본 노출 포인트 가격입니다.' }}
+                    pricingOptions={pricingOptions} 
+                    setPricingOptions={setPricingOptions} 
+                  />
+                  {/* 사이드 고정 요금 */}
+                  <OptionCard 
+                    baseOpt={{ key: 'OPTION_PRICE_SIDE_FIXED', title: '스마트 고정 노출 (Fix Slot) 요금', desc: '상단 4구좌 영역에 롤링 없이 상시 고정하는 옵션의 요금입니다.' }}
+                    pricingOptions={pricingOptions} 
+                    setPricingOptions={setPricingOptions} 
+                  />
+                  {/* 스페셜 테마 이펙트 요금 */}
+                  <OptionCard 
+                    baseOpt={{ key: 'OPTION_PRICE_BIZ_THEME_EFFECT', title: '스페셜 테마 이펙트 요금', desc: '배너 테두리에 화려한 네온, 골드 효과 등을 적용하는 요금입니다.' }}
+                    pricingOptions={pricingOptions} 
+                    setPricingOptions={setPricingOptions} 
+                  />
+                </div>
+              </TabsContent>
+
+              {/* 서브탭 4: 기타 배너들 */}
+              <TabsContent value="other_ads" className="mt-0 space-y-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 mb-6">
+                  {OTHER_TIER_OPTIONS.map(tierOpt => (
+                    <OptionCard 
+                      key={tierOpt.key} 
+                      baseOpt={tierOpt} 
+                      pricingOptions={pricingOptions} 
+                      setPricingOptions={setPricingOptions} 
+                    />
+                  ))}
+                </div>
+                
+                <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+                  {/* 더블 슬롯 할인율 설정 */}
+                  <SingleConfigCard
+                    configKey="DISCOUNT_RATIO_BIZ_DOUBLE_SLOT"
+                    title="연속 노출 (더블 슬롯) 할인율"
+                    desc="배너 2칸을 나란히 구매하여 연속 노출 시 적용되는 퍼센트(%) 할인 비율입니다."
+                    unit="%"
+                    pricingOptions={pricingOptions}
+                    setPricingOptions={setPricingOptions}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </TabsContent>
 

@@ -78,6 +78,29 @@ const DEFAULT_POLICIES = [
     { config_key: 'OPTION_PRICE_BIZ_JUMP_30', config_value: 30000 },
     { config_key: 'OPTION_PRICE_BIZ_JUMP_60', config_value: 55000 },
     { config_key: 'OPTION_PRICE_BIZ_JUMP_90', config_value: 70000 },
+
+    // 프리미엄 메인 배너 기간별 요금
+    { config_key: 'TIER_PRICE_PREMIUM_MAIN_30', config_value: 800000 },
+    { config_key: 'TIER_PRICE_PREMIUM_MAIN_60', config_value: 1440000 },
+    { config_key: 'TIER_PRICE_PREMIUM_MAIN_90', config_value: 1920000 },
+
+    // 사이드 고정 노출 (Fix Slot) 기간별 요금 (기본 3배 적용)
+    { config_key: 'OPTION_PRICE_SIDE_FIXED_30', config_value: 600000 },
+    { config_key: 'OPTION_PRICE_SIDE_FIXED_60', config_value: 1080000 },
+    { config_key: 'OPTION_PRICE_SIDE_FIXED_90', config_value: 1440000 },
+
+    // 비즈니스용 스페셜 테마 이펙트 요금
+    { config_key: 'OPTION_PRICE_BIZ_THEME_EFFECT_30', config_value: 30000 },
+    { config_key: 'OPTION_PRICE_BIZ_THEME_EFFECT_60', config_value: 55000 },
+    { config_key: 'OPTION_PRICE_BIZ_THEME_EFFECT_90', config_value: 70000 },
+
+    // 배너 더블 슬롯 할인율 (%)
+    { config_key: 'DISCOUNT_RATIO_BIZ_DOUBLE_SLOT', config_value: 5 },
+
+    // 배너 최대 구좌 개수 제한
+    { config_key: 'LIMIT_PREMIUM_MAIN_SLOTS', config_value: 10 },
+    { config_key: 'LIMIT_SIDE_SLOTS', config_value: 15 },
+    { config_key: 'LIMIT_SIDE_FIXED_SLOTS', config_value: 4 },
 ];
 
 export async function GET_POINT_POLICIES() {

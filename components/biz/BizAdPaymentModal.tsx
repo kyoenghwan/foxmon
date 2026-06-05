@@ -74,7 +74,13 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
     
     const calculateTotalPoints = () => {
         const p = form.exposure_period || 30;
-        let total = getBasePrice(p);
+        const doubleDiscount = policies['DISCOUNT_RATIO_BIZ_DOUBLE_SLOT'] !== undefined ? policies['DISCOUNT_RATIO_BIZ_DOUBLE_SLOT'] : 5;
+        const themeEffectPrice = policies['OPTION_PRICE_BIZ_THEME_EFFECT_' + p] || 30000;
+        const fixedPrice = policies['OPTION_PRICE_SIDE_FIXED_' + p] || (getBasePrice(p) * 3);
+
+        // 고정 옵션 적용 시 기본 요금을 고정 노출 요금으로 대체
+        let base = form.option_fixed ? fixedPrice : getBasePrice(p);
+        let total = base;
         
         if (form.is_subscription) {
             total = Math.floor(total * 0.95);
@@ -84,16 +90,12 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
             total *= 2;
         }
 
-        if (form.option_fixed) {
-            total *= 3; // 스마트 고정 노출 3배 단가 적용
-        }
-
         if (form.option_highlight) {
-            total += 30000; // 스페셜 테마 이펙트 30,000 P 추가
+            total += themeEffectPrice;
         }
 
         if (form.option_double_slot) {
-            total = Math.floor(total * 0.95);
+            total = Math.floor(total * ((100 - doubleDiscount) / 100));
         }
 
         return total;
@@ -310,9 +312,14 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                 
                                 {/* 스마트 고정 노출 (Fix Slot) - 사이드 배너 전용 */}
                                 {form.tier === 'SIDE' && (() => {
-                                    const isLimitReached = fixedAdCount >= 4;
+                                    const maxFixedSlots = policies['LIMIT_SIDE_FIXED_SLOTS'] || 4;
+                                    const isLimitReached = fixedAdCount >= maxFixedSlots;
                                     const isAlreadyFixed = !!initialData.is_fixed;
                                     const isSelectDisabled = isLimitReached && !isAlreadyFixed;
+
+                                    const period = form.exposure_period || 30;
+                                    const fixedPrice = policies['OPTION_PRICE_SIDE_FIXED_' + period] || (getBasePrice(period) * 3);
+                                    const fixedRatio = getBasePrice(period) > 0 ? Math.round(fixedPrice / getBasePrice(period)) : 3;
 
                                     return (
                                         <div 
@@ -326,7 +333,7 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                             onClick={() => { 
                                                 if (initialData.isPaid) return;
                                                 if (isSelectDisabled) {
-                                                    alert("죄송합니다. 사이드 배너 고정 옵션은 선착순 4구좌가 모두 마감되었습니다.");
+                                                    alert(`죄송합니다. 사이드 배너 고정 옵션은 선착순 ${maxFixedSlots}구좌가 모두 마감되었습니다.`);
                                                     return;
                                                 }
                                                 update('option_fixed', !form.option_fixed); 
@@ -342,21 +349,21 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                                             <h5 className="font-black text-[14px] text-gray-900">스마트 고정 노출 (Fix Slot)</h5>
                                                             {isLimitReached && (
                                                                 <span className="text-[10px] font-black bg-red-100 text-red-600 px-2 py-0.5 rounded-full border border-red-200">
-                                                                    선착순 마감 ({fixedAdCount}/4)
+                                                                    선착순 마감 ({fixedAdCount}/{maxFixedSlots})
                                                                 </span>
                                                             )}
                                                             {!isLimitReached && (
                                                                 <span className="text-[10px] font-black bg-green-100 text-green-600 px-2 py-0.5 rounded-full border border-green-200">
-                                                                    신청 가능 ({fixedAdCount}/4)
+                                                                    신청 가능 ({fixedAdCount}/{maxFixedSlots})
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <p className="text-[12px] font-medium text-gray-500">배너 1~4번 명당 영역에 상시 고정 노출! (롤링 제외)</p>
+                                                        <p className="text-[12px] font-medium text-gray-500">배너 명당 영역에 상시 고정 노출! (롤링 제외)</p>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="text-[14px] font-black text-indigo-600">기본 요금 3배 부과</div>
-                                                    <div className="text-[11px] font-medium text-gray-400">(Fix Slot 프리미엄)</div>
+                                                    <div className="text-[14px] font-black text-indigo-600">{fixedPrice.toLocaleString()} P</div>
+                                                    <div className="text-[11px] font-medium text-gray-400">({fixedRatio}배 단가 적용)</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -364,33 +371,40 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                 })()}
                                 
                                 {/* 스페셜 테마 이펙트 (Theme Effect) */}
-                                <div 
-                                    className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${
-                                        form.option_highlight ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'
-                                    } ${
-                                        initialData.isPaid ? 'opacity-70 cursor-default' : 'cursor-pointer hover:border-gray-300'
-                                    }`} 
-                                    onClick={() => { 
-                                        if (!initialData.isPaid) update('option_highlight', !form.option_highlight); 
-                                    }}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${form.option_highlight ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                                <Eye className="w-4 h-4" />
-                                            </div>
-                                            <div>
-                                                <h5 className="font-black text-[14px] text-gray-900">스페셜 테마 이펙트 (Theme Effect)</h5>
-                                                <p className="text-[12px] font-medium text-gray-500">배너 테두리에 화려한 네온, 골드 효과 등을 적용해 시선 강탈!</p>
+                                {(() => {
+                                    const period = form.exposure_period || 30;
+                                    const themeEffectPrice = policies['OPTION_PRICE_BIZ_THEME_EFFECT_' + period] || 30000;
+
+                                    return (
+                                        <div 
+                                            className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${
+                                                form.option_highlight ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'
+                                            } ${
+                                                initialData.isPaid ? 'opacity-70 cursor-default' : 'cursor-pointer hover:border-gray-300'
+                                            }`} 
+                                            onClick={() => { 
+                                                if (!initialData.isPaid) update('option_highlight', !form.option_highlight); 
+                                            }}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${form.option_highlight ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                                        <Eye className="w-4 h-4" />
+                                                    </div>
+                                                    <div>
+                                                        <h5 className="font-black text-[14px] text-gray-900">스페셜 테마 이펙트 (Theme Effect)</h5>
+                                                        <p className="text-[12px] font-medium text-gray-500">배너 테두리에 화려한 네온, 골드 효과 등을 적용해 시선 강탈!</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-[14px] font-black text-indigo-600">
+                                                        +{themeEffectPrice.toLocaleString()} P
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <div className="text-[14px] font-black text-indigo-600">
-                                                +30,000 P
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                    );
+                                })()}
                             </div>
                         </section>
                     </div>
