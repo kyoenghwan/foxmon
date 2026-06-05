@@ -83,10 +83,10 @@ export function SideBanners() {
 
     return (
         <div className="fixed top-[220px] left-0 w-full z-20 pointer-events-none flex justify-center">
-            <div ref={containerRef} className="container relative h-0">
+            <div ref={containerRef} className="w-full max-w-[1060px] 2xl:max-w-[1200px] relative h-0">
                 {/* Left Wing */}
                 <div 
-                    className="hidden xl:flex flex-col gap-3 absolute top-0 right-full mr-4 pointer-events-auto transition-all duration-300 w-[130px]"
+                    className="hidden xl:flex flex-col gap-3 absolute top-0 right-full mr-2 pointer-events-auto transition-all duration-300 w-[110px] 2xl:w-[130px]"
                 >
                     {leftAds.map((ad) => (
                         <BannerCard key={ad.id} ad={ad} />
@@ -103,7 +103,7 @@ export function SideBanners() {
 
                 {/* Right Wing */}
                 <div 
-                    className="hidden xl:flex flex-col gap-3 absolute top-0 left-full ml-4 pointer-events-auto transition-all duration-300 w-[130px]"
+                    className="hidden xl:flex flex-col gap-3 absolute top-0 left-full ml-2 pointer-events-auto transition-all duration-300 w-[110px] 2xl:w-[130px]"
                 >
                     {rightAds.map((ad) => (
                         <BannerCard key={ad.id} ad={ad} />

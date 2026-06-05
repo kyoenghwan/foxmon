@@ -149,17 +149,19 @@ export async function getRotatedAds(
         let queryBuilder;
 
         // detail_content는 대용량이므로 초기 로딩 속도 향상을 위해 쿼리 필드에서 제외
-        const selectFields = 'id, user_id, company, company_name, title, location, address, pay, salary_type, salary_amount, image, logo_url, color, theme, category1, category2, keywords, amenities, action_type, effect_intensity, bg_opacity, is_big, weight, exposure_count, last_exposed_at, status, expires_at, view_count, detail_images, work_type, work_hours, benefits, contact_info, created_at, updated_at';
+        const jobsSelectFields = 'id, author_id, company_id, company_name, title, content, category, location, pay, image_url, tier, is_big, exposure_count, last_exposed_at, created_at, user_id, status, expires_at, view_count, detail_images, work_type, work_hours, benefits, contact_info, address, updated_at, source_origin, salary_type, salary_amount, logo_url, contact_name, contact_phone, kakao_id, line_id, telegram_id, wechat_id, employment_type, category1, category2, work_time, amenities, keywords, design_mode, detail_bg_color, detail_bg_image, exposure_period, option_bold, option_color, option_bg, option_icon, option_jump, total_points, option_color_value, option_bg_value, option_bold_expires_at, option_color_expires_at, option_bg_expires_at, option_icon_expires_at, option_jump_expires_at, option_highlight, option_highlight_value, option_highlight_expires_at, option_general_icons, option_general_icons_expires_at, is_subscription';
+
+        const bizAdsSelectFields = 'id, author_id, company_id, company_name, title, content, category, location, pay, image_url, tier, is_big, exposure_count, last_exposed_at, created_at, user_id, status, expires_at, view_count, detail_images, work_type, work_hours, benefits, contact_info, address, updated_at, source_origin, salary_type, salary_amount, logo_url, contact_name, contact_phone, kakao_id, line_id, telegram_id, wechat_id, employment_type, category1, category2, work_time, amenities, keywords, design_mode, detail_bg_color, detail_bg_image, exposure_period, option_bold, option_color, option_bg, option_icon, option_jump, total_points, option_color_value, option_bg_value, option_bold_expires_at, option_color_expires_at, option_bg_expires_at, option_icon_expires_at, option_jump_expires_at, option_highlight, option_highlight_value, option_highlight_expires_at, option_general_icons, option_general_icons_expires_at, color, bg_opacity, theme, effect_intensity, is_subscription, option_double_slot, option_double_slot_expires_at, claim_code';
 
         if (targetTable === 'jobs') {
             queryBuilder = supabaseAdmin
                 .from('jobs')
-                .select(`${selectFields}, users(merchant_tier)`)
+                .select(`${jobsSelectFields}, users(merchant_tier)`)
                 .eq('tier', tier);
         } else {
             queryBuilder = supabaseAdmin
                 .from('biz_ads')
-                .select(selectFields)
+                .select(bizAdsSelectFields)
                 .eq('tier', tier);
         }
 
@@ -173,6 +175,9 @@ export async function getRotatedAds(
         const { data, error } = await queryBuilder;
 
         if (error || !data || data.length === 0) {
+            if (error) {
+                console.error(`[getRotatedAds] Supabase error for tier ${tier}:`, error);
+            }
             if (tier === 'SIDE') return [];
             return getMockAds(tier, limitCount, searchQuery);
         }
@@ -183,10 +188,13 @@ export async function getRotatedAds(
         if (targetTable === 'biz_ads') {
             const userIds = Array.from(new Set(data.map((item: any) => item.user_id).filter(Boolean)));
             if (userIds.length > 0) {
-                const { data: usersData } = await supabaseAdmin
+                const { data: usersData, error: usersError } = await supabaseAdmin
                     .from('users')
                     .select('id, merchant_tier')
                     .in('id', userIds);
+                if (usersError) {
+                    console.error("[getRotatedAds] Error fetching users for merchant_tier:", usersError);
+                }
                 if (usersData) {
                     usersData.forEach((u: any) => {
                         userMap[u.id] = u.merchant_tier || 'NORMAL';
@@ -224,9 +232,9 @@ export async function getRotatedAds(
             }
             return {
                 ...item,
-                company: item.company || item.company_name || '업체명 없음',
+                company: item.company_name || item.company || '업체명 없음',
                 pay: item.pay || (item.salary_type ? `[${item.salary_type}] ${item.salary_amount}` : item.salary_amount) || '급여협의',
-                image: item.image || item.logo_url || '',
+                image: item.image_url || item.image || item.logo_url || '',
                 merchant_tier: merchant_tier as 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP',
                 isRealAd: true
             };
@@ -260,6 +268,7 @@ export async function getRotatedAds(
 
         return rolledAds.slice(0, limitCount);
     } catch (error) {
+        console.error(`[getRotatedAds] Exception for tier ${tier}:`, error);
         if (tier === 'SIDE') return [];
         return getMockAds(tier, limitCount, searchQuery);
     }
