@@ -62,7 +62,8 @@ export function HomeJobSections() {
         lineJobs, 
         generalJobs, 
         isJobsLoaded, 
-        fetchJobs 
+        fetchJobs,
+        rotateJobs
     } = useAdStore();
 
     const [loading, setLoading] = useState(!isJobsLoaded);
@@ -95,13 +96,13 @@ export function HomeJobSections() {
         return () => clearInterval(interval);
     }, [isPaused, notices.length]);
 
-    // 1분(60초)마다 백그라운드에서 데이터를 강제 조용히 최신화
+    // 1분(60초)마다 로컬 메모리 상에서 배너 순서 순환
     useEffect(() => {
         const adInterval = setInterval(() => {
-            fetchJobs(true);
+            rotateJobs();
         }, 60000); // 60초 주기
         return () => clearInterval(adInterval);
-    }, [fetchJobs]);
+    }, [rotateJobs]);
 
     // 🎨 [IMPACT DEMO] 22종 테마 전체 적용 (50개 카드)
     const impacts: any[] = [

@@ -15,7 +15,7 @@ export function SideBanners() {
     const isBusinessVerified = (session?.user as any)?.business_number ? true : false;
     const showAdRegister = isEmployer && isBusinessVerified;
 
-    const { sideAds, isSideAdsLoaded, fetchSideAds } = useAdStore();
+    const { sideAds, isSideAdsLoaded, fetchSideAds, rotateSideAds } = useAdStore();
     const [loading, setLoading] = useState(!isSideAdsLoaded);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -32,13 +32,13 @@ export function SideBanners() {
         }
         initSideAds();
 
-        // 1분(60초)마다 배너 순서 순환을 위해 비동기 백그라운드 강제 재호출
+        // 1분(60초)마다 로컬 메모리 상에서 배너 순서 순환
         const intervalId = setInterval(() => {
-            fetchSideAds(true);
+            rotateSideAds();
         }, 60000);
 
         return () => clearInterval(intervalId);
-    }, [isSideAdsLoaded, fetchSideAds]);
+    }, [isSideAdsLoaded, fetchSideAds, rotateSideAds]);
 
     const handleAdClick = (adId: string) => {
         recordAdExposure(adId);

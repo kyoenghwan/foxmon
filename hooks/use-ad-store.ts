@@ -14,9 +14,13 @@ interface AdState {
     generalJobs: AdItem[];
     isJobsLoaded: boolean;
     
-    fetchSideAds: (force?: boolean) => Promise<void>;
-    fetchPremiumMainAds: (force?: boolean) => Promise<void>;
-    fetchJobs: (force?: boolean, searchTerms?: string) => Promise<void>;
+    fetchSideAds: () => Promise<void>;
+    fetchPremiumMainAds: () => Promise<void>;
+    fetchJobs: (searchTerms?: string) => Promise<void>;
+    
+    // 클라이언트 사이드 로테이션 액션
+    rotateSideAds: () => void;
+    rotateJobs: () => void;
 }
 
 export const useAdStore = create<AdState>((set, get) => ({
@@ -31,8 +35,9 @@ export const useAdStore = create<AdState>((set, get) => ({
     generalJobs: [],
     isJobsLoaded: false,
 
-    fetchSideAds: async (force = false) => {
-        if (get().isSideAdsLoaded && !force) return;
+    fetchSideAds: async () => {
+        // 이미 로드되었다면 절대로 서버에 재접속하지 않음 (고정 유지)
+        if (get().isSideAdsLoaded) return;
         try {
             const ads = await getRotatedAds('SIDE', 8);
             set({ sideAds: ads, isSideAdsLoaded: true });
@@ -41,8 +46,9 @@ export const useAdStore = create<AdState>((set, get) => ({
         }
     },
 
-    fetchPremiumMainAds: async (force = false) => {
-        if (get().isPremiumMainAdsLoaded && !force) return;
+    fetchPremiumMainAds: async () => {
+        // 이미 로드되었다면 절대로 서버에 재접속하지 않음 (고정 유지)
+        if (get().isPremiumMainAdsLoaded) return;
         try {
             const ads = await getRotatedAds('PREMIUM_MAIN', 5);
             set({ premiumMainAds: ads, isPremiumMainAdsLoaded: true });
@@ -51,9 +57,9 @@ export const useAdStore = create<AdState>((set, get) => ({
         }
     },
 
-    fetchJobs: async (force = false, searchTerms = '') => {
-        // 검색 조건이 없고 이미 로드되어 있다면 캐시 우선 반환
-        if (searchTerms === '' && get().isJobsLoaded && !force) return;
+    fetchJobs: async (searchTerms = '') => {
+        // 검색 조건이 없고 이미 로드되어 있다면 절대로 서버에 재접속하지 않음 (고정 유지)
+        if (searchTerms === '' && get().isJobsLoaded) return;
         try {
             const [p, s, l, g] = await Promise.all([
                 getRotatedAds('PREMIUM', 50, searchTerms),
@@ -75,5 +81,27 @@ export const useAdStore = create<AdState>((set, get) => ({
         } catch (error) {
             console.error("Store failed to fetch jobs:", error);
         }
+    },
+
+    // 클라이언트 메모리 내에서 배너 순서 순환 회전 (서버 재페치 배제)
+    rotateSideAds: () => {
+        const ads = get().sideAds;
+        if (ads.length <= 1) return;
+        const rotated = [...ads.slice(1), ads[0]];
+        set({ sideAds: rotated });
+    },
+
+    rotateJobs: () => {
+        const p = get().premiumJobs;
+        const s = get().specialJobs;
+        const l = get().lineJobs;
+        const g = get().generalJobs;
+
+        set({
+            premiumJobs: p.length > 1 ? [...p.slice(1), p[0]] : p,
+            specialJobs: s.length > 1 ? [...s.slice(1), s[0]] : s,
+            lineJobs: l.length > 1 ? [...l.slice(1), l[0]] : l,
+            generalJobs: g.length > 1 ? [...g.slice(1), g[0]] : g,
+        });
     }
 }));
