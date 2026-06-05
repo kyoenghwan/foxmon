@@ -58,6 +58,7 @@ global_components:
     label: "우측 사이드 배너 (PC 전용)"
     keywords: ["사이드 배너", "우측 배너", "side banner"]
     files: ["components/home/side-banners.tsx"]
+    flows: ["getRotatedAds (SIDE, 8)", "1분 주기 순환 롤링 타이머"]
     responsive_variants:
       - viewport: "desktop (xl+)"
         note: "xl 해상도 이상에서만 표시"

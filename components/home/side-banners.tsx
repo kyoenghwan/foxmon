@@ -19,22 +19,33 @@ export function SideBanners() {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        async function fetchSideAds() {
-            setLoading(true);
+        async function fetchSideAds(showSpinner = true) {
+            if (showSpinner) setLoading(true);
             try {
-                // 사이드 배너용으로 SIDE 티어 광고를 활용 (좌4, 우4)
-                const [left, right] = await Promise.all([
-                    getRotatedAds('SIDE', 4),
-                    getRotatedAds('SIDE', 4)
-                ]);
-                setLeftAds(left);
-                setRightAds(right);
+                // SIDE 티어 광고 8개를 단일 쿼리로 순서대로 조회
+                const allSideAds = await getRotatedAds('SIDE', 8);
+                if (allSideAds && allSideAds.length > 0) {
+                    // 1234번은 좌측, 5678번은 우측 배치
+                    setLeftAds(allSideAds.slice(0, 4));
+                    setRightAds(allSideAds.slice(4, 8));
+                } else {
+                    setLeftAds([]);
+                    setRightAds([]);
+                }
             } catch (error) {
                 console.error("Failed to fetch side ads:", error);
             }
-            setLoading(false);
+            if (showSpinner) setLoading(false);
         }
-        fetchSideAds();
+
+        fetchSideAds(true);
+
+        // 1분(60초)마다 배너 순서 순환을 위해 비동기 백그라운드 재호출
+        const intervalId = setInterval(() => {
+            fetchSideAds(false);
+        }, 60000);
+
+        return () => clearInterval(intervalId);
     }, []);
 
     const handleAdClick = (adId: string) => {

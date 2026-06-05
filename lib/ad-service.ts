@@ -173,6 +173,7 @@ export async function getRotatedAds(
         const { data, error } = await queryBuilder;
 
         if (error || !data || data.length === 0) {
+            if (tier === 'SIDE') return [];
             return getMockAds(tier, limitCount, searchQuery);
         }
 
@@ -231,14 +232,35 @@ export async function getRotatedAds(
             };
         }) as AdItem[];
         
-        if (ads.length < limitCount) {
-            const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
-            const filteredMock = filterBySearch(mockAdsForTier, searchQuery);
-            ads = [...ads, ...filteredMock.slice(0, limitCount - ads.length)];
+        // 롤링 알고리즘을 실제 쿼리된 광고 리스트에 먼저 적용하여 롤링 순서를 정함
+        let rolledAds = applyRollingLogic(ads, ads.length);
+
+        if (rolledAds.length > 0 && rolledAds.length < limitCount) {
+            if (tier === 'SIDE') {
+                // SIDE 배너의 경우, 실제 등록된 배너들만 순환 반복하여 limitCount를 꽉 채움
+                const originalAds = [...rolledAds];
+                while (rolledAds.length < limitCount) {
+                    rolledAds = [...rolledAds, ...originalAds.map(ad => ({
+                        ...ad,
+                        id: `${ad.id}_repeat_${rolledAds.length}`
+                    }))];
+                }
+                rolledAds = rolledAds.slice(0, limitCount);
+            } else {
+                // 타 등급은 기존대로 mock 광고를 추가하여 채워 넣음
+                const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
+                const filteredMock = filterBySearch(mockAdsForTier, searchQuery);
+                rolledAds = [...rolledAds, ...filteredMock.slice(0, limitCount - rolledAds.length)];
+                // 보충된 전체에 대해 다시 롤링 알고리즘 적용
+                rolledAds = applyRollingLogic(rolledAds, limitCount);
+            }
+        } else if (rolledAds.length === 0 && tier === 'SIDE') {
+            return [];
         }
 
-        return applyRollingLogic(ads, limitCount);
+        return rolledAds.slice(0, limitCount);
     } catch (error) {
+        if (tier === 'SIDE') return [];
         return getMockAds(tier, limitCount, searchQuery);
     }
 }
