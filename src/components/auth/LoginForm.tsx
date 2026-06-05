@@ -62,10 +62,12 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
             // Set session cookie for PC Bang security. Max-age deleted on browser close.
             document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "foxmon_transient=1; path=/;";
+            document.cookie = "age_verified=true; path=/; SameSite=Lax";
         } else {
             // Keep persistent cookie
             document.cookie = "foxmon_auto_login=1; path=/; max-age=2592000"; // 30 days
             document.cookie = "foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "age_verified=true; path=/; max-age=2592000; SameSite=Lax";
         }
         
         // Use hard navigation to prevent race condition between router.refresh() and router.push()

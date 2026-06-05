@@ -91,5 +91,16 @@ export default auth((req) => {
 
 export const config = {
     // https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
-    matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
+    matcher: [
+        // 1. 관리자 경로는 보안 검증을 위해 무조건 미들웨어를 거치게 설정
+        '/fox-office/:path*',
+        // 2. 일반 경로는 'age_verified=true' 쿠키가 없을 때만 미들웨어를 실행하여 성인게이트(/age-gate)로 보냄
+        // 이미 성인인증 쿠키가 있다면 미들웨어를 완전히 우회(Bypass)하여 NextAuth 세션 로드 부하를 차단(0ms)
+        {
+            source: '/((?!api|_next/static|_next/image|fox-office|.*\\.png$).*)',
+            missing: [
+                { type: 'cookie', key: 'age_verified', value: 'true' }
+            ]
+        }
+    ],
 };
