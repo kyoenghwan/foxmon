@@ -60,7 +60,23 @@ function formatNoticeDate(iso: string) {
   }
 }
 
+interface NoticeCacheItem {
+  data: PublicNotice[];
+  lastFetched: number;
+}
+const noticeCache: Record<string, NoticeCacheItem> = {};
+const NOTICE_CACHE_TTL = 60 * 1000; // 60초 캐시 (1분)
+
 export async function getPublicNotices(category?: string): Promise<PublicNotice[]> {
+  const cacheKey = category || 'all';
+  const now = Date.now();
+  const cached = noticeCache[cacheKey];
+
+  if (cached && (now - cached.lastFetched < NOTICE_CACHE_TTL)) {
+    nvLog('AT', '⚡ [Cache Hit] getPublicNotices', { category });
+    return cached.data;
+  }
+
   try {
     let q = supabase.from('notices').select('*').order('is_pinned', { ascending: false }).order('created_at', { ascending: false });
     if (category && category !== '전체') {
@@ -69,9 +85,9 @@ export async function getPublicNotices(category?: string): Promise<PublicNotice[
     const { data, error } = await q;
     if (error) {
       nvLog('AT', '❌ getPublicNotices', error);
-      return [];
+      return cached?.data || [];
     }
-    return (data || []).map((n) => ({
+    const formattedNotices = (data || []).map((n) => ({
       id: n.id,
       category: n.category,
       title: n.title,
@@ -82,9 +98,16 @@ export async function getPublicNotices(category?: string): Promise<PublicNotice[
       view_count: n.view_count ?? 0,
       is_pinned: !!n.is_pinned,
     }));
+
+    noticeCache[cacheKey] = {
+      data: formattedNotices,
+      lastFetched: Date.now()
+    };
+
+    return formattedNotices;
   } catch (err) {
     nvLog('AT', '❌ getPublicNotices 예외', err);
-    return [];
+    return cached?.data || [];
   }
 }
 

@@ -6,39 +6,70 @@ import { nvLog } from '@/lib/logger';
 import { RA_CHECK_BOARD_PERMISSION } from '@/src/atoms/ra/community/RA_CHECK_BOARD_PERMISSION';
 import { RA_VALIDATE_POST_INPUT } from '@/src/atoms/ra/community/RA_VALIDATE_POST_INPUT';
 
+// 캐시 저장을 위한 인터페이스 및 전역 캐시 변수 정의
+interface CommunityCacheItem {
+    posts: any[];
+    total: number;
+    lastFetched: number;
+}
+const communityCache: Record<string, CommunityCacheItem> = {};
+const COMMUNITY_CACHE_TTL = 15 * 1000; // 15초 캐시 (15,000ms)
+
 // ============================================
 // QA: 게시판별 게시글 목록 조회
 // ============================================
 export async function getCommunityPosts(boardId: string, page: number = 1, limit: number = 20) {
+    const cacheKey = `${boardId}_${page}_${limit}`;
+    const now = Date.now();
+    const cached = communityCache[cacheKey];
+
+    if (cached && (now - cached.lastFetched < COMMUNITY_CACHE_TTL)) {
+        nvLog('AT', '⚡ [Cache Hit] QA_GET_COMMUNITY_POSTS', { boardId, page, limit });
+        return { posts: cached.posts, total: cached.total };
+    }
+
     nvLog('AT', '▶️ QA_GET_COMMUNITY_POSTS', { boardId, page, limit });
 
     try {
         const offset = (page - 1) * limit;
 
-        // 전체 건수
-        const { count } = await supabase
-            .from('community_posts')
-            .select('*', { count: 'exact', head: true })
-            .eq('board_id', boardId);
+        // 전체 건수 및 게시글 목록을 병렬로 쿼리하여 성능 최적화 (Promise.all)
+        const [countRes, listRes] = await Promise.all([
+            supabase
+                .from('community_posts')
+                .select('*', { count: 'exact', head: true })
+                .eq('board_id', boardId),
+            supabase
+                .from('community_posts')
+                .select('*')
+                .eq('board_id', boardId)
+                .order('is_hot', { ascending: false })
+                .order('created_at', { ascending: false })
+                .range(offset, offset + limit - 1)
+        ]);
 
-        // 게시글 목록 (HOT 우선, 최신순)
-        const { data, error } = await supabase
-            .from('community_posts')
-            .select('*')
-            .eq('board_id', boardId)
-            .order('is_hot', { ascending: false })
-            .order('created_at', { ascending: false })
-            .range(offset, offset + limit - 1);
+        const count = countRes.count;
+        const { data, error } = listRes;
 
         if (error) {
             nvLog('AT', '❌ QA_GET_COMMUNITY_POSTS 에러', error);
-            return { posts: [], total: 0 };
+            // 에러 시 캐시 데이터가 있으면 폴백 반환
+            return { posts: cached?.posts || [], total: cached?.total || 0 };
         }
 
-        return { posts: data || [], total: count || 0 };
+        const result = { posts: data || [], total: count || 0 };
+        
+        // 메모리 캐시에 데이터 갱신
+        communityCache[cacheKey] = {
+            posts: result.posts,
+            total: result.total,
+            lastFetched: Date.now()
+        };
+
+        return result;
     } catch (err) {
         nvLog('AT', '❌ QA_GET_COMMUNITY_POSTS 예외', err);
-        return { posts: [], total: 0 };
+        return { posts: cached?.posts || [], total: cached?.total || 0 };
     }
 }
 
@@ -122,6 +153,12 @@ export async function createCommunityPost(input: {
             nvLog('AT', '❌ OA_INSERT_COMMUNITY_POST 에러', error);
             return { success: false, message: `게시글 저장에 실패했습니다. (${error.message || JSON.stringify(error)})` };
         }
+
+        // 새 글 등록 성공 시 해당 게시판의 관련 페이징 캐시 무효화 (Invalidate)
+        const keysToInvalidate = Object.keys(communityCache).filter(key => key.startsWith(`${input.board_id}_`));
+        keysToInvalidate.forEach(key => {
+            delete communityCache[key];
+        });
 
         nvLog('AT', '✅ FA_CREATE_COMMUNITY_POST 완료', { postId: data.id });
         return { success: true, data, message: '게시글이 등록되었습니다.' };
