@@ -10,6 +10,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { handleSignOut } from '@/lib/actions';
+import { AdminRefreshButton } from './AdminRefreshButton';
 
 export function AdminNavbar({ session }: { session: any }) {
   return (
@@ -31,6 +32,7 @@ export function AdminNavbar({ session }: { session: any }) {
 
       {/* Right: Notifications & User */}
       <div className="flex items-center gap-4">
+        <AdminRefreshButton />
         <button className="p-2.5 text-gray-400 hover:bg-gray-100 rounded-xl transition-all relative">
           <Bell size={20} />
           <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>

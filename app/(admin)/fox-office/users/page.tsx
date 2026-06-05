@@ -2,6 +2,7 @@ import { QA_GET_ALL_USERS } from '@/src/atoms/qa/admin/QA_GET_ALL_USERS';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { Search, Users, ShieldCheck, User } from 'lucide-react';
+import { AdminRefreshButton } from '@/src/components/admin/AdminRefreshButton';
 
 export default async function UsersManagementPage() {
     const res = await QA_GET_ALL_USERS();
@@ -21,6 +22,7 @@ export default async function UsersManagementPage() {
                 </div>
                 
                 <div className="flex items-center gap-3">
+                    <AdminRefreshButton />
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input 

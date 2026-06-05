@@ -5,6 +5,7 @@ import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMM
 import { OA_UPSERT_COMMON_CODE } from '@/src/atoms/oa/master/OA_UPSERT_COMMON_CODE';
 import { OA_DELETE_COMMON_CODE } from '@/src/atoms/oa/master/OA_DELETE_COMMON_CODE';
 import { Plus, Trash2, Edit2, Save, X, ToggleLeft, ToggleRight } from 'lucide-react';
+import { AdminRefreshButton } from '@/src/components/admin/AdminRefreshButton';
 
 export default function MasterDataPage() {
     const [codes, setCodes] = useState<CodeItem[]>([]);
@@ -186,14 +187,17 @@ export default function MasterDataPage() {
                         <h2 className="font-black text-gray-800 text-lg flex items-center gap-2">
                             <span className="text-primary">{selectedType === 'SYSTEM_LIST_TYPES' ? '⚙️ 시스템 기초 리스트 그룹' : metaListTypes.find(m => m.code_value === selectedType)?.code_name || selectedType}</span> <span className="text-sm font-medium text-gray-500 ml-1">항목 리스트</span>
                         </h2>
-                        {!newFormOpen && (
-                            <button 
-                                onClick={() => setNewFormOpen(true)}
-                                className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-black transition-colors"
-                            >
-                                <Plus size={16} /> 신규 항목 추가
-                            </button>
-                        )}
+                        <div className="flex items-center gap-2">
+                            <AdminRefreshButton onClick={loadData} />
+                            {!newFormOpen && (
+                                <button 
+                                    onClick={() => setNewFormOpen(true)}
+                                    className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-black transition-colors"
+                                >
+                                    <Plus size={16} /> 신규 항목 추가
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <div className="p-0">

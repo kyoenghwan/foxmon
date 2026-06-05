@@ -10,6 +10,14 @@
 # ─────────────────────────────────────────────
 global_components:
 
+  ADMIN_REFRESH_BUTTON:
+    label: "관리자 전역/로컬 데이터 새로고침 버튼"
+    keywords: ["새로고침", "refresh", "스핀 애니메이션", "RotateCw"]
+    shared_style: true
+    style_group: "PRIMARY_BUTTONS"
+    files: ["src/components/admin/AdminRefreshButton.tsx"]
+
+
   TOP_NAVIGATION:
     label: "상단 메인 헤더 네비게이션"
     keywords: ["상단 메뉴", "네비게이션", "메뉴바", "헤더", "GNB"]
