@@ -93,7 +93,10 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                     </thead>
                     <tbody>
                         {ads.map((ad: any) => {
-                            const isPendingOrExpired = new Date(ad.expires_at) < new Date();
+                            const expiresMs = ad.expires_at ? new Date(ad.expires_at).getTime() : 0;
+                            const isInvalidOrPending = !ad.expires_at || isNaN(expiresMs) || new Date(ad.expires_at).getFullYear() === 2000;
+                            const isExpired = !isInvalidOrPending && (expiresMs < Date.now());
+                            const isPendingOrExpired = isInvalidOrPending || isExpired;
                             
                             return (
                                 <tr 
