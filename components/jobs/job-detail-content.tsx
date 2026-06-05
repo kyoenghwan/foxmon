@@ -9,6 +9,7 @@ import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM'
 export function JobDetailContent({ job, isModal = false, onClose }: { job: any, isModal?: boolean, onClose?: () => void }) {
   const [isScrapped, setIsScrapped] = React.useState(false);
   const [displayJob, setDisplayJob] = React.useState(job);
+  const [isDetailLoading, setIsDetailLoading] = React.useState(false);
 
   // detail_content의 캔버스 데이터 여부 검증 헬퍼
   const isCanvasData = (content?: string) => {
@@ -86,37 +87,67 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
     }
   }, [job?.id]);
 
-  // 클라이언트 사이드 공통 코드 치환 로직
+  // 클라이언트 사이드 상세 내용 지연 로딩 및 공통 코드 치환 로직
   React.useEffect(() => {
     setDisplayJob(job);
     if (!job) return;
 
-    const hasCodes = 
-      (Array.isArray(job.keywords) && job.keywords.some((k: string) => k && (k.startsWith('KW_') || k.startsWith('AM_')))) ||
-      (Array.isArray(job.amenities) && job.amenities.some((a: string) => a && (a.startsWith('KW_') || a.startsWith('AM_'))));
+    const needsFetchDetail = !job.detail_content && job.id && !job.id.startsWith('mock-') && !job.id.startsWith('demo-');
 
-    if (hasCodes) {
-      import('@/src/atoms/qa/master/QA_GET_COMMON_CODES').then(async ({ QA_GET_COMMON_CODES }) => {
-        const res = await QA_GET_COMMON_CODES(undefined, true);
-        if (res.success && Array.isArray(res.data)) {
-          const codeMap: Record<string, string> = {};
-          res.data.forEach((item: any) => {
-            codeMap[item.code_value] = item.code_name;
-          });
+    const fetchDetailAndCodes = async () => {
+      let currentJob = job;
 
-          const mapTags = (tags: any) => {
-            if (!Array.isArray(tags)) return tags;
-            return tags.map((t: string) => codeMap[t] || t);
-          };
-
-          setDisplayJob((prev: any) => ({
-            ...prev,
-            keywords: mapTags(prev.keywords),
-            amenities: mapTags(prev.amenities)
-          }));
+      if (needsFetchDetail) {
+        setIsDetailLoading(true);
+        try {
+          const { QA_GET_JOB_BY_ID } = await import('@/src/atoms/qa/auth/QA_GET_JOB_BY_ID');
+          const res = await QA_GET_JOB_BY_ID(job.id);
+          if (res.success && res.data) {
+            currentJob = {
+              ...job,
+              ...res.data,
+            };
+            setDisplayJob(currentJob);
+          }
+        } catch (err) {
+          console.error("Failed to fetch job detail:", err);
+        } finally {
+          setIsDetailLoading(false);
         }
-      }).catch(err => console.error("Failed to load common codes:", err));
-    }
+      }
+
+      const hasCodes = 
+        (Array.isArray(currentJob.keywords) && currentJob.keywords.some((k: string) => k && (k.startsWith('KW_') || k.startsWith('AM_')))) ||
+        (Array.isArray(currentJob.amenities) && currentJob.amenities.some((a: string) => a && (a.startsWith('KW_') || a.startsWith('AM_'))));
+
+      if (hasCodes) {
+        try {
+          const { QA_GET_COMMON_CODES } = await import('@/src/atoms/qa/master/QA_GET_COMMON_CODES');
+          const res = await QA_GET_COMMON_CODES(undefined, true);
+          if (res.success && Array.isArray(res.data)) {
+            const codeMap: Record<string, string> = {};
+            res.data.forEach((item: any) => {
+              codeMap[item.code_value] = item.code_name;
+            });
+
+            const mapTags = (tags: any) => {
+              if (!Array.isArray(tags)) return tags;
+              return tags.map((t: string) => codeMap[t] || t);
+            };
+
+            setDisplayJob((prev: any) => ({
+              ...prev,
+              keywords: mapTags(prev.keywords),
+              amenities: mapTags(prev.amenities)
+            }));
+          }
+        } catch (err) {
+          console.error("Failed to load common codes:", err);
+        }
+      }
+    };
+
+    fetchDetailAndCodes();
   }, [job]);
 
   const handleToggleScrap = () => {
@@ -405,7 +436,12 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                         </h3>
 
                         <div className="w-full bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden p-6 md:p-10 flex flex-col items-center">
-                            {displayJob.detail_content ? (
+                            {isDetailLoading ? (
+                                <div className="flex flex-col items-center justify-center py-24 w-full min-h-[300px] gap-3">
+                                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                    <p className="text-sm font-bold text-gray-400">상세 채용 공고를 불러오는 중...</p>
+                                </div>
+                            ) : displayJob.detail_content ? (
                                 <div 
                                     className="w-full rounded-xl overflow-hidden shadow-sm border border-gray-200 min-h-[400px] flex justify-center"
                                     style={isCanvasData(displayJob.detail_content) ? {} : {

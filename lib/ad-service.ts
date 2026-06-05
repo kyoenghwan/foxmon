@@ -148,15 +148,18 @@ export async function getRotatedAds(
         const targetTable = tier === 'GENERAL' ? 'jobs' : 'biz_ads';
         let queryBuilder;
 
+        // detail_content는 대용량이므로 초기 로딩 속도 향상을 위해 쿼리 필드에서 제외
+        const selectFields = 'id, user_id, company, company_name, title, location, address, pay, salary_type, salary_amount, image, logo_url, color, theme, category1, category2, keywords, amenities, action_type, effect_intensity, bg_opacity, is_big, weight, exposure_count, last_exposed_at, status, expires_at, view_count, detail_images, work_type, work_hours, benefits, contact_info, created_at, updated_at';
+
         if (targetTable === 'jobs') {
             queryBuilder = supabaseAdmin
                 .from('jobs')
-                .select('*, users(merchant_tier)')
+                .select(`${selectFields}, users(merchant_tier)`)
                 .eq('tier', tier);
         } else {
             queryBuilder = supabaseAdmin
                 .from('biz_ads')
-                .select('*')
+                .select(selectFields)
                 .eq('tier', tier);
         }
 
