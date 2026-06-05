@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -19,6 +20,7 @@ import { AutoLogoutWrapper } from "@/components/auth/auto-logout-wrapper";
 import { MaxWidthWrapper } from "@/src/components/layout/MaxWidthWrapper";
 import { JobGlobalModal } from "@/components/jobs/job-global-modal";
 import { MainLayoutWrapper } from "@/components/layout/main-layout-wrapper";
+import { NavigationObserver } from "@/components/common/NavigationObserver";
 import Script from "next/script";
 
 export const viewport: Viewport = {
@@ -77,6 +79,9 @@ export default function RootLayout({
       >
         <MaxWidthWrapper>
           <LanguageProvider>
+            <Suspense fallback={null}>
+              <NavigationObserver />
+            </Suspense>
             <AutoLogoutWrapper>
               <MainLayoutWrapper>
                 {children}
