@@ -20,6 +20,14 @@ interface AdState {
     fetchSideAds: () => Promise<void>;
     fetchPremiumMainAds: () => Promise<void>;
     fetchJobs: (searchTerms?: string) => Promise<void>;
+    setInitialData: (data: {
+        sideAds: AdItem[];
+        premiumMainAds: AdItem[];
+        premiumJobs: AdItem[];
+        specialJobs: AdItem[];
+        lineJobs: AdItem[];
+        generalJobs: AdItem[];
+    }) => void;
     
     // 클라이언트 사이드 로테이션 액션
     rotateSideAds: () => void;
@@ -101,6 +109,20 @@ export const useAdStore = create<AdState>((set, get) => ({
         } finally {
             set({ isFetchingJobs: false });
         }
+    },
+
+    setInitialData: (data) => {
+        set({
+            sideAds: data.sideAds,
+            isSideAdsLoaded: true,
+            premiumMainAds: data.premiumMainAds,
+            isPremiumMainAdsLoaded: true,
+            premiumJobs: data.premiumJobs,
+            specialJobs: data.specialJobs,
+            lineJobs: data.lineJobs,
+            generalJobs: data.generalJobs,
+            isJobsLoaded: true
+        });
     },
 
     // 클라이언트 메모리 내에서 배너 순서 순환 회전 (고정과 일반 광고를 격리하여 회전)

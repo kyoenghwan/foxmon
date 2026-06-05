@@ -53,7 +53,18 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
 }
 
 
-export function HomeJobSections() {
+interface HomeJobSectionsProps {
+    initialData?: {
+        sideAds: AdItem[];
+        premiumMainAds: AdItem[];
+        premiumJobs: AdItem[];
+        specialJobs: AdItem[];
+        lineJobs: AdItem[];
+        generalJobs: AdItem[];
+    };
+}
+
+export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
     const { data: session } = useSession();
     const isEmployer = (session?.user as any)?.role === 'EMPLOYER';
     const isBusinessVerified = (session?.user as any)?.business_number ? true : false;
@@ -73,21 +84,20 @@ export function HomeJobSections() {
         generalJobs, 
         isJobsLoaded, 
         fetchJobs,
+        setInitialData,
         rotateJobs
     } = useAdStore();
 
-    const [loading, setLoading] = useState(!isJobsLoaded);
+    const [loading, setLoading] = useState(initialData ? false : !isJobsLoaded);
     const [notices, setNotices] = useState<Notice[]>([]);
 
     useEffect(() => {
-        async function initJobs() {
-            if (!isJobsLoaded) {
-                setLoading(true);
-                await fetchJobs();
-                setLoading(false);
-            }
+        if (initialData && !isJobsLoaded) {
+            setInitialData(initialData);
+        } else if (!isJobsLoaded) {
+            setLoading(true);
+            fetchJobs().then(() => setLoading(false));
         }
-        initJobs();
 
         import('@/lib/actions/help').then(({ getHomeNotices }) => {
             getHomeNotices(5).then((rows) => {
@@ -96,7 +106,7 @@ export function HomeJobSections() {
                 }
             });
         });
-    }, [isJobsLoaded, fetchJobs]);
+    }, [isJobsLoaded, fetchJobs, initialData, setInitialData]);
 
     useEffect(() => {
         if (isPaused || notices.length === 0) return;
