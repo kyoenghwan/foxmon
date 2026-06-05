@@ -19,8 +19,16 @@ export function SideBanners() {
     const [loading, setLoading] = useState(!isSideAdsLoaded);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const leftAds = sideAds.slice(0, 4);
-    const rightAds = sideAds.slice(4, 8);
+    // 등록된 사이드 배너가 8개 미만일 때, 비어 보이지 않도록 8개의 공간을 순환 반복하여 채움
+    const filledAds: AdItem[] = [];
+    if (sideAds.length > 0) {
+        for (let i = 0; i < 8; i++) {
+            filledAds.push(sideAds[i % sideAds.length]);
+        }
+    }
+
+    const leftAds = filledAds.slice(0, 4);
+    const rightAds = filledAds.slice(4, 8);
 
     useEffect(() => {
         async function initSideAds() {
