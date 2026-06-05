@@ -72,6 +72,20 @@ function OptionCard({ baseOpt, pricingOptions, setPricingOptions }: any) {
 
     const [percent60, setPercent60] = useState('');
     const [percent90, setPercent90] = useState('');
+    const [isFocused60, setIsFocused60] = useState(false);
+    const [isFocused90, setIsFocused90] = useState(false);
+
+    const getCalculatedPercent = (period: number, valPeriod: number, val30Price: number) => {
+        if (val30Price <= 0 || valPeriod <= 0) return '';
+        const months = period / 30;
+        const originalPrice = val30Price * months;
+        const discountRatio = ((originalPrice - valPeriod) / originalPrice) * 100;
+        const rounded = Math.round(discountRatio * 10) / 10;
+        return rounded > 0 ? rounded.toString() : '';
+    };
+
+    const displayPercent60 = isFocused60 ? percent60 : getCalculatedPercent(60, val60, val30);
+    const displayPercent90 = isFocused90 ? percent90 : getCalculatedPercent(90, val90, val30);
 
     const handlePriceChange = (period: number, value: number) => {
         setPricingOptions((prev: PointPolicyItem[]) => prev.map(p => p.config_key === `${baseOpt.key}_${period}` ? { ...p, config_value: value } : p));
@@ -101,10 +115,21 @@ function OptionCard({ baseOpt, pricingOptions, setPricingOptions }: any) {
                 {/* 60일 */}
                 <div className="flex items-center gap-1.5">
                     <span className="w-9 shrink-0 text-[13px] font-bold text-gray-600">60일</span>
-                    <input type="number" placeholder="%" value={percent60} onChange={e => {
-                        setPercent60(e.target.value);
-                        if (e.target.value) handlePercentChange(60, parseFloat(e.target.value));
-                    }} className="w-[50px] shrink-0 px-1 py-1.5 border border-gray-200 rounded-lg text-center text-sm font-bold text-blue-600 focus:border-blue-500 outline-none bg-blue-50" />
+                    <input 
+                        type="number" 
+                        placeholder="%" 
+                        value={displayPercent60} 
+                        onFocus={() => {
+                            setIsFocused60(true);
+                            setPercent60(getCalculatedPercent(60, val60, val30));
+                        }}
+                        onBlur={() => setIsFocused60(false)}
+                        onChange={e => {
+                            setPercent60(e.target.value);
+                            if (e.target.value) handlePercentChange(60, parseFloat(e.target.value));
+                        }} 
+                        className="w-[50px] shrink-0 px-1 py-1.5 border border-gray-200 rounded-lg text-center text-sm font-bold text-blue-600 focus:border-blue-500 outline-none bg-blue-50" 
+                    />
                     <input type="number" value={val60} onChange={e => {
                         setPercent60('');
                         handlePriceChange(60, parseInt(e.target.value) || 0);
@@ -115,10 +140,21 @@ function OptionCard({ baseOpt, pricingOptions, setPricingOptions }: any) {
                 {/* 90일 */}
                 <div className="flex items-center gap-1.5">
                     <span className="w-9 shrink-0 text-[13px] font-bold text-gray-600">90일</span>
-                    <input type="number" placeholder="%" value={percent90} onChange={e => {
-                        setPercent90(e.target.value);
-                        if (e.target.value) handlePercentChange(90, parseFloat(e.target.value));
-                    }} className="w-[50px] shrink-0 px-1 py-1.5 border border-gray-200 rounded-lg text-center text-sm font-bold text-blue-600 focus:border-blue-500 outline-none bg-blue-50" />
+                    <input 
+                        type="number" 
+                        placeholder="%" 
+                        value={displayPercent90} 
+                        onFocus={() => {
+                            setIsFocused90(true);
+                            setPercent90(getCalculatedPercent(90, val90, val30));
+                        }}
+                        onBlur={() => setIsFocused90(false)}
+                        onChange={e => {
+                            setPercent90(e.target.value);
+                            if (e.target.value) handlePercentChange(90, parseFloat(e.target.value));
+                        }} 
+                        className="w-[50px] shrink-0 px-1 py-1.5 border border-gray-200 rounded-lg text-center text-sm font-bold text-blue-600 focus:border-blue-500 outline-none bg-blue-50" 
+                    />
                     <input type="number" value={val90} onChange={e => {
                         setPercent90('');
                         handlePriceChange(90, parseInt(e.target.value) || 0);
