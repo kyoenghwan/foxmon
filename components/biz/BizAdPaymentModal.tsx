@@ -419,7 +419,7 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                         </div>
                         <div className="mt-1 flex items-center gap-2">
                             <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded font-medium">내 잔여 포인트: {loadingPoints ? '조회 중...' : `${userPoints.toLocaleString()} P`}</span>
-                            {calculateTotalPoints() > userPoints && !loadingPoints && (
+                            {calculateTotalPoints() > userPoints && !loadingPoints && !initialData.isPaid && (
                                 <span className="text-[12px] text-red-500 font-bold animate-pulse">잔액 부족!</span>
                             )}
                         </div>
@@ -439,16 +439,22 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                 <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-14 px-6 rounded-xl font-bold text-[15px] border-gray-300">
                                     취소
                                 </Button>
-                                {calculateTotalPoints() > userPoints && !loadingPoints ? (
-                                    <Button onClick={() => alert('포인트 충전 페이지로 이동합니다. (구현 예정)')} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-orange-500 hover:bg-orange-600 text-white">
+                                {calculateTotalPoints() > userPoints && !loadingPoints && (
+                                    <Button 
+                                        onClick={() => window.location.href = '/biz/points'} 
+                                        className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-orange-500 hover:bg-orange-600 text-white"
+                                    >
                                         포인트 충전하기
                                     </Button>
-                                ) : (
-                                    <Button onClick={handleFinalSubmit} disabled={saving || loadingPoints} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-gray-900 hover:bg-black text-white">
-                                        {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <DollarSign className="w-5 h-5 mr-2" />}
-                                        결제 및 최종 등록하기
-                                    </Button>
                                 )}
+                                <Button 
+                                    onClick={handleFinalSubmit} 
+                                    disabled={saving || loadingPoints || calculateTotalPoints() > userPoints} 
+                                    className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-gray-900 hover:bg-black text-white"
+                                >
+                                    {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <DollarSign className="w-5 h-5 mr-2" />}
+                                    결제 및 최종 등록하기
+                                </Button>
                             </>
                         )}
                     </div>
