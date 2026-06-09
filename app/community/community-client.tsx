@@ -42,6 +42,7 @@ export function CommunityClient({
     const [writeTitle, setWriteTitle] = useState('');
     const [writeContent, setWriteContent] = useState('');
     const [writeImages, setWriteImages] = useState<string[]>([]);
+    const [writePrice, setWritePrice] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -49,6 +50,7 @@ export function CommunityClient({
             setWriteTitle('');
             setWriteContent('');
             setWriteImages([]);
+            setWritePrice('');
         }
     }, [showWriteModal]);
 
@@ -152,6 +154,7 @@ export function CommunityClient({
                 title: writeTitle,
                 content: writeContent,
                 thumbnail: writeImages.length > 0 ? writeImages[0] : null,
+                price: isMarketBoard ? (writePrice.trim() || null) : null,
                 detail_images: writeImages.length > 0 ? writeImages : null
             });
             if (res.success) {
@@ -362,6 +365,11 @@ export function CommunityClient({
                         
                         {/* 모달 바디 (입력폼) */}
                         <div className="p-6 space-y-4">
+                            {isMarketBoard && (
+                                <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-[11px] text-red-800 leading-relaxed font-medium">
+                                    🚨 <strong>장터 거래 주의:</strong> 폭스몬 장터는 회원 간 자율 직거래 공간입니다. 폭스몬은 거래에 일절 관여하지 않으며 어떠한 책임도 지지 않습니다. 사기 예방을 위해 반드시 직접 대면 거래를 권장합니다.
+                                </div>
+                            )}
                             <div>
                                 <input 
                                     type="text" 
@@ -372,6 +380,18 @@ export function CommunityClient({
                                     maxLength={100}
                                 />
                             </div>
+                            {isMarketBoard && (
+                                <div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="희망 거래 가격 (예: 50,000원 / 협의)" 
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-[14px] font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        value={writePrice}
+                                        onChange={(e) => setWritePrice(e.target.value)}
+                                        maxLength={50}
+                                    />
+                                </div>
+                            )}
                             <div>
                                 <textarea 
                                     placeholder="내용을 입력하세요. 욕설, 비방, 광고 등은 무통보 삭제될 수 있습니다." 
