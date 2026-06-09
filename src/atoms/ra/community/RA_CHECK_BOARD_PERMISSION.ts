@@ -40,7 +40,7 @@ export function RA_CHECK_BOARD_PERMISSION(input: PermissionInput): PermissionOut
   if (isAdminRole(role)) {
     return {
       isValid: true,
-      data: { forceAnonymous: board_id === 'report' },
+      data: { forceAnonymous: board_id === 'reviews' },
     };
   }
 
@@ -51,6 +51,6 @@ export function RA_CHECK_BOARD_PERMISSION(input: PermissionInput): PermissionOut
   nvLog('AT', '✅ RA_CHECK_BOARD_PERMISSION 통과');
   return {
     isValid: true,
-    data: { forceAnonymous: board_id === 'report' },
+    data: { forceAnonymous: board_id === 'reviews' },
   };
 }

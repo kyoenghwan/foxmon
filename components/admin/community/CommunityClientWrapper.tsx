@@ -35,8 +35,8 @@ export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }
             case 'foxtalk': return '폭스수다';
             case 'foxmarket': return '폭스중고';
             case 'business': return '업소장터';
-            case 'reviews': return '알바후기';
-            case 'secret': return '비밀게시판';
+            case 'reviews': return '업소후기·제보';
+            case 'tips': return '꿀팁·노하우';
             default: return boardId;
         }
     };

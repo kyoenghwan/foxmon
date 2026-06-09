@@ -20,12 +20,10 @@ export const COMMUNITY_AUDIENCE_LABELS: Record<CommunityAudience, string> = {
 
 export const COMMUNITY_BOARDS: CommunityBoardDef[] = [
   { id: 'free', label: '자유게시판', prefix: '💬자유', audience: 'all', sectionTitle: '전체 이용' },
-  { id: 'tips', label: '꿀팁·노하우', prefix: '💡꿀팁', audience: 'all', sectionTitle: '전체 이용' },
   { id: 'foxtalk', label: '폭스수다', prefix: '🦊폭스수다', audience: 'women', sectionTitle: '여성 회원 전용' },
   { id: 'foxmarket', label: '폭스중고', prefix: '🛍️폭스중고', audience: 'women', sectionTitle: '여성 회원 전용' },
-  { id: 'reviews', label: '업소후기', prefix: '⭐후기', audience: 'women', sectionTitle: '여성 회원 전용' },
-  { id: 'secret', label: '비밀게시판', prefix: '🔒비밀', audience: 'women', sectionTitle: '여성 회원 전용' },
-  { id: 'report', label: '업소제보', prefix: '🚨제보', audience: 'women', sectionTitle: '여성 회원 전용' },
+  { id: 'tips', label: '꿀팁·노하우', prefix: '💡꿀팁', audience: 'women', sectionTitle: '여성 회원 전용' },
+  { id: 'reviews', label: '업소후기·제보', prefix: '⭐후기·제보', audience: 'women', sectionTitle: '여성 회원 전용' },
   { id: 'business', label: '업소장터', prefix: '🏪업소장터', audience: 'employer', sectionTitle: '업소(사업자) 전용' },
 ];
 

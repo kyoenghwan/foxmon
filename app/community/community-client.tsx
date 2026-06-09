@@ -215,13 +215,13 @@ export function CommunityClient({
 
 
 
-                {/* 업소제보 안내 */}
-                {activeTab === 'report' && (
+                {/* 업소후기·제보 안내 */}
+                {activeTab === 'reviews' && (
                     <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-start gap-3 mx-1 sm:mx-0">
                         <span className="text-red-500 text-xl">🚨</span>
                         <div className="text-[13px] text-red-700 leading-relaxed">
-                            <p className="font-bold">익명 제보 게시판</p>
-                            <p className="mt-1">작성자명이 '익명'으로 표시됩니다. 임금 체불, 부당 대우 등을 안전하게 제보해주세요.</p>
+                            <p className="font-bold">익명 후기·제보 게시판</p>
+                            <p className="mt-1">작성자명이 '익명'으로 표시됩니다. 업소 방문 후기 및 부당 대우, 임금 체불 등의 제보를 안전하게 나눠주세요.</p>
                         </div>
                     </div>
                 )}

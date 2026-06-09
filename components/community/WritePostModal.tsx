@@ -31,7 +31,7 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
     const [error, setError] = useState('');
 
     const isFoxmarket = boardId === 'foxmarket';
-    const isReport = boardId === 'report';
+    const isReport = boardId === 'reviews';
 
     useEffect(() => {
         if (isOpen && editPost) {
@@ -227,7 +227,7 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
                     {/* 익명 안내 */}
                     {isReport && (
                         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-[12px] text-yellow-800 font-medium">
-                            🔒 이 게시판의 모든 글은 <strong>익명</strong>으로 등록됩니다. 안심하고 제보해주세요.
+                            🔒 이 게시판의 모든 글은 <strong>익명</strong>으로 등록됩니다. 안심하고 후기 및 제보를 남겨주세요.
                         </div>
                     )}
                 </div>
