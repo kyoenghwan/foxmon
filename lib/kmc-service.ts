@@ -39,7 +39,7 @@ export async function decryptMokKeyInfo(): Promise<KmcKeyInfo> {
     let keyPassword = KMC_KEY_PASSWORD;
 
     // 1) DB에서 키 값 가져오기 우선 시도
-    nvLog('KMC', '🔍 DB(site_settings)에서 KMC 설정을 조회합니다.');
+    nvLog('AT', '🔍 DB(site_settings)에서 KMC 설정을 조회합니다.');
     const { data: dbSettings, error: dbError } = await supabaseAdmin
       .from('site_settings')
       .select('*')
@@ -51,12 +51,12 @@ export async function decryptMokKeyInfo(): Promise<KmcKeyInfo> {
     }, {} as Record<string, string>);
 
     if (!dbError && settingsMap.kmc_key_content && settingsMap.kmc_key_password) {
-      nvLog('KMC', '✅ DB 설정 획득 성공 (DB 기반 복호화)');
+      nvLog('AT', '✅ DB 설정 획득 성공 (DB 기반 복호화)');
       encryptedData = Buffer.from(settingsMap.kmc_key_content, 'base64');
       keyPassword = settingsMap.kmc_key_password;
     } else {
       // 2) DB가 누락된 경우 로컬 환경 변수와 디스크 파일 로드 시도
-      nvLog('KMC', '⚠️ DB에 설정이 없어 로컬 환경 변수와 파일을 시도합니다.');
+      nvLog('AT', '⚠️ DB에 설정이 없어 로컬 환경 변수와 파일을 시도합니다.');
       if (!KMC_KEY_FILE_PATH || !KMC_KEY_PASSWORD) {
         throw new Error('KMC 환경 변수(KMC_KEY_FILE_PATH 또는 KMC_KEY_PASSWORD)가 누락되었습니다.');
       }
@@ -104,10 +104,10 @@ export async function decryptMokKeyInfo(): Promise<KmcKeyInfo> {
       ServerPublicKey: formatPem(keyInfoJson.ServerPublicKey, 'PUBLIC')
     };
 
-    nvLog('KMC', '🔑 KMC 키 정보 파일 복호화 및 로드 성공');
+    nvLog('AT', '🔑 KMC 키 정보 파일 복호화 및 로드 성공');
     return cachedKeyInfo;
   } catch (err: any) {
-    nvLog('KMC', '⚠️ KMC 키 파일 로드 실패 (Mock 모드로 작동 가능)', err.message);
+    nvLog('AT', '⚠️ KMC 키 파일 로드 실패 (Mock 모드로 작동 가능)', err.message);
     throw err;
   }
 }
@@ -220,7 +220,7 @@ export async function getKmcToken(siteUrl: string): Promise<{ encryptMOKToken: s
       ? 'https://scert-dir.mobile-ok.com/agent/v2/token/get'
       : 'https://cert-dir.mobile-ok.com/agent/v2/token/get';
 
-    nvLog('KMC', '📡 KMC 토큰 발급 API 호출', { url: apiUrl, serviceId: keyInfo.ServiceId });
+    nvLog('AT', '📡 KMC 토큰 발급 API 호출', { url: apiUrl, serviceId: keyInfo.ServiceId });
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=UTF-8' },
@@ -245,7 +245,7 @@ export async function getKmcToken(siteUrl: string): Promise<{ encryptMOKToken: s
       throw new Error(`KMC 토큰 요청 실패: ${result.resultMsg} (${result.resultCode})`);
     }
   } catch (err: any) {
-    nvLog('KMC', '❌ KMC 토큰 발급 오류', err.message);
+    nvLog('AT', '❌ KMC 토큰 발급 오류', err.message);
     return null;
   }
 }
@@ -298,7 +298,7 @@ export async function requestKmcAuth(params: {
       ? 'https://scert-dir.mobile-ok.com/agent/v1/auth/request'
       : 'https://cert-dir.mobile-ok.com/agent/v1/auth/request';
 
-    nvLog('KMC', '📡 KMC 본인확인 인증번호 전송 API 호출', { url: apiUrl });
+    nvLog('AT', '📡 KMC 본인확인 인증번호 전송 API 호출', { url: apiUrl });
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=UTF-8' },
@@ -320,7 +320,7 @@ export async function requestKmcAuth(params: {
       return { success: false, message: `${result.resultMsg} (${result.resultCode})` };
     }
   } catch (err: any) {
-    nvLog('KMC', '❌ KMC 인증요청 실패', err.message);
+    nvLog('AT', '❌ KMC 인증요청 실패', err.message);
     return { success: false, message: `본인인증 요청 중 오류가 발생했습니다: ${err.message}` };
   }
 }
@@ -353,7 +353,7 @@ export async function confirmKmcAuth(params: {
       ? 'https://scert-dir.mobile-ok.com/agent/v1/confirm/request'
       : 'https://cert-dir.mobile-ok.com/agent/v1/confirm/request';
 
-    nvLog('KMC', '📡 KMC 인증결과 확인 API 호출', { url: apiUrl });
+    nvLog('AT', '📡 KMC 인증결과 확인 API 호출', { url: apiUrl });
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=UTF-8' },
@@ -402,7 +402,7 @@ export async function confirmKmcAuth(params: {
     };
 
   } catch (err: any) {
-    nvLog('KMC', '❌ KMC 인증확인 실패', err.message);
+    nvLog('AT', '❌ KMC 인증확인 실패', err.message);
     return { success: false, message: `인증 확인 중 오류가 발생했습니다: ${err.message}` };
   }
 }

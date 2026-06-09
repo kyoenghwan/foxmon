@@ -15,12 +15,12 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { action, ...params } = body;
 
-    nvLog('KMC_API', `▶️ KMC API 요청 수신 - action: ${action}`);
+    nvLog('FW', `▶️ KMC API 요청 수신 - action: ${action}`);
 
     const isMock = (await isMockMode()) || params.isMock === true;
 
     if (isMock) {
-      nvLog('KMC_API', '⚠️ Mock 모드로 요청을 시뮬레이션합니다.');
+      nvLog('FW', '⚠️ Mock 모드로 요청을 시뮬레이션합니다.');
       return handleMockAction(action, params);
     }
 
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: false, message: '지원하지 않는 action입니다.' }, { status: 400 });
     }
   } catch (err: any) {
-    nvLog('KMC_API', '❌ KMC API 라우트 핸들러 에러', err.message);
+    nvLog('FW', '❌ KMC API 라우트 핸들러 에러', err.message);
     return NextResponse.json({ success: false, message: `서버 내부 에러: ${err.message}` }, { status: 500 });
   }
 }
@@ -119,7 +119,7 @@ async function handleMockAction(action: string, params: any) {
       });
 
     case 'request':
-      nvLog('KMC_API', `📱 [Mock SMS 발송] ${params.userName} (${params.userPhone}) ➔ 인증번호 123456 발송 시뮬레이션`);
+      nvLog('FW', `📱 [Mock SMS 발송] ${params.userName} (${params.userPhone}) ➔ 인증번호 123456 발송 시뮬레이션`);
       return NextResponse.json({
         success: true,
         message: '인증번호가 발송되었습니다. (Mock 모드: 123456 입력)',
@@ -157,7 +157,7 @@ async function handleMockAction(action: string, params: any) {
         return NextResponse.json({ success: false, message: '세션 발급 오류가 발생했습니다.' }, { status: 500 });
       }
 
-      nvLog('KMC_API', '✅ [Mock 인증성공] 게스트 세션 쿠키 발급 완료');
+      nvLog('FW', '✅ [Mock 인증성공] 게스트 세션 쿠키 발급 완료');
       return NextResponse.json({
         success: true,
         message: '성인 인증이 완료되었습니다. (Mock 모드)',
