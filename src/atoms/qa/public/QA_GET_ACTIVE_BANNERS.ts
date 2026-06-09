@@ -1,9 +1,9 @@
-import { createClient } from '@/utils/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase';
 import { unstable_cache } from 'next/cache';
 
 async function QA_GET_ACTIVE_BANNERS_INTERNAL(type: 'POPUP' | 'MAIN_BANNER' = 'POPUP') {
     try {
-        const supabase = await createClient();
+        const supabase = supabaseAdmin;
         const nowStr = new Date().toISOString();
 
         // 1. is_active = true

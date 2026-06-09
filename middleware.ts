@@ -74,8 +74,8 @@ export default auth((req) => {
         return NextResponse.redirect(new URL('/login', nextUrl));
     }
  
-    // 2. Age Gate Check (Redirect all unverified users to /age-gate EXCEPT if they are trying to login, or access SEO/home/public pages)
-    if (!isAgeVerified && !isAgeGatePage && !isLoginPage && !isRegisterPage && !isSeoPath && !isPublicStatic && !isAdminPath && !isHomePage) {
+    // 2. Age Gate Check (Redirect all unverified users to /age-gate EXCEPT if they are trying to login, or access SEO/public pages)
+    if (!isAgeVerified && !isAgeGatePage && !isLoginPage && !isRegisterPage && !isSeoPath && !isPublicStatic && !isAdminPath) {
         return NextResponse.redirect(new URL('/age-gate', nextUrl));
     }
  
