@@ -79,13 +79,11 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
     // Zustand 글로벌 광고 데이터 상태 연동
     const store = useAdStore();
     const initializedRef = React.useRef(false);
-    const prevInitialDataRef = React.useRef(initialData);
 
     // 컴포넌트 마운트 전 렌더 패스(Render Pass) 단에서 동기식 스토어 주입 (Race Condition 방지)
-    if (initialData && (!initializedRef.current || !store.isJobsLoaded || initialData !== prevInitialDataRef.current)) {
+    if (initialData && !initializedRef.current && !store.isJobsLoaded) {
         store.setInitialData(initialData);
         initializedRef.current = true;
-        prevInitialDataRef.current = initialData;
     }
 
     const { 
