@@ -114,12 +114,11 @@ export function getAllowedRolesForBoard(boardId: string): string[] | null {
 
 export function getBoardAccessDeniedMessage(boardId: string): string {
   const board = getCommunityBoard(boardId);
-  const label = board?.label ?? boardId;
   if (board?.audience === 'employer') {
-    return `${label}은(는) 업소(사업자) 회원 전용 게시판입니다.`;
+    return '업소 전용 공간입니다.';
   }
   if (board?.audience === 'women') {
-    return `${label}은(는) 여성 회원 전용 게시판입니다.`;
+    return '여성 회원 전용 공간입니다.';
   }
-  return `${label}에 접근할 수 없습니다.`;
+  return '접근 권한이 없습니다.';
 }

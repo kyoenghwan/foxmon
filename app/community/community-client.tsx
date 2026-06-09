@@ -206,16 +206,7 @@ export function CommunityClient({
                     )}
                 </div>
 
-                {currentBoard.audience === 'women' && (
-                    <div className="bg-pink-50 border border-pink-100 rounded-xl p-3 mx-1 sm:mx-0 text-[12px] text-pink-800 font-medium">
-                        여성 회원(구직 회원) 전용 공간입니다. 업소 회원은 이용할 수 없습니다.
-                    </div>
-                )}
-                {currentBoard.audience === 'employer' && (
-                    <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 mx-1 sm:mx-0 text-[12px] text-amber-900 font-medium">
-                        업소·사업자 회원 전용 공간입니다. 구직 회원 전용 게시판과 분리되어 있습니다.
-                    </div>
-                )}
+
 
                 {/* 업소제보 안내 */}
                 {activeTab === 'report' && (
