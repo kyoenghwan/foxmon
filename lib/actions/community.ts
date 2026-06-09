@@ -35,11 +35,11 @@ export async function getCommunityPosts(boardId: string, page: number = 1, limit
 
         // 전체 건수 및 게시글 목록을 병렬로 쿼리하여 성능 최적화 (Promise.all)
         const [countRes, listRes] = await Promise.all([
-            supabase
+            supabaseAdmin
                 .from('community_posts')
                 .select('*', { count: 'exact', head: true })
                 .eq('board_id', boardId),
-            supabase
+            supabaseAdmin
                 .from('community_posts')
                 .select('*')
                 .eq('board_id', boardId)
@@ -241,7 +241,7 @@ export async function updateCommunityPost(postId: string, input: {
 // ============================================
 export async function getCommunityComments(postId: string) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from('community_comments')
             .select('*')
             .eq('post_id', postId)

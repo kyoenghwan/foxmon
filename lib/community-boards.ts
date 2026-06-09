@@ -77,7 +77,7 @@ export function getDefaultCommunityTab(role?: string | null): string {
 
 /** 역할별 노출 가능한 게시판 (사이드바·모바일 탭) */
 export function getVisibleCommunityBoards(role?: string | null): CommunityBoardDef[] {
-  return COMMUNITY_BOARDS.filter((b) => canAccessCommunityBoard(b.id, role));
+  return COMMUNITY_BOARDS;
 }
 
 /** 사이드바 섹션 그룹 */

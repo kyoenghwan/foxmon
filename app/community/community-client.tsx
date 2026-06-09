@@ -13,6 +13,7 @@ import {
     getVisibleCommunityBoards,
     getCommunitySidebarSections,
     canAccessCommunityBoard,
+    getBoardAccessDeniedMessage,
 } from '@/lib/community-boards';
 
 export function CommunityClient({
@@ -69,6 +70,10 @@ export function CommunityClient({
     };
 
     const handleTabChange = (tabId: string) => {
+        if (!canAccessCommunityBoard(tabId, userRole)) {
+            alert(getBoardAccessDeniedMessage(tabId));
+            return;
+        }
         router.push(`/community?tab=${tabId}`);
     };
 
