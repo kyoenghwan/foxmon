@@ -35,6 +35,7 @@ export function CommunityClient({
     const currentBoard =
         getCommunityBoard(activeTab) || visibleBoards[0] || getCommunityBoard('free')!;
     const canWrite = isLoggedIn && canAccessCommunityBoard(activeTab, userRole);
+    const isMarketBoard = activeTab === 'business' || activeTab === 'foxmarket' || activeTab === 'freemarket';
 
     const [showWriteModal, setShowWriteModal] = useState(false);
     const [selectedPost, setSelectedPost] = useState<any>(null);
@@ -55,7 +56,7 @@ export function CommunityClient({
         const file = e.target.files?.[0];
         if (!file) return;
         
-        const maxLimit = activeTab === 'business' ? 5 : 1;
+        const maxLimit = isMarketBoard ? 5 : 1;
         if (writeImages.length >= maxLimit) {
             alert(`이미지는 최대 ${maxLimit}장까지 첨부할 수 있습니다.`);
             return;
@@ -344,7 +345,7 @@ export function CommunityClient({
                                     maxLength={2000}
                                 />
                             </div>
-                            {activeTab === 'business' && (
+                            {isMarketBoard && (
                                 <div className="space-y-2">
                                     <label className="text-[12px] font-bold text-gray-500 block">이미지 첨부 (최대 5장, 선택)</label>
                                     <div className="flex flex-wrap items-center gap-3">
