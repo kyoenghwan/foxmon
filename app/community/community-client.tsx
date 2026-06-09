@@ -364,6 +364,11 @@ export function CommunityClient({
                                         {writeImages.map((img, index) => (
                                             <div key={index} className="relative w-12 h-12 border border-gray-200 rounded-xl overflow-hidden shadow-sm shrink-0">
                                                 <img src={img} alt={`첨부 이미지 ${index + 1}`} className="w-full h-full object-cover" />
+                                                {index === 0 && (
+                                                    <span className="absolute bottom-0 left-0 right-0 bg-primary/90 text-white text-[8px] font-black text-center py-0.5 leading-none">
+                                                        대표
+                                                    </span>
+                                                )}
                                                 <button
                                                     type="button"
                                                     onClick={() => setWriteImages(prev => prev.filter((_, i) => i !== index))}

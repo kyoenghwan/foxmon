@@ -18,6 +18,50 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
     const [replyingTo, setReplyingTo] = useState<{ id: string, name: string } | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [activeImgIndex, setActiveImgIndex] = useState(0);
+
+    const isMarketBoard = boardId === 'business' || boardId === 'foxmarket' || boardId === 'freemarket';
+
+    const imagesList = useMemo(() => {
+        if (post.detail_images && Array.isArray(post.detail_images) && post.detail_images.length > 0) {
+            return post.detail_images;
+        }
+        return post.thumbnail ? [post.thumbnail] : [];
+    }, [post.detail_images, post.thumbnail]);
+
+    const handleStartChat = async () => {
+        try {
+            const res = await fetch('/api/auth/session');
+            const session = await res.json();
+            if (!session?.user?.id) {
+                alert('로그인이 필요합니다.');
+                return;
+            }
+            if (session.user.id === post.user_id) {
+                alert('본인이 작성한 글에는 대화를 신청할 수 없습니다.');
+                return;
+            }
+
+            const { OA_INSERT_CHAT_ROOM } = await import('@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM');
+            const createRes = await OA_INSERT_CHAT_ROOM({
+                title: `장터 대화 - ${post.title}`,
+                type: '1ON1',
+                max_participants: 2,
+                created_by: session.user.id,
+                employer_id: post.user_id,
+                seeker_id: session.user.id
+            });
+
+            if (createRes.success) {
+                onClose();
+                window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
+            } else {
+                alert(createRes.message || '채팅방을 생성하지 못했습니다.');
+            }
+        } catch (err) {
+            alert('채팅방 생성 중 오류가 발생했습니다.');
+        }
+    };
 
     useEffect(() => {
         // Fetch comments when modal opens
@@ -131,24 +175,63 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                                 {post.comment_count || 0}
                             </div>
                         </div>
+                        
+                        {/* 가격 및 폭스토크 대화 (장터 전용) */}
+                        {isMarketBoard && (
+                            <div className="bg-gray-50 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 border border-gray-100/70 shadow-sm">
+                                <div>
+                                    <span className="text-[11px] text-gray-400 font-bold block mb-0.5">희망 거래 가격</span>
+                                    <span className="text-[16px] font-black text-pink-600">
+                                        {post.price ? post.price : '가격 협의'}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={handleStartChat}
+                                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white font-black text-[13px] rounded-xl shadow-md transition-all active:scale-[0.98] shrink-0"
+                                >
+                                    <span className="text-primary text-[15px]">⚡</span>
+                                    폭스토크 연락하기
+                                </button>
+                            </div>
+                        )}
 
                         {/* Post Content */}
                         <div className="min-h-[150px] space-y-4">
-                            {/* 다중 이미지 첨부가 있을 경우 세로 나열 렌더링 (하위 호환 지원) */}
-                            {post.detail_images && Array.isArray(post.detail_images) && post.detail_images.length > 0 ? (
-                                <div className="flex flex-col gap-4 max-w-full">
-                                    {post.detail_images.map((img: string, idx: number) => (
-                                        <div key={idx} className="max-w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm max-h-[450px] flex items-center justify-center bg-gray-50">
-                                            <img src={img} alt={`첨부 이미지 ${idx + 1}`} className="max-w-full max-h-[450px] object-contain" />
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                post.thumbnail && (
-                                    <div className="max-w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm max-h-[400px] flex items-center justify-center bg-gray-50">
-                                        <img src={post.thumbnail} alt="첨부 이미지" className="max-w-full max-h-[400px] object-contain" />
+                            {/* 이미지 갤러리 영역 (대표 이미지 메인 전환 뷰어) */}
+                            {imagesList.length > 0 && (
+                                <div className="space-y-3 max-w-full">
+                                    <div className="max-w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm aspect-[4/3] max-h-[380px] flex items-center justify-center bg-gray-50">
+                                        <img 
+                                            src={imagesList[activeImgIndex]} 
+                                            alt="첨부 이미지" 
+                                            className="max-w-full max-h-full object-contain" 
+                                        />
                                     </div>
-                                )
+                                    
+                                    {imagesList.length > 1 && (
+                                        <div className="flex gap-2 overflow-x-auto py-1 scrollbar-thin">
+                                            {imagesList.map((img: string, idx: number) => {
+                                                const isActive = idx === activeImgIndex;
+                                                return (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={() => setActiveImgIndex(idx)}
+                                                        className={`relative w-14 h-14 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${
+                                                            isActive ? 'border-primary shadow-sm scale-95' : 'border-gray-200 hover:border-gray-300'
+                                                        }`}
+                                                    >
+                                                        <img src={img} alt={`썸네일 ${idx + 1}`} className="w-full h-full object-cover" />
+                                                        {idx === 0 && (
+                                                            <span className="absolute bottom-0 left-0 right-0 bg-primary/90 text-white text-[8px] font-black text-center py-0.5 leading-none">
+                                                                대표
+                                                            </span>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
                             )}
                             <div 
                                 className="sun-editor-editable ProseMirror custom-prose text-gray-800 text-[14px] md:text-[15px] leading-loose whitespace-pre-wrap break-words"
