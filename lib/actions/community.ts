@@ -327,20 +327,6 @@ export async function createCommunityComment(input: {
             return { success: false, message: '댓글 저장에 실패했습니다.' };
         }
 
-        // Step 3: 원본 게시글의 댓글 수 증가
-        // (트리거가 없으므로 서버 액션에서 수동 업데이트)
-        const { data: post } = await supabaseAdmin
-            .from('community_posts')
-            .select('comment_count')
-            .eq('id', input.post_id)
-            .single();
-
-        const currentCount = post?.comment_count || 0;
-        await supabaseAdmin
-            .from('community_posts')
-            .update({ comment_count: currentCount + 1 })
-            .eq('id', input.post_id);
-
         return { success: true, data: comment, message: '댓글이 등록되었습니다.' };
 
     } catch (err: any) {
