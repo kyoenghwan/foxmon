@@ -20,6 +20,7 @@ export const COMMUNITY_AUDIENCE_LABELS: Record<CommunityAudience, string> = {
 
 export const COMMUNITY_BOARDS: CommunityBoardDef[] = [
   { id: 'free', label: '자유게시판', prefix: '💬자유', audience: 'all', sectionTitle: '전체 이용' },
+  { id: 'freemarket', label: '자유장터', prefix: '🛒자유장터', audience: 'all', sectionTitle: '전체 이용' },
   { id: 'foxtalk', label: '폭스수다', prefix: '🦊폭스수다', audience: 'women', sectionTitle: '여성 회원 전용' },
   { id: 'foxmarket', label: '폭스중고', prefix: '🛍️폭스중고', audience: 'women', sectionTitle: '여성 회원 전용' },
   { id: 'tips', label: '꿀팁·노하우', prefix: '💡꿀팁', audience: 'women', sectionTitle: '여성 회원 전용' },

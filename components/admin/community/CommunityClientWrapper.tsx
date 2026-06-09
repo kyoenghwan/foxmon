@@ -37,6 +37,7 @@ export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }
             case 'business': return '업소장터';
             case 'reviews': return '업소후기·제보';
             case 'tips': return '꿀팁·노하우';
+            case 'freemarket': return '자유장터';
             default: return boardId;
         }
     };

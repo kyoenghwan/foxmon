@@ -491,6 +491,8 @@ export function MainHeader({ session }: MainHeaderProps) {
                         <div className="space-y-4">
                             <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4">커뮤니티</h4>
                             <div className="grid grid-cols-1 gap-y-3 text-[14px] font-medium text-gray-600">
+                                <Link href="/community?tab=free" className="hover:text-primary transition-colors">자유게시판</Link>
+                                <Link href="/community?tab=freemarket" className="hover:text-primary transition-colors">자유장터</Link>
                                 <Link href="/community?tab=foxtalk" className="hover:text-primary transition-colors flex items-center gap-1">
                                     폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span>
                                 </Link>
@@ -579,6 +581,8 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 </button>
                                 {mobileExpanded === 'community' && (
                                     <div className="flex flex-col gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
+                                        <Link href="/community?tab=free">자유게시판</Link>
+                                        <Link href="/community?tab=freemarket">자유장터</Link>
                                         <Link href="/community?tab=foxtalk" className="flex items-center gap-2">폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
                                         <Link href="/community?tab=foxmarket">폭스중고</Link>
                                         <Link href="/community?tab=business">업소장터</Link>

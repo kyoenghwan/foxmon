@@ -30,7 +30,7 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const isFoxmarket = boardId === 'foxmarket';
+    const isMarketBoard = boardId === 'foxmarket' || boardId === 'freemarket';
     const isReport = boardId === 'reviews';
 
     useEffect(() => {
@@ -57,15 +57,15 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
                 ? await updateCommunityPost(editPost.id, {
                     title,
                     content,
-                    thumbnail: isFoxmarket ? thumbnail : null,
-                    price: isFoxmarket ? price : null,
+                    thumbnail: isMarketBoard ? thumbnail : null,
+                    price: isMarketBoard ? price : null,
                 })
                 : await createCommunityPost({
                     board_id: boardId,
                     title,
                     content,
-                    thumbnail: isFoxmarket ? thumbnail : null,
-                    price: isFoxmarket ? price : null,
+                    thumbnail: isMarketBoard ? thumbnail : null,
+                    price: isMarketBoard ? price : null,
                 });
 
             if (result.success) {
@@ -140,8 +140,8 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
                         <p className="text-[11px] text-gray-400 mt-1 text-right">{title.length}/100</p>
                     </div>
 
-                    {/* 폭스중고 전용: 대표 이미지 + 가격 */}
-                    {isFoxmarket && (
+                    {/* 폭스중고/자유장터 전용: 대표 이미지 + 가격 */}
+                    {isMarketBoard && (
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">
