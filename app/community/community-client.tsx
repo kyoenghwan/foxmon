@@ -129,74 +129,59 @@ export function CommunityClient({
 
     return (
         <div className="flex flex-col gap-4 w-full">
-            {/* 상단 메뉴 — 가로 스크롤 단일 탭 라인 */}
-            <div className="w-full bg-white sticky top-[130px] z-20 border-b border-gray-100 shadow-sm px-2 sm:px-4 py-3 sm:py-4 overflow-x-auto scrollbar-none">
-                <div className="flex items-center gap-3 md:gap-4 flex-nowrap min-w-max">
-                    {sidebarSections.map((section, idx) => {
-                        let theme = 'all';
-                        if (section.title.includes('여성')) theme = 'women';
-                        if (section.title.includes('업소')) theme = 'employer';
+            {/* 상단 메뉴 — 이전처럼 상 중 하 3단 레이아웃이되, 세련된 테마 칩 스타일 적용 */}
+            <div className="w-full bg-white sticky top-[130px] z-20 border-b border-gray-100 shadow-sm space-y-3 px-2 sm:px-4 py-3 sm:py-4">
+                {sidebarSections.map((section) => {
+                    let theme = 'all';
+                    if (section.title.includes('여성')) theme = 'women';
+                    if (section.title.includes('업소')) theme = 'employer';
 
-                        return (
-                            <React.Fragment key={section.title}>
-                                {/* 섹션 간 수직 분할선 */}
-                                {idx > 0 && (
-                                    <div className="w-px h-6 bg-gray-200 self-center shrink-0 mx-1 md:mx-2" />
-                                )}
+                    return (
+                        <div key={section.title} className="space-y-1.5">
+                            {/* 소속 그룹 타이틀 */}
+                            <p className="text-[10px] sm:text-[11px] font-black text-gray-400 px-0.5 sm:px-1">
+                                {section.title}
+                            </p>
+                            
+                            {/* 가로 칩 리스트 */}
+                            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                                {section.items.map((item) => {
+                                    const isActive = activeTab === item.id;
+                                    
+                                    let btnClass = '';
+                                    if (isActive) {
+                                        if (theme === 'women') {
+                                            btnClass = 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-md shadow-pink-500/20';
+                                        } else if (theme === 'employer') {
+                                            btnClass = 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/20';
+                                        } else {
+                                            btnClass = 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/20';
+                                        }
+                                    } else {
+                                        if (theme === 'women') {
+                                            btnClass = 'bg-pink-50/20 text-pink-700 border border-pink-100/70 hover:bg-pink-50/80';
+                                        } else if (theme === 'employer') {
+                                            btnClass = 'bg-amber-50/20 text-amber-800 border border-amber-100/70 hover:bg-amber-50/80';
+                                        } else {
+                                            btnClass = 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100';
+                                        }
+                                    }
 
-                                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                                    {/* 섹션 라벨 뱃지 */}
-                                    <span className={`text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-md uppercase shrink-0 ${
-                                        theme === 'women'
-                                            ? 'bg-pink-100/60 text-pink-600 border border-pink-100'
-                                            : theme === 'employer'
-                                            ? 'bg-amber-100/60 text-amber-700 border border-amber-100'
-                                            : 'bg-slate-100 text-slate-500 border border-slate-200'
-                                    }`}>
-                                        {theme === 'women' ? '여성' : theme === 'employer' ? '업소' : '전체'}
-                                    </span>
-
-                                    {/* 섹션 내 탭 칩 버튼 */}
-                                    <div className="flex items-center gap-1.5 sm:gap-2">
-                                        {section.items.map((item) => {
-                                            const isActive = activeTab === item.id;
-                                            
-                                            let btnClass = '';
-                                            if (isActive) {
-                                                if (theme === 'women') {
-                                                    btnClass = 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-md shadow-pink-500/20';
-                                                } else if (theme === 'employer') {
-                                                    btnClass = 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/20';
-                                                } else {
-                                                    btnClass = 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/20';
-                                                }
-                                            } else {
-                                                if (theme === 'women') {
-                                                    btnClass = 'bg-pink-50/20 text-pink-700 border border-pink-100/70 hover:bg-pink-50/80';
-                                                } else if (theme === 'employer') {
-                                                    btnClass = 'bg-amber-50/20 text-amber-800 border border-amber-100/70 hover:bg-amber-50/80';
-                                                } else {
-                                                    btnClass = 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100';
-                                                }
-                                            }
-
-                                            return (
-                                                <button
-                                                    key={item.id}
-                                                    type="button"
-                                                    onClick={() => handleTabChange(item.id)}
-                                                    className={`min-h-[30px] sm:min-h-[36px] px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-lg sm:rounded-full text-[10px] sm:text-[13px] font-bold transition-all whitespace-nowrap ${btnClass}`}
-                                                >
-                                                    {item.label}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </React.Fragment>
-                        );
-                    })}
-                </div>
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            type="button"
+                                            onClick={() => handleTabChange(item.id)}
+                                            className={`min-h-[30px] sm:min-h-[36px] px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-lg sm:rounded-full text-[10px] sm:text-[13px] font-bold transition-all whitespace-nowrap ${btnClass}`}
+                                        >
+                                            {item.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
 
             {/* 우측 게시판 콘텐츠 */}
