@@ -134,10 +134,21 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
 
                         {/* Post Content */}
                         <div className="min-h-[150px] space-y-4">
-                            {post.thumbnail && (
-                                <div className="max-w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm max-h-[400px] flex items-center justify-center bg-gray-50">
-                                    <img src={post.thumbnail} alt="첨부 이미지" className="max-w-full max-h-[400px] object-contain" />
+                            {/* 다중 이미지 첨부가 있을 경우 세로 나열 렌더링 (하위 호환 지원) */}
+                            {post.detail_images && Array.isArray(post.detail_images) && post.detail_images.length > 0 ? (
+                                <div className="flex flex-col gap-4 max-w-full">
+                                    {post.detail_images.map((img: string, idx: number) => (
+                                        <div key={idx} className="max-w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm max-h-[450px] flex items-center justify-center bg-gray-50">
+                                            <img src={img} alt={`첨부 이미지 ${idx + 1}`} className="max-w-full max-h-[450px] object-contain" />
+                                        </div>
+                                    ))}
                                 </div>
+                            ) : (
+                                post.thumbnail && (
+                                    <div className="max-w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm max-h-[400px] flex items-center justify-center bg-gray-50">
+                                        <img src={post.thumbnail} alt="첨부 이미지" className="max-w-full max-h-[400px] object-contain" />
+                                    </div>
+                                )
                             )}
                             <div 
                                 className="sun-editor-editable ProseMirror custom-prose text-gray-800 text-[14px] md:text-[15px] leading-loose whitespace-pre-wrap break-words"

@@ -82,6 +82,7 @@ export async function createCommunityPost(input: {
     content: string;
     thumbnail?: string | null;
     price?: string | null;
+    detail_images?: string[] | null;
 }) {
     nvLog('AT', '▶️ FA_CREATE_COMMUNITY_POST 시작', { board_id: input.board_id, title: input.title });
 
@@ -145,6 +146,7 @@ export async function createCommunityPost(input: {
                 content: input.content.trim(),
                 thumbnail: input.thumbnail || null,
                 price: input.price || null,
+                detail_images: input.detail_images || null,
             })
             .select()
             .single();
@@ -202,6 +204,7 @@ export async function updateCommunityPost(postId: string, input: {
     content: string;
     thumbnail?: string | null;
     price?: string | null;
+    detail_images?: string[] | null;
 }) {
     nvLog('AT', '▶️ FA_UPDATE_COMMUNITY_POST 시작', { postId, title: input.title });
 
@@ -218,6 +221,7 @@ export async function updateCommunityPost(postId: string, input: {
                 content: input.content.trim(),
                 thumbnail: input.thumbnail || null,
                 price: input.price || null,
+                detail_images: input.detail_images || null,
                 updated_at: new Date().toISOString()
             })
             .eq('id', postId);
