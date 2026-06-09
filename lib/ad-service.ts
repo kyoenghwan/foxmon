@@ -353,7 +353,10 @@ export async function getRotatedAds(
             // 타 등급은 기존대로 mock 광고를 추가하여 채워 넣음
             const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
             const filteredMock = (tier === 'GENERAL') ? filterBySearch(mockAdsForTier, searchQuery) : mockAdsForTier;
-            rolledAds = [...rolledAds, ...filteredMock.slice(0, limitCount - rolledAds.length)];
+            // 이미 롤링된 광고의 ID 목록을 추출하여 중복 유입 방지 (_dup 및 _repeat_ 제거한 원본 ID 기준)
+            const rolledIds = new Set(rolledAds.map(ad => ad.id.replace('_dup', '').split('_repeat_')[0]));
+            const cleanMock = filteredMock.filter(ad => !rolledIds.has(ad.id));
+            rolledAds = [...rolledAds, ...cleanMock.slice(0, limitCount - rolledAds.length)];
             // 보충된 전체에 대해 다시 롤링 알고리즘 적용
             rolledAds = applyRollingLogic(rolledAds, limitCount);
         }

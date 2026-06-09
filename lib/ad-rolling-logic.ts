@@ -41,7 +41,7 @@ export function applyRollingLogic(ads: AdItem[], count: number, customNowMs?: nu
     const baseSlots: AdItem[] = [];
     for (const ad of rolledGroup) {
         baseSlots.push(ad);
-        if (ad.option_double_slot) {
+        if (ad.option_double_slot && !ad.id.includes('_dup')) {
             baseSlots.push({ ...ad, id: ad.id + '_dup' });
         }
     }
@@ -74,7 +74,7 @@ export function applyRollingLogic(ads: AdItem[], count: number, customNowMs?: nu
         }
         
         baseSlots.splice(i, 0, anchor.ad);
-        if (anchor.ad.option_double_slot) {
+        if (anchor.ad.option_double_slot && !anchor.ad.id.includes('_dup')) {
             baseSlots.splice(i + 1, 0, { ...anchor.ad, id: anchor.ad.id + '_dup' });
         }
     }
