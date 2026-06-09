@@ -18,7 +18,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
     const [replyingTo, setReplyingTo] = useState<{ id: string, name: string } | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeImgIndex, setActiveImgIndex] = useState(0);
+    const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
     const isMarketBoard = boardId === 'business' || boardId === 'foxmarket' || boardId === 'freemarket';
 
@@ -176,6 +176,13 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                             </div>
                         </div>
                         
+                        {/* 🚨 장터 자율거래 면책 안내 배너 (장터 전용) */}
+                        {isMarketBoard && (
+                            <div className="bg-red-50/70 border border-red-100 rounded-xl p-3.5 mb-4 text-[12px] md:text-[13px] text-red-800 leading-relaxed font-medium">
+                                🚨 <strong>거래 안내:</strong> 본 장터는 회원 간 자율 직거래 공간입니다. 안전거래 사기 예방을 위해 직접 만나서 거래(대면 직거래)하시는 것을 강력히 권장하며, 거래 과정에서 발생한 분쟁이나 사고에 대해 폭스몬은 어떠한 책임도 지지 않습니다.
+                            </div>
+                        )}
+                        
                         {/* 가격 및 폭스토크 대화 (장터 전용) */}
                         {isMarketBoard && (
                             <div className="bg-gray-50 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 border border-gray-100/70 shadow-sm">
@@ -196,47 +203,35 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                         )}
 
                         {/* Post Content */}
-                        <div className="min-h-[150px] space-y-4">
-                            {/* 이미지 갤러리 영역 (대표 이미지 메인 전환 뷰어) */}
-                            {imagesList.length > 0 && (
-                                <div className="space-y-3 max-w-full">
-                                    <div className="max-w-full rounded-xl overflow-hidden border border-gray-100 shadow-sm aspect-[4/3] max-h-[380px] flex items-center justify-center bg-gray-50">
-                                        <img 
-                                            src={imagesList[activeImgIndex]} 
-                                            alt="첨부 이미지" 
-                                            className="max-w-full max-h-full object-contain" 
-                                        />
-                                    </div>
-                                    
-                                    {imagesList.length > 1 && (
-                                        <div className="flex gap-2 overflow-x-auto py-1 scrollbar-thin">
-                                            {imagesList.map((img: string, idx: number) => {
-                                                const isActive = idx === activeImgIndex;
-                                                return (
-                                                    <button
-                                                        key={idx}
-                                                        onClick={() => setActiveImgIndex(idx)}
-                                                        className={`relative w-14 h-14 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${
-                                                            isActive ? 'border-primary shadow-sm scale-95' : 'border-gray-200 hover:border-gray-300'
-                                                        }`}
-                                                    >
-                                                        <img src={img} alt={`썸네일 ${idx + 1}`} className="w-full h-full object-cover" />
-                                                        {idx === 0 && (
-                                                            <span className="absolute bottom-0 left-0 right-0 bg-primary/90 text-white text-[8px] font-black text-center py-0.5 leading-none">
-                                                                대표
-                                                            </span>
-                                                        )}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                        <div className="min-h-[150px] space-y-6">
+                            {/* 본문 내용이 이미지보다 위로 이동 */}
                             <div 
                                 className="sun-editor-editable ProseMirror custom-prose text-gray-800 text-[14px] md:text-[15px] leading-loose whitespace-pre-wrap break-words"
                                 dangerouslySetInnerHTML={{ __html: post.content }}
                             />
+
+                            {/* 이미지는 본문 아래에 작게 썸네일로 나열되며, 누르면 커집니다 */}
+                            {imagesList.length > 0 && (
+                                <div className="space-y-2 pt-4 border-t border-gray-100">
+                                    <span className="text-[12px] font-bold text-gray-400 block">첨부 사진 ({imagesList.length}장 - 클릭 시 크게 보기)</span>
+                                    <div className="flex flex-wrap gap-2.5">
+                                        {imagesList.map((img: string, idx: number) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => setLightboxImage(img)}
+                                                className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 hover:border-primary/50 shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
+                                            >
+                                                <img src={img} alt={`첨부 이미지 ${idx + 1}`} className="w-full h-full object-cover" />
+                                                {idx === 0 && (
+                                                    <span className="absolute bottom-0 left-0 right-0 bg-primary/90 text-white text-[9px] font-black text-center py-0.5 leading-none">
+                                                        대표
+                                                    </span>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -346,6 +341,28 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                     </div>
                 </div>
             </div>
+
+            {/* 🔍 이미지 라이트박스 확대 모달 */}
+            {lightboxImage && (
+                <div 
+                    className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 cursor-pointer animate-in fade-in duration-200"
+                    onClick={() => setLightboxImage(null)}
+                >
+                    <div className="relative max-w-full max-h-[90vh] overflow-hidden rounded-2xl bg-black">
+                        <img 
+                            src={lightboxImage} 
+                            alt="확대 이미지" 
+                            className="max-w-full max-h-[90vh] object-contain" 
+                        />
+                        <button 
+                            onClick={() => setLightboxImage(null)}
+                            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center text-[20px] font-black shadow-md border border-white/20 transition-all active:scale-95"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
