@@ -349,3 +349,32 @@ export async function createCommunityComment(input: {
     }
 }
 
+// ============================================
+// FA: 게시글 조회수 1 증가
+// ============================================
+export async function incrementCommunityPostViewCount(postId: string) {
+    nvLog('AT', '▶️ FA_INCREMENT_COMMUNITY_POST_VIEW_COUNT 시작', { postId });
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('community_posts')
+            .select('view_count')
+            .eq('id', postId)
+            .single();
+
+        if (error) {
+            return { success: false, message: '게시글이 존재하지 않습니다.' };
+        }
+
+        const nextCount = (data?.view_count ?? 0) + 1;
+        await supabaseAdmin
+            .from('community_posts')
+            .update({ view_count: nextCount })
+            .eq('id', postId);
+
+        return { success: true, view_count: nextCount };
+    } catch (err: any) {
+        nvLog('AT', '❌ FA_INCREMENT_COMMUNITY_POST_VIEW_COUNT 예외', err);
+        return { success: false, message: `시스템 오류가 발생했습니다. (${err?.message || ''})` };
+    }
+}
+

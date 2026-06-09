@@ -496,7 +496,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 <Link href="/community?tab=foxtalk" className="hover:text-primary transition-colors flex items-center gap-1">
                                     폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span>
                                 </Link>
-                                <Link href="/community?tab=foxmarket" className="hover:text-primary transition-colors">폭스중고</Link>
+                                <Link href="/community?tab=foxmarket" className="hover:text-primary transition-colors">폭스장터</Link>
                                 <Link href="/community?tab=business" className="hover:text-primary transition-colors">업소장터</Link>
                                 <Link href="/community?tab=reviews" className="hover:text-primary transition-colors">업소후기·제보</Link>
                             </div>
@@ -584,7 +584,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                         <Link href="/community?tab=free">자유게시판</Link>
                                         <Link href="/community?tab=freemarket">자유장터</Link>
                                         <Link href="/community?tab=foxtalk" className="flex items-center gap-2">폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
-                                        <Link href="/community?tab=foxmarket">폭스중고</Link>
+                                        <Link href="/community?tab=foxmarket">폭스장터</Link>
                                         <Link href="/community?tab=business">업소장터</Link>
                                         <Link href="/community?tab=reviews">업소후기·제보</Link>
                                     </div>

@@ -99,8 +99,44 @@ export function CommunityClient({
     };
 
     const handlePostClick = async (post: any) => {
-        // Increment view count via server action or just open modal
         setSelectedPost(post);
+
+        // 조회수 증가 처리 (중복 카운팅 방지: 하루 1회 & 본인 글 제외)
+        try {
+            const viewedPostsKey = 'foxmon_viewed_posts';
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const storageVal = localStorage.getItem(viewedPostsKey) || '{}';
+            let viewedMap: Record<string, string[]> = {};
+            
+            try {
+                viewedMap = JSON.parse(storageVal);
+            } catch (e) {
+                viewedMap = {};
+            }
+
+            if (!viewedMap[todayStr]) {
+                viewedMap = { [todayStr]: [] };
+            }
+
+            const todayViewedList = viewedMap[todayStr];
+            if (!todayViewedList.includes(post.id)) {
+                const res = await fetch('/api/auth/session');
+                const session = await res.json();
+                
+                if (session?.user?.id !== post.user_id) {
+                    const { incrementCommunityPostViewCount } = await import('@/lib/actions/community');
+                    const viewRes = await incrementCommunityPostViewCount(post.id);
+                    if (viewRes.success && viewRes.view_count != null) {
+                        post.view_count = viewRes.view_count;
+                    }
+                }
+                
+                todayViewedList.push(post.id);
+                localStorage.setItem(viewedPostsKey, JSON.stringify(viewedMap));
+            }
+        } catch (error) {
+            console.error('Failed to increment view count:', error);
+        }
     };
 
     const handleWriteSubmit = async () => {

@@ -33,7 +33,7 @@ export function CommunityClientWrapper({ initialPosts }: { initialPosts: any[] }
             case 'notice': return '공지사항';
             case 'event': return '이벤트';
             case 'foxtalk': return '폭스수다';
-            case 'foxmarket': return '폭스중고';
+            case 'foxmarket': return '폭스장터';
             case 'business': return '업소장터';
             case 'reviews': return '업소후기·제보';
             case 'tips': return '꿀팁·노하우';
