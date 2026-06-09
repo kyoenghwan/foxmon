@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { nvLog } from './logger';
+import { supabaseAdmin } from './supabase';
 
 export interface KmcUserInfo {
   name: string;
@@ -30,23 +31,47 @@ let cachedKeyInfo: KmcKeyInfo | null = null;
 /**
  * 1. mok_keyInfo.dat 파일 복호화하여 서비스 ID 및 암호화 키 획득
  */
-export function decryptMokKeyInfo(): KmcKeyInfo {
+export async function decryptMokKeyInfo(): Promise<KmcKeyInfo> {
   if (cachedKeyInfo) return cachedKeyInfo;
 
   try {
-    if (!KMC_KEY_FILE_PATH || !KMC_KEY_PASSWORD) {
-      throw new Error('KMC 환경 변수(KMC_KEY_FILE_PATH 또는 KMC_KEY_PASSWORD)가 누락되었습니다.');
-    }
+    let encryptedData: Buffer;
+    let keyPassword = KMC_KEY_PASSWORD;
 
-    const keyFilePath = path.resolve(KMC_KEY_FILE_PATH);
-    if (!fs.existsSync(keyFilePath)) {
-      throw new Error(`KMC 키 파일을 찾을 수 없습니다: ${keyFilePath}`);
-    }
+    // 1) DB에서 키 값 가져오기 우선 시도
+    nvLog('KMC', '🔍 DB(site_settings)에서 KMC 설정을 조회합니다.');
+    const { data: dbSettings, error: dbError } = await supabaseAdmin
+      .from('site_settings')
+      .select('*')
+      .in('key_name', ['kmc_key_content', 'kmc_key_password']);
 
-    const encryptedData = fs.readFileSync(keyFilePath);
+    const settingsMap = (dbSettings || []).reduce((acc, row) => {
+      acc[row.key_name] = row.key_value;
+      return acc;
+    }, {} as Record<string, string>);
+
+    if (!dbError && settingsMap.kmc_key_content && settingsMap.kmc_key_password) {
+      nvLog('KMC', '✅ DB 설정 획득 성공 (DB 기반 복호화)');
+      encryptedData = Buffer.from(settingsMap.kmc_key_content, 'base64');
+      keyPassword = settingsMap.kmc_key_password;
+    } else {
+      // 2) DB가 누락된 경우 로컬 환경 변수와 디스크 파일 로드 시도
+      nvLog('KMC', '⚠️ DB에 설정이 없어 로컬 환경 변수와 파일을 시도합니다.');
+      if (!KMC_KEY_FILE_PATH || !KMC_KEY_PASSWORD) {
+        throw new Error('KMC 환경 변수(KMC_KEY_FILE_PATH 또는 KMC_KEY_PASSWORD)가 누락되었습니다.');
+      }
+
+      const keyFilePath = path.resolve(KMC_KEY_FILE_PATH);
+      if (!fs.existsSync(keyFilePath)) {
+        throw new Error(`KMC 키 파일을 찾을 수 없습니다: ${keyFilePath}`);
+      }
+
+      encryptedData = fs.readFileSync(keyFilePath);
+      keyPassword = KMC_KEY_PASSWORD;
+    }
 
     // SHA-256 기반 AES Key 및 IV 파생 로직
-    const passwordBytes = Buffer.from(KMC_KEY_PASSWORD, 'utf8');
+    const passwordBytes = Buffer.from(keyPassword, 'utf8');
     const hash1 = crypto.createHash('sha256').update(passwordBytes).digest();
     
     const aesKeyBytes = Buffer.alloc(32);
@@ -66,7 +91,6 @@ export function decryptMokKeyInfo(): KmcKeyInfo {
     const keyInfoJson = JSON.parse(decrypted.toString('utf8'));
     
     // PEM 형식으로 변환하여 사용하기 편하도록 처리
-    // 가이드 상의 개인키와 공개키 형식이 DER(Base64) 형태이면 PEM 형태로 포맷팅해 줍니다.
     const formatPem = (key: string, type: 'PUBLIC' | 'PRIVATE') => {
       if (key.includes('---BEGIN')) return key;
       const cleanKey = key.replace(/\s+/g, '');
@@ -176,7 +200,7 @@ export function decryptKmcResult(encryptedResult: string, clientPrivateKeyPem: s
  */
 export async function getKmcToken(siteUrl: string): Promise<{ encryptMOKToken: string; publicKey: string } | null> {
   try {
-    const keyInfo = decryptMokKeyInfo();
+    const keyInfo = await decryptMokKeyInfo();
 
     // 1) 토큰 요청용 평문 데이터 생성
     const clientTxId = `${keyInfo.ServiceId}-${crypto.randomBytes(8).toString('hex')}`;
@@ -349,7 +373,7 @@ export async function confirmKmcAuth(params: {
     }
 
     // 3) 결과 복호화
-    const keyInfo = decryptMokKeyInfo();
+    const keyInfo = await decryptMokKeyInfo();
     const rawUserInfo = decryptKmcResult(result.encryptMOKResult, keyInfo.ClientPrivateKey);
 
     // 4) 19세 이상 나이 검증
@@ -384,11 +408,11 @@ export async function confirmKmcAuth(params: {
 }
 
 /**
- * 7. Mock 모드 작동 유무 판별 (환경변수 미충족 시 자동으로 Mock으로 백업)
+ * 7. Mock 모드 작동 유무 판별 (환경변수 및 DB 설정 미충족 시 자동으로 Mock으로 백업)
  */
-export function isMockMode(): boolean {
+export async function isMockMode(): Promise<boolean> {
   try {
-    decryptMokKeyInfo();
+    await decryptMokKeyInfo();
     return false;
   } catch {
     return true;
