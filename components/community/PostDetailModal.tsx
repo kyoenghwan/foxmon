@@ -157,7 +157,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                         {/* 🚨 장터 자율거래 면책 안내 배너 (장터 전용) */}
                         {isMarketBoard && (
                             <div className="bg-red-50/70 border border-red-100 rounded-xl p-3 mb-4 text-[12px] md:text-[13px] text-red-800 leading-relaxed font-medium">
-                                🚨 <strong>거래 안내:</strong> 본 거래는 회원 간 자율 직거래 방식입니다. 폭스몬은 거래 당사자가 아니며, 거래 중 발생하는 문제에 대해 책임을 지지 않고 일절 관여하지 않습니다.
+                                🚨 <strong>거래 안내:</strong> 회원 간 자율 직거래 공간이오니, 사기 피해 예방을 위해 직접 만나 물건을 확인하시는 등 안전에 유의해 주세요.
                             </div>
                         )}
 

@@ -367,7 +367,7 @@ export function CommunityClient({
                         <div className="p-6 space-y-4">
                             {isMarketBoard && (
                                 <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-[11px] text-red-800 leading-relaxed font-medium">
-                                    🚨 <strong>장터 거래 주의:</strong> 회원 간 자율 거래이며, 폭스몬은 거래에 일절 관여하지 않고 어떠한 책임도 지지 않습니다.
+                                    🚨 <strong>장터 거래 주의:</strong> 회원 간 자율 거래 공간이오니, 대면 거래 등을 통해 안전하게 거래가 이루어지도록 유의해 주세요.
                                 </div>
                             )}
                             <div>
