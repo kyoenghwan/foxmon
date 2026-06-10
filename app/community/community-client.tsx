@@ -43,6 +43,8 @@ export function CommunityClient({
     const [writeContent, setWriteContent] = useState('');
     const [writeImages, setWriteImages] = useState<string[]>([]);
     const [writePrice, setWritePrice] = useState('');
+    const [isPriceNegotiable, setIsPriceNegotiable] = useState(false);
+    const [isDiscountable, setIsDiscountable] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -51,6 +53,8 @@ export function CommunityClient({
             setWriteContent('');
             setWriteImages([]);
             setWritePrice('');
+            setIsPriceNegotiable(false);
+            setIsDiscountable(false);
         }
     }, [showWriteModal]);
 
@@ -148,13 +152,27 @@ export function CommunityClient({
         }
         setIsSubmitting(true);
         try {
+            let finalPrice: string | null = null;
+            if (isMarketBoard) {
+                if (isPriceNegotiable) {
+                    finalPrice = '가격 협의';
+                } else {
+                    const priceText = writePrice.trim();
+                    if (priceText) {
+                        finalPrice = isDiscountable ? `${priceText} (네고 가능)` : priceText;
+                    } else {
+                        finalPrice = '가격 협의';
+                    }
+                }
+            }
+
             const { createCommunityPost } = await import('@/lib/actions/community');
             const res = await createCommunityPost({
                 board_id: activeTab,
                 title: writeTitle,
                 content: writeContent,
                 thumbnail: writeImages.length > 0 ? writeImages[0] : null,
-                price: isMarketBoard ? (writePrice.trim() || null) : null,
+                price: finalPrice,
                 detail_images: writeImages.length > 0 ? writeImages : null
             });
             if (res.success) {
@@ -381,15 +399,44 @@ export function CommunityClient({
                                 />
                             </div>
                             {isMarketBoard && (
-                                <div>
-                                    <input 
-                                        type="text" 
-                                        placeholder="희망 거래 가격 (예: 50,000원 / 협의)" 
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-[14px] font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                        value={writePrice}
-                                        onChange={(e) => setWritePrice(e.target.value)}
-                                        maxLength={50}
-                                    />
+                                <div className="space-y-2">
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            placeholder={isPriceNegotiable ? "가격 협의 선택됨" : "희망 거래 가격 (예: 50,000원)"} 
+                                            className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-[14px] font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                            value={writePrice}
+                                            onChange={(e) => setWritePrice(e.target.value)}
+                                            maxLength={30}
+                                            disabled={isPriceNegotiable}
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-4 px-1">
+                                        <label className="flex items-center gap-1.5 cursor-pointer text-[12px] md:text-[13px] font-bold text-gray-600 select-none">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={isPriceNegotiable} 
+                                                onChange={(e) => {
+                                                    setIsPriceNegotiable(e.target.checked);
+                                                    if (e.target.checked) {
+                                                        setWritePrice('');
+                                                    }
+                                                }}
+                                                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20 cursor-pointer"
+                                            />
+                                            가격 협의
+                                        </label>
+                                        <label className={`flex items-center gap-1.5 text-[12px] md:text-[13px] font-bold select-none ${isPriceNegotiable ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 cursor-pointer'}`}>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={isDiscountable} 
+                                                onChange={(e) => setIsDiscountable(e.target.checked)}
+                                                disabled={isPriceNegotiable}
+                                                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20 cursor-pointer disabled:cursor-not-allowed"
+                                            />
+                                            네고 가능
+                                        </label>
+                                    </div>
                                 </div>
                             )}
                             <div>

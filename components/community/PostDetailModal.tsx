@@ -179,43 +179,45 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                         )}
 
                         {/* Post Meta */}
-                        <div className="flex flex-wrap items-center gap-3 md:gap-4 text-[12px] md:text-[13px] text-gray-500 mb-6 pb-4 border-b border-gray-100">
-                            <div className="flex items-center gap-1.5 text-gray-700 font-bold">
-                                <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
-                                    <User className="w-3.5 h-3.5 text-gray-400" />
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-100">
+                            <div className="flex flex-wrap items-center gap-3 md:gap-4 text-[12px] md:text-[13px] text-gray-500">
+                                <div className="flex items-center gap-1.5 text-gray-700 font-bold">
+                                    <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                                        <User className="w-3.5 h-3.5 text-gray-400" />
+                                    </div>
+                                    {post.is_anonymous ? '익명' : maskName(post.author_name)}
                                 </div>
-                                {post.is_anonymous ? '익명' : maskName(post.author_name)}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5" />
-                                {format(new Date(post.created_at), 'yyyy-MM-dd HH:mm')}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <Eye className="w-3.5 h-3.5" />
-                                {post.view_count || 0}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <MessageSquare className="w-3.5 h-3.5" />
-                                {post.comment_count || 0}
-                            </div>
-                        </div>
-                        
-                        {/* 가격 및 폭스토크 대화 (장터 전용) */}
-                        {isMarketBoard && (
-                            <div className="bg-gray-50 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 border border-gray-100/70 shadow-sm">
-                                <div>
-                                    <span className="text-[11px] text-gray-400 font-bold block mb-0.5">희망 거래 가격</span>
-                                    <span className="text-[16px] font-black text-pink-600">
-                                        {post.price ? post.price : '가격 협의'}
-                                    </span>
+                                <div className="flex items-center gap-1">
+                                    <Clock className="w-3.5 h-3.5" />
+                                    {format(new Date(post.created_at), 'yyyy-MM-dd HH:mm')}
                                 </div>
+                                <div className="flex items-center gap-1">
+                                    <Eye className="w-3.5 h-3.5" />
+                                    {post.view_count || 0}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                    {post.comment_count || 0}
+                                </div>
+                            </div>
+                            {isMarketBoard && (
                                 <button
                                     onClick={handleStartChat}
-                                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white font-black text-[13px] rounded-xl shadow-md transition-all active:scale-[0.98] shrink-0"
+                                    className="flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white font-black text-[12px] rounded-xl shadow-md transition-all active:scale-[0.98] shrink-0"
                                 >
-                                    <span className="text-primary text-[15px]">⚡</span>
+                                    <span className="text-primary text-[14px]">⚡</span>
                                     폭스토크 연락하기
                                 </button>
+                            )}
+                        </div>
+                        
+                        {/* 가격 표시 (장터 전용, 라벨 옆에 값 오도록) */}
+                        {isMarketBoard && (
+                            <div className="bg-gray-50 rounded-2xl px-4 py-3 mb-6 flex items-center gap-2 border border-gray-100/70 shadow-sm">
+                                <span className="text-[12px] text-gray-500 font-bold shrink-0">희망 거래 가격:</span>
+                                <span className="text-[15px] font-black text-pink-600">
+                                    {post.price ? post.price : '가격 협의'}
+                                </span>
                             </div>
                         )}
 
