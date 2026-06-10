@@ -364,3 +364,20 @@ export async function incrementCommunityPostViewCount(postId: string) {
     }
 }
 
+// ============================================
+// FA: 잘못된 댓글 수 강제 동기화 (자가 치유)
+// ============================================
+export async function syncPostCommentCount(postId: string, actualCount: number) {
+    nvLog('AT', '▶️ FA_SYNC_POST_COMMENT_COUNT 시작', { postId, actualCount });
+    try {
+        await supabaseAdmin
+            .from('community_posts')
+            .update({ comment_count: actualCount })
+            .eq('id', postId);
+        return { success: true };
+    } catch (err: any) {
+        nvLog('AT', '❌ FA_SYNC_POST_COMMENT_COUNT 예외', err);
+        return { success: false, message: err?.message || '동기화 예외 발생' };
+    }
+}
+
