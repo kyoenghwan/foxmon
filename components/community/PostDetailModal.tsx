@@ -86,6 +86,21 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
     }, [post.id, post]);
 
     useEffect(() => {
+        // 모달 활성화 시 뒷배경(body/html) 스크롤 차단
+        const originalHtmlOverflow = document.documentElement.style.overflow;
+        const originalBodyOverflow = document.body.style.overflow;
+
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            // 모달 닫힐 시 원복
+            document.documentElement.style.overflow = originalHtmlOverflow;
+            document.body.style.overflow = originalBodyOverflow;
+        };
+    }, []);
+
+    useEffect(() => {
         if (lightboxIndex === null) return;
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'ArrowLeft') {

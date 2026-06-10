@@ -167,6 +167,9 @@ pages:
       - name: "LOGIN_FORM"
         keywords: ["로그인 폼", "이메일 입력", "비밀번호 입력"]
         files: ["src/components/auth/LoginForm.tsx"]
+      - name: "AUTO_LOGIN_CHECKBOX"
+        keywords: ["로그인 유지", "자동 로그인", "auto login checkbox"]
+        files: ["src/components/auth/LoginForm.tsx"]
 
   REGISTER_PAGE:
     label: "회원가입 페이지"
@@ -305,6 +308,12 @@ pages:
       - "app/community/community-client.tsx"
       - "components/community/CommunitySidebar.tsx"
       - "components/community/WritePostModal.tsx"
+    db_tables: ["community_posts"]
+
+  POST_DETAIL_MODAL:
+    label: "커뮤니티 게시글 상세 팝업"
+    keywords: ["게시글 상세", "커뮤니티 상세", "post detail", "PostDetailModal"]
+    files: ["components/community/PostDetailModal.tsx"]
     db_tables: ["community_posts"]
 
   # ── 고객센터 ──
