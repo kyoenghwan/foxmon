@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { User, Eye, MessageSquare, Clock, X, Send, CornerDownRight } from 'lucide-react';
+import { User, Eye, MessageSquare, Clock, X, Send, CornerDownRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { maskName } from '@/lib/utils';
 
@@ -18,7 +18,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
     const [replyingTo, setReplyingTo] = useState<{ id: string, name: string } | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+    const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
     const isMarketBoard = boardId === 'business' || boardId === 'foxmarket' || boardId === 'freemarket';
 
@@ -83,6 +83,23 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
         };
         fetchComments();
     }, [post.id, post]);
+
+    useEffect(() => {
+        if (lightboxIndex === null) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                setLightboxIndex(prev => (prev !== null) ? (prev === 0 ? imagesList.length - 1 : prev - 1) : null);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                setLightboxIndex(prev => (prev !== null) ? (prev === imagesList.length - 1 ? 0 : prev + 1) : null);
+            } else if (e.key === 'Escape') {
+                setLightboxIndex(null);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [lightboxIndex, imagesList.length]);
 
     const handleCommentSubmit = async () => {
         if (!isLoggedIn) {
@@ -218,7 +235,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                                         {imagesList.map((img: string, idx: number) => (
                                             <button
                                                 key={idx}
-                                                onClick={() => setLightboxImage(img)}
+                                                onClick={() => setLightboxIndex(idx)}
                                                 className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 hover:border-primary/50 shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
                                             >
                                                 <img src={img} alt={`첨부 이미지 ${idx + 1}`} className="w-full h-full object-cover" />
@@ -343,23 +360,61 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
             </div>
 
             {/* 🔍 이미지 라이트박스 확대 모달 */}
-            {lightboxImage && (
+            {lightboxIndex !== null && (
                 <div 
                     className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 cursor-pointer animate-in fade-in duration-200"
-                    onClick={() => setLightboxImage(null)}
+                    onClick={() => setLightboxIndex(null)}
                 >
-                    <div className="relative max-w-full max-h-[90vh] overflow-hidden rounded-2xl bg-black">
+                    <div 
+                        className="relative max-w-[90vw] md:max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl bg-black flex items-center justify-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <img 
-                            src={lightboxImage} 
+                            src={imagesList[lightboxIndex]} 
                             alt="확대 이미지" 
-                            className="max-w-full max-h-[90vh] object-contain" 
+                            className="max-w-full max-h-[85vh] object-contain select-none" 
                         />
+
+                        {/* 좌측 화살표 (이전 이미지) */}
+                        {imagesList.length > 1 && (
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setLightboxIndex(prev => (prev !== null) ? (prev === 0 ? imagesList.length - 1 : prev - 1) : null);
+                                }}
+                                className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/85 text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center border border-white/10 hover:border-white/20 shadow-md transition-all active:scale-95 focus:outline-none"
+                            >
+                                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+                            </button>
+                        )}
+
+                        {/* 우측 화살표 (다음 이미지) */}
+                        {imagesList.length > 1 && (
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setLightboxIndex(prev => (prev !== null) ? (prev === imagesList.length - 1 ? 0 : prev + 1) : null);
+                                }}
+                                className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/85 text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center border border-white/10 hover:border-white/20 shadow-md transition-all active:scale-95 focus:outline-none"
+                            >
+                                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+                            </button>
+                        )}
+
+                        {/* 상단 닫기 버튼 */}
                         <button 
-                            onClick={() => setLightboxImage(null)}
-                            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center text-[20px] font-black shadow-md border border-white/20 transition-all active:scale-95"
+                            onClick={() => setLightboxIndex(null)}
+                            className="absolute top-3 right-3 md:top-4 md:right-4 bg-black/50 hover:bg-black/85 text-white w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-[16px] md:text-[18px] font-black shadow-md border border-white/10 hover:border-white/20 transition-all active:scale-95 focus:outline-none"
                         >
                             ✕
                         </button>
+
+                        {/* 하단 인덱스 표시 뱃지 */}
+                        {imagesList.length > 1 && (
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-[11px] md:text-[12px] font-bold px-3 py-1 rounded-full border border-white/5 tracking-wider select-none">
+                                {lightboxIndex + 1} / {imagesList.length}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
