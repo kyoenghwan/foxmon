@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Bell } from 'lucide-react';
 import type { PublicNotice } from '@/lib/actions/help';
 import { incrementNoticeViewCount } from '@/lib/actions/help';
@@ -16,9 +17,27 @@ export function NoticePageClient({
     initialNotices: PublicNotice[];
     initialTab?: string;
 }) {
-    const resolvedTab = tabs.includes(initialTab as NoticeTab) ? initialTab : '전체';
-    const [activeTab, setActiveTab] = useState(resolvedTab);
+    const mappedTab = initialTab === 'event' ? '이벤트' : (initialTab === 'notice' ? '공지' : (initialTab === 'etc' ? '기타' : initialTab));
+    const resolvedTab = tabs.includes(mappedTab as NoticeTab) ? (mappedTab as NoticeTab) : '전체';
+    const [activeTab, setActiveTab] = useState<NoticeTab>(resolvedTab);
     const [expandedId, setExpandedId] = useState<string | null>(null);
+    const router = useRouter();
+
+    useEffect(() => {
+        const mapped = initialTab === 'event' ? '이벤트' : (initialTab === 'notice' ? '공지' : (initialTab === 'etc' ? '기타' : initialTab));
+        const resolved = tabs.includes(mapped as NoticeTab) ? (mapped as NoticeTab) : '전체';
+        setActiveTab(resolved);
+    }, [initialTab]);
+
+    const handleTabChange = (tab: NoticeTab) => {
+        setActiveTab(tab);
+        let tabQuery = '';
+        if (tab === '공지') tabQuery = '?tab=notice';
+        if (tab === '이벤트') tabQuery = '?tab=event';
+        if (tab === '기타') tabQuery = '?tab=etc';
+        
+        router.push(`/help${tabQuery}`, { scroll: false });
+    };
     const [viewCounts, setViewCounts] = useState<Record<string, number>>(() =>
         Object.fromEntries(initialNotices.map((n) => [n.id, n.view_count]))
     );
@@ -61,7 +80,7 @@ export function NoticePageClient({
                     <button
                         key={tab}
                         type="button"
-                        onClick={() => setActiveTab(tab)}
+                        onClick={() => handleTabChange(tab)}
                         className={`flex-1 sm:flex-none px-5 sm:px-6 py-2.5 text-[13px] sm:text-[14px] font-bold border-b-2 transition-all -mb-px whitespace-nowrap text-center ${
                             activeTab === tab
                                 ? 'border-primary text-primary'
