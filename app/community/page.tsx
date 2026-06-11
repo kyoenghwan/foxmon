@@ -21,7 +21,15 @@ export default async function CommunityPage({
     redirect('/help?tab=이벤트');
   }
   const session = await auth();
-  const userRole = (session?.user as { role?: string } | undefined)?.role ?? null;
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const guestGender = cookieStore.get('guest_gender')?.value;
+
+  let userRole = (session?.user as { role?: string } | undefined)?.role ?? null;
+  if (!userRole && guestGender === 'FEMALE') {
+    userRole = 'GENERAL';
+  }
+
   let activeTab = params.tab || getDefaultCommunityTab(userRole);
 
   if (!canAccessCommunityBoard(activeTab, userRole)) {
