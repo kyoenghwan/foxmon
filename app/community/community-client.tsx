@@ -30,11 +30,29 @@ export function CommunityClient({
     userRole?: string | null;
 }) {
     const router = useRouter();
-    const visibleBoards = useMemo(() => getVisibleCommunityBoards(userRole), [userRole]);
-    const sidebarSections = useMemo(() => getCommunitySidebarSections(userRole), [userRole]);
+    const [localRole, setLocalRole] = useState<string | null>(userRole);
+
+    useEffect(() => {
+        if (!userRole && typeof window !== 'undefined') {
+            const verified = sessionStorage.getItem('foxmon_verified_user');
+            if (verified) {
+                try {
+                    const data = JSON.parse(verified);
+                    if (data.gender === 'FEMALE') {
+                        setLocalRole('GENERAL');
+                    }
+                } catch (e) {
+                    console.error('Failed to parse guest verification data for board permission:', e);
+                }
+            }
+        }
+    }, [userRole]);
+
+    const visibleBoards = useMemo(() => getVisibleCommunityBoards(localRole), [localRole]);
+    const sidebarSections = useMemo(() => getCommunitySidebarSections(localRole), [localRole]);
     const currentBoard =
         getCommunityBoard(activeTab) || visibleBoards[0] || getCommunityBoard('free')!;
-    const canWrite = isLoggedIn && canAccessCommunityBoard(activeTab, userRole);
+    const canWrite = isLoggedIn && canAccessCommunityBoard(activeTab, localRole);
     const isMarketBoard = activeTab === 'business' || activeTab === 'foxmarket' || activeTab === 'freemarket';
 
     const [showWriteModal, setShowWriteModal] = useState(false);
@@ -83,7 +101,7 @@ export function CommunityClient({
     };
 
     const handleTabChange = (tabId: string) => {
-        if (!canAccessCommunityBoard(tabId, userRole)) {
+        if (!canAccessCommunityBoard(tabId, localRole)) {
             alert(getBoardAccessDeniedMessage(tabId));
             return;
         }
@@ -97,7 +115,7 @@ export function CommunityClient({
             }
             return;
         }
-        if (!canAccessCommunityBoard(activeTab, userRole)) {
+        if (!canAccessCommunityBoard(activeTab, localRole)) {
             alert('이 게시판에 글을 쓸 권한이 없습니다.');
             return;
         }
