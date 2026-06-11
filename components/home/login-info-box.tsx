@@ -30,6 +30,37 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
+    const [guestUser, setGuestUser] = useState<{ tempId: string } | null>(null);
+
+    // 성인인증된 게스트 정보가 있는지 체크하여 임시 아이디 발급
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const verified = sessionStorage.getItem('foxmon_verified_user');
+            if (verified) {
+                try {
+                    const data = JSON.parse(verified);
+                    let tempNum = '';
+                    if (data.phoneNumber) {
+                        const numbers = data.phoneNumber.replace(/[^0-9]/g, '');
+                        tempNum = numbers.slice(-4);
+                    }
+                    if (!tempNum) {
+                        let rand = sessionStorage.getItem('foxmon_temp_rand');
+                        if (!rand) {
+                            rand = Math.floor(1000 + Math.random() * 9000).toString();
+                            sessionStorage.setItem('foxmon_temp_rand', rand);
+                        }
+                        tempNum = rand;
+                    }
+                    setGuestUser({ tempId: `user-${tempNum}` });
+                } catch (e) {
+                    console.error('Failed to parse guest user session data:', e);
+                }
+            } else {
+                setGuestUser(null);
+            }
+        }
+    }, [session]);
 
     // 프로필 이미지를 DB에서 가져오기
     const fetchProfile = () => {
@@ -95,7 +126,40 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         return () => window.removeEventListener('profile-updated', handleProfileUpdate);
     }, [session?.user?.id]);
 
-        if (session && session.user) {
+    // 비회원 성인인증 완료 게스트 상태
+    if (!session?.user && guestUser) {
+        return (
+            <div className="h-full w-full bg-white rounded-2xl border p-5 sm:p-6 flex flex-col justify-between shadow-sm text-center">
+                <div className="w-full flex flex-col items-center my-auto">
+                    {/* 게스트 아바타 아이콘 */}
+                    <div className="h-14 w-14 rounded-xl bg-orange-50/50 flex items-center justify-center text-primary shadow-inner mb-3 border border-orange-100/50">
+                        <User className="h-7 w-7 stroke-[2.5]" />
+                    </div>
+                    <h3 className="font-black text-base sm:text-lg text-gray-900 leading-tight mb-1">
+                        <span className="text-primary">{guestUser.tempId}</span>님 반갑습니다!
+                    </h3>
+                    <p className="text-[11px] text-gray-400 font-semibold mb-4">
+                        임시 아이디로 둘러보는 중입니다.
+                    </p>
+                </div>
+
+                <div className="w-full space-y-3 mt-auto">
+                    <Link href="/login" className="w-full block">
+                        <Button size="lg" className="w-full font-black bg-primary hover:bg-primary/90 text-sm h-10 shadow-md">
+                            <LogIn className="w-4 h-4 mr-2" /> 정식 로그인하기
+                        </Button>
+                    </Link>
+
+                    <div className="flex justify-center gap-6 text-xs text-gray-400 font-bold">
+                        <Link href="/login?tab=register" className="hover:text-primary transition-colors hover:underline underline-offset-4">{t.common.signup}</Link>
+                        <Link href="/find-account" className="hover:text-primary transition-colors hover:underline underline-offset-4">{t.loginBox.findAccount}</Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (session && session.user) {
         // Logged In State
         const displayName = (session.user as any).nickname || session.user.name || (session.user.email ? session.user.email.split('@')[0] : '회원');
         const isEmployer = session.user.role === 'EMPLOYER' || session.user.role === 'ADMIN' || session.user.role === 'SUPER_ADMIN';
@@ -236,7 +300,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
 
             <div className="flex justify-center gap-6 text-sm text-gray-400 font-bold">
                 <Link href="/login?tab=register" className="hover:text-primary transition-colors hover:underline underline-offset-4">{t.common.signup}</Link>
-                <Link href="#" className="hover:text-primary transition-colors hover:underline underline-offset-4">{t.loginBox.findAccount}</Link>
+                <Link href="/find-account" className="hover:text-primary transition-colors hover:underline underline-offset-4">{t.loginBox.findAccount}</Link>
             </div>
         </div>
     );
