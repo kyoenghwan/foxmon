@@ -245,9 +245,9 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       if (response.ok && result.success && result.data) {
         nvLog('FW', 'KMC 본인인증 및 성인인증 검증 완료', result.data);
         
-        document.cookie = "age_verified=true; path=/; max-age=3600; SameSite=Lax; Secure";
+        document.cookie = "age_verified=true; path=/; max-age=3600; SameSite=Lax";
         if (result.data && result.data.gender) {
-          document.cookie = `guest_gender=${result.data.gender}; path=/; max-age=3600; SameSite=Lax; Secure`;
+          document.cookie = `guest_gender=${result.data.gender}; path=/; max-age=3600; SameSite=Lax`;
         }
         sessionStorage.setItem('foxmon_verified_user', JSON.stringify(result.data));
 
