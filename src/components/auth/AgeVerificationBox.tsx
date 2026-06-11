@@ -331,9 +331,9 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
           <button 
             type="button" 
             onClick={handleCloseModal}
-            className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-all active:scale-95 focus:outline-none"
+            className="absolute top-5 right-5 text-xs font-black text-gray-400 hover:text-gray-600 transition-all active:scale-95 focus:outline-none"
           >
-            <X size={20} />
+            닫기
           </button>
 
           <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100 pr-8">
