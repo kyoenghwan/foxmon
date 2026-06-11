@@ -131,10 +131,6 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         return (
             <div className="h-full w-full bg-white rounded-2xl border p-5 sm:p-6 flex flex-col justify-between shadow-sm text-center">
                 <div className="w-full flex flex-col items-center my-auto">
-                    {/* 게스트 아바타 아이콘 */}
-                    <div className="h-14 w-14 rounded-xl bg-orange-50/50 flex items-center justify-center text-primary shadow-inner mb-3 border border-orange-100/50">
-                        <User className="h-7 w-7 stroke-[2.5]" />
-                    </div>
                     <h3 className="font-black text-base sm:text-lg text-gray-900 leading-tight mb-1">
                         <span className="text-primary">{guestUser.tempId}</span>님 반갑습니다!
                     </h3>
