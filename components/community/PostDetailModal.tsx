@@ -181,14 +181,9 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                     </h3>
                     <button 
                         onClick={onClose}
-                        className="focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
+                        className="text-xs font-black text-gray-400 hover:text-gray-600 transition-all active:scale-95 focus:outline-none shrink-0"
                     >
-                        <span className="hidden md:flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors">
-                            <X className="w-5 h-5" />
-                        </span>
-                        <span className="md:hidden inline-block px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all">
-                            닫기
-                        </span>
+                        닫기
                     </button>
                 </div>
 
