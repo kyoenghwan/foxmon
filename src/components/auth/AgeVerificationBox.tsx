@@ -2,7 +2,7 @@
 
 import { useState, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Smartphone, ChevronRight, X, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Smartphone, ChevronRight, X, ArrowLeft } from 'lucide-react';
 import { nvLog } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
 
   const [step, setStep] = useState<'SELECT' | 'FORM'>('SELECT');
   const [isSmsSent, setIsSmsSent] = useState(false);
+  const [isVerified, setIsVerified] = useState(false); // 인증 성공 여부
+  const [verifiedData, setVerifiedData] = useState<any>(null); // 인증 성공 데이터 캐시
   const [isVerifying, setIsVerifying] = useState(false);
   
   // KMC 연동 상태 정보
@@ -92,6 +94,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   const handleCloseModal = () => {
     setStep('SELECT');
     setIsSmsSent(false);
+    setIsVerified(false);
+    setVerifiedData(null);
     setTimerActive(false);
     setSmsTimer(180);
     setAuthNumber('');
@@ -120,6 +124,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         setKmcPublicKey(result.data.publicKey);
         setStep('FORM');
         setIsSmsSent(false);
+        setIsVerified(false);
+        setVerifiedData(null);
       } else {
         // 실제 키 설정 에러 등으로 실패 시 자동으로 Mock 모드로 강제 전환하여 진행
         nvLog('FW', '⚠️ KMC 실서버 토큰 획득 실패. 자동으로 임시 테스트 모드로 연동합니다.');
@@ -128,12 +134,16 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         setKmcPublicKey('MOCK_PUBLIC_KEY');
         setStep('FORM');
         setIsSmsSent(false);
+        setIsVerified(false);
+        setVerifiedData(null);
       }
     } catch (err) {
       alert('본인인증 서버 연결 중 오류가 발생했습니다. 임시 모드로 전환합니다.');
       setIsTestMode(true);
       setStep('FORM');
       setIsSmsSent(false);
+      setIsVerified(false);
+      setVerifiedData(null);
     } finally {
       setIsVerifying(false);
     }
@@ -154,6 +164,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
     const userGender = ['1', '3', '5', '7'].includes(formData.genderCode) ? 'MALE' : 'FEMALE';
 
     setIsVerifying(true);
+    setIsVerified(false);
+    setVerifiedData(null);
     try {
       nvLog('FW', 'KMC SMS 인증 요청 전송', { userName: formData.userName });
       const response = await fetch('/api/auth/kmc', {
@@ -196,8 +208,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   /**
    * SMS 인증번호 확인 및 최종 성인 검증 완료
    */
-  const handleConfirmSms = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleConfirmSms = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (smsTimer === 0) {
       alert('입력 시간이 만료되었습니다. 다시 시도해 주세요.');
       return;
@@ -236,9 +248,9 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         document.cookie = "age_verified=true; path=/; max-age=3600; SameSite=Lax; Secure";
         sessionStorage.setItem('foxmon_verified_user', JSON.stringify(result.data));
 
-        if (onVerifySuccess) {
-          onVerifySuccess(result.data);
-        }
+        setIsVerified(true);
+        setVerifiedData(result.data);
+        setTimerActive(false); // 타이머 멈춤
       } else {
         alert(result.message || '인증번호 확인에 실패했습니다.');
       }
@@ -246,6 +258,17 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       alert('서버 응답 확인 중 오류가 발생했습니다.');
     } finally {
       setIsVerifying(false);
+    }
+  };
+
+  /**
+   * 최종 폭스몬 입장 처리
+   */
+  const handleEnterFoxmon = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isVerified || !verifiedData) return;
+    if (onVerifySuccess) {
+      onVerifySuccess(verifiedData);
     }
   };
 
@@ -321,7 +344,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
             <span className="w-8" />
           </div>
 
-          <form onSubmit={handleConfirmSms} className="space-y-4">
+          <form onSubmit={handleEnterFoxmon} className="space-y-4">
             {/* 내외국인 구분 */}
             <div className="flex gap-2">
               <button
@@ -333,6 +356,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
                     ? "bg-purple-600 border-purple-600 text-white" 
                     : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
                 )}
+                disabled={isVerified}
               >
                 내국인
               </button>
@@ -345,6 +369,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
                     ? "bg-purple-600 border-purple-600 text-white" 
                     : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
                 )}
+                disabled={isVerified}
               >
                 외국인
               </button>
@@ -359,6 +384,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
                 onChange={e => setFormData({...formData, userName: e.target.value})} 
                 className="h-10 text-sm font-bold focus-visible:ring-purple-500/50"
                 required 
+                disabled={isVerified}
               />
             </div>
 
@@ -373,6 +399,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
                   className="h-10 text-sm font-bold text-center flex-1 focus-visible:ring-purple-500/50"
                   maxLength={6}
                   required 
+                  disabled={isVerified}
                 />
                 <span className="text-gray-400 font-bold">-</span>
                 <Input 
@@ -382,6 +409,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
                   className="h-10 text-sm font-bold text-center w-12 focus-visible:ring-purple-500/50"
                   maxLength={1}
                   required 
+                  disabled={isVerified}
                 />
                 <span className="text-gray-300 font-bold text-sm tracking-widest flex-1">●●●●●●</span>
               </div>
@@ -394,6 +422,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
                 value={formData.providerId}
                 onChange={e => setFormData({...formData, providerId: e.target.value})}
                 className="w-full h-10 px-3 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                disabled={isVerified}
               >
                 <option value="SKT">SKT</option>
                 <option value="KT">KT</option>
@@ -414,11 +443,12 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
                   onChange={e => setFormData({...formData, userPhone: e.target.value.replace(/[^0-9]/g, '')})} 
                   className="h-10 text-sm font-bold flex-1 focus-visible:ring-purple-500/50"
                   required 
+                  disabled={isVerified}
                 />
                 <button
                   type="button"
                   onClick={handleRequestSms}
-                  disabled={isVerifying || !formData.userPhone || !formData.userName || !formData.birthDate6 || !formData.genderCode}
+                  disabled={isVerifying || !formData.userPhone || !formData.userName || !formData.birthDate6 || !formData.genderCode || isVerified}
                   className={cn(
                     "px-4 h-10 text-xs font-black rounded-lg border transition-all shrink-0 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
                     isSmsSent
@@ -440,22 +470,28 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
                     {formatTime(smsTimer)}
                   </span>
                 </div>
-                <div className="relative">
+                <div className="flex gap-2">
                   <Input 
                     placeholder={isTestMode ? "Mock 인증번호: 123456" : "인증번호 입력"}
                     value={authNumber} 
                     onChange={e => setAuthNumber(e.target.value.replace(/[^0-9]/g, ''))} 
-                    className="h-11 text-lg font-black text-center tracking-widest pr-12 focus-visible:ring-purple-500/50"
+                    className="h-10 text-lg font-black text-center tracking-widest flex-1 focus-visible:ring-purple-500/50"
                     maxLength={6}
                     required 
+                    disabled={isVerified}
                   />
                   <button
                     type="button"
-                    onClick={handleRequestSms}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600"
-                    title="인증번호 재요청"
+                    onClick={handleConfirmSms}
+                    disabled={isVerifying || !authNumber || isVerified || smsTimer === 0}
+                    className={cn(
+                      "px-4 h-10 text-xs font-black rounded-lg border transition-all shrink-0 active:scale-95",
+                      isVerified
+                        ? "bg-green-50 border-green-600 text-green-600 cursor-default"
+                        : "bg-purple-600 border-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    )}
                   >
-                    <RefreshCw size={16} />
+                    {isVerified ? '인증완료' : '인증확인'}
                   </button>
                 </div>
               </div>
@@ -464,13 +500,13 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
             {/* 맨 하단 폭스몬 들어가기 버튼 */}
             <Button 
               type="submit" 
-              disabled={isVerifying || !isSmsSent || (isSmsSent && smsTimer === 0)} 
+              disabled={isVerifying || !isVerified} 
               className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white font-black text-sm rounded-xl mt-4 shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isVerifying ? '확인 중...' : '폭스몬 들어가기'}
+              폭스몬 들어가기
             </Button>
 
-            {isTestMode && isSmsSent && (
+            {isTestMode && isSmsSent && !isVerified && (
               <p className="text-[11px] text-center text-blue-500 font-bold bg-blue-50 p-2 rounded-lg mt-2">
                 💡 Mock 모드 인증 성공 번호는 [123456] 입니다.
               </p>
