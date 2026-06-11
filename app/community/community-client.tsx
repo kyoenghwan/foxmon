@@ -52,7 +52,7 @@ export function CommunityClient({
     const sidebarSections = useMemo(() => getCommunitySidebarSections(localRole), [localRole]);
     const currentBoard =
         getCommunityBoard(activeTab) || visibleBoards[0] || getCommunityBoard('free')!;
-    const canWrite = isLoggedIn && canAccessCommunityBoard(activeTab, localRole);
+    const canWrite = canAccessCommunityBoard(activeTab, localRole);
     const isMarketBoard = activeTab === 'business' || activeTab === 'foxmarket' || activeTab === 'freemarket';
 
     const [showWriteModal, setShowWriteModal] = useState(false);
