@@ -172,8 +172,14 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
     }, [comments]);
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div 
+            onClick={onClose}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 cursor-pointer"
+        >
+            <div 
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 cursor-default"
+            >
                 {/* Header */}
                 <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
                     <h3 className="text-[15px] font-black text-gray-900 truncate pr-4">
