@@ -66,6 +66,22 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
     return () => clearInterval(interval);
   }, [timerActive, smsTimer]);
 
+  // 본인인증 팝업 활성화 시 뒷배경 스크롤 락 처리
+  useEffect(() => {
+    if (step === 'FORM' || step === 'SMS') {
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+      const originalBodyOverflow = document.body.style.overflow;
+
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        document.documentElement.style.overflow = originalHtmlOverflow;
+        document.body.style.overflow = originalBodyOverflow;
+      };
+    }
+  }, [step]);
+
   const formatTime = (seconds: number) => {
     const min = Math.floor(seconds / 60);
     const sec = seconds % 60;
@@ -274,118 +290,130 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
    */
   if (step === 'FORM') {
     return (
-      <div className={cn("flex flex-col w-full bg-white border border-gray-200 rounded-2xl p-5 shadow-sm animate-in fade-in zoom-in-95", className)}>
-        <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
-          <button onClick={() => setStep('SELECT')} className="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-800">
-            <ArrowLeft size={14} /> 이전
-          </button>
-          <h3 className="text-xs font-black text-gray-800">본인 정보 입력 {isTestMode && <span className="text-blue-500 font-mono">(Mock)</span>}</h3>
-          <span className="w-8" />
-        </div>
-
-        <form onSubmit={handleRequestSms} className="space-y-4">
-          {/* 내외국인 구분 */}
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setFormData({...formData, userNation: 'KOREAN'})}
-              className={cn(
-                "flex-1 py-2 text-xs font-black rounded-lg border transition-all",
-                formData.userNation === 'KOREAN' 
-                  ? "bg-purple-600 border-purple-600 text-white" 
-                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-              )}
-            >
-              내국인
-            </button>
-            <button
-              type="button"
-              onClick={() => setFormData({...formData, userNation: 'FOREIGNER'})}
-              className={cn(
-                "flex-1 py-2 text-xs font-black rounded-lg border transition-all",
-                formData.userNation === 'FOREIGNER' 
-                  ? "bg-purple-600 border-purple-600 text-white" 
-                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-              )}
-            >
-              외국인
-            </button>
-          </div>
-
-          {/* 이름 */}
-          <div className="space-y-1">
-            <Label className="text-xs font-bold text-gray-600">이름</Label>
-            <Input 
-              placeholder="홍길동"
-              value={formData.userName} 
-              onChange={e => setFormData({...formData, userName: e.target.value})} 
-              className="h-10 text-sm font-bold"
-              required 
-            />
-          </div>
-
-          {/* 주민등록번호 앞자리 + 뒷자리 1번째 */}
-          <div className="space-y-1">
-            <Label className="text-xs font-bold text-gray-600">주민등록번호 앞 7자리</Label>
-            <div className="flex items-center gap-2">
-              <Input 
-                placeholder="YYMMDD"
-                value={formData.birthDate6} 
-                onChange={e => setFormData({...formData, birthDate6: e.target.value.replace(/[^0-9]/g, '')})} 
-                className="h-10 text-sm font-bold text-center flex-1"
-                maxLength={6}
-                required 
-              />
-              <span className="text-gray-400 font-bold">-</span>
-              <Input 
-                placeholder="1"
-                value={formData.genderCode} 
-                onChange={e => setFormData({...formData, genderCode: e.target.value.replace(/[^1-8]/g, '')})} 
-                className="h-10 text-sm font-bold text-center w-12"
-                maxLength={1}
-                required 
-              />
-              <span className="text-gray-300 font-bold text-sm tracking-widest flex-1">●●●●●●</span>
-            </div>
-          </div>
-
-          {/* 통신사 선택 */}
-          <div className="space-y-1">
-            <Label className="text-xs font-bold text-gray-600">통신사</Label>
-            <select
-              value={formData.providerId}
-              onChange={e => setFormData({...formData, providerId: e.target.value})}
-              className="w-full h-10 px-3 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="SKT">SKT</option>
-              <option value="KT">KT</option>
-              <option value="LGU">LGU+</option>
-              <option value="SKTMVNO">SKT 알뜰폰</option>
-              <option value="KTMVNO">KT 알뜰폰</option>
-              <option value="LGUMVNO">LGU+ 알뜰폰</option>
-            </select>
-          </div>
-
-          {/* 휴대폰 번호 */}
-          <div className="space-y-1">
-            <Label className="text-xs font-bold text-gray-600">휴대폰 번호</Label>
-            <Input 
-              placeholder="01012345678"
-              value={formData.userPhone} 
-              onChange={e => setFormData({...formData, userPhone: e.target.value.replace(/[^0-9]/g, '')})} 
-              className="h-10 text-sm font-bold"
-              required 
-            />
-          </div>
-
-          <Button 
-            type="submit" 
-            disabled={isVerifying} 
-            className="w-full h-11 bg-purple-600 hover:bg-purple-700 text-white font-black mt-2"
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className={cn("flex flex-col w-full max-w-md bg-white border border-gray-200 rounded-[2rem] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 relative", className)}>
+          
+          {/* 우측 상단 닫기 X 버튼 */}
+          <button 
+            type="button" 
+            onClick={() => setStep('SELECT')}
+            className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-all active:scale-95 focus:outline-none"
           >
-            {isVerifying ? '인증 요청 중...' : '인증번호 전송'}
-          </Button>
-        </form>
+            <X size={20} />
+          </button>
+
+          <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100 pr-8">
+            <button type="button" onClick={() => setStep('SELECT')} className="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-800">
+              <ArrowLeft size={14} /> 이전
+            </button>
+            <h3 className="text-sm font-black text-gray-800">본인 정보 입력 {isTestMode && <span className="text-blue-500 font-mono">(Mock)</span>}</h3>
+            <span className="w-8" />
+          </div>
+
+          <form onSubmit={handleRequestSms} className="space-y-4">
+            {/* 내외국인 구분 */}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setFormData({...formData, userNation: 'KOREAN'})}
+                className={cn(
+                  "flex-1 py-2 text-xs font-black rounded-lg border transition-all",
+                  formData.userNation === 'KOREAN' 
+                    ? "bg-purple-600 border-purple-600 text-white" 
+                    : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                )}
+              >
+                내국인
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({...formData, userNation: 'FOREIGNER'})}
+                className={cn(
+                  "flex-1 py-2 text-xs font-black rounded-lg border transition-all",
+                  formData.userNation === 'FOREIGNER' 
+                    ? "bg-purple-600 border-purple-600 text-white" 
+                    : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                )}
+              >
+                외국인
+              </button>
+            </div>
+
+            {/* 이름 */}
+            <div className="space-y-1">
+              <Label className="text-xs font-bold text-gray-600">이름</Label>
+              <Input 
+                placeholder="홍길동"
+                value={formData.userName} 
+                onChange={e => setFormData({...formData, userName: e.target.value})} 
+                className="h-10 text-sm font-bold"
+                required 
+              />
+            </div>
+
+            {/* 주민등록번호 앞자리 + 뒷자리 1번째 */}
+            <div className="space-y-1">
+              <Label className="text-xs font-bold text-gray-600">주민등록번호 앞 7자리</Label>
+              <div className="flex items-center gap-2">
+                <Input 
+                  placeholder="YYMMDD"
+                  value={formData.birthDate6} 
+                  onChange={e => setFormData({...formData, birthDate6: e.target.value.replace(/[^0-9]/g, '')})} 
+                  className="h-10 text-sm font-bold text-center flex-1"
+                  maxLength={6}
+                  required 
+                />
+                <span className="text-gray-400 font-bold">-</span>
+                <Input 
+                  placeholder="1"
+                  value={formData.genderCode} 
+                  onChange={e => setFormData({...formData, genderCode: e.target.value.replace(/[^1-8]/g, '')})} 
+                  className="h-10 text-sm font-bold text-center w-12"
+                  maxLength={1}
+                  required 
+                />
+                <span className="text-gray-300 font-bold text-sm tracking-widest flex-1">●●●●●●</span>
+              </div>
+            </div>
+
+            {/* 통신사 선택 */}
+            <div className="space-y-1">
+              <Label className="text-xs font-bold text-gray-600">통신사</Label>
+              <select
+                value={formData.providerId}
+                onChange={e => setFormData({...formData, providerId: e.target.value})}
+                className="w-full h-10 px-3 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="SKT">SKT</option>
+                <option value="KT">KT</option>
+                <option value="LGU">LGU+</option>
+                <option value="SKTMVNO">SKT 알뜰폰</option>
+                <option value="KTMVNO">KT 알뜰폰</option>
+                <option value="LGUMVNO">LGU+ 알뜰폰</option>
+              </select>
+            </div>
+
+            {/* 휴대폰 번호 */}
+            <div className="space-y-1">
+              <Label className="text-xs font-bold text-gray-600">휴대폰 번호</Label>
+              <Input 
+                placeholder="01012345678"
+                value={formData.userPhone} 
+                onChange={e => setFormData({...formData, userPhone: e.target.value.replace(/[^0-9]/g, '')})} 
+                className="h-10 text-sm font-bold"
+                required 
+              />
+            </div>
+
+            <Button 
+              type="submit" 
+              disabled={isVerifying} 
+              className="w-full h-11 bg-purple-600 hover:bg-purple-700 text-white font-black mt-2"
+            >
+              {isVerifying ? '인증 요청 중...' : '인증번호 전송'}
+            </Button>
+          </form>
+        </div>
       </div>
     );
   }
@@ -395,57 +423,69 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
    */
   if (step === 'SMS') {
     return (
-      <div className={cn("flex flex-col w-full bg-white border border-gray-200 rounded-2xl p-5 shadow-sm animate-in fade-in zoom-in-95", className)}>
-        <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
-          <button onClick={() => setStep('FORM')} className="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-800">
-            <ArrowLeft size={14} /> 이전
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className={cn("flex flex-col w-full max-w-md bg-white border border-gray-200 rounded-[2rem] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 relative", className)}>
+          
+          {/* 우측 상단 닫기 X 버튼 */}
+          <button 
+            type="button" 
+            onClick={() => setStep('SELECT')}
+            className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-all active:scale-95 focus:outline-none"
+          >
+            <X size={20} />
           </button>
-          <h3 className="text-xs font-black text-gray-800">인증번호 입력 {isTestMode && <span className="text-blue-500 font-mono">(Mock)</span>}</h3>
-          <span className="w-8" />
-        </div>
 
-        <form onSubmit={handleConfirmSms} className="space-y-4">
-          <div className="space-y-1">
-            <div className="flex justify-between items-center">
-              <Label className="text-xs font-bold text-gray-600">인증번호 6자리 입력</Label>
-              <span className={cn("text-xs font-black", timerActive ? "text-purple-600" : "text-red-500")}>
-                {formatTime(smsTimer)}
-              </span>
-            </div>
-            <div className="relative">
-              <Input 
-                placeholder={isTestMode ? "Mock 인증번호: 123456" : "인증번호 입력"}
-                value={authNumber} 
-                onChange={e => setAuthNumber(e.target.value.replace(/[^0-9]/g, ''))} 
-                className="h-11 text-lg font-black text-center tracking-widest pr-12"
-                maxLength={6}
-                required 
-              />
-              <button
-                type="button"
-                onClick={handleStartKmcAuth}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600"
-                title="인증번호 재요청"
-              >
-                <RefreshCw size={16} />
-              </button>
-            </div>
+          <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100 pr-8">
+            <button type="button" onClick={() => setStep('FORM')} className="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-800">
+              <ArrowLeft size={14} /> 이전
+            </button>
+            <h3 className="text-sm font-black text-gray-800">인증번호 입력 {isTestMode && <span className="text-blue-500 font-mono">(Mock)</span>}</h3>
+            <span className="w-8" />
           </div>
 
-          <Button 
-            type="submit" 
-            disabled={isVerifying || smsTimer === 0} 
-            className="w-full h-11 bg-purple-600 hover:bg-purple-700 text-white font-black"
-          >
-            {isVerifying ? '확인 중...' : '인증 완료'}
-          </Button>
+          <form onSubmit={handleConfirmSms} className="space-y-4">
+            <div className="space-y-1">
+              <div className="flex justify-between items-center">
+                <Label className="text-xs font-bold text-gray-600">인증번호 6자리 입력</Label>
+                <span className={cn("text-xs font-black", timerActive ? "text-purple-600" : "text-red-500")}>
+                  {formatTime(smsTimer)}
+                </span>
+              </div>
+              <div className="relative">
+                <Input 
+                  placeholder={isTestMode ? "Mock 인증번호: 123456" : "인증번호 입력"}
+                  value={authNumber} 
+                  onChange={e => setAuthNumber(e.target.value.replace(/[^0-9]/g, ''))} 
+                  className="h-11 text-lg font-black text-center tracking-widest pr-12"
+                  maxLength={6}
+                  required 
+                />
+                <button
+                  type="button"
+                  onClick={handleStartKmcAuth}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600"
+                  title="인증번호 재요청"
+                >
+                  <RefreshCw size={16} />
+                </button>
+              </div>
+            </div>
 
-          {isTestMode && (
-            <p className="text-[11px] text-center text-blue-500 font-bold bg-blue-50 p-2 rounded-lg">
-              💡 Mock 모드 인증 성공 번호는 [123456] 입니다.
-            </p>
-          )}
-        </form>
+            <Button 
+              type="submit" 
+              disabled={isVerifying || smsTimer === 0} 
+              className="w-full h-11 bg-purple-600 hover:bg-purple-700 text-white font-black"
+            >
+              {isVerifying ? '확인 중...' : '인증 완료'}
+            </Button>
+
+            {isTestMode && (
+              <p className="text-[11px] text-center text-blue-500 font-bold bg-blue-50 p-2 rounded-lg">
+                💡 Mock 모드 인증 성공 번호는 [123456] 입니다.
+              </p>
+            )}
+          </form>
+        </div>
       </div>
     );
   }
