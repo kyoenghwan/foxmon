@@ -15,7 +15,12 @@ const config = {
         'animate-emerald', 'animate-glitch', 'animate-forest', 'animate-ocean', 'animate-sakura',
         'animate-galaxy', 'animate-sun', 'animate-lava', 'animate-matrix', 'animate-retro',
         'animate-diamond', 'animate-platinum', 'animate-aura', 'animate-candy', 'animate-royal',
-        'animate-autumn', 'animate-toxic', 'animate-storm', 'animate-ghost', 'animate-rainbow-border'
+        'animate-autumn', 'animate-toxic', 'animate-storm', 'animate-ghost', 'animate-rainbow-border',
+        'min-[768px]:max-[799px]:hidden',
+        'min-[800px]:max-[1439px]:hidden',
+        'min-[1440px]:max-[1919px]:hidden',
+        'min-[1920px]:max-[2559px]:hidden',
+        'min-[2560px]:hidden'
     ],
     theme: {
         screens: {

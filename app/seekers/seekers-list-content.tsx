@@ -52,21 +52,21 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
   if (maxRows === 6) {
     let classes = '';
     if (idx >= 12) classes += ' max-md:hidden';
-    if (idx >= 18) classes += ' md:max-[799px]:hidden';
-    if (idx >= 24) classes += ' min-[800px]:max-2xl:hidden';
-    if (idx >= 30) classes += ' 2xl:max-3xl:hidden';
-    if (idx >= 36) classes += ' 3xl:max-4xl:hidden';
-    if (idx >= 48) classes += ' 4xl:hidden';
+    if (idx >= 18) classes += ' min-[768px]:max-[799px]:hidden';
+    if (idx >= 24) classes += ' min-[800px]:max-[1439px]:hidden';
+    if (idx >= 30) classes += ' min-[1440px]:max-[1919px]:hidden';
+    if (idx >= 36) classes += ' min-[1920px]:max-[2559px]:hidden';
+    if (idx >= 48) classes += ' min-[2560px]:hidden';
     return classes.trim();
   }
   if (maxRows === 3) {
     let classes = '';
     if (idx >= 10) classes += ' max-md:hidden';
-    if (idx >= 9) classes += ' md:max-[799px]:hidden';
-    if (idx >= 12) classes += ' min-[800px]:max-2xl:hidden';
-    if (idx >= 15) classes += ' 2xl:max-3xl:hidden';
-    if (idx >= 18) classes += ' 3xl:max-4xl:hidden';
-    if (idx >= 24) classes += ' 4xl:hidden';
+    if (idx >= 9) classes += ' min-[768px]:max-[799px]:hidden';
+    if (idx >= 12) classes += ' min-[800px]:max-[1439px]:hidden';
+    if (idx >= 15) classes += ' min-[1440px]:max-[1919px]:hidden';
+    if (idx >= 18) classes += ' min-[1920px]:max-[2559px]:hidden';
+    if (idx >= 24) classes += ' min-[2560px]:hidden';
     return classes.trim();
   }
   return '';
