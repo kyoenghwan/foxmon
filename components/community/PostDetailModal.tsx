@@ -358,21 +358,27 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                                     </button>
                                 </div>
                             )}
-                            <textarea
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                onFocus={() => {
-                                    if (!isLoggedIn) {
+                            {!isLoggedIn ? (
+                                <div 
+                                    onClick={() => {
                                         if (confirm('로그인 후 댓글을 작성할 수 있습니다. 로그인 페이지로 이동하시겠습니까?')) {
                                             onClose();
                                             router.push('/login');
                                         }
-                                    }
-                                }}
-                                placeholder={isLoggedIn ? (replyingTo ? "답글을 입력하세요." : "따뜻한 댓글을 남겨주세요.") : "로그인 후 댓글 작성이 가능합니다. (클릭 시 이동)"}
-                                disabled={isSubmitting}
-                                className={`w-full h-24 p-3 rounded-xl border text-[13px] resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${replyingTo ? 'border-primary/50 bg-primary/5' : 'border-gray-200'}`}
-                            />
+                                    }}
+                                    className="w-full h-24 p-3 rounded-xl border border-gray-200 text-[13px] text-gray-400 bg-gray-50/60 cursor-pointer flex items-center justify-center font-bold hover:bg-gray-100 hover:text-gray-500 transition-all"
+                                >
+                                    로그인 후 댓글 작성이 가능합니다. (클릭 시 이동)
+                                </div>
+                            ) : (
+                                <textarea
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                    placeholder={replyingTo ? "답글을 입력하세요." : "따뜻한 댓글을 남겨주세요."}
+                                    disabled={isSubmitting}
+                                    className={`w-full h-24 p-3 rounded-xl border text-[13px] resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${replyingTo ? 'border-primary/50 bg-primary/5' : 'border-gray-200'}`}
+                                />
+                            )}
                             <div className="flex justify-end">
                                 <button
                                     onClick={handleCommentSubmit}
