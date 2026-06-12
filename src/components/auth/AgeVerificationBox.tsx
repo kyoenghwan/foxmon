@@ -127,23 +127,29 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         setIsVerified(false);
         setVerifiedData(null);
       } else {
-        // 실제 키 설정 에러 등으로 실패 시 자동으로 Mock 모드로 강제 전환하여 진행
-        nvLog('FW', '⚠️ KMC 실서버 토큰 획득 실패. 자동으로 임시 테스트 모드로 연동합니다.');
-        setIsTestMode(true);
-        setKmcToken('MOCK_TOKEN_' + Math.random().toString(36).substring(7));
-        setKmcPublicKey('MOCK_PUBLIC_KEY');
+        if (isTestMode) {
+          nvLog('FW', '⚠️ KMC 테스트 모드 토큰 획득 실패로 Mock 모드로 폴백합니다.');
+          setKmcToken('MOCK_TOKEN_' + Math.random().toString(36).substring(7));
+          setKmcPublicKey('MOCK_PUBLIC_KEY');
+          setStep('FORM');
+          setIsSmsSent(false);
+          setIsVerified(false);
+          setVerifiedData(null);
+        } else {
+          nvLog('FW', '❌ KMC 실서버 토큰 획득 실패', result.message);
+          alert(`본인인증 토큰 발급에 실패했습니다:\n${result.message || '알 수 없는 오류'}`);
+        }
+      }
+    } catch (err: any) {
+      if (isTestMode) {
         setStep('FORM');
         setIsSmsSent(false);
         setIsVerified(false);
         setVerifiedData(null);
+      } else {
+        nvLog('FW', '❌ KMC 토큰 발급 통신 오류', err.message);
+        alert(`본인인증 서버 연결 중 오류가 발생했습니다:\n${err.message}`);
       }
-    } catch (err) {
-      alert('본인인증 서버 연결 중 오류가 발생했습니다. 임시 모드로 전환합니다.');
-      setIsTestMode(true);
-      setStep('FORM');
-      setIsSmsSent(false);
-      setIsVerified(false);
-      setVerifiedData(null);
     } finally {
       setIsVerifying(false);
     }

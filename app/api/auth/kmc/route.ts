@@ -17,7 +17,8 @@ export async function POST(req: Request) {
 
     nvLog('FW', `▶️ KMC API 요청 수신 - action: ${action}`);
 
-    const isMock = (await isMockMode()) || params.isMock === true;
+    const isTestMode = process.env.NEXT_PUBLIC_KMC_TEST_MODE === 'true';
+    const isMock = isTestMode && ((await isMockMode()) || params.isMock === true);
 
     if (isMock) {
       nvLog('FW', '⚠️ Mock 모드로 요청을 시뮬레이션합니다.');

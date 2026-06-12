@@ -259,7 +259,7 @@ export async function getKmcToken(siteUrl: string): Promise<{ encryptMOKToken: s
     }
   } catch (err: any) {
     nvLog('AT', '❌ KMC 토큰 발급 오류', err.message);
-    return null;
+    throw err;
   }
 }
 
@@ -424,6 +424,9 @@ export async function confirmKmcAuth(params: {
  * 7. Mock 모드 작동 유무 판별 (환경변수 및 DB 설정 미충족 시 자동으로 Mock으로 백업)
  */
 export async function isMockMode(): Promise<boolean> {
+  if (!TEST_MODE) {
+    return false; // 상용 모드에서는 절대 Mock 모드 자동 폴백을 허용하지 않음
+  }
   try {
     await decryptMokKeyInfo();
     return false;
