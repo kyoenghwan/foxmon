@@ -1,8 +1,22 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import axios from 'axios';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import { nvLog } from './logger';
 import { supabaseAdmin } from './supabase';
+
+// Fixie 고정 IP 프록시 설정
+const proxyUrl = process.env.FIXIE_URL;
+const httpsAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
+const kmcClient = axios.create({
+  httpsAgent,
+  proxy: false,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json; charset=UTF-8'
+  }
+});
 
 export interface KmcUserInfo {
   name: string;
@@ -246,22 +260,14 @@ export async function getKmcToken(siteUrl: string): Promise<{ encryptMOKToken: s
       ? 'https://scert-dir.mobile-ok.com/agent/v2/token/get'
       : 'https://cert-dir.mobile-ok.com/agent/v2/token/get';
 
-    nvLog('AT', '📡 KMC 토큰 발급 API 호출', { url: apiUrl, serviceId: keyInfo.ServiceId });
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-      body: JSON.stringify({
-        serviceId: keyInfo.ServiceId,
-        encryptReqClientInfo,
-        siteUrl
-      })
+    nvLog('AT', '📡 KMC 토큰 발급 API 호출 (Fixie 프록시)', { url: apiUrl, serviceId: keyInfo.ServiceId });
+    const response = await kmcClient.post(apiUrl, {
+      serviceId: keyInfo.ServiceId,
+      encryptReqClientInfo,
+      siteUrl
     });
 
-    if (!response.ok) {
-      throw new Error(`KMC HTTP 오류: ${response.status}`);
-    }
-
-    const result = await response.json();
+    const result = response.data;
     if (result.resultCode === '2000') {
       return {
         encryptMOKToken: result.encryptMOKToken,
@@ -324,22 +330,14 @@ export async function requestKmcAuth(params: {
       ? 'https://scert-dir.mobile-ok.com/agent/v1/auth/request'
       : 'https://cert-dir.mobile-ok.com/agent/v1/auth/request';
 
-    nvLog('AT', '📡 KMC 본인확인 인증번호 전송 API 호출', { url: apiUrl });
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-      body: JSON.stringify({
-        encryptMOKToken: params.encryptMOKToken,
-        encryptMOKAuthInfo,
-        siteUrl: params.siteUrl
-      })
+    nvLog('AT', '📡 KMC 본인확인 인증번호 전송 API 호출 (Fixie 프록시)', { url: apiUrl });
+    const response = await kmcClient.post(apiUrl, {
+      encryptMOKToken: params.encryptMOKToken,
+      encryptMOKAuthInfo,
+      siteUrl: params.siteUrl
     });
 
-    if (!response.ok) {
-      throw new Error(`KMC HTTP 오류: ${response.status}`);
-    }
-
-    const result = await response.json();
+    const result = response.data;
     if (result.resultCode === '2000') {
       return { success: true, message: '인증번호가 발송되었습니다.', encryptMOKToken: result.encryptMOKToken };
     } else {
@@ -379,21 +377,13 @@ export async function confirmKmcAuth(params: {
       ? 'https://scert-dir.mobile-ok.com/agent/v1/confirm/request'
       : 'https://cert-dir.mobile-ok.com/agent/v1/confirm/request';
 
-    nvLog('AT', '📡 KMC 인증결과 확인 API 호출', { url: apiUrl });
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-      body: JSON.stringify({
-        encryptMOKToken: params.encryptMOKToken,
-        encryptMOKVerifyInfo
-      })
+    nvLog('AT', '📡 KMC 인증결과 확인 API 호출 (Fixie 프록시)', { url: apiUrl });
+    const response = await kmcClient.post(apiUrl, {
+      encryptMOKToken: params.encryptMOKToken,
+      encryptMOKVerifyInfo
     });
 
-    if (!response.ok) {
-      throw new Error(`KMC HTTP 오류: ${response.status}`);
-    }
-
-    const result = await response.json();
+    const result = response.data;
     if (result.resultCode !== '2000') {
       return { success: false, message: `${result.resultMsg} (${result.resultCode})` };
     }
