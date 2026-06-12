@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import axios from 'axios';
+// @ts-ignore
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { nvLog } from './logger';
 import { supabaseAdmin } from './supabase';
