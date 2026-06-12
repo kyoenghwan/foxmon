@@ -51,7 +51,9 @@ export async function decryptMokKeyInfo(): Promise<KmcKeyInfo> {
     // 2) 파일이 없으면 환경변수 KMC_KEY_CONTENT 백업 로드 시도
     else if (KMC_KEY_CONTENT) {
       nvLog('AT', '⚡ 환경변수(KMC_KEY_CONTENT)에서 KMC 키 정보를 로드합니다.');
-      encryptedData = Buffer.from(KMC_KEY_CONTENT.trim(), 'base64');
+      // 공백 및 개행문자가 섞여 들어왔을 때를 대비한 방어 필터 적용
+      const sanitizedContent = KMC_KEY_CONTENT.replace(/\s+/g, '');
+      encryptedData = Buffer.from(sanitizedContent, 'base64');
     } 
     // 3) 둘 다 누락 시 에러 발생
     else {
