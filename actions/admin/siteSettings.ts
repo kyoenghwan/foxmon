@@ -23,7 +23,9 @@ export async function getSiteSettings() {
 
     // 배열 형태를 key-value 객체 형태로 변환하여 프론트에 전달
     const settingsMap = data.reduce((acc, row) => {
-        acc[row.key_name] = row.key_value;
+        if (!row.key_name.startsWith('kmc_')) {
+            acc[row.key_name] = row.key_value;
+        }
         return acc;
     }, {} as Record<string, string>);
 
@@ -49,6 +51,9 @@ export async function updateSiteSettings(payload: Record<string, string>) {
     let hasError = false;
 
     for (const [key, value] of entries) {
+        if (key.startsWith('kmc_')) {
+            continue; // KMC 관련 키는 DB 저장을 완전히 배제
+        }
         const { error } = await supabaseAdmin
             .from('site_settings')
             .upsert({

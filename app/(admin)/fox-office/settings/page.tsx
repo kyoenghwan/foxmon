@@ -14,15 +14,12 @@ export default function AdminSettingsPage() {
         telegram_bot_username: '',
         bank_name: '',
         account_number: '',
-        account_holder: '',
-        kmc_key_password: '',
-        kmc_key_content: ''
+        account_holder: ''
     });
     
     // Toggle States for passwords
     const [showApiKey, setShowApiKey] = useState(false);
     const [showTelegramToken, setShowTelegramToken] = useState(false);
-    const [showKmcPassword, setShowKmcPassword] = useState(false);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -34,9 +31,7 @@ export default function AdminSettingsPage() {
                     telegram_bot_username: data.telegram_bot_username || '',
                     bank_name: data.bank_name || '',
                     account_number: data.account_number || '',
-                    account_holder: data.account_holder || '',
-                    kmc_key_password: data.kmc_key_password || '',
-                    kmc_key_content: data.kmc_key_content || ''
+                    account_holder: data.account_holder || ''
                 });
             }
             setLoading(false);
@@ -135,69 +130,7 @@ export default function AdminSettingsPage() {
                         </p>
                     </div>
 
-                    <hr className="border-gray-100" />
 
-                    {/* KMC 본인확인 설정 */}
-                    <div>
-                        <label className="block text-[14px] font-bold text-gray-800 mb-2">KMC 휴대폰 본인확인 설정 (V3)</label>
-                        <div className="flex flex-col gap-4">
-                            {/* 키 비밀번호 */}
-                            <div>
-                                <label className="block text-[12px] font-bold text-gray-500 mb-1">키 파일 비밀번호 (mobileOK_password)</label>
-                                <div className="relative">
-                                    <input
-                                        type={showKmcPassword ? "text" : "password"}
-                                        value={settings.kmc_key_password}
-                                        onChange={(e) => setSettings({ ...settings, kmc_key_password: e.target.value })}
-                                        placeholder="KMC 키 비밀번호 입력"
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight pr-10"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowKmcPassword(!showKmcPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                    >
-                                        {showKmcPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* 키 파일 업로드 */}
-                            <div>
-                                <label className="block text-[12px] font-bold text-gray-500 mb-1">키 정보 파일 (mok_keyInfo.dat)</label>
-                                <div className="flex items-center gap-3">
-                                    <label className="flex items-center justify-center h-10 px-4 bg-white border border-gray-300 rounded-lg text-[13px] font-bold text-gray-600 cursor-pointer hover:bg-gray-50 transition-colors">
-                                        <span>파일 업로드</span>
-                                        <input
-                                            type="file"
-                                            accept=".dat"
-                                            className="hidden"
-                                            onChange={(e) => {
-                                                if (e.target.files && e.target.files[0]) {
-                                                    const file = e.target.files[0];
-                                                    const reader = new FileReader();
-                                                    reader.onload = () => {
-                                                        const base64 = (reader.result as string).split(',')[1];
-                                                        setSettings(prev => ({ ...prev, kmc_key_content: base64 }));
-                                                    };
-                                                    reader.readAsDataURL(file);
-                                                }
-                                            }}
-                                        />
-                                    </label>
-                                    <span className="text-[13px] font-medium text-gray-600">
-                                        {settings.kmc_key_content 
-                                            ? "✅ KMC 키 파일 데이터가 등록되었습니다. (새 파일 업로드 시 교체)" 
-                                            : "❌ 등록된 키 파일 없음 (.dat 파일을 업로드해 주세요)"}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
-                            <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                            KMC에서 발급받은 mok_keyInfo.dat 파일과 비밀번호를 마스터 화면에 주입하면 성인 본인인증 실서버 모드가 자동으로 활성화됩니다.
-                        </p>
-                    </div>
 
                 </div>
 

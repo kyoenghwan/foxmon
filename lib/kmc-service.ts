@@ -35,40 +35,18 @@ export async function decryptMokKeyInfo(): Promise<KmcKeyInfo> {
   if (cachedKeyInfo) return cachedKeyInfo;
 
   try {
-    let encryptedData: Buffer;
-    let keyPassword = KMC_KEY_PASSWORD;
-
-    // 1) DB에서 키 값 가져오기 우선 시도
-    nvLog('AT', '🔍 DB(site_settings)에서 KMC 설정을 조회합니다.');
-    const { data: dbSettings, error: dbError } = await supabaseAdmin
-      .from('site_settings')
-      .select('*')
-      .in('key_name', ['kmc_key_content', 'kmc_key_password']);
-
-    const settingsMap = (dbSettings || []).reduce((acc, row) => {
-      acc[row.key_name] = row.key_value;
-      return acc;
-    }, {} as Record<string, string>);
-
-    if (!dbError && settingsMap.kmc_key_content && settingsMap.kmc_key_password) {
-      nvLog('AT', '✅ DB 설정 획득 성공 (DB 기반 복호화)');
-      encryptedData = Buffer.from(settingsMap.kmc_key_content, 'base64');
-      keyPassword = settingsMap.kmc_key_password;
-    } else {
-      // 2) DB가 누락된 경우 로컬 환경 변수와 디스크 파일 로드 시도
-      nvLog('AT', '⚠️ DB에 설정이 없어 로컬 환경 변수와 파일을 시도합니다.');
-      if (!KMC_KEY_FILE_PATH || !KMC_KEY_PASSWORD) {
-        throw new Error('KMC 환경 변수(KMC_KEY_FILE_PATH 또는 KMC_KEY_PASSWORD)가 누락되었습니다.');
-      }
-
-      const keyFilePath = path.resolve(KMC_KEY_FILE_PATH);
-      if (!fs.existsSync(keyFilePath)) {
-        throw new Error(`KMC 키 파일을 찾을 수 없습니다: ${keyFilePath}`);
-      }
-
-      encryptedData = fs.readFileSync(keyFilePath);
-      keyPassword = KMC_KEY_PASSWORD;
+    nvLog('AT', '📂 로컬 디스크 파일에서 KMC 키 정보를 로드합니다.');
+    if (!KMC_KEY_FILE_PATH || !KMC_KEY_PASSWORD) {
+      throw new Error('KMC 환경 변수(KMC_KEY_FILE_PATH 또는 KMC_KEY_PASSWORD)가 누락되었습니다.');
     }
+
+    const keyFilePath = path.resolve(KMC_KEY_FILE_PATH);
+    if (!fs.existsSync(keyFilePath)) {
+      throw new Error(`KMC 키 파일을 찾을 수 없습니다: ${keyFilePath}`);
+    }
+
+    encryptedData = fs.readFileSync(keyFilePath);
+    keyPassword = KMC_KEY_PASSWORD;
 
     // SHA-256 기반 AES Key 및 IV 파생 로직
     const passwordBytes = Buffer.from(keyPassword, 'utf8');
