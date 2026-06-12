@@ -23,6 +23,7 @@ export interface KmcKeyInfo {
 // 환경 변수 및 임시 모의 모드 설정
 const KMC_KEY_PASSWORD = process.env.KMC_KEY_PASSWORD || '';
 const KMC_KEY_FILE_PATH = process.env.KMC_KEY_FILE_PATH || '';
+const KMC_KEY_CONTENT = process.env.KMC_KEY_CONTENT || '';
 const TEST_MODE = process.env.NEXT_PUBLIC_KMC_TEST_MODE === 'true';
 
 // 캐싱된 키 정보
@@ -35,17 +36,26 @@ export async function decryptMokKeyInfo(): Promise<KmcKeyInfo> {
   if (cachedKeyInfo) return cachedKeyInfo;
 
   try {
-    nvLog('AT', '📂 로컬 디스크 파일에서 KMC 키 정보를 로드합니다.');
-    if (!KMC_KEY_FILE_PATH || !KMC_KEY_PASSWORD) {
-      throw new Error('KMC 환경 변수(KMC_KEY_FILE_PATH 또는 KMC_KEY_PASSWORD)가 누락되었습니다.');
+    if (!KMC_KEY_PASSWORD) {
+      throw new Error('KMC 복호화 비밀번호(KMC_KEY_PASSWORD)가 누락되었습니다.');
     }
 
-    const keyFilePath = path.resolve(KMC_KEY_FILE_PATH);
-    if (!fs.existsSync(keyFilePath)) {
-      throw new Error(`KMC 키 파일을 찾을 수 없습니다: ${keyFilePath}`);
+    // 1) 로컬 디스크 파일이 존재하면 우선 로드
+    const keyFilePath = KMC_KEY_FILE_PATH ? path.resolve(KMC_KEY_FILE_PATH) : null;
+    if (keyFilePath && fs.existsSync(keyFilePath)) {
+      nvLog('AT', '📂 로컬 디스크 파일에서 KMC 키 정보를 로드합니다.');
+      encryptedData = fs.readFileSync(keyFilePath);
+    } 
+    // 2) 파일이 없으면 환경변수 KMC_KEY_CONTENT 백업 로드 시도
+    else if (KMC_KEY_CONTENT) {
+      nvLog('AT', '⚡ 환경변수(KMC_KEY_CONTENT)에서 KMC 키 정보를 로드합니다.');
+      encryptedData = Buffer.from(KMC_KEY_CONTENT.trim(), 'base64');
+    } 
+    // 3) 둘 다 누락 시 에러 발생
+    else {
+      throw new Error('KMC 키 파일(물리 파일 또는 KMC_KEY_CONTENT 환경변수)을 찾을 수 없습니다.');
     }
 
-    encryptedData = fs.readFileSync(keyFilePath);
     keyPassword = KMC_KEY_PASSWORD;
 
     // SHA-256 기반 AES Key 및 IV 파생 로직
