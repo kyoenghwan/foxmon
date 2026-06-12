@@ -48,16 +48,37 @@ export async function decryptMokKeyInfo(): Promise<KmcKeyInfo> {
       nvLog('AT', '📂 로컬 디스크 파일에서 KMC 키 정보를 로드합니다.');
       encryptedData = fs.readFileSync(keyFilePath);
     } 
-    // 2) 파일이 없으면 환경변수 KMC_KEY_CONTENT 백업 로드 시도
-    else if (KMC_KEY_CONTENT) {
-      nvLog('AT', '⚡ 환경변수(KMC_KEY_CONTENT)에서 KMC 키 정보를 로드합니다.');
-      // 공백 및 개행문자가 섞여 들어왔을 때를 대비한 방어 필터 적용
-      const sanitizedContent = KMC_KEY_CONTENT.replace(/\s+/g, '');
-      encryptedData = Buffer.from(sanitizedContent, 'base64');
-    } 
-    // 3) 둘 다 누락 시 에러 발생
+    // 2) 파일이 없으면 Supabase Storage에서 로드 시도
     else {
-      throw new Error('KMC 키 파일(물리 파일 또는 KMC_KEY_CONTENT 환경변수)을 찾을 수 없습니다.');
+      let supabaseSuccess = false;
+      try {
+        nvLog('AT', '📡 Supabase Storage에서 KMC 키 파일(mok_keyInfo.dat)을 다운로드합니다.');
+        const { data, error } = await supabaseAdmin.storage
+          .from('keys')
+          .download('mok_keyInfo.dat');
+        
+        if (error) {
+          nvLog('AT', '⚠️ Supabase Storage 다운로드 중 오류 발생:', error.message);
+        } else if (data) {
+          const arrayBuffer = await data.arrayBuffer();
+          encryptedData = Buffer.from(arrayBuffer);
+          supabaseSuccess = true;
+          nvLog('AT', '⚡ Supabase Storage에서 KMC 키 정보를 성공적으로 로드했습니다.');
+        }
+      } catch (err: any) {
+        nvLog('AT', '⚠️ Supabase Storage 로드 중 예외 발생:', err.message);
+      }
+
+      // 3) Supabase Storage 로드에 실패한 경우 환경변수 KMC_KEY_CONTENT 백업 로드 시도
+      if (!supabaseSuccess) {
+        if (KMC_KEY_CONTENT) {
+          nvLog('AT', '⚡ 환경변수(KMC_KEY_CONTENT)에서 KMC 키 정보를 로드합니다.');
+          const sanitizedContent = KMC_KEY_CONTENT.replace(/\s+/g, '');
+          encryptedData = Buffer.from(sanitizedContent, 'base64');
+        } else {
+          throw new Error('KMC 키 파일(물리 파일, Supabase Storage, 또는 KMC_KEY_CONTENT 환경변수)을 모두 찾을 수 없습니다.');
+        }
+      }
     }
 
     keyPassword = KMC_KEY_PASSWORD;
