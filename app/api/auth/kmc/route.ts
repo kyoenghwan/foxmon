@@ -28,7 +28,11 @@ export async function POST(req: Request) {
     // 실제 KMC 서버 연동 흐름
     switch (action) {
       case 'token': {
-        const { siteUrl } = params;
+        let { siteUrl } = params;
+        if (process.env.NEXT_PUBLIC_KMC_TEST_MODE !== 'true') {
+          // KMC 공식 등록 주소로 강제 고정 (도메인 불일치 방어)
+          siteUrl = 'https://foxmon.co.kr/';
+        }
         if (!siteUrl) {
           return NextResponse.json({ success: false, message: 'siteUrl 파라미터가 누락되었습니다.' }, { status: 400 });
         }
@@ -45,6 +49,11 @@ export async function POST(req: Request) {
           return NextResponse.json({ success: false, message: '필수 요청 파라미터가 누락되었습니다.' }, { status: 400 });
         }
 
+        let finalSiteUrl = siteUrl;
+        if (process.env.NEXT_PUBLIC_KMC_TEST_MODE !== 'true') {
+          finalSiteUrl = 'https://foxmon.co.kr/';
+        }
+
         const requestResult = await requestKmcAuth({
           encryptMOKToken,
           publicKey,
@@ -55,7 +64,7 @@ export async function POST(req: Request) {
           userBirthday,
           userGender,
           userNation,
-          siteUrl
+          siteUrl: finalSiteUrl
         });
 
         return NextResponse.json(requestResult);
