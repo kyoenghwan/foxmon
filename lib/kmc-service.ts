@@ -36,6 +36,7 @@ export async function decryptMokKeyInfo(): Promise<KmcKeyInfo> {
   if (cachedKeyInfo) return cachedKeyInfo;
 
   try {
+    let encryptedData: Buffer;
     if (!KMC_KEY_PASSWORD) {
       throw new Error('KMC 복호화 비밀번호(KMC_KEY_PASSWORD)가 누락되었습니다.');
     }
