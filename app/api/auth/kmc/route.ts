@@ -30,8 +30,8 @@ export async function POST(req: Request) {
       case 'token': {
         let { siteUrl } = params;
         if (process.env.NEXT_PUBLIC_KMC_TEST_MODE !== 'true') {
-          // KMC 공식 등록 주소로 강제 고정 (도메인 불일치 방어)
-          siteUrl = 'https://foxmon.co.kr';
+          // 환경변수 KMC_SITE_URL이 있으면 우선 사용하고 없으면 기본값 적용
+          siteUrl = process.env.KMC_SITE_URL || 'https://foxmon.co.kr';
         }
         if (!siteUrl) {
           return NextResponse.json({ success: false, message: 'siteUrl 파라미터가 누락되었습니다.' }, { status: 400 });
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
         let finalSiteUrl = siteUrl;
         if (process.env.NEXT_PUBLIC_KMC_TEST_MODE !== 'true') {
-          finalSiteUrl = 'https://foxmon.co.kr';
+          finalSiteUrl = process.env.KMC_SITE_URL || 'https://foxmon.co.kr';
         }
 
         const requestResult = await requestKmcAuth({
