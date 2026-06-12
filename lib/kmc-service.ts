@@ -150,6 +150,19 @@ export function encryptKmcData(plainText: string, serverPublicKeyPem: string): s
 }
 
 /**
+ * 2-1. KMC 최초 토큰 요청 데이터 암호화 로직 (순수 RSA-OAEP-SHA256 단일 암호화)
+ * - 토큰 요청 거래정보(encryptReqClientInfo)는 대칭키 암호화를 하지 않고, 평문 JSON을 RSA로 직접 암호화합니다.
+ */
+export function encryptKmcTokenRequest(plainText: string, serverPublicKeyPem: string): string {
+  const encrypted = crypto.publicEncrypt({
+    key: serverPublicKeyPem,
+    padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+    oaepHash: 'sha256'
+  }, Buffer.from(plainText, 'utf8'));
+  return encrypted.toString('base64');
+}
+
+/**
  * 3. KMC로부터 받은 암호화된 결과 복호화 로직
  */
 export function decryptKmcResult(encryptedResult: string, clientPrivateKeyPem: string): any {
@@ -212,8 +225,8 @@ export async function getKmcToken(siteUrl: string): Promise<{ encryptMOKToken: s
       requestTime
     });
 
-    // 2) KMC 서버 공개키로 암호화
-    const encryptReqClientInfo = encryptKmcData(requestJson, keyInfo.ServerPublicKey);
+    // 2) KMC 서버 공개키로 암호화 (하이브리드 암호화가 아닌 순수 RSA-OAEP 단일 암호화)
+    const encryptReqClientInfo = encryptKmcTokenRequest(requestJson, keyInfo.ServerPublicKey);
 
     // 3) KMC 서버로 토큰 요청 API 호출
     const apiUrl = TEST_MODE 
