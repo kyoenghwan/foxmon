@@ -105,7 +105,7 @@ function LoginCombinedContent() {
                                     <h2 className="text-xl md:text-2xl font-black tracking-tight leading-tight">비회원 인증 입장</h2>
                                 </div>
                             </div>
-                            <div className="w-full flex-1 flex flex-col items-center">
+                            <div className="w-full flex-1 flex flex-col items-center justify-center">
                                 <div className="w-full max-w-xs">
                                     <AgeVerificationBox onVerifySuccess={handleVerifySuccess} />
                                 </div>
