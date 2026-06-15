@@ -244,7 +244,8 @@ export async function getKmcToken(siteUrl: string): Promise<{ encryptMOKToken: s
     const keyInfo = await decryptMokKeyInfo();
 
     // 1) 토큰 요청용 평문 데이터 생성
-    const clientTxId = `${keyInfo.ServiceId}-${crypto.randomBytes(8).toString('hex')}`;
+    // 거래ID(clientTxId)는 최소 20자 이상 40자 이내여야 하므로, 회원사 ID 'foxmon'과 난수 12바이트(24자)를 조합하여 31자로 생성합니다.
+    const clientTxId = `foxmon-${crypto.randomBytes(12).toString('hex')}`;
     const requestTime = new Date().toISOString().replace(/[-T:.Z]/g, '').substring(0, 14); // YYYYMMDDHHmmss
     
     const requestJson = JSON.stringify({
