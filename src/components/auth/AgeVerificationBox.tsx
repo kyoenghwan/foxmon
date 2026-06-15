@@ -43,6 +43,10 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   const [smsTimer, setSmsTimer] = useState(180); // 3분 타이머
   const [timerActive, setTimerActive] = useState(false);
 
+  // 실시간 진행 상세 상태 트래킹 메시지
+  const [statusMsg, setStatusMsg] = useState('인증 시작 전');
+  const [statusError, setStatusError] = useState('');
+
   // 본인인증 폼 데이터
   const [formData, setFormData] = useState({
     userName: '',
@@ -99,6 +103,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
     setTimerActive(false);
     setSmsTimer(180);
     setAuthNumber('');
+    setStatusMsg('인증 시작 전');
+    setStatusError('');
   };
 
   /**
@@ -106,6 +112,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
    */
   const handleStartKmcAuth = async () => {
     setIsVerifying(true);
+    setStatusMsg('1단계: KMC 서버 토큰 발급 요청 중...');
+    setStatusError('');
     try {
       nvLog('FW', 'KMC 토큰 발급 요청 시작');
       const response = await fetch('/api/auth/kmc', {
@@ -120,6 +128,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
 
       const result = await response.json();
       if (response.ok && result.success && result.data) {
+        setStatusMsg('1단계 완료: KMC 토큰 발급 성공');
         setKmcToken(result.data.encryptMOKToken);
         setKmcPublicKey(result.data.publicKey);
         setStep('FORM');
@@ -129,6 +138,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       } else {
         if (isTestMode) {
           nvLog('FW', '⚠️ KMC 테스트 모드 토큰 획득 실패로 Mock 모드로 폴백합니다.');
+          setStatusMsg('1단계 완료: Mock 테스트 모드로 전환');
           setKmcToken('MOCK_TOKEN_' + Math.random().toString(36).substring(7));
           setKmcPublicKey('MOCK_PUBLIC_KEY');
           setStep('FORM');
@@ -137,6 +147,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
           setVerifiedData(null);
         } else {
           nvLog('FW', '❌ KMC 실서버 토큰 획득 실패', result.message);
+          setStatusError(`1단계 실패: ${result.message || '토큰 획득 오류'}`);
           alert(`본인인증 토큰 발급에 실패했습니다:\n${result.message || '알 수 없는 오류'}`);
         }
       }
@@ -146,8 +157,10 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         setIsSmsSent(false);
         setIsVerified(false);
         setVerifiedData(null);
+        setStatusMsg('1단계 완료: 통신오류 복구 후 Mock 모드 진입');
       } else {
         nvLog('FW', '❌ KMC 토큰 발급 통신 오류', err.message);
+        setStatusError(`1단계 통신에러: ${err.message}`);
         alert(`본인인증 서버 연결 중 오류가 발생했습니다:\n${err.message}`);
       }
     } finally {
@@ -172,6 +185,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
     setIsVerifying(true);
     setIsVerified(false);
     setVerifiedData(null);
+    setStatusMsg('2단계: SMS 인증번호 발송 요청 중...');
+    setStatusError('');
     try {
       nvLog('FW', 'KMC SMS 인증 요청 전송', { userName: formData.userName });
       const response = await fetch('/api/auth/kmc', {
@@ -195,6 +210,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
 
       const result = await response.json();
       if (response.ok && result.success) {
+        setStatusMsg('2단계 완료: SMS 인증번호 발송 완료 (인증 대기)');
         if (result.encryptMOKToken) {
           setKmcToken(result.encryptMOKToken);
         }
@@ -202,9 +218,11 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         setSmsTimer(180);
         setTimerActive(true);
       } else {
+        setStatusError(`2단계 실패: ${result.message || '인증번호 발송 실패'}`);
         alert(result.message || '인증번호 발송에 실패했습니다.');
       }
-    } catch (err) {
+    } catch (err: any) {
+      setStatusError(`2단계 통신에러: ${err.message || '연결 실패'}`);
       alert('인증 요청 처리 중 통신 에러가 발생했습니다.');
     } finally {
       setIsVerifying(false);
@@ -222,6 +240,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
     }
 
     setIsVerifying(true);
+    setStatusMsg('3단계: KMC 인증번호 검증 요청 중...');
+    setStatusError('');
     try {
       nvLog('FW', 'KMC 인증번호 검증 시작');
 
@@ -250,6 +270,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       const result = await response.json();
       if (response.ok && result.success && result.data) {
         nvLog('FW', 'KMC 본인인증 및 성인인증 검증 완료', result.data);
+        setStatusMsg('3단계 완료: 본인확인 및 성인인증 성공');
         
         document.cookie = "age_verified=true; path=/; max-age=3600; SameSite=Lax";
         if (result.data && result.data.gender) {
@@ -261,9 +282,11 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         setVerifiedData(result.data);
         setTimerActive(false); // 타이머 멈춤
       } else {
+        setStatusError(`3단계 실패: ${result.message || '인증번호 검증 불일치'}`);
         alert(result.message || '인증번호 확인에 실패했습니다.');
       }
-    } catch (err) {
+    } catch (err: any) {
+      setStatusError(`3단계 통신에러: ${err.message || '인증확인 요청 실패'}`);
       alert('서버 응답 확인 중 오류가 발생했습니다.');
     } finally {
       setIsVerifying(false);
@@ -330,6 +353,18 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
               <div className="flex items-center gap-1.5">
                 <span className={cn("inline-block w-2 h-2 rounded-full", isVerified ? "bg-green-500" : "bg-gray-300")} />
                 <span className={cn(isVerified ? "text-gray-700 font-semibold" : "text-gray-400")}>Step 3: 인증번호 일치 검증 및 성인인증 완료</span>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-gray-200/60 text-[10px] space-y-0.5">
+                <div className="text-gray-600 font-semibold flex gap-1 items-start">
+                  <span className="text-purple-600 shrink-0">➔ Status:</span>
+                  <span className="break-all">{statusMsg}</span>
+                </div>
+                {statusError && (
+                  <div className="text-red-600 font-semibold flex gap-1 items-start">
+                    <span className="shrink-0">⚠️ Error:</span>
+                    <span className="break-all">{statusError}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -536,6 +571,37 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
             >
               폭스몬 들어가기
             </Button>
+
+            {/* 입력 폼 내부 실시간 트래커 */}
+            {process.env.NEXT_PUBLIC_ENABLE_LOGS !== 'false' && (
+              <div className="mt-4 p-3 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-mono text-gray-500 space-y-1 animate-in fade-in duration-200">
+                <div className="font-bold text-gray-700 border-b border-gray-200/40 pb-1 mb-1">
+                  🔄 KMC 본인확인 실시간 상태
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className={cn("inline-block w-1.5 h-1.5 rounded-full", step !== 'SELECT' ? "bg-green-500" : "bg-gray-300")} />
+                  <span>1단계: KMC 세션 생성 완료</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className={cn("inline-block w-1.5 h-1.5 rounded-full", isSmsSent ? "bg-green-500" : "bg-gray-300")} />
+                  <span>2단계: SMS 발급 완료</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className={cn("inline-block w-1.5 h-1.5 rounded-full", isVerified ? "bg-green-500" : "bg-gray-300")} />
+                  <span>3단계: 성인인증 검증 완료</span>
+                </div>
+                <div className="mt-1.5 pt-1 border-t border-gray-200/40 text-[9px]">
+                  <div className="text-gray-600 font-semibold break-all">
+                    <span className="text-purple-600">➔ Status:</span> {statusMsg}
+                  </div>
+                  {statusError && (
+                    <div className="text-red-600 font-semibold mt-0.5 break-all">
+                      <span>⚠️ Error:</span> {statusError}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {isTestMode && isSmsSent && !isVerified && (
               <p className="text-[11px] text-center text-blue-500 font-bold bg-blue-50 p-2 rounded-lg mt-2">
