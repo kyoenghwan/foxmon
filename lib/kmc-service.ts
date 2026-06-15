@@ -476,7 +476,7 @@ export async function confirmKmcAuth(
   log('📱 [KMC_CONFIRM] KMC 인증번호 최종 확인 및 검증 단계 시작');
   log(`   - encryptMOKToken(일부): [${params.encryptMOKToken ? params.encryptMOKToken.substring(0, 20) + '...' : '누락'}]`);
   log(`   - publicKey(일부): [${params.publicKey ? params.publicKey.substring(0, 20) + '...' : '누락'}]`);
-  log(`   - 입력된 인증번호: [${params.authNumber ? '******' : '없음'}]`);
+  log(`   - 입력된 인증번호 원본: [${params.authNumber || '없음'}]`);
   try {
     const formatPemPublic = (base64Key: string) => {
       const cleanKey = base64Key.replace(/\s+/g, '');
@@ -490,11 +490,12 @@ export async function confirmKmcAuth(
       const verifyInfo = {
         authNumber: params.authNumber
       };
-      log(`⚡ [KMC_CONFIRM] Step 1: 인증번호 확인용 JSON 데이터 구성 완료 (개인정보 마스킹)`);
-      log(`   - authNumber: [******]`);
+      const verifyInfoJson = JSON.stringify(verifyInfo);
+      log(`⚡ [KMC_CONFIRM] Step 1: 인증번호 확인용 JSON 데이터 구성 완료`);
+      log(`   - 암호화 대상 JSON 평문: [${verifyInfoJson}]`);
       
       const serverPublicKeyPem = formatPemPublic(params.publicKey);
-      encryptMOKVerifyInfo = encryptKmcData(JSON.stringify(verifyInfo), serverPublicKeyPem);
+      encryptMOKVerifyInfo = encryptKmcData(verifyInfoJson, serverPublicKeyPem);
       log(`⚡ [KMC_CONFIRM] Step 2: KMC 1회용 공개키로 인증번호 정보 암호화 완료`);
     } else {
       log(`⚡ [KMC_CONFIRM] Step 1 & 2: 인증번호 없음 (PASS/ARS 등 인증번호가 불필요한 상품용 빈 값 처리)`);
