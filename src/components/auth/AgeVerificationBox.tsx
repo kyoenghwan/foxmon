@@ -579,7 +579,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
                   🔄 KMC 본인확인 실시간 상태
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className={cn("inline-block w-1.5 h-1.5 rounded-full", step !== 'SELECT' ? "bg-green-500" : "bg-gray-300")} />
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500" />
                   <span>1단계: KMC 세션 생성 완료</span>
                 </div>
                 <div className="flex items-center gap-1.5">
