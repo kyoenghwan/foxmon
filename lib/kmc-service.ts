@@ -340,26 +340,36 @@ export async function getKmcToken(siteUrl: string, trace?: string[]): Promise<{ 
 /**
  * 5. KMC 인증요청 데이터 생성 (SMS/PASS 발송)
  */
-export async function requestKmcAuth(params: {
-  encryptMOKToken: string;
-  publicKey: string;
-  serviceType?: 'telcoAuth' | 'telcoAuth-Adult';
-  providerId: string; // SKT, KT, LGU 등
-  reqAuthType: 'SMS' | 'PASS';
-  userName: string;
-  userPhone: string;
-  userBirthday: string;
-  userGender: 'MALE' | 'FEMALE';
-  userNation: 'KOREAN' | 'FOREIGNER';
-  siteUrl: string;
-}): Promise<{ success: boolean; message: string; encryptMOKToken?: string }> {
+export async function requestKmcAuth(
+  params: {
+    encryptMOKToken: string;
+    publicKey: string;
+    serviceType?: 'telcoAuth' | 'telcoAuth-Adult';
+    providerId: string; // SKT, KT, LGU 등
+    reqAuthType: 'SMS' | 'PASS';
+    userName: string;
+    userPhone: string;
+    userBirthday: string;
+    userGender: 'MALE' | 'FEMALE';
+    userNation: 'KOREAN' | 'FOREIGNER';
+    siteUrl: string;
+  },
+  trace?: string[]
+): Promise<{ success: boolean; message: string; encryptMOKToken?: string }> {
+  const log = (msg: string) => {
+    nvLog('AT', msg);
+    trace?.push(msg);
+  };
+
+  log('📱 [KMC_REQ] KMC SMS/PASS 인증요청 단계 시작');
   try {
     // 1) MOKAuthInfo JSON 데이터 구성
+    const usageCode = process.env.KMC_USAGE_CODE || '01005';
     const authInfo = {
       serviceType: params.serviceType || 'telcoAuth-Adult', // 기본 성인인증
       providerId: params.providerId,
       reqAuthType: params.reqAuthType,
-      usageCode: '01005', // 본인확인용
+      usageCode, // 본인확인용/성인인증용
       userName: params.userName,
       userPhone: params.userPhone,
       userBirthday: params.userBirthday,
@@ -367,6 +377,9 @@ export async function requestKmcAuth(params: {
       userNation: params.userNation === 'KOREAN' ? '0' : '1',
       retTransferType: 'MOKResult'
     };
+
+    log(`⚡ [KMC_REQ] Step 1: 요청 바디(MOKAuthInfo) JSON 데이터 구성 완료 (마스킹 처리)`);
+    log(`⚡ [KMC_REQ] Step 1-1: 적용된 서비스 이용 코드(usageCode) = [${usageCode}]`);
 
     // 2) KMC 서버로부터 받은 일회용 공개키를 PEM 형태로 포맷팅
     const formatPemPublic = (base64Key: string) => {
@@ -376,16 +389,18 @@ export async function requestKmcAuth(params: {
     };
 
     const serverPublicKeyPem = formatPemPublic(params.publicKey);
+    log('⚡ [KMC_REQ] Step 2: 수신한 KMC 1회용 공개키 PEM 변환 완료');
 
     // 3) AES + RSA-OAEP 암호화 진행
     const encryptMOKAuthInfo = encryptKmcData(JSON.stringify(authInfo), serverPublicKeyPem);
+    log('⚡ [KMC_REQ] Step 3: 요청 정보(encryptMOKAuthInfo) AES/RSA 하이브리드 암호화 완료');
 
     // 4) KMC 본인확인 인증번호 전송 API 호출
     const apiUrl = TEST_MODE
       ? 'https://scert-dir.mobile-ok.com/agent/v1/auth/request'
       : 'https://cert-dir.mobile-ok.com/agent/v1/auth/request';
 
-    nvLog('AT', '📡 KMC 본인확인 인증번호 전송 API 호출 (Fixie 프록시)', { url: apiUrl });
+    log(`📡 [KMC_REQ] Step 4: KMC 본인확인 인증번호 전송 API 호출 시작 (Fixie 프록시) - URL: ${apiUrl}`);
     const response = await kmcClient.post(apiUrl, {
       encryptMOKToken: params.encryptMOKToken,
       encryptMOKAuthInfo,
@@ -393,13 +408,17 @@ export async function requestKmcAuth(params: {
     });
 
     const result = response.data;
+    log(`⚡ [KMC_REQ] KMC API 응답 수신 - resultCode: [${result.resultCode}], resultMsg: [${result.resultMsg}]`);
+
     if (result.resultCode === '2000') {
+      log('✅ [KMC_REQ] KMC 본인확인 SMS 인증요청 성공');
       return { success: true, message: '인증번호가 발송되었습니다.', encryptMOKToken: result.encryptMOKToken };
     } else {
+      log(`❌ [KMC_REQ] KMC 본인확인 SMS 인증요청 에러: ${result.resultMsg} (${result.resultCode})`);
       return { success: false, message: `${result.resultMsg} (${result.resultCode})` };
     }
   } catch (err: any) {
-    nvLog('AT', '❌ KMC 인증요청 실패', err.message);
+    log(`❌ [KMC_REQ] KMC 본인확인 SMS 인증요청 예외 발생: ${err.message}`);
     return { success: false, message: `본인인증 요청 중 오류가 발생했습니다: ${err.message}` };
   }
 }
@@ -407,16 +426,27 @@ export async function requestKmcAuth(params: {
 /**
  * 6. KMC 인증번호 검증 및 결과 데이터 확인
  */
-export async function confirmKmcAuth(params: {
-  encryptMOKToken: string;
-  publicKey: string;
-  authNumber: string; // 6자리 인증번호
-}): Promise<{ success: boolean; message: string; userInfo?: KmcUserInfo }> {
+export async function confirmKmcAuth(
+  params: {
+    encryptMOKToken: string;
+    publicKey: string;
+    authNumber: string; // 6자리 인증번호
+  },
+  trace?: string[]
+): Promise<{ success: boolean; message: string; userInfo?: KmcUserInfo }> {
+  const log = (msg: string) => {
+    nvLog('AT', msg);
+    trace?.push(msg);
+  };
+
+  log('📱 [KMC_CONFIRM] KMC 인증번호 최종 확인 및 검증 단계 시작');
   try {
     // 1) MOKVerifyInfo 데이터 암호화
     const verifyInfo = {
       authNumber: params.authNumber
     };
+
+    log(`⚡ [KMC_CONFIRM] Step 1: 인증번호 확인용 JSON 데이터 구성 완료`);
 
     const formatPemPublic = (base64Key: string) => {
       const cleanKey = base64Key.replace(/\s+/g, '');
@@ -426,33 +456,41 @@ export async function confirmKmcAuth(params: {
 
     const serverPublicKeyPem = formatPemPublic(params.publicKey);
     const encryptMOKVerifyInfo = encryptKmcData(JSON.stringify(verifyInfo), serverPublicKeyPem);
+    log(`⚡ [KMC_CONFIRM] Step 2: KMC 1회용 공개키로 인증번호 정보 암호화 완료`);
 
     // 2) KMC 인증결과 요청 API 호출
     const apiUrl = TEST_MODE
       ? 'https://scert-dir.mobile-ok.com/agent/v1/confirm/request'
       : 'https://cert-dir.mobile-ok.com/agent/v1/confirm/request';
 
-    nvLog('AT', '📡 KMC 인증결과 확인 API 호출 (Fixie 프록시)', { url: apiUrl });
+    log(`📡 [KMC_CONFIRM] Step 3: KMC 인증결과 요청 API 호출 (Fixie 프록시) - URL: ${apiUrl}`);
     const response = await kmcClient.post(apiUrl, {
       encryptMOKToken: params.encryptMOKToken,
       encryptMOKVerifyInfo
     });
 
     const result = response.data;
+    log(`⚡ [KMC_CONFIRM] KMC API 응답 수신 - resultCode: [${result.resultCode}], resultMsg: [${result.resultMsg}]`);
+
     if (result.resultCode !== '2000') {
+      log(`❌ [KMC_CONFIRM] KMC 인증결과 요청 실패: ${result.resultMsg} (${result.resultCode})`);
       return { success: false, message: `${result.resultMsg} (${result.resultCode})` };
     }
 
     // 3) 결과 복호화
-    const keyInfo = await decryptMokKeyInfo();
+    log('📱 [KMC_CONFIRM] Step 4: KMC 인증 결과 복호화 시작');
+    const keyInfo = await decryptMokKeyInfo(trace);
     const rawUserInfo = decryptKmcResult(result.encryptMOKResult, keyInfo.ClientPrivateKey);
+    log('⚡ [KMC_CONFIRM] Step 4-1: KMC 암호화 정보 복호화 완료');
 
     // 4) 19세 이상 나이 검증
     const birthYear = parseInt(rawUserInfo.userBirthday.substring(0, 4), 10);
     const currentYear = new Date().getFullYear();
     const age = currentYear - birthYear;
+    log(`⚡ [KMC_CONFIRM] Step 4-2: 성인 인증 나이 판별 - 출생년도: [${birthYear}], 판별나이: [${age}]`);
     
     if (age < 19) {
+      log('❌ [KMC_CONFIRM] 성인인증 연령 검증 실패 (만 19세 미만)');
       return { success: false, message: '만 19세 미만 성인은 이용이 불가능합니다.' };
     }
 
@@ -466,6 +504,7 @@ export async function confirmKmcAuth(params: {
       verifiedMethod: rawUserInfo.reqAuthType || 'MOBILE'
     };
 
+    log(`✅ [KMC_CONFIRM] 본인확인 및 성인인증 완료. 성명: [${userInfo.name.substring(0, 1)}**]`);
     return {
       success: true,
       message: '인증이 성공적으로 완료되었습니다.',
@@ -473,7 +512,7 @@ export async function confirmKmcAuth(params: {
     };
 
   } catch (err: any) {
-    nvLog('AT', '❌ KMC 인증확인 실패', err.message);
+    log(`❌ [KMC_CONFIRM] KMC 인증확인 도중 예외 발생: ${err.message}`);
     return { success: false, message: `인증 확인 중 오류가 발생했습니다: ${err.message}` };
   }
 }

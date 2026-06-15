@@ -56,7 +56,7 @@ export async function POST(req: Request) {
       case 'request': {
         const { encryptMOKToken, publicKey, providerId, reqAuthType, userName, userPhone, userBirthday, userGender, userNation, siteUrl } = params;
         if (!encryptMOKToken || !publicKey || !providerId || !reqAuthType || !userName || !userPhone || !userBirthday || !userGender || !userNation || !siteUrl) {
-          return NextResponse.json({ success: false, message: '필수 요청 파라미터가 누락되었습니다.' }, { status: 400 });
+          return NextResponse.json({ success: false, message: '필수 요청 파라미터가 누락되었습니다.', trace }, { status: 400 });
         }
 
         let finalSiteUrl = siteUrl;
@@ -75,43 +75,44 @@ export async function POST(req: Request) {
           userGender,
           userNation,
           siteUrl: finalSiteUrl
-        });
+        }, trace);
 
-        return NextResponse.json(requestResult);
+        return NextResponse.json({ ...requestResult, trace });
       }
 
       case 'confirm': {
         const { encryptMOKToken, publicKey, authNumber } = params;
         if (!encryptMOKToken || !publicKey || !authNumber) {
-          return NextResponse.json({ success: false, message: '필수 검증 파라미터가 누락되었습니다.' }, { status: 400 });
+          return NextResponse.json({ success: false, message: '필수 검증 파라미터가 누락되었습니다.', trace }, { status: 400 });
         }
 
         const confirmResult = await confirmKmcAuth({
           encryptMOKToken,
           publicKey,
           authNumber
-        });
+        }, trace);
 
         if (!confirmResult.success || !confirmResult.userInfo) {
-          return NextResponse.json({ success: false, message: confirmResult.message }, { status: 400 });
+          return NextResponse.json({ success: false, message: confirmResult.message, trace }, { status: 400 });
         }
 
         // 만 19세 이상 나이 검증 추가 필터링 (RA 원자 호출)
         const parseResult = await RA_PARSE_EXTERNAL_AUTH_DATA('MOBILE', confirmResult.userInfo);
         if (!parseResult.success || !parseResult.data) {
-          return NextResponse.json({ success: false, message: parseResult.error || '나이 검증에 실패했습니다.' }, { status: 400 });
+          return NextResponse.json({ success: false, message: parseResult.error || '나이 검증에 실패했습니다.', trace }, { status: 400 });
         }
 
         // 게스트 세션 쿠키 생성 및 발급
         const sessionResult = await OA_CREATE_GUEST_SESSION(parseResult.data);
         if (!sessionResult.success) {
-          return NextResponse.json({ success: false, message: '세션 발급 오류가 발생했습니다.' }, { status: 500 });
+          return NextResponse.json({ success: false, message: '세션 발급 오류가 발생했습니다.', trace }, { status: 500 });
         }
 
         return NextResponse.json({
           success: true,
           message: '성인 인증이 완료되었습니다.',
-          data: confirmResult.userInfo
+          data: confirmResult.userInfo,
+          trace
         });
       }
 
