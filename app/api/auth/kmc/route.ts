@@ -11,6 +11,7 @@ import { OA_CREATE_GUEST_SESSION } from '@/src/atoms/oa/auth/OA_CREATE_GUEST_SES
 import { RA_PARSE_EXTERNAL_AUTH_DATA } from '@/src/atoms/ra/auth/RA_PARSE_EXTERNAL_AUTH_DATA';
 
 export async function POST(req: Request) {
+  const trace: string[] = [];
   try {
     const body = await req.json();
     const { action, ...params } = body;
@@ -34,13 +35,18 @@ export async function POST(req: Request) {
           siteUrl = process.env.KMC_SITE_URL || 'https://foxmon.co.kr';
         }
         if (!siteUrl) {
-          return NextResponse.json({ success: false, message: 'siteUrl 파라미터가 누락되었습니다.' }, { status: 400 });
+          return NextResponse.json({ success: false, message: 'siteUrl 파라미터가 누락되었습니다.', trace }, { status: 400 });
         }
-        const tokenData = await getKmcToken(siteUrl);
-        if (!tokenData) {
-          return NextResponse.json({ success: false, message: 'KMC 토큰 발급 실패' }, { status: 500 });
+        
+        try {
+          const tokenData = await getKmcToken(siteUrl, trace);
+          if (!tokenData) {
+            return NextResponse.json({ success: false, message: 'KMC 토큰 발급 실패', trace }, { status: 500 });
+          }
+          return NextResponse.json({ success: true, data: tokenData, trace });
+        } catch (err: any) {
+          return NextResponse.json({ success: false, message: `KMC 토큰 요청 오류: ${err.message}`, trace }, { status: 500 });
         }
-        return NextResponse.json({ success: true, data: tokenData });
       }
 
       case 'request': {
@@ -110,7 +116,7 @@ export async function POST(req: Request) {
     }
   } catch (err: any) {
     nvLog('FW', '❌ KMC API 라우트 핸들러 에러', err.message);
-    return NextResponse.json({ success: false, message: `서버 내부 에러: ${err.message}` }, { status: 500 });
+    return NextResponse.json({ success: false, message: `서버 내부 에러: ${err.message}`, trace }, { status: 500 });
   }
 }
 

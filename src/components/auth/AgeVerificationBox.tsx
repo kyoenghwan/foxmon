@@ -127,6 +127,9 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       });
 
       const result = await response.json();
+      if (result.trace && Array.isArray(result.trace)) {
+        result.trace.forEach((line: string) => nvLog('AT', `[SERVER_TRACE] ${line}`));
+      }
       if (response.ok && result.success && result.data) {
         setStatusMsg('1단계 완료: KMC 토큰 발급 성공');
         setKmcToken(result.data.encryptMOKToken);
@@ -209,6 +212,9 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       });
 
       const result = await response.json();
+      if (result.trace && Array.isArray(result.trace)) {
+        result.trace.forEach((line: string) => nvLog('AT', `[SERVER_TRACE] ${line}`));
+      }
       if (response.ok && result.success) {
         setStatusMsg('2단계 완료: SMS 인증번호 발송 완료 (인증 대기)');
         if (result.encryptMOKToken) {
@@ -268,6 +274,9 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       });
 
       const result = await response.json();
+      if (result.trace && Array.isArray(result.trace)) {
+        result.trace.forEach((line: string) => nvLog('AT', `[SERVER_TRACE] ${line}`));
+      }
       if (response.ok && result.success && result.data) {
         nvLog('FW', 'KMC 본인인증 및 성인인증 검증 완료', result.data);
         setStatusMsg('3단계 완료: 본인확인 및 성인인증 성공');
