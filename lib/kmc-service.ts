@@ -19,6 +19,25 @@ const kmcClient = axios.create({
   }
 });
 
+// 디버깅용 개인정보 마스킹 헬퍼
+const maskName = (name: string) => {
+  if (!name) return '';
+  if (name.length <= 2) {
+    return name.charAt(0) + '*';
+  }
+  return name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1);
+};
+
+const maskPhone = (phone: string) => {
+  if (!phone) return '';
+  return phone.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-****-$3');
+};
+
+const maskBirth = (birth: string) => {
+  if (!birth || birth.length !== 8) return birth || '';
+  return birth.substring(0, 4) + '-**-**';
+};
+
 export interface KmcUserInfo {
   name: string;
   birthDate: string; // YYYYMMDD
@@ -381,8 +400,20 @@ export async function requestKmcAuth(
       retTransferType: 'MOKResult'
     };
 
-    log(`⚡ [KMC_REQ] Step 1: 요청 바디(MOKAuthInfo) JSON 데이터 구성 완료 (마스킹 처리)`);
-    log(`⚡ [KMC_REQ] Step 1-1: 적용된 서비스 이용 코드(usageCode) = [${usageCode}] (상품타입: [${serviceType}])`);
+    log(`⚡ [KMC_REQ] Step 1: 요청 바디(MOKAuthInfo) JSON 데이터 구성 완료 (개인정보 마스킹)`);
+    log(`   - serviceType: [${authInfo.serviceType}]`);
+    log(`   - providerId: [${authInfo.providerId}]`);
+    log(`   - reqAuthType: [${authInfo.reqAuthType}]`);
+    log(`   - usageCode: [${authInfo.usageCode}]`);
+    log(`   - userName: [${maskName(authInfo.userName)}]`);
+    log(`   - userPhone: [${maskPhone(authInfo.userPhone)}]`);
+    log(`   - userBirthday: [${maskBirth(authInfo.userBirthday)}]`);
+    log(`   - userGender: [${authInfo.userGender}]`);
+    log(`   - userNation: [${authInfo.userNation}]`);
+    
+    log(`⚡ [KMC_REQ] Step 1-1: 요청 전송에 사용될 토큰 메타데이터 검증`);
+    log(`   - encryptMOKToken(일부): [${params.encryptMOKToken ? params.encryptMOKToken.substring(0, 20) + '...' : '누락'}]`);
+    log(`   - publicKey(일부): [${params.publicKey ? params.publicKey.substring(0, 20) + '...' : '누락'}]`);
 
     // 2) KMC 서버로부터 받은 일회용 공개키를 PEM 형태로 포맷팅
     const formatPemPublic = (base64Key: string) => {
@@ -443,6 +474,9 @@ export async function confirmKmcAuth(
   };
 
   log('📱 [KMC_CONFIRM] KMC 인증번호 최종 확인 및 검증 단계 시작');
+  log(`   - encryptMOKToken(일부): [${params.encryptMOKToken ? params.encryptMOKToken.substring(0, 20) + '...' : '누락'}]`);
+  log(`   - publicKey(일부): [${params.publicKey ? params.publicKey.substring(0, 20) + '...' : '누락'}]`);
+  log(`   - 입력된 인증번호: [${params.authNumber ? '******' : '없음'}]`);
   try {
     const formatPemPublic = (base64Key: string) => {
       const cleanKey = base64Key.replace(/\s+/g, '');
@@ -456,7 +490,8 @@ export async function confirmKmcAuth(
       const verifyInfo = {
         authNumber: params.authNumber
       };
-      log(`⚡ [KMC_CONFIRM] Step 1: 인증번호 확인용 JSON 데이터 구성 완료`);
+      log(`⚡ [KMC_CONFIRM] Step 1: 인증번호 확인용 JSON 데이터 구성 완료 (개인정보 마스킹)`);
+      log(`   - authNumber: [******]`);
       
       const serverPublicKeyPem = formatPemPublic(params.publicKey);
       encryptMOKVerifyInfo = encryptKmcData(JSON.stringify(verifyInfo), serverPublicKeyPem);
