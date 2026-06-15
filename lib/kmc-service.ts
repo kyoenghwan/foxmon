@@ -392,7 +392,7 @@ export async function requestKmcAuth(
       providerId: params.providerId,
       reqAuthType: params.reqAuthType,
       usageCode, // 성인인증용(01016) 또는 본인확인용(01005)
-      userName: params.userName,
+      username: params.userName, // KMC 규격서상 소문자 username 매핑
       userPhone: params.userPhone,
       userBirthday: params.userBirthday,
       userGender: params.userGender === 'MALE' ? '1' : '2',
@@ -400,16 +400,17 @@ export async function requestKmcAuth(
       retTransferType: 'MOKResult'
     };
 
-    log(`⚡ [KMC_REQ] Step 1: 요청 바디(MOKAuthInfo) JSON 데이터 구성 완료 (개인정보 마스킹)`);
+    log(`⚡ [KMC_REQ] Step 1: 요청 바디(MOKAuthInfo) JSON 데이터 구성 완료`);
     log(`   - serviceType: [${authInfo.serviceType}]`);
     log(`   - providerId: [${authInfo.providerId}]`);
     log(`   - reqAuthType: [${authInfo.reqAuthType}]`);
     log(`   - usageCode: [${authInfo.usageCode}]`);
-    log(`   - userName: [${maskName(authInfo.userName)}]`);
-    log(`   - userPhone: [${maskPhone(authInfo.userPhone)}]`);
-    log(`   - userBirthday: [${maskBirth(authInfo.userBirthday)}]`);
+    log(`   - username (원본): [${authInfo.username}]`);
+    log(`   - userPhone (원본): [${authInfo.userPhone}]`);
+    log(`   - userBirthday (원본): [${authInfo.userBirthday}]`);
     log(`   - userGender: [${authInfo.userGender}]`);
     log(`   - userNation: [${authInfo.userNation}]`);
+    log(`   - 암호화 대상 JSON 평문: [${JSON.stringify(authInfo)}]`);
     
     log(`⚡ [KMC_REQ] Step 1-1: 요청 전송에 사용될 토큰 메타데이터 검증`);
     log(`   - encryptMOKToken(일부): [${params.encryptMOKToken ? params.encryptMOKToken.substring(0, 20) + '...' : '누락'}]`);
