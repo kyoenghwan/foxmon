@@ -273,29 +273,45 @@ export function decryptKmcResult(encryptedResult: string, clientPrivateKeyPem: s
  * 4. KMC 거래 토큰 발급 API 연동
  */
 export async function getKmcToken(siteUrl: string, trace?: string[]): Promise<{ encryptMOKToken: string; publicKey: string } | null> {
+  const log = (msg: string) => {
+    nvLog('AT', msg);
+    trace?.push(msg);
+  };
+
+  log('📡 [KMC_TOKEN] KMC 거래 토큰 발급 프로세스 시작');
   try {
     const keyInfo = await decryptMokKeyInfo(trace);
 
-    // 1) 토큰 요청용 평문 데이터 생성
-    // 거래ID(clientTxId)는 최소 20자 이상 40자 이내여야 하므로, 회원사 ID 'foxmon'과 난수 12바이트(24자)를 조합하여 31자로 생성합니다.
-    const clientTxId = `foxmon-${crypto.randomBytes(12).toString('hex')}`;
-    const requestTime = new Date().toISOString().replace(/[-T:.Z]/g, '').substring(0, 14); // YYYYMMDDHHmmss
+    // Step 1. 이용기관 거래 ID (clientTxId) 생성
+    log('📡 [KMC_TOKEN] Step 1: 이용기관 거래 ID (clientTxId) 생성 시작');
     
+    // Step 1-1. 중복되지 않는 거래ID 생성 (20자 이상 40자 이내)
+    const clientTxId = `foxmon-${crypto.randomBytes(12).toString('hex')}`;
+    log(`⚡ [KMC_TOKEN] Step 1-1: clientTxId 생성 완료 = [${clientTxId}] (길이: ${clientTxId.length})`);
+
+    // Step 2. 본인확인 토큰요청 데이터 생성
+    log('📡 [KMC_TOKEN] Step 2: 본인확인 토큰요청 데이터 생성 시작');
+    
+    // Step 2-1 & 2-2. 암호화 전 데이터(JSONData) 생성 및 직렬화
+    const requestTime = new Date().toISOString().replace(/[-T:.Z]/g, '').substring(0, 14); // YYYYMMDDHHmmss
     const requestJson = JSON.stringify({
       version: 'V2',
       clientTxId,
       requestTime
     });
+    log(`⚡ [KMC_TOKEN] Step 2-1 & 2-2: JSON 객체 생성 및 직렬화 완료 = ${requestJson}`);
 
-    // 2) KMC 서버 공개키로 암호화 (하이브리드 암호화가 아닌 순수 RSA-OAEP 단일 암호화)
+    // Step 2-3. 암호화 진행 (RSA 암호화)
+    log('📡 [KMC_TOKEN] Step 2-3: RSA-OAEP 방식으로 JSON 직렬화 데이터 암호화 및 Base64 인코딩 시작');
     const encryptReqClientInfo = encryptKmcTokenRequest(requestJson, keyInfo.ServerPublicKey);
+    log(`⚡ [KMC_TOKEN] Step 3-1: Base64 인코딩된 본인확인 요청 토큰(encryptReqClientInfo) 생성 성공 (${encryptReqClientInfo.substring(0, 20)}...)`);
 
     // 3) KMC 서버로 토큰 요청 API 호출
     const apiUrl = TEST_MODE 
       ? 'https://scert-dir.mobile-ok.com/agent/v2/token/get'
       : 'https://cert-dir.mobile-ok.com/agent/v2/token/get';
 
-    nvLog('AT', '📡 KMC 토큰 발급 API 호출 (Fixie 프록시)', { url: apiUrl, serviceId: keyInfo.ServiceId });
+    log(`📡 [KMC_TOKEN] Step 3: KMC 서버로 토큰 요청 API 호출 시작 (Fixie 프록시 사용) - URL: ${apiUrl}`);
     const response = await kmcClient.post(apiUrl, {
       serviceId: keyInfo.ServiceId,
       encryptReqClientInfo,
@@ -303,16 +319,20 @@ export async function getKmcToken(siteUrl: string, trace?: string[]): Promise<{ 
     });
 
     const result = response.data;
+    log(`⚡ [KMC_TOKEN] KMC API 응답 수신 - resultCode: [${result.resultCode}], resultMsg: [${result.resultMsg}]`);
+
     if (result.resultCode === '2000') {
+      log('✅ [KMC_TOKEN] KMC 거래 토큰 발급 최종 성공');
       return {
         encryptMOKToken: result.encryptMOKToken,
         publicKey: result.publicKey
       };
     } else {
+      log(`❌ [KMC_TOKEN] KMC 토큰 발급 에러: ${result.resultMsg} (${result.resultCode})`);
       throw new Error(`KMC 토큰 요청 실패: ${result.resultMsg} (${result.resultCode})`);
     }
   } catch (err: any) {
-    nvLog('AT', '❌ KMC 토큰 발급 오류', err.message);
+    log(`❌ [KMC_TOKEN] KMC 토큰 발급 프로세스 도중 예외 발생: ${err.message}`);
     throw err;
   }
 }
