@@ -177,20 +177,49 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   const handleRequestSms = async (e?: React.FormEvent | React.MouseEvent) => {
     if (e) e.preventDefault();
     
-    // 생년월일 YYYYMMDD 파싱
-    const is19xx = ['1', '2', '5', '6'].includes(formData.genderCode);
-    const century = is19xx ? '19' : '20';
-    const userBirthday = `${century}${formData.birthDate6}`;
-
-    // 성별 판단
-    const userGender = ['1', '3', '5', '7'].includes(formData.genderCode) ? 'MALE' : 'FEMALE';
-
     setIsVerifying(true);
     setIsVerified(false);
     setVerifiedData(null);
-    setStatusMsg('2단계: SMS 인증번호 발송 요청 중...');
+    setStatusMsg('2단계: KMC 세션 생성 및 SMS 인증번호 발송 요청 중...');
     setStatusError('');
     try {
+      let currentToken = kmcToken;
+      let currentPublicKey = kmcPublicKey;
+
+      // 1. KMC 거래토큰 1회용 제한을 준수하기 위해 매 SMS 발송 시 신규 토큰 생성
+      nvLog('FW', 'KMC 신규 토큰 발급 요청');
+      const tokenResponse = await fetch('/api/auth/kmc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'token', 
+          siteUrl: window.location.origin,
+          isMock: isTestMode
+        }),
+      });
+
+      const tokenResult = await tokenResponse.json();
+      if (tokenResult.trace && Array.isArray(tokenResult.trace)) {
+        tokenResult.trace.forEach((line: string) => nvLog('AT', `[SERVER_TRACE] ${line}`));
+      }
+
+      if (tokenResponse.ok && tokenResult.success && tokenResult.data) {
+        currentToken = tokenResult.data.encryptMOKToken;
+        currentPublicKey = tokenResult.data.publicKey;
+        setKmcToken(currentToken);
+        setKmcPublicKey(currentPublicKey);
+      } else {
+        throw new Error(tokenResult.message || 'KMC 인증 세션(토큰) 발급에 실패했습니다.');
+      }
+
+      // 생년월일 YYYYMMDD 파싱
+      const is19xx = ['1', '2', '5', '6'].includes(formData.genderCode);
+      const century = is19xx ? '19' : '20';
+      const userBirthday = `${century}${formData.birthDate6}`;
+
+      // 성별 판단
+      const userGender = ['1', '3', '5', '7'].includes(formData.genderCode) ? 'MALE' : 'FEMALE';
+
       nvLog('FW', 'KMC SMS 인증 요청 전송', { userName: formData.userName });
       const response = await fetch('/api/auth/kmc', {
         method: 'POST',
@@ -198,8 +227,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         body: JSON.stringify({
           action: 'request',
           isMock: isTestMode,
-          encryptMOKToken: kmcToken,
-          publicKey: kmcPublicKey,
+          encryptMOKToken: currentToken,
+          publicKey: currentPublicKey,
           providerId: formData.providerId,
           reqAuthType: formData.reqAuthType,
           userName: formData.userName,
@@ -229,7 +258,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       }
     } catch (err: any) {
       setStatusError(`2단계 통신에러: ${err.message || '연결 실패'}`);
-      alert('인증 요청 처리 중 통신 에러가 발생했습니다.');
+      alert(err.message || '인증 요청 처리 중 오류가 발생했습니다.');
     } finally {
       setIsVerifying(false);
     }
