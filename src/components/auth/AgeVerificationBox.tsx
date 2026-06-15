@@ -312,6 +312,28 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
             </div>
           )}
 
+          {/* 인증 진행 상태 로그 보드 (ENABLE_LOGS 환경 변수 설정에 따라 켜고 끌 수 있음) */}
+          {process.env.NEXT_PUBLIC_ENABLE_LOGS !== 'false' && (
+            <div className="mt-4 p-3 bg-gray-50 border border-gray-100 rounded-xl text-[11px] font-mono text-gray-500 space-y-1.5 animate-in fade-in duration-300">
+              <div className="font-bold text-gray-700 border-b border-gray-200/60 pb-1 mb-1 flex justify-between items-center">
+                <span>🔄 본인인증 실시간 트래커</span>
+                <span className="text-[9px] px-1.5 py-0.2 bg-purple-100 text-purple-700 rounded-full font-sans font-bold">KMC API V3</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className={cn("inline-block w-2 h-2 rounded-full", step !== 'SELECT' ? "bg-green-500" : "bg-gray-300 animate-pulse")} />
+                <span className={cn(step !== 'SELECT' ? "text-gray-700 font-semibold" : "text-gray-400")}>Step 1: KMC 거래 토큰 발급 및 세션 생성</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className={cn("inline-block w-2 h-2 rounded-full", isSmsSent ? "bg-green-500" : "bg-gray-300")} />
+                <span className={cn(isSmsSent ? "text-gray-700 font-semibold" : "text-gray-400")}>Step 2: SMS 인증번호 발송 요청</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className={cn("inline-block w-2 h-2 rounded-full", isVerified ? "bg-green-500" : "bg-gray-300")} />
+                <span className={cn(isVerified ? "text-gray-700 font-semibold" : "text-gray-400")}>Step 3: 인증번호 일치 검증 및 성인인증 완료</span>
+              </div>
+            </div>
+          )}
+
           {isVerifying && (
             <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] rounded-2xl flex items-center justify-center z-10">
               <div className="flex flex-col items-center gap-2">
