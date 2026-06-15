@@ -508,13 +508,21 @@ export async function confirmKmcAuth(
       : 'https://cert-dir.mobile-ok.com/agent/v1/confirm/request';
 
     log(`📡 [KMC_CONFIRM] Step 3: KMC 인증결과 요청 API 호출 (Fixie 프록시) - URL: ${apiUrl}`);
+    log(`   - [INPUT] encryptMOKToken: [${params.encryptMOKToken}]`);
+    log(`   - [INPUT] encryptMOKVerifyInfo: [${encryptMOKVerifyInfo}]`);
+
     const response = await kmcClient.post(apiUrl, {
       encryptMOKToken: params.encryptMOKToken,
       encryptMOKVerifyInfo
     });
 
     const result = response.data;
-    log(`⚡ [KMC_CONFIRM] KMC API 응답 수신 - resultCode: [${result.resultCode}], resultMsg: [${result.resultMsg}]`);
+    log(`⚡ [KMC_CONFIRM] KMC API 응답 수신`);
+    log(`   - [OUTPUT] resultCode: [${result.resultCode}]`);
+    log(`   - [OUTPUT] resultMsg: [${result.resultMsg}]`);
+    log(`   - [OUTPUT] encryptMOKResult: [${result.encryptMOKResult || '없음'}]`);
+    log(`   - [OUTPUT] retryCount: [${result.retryCount || '없음'}]`);
+    log(`   - [OUTPUT RAW JSON]: [${JSON.stringify(result)}]`);
 
     if (result.resultCode !== '2000') {
       log(`❌ [KMC_CONFIRM] KMC 인증결과 요청 실패: ${result.resultMsg} (${result.resultCode})`);
