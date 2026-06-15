@@ -48,77 +48,103 @@ let cachedKeyInfo: KmcKeyInfo | null = null;
  * 1. mok_keyInfo.dat 파일 복호화하여 서비스 ID 및 암호화 키 획득
  */
 export async function decryptMokKeyInfo(): Promise<KmcKeyInfo> {
-  if (cachedKeyInfo) return cachedKeyInfo;
+  if (cachedKeyInfo) {
+    nvLog('AT', '🔑 [KMC_DECRYPT] 캐싱된 KMC 키 정보를 재사용합니다.');
+    return cachedKeyInfo;
+  }
 
+  nvLog('AT', '🔑 [KMC_DECRYPT] KMC 복호화 프로세스 시작');
   try {
-    let encryptedData: Buffer;
+    let encryptedData: Buffer | null = null;
     let keyPassword = KMC_KEY_PASSWORD;
+    
+    // Step 1. 암호화된 키 파일 준비
+    nvLog('AT', '🔑 [KMC_DECRYPT] Step 1: 암호화된 키 파일(mok_keyInfo.dat) 준비 및 읽기 시작');
     if (!KMC_KEY_PASSWORD) {
+      nvLog('AT', '❌ [KMC_DECRYPT] 에러: KMC_KEY_PASSWORD 환경 변수가 누락되었습니다.');
       throw new Error('KMC 복호화 비밀번호(KMC_KEY_PASSWORD)가 누락되었습니다.');
     }
 
-    // 1) 로컬 디스크 파일이 존재하면 우선 로드
+    // Step 1-1 & 1-2. 파일 준비 및 byte[] 배열 읽기
     const keyFilePath = KMC_KEY_FILE_PATH ? path.resolve(KMC_KEY_FILE_PATH) : null;
     if (keyFilePath && fs.existsSync(keyFilePath)) {
-      nvLog('AT', '📂 로컬 디스크 파일에서 KMC 키 정보를 로드합니다.');
+      nvLog('AT', `📂 [KMC_DECRYPT] Step 1-1 (로컬 디스크): 경로 = ${keyFilePath}`);
       encryptedData = fs.readFileSync(keyFilePath);
-    } 
-    // 2) 파일이 없으면 Supabase Storage에서 로드 시도
-    else {
+      nvLog('AT', `⚡ [KMC_DECRYPT] Step 1-2: 로컬 디스크 파일 읽기 완료 (${encryptedData.length} bytes)`);
+    } else {
+      nvLog('AT', '📂 [KMC_DECRYPT] Step 1-1: 로컬 디스크에 키 파일이 없어 원격 저장소 조회를 시도합니다.');
       let supabaseSuccess = false;
       try {
-        nvLog('AT', '📡 Supabase Storage에서 KMC 키 파일(mok_keyInfo.dat)을 다운로드합니다.');
+        nvLog('AT', '📡 [KMC_DECRYPT] Step 1-1 (Supabase Storage): keys/mok_keyInfo.dat 다운로드 시도');
         const { data, error } = await supabaseAdmin.storage
           .from('keys')
           .download('mok_keyInfo.dat');
         
         if (error) {
-          nvLog('AT', '⚠️ Supabase Storage 다운로드 중 오류 발생:', error.message);
+          nvLog('AT', `⚠️ [KMC_DECRYPT] Supabase Storage 다운로드 실패: ${error.message}`);
         } else if (data) {
           const arrayBuffer = await data.arrayBuffer();
           encryptedData = Buffer.from(arrayBuffer);
           supabaseSuccess = true;
-          nvLog('AT', '⚡ Supabase Storage에서 KMC 키 정보를 성공적으로 로드했습니다.');
+          nvLog('AT', `⚡ [KMC_DECRYPT] Step 1-2: Supabase Storage 로드 완료 (${encryptedData.length} bytes)`);
         }
       } catch (err: any) {
-        nvLog('AT', '⚠️ Supabase Storage 로드 중 예외 발생:', err.message);
+        nvLog('AT', `⚠️ [KMC_DECRYPT] Supabase Storage 다운로드 예외 발생: ${err.message}`);
       }
 
-      // 3) Supabase Storage 로드에 실패한 경우 환경변수 KMC_KEY_CONTENT 백업 로드 시도
       if (!supabaseSuccess) {
         if (KMC_KEY_CONTENT) {
-          nvLog('AT', '⚡ 환경변수(KMC_KEY_CONTENT)에서 KMC 키 정보를 로드합니다.');
+          nvLog('AT', '⚡ [KMC_DECRYPT] Step 1-1 (환경변수 백업): KMC_KEY_CONTENT base64 파싱 시도');
           const sanitizedContent = KMC_KEY_CONTENT.replace(/\s+/g, '');
           encryptedData = Buffer.from(sanitizedContent, 'base64');
+          nvLog('AT', `⚡ [KMC_DECRYPT] Step 1-2: 환경변수 KMC_KEY_CONTENT 파싱 완료 (${encryptedData.length} bytes)`);
         } else {
+          nvLog('AT', '❌ [KMC_DECRYPT] 에러: 로컬 파일, Supabase Storage, KMC_KEY_CONTENT 환경변수 모두 존재하지 않습니다.');
           throw new Error('KMC 키 파일(물리 파일, Supabase Storage, 또는 KMC_KEY_CONTENT 환경변수)을 모두 찾을 수 없습니다.');
         }
       }
     }
 
-    keyPassword = KMC_KEY_PASSWORD;
+    if (!encryptedData || encryptedData.length === 0) {
+      nvLog('AT', '❌ [KMC_DECRYPT] 에러: 로드된 키 데이터 바이트 배열이 비어있습니다.');
+      throw new Error('로드된 키 데이터 바이트 배열이 비어있습니다.');
+    }
 
-    // SHA-256 기반 AES Key 및 IV 파생 로직
+    // Step 2. AES 복호화 키 및 IV 생성
+    nvLog('AT', '🔑 [KMC_DECRYPT] Step 2: AES 복호화용 Key 및 IV 유도 시작');
+    
+    // Step 2-1. 해시함수(SHA-256) 준비
+    // Step 2-2. mobileOK_password를 해싱하여 Hash1 생성 및 앞 16바이트 추출
     const passwordBytes = Buffer.from(keyPassword, 'utf8');
     const hash1 = crypto.createHash('sha256').update(passwordBytes).digest();
+    nvLog('AT', '⚡ [KMC_DECRYPT] Step 2-1 & 2-2: 비밀번호 바이트 해싱 1회차(Hash1) 완료');
     
     const aesKeyBytes = Buffer.alloc(32);
-    hash1.copy(aesKeyBytes, 0, 0, 16); // Hash1 앞 16바이트를 Key 앞 16바이트로 복사
+    hash1.copy(aesKeyBytes, 0, 0, 16); // Hash1 앞 16바이트 복사
+    nvLog('AT', '⚡ [KMC_DECRYPT] Step 2-2: Hash1의 앞 16바이트를 AES Key 앞부분으로 채웠습니다.');
 
+    // Step 2-3. Hash1 결과물을 한 번 더 해싱하여 Hash2 생성 및 IV(16바이트) 추출
     const hash2 = crypto.createHash('sha256').update(hash1).digest();
-    hash2.copy(aesKeyBytes, 16, 16, 32); // Hash2 뒤 16바이트를 Key 뒤 16바이트로 복사
+    nvLog('AT', '⚡ [KMC_DECRYPT] Step 2-3: Hash1을 재해싱하여 Hash2 완료');
+    
+    hash2.copy(aesKeyBytes, 16, 16, 32); // Hash2 뒤 16바이트 복사
+    nvLog('AT', '⚡ [KMC_DECRYPT] Step 2-3: Hash2의 뒤 16바이트를 AES Key 뒷부분으로 채워 32바이트 Key 완성');
 
     const aesIvBytes = Buffer.alloc(16);
-    hash2.copy(aesIvBytes, 0, 0, 16); // Hash2 앞 16바이트를 IV로 사용
+    hash2.copy(aesIvBytes, 0, 0, 16); // Hash2 앞 16바이트 복사
+    nvLog('AT', '⚡ [KMC_DECRYPT] Step 2-3: Hash2의 앞 16바이트를 초기화 벡터(AES IV, 16바이트)로 유도 완료');
 
-    // AES-256-CBC 복호화
+    // Step 3. 데이터 복호화 (AES-256-CBC)
+    nvLog('AT', '🔑 [KMC_DECRYPT] Step 3: AES/CBC/PKCS5Padding 모드로 데이터 복호화 실행');
     const decipher = crypto.createDecipheriv('aes-256-cbc', aesKeyBytes, aesIvBytes);
     let decrypted = decipher.update(encryptedData);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
+    nvLog('AT', `⚡ [KMC_DECRYPT] Step 3-1: AES-256-CBC 복호화 완료 (${decrypted.length} bytes)`);
 
+    // Step 4. 결과 확인
+    nvLog('AT', '🔑 [KMC_DECRYPT] Step 4: 복호화 데이터 JSON UTF-8 문자열 변환 및 파싱');
     const keyInfoJson = JSON.parse(decrypted.toString('utf8'));
     
-    // PEM 형식으로 변환하여 사용하기 편하도록 처리
     const formatPem = (key: string, type: 'PUBLIC' | 'PRIVATE') => {
       if (key.includes('---BEGIN')) return key;
       const cleanKey = key.replace(/\s+/g, '');
@@ -132,10 +158,10 @@ export async function decryptMokKeyInfo(): Promise<KmcKeyInfo> {
       ServerPublicKey: formatPem(keyInfoJson.ServerPublicKey, 'PUBLIC')
     };
 
-    nvLog('AT', '🔑 KMC 키 정보 파일 복호화 및 로드 성공');
+    nvLog('AT', `✅ [KMC_DECRYPT] Step 4-1: 파싱 완료. ServiceId = [${cachedKeyInfo.ServiceId}] 확인`);
     return cachedKeyInfo;
   } catch (err: any) {
-    nvLog('AT', '⚠️ KMC 키 파일 로드 실패 (Mock 모드로 작동 가능)', err.message);
+    nvLog('AT', `❌ [KMC_DECRYPT] 복호화 단계 도중 에러가 발생했습니다: ${err.message}`);
     throw err;
   }
 }
