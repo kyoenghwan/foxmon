@@ -392,7 +392,7 @@ export async function requestKmcAuth(
       providerId: params.providerId,
       reqAuthType: params.reqAuthType,
       usageCode, // 성인인증용(01016) 또는 본인확인용(01005)
-      username: params.userName, // KMC 규격서상 소문자 username 매핑
+      userName: params.userName, // KMC 규격서 표에는 username이나 실제 동작 JSON 규격은 userName
       userPhone: params.userPhone,
       userBirthday: params.userBirthday,
       userGender: params.userGender === 'MALE' ? '1' : '2',
