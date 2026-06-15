@@ -187,7 +187,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       let currentPublicKey = kmcPublicKey;
 
       // 1. KMC 거래토큰 1회용 제한을 준수하기 위해 매 SMS 발송 시 신규 토큰 생성
-      nvLog('FW', 'KMC 신규 토큰 발급 요청');
+      nvLog('FW', 'KMC 신규 토큰 발급 요청 시작');
       const tokenResponse = await fetch('/api/auth/kmc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -208,6 +208,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         currentPublicKey = tokenResult.data.publicKey;
         setKmcToken(currentToken);
         setKmcPublicKey(currentPublicKey);
+        nvLog('FW', `KMC 신규 토큰 획득 성공 - token(일부): [${currentToken.substring(0, 20)}...], publicKey(일부): [${currentPublicKey.substring(0, 20)}...]`);
       } else {
         throw new Error(tokenResult.message || 'KMC 인증 세션(토큰) 발급에 실패했습니다.');
       }
@@ -220,7 +221,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       // 성별 판단
       const userGender = ['1', '3', '5', '7'].includes(formData.genderCode) ? 'MALE' : 'FEMALE';
 
-      nvLog('FW', 'KMC SMS 인증 요청 전송', { userName: formData.userName });
+      nvLog('FW', `KMC SMS 인증 요청 전송 시도 - token(일부): [${currentToken.substring(0, 20)}...], userName: [${formData.userName}]`);
       const response = await fetch('/api/auth/kmc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -248,6 +249,9 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         setStatusMsg('2단계 완료: SMS 인증번호 발송 완료 (인증 대기)');
         if (result.encryptMOKToken) {
           setKmcToken(result.encryptMOKToken);
+          nvLog('FW', `KMC SMS 인증 요청 성공 (토큰 갱신됨) - 신규 토큰(일부): [${result.encryptMOKToken.substring(0, 20)}...]`);
+        } else {
+          nvLog('FW', '⚠️ KMC SMS 인증 요청 성공하였으나 갱신된 토큰이 응답에 없습니다.');
         }
         setIsSmsSent(true);
         setSmsTimer(180);
@@ -278,7 +282,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
     setStatusMsg('3단계: KMC 인증번호 검증 요청 중...');
     setStatusError('');
     try {
-      nvLog('FW', 'KMC 인증번호 검증 시작');
+      nvLog('FW', `KMC 인증번호 검증 시작 - 전송할 토큰(일부): [${kmcToken ? kmcToken.substring(0, 20) + '...' : '누락'}], 공개키(일부): [${kmcPublicKey ? kmcPublicKey.substring(0, 20) + '...' : '누락'}], 인증번호: [${authNumber}]`);
 
       const is19xx = ['1', '2', '5', '6'].includes(formData.genderCode);
       const century = is19xx ? '19' : '20';
