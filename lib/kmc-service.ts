@@ -364,12 +364,15 @@ export async function requestKmcAuth(
   log('📱 [KMC_REQ] KMC SMS/PASS 인증요청 단계 시작');
   try {
     // 1) MOKAuthInfo JSON 데이터 구성
-    const usageCode = process.env.KMC_USAGE_CODE || '01005';
+    const serviceType = params.serviceType || 'telcoAuth-Adult';
+    const defaultUsageCode = serviceType === 'telcoAuth-Adult' ? '01016' : '01005';
+    const usageCode = process.env.KMC_USAGE_CODE || defaultUsageCode;
+
     const authInfo = {
-      serviceType: params.serviceType || 'telcoAuth-Adult', // 기본 성인인증
+      serviceType,
       providerId: params.providerId,
       reqAuthType: params.reqAuthType,
-      usageCode, // 본인확인용/성인인증용
+      usageCode, // 성인인증용(01016) 또는 본인확인용(01005)
       userName: params.userName,
       userPhone: params.userPhone,
       userBirthday: params.userBirthday,
@@ -379,7 +382,7 @@ export async function requestKmcAuth(
     };
 
     log(`⚡ [KMC_REQ] Step 1: 요청 바디(MOKAuthInfo) JSON 데이터 구성 완료 (마스킹 처리)`);
-    log(`⚡ [KMC_REQ] Step 1-1: 적용된 서비스 이용 코드(usageCode) = [${usageCode}]`);
+    log(`⚡ [KMC_REQ] Step 1-1: 적용된 서비스 이용 코드(usageCode) = [${usageCode}] (상품타입: [${serviceType}])`);
 
     // 2) KMC 서버로부터 받은 일회용 공개키를 PEM 형태로 포맷팅
     const formatPemPublic = (base64Key: string) => {
