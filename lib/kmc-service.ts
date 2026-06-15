@@ -311,7 +311,7 @@ export async function getKmcToken(siteUrl: string, trace?: string[]): Promise<{ 
       ? 'https://scert-dir.mobile-ok.com/agent/v2/token/get'
       : 'https://cert-dir.mobile-ok.com/agent/v2/token/get';
 
-    log(`📡 [KMC_TOKEN] Step 3: KMC 서버로 토큰 요청 API 호출 시작 (Fixie 프록시 사용) - URL: ${apiUrl}`);
+    log(`📡 [KMC_TOKEN] Step 3: KMC 서버로 토큰 요청 API 호출 시작 (Fixie 프록시 사용) - URL: ${apiUrl}, siteUrl: [${siteUrl}]`);
     const response = await kmcClient.post(apiUrl, {
       serviceId: keyInfo.ServiceId,
       encryptReqClientInfo,

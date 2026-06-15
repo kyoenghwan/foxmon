@@ -30,10 +30,14 @@ export async function POST(req: Request) {
     switch (action) {
       case 'token': {
         let { siteUrl } = params;
+        trace.push(`📡 [API_ROUTE] 프론트엔드 전달 siteUrl: [${params.siteUrl || '없음'}]`);
         if (process.env.NEXT_PUBLIC_KMC_TEST_MODE !== 'true') {
-          // 환경변수 KMC_SITE_URL이 있으면 우선 사용하고 없으면 기본값 적용
-          siteUrl = process.env.KMC_SITE_URL || 'https://foxmon.co.kr';
+          const envSiteUrl = process.env.KMC_SITE_URL;
+          trace.push(`📡 [API_ROUTE] 환경변수 KMC_SITE_URL 로드: [${envSiteUrl || '미지정'}]`);
+          siteUrl = envSiteUrl || 'https://foxmon.co.kr';
         }
+        trace.push(`📡 [API_ROUTE] KMC로 송신할 최종 siteUrl 결정: [${siteUrl}]`);
+        
         if (!siteUrl) {
           return NextResponse.json({ success: false, message: 'siteUrl 파라미터가 누락되었습니다.', trace }, { status: 400 });
         }
