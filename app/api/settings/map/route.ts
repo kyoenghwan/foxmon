@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 // 네이버 지도 Client ID를 공개적으로 제공하는 엔드포인트
 // (Client ID는 프론트엔드 JS에서 사용되는 공개 키이므로 인증 불필요)
 export async function GET() {
