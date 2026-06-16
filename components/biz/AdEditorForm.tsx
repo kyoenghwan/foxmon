@@ -2054,7 +2054,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                     </div>
 
                     {/* 위치 지도 미리보기 */}
-                    {form.address && (
+                    {form.address && !isManualAddress && (
                         <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-3">
                             <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
                                 <MapPin className="w-4 h-4 text-primary" />

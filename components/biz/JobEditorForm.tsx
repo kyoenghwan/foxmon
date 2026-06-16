@@ -1504,7 +1504,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                     </div>
 
                     {/* 위치 지도 미리보기 */}
-                    {form.address && (
+                    {form.address && !isManualAddress && (
                         <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-3">
                             <h3 className="text-[14px] font-black text-gray-900 pb-3 border-b flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-primary" />
