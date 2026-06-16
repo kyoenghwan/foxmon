@@ -16,6 +16,7 @@ import { userSettingsAction } from '@/lib/actions';
 import { compressImageFile } from '@/lib/image-utils';
 import { LoadMyDataModal } from './LoadMyDataModal';
 import dynamic from 'next/dynamic';
+import NaverMap from '@/components/maps/NaverMap';
 
 // Fabric.js는 브라우저 전용이므로 SSR 비활성화
 import type { AdCanvasEditorRef } from '@/components/biz/AdCanvasEditor';
@@ -2033,6 +2034,18 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             </div>
                         </div>
                     </div>
+
+                    {/* 위치 지도 미리보기 */}
+                    {form.address && (
+                        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-3">
+                            <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-primary" />
+                                업체 위치
+                            </h3>
+                            <p className="text-[12px] text-gray-500 font-medium">{form.address}</p>
+                            <NaverMap address={form.address} />
+                        </div>
+                    )}
 
                     <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
                         <h3 className="font-black text-[15px] text-gray-800 flex items-center gap-2">

@@ -13,6 +13,7 @@ import {
 import { userSettingsAction } from '@/lib/actions';
 import { getUserPointsAction } from '@/app/actions/pointActions';
 import { useSearchParams } from 'next/navigation';
+import NaverMap from '@/components/maps/NaverMap';
 import { compressImageFile } from '@/lib/image-utils';
 import dynamic from 'next/dynamic';
 import { JobPaymentModal } from './JobPaymentModal';
@@ -1483,6 +1484,18 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                             </div>
                         </div>
                     </div>
+
+                    {/* 위치 지도 미리보기 */}
+                    {form.address && (
+                        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-3">
+                            <h3 className="text-[14px] font-black text-gray-900 pb-3 border-b flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                📍 업체 위치
+                            </h3>
+                            <p className="text-[12px] text-gray-500 font-medium">{form.address}</p>
+                            <NaverMap address={form.address} />
+                        </div>
+                    )}
 
                     <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
                         <h3 className="text-[14px] font-black text-gray-900 pb-3 border-b mb-5 flex items-center gap-2">
