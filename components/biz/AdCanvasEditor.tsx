@@ -637,7 +637,7 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
         let obj: any;
 
         if (preset === 'goldTitle') {
-            obj = new Textbox('골드 타이틀', {
+            obj = new Textbox('타이틀', {
                 left: width / 2,
                 top: canvasHeight / 2,
                 originX: 'center',
@@ -645,12 +645,10 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
                 fontFamily: 'Black Han Sans',
                 fontSize: 64,
                 fontWeight: 'bold',
-                fill: '#FDE047', // 노란색 (그라데이션 효과는 텍스트에 적용하기 까다로워 단순 색상과 그림자로 대체)
-                stroke: '#854D0E',
-                strokeWidth: 2,
+                fill: '#000000', // 검정색으로 변경
                 textAlign: 'center',
                 width: 400,
-                shadow: new Shadow({ color: 'rgba(0,0,0,0.8)', blur: 10, offsetX: 3, offsetY: 3 }),
+                shadow: new Shadow({ color: 'rgba(0,0,0,0.15)', blur: 5, offsetX: 1, offsetY: 1 }), // 은은한 그림자
                 editable: true,
             } as any);
         } else if (preset === 'neonBox') {
@@ -663,9 +661,9 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
                 height: 150,
                 fill: 'rgba(0,0,0,0.7)',
                 rx: 15, ry: 15,
-                stroke: '#3B82F6',
-                strokeWidth: 2,
-                shadow: new Shadow({ color: '#3B82F6', blur: 15, offsetX: 0, offsetY: 0 }),
+                stroke: '#e5e7eb', // 깔끔한 회색 테두리
+                strokeWidth: 1.5,
+                shadow: new Shadow({ color: 'rgba(0,0,0,0.15)', blur: 10, offsetX: 0, offsetY: 0 }),
             });
             const text = new Textbox('여기를 클릭하여 내용을 입력하세요\n- 조건 1\n- 조건 2\n- 연락처: 010-0000-0000', {
                 left: width / 2,
@@ -747,15 +745,34 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
         if (!canvas || !obj) return;
 
         const isInlineStyleKey = ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'underline', 'linethrough', 'fill', 'textBackgroundColor'].includes(key);
-        const isSelectedText = (obj.type === 'textbox' || obj.type === 'itext') && obj.isEditing && obj.selectionStart !== obj.selectionEnd;
+        const isSelectedText = (obj.type === 'textbox' || obj.type === 'itext') && obj.isEditing;
 
-        if (isInlineStyleKey && isSelectedText) {
+        // 선택 영역 정보 임시 저장
+        let selectionStart = 0;
+        let selectionEnd = 0;
+        if (isSelectedText) {
+            selectionStart = obj.selectionStart;
+            selectionEnd = obj.selectionEnd;
+        }
+
+        if (isInlineStyleKey && isSelectedText && selectionStart !== selectionEnd) {
             obj.setSelectionStyles({ [key]: val });
         } else {
             obj.set(key as any, val);
         }
         
         canvas.renderAll();
+
+        // 선택 영역 및 포커스 복구
+        if (isSelectedText) {
+            obj.setSelection(selectionStart, selectionEnd);
+            obj.enterEditing();
+            if (obj.hiddenTextarea) {
+                obj.hiddenTextarea.focus();
+            }
+            canvas.renderAll();
+        }
+
         emitChange(canvas);
 
         // 상태 동기화
@@ -907,12 +924,12 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
                 <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mr-1">디자인 블록</span>
                     <button onClick={() => addTemplate('goldTitle')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg text-[12px] font-bold transition-all border border-yellow-400">
-                        <Type className="w-3.5 h-3.5" /> 골드 타이틀
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-[12px] font-bold transition-all border border-gray-200">
+                        <Type className="w-3.5 h-3.5" /> 타이틀
                     </button>
                     <button onClick={() => addTemplate('neonBox')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 hover:bg-blue-800 text-blue-100 rounded-lg text-[12px] font-bold transition-all border border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]">
-                        <Layers className="w-3.5 h-3.5" /> 네온 정보 박스
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-[12px] font-bold transition-all border border-gray-200">
+                        <Layers className="w-3.5 h-3.5" /> 정보 박스
                     </button>
                     <div className="w-px h-6 bg-gray-200 mx-1" />
                     <button onClick={() => addTemplate('title')}
