@@ -879,6 +879,12 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
 
     const isTextSelected = activeObj && (activeObj.type === 'text' || activeObj.type === 'textbox' || activeObj.type === 'itext');
 
+    // 플로팅 툴바 top 위치 계산 (오브젝트 상단 위 배치, 캔버스 상단 영역 이탈 시 하단 배치)
+    const toolbarHeight = isTextSelected ? 80 : 42;
+    const margin = 12;
+    const computedTop = activeObjCoords.top - toolbarHeight - margin;
+    const finalToolbarTop = computedTop < 0 ? (activeObjCoords.top + activeObjCoords.height + margin) : computedTop;
+
     return (
         <div className="space-y-4">
             <style>{`
@@ -1038,7 +1044,7 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
                             className="absolute z-50 bg-[#f3f2f1] rounded-md shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-[#c8c6c4] flex animate-in fade-in zoom-in-95 duration-200 overflow-hidden"
                             style={{
                                 left: Math.max(0, Math.min(activeObjCoords.left + (activeObjCoords.width / 2) - (isTextSelected ? 220 : 120), width - (isTextSelected ? 440 : 240))),
-                                top: activeObjCoords.top + activeObjCoords.height + 15
+                                top: finalToolbarTop
                             }}
                             onClick={e => e.stopPropagation()}
                             onMouseDown={e => e.stopPropagation()}
