@@ -436,6 +436,10 @@ export async function requestKmcAuth(
       : 'https://cert-dir.mobile-ok.com/agent/v1/auth/request';
 
     log(`📡 [KMC_REQ] Step 4: KMC 본인확인 인증번호 전송 API 호출 시작 (Fixie 프록시) - URL: ${apiUrl}`);
+    log(`   - [INPUT] encryptMOKToken: [${params.encryptMOKToken}]`);
+    log(`   - [INPUT] encryptMOKAuthInfo: [${encryptMOKAuthInfo}]`);
+    log(`   - [INPUT] siteUrl: [${params.siteUrl}]`);
+
     const response = await kmcClient.post(apiUrl, {
       encryptMOKToken: params.encryptMOKToken,
       encryptMOKAuthInfo,
@@ -443,7 +447,12 @@ export async function requestKmcAuth(
     });
 
     const result = response.data;
-    log(`⚡ [KMC_REQ] KMC API 응답 수신 - resultCode: [${result.resultCode}], resultMsg: [${result.resultMsg}]`);
+    log(`⚡ [KMC_REQ] KMC API 응답 수신`);
+    log(`   - [OUTPUT] resultCode: [${result.resultCode}]`);
+    log(`   - [OUTPUT] resultMsg: [${result.resultMsg}]`);
+    log(`   - [OUTPUT] encryptMOKToken: [${result.encryptMOKToken || '없음'}]`);
+    log(`   - [OUTPUT] resendCount: [${result.resendCount || '없음'}]`);
+    log(`   - [OUTPUT RAW JSON]: [${JSON.stringify(result)}]`);
 
     if (result.resultCode === '2000') {
       log('✅ [KMC_REQ] KMC 본인확인 SMS 인증요청 성공');
