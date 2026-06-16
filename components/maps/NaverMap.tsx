@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { nvLog } from '@/lib/logger';
 
 declare global {
   interface Window {
@@ -22,10 +23,11 @@ export default function NaverMap({ address }: NaverMapProps) {
   // 1. DB에서 Client ID 가져오기 + 서버사이드 Geocoding 동시 실행
   useEffect(() => {
     let cancelled = false;
+    nvLog('FW', `[NaverMap] 컴포넌트 초기화 - 주소: "${address}"`);
 
     const init = async () => {
       try {
-        // Client ID와 좌표를 동시에 가져옴
+        nvLog('FW', `[NaverMap] DB설정 및 좌표 변환 API 호출 시작...`);
         const [mapRes, geoRes] = await Promise.all([
           fetch('/api/settings/map'),
           fetch(`/api/settings/geocode?query=${encodeURIComponent(address)}`)
@@ -34,9 +36,15 @@ export default function NaverMap({ address }: NaverMapProps) {
         const mapData = await mapRes.json();
         const geoData = await geoRes.json();
 
-        if (cancelled) return;
+        if (cancelled) {
+          nvLog('FW', `[NaverMap] 컴포넌트 언마운트로 작업 취소됨`);
+          return;
+        }
+
+        nvLog('FW', `[NaverMap] API 응답 수신`, { mapData, geoData });
 
         if (!mapData.clientId) {
+          nvLog('FW', `[NaverMap] 에러 - 지도 API 키(Client ID)가 설정되지 않음`);
           setError('지도 API 키가 설정되지 않았습니다.');
           setLoading(false);
           return;
@@ -45,12 +53,14 @@ export default function NaverMap({ address }: NaverMapProps) {
         setClientId(mapData.clientId);
 
         if (geoData.lat && geoData.lng) {
+          nvLog('FW', `[NaverMap] 주소 변환 성공 - 좌표:`, { lat: geoData.lat, lng: geoData.lng });
           setCoords({ lat: geoData.lat, lng: geoData.lng });
         } else {
-          // Geocoding 실패 시에도 지도는 표시 (기본 위치)
+          nvLog('FW', `[NaverMap] 경고 - 주소 변환 결과 없음 (기본 서울시청 위치 사용)`, { error: geoData.error });
           setCoords(null);
         }
-      } catch {
+      } catch (err: any) {
+        nvLog('FW', `[NaverMap] 에러 - API 호출 중 오류 발생:`, err);
         if (!cancelled) {
           setError('지도 설정을 불러올 수 없습니다.');
           setLoading(false);
@@ -68,6 +78,7 @@ export default function NaverMap({ address }: NaverMapProps) {
 
     // 이미 로드된 경우
     if (window.naver?.maps) {
+      nvLog('FW', `[NaverMap] 네이버 지도 객체가 이미 window.naver.maps에 로드되어 있음 -> 바로 렌더링`);
       renderMap();
       return;
     }
@@ -75,8 +86,10 @@ export default function NaverMap({ address }: NaverMapProps) {
     // 스크립트가 이미 추가되어 로딩 중인 경우 대기
     const existingScript = document.querySelector('script[src*="oapi.map.naver.com"]');
     if (existingScript) {
+      nvLog('FW', `[NaverMap] 네이버 지도 스크립트가 이미 DOM에 존재함. 완료 대기 중...`);
       const checkLoaded = setInterval(() => {
         if (window.naver?.maps) {
+          nvLog('FW', `[NaverMap] 대기하던 스크립트 로드 완료 감지 -> 렌더링 시작`);
           clearInterval(checkLoaded);
           renderMap();
         }
@@ -84,11 +97,16 @@ export default function NaverMap({ address }: NaverMapProps) {
       return () => clearInterval(checkLoaded);
     }
 
+    nvLog('FW', `[NaverMap] 네이버 지도 JS 스크립트 동적 로드 시작 (ncpClientId: ${clientId})`);
     const script = document.createElement('script');
     script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${clientId}`;
     script.async = true;
-    script.onload = () => renderMap();
-    script.onerror = () => {
+    script.onload = () => {
+      nvLog('FW', `[NaverMap] 네이버 지도 스크립트 로드 완료(onload) -> 렌더링 시작`);
+      renderMap();
+    };
+    script.onerror = (err) => {
+      nvLog('FW', `[NaverMap] 에러 - 네이버 지도 스크립트 로드 실패(onerror)`, err);
       setError('네이버 지도를 불러올 수 없습니다.');
       setLoading(false);
     };
@@ -97,32 +115,48 @@ export default function NaverMap({ address }: NaverMapProps) {
 
   // 3. 지도 렌더링
   const renderMap = () => {
-    if (!mapRef.current || !window.naver?.maps) return;
+    if (!mapRef.current) {
+      nvLog('FW', `[NaverMap] 에러 - 지도 컨테이너 엘리먼트(mapRef)가 없음`);
+      return;
+    }
+    if (!window.naver?.maps) {
+      nvLog('FW', `[NaverMap] 에러 - window.naver.maps 객체가 존재하지 않음`);
+      return;
+    }
 
-    // 좌표가 있으면 해당 위치, 없으면 서울시청 기본 위치
     const lat = coords?.lat ?? 37.5666805;
     const lng = coords?.lng ?? 126.9784147;
     const hasCoords = !!coords;
 
-    const position = new window.naver.maps.LatLng(lat, lng);
-    const map = new window.naver.maps.Map(mapRef.current, {
-      center: position,
-      zoom: 16,
-      zoomControl: true,
-      zoomControlOptions: {
-        position: window.naver.maps.Position.TOP_LEFT,
-        style: window.naver.maps.ZoomControlStyle.SMALL
-      }
-    });
+    nvLog('FW', `[NaverMap] 네이버 지도 객체 생성 시작 - 좌표:`, { lat, lng });
 
-    if (hasCoords) {
-      new window.naver.maps.Marker({
-        position,
-        map,
+    try {
+      const position = new window.naver.maps.LatLng(lat, lng);
+      const map = new window.naver.maps.Map(mapRef.current, {
+        center: position,
+        zoom: 16,
+        zoomControl: true,
+        zoomControlOptions: {
+          position: window.naver.maps.Position.TOP_LEFT,
+          style: window.naver.maps.ZoomControlStyle.SMALL
+        }
       });
-    }
 
-    setLoading(false);
+      if (hasCoords) {
+        nvLog('FW', `[NaverMap] 지도 마커 생성 완료`);
+        new window.naver.maps.Marker({
+          position,
+          map,
+        });
+      }
+
+      nvLog('FW', `[NaverMap] 지도 렌더링 완료 및 로딩 해제`);
+      setLoading(false);
+    } catch (err) {
+      nvLog('FW', `[NaverMap] 에러 - 지도 객체 생성 중 예외 발생:`, err);
+      setError('지도를 초기화하는 중 오류가 발생했습니다.');
+      setLoading(false);
+    }
   };
 
   if (error) {
