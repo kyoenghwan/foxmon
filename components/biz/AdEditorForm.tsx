@@ -1910,12 +1910,38 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     <span>상세 주소</span>
                                     <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
-                                <div className="flex-1 w-full">
-                                    <input 
-                                        type="text" value={form.address || ''} onChange={e => update('address', e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary"
-                                        placeholder="예: 서울시 강남구 역삼동 123-4" 
-                                    />
+                                <div className="flex-1 w-full flex gap-2">
+                                    <input type="text" value={form.address || ''} readOnly
+                                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none bg-gray-50 text-gray-700 font-medium cursor-default"
+                                        placeholder="주소 검색 버튼을 클릭하세요" />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const script = document.createElement('script');
+                                            script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+                                            script.onload = () => {
+                                                new (window as any).daum.Postcode({
+                                                    oncomplete: (data: any) => {
+                                                        const fullAddr = data.roadAddress || data.jibunAddress || data.address;
+                                                        update('address', fullAddr);
+                                                    }
+                                                }).open();
+                                            };
+                                            if ((window as any).daum?.Postcode) {
+                                                new (window as any).daum.Postcode({
+                                                    oncomplete: (data: any) => {
+                                                        const fullAddr = data.roadAddress || data.jibunAddress || data.address;
+                                                        update('address', fullAddr);
+                                                    }
+                                                }).open();
+                                            } else {
+                                                document.head.appendChild(script);
+                                            }
+                                        }}
+                                        className="shrink-0 px-4 py-2 bg-gray-900 hover:bg-black text-white text-[12px] font-bold rounded-lg transition-colors shadow-sm active:scale-95"
+                                    >
+                                        주소 검색
+                                    </button>
                                 </div>
                             </div>
 

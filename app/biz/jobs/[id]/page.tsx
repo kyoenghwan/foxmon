@@ -56,7 +56,7 @@ export default async function BizJobEditPage({ params }: { params: Promise<{ id:
         work_type: '',
         benefits: '',
         contact_info: '',
-        address: ''
+        address: job.address || ''
     };
 
     return (
