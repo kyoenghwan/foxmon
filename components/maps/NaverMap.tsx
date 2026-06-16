@@ -97,9 +97,9 @@ export default function NaverMap({ address }: NaverMapProps) {
       return () => clearInterval(checkLoaded);
     }
 
-    nvLog('FW', `[NaverMap] 네이버 지도 JS 스크립트 동적 로드 시작 (ncpClientId: ${clientId})`);
+    nvLog('FW', `[NaverMap] 네이버 지도 JS 스크립트 동적 로드 시작 (ncpKeyId: ${clientId})`);
     const script = document.createElement('script');
-    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${clientId}`;
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${clientId}`;
     script.async = true;
     script.onload = () => {
       nvLog('FW', `[NaverMap] 네이버 지도 스크립트 로드 완료(onload) -> 렌더링 시작`);
