@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Save, Key, AlertCircle, Loader2, Eye, EyeOff, Coins } from 'lucide-react';
+import { Save, Key, AlertCircle, Loader2, Eye, EyeOff, Coins, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getSiteSettings, updateSiteSettings } from '@/actions/admin/siteSettings';
 
@@ -12,6 +12,7 @@ export default function AdminSettingsPage() {
         openai_api_key: '',
         telegram_bot_token: '',
         telegram_bot_username: '',
+        naver_map_client_id: '',
         bank_name: '',
         account_number: '',
         account_holder: ''
@@ -29,6 +30,7 @@ export default function AdminSettingsPage() {
                     openai_api_key: data.openai_api_key || '',
                     telegram_bot_token: data.telegram_bot_token || '',
                     telegram_bot_username: data.telegram_bot_username || '',
+                    naver_map_client_id: data.naver_map_client_id || '',
                     bank_name: data.bank_name || '',
                     account_number: data.account_number || '',
                     account_holder: data.account_holder || ''
@@ -130,7 +132,23 @@ export default function AdminSettingsPage() {
                         </p>
                     </div>
 
+                    <hr className="border-gray-100" />
 
+                    {/* Naver Maps Client ID 설정 */}
+                    <div>
+                        <label className="block text-[14px] font-bold text-gray-800 mb-2">네이버 지도 API Client ID</label>
+                        <input
+                            type="text"
+                            value={settings.naver_map_client_id}
+                            onChange={(e) => setSettings({ ...settings, naver_map_client_id: e.target.value })}
+                            placeholder="예: 9YET2CLQEkinryeYut1A..."
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight"
+                        />
+                        <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
+                            <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                            네이버 클라우드 플랫폼에서 발급받은 Maps API Client ID를 입력하세요. 구인 상세 페이지에서 업체 주소를 지도로 표시하는 데 사용됩니다.
+                        </p>
+                    </div>
 
                 </div>
 

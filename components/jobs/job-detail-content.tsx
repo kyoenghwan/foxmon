@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, MessageCircle, ThumbsUp, ThumbsDown, X } from 'lucide-react';
 import Link from 'next/link';
 import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM';
+import NaverMap from '@/components/maps/NaverMap';
 
 export function JobDetailContent({ job, isModal = false, onClose }: { job: any, isModal?: boolean, onClose?: () => void }) {
   const [isScrapped, setIsScrapped] = React.useState(false);
@@ -346,6 +347,16 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     </div>
                 </section>
                 
+                {/* 1-2. 위치 지도 */}
+                {(displayJob.address || displayJob.location) && (
+                <section>
+                    <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
+                       <span className="w-1 h-5 bg-primary rounded-full"></span> 위치
+                    </h3>
+                    <NaverMap address={displayJob.address || displayJob.location} />
+                </section>
+                )}
+
                 {/* 2. 업소 이미지 */}
                 {Array.isArray(displayJob.gallery_images || displayJob.images) && (displayJob.gallery_images || displayJob.images).length > 0 && (
                 <section>
