@@ -280,6 +280,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
     const mode = 'JOB' as string;
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'job' | 'detail'>('job');
+    const [isManualAddress, setIsManualAddress] = useState(false);
     const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | null>(null);
     
     // 동적 SNS 계정 연결 상태 (업체 프로필과 연동)
@@ -1286,7 +1287,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                             <Info className="w-4 h-4 text-primary" />
                             상세 업소 정보
                         </h3>
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1 max-w-3xl">
                             {/* 상호명 */}
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-1.5">
                                 <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
@@ -1362,12 +1363,29 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                     <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
                                 <div className="flex-1 w-full flex gap-2">
-                                    <input type="text" value={form.address} readOnly
-                                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none bg-gray-50 text-gray-700 font-medium cursor-default"
-                                        placeholder="주소 검색 버튼을 클릭하세요" />
+                                    <input type="text" value={form.address || ''} readOnly={!isManualAddress}
+                                        onChange={isManualAddress ? (e) => update('address', e.target.value) : undefined}
+                                        className={`flex-1 px-3 py-2 border rounded-lg text-[13px] outline-none font-medium transition-colors ${
+                                            isManualAddress 
+                                                ? 'bg-white text-gray-900 border-purple-500 focus:ring-1 focus:ring-purple-500/20 cursor-text' 
+                                                : 'bg-gray-50 text-gray-700 border-gray-200 cursor-default'
+                                        }`}
+                                        placeholder={isManualAddress ? "주소를 직접 입력하세요 (해외 주소 등)" : "주소 검색 버튼을 클릭하세요"} />
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsManualAddress(!isManualAddress)}
+                                        className={`shrink-0 px-3 py-2 text-[12px] font-bold rounded-lg transition-all active:scale-95 border ${
+                                            isManualAddress 
+                                                ? 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700' 
+                                                : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300'
+                                        }`}
+                                    >
+                                        직접 입력
+                                    </button>
                                     <button
                                         type="button"
                                         onClick={() => {
+                                            setIsManualAddress(false);
                                             const script = document.createElement('script');
                                             script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
                                             script.onload = () => {
