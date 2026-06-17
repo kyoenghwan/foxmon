@@ -225,24 +225,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
   return (
     <div className="flex flex-col min-h-full bg-white relative">
       
-      {/* 상단 닫기/뒤로가기 헤더 */}
-      <div className="sticky top-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100 px-4 h-14 flex items-center justify-end shrink-0 gap-2">
-         {isModal ? (
-           <button
-             onClick={onClose}
-             className="focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0 px-4 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] sm:text-[13px] font-black transition-all"
-           >
-             닫기
-           </button>
-         ) : (
-           <Link
-             href="/jobs"
-             className="focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0 px-4 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] sm:text-[13px] font-black transition-all flex items-center justify-center"
-           >
-             닫기
-           </Link>
-         )}
-      </div>
+      {/* 닫기 버튼 이동으로 상단 헤더 제거 */}
 
       <div className="flex-1 overflow-y-auto pb-28 bg-gray-50/50">
         
@@ -556,6 +539,23 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
             <span className="text-primary text-[20px] mb-0.5">⚡</span>
             FoxTalk 지원하기
         </div>
+        
+        {isModal ? (
+          <Button
+            onClick={onClose}
+            variant="outline"
+            className="h-[52px] shrink-0 border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-[15px] rounded-2xl shadow-sm px-6"
+          >
+            닫기
+          </Button>
+        ) : (
+          <Link
+            href="/jobs"
+            className="h-[52px] shrink-0 border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-[15px] rounded-2xl shadow-sm px-6 flex items-center justify-center"
+          >
+            닫기
+          </Link>
+        )}
       </div>
 
     </div>
