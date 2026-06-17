@@ -13,9 +13,9 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
     const { nextUrl, cookies, auth: session } = req;
     
-    const isCookieVerified = cookies.has('age_verified');
+    const hasGuestSession = cookies.has('foxmon_guest_session');
     const isSessionVerified = session?.user && (session.user as any).is_age_verified;
-    const isAgeVerified = isCookieVerified || isSessionVerified;
+    const isAgeVerified = isSessionVerified || (cookies.has('age_verified') && hasGuestSession);
 
     const isAgeGatePage = nextUrl.pathname === '/age-gate';
     const isRegisterPage = nextUrl.pathname === '/register';
@@ -108,7 +108,8 @@ export const config = {
         {
             source: '/((?!api|_next/static|_next/image|fox-office|.*\\.png$).*)',
             missing: [
-                { type: 'cookie', key: 'age_verified', value: 'true' }
+                { type: 'cookie', key: 'age_verified', value: 'true' },
+                { type: 'cookie', key: 'foxmon_guest_session' }
             ]
         }
     ],
