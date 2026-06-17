@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getRotatedAds, recordAdExposure, AdItem } from '@/lib/ad-service';
+import { useSession } from 'next-auth/react';
 
 import { useAdStore } from '@/hooks/use-ad-store';
 
 // 메인 배너 컴포넌트
 export function MainBanner() {
+    const { data: session } = useSession();
     const { premiumMainAds, isPremiumMainAdsLoaded, fetchPremiumMainAds } = useAdStore();
     const [loading, setLoading] = useState(!isPremiumMainAdsLoaded);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -136,9 +138,11 @@ export function MainBanner() {
         return (
             <div className="w-full h-full bg-white border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 text-center">
                 <p className="text-gray-400 font-bold mb-2">등록된 프리미엄 광고가 없습니다.</p>
-                <Link href="/jobs/post">
-                    <Button variant="outline" size="sm" className="font-bold">광고 등록하기</Button>
-                </Link>
+                {session?.user?.role !== 'VIEWER' && (
+                    <Link href="/jobs/post">
+                        <Button variant="outline" size="sm" className="font-bold">광고 등록하기</Button>
+                    </Link>
+                )}
             </div>
         );
     }

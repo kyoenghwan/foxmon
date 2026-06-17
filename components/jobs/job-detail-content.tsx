@@ -13,6 +13,40 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
   const [isDetailLoading, setIsDetailLoading] = React.useState(false);
   const [isViewer, setIsViewer] = React.useState(false);
 
+  const maskName = (name: string) => {
+    if (!name || name === '비공개') return name;
+    const trimmed = name.trim();
+    if (trimmed.length <= 1) return trimmed;
+    if (trimmed.length === 2) return trimmed[0] + '*';
+    return trimmed[0] + '*'.repeat(trimmed.length - 2) + trimmed[trimmed.length - 1];
+  };
+
+  const maskPhone = (phone: string) => {
+    if (!phone || phone === '비공개') return phone;
+    const trimmed = phone.trim();
+    return trimmed.replace(/(\d{3})[-.]?\d{3,4}[-.]?(\d{4})/, '$1-****-$2');
+  };
+
+  const maskKakao = (id: string) => {
+    if (!id || id === '비공개') return id;
+    const trimmed = id.trim();
+    if (trimmed.length <= 1) return trimmed[0] + '*';
+    return trimmed[0] + '*'.repeat(trimmed.length - 1);
+  };
+
+  const maskSnsValue = (type: string, value: string) => {
+    if (!value || value === '비공개') return value;
+    const trimmed = value.trim();
+    if (type.toLowerCase() === 'phone' || type.toLowerCase() === 'tel') {
+      return maskPhone(trimmed);
+    }
+    if (trimmed.startsWith('http')) {
+      return '링크 비공개';
+    }
+    if (trimmed.length <= 1) return trimmed + '*';
+    return trimmed[0] + '*'.repeat(trimmed.length - 1);
+  };
+
   React.useEffect(() => {
     fetch('/api/auth/session')
       .then(res => res.json())
@@ -217,9 +251,9 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
   // DB에 없는 부가 정보들 하드코딩 대체 (실제 job 데이터 사용, 없으면 비공개/기본값)
   const contact = {
     nickname: displayJob.nickname || '비공개',
-    phone: displayJob.contact_phone || '비공개',
-    kakao: displayJob.kakao_id || '비공개',
-    manager: displayJob.contact_name || displayJob.company_name || displayJob.company || '담당자'
+    phone: isViewer ? maskPhone(displayJob.contact_phone || '비공개') : (displayJob.contact_phone || '비공개'),
+    kakao: isViewer ? maskKakao(displayJob.kakao_id || '비공개') : (displayJob.kakao_id || '비공개'),
+    manager: isViewer ? maskName(displayJob.contact_name || displayJob.company_name || displayJob.company || '담당자') : (displayJob.contact_name || displayJob.company_name || displayJob.company || '담당자')
   };
 
   return (
@@ -288,7 +322,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                                     <div className="text-gray-400 font-medium flex items-center">전화번호</div>
                                     <div className="font-black text-primary text-[16px] tracking-tight flex items-center justify-between group">
                                         <span>{contact.phone}</span>
-                                        {contact.phone !== '비공개' && (
+                                        {contact.phone !== '비공개' && !isViewer && (
                                             <button 
                                                 onClick={() => navigator.clipboard.writeText(contact.phone).then(() => alert(`전화번호 '${contact.phone}' 가 복사되었습니다!`))}
                                                 className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform"
@@ -305,17 +339,19 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                                                 <div className="text-gray-400 font-medium flex items-center capitalize">{sns.type}</div>
                                                 <div className="font-bold text-gray-900 flex items-center justify-between group">
                                                     <span className="truncate mr-2 flex items-center gap-1.5 text-[13px]">
-                                                        {getSnsBadge(sns.type)} {sns.value}
+                                                        {getSnsBadge(sns.type)} {isViewer ? maskSnsValue(sns.type, sns.value) : sns.value}
                                                     </span>
-                                                    <button 
-                                                        onClick={() => {
-                                                            if (sns.value.startsWith('http')) window.open(sns.value, '_blank');
-                                                            else navigator.clipboard.writeText(sns.value).then(() => alert(`'${sns.value}' 가 복사되었습니다!`));
-                                                        }}
-                                                        className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform shrink-0"
-                                                    >
-                                                        복사
-                                                    </button>
+                                                    {!isViewer && (
+                                                        <button 
+                                                            onClick={() => {
+                                                                if (sns.value.startsWith('http')) window.open(sns.value, '_blank');
+                                                                else navigator.clipboard.writeText(sns.value).then(() => alert(`'${sns.value}' 가 복사되었습니다!`));
+                                                            }}
+                                                            className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform shrink-0"
+                                                        >
+                                                            복사
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </React.Fragment>
                                         ))
@@ -326,7 +362,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                                                 <span className="flex items-center gap-1.5 text-[13px]">
                                                     {getSnsBadge('kakao')} {contact.kakao}
                                                 </span>
-                                                {contact.kakao !== '비공개' && (
+                                                {contact.kakao !== '비공개' && !isViewer && (
                                                     <button 
                                                         onClick={() => navigator.clipboard.writeText(contact.kakao).then(() => alert(`카카오톡 아이디 '${contact.kakao}' 가 복사되었습니다!`))}
                                                         className="px-2 py-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 rounded text-[11px] font-bold shadow-sm active:scale-95 transition-transform"

@@ -249,11 +249,13 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                         )}
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-3 ml-auto">
-                        <Link href="/biz/ads/new">
-                            <span className="text-xs sm:text-sm font-black text-white bg-primary hover:bg-orange-600 px-3 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1">
-                                <Plus className="w-3.5 h-3.5" /> 광고 등록
-                            </span>
-                        </Link>
+                        {session?.user?.role !== 'VIEWER' && (
+                            <Link href="/biz/ads/new">
+                                <span className="text-xs sm:text-sm font-black text-white bg-primary hover:bg-orange-600 px-3 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1">
+                                    <Plus className="w-3.5 h-3.5" /> 광고 등록
+                                </span>
+                            </Link>
+                        )}
                         <button 
                             onClick={() => setShowAllPremium(!showAllPremium)}
                             className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
@@ -305,11 +307,13 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                                 </Button>
                             </Link>
                         )}
-                        <Link href="/biz/ads/new">
-                            <span className="text-xs sm:text-sm font-black text-white bg-primary hover:bg-orange-600 px-3 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1">
-                                <Plus className="w-3.5 h-3.5" /> 광고 등록
-                            </span>
-                        </Link>
+                        {session?.user?.role !== 'VIEWER' && (
+                            <Link href="/biz/ads/new">
+                                <span className="text-xs sm:text-sm font-black text-white bg-primary hover:bg-orange-600 px-3 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1">
+                                    <Plus className="w-3.5 h-3.5" /> 광고 등록
+                                </span>
+                            </Link>
+                        )}
                         <button 
                             onClick={() => setShowAllSpecial(!showAllSpecial)}
                             className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
@@ -360,11 +364,13 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                                 </Button>
                             </Link>
                         )}
-                        <Link href="/biz/ads/new">
-                            <span className="text-xs sm:text-sm font-black text-white bg-primary hover:bg-orange-600 px-3 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1">
-                                <Plus className="w-3.5 h-3.5" /> 광고 등록
-                            </span>
-                        </Link>
+                        {session?.user?.role !== 'VIEWER' && (
+                            <Link href="/biz/ads/new">
+                                <span className="text-xs sm:text-sm font-black text-white bg-primary hover:bg-orange-600 px-3 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1">
+                                    <Plus className="w-3.5 h-3.5" /> 광고 등록
+                                </span>
+                            </Link>
+                        )}
                         <button 
                             onClick={() => setShowAllGeneral(!showAllGeneral)}
                             className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"

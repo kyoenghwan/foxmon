@@ -158,8 +158,8 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
     if (session && session.user) {
         // Logged In State
         const displayName = (session.user as any).nickname || session.user.name || (session.user.email ? session.user.email.split('@')[0] : '회원');
-        const isEmployer = session.user.role === 'EMPLOYER' || session.user.role === 'ADMIN' || session.user.role === 'SUPER_ADMIN';
-        const showResumeMenu = session.user.role !== 'EMPLOYER';
+        const isEmployer = (session.user.role === 'EMPLOYER' || session.user.role === 'ADMIN' || session.user.role === 'SUPER_ADMIN') && session.user.role !== 'VIEWER';
+        const showResumeMenu = session.user.role !== 'EMPLOYER' && session.user.role !== 'VIEWER';
         
         return (
             <div className="h-full w-full bg-white rounded-2xl border p-4 sm:p-5 flex flex-col justify-between shadow-sm">
@@ -186,9 +186,11 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                 </MarqueeText>
                             </div>
                             {/* 프로필 설정 버튼 */}
-                            <div className="scale-100 origin-left shrink-0">
-                                <SettingsModal />
-                            </div>
+                            {session.user.role !== 'VIEWER' && (
+                                <div className="scale-100 origin-left shrink-0">
+                                    <SettingsModal />
+                                </div>
+                            )}
                         </div>
 
                         {/* 2. min-[800px] 미만 (아래쪽 배치 - 모바일) 레이아웃 */}
@@ -200,9 +202,11 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                         <span className="text-primary">{displayName}</span>님 반갑습니다!
                                     </MarqueeText>
                                 </div>
-                                <div className="scale-90 min-[375px]:scale-95 origin-right shrink-0">
-                                    <SettingsModal />
-                                </div>
+                                {session.user.role !== 'VIEWER' && (
+                                    <div className="scale-90 min-[375px]:scale-95 origin-right shrink-0">
+                                        <SettingsModal />
+                                    </div>
+                                )}
                             </div>
 
                             {/* 2행: 이력서/업체 관리 + 더보기(접기/열기) */}
