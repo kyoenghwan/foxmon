@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { nvLog } from '@/lib/logger';
 import { 
-  getKmcToken, 
-  requestKmcAuth, 
-  confirmKmcAuth, 
+  decryptMokKeyInfo, 
+  encryptKmcTokenRequest, 
+  confirmMokStandardAuth, 
   isMockMode, 
   KmcUserInfo 
 } from '@/lib/kmc-service';
@@ -13,8 +14,16 @@ import { RA_PARSE_EXTERNAL_AUTH_DATA } from '@/src/atoms/ra/auth/RA_PARSE_EXTERN
 export async function POST(req: Request) {
   const trace: string[] = [];
   try {
-    const body = await req.json();
-    const { action, ...params } = body;
+    let action = 'token';
+    let params: any = {};
+    
+    try {
+      const body = await req.json();
+      action = body.action || 'token';
+      params = body;
+    } catch (e) {
+      trace.push('📡 [API_ROUTE] JSON 파싱 실패 또는 바디 없음. 기본 action: [token] 설정');
+    }
 
     nvLog('FW', `▶️ KMC API 요청 수신 - action: ${action}`);
 
@@ -26,7 +35,7 @@ export async function POST(req: Request) {
       return handleMockAction(action, params);
     }
 
-    // 실제 KMC 서버 연동 흐름
+    // 실제 드림시큐리티 표준창 연동 흐름
     switch (action) {
       case 'token': {
         let { siteUrl } = params;
@@ -43,53 +52,46 @@ export async function POST(req: Request) {
         }
         
         try {
-          const tokenData = await getKmcToken(siteUrl, trace);
-          if (!tokenData) {
-            return NextResponse.json({ success: false, message: 'KMC 토큰 발급 실패', trace }, { status: 500 });
-          }
-          return NextResponse.json({ success: true, data: tokenData, trace });
+          const keyInfo = await decryptMokKeyInfo(trace);
+          
+          // 1. 거래 ID 생성 (20자 이상 40자 이내 고유값)
+          const clientTxId = `foxmon-${crypto.randomBytes(12).toString('hex')}`;
+          trace.push(`📡 [API_ROUTE] clientTxId 생성: [${clientTxId}]`);
+          
+          // 2. 현재 요청 시간 (YYYYMMDDHHmmss)
+          const requestTime = new Date().toISOString().replace(/[-T:.Z]/g, '').substring(0, 14);
+          
+          // 3. 거래요청정보 평문 생성 및 RSA 암호화
+          const reqClientInfo = `${clientTxId}|${requestTime}`;
+          const encryptReqClientInfo = encryptKmcTokenRequest(reqClientInfo, keyInfo.ServerPublicKey);
+          
+          const usageCode = process.env.KMC_USAGE_CODE || '01016'; // 기본 성인인증용(01016)
+          const returnUrl = `${siteUrl}/api/auth/kmc/callback`;
+          
+          const responseData = {
+            usageCode,
+            serviceId: keyInfo.ServiceId,
+            encryptReqClientInfo,
+            serviceType: 'telcoAuth',
+            retTransferType: 'MOKToken',
+            returnUrl,
+            clientTxId
+          };
+          
+          return NextResponse.json({ success: true, data: responseData, trace });
         } catch (err: any) {
-          return NextResponse.json({ success: false, message: `KMC 토큰 요청 오류: ${err.message}`, trace }, { status: 500 });
+          return NextResponse.json({ success: false, message: `KMC 토큰 데이터 생성 오류: ${err.message}`, trace }, { status: 500 });
         }
-      }
-
-      case 'request': {
-        const { encryptMOKToken, publicKey, providerId, reqAuthType, userName, userPhone, userBirthday, userGender, userNation, siteUrl } = params;
-        if (!encryptMOKToken || !publicKey || !providerId || !reqAuthType || !userName || !userPhone || !userBirthday || !userGender || !userNation || !siteUrl) {
-          return NextResponse.json({ success: false, message: '필수 요청 파라미터가 누락되었습니다.', trace }, { status: 400 });
-        }
-
-        let finalSiteUrl = siteUrl;
-        if (process.env.NEXT_PUBLIC_KMC_TEST_MODE !== 'true') {
-          finalSiteUrl = process.env.KMC_SITE_URL || 'https://foxmon.co.kr';
-        }
-
-        const requestResult = await requestKmcAuth({
-          encryptMOKToken,
-          publicKey,
-          providerId,
-          reqAuthType,
-          userName,
-          userPhone,
-          userBirthday,
-          userGender,
-          userNation,
-          siteUrl: finalSiteUrl
-        }, trace);
-
-        return NextResponse.json({ ...requestResult, trace });
       }
 
       case 'confirm': {
-        const { encryptMOKToken, publicKey, authNumber } = params;
-        if (!encryptMOKToken || !publicKey || !authNumber) {
-          return NextResponse.json({ success: false, message: '필수 검증 파라미터가 누락되었습니다.', trace }, { status: 400 });
+        const { encryptMOKKeyToken } = params;
+        if (!encryptMOKKeyToken) {
+          return NextResponse.json({ success: false, message: '필수 검증 파라미터(encryptMOKKeyToken)가 누락되었습니다.', trace }, { status: 400 });
         }
 
-        const confirmResult = await confirmKmcAuth({
-          encryptMOKToken,
-          publicKey,
-          authNumber
+        const confirmResult = await confirmMokStandardAuth({
+          encryptMOKKeyToken
         }, trace);
 
         if (!confirmResult.success || !confirmResult.userInfo) {
@@ -134,34 +136,30 @@ async function handleMockAction(action: string, params: any) {
       return NextResponse.json({
         success: true,
         data: {
-          encryptMOKToken: 'MOCK_TOKEN_' + Math.random().toString(36).substring(7),
-          publicKey: 'MOCK_PUBLIC_KEY_BASE64_FORMAT_STR_FOR_AES_ENCRYPTION_DEMO'
+          usageCode: '01016',
+          serviceId: 'MOCK_SERVICE_ID',
+          encryptReqClientInfo: 'MOCK_ENCRYPTED_REQ_INFO_RSA_OAEP',
+          serviceType: 'telcoAuth',
+          retTransferType: 'MOKToken',
+          returnUrl: `${params.siteUrl || 'https://foxmon.co.kr'}/api/auth/kmc/callback`,
+          clientTxId: 'MOCK_TX_ID_' + Math.random().toString(36).substring(7)
         }
       });
 
-    case 'request':
-      nvLog('FW', `📱 [Mock SMS 발송] ${params.userName} (${params.userPhone}) ➔ 인증번호 123456 발송 시뮬레이션`);
-      return NextResponse.json({
-        success: true,
-        message: '인증번호가 발송되었습니다. (Mock 모드: 123456 입력)',
-        encryptMOKToken: params.encryptMOKToken
-      });
-
     case 'confirm': {
-      const { authNumber, mockUser } = params;
+      const { encryptMOKKeyToken } = params;
       
-      // 기본적으로 123456 입력 시 성공 처리
-      if (authNumber !== '123456') {
-        return NextResponse.json({ success: false, message: '인증번호가 올바르지 않습니다. (Mock 번호: 123456)' }, { status: 400 });
+      // Mock 토큰 데이터 검증
+      if (!encryptMOKKeyToken || (!encryptMOKKeyToken.startsWith('MOCK_KEY_TOKEN') && !encryptMOKKeyToken.startsWith('MOCK_TOKEN'))) {
+        return NextResponse.json({ success: false, message: '올바른 Mock 토큰 정보가 아닙니다.' }, { status: 400 });
       }
 
-      // 테스트 목적상 생년월일이나 기타 정보를 커스텀하게 넘겨 테스트할 수 있게 지원
       const mockUserInfo: KmcUserInfo = {
-        name: mockUser?.name || params.userName || '홍길동',
-        birthDate: mockUser?.birthDate || params.userBirthday || '19900101',
-        gender: mockUser?.gender || params.userGender || 'MALE',
-        phoneNumber: mockUser?.phoneNumber || params.userPhone || '01012345678',
-        nationality: mockUser?.nationality || params.userNation || 'KOREAN',
+        name: '홍길동',
+        birthDate: '19900101',
+        gender: 'MALE',
+        phoneNumber: '01012345678',
+        nationality: 'KOREAN',
         isAdult: true,
         verifiedMethod: 'MOBILE'
       };

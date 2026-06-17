@@ -405,7 +405,7 @@ export async function requestKmcAuth(
     log(`   - providerId: [${authInfo.providerId}]`);
     log(`   - reqAuthType: [${authInfo.reqAuthType}]`);
     log(`   - usageCode: [${authInfo.usageCode}]`);
-    log(`   - username (원본): [${authInfo.username}]`);
+    log(`   - userName (원본): [${authInfo.userName}]`);
     log(`   - userPhone (원본): [${authInfo.userPhone}]`);
     log(`   - userBirthday (원본): [${authInfo.userBirthday}]`);
     log(`   - userGender: [${authInfo.userGender}]`);
@@ -574,6 +574,86 @@ export async function confirmKmcAuth(
 
   } catch (err: any) {
     log(`❌ [KMC_CONFIRM] KMC 인증확인 도중 예외 발생: ${err.message}`);
+    return { success: false, message: `인증 확인 중 오류가 발생했습니다: ${err.message}` };
+  }
+}
+
+/**
+ * 6-1. 드림시큐리티 표준창 인증 결과 검증 및 데이터 복호화
+ */
+export async function confirmMokStandardAuth(
+  params: {
+    encryptMOKKeyToken: string;
+  },
+  trace?: string[]
+): Promise<{ success: boolean; message: string; userInfo?: KmcUserInfo }> {
+  const log = (msg: string) => {
+    nvLog('AT', msg);
+    trace?.push(msg);
+  };
+
+  log('📱 [MOK_STD_CONFIRM] 드림시큐리티 표준창 결과 요청 및 검증 시작');
+  log(`   - encryptMOKKeyToken(일부): [${params.encryptMOKKeyToken ? params.encryptMOKKeyToken.substring(0, 20) + '...' : '누락'}]`);
+
+  try {
+    const keyInfo = await decryptMokKeyInfo(trace);
+
+    // 1) 드림시큐리티 결과 요청 API 호출
+    const apiUrl = TEST_MODE
+      ? 'https://scert.mobile-ok.com/gui/service/v1/result/request'
+      : 'https://cert.mobile-ok.com/gui/service/v1/result/request';
+
+    log(`📡 [MOK_STD_CONFIRM] 결과 요청 API 호출 (Fixie 프록시) - URL: ${apiUrl}`);
+
+    const response = await kmcClient.post(apiUrl, {
+      encryptMOKKeyToken: params.encryptMOKKeyToken
+    });
+
+    const result = response.data;
+    log(`⚡ [MOK_STD_CONFIRM] 드림시큐리티 API 응답 수신`);
+    log(`   - [OUTPUT] resultCode: [${result.resultCode}]`);
+    log(`   - [OUTPUT] resultMsg: [${result.resultMsg}]`);
+
+    if (result.resultCode !== '2000') {
+      log(`❌ [MOK_STD_CONFIRM] 드림시큐리티 결과 요청 실패: ${result.resultMsg} (${result.resultCode})`);
+      return { success: false, message: `${result.resultMsg} (${result.resultCode})` };
+    }
+
+    // 2) 결과 복호화
+    log('📱 [MOK_STD_CONFIRM] 드림시큐리티 결과 데이터 복호화 시작');
+    const rawUserInfo = decryptKmcResult(result.encryptMOKResult, keyInfo.ClientPrivateKey);
+    log('⚡ [MOK_STD_CONFIRM] 복호화 성공');
+
+    // 3) 만 19세 이상 나이 검증
+    const birthYear = parseInt(rawUserInfo.userBirthday.substring(0, 4), 10);
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - birthYear;
+    log(`⚡ [MOK_STD_CONFIRM] 성인 인증 나이 판별 - 출생년도: [${birthYear}], 판별나이: [${age}]`);
+
+    if (age < 19) {
+      log('❌ [MOK_STD_CONFIRM] 성인인증 연령 검증 실패 (만 19세 미만)');
+      return { success: false, message: '만 19세 미만 성인은 이용이 불가능합니다.' };
+    }
+
+    const userInfo: KmcUserInfo = {
+      name: rawUserInfo.userName,
+      birthDate: rawUserInfo.userBirthday,
+      gender: rawUserInfo.userGender === '1' ? 'MALE' : 'FEMALE',
+      phoneNumber: rawUserInfo.userPhone,
+      nationality: rawUserInfo.userNation === '0' ? 'KOREAN' : 'FOREIGNER',
+      isAdult: true,
+      verifiedMethod: rawUserInfo.reqAuthType || 'MOBILE'
+    };
+
+    log(`✅ [MOK_STD_CONFIRM] 본인확인 및 성인인증 완료. 성명: [${userInfo.name.substring(0, 1)}**]`);
+    return {
+      success: true,
+      message: '인증이 성공적으로 완료되었습니다.',
+      userInfo
+    };
+
+  } catch (err: any) {
+    log(`❌ [MOK_STD_CONFIRM] 드림시큐리티 결과 확인 중 예외 발생: ${err.message}`);
     return { success: false, message: `인증 확인 중 오류가 발생했습니다: ${err.message}` };
   }
 }
