@@ -7,6 +7,38 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import { nvLog } from './logger';
 import { supabaseAdmin } from './supabase';
 
+// 벤더 라이브러리 동적 로드
+let mobileOK: any = null;
+try {
+  const tryPaths = [
+    path.resolve(process.cwd(), 'mok', 'mok_Key_Manager_v1.0.3.js'),
+    path.resolve(process.cwd(), 'keys', 'mok_Key_Manager_v1.0.3.js'),
+    path.resolve(process.cwd(), 'mok_Key_Manager_v1.0.3.js'),
+    '../mok/mok_Key_Manager_v1.0.3.js',
+    './mok_Key_Manager_v1.0.3.js'
+  ];
+
+  let loaded = false;
+  for (const p of tryPaths) {
+    if (fs.existsSync(p)) {
+      mobileOK = require(p);
+      nvLog('AT', `📦 [MOK_VENDOR] 벤더 라이브러리 로드 성공: [${p}]`);
+      if (mobileOK) {
+        nvLog('AT', `📦 [MOK_VENDOR] 라이브러리 export 속성: [${Object.keys(mobileOK).join(', ')}]`);
+      }
+      loaded = true;
+      break;
+    }
+  }
+
+  if (!loaded) {
+    nvLog('AT', '⚠️ [MOK_VENDOR] 벤더 라이브러리(mok_Key_Manager_v1.0.3.js) 파일을 찾을 수 없습니다. 순수 Node.js crypto 폴백 모드로 구동됩니다.');
+  }
+} catch (err: any) {
+  nvLog('AT', `⚠️ [MOK_VENDOR] 벤더 라이브러리 로드 중 예외 발생 (순수 crypto 모드로 작동): ${err.message}`);
+}
+
+
 // Fixie 고정 IP 프록시 설정
 const proxyUrl = process.env.FIXIE_URL;
 const httpsAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
@@ -80,6 +112,33 @@ export async function decryptMokKeyInfo(trace?: string[]): Promise<KmcKeyInfo> {
   };
 
   log('🔑 [KMC_DECRYPT] KMC 복호화 프로세스 시작');
+
+  const formatPem = (key: string, type: 'PUBLIC' | 'PRIVATE') => {
+    if (key.includes('---BEGIN')) return key;
+    const cleanKey = key.replace(/\s+/g, '');
+    const lines = cleanKey.match(/.{1,64}/g) || [];
+    return `-----BEGIN ${type} KEY-----\n${lines.join('\n')}\n-----END ${type} KEY-----`;
+  };
+
+  // 벤더 라이브러리 시도
+  const decryptFn = mobileOK?.decryptMokKeyInfo || mobileOK?.decryptKeyInfo;
+  if (decryptFn) {
+    log('🔑 [KMC_DECRYPT] 벤더 라이브러리를 사용해 mok_keyInfo.dat 복호화를 진행합니다.');
+    try {
+      const keyFilePath = KMC_KEY_FILE_PATH ? path.resolve(KMC_KEY_FILE_PATH) : '';
+      const decryptedText = decryptFn(keyFilePath, KMC_KEY_PASSWORD);
+      log('⚡ [KMC_DECRYPT] 벤더 라이브러리 복호화 수행 성공');
+      const keyInfoJson = JSON.parse(decryptedText);
+      cachedKeyInfo = {
+        ServiceId: keyInfoJson.ServiceId,
+        ClientPrivateKey: formatPem(keyInfoJson.ClientPrivateKey, 'PRIVATE'),
+        ServerPublicKey: formatPem(keyInfoJson.ServerPublicKey, 'PUBLIC')
+      };
+      return cachedKeyInfo;
+    } catch (vendorErr: any) {
+      log(`⚠️ [KMC_DECRYPT] 벤더 라이브러리 복호화 실패 (${vendorErr.message}). 순수 crypto 복호화로 전환합니다.`);
+    }
+  }
   try {
     let encryptedData: Buffer | null = null;
     let keyPassword = KMC_KEY_PASSWORD;
@@ -234,13 +293,31 @@ export function encryptKmcData(plainText: string, serverPublicKeyPem: string): s
  * 2-1. KMC 최초 토큰 요청 데이터 암호화 로직 (순수 RSA-OAEP-SHA256 단일 암호화)
  * - 토큰 요청 거래정보(encryptReqClientInfo)는 대칭키 암호화를 하지 않고, 평문 JSON을 RSA로 직접 암호화합니다.
  */
-export function encryptKmcTokenRequest(plainText: string, clientPrivateKeyPem: string): string {
-  const encrypted = crypto.privateEncrypt({
-    key: clientPrivateKeyPem,
-    padding: crypto.constants.RSA_PKCS1_PADDING
-  }, Buffer.from(plainText, 'utf8'));
+export function encryptKmcTokenRequest(plainText: string, serverPublicKeyPem: string): string {
+  const encryptFn = mobileOK?.generateEncryptReqClientInfo || mobileOK?.RSAEncrypt || mobileOK?.encryptReqClientInfo;
+  if (encryptFn) {
+    nvLog('AT', '🔑 [KMC_ENCRYPT] 벤더 라이브러리를 사용해 1단계 토큰 요청 데이터를 암호화합니다.');
+    try {
+      const cleanPublicKey = serverPublicKeyPem
+        .replace(/-----BEGIN[^-]*-----/g, '')
+        .replace(/-----END[^-]*-----/g, '')
+        .replace(/\s+/g, '');
+      return encryptFn(plainText, cleanPublicKey);
+    } catch (err: any) {
+      nvLog('AT', `⚠️ [KMC_ENCRYPT] 벤더 라이브러리 암호화 실패: ${err.message}. 순수 crypto 암호화로 폴백합니다.`);
+    }
+  }
+
+  // 순수 crypto 암호화 로직 (RSA-OAEP-SHA256 규격 적용)
+  const encrypted = crypto.publicEncrypt({
+    key: serverPublicKeyPem,
+    padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+    oaepHash: 'sha256',
+    mgf1Hash: 'sha256'
+  } as any, Buffer.from(plainText, 'utf8'));
   return encrypted.toString('base64');
 }
+
 
 /**
  * 3. KMC로부터 받은 암호화된 결과 복호화 로직
@@ -264,6 +341,23 @@ export function decryptKmcResult(encryptedResult: string, clientPrivateKeyPem: s
     log(`🔑 [DECRYPT_KMC] 비밀키 뒤 64자: [${clientPrivateKeyPem.substring(clientPrivateKeyPem.length - 64).replace(/\n/g, ' ')}]`);
   }
 
+  // 벤더 라이브러리 복호화 시도
+  const decryptFn = mobileOK?.decryptMOKResult || mobileOK?.getResult || mobileOK?.decryptResult;
+  if (decryptFn) {
+    log('🔑 [DECRYPT_KMC] 벤더 라이브러리를 사용해 본인인증 결과 복호화를 진행합니다.');
+    try {
+      const cleanPrivateKey = clientPrivateKeyPem
+        .replace(/-----BEGIN[^-]*-----/g, '')
+        .replace(/-----END[^-]*-----/g, '')
+        .replace(/\s+/g, '');
+      const decryptedText = decryptFn(encryptedResult, cleanPrivateKey);
+      log('🔑 [DECRYPT_KMC] 벤더 라이브러리 복호화 성공!');
+      return JSON.parse(decryptedText);
+    } catch (vendorErr: any) {
+      log(`⚠️ [DECRYPT_KMC] 벤더 라이브러리 복호화 실패 (${vendorErr.message}). 순수 crypto 복호화로 전환합니다.`);
+    }
+  }
+
   const parts = encryptedResult.split('|');
   log(`🔑 [DECRYPT_KMC] 암호문 '|' 구분자 분리 갯수: ${parts.length}`);
   if (parts.length !== 2) {
@@ -277,20 +371,32 @@ export function decryptKmcResult(encryptedResult: string, clientPrivateKeyPem: s
 
   let decryptedKeyIvHash: Buffer;
   try {
-    log('🔑 [DECRYPT_KMC] RSA 복호화(privateDecrypt)를 시도합니다 (OAEP Padding + SHA-256)...');
+    log('🔑 [DECRYPT_KMC] 1차 시도: RSA-OAEP 복호화 (OAEP Padding + SHA-256 + MGF1-SHA256)를 진행합니다...');
     decryptedKeyIvHash = crypto.privateDecrypt({
       key: clientPrivateKeyPem,
       padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
       oaepHash: 'sha256',
       mgf1Hash: 'sha256'
     } as any, Buffer.from(encryptKeyIvHashData, 'base64'));
-    log('🔑 [DECRYPT_KMC] RSA 복호화 성공!');
+    log('🔑 [DECRYPT_KMC] 1차 시도 (RSA-OAEP) 복호화 성공!');
   } catch (err: any) {
-    log(`❌ [DECRYPT_KMC] RSA 복호화 중 에러 발생: ${err.message}`);
-    if (err.stack) {
-      log(`❌ [DECRYPT_KMC] OpenSSL 에러 스택: ${err.stack}`);
+    log(`⚠️ [DECRYPT_KMC] 1차 시도 실패 (${err.message}). 2차 시도: RSA PKCS#1 v1.5 복호화로 폴백 시도합니다...`);
+    try {
+      decryptedKeyIvHash = crypto.privateDecrypt({
+        key: clientPrivateKeyPem,
+        padding: crypto.constants.RSA_PKCS1_PADDING
+      } as any, Buffer.from(encryptKeyIvHashData, 'base64'));
+      log('🔑 [DECRYPT_KMC] 2차 시도 (RSA PKCS#1 v1.5) 복호화 성공!');
+    } catch (fallbackErr: any) {
+      log(`❌ [DECRYPT_KMC] 2차 시도 폴백 복호화 실패: ${fallbackErr.message}`);
+      if (err.stack) {
+        log(`❌ [DECRYPT_KMC] 1차 시도 OpenSSL 에러 스택: ${err.stack}`);
+      }
+      if (fallbackErr.stack) {
+        log(`❌ [DECRYPT_KMC] 2차 시도 OpenSSL 에러 스택: ${fallbackErr.stack}`);
+      }
+      throw new Error(`인증 확인 중 RSA 복호화에 실패했습니다 (모든 패딩 시도 실패). 1차: ${err.message}, 2차: ${fallbackErr.message}`);
     }
-    throw new Error(`인증 확인 중 오류가 발생했습니다: ${err.message}`);
   }
 
   const decryptedKeyIvHashStr = decryptedKeyIvHash.toString('utf8');

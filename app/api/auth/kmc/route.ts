@@ -62,12 +62,16 @@ export async function POST(req: Request) {
           const requestTime = new Date().toISOString().replace(/[-T:.Z]/g, '').substring(0, 14);
           
           // 3. 거래요청정보 평문 생성 및 RSA 암호화
-          const reqClientInfo = `${clientTxId}|${requestTime}`;
+          const reqClientInfo = JSON.stringify({
+            version: 'V2',
+            clientTxId,
+            requestTime
+          });
           nvLog('FW', `🔒 [KMC_TOKEN_REQ] [1단계] 평문 정보 생성: [${reqClientInfo}]`);
           trace.push(`[1단계_평문] reqClientInfo: [${reqClientInfo}]`);
 
-          const encryptReqClientInfo = encryptKmcTokenRequest(reqClientInfo, keyInfo.ClientPrivateKey);
-          nvLog('FW', `🔒 [KMC_TOKEN_REQ] [1단계] 이용기관 비밀키(ClientPrivateKey)로 암호화 완료 (길이: ${encryptReqClientInfo.length})`);
+          const encryptReqClientInfo = encryptKmcTokenRequest(reqClientInfo, keyInfo.ServerPublicKey);
+          nvLog('FW', `🔒 [KMC_TOKEN_REQ] [1단계] 서버 공개키(ServerPublicKey)로 암호화 완료 (길이: ${encryptReqClientInfo.length})`);
           trace.push(`[1단계_암호문] encryptReqClientInfo (일부): [${encryptReqClientInfo.substring(0, 30)}...]`);
           trace.push(`[1단계_암호문_전체]: ${encryptReqClientInfo}`);
           trace.push(`[RSA_COMPARE] [1단계_토큰요청전_생성값(encryptReqClientInfo)_전체]: ${encryptReqClientInfo}`);
