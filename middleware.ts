@@ -68,10 +68,11 @@ export default auth((req) => {
         }
     }
 
-    // 1.2 Viewer Restrict Pages Check (Restricting access to recharge and post registration)
+    // 1.2 Viewer Restrict Pages Check (Restricting access to recharge, post registration and community)
     const isViewerRestrictPath = nextUrl.pathname.startsWith('/biz/points') || 
                                  nextUrl.pathname.startsWith('/biz/jobs/new') || 
-                                 nextUrl.pathname.startsWith('/biz/ads/new');
+                                 nextUrl.pathname.startsWith('/biz/ads/new') ||
+                                 nextUrl.pathname.startsWith('/community');
     if (isViewerRestrictPath && session?.user && (session.user as any).role === 'VIEWER') {
         return NextResponse.redirect(new URL('/', nextUrl));
     }

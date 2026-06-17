@@ -142,7 +142,7 @@ export function MainHeader({ session }: MainHeaderProps) {
         { href: '/', label: "홈" },
         { href: '/jobs', label: "구인정보" },
         { href: '/seekers', label: "인재정보" },
-        { href: '/community', label: "커뮤니티" },
+        ...(session?.user?.role !== 'VIEWER' ? [{ href: '/community', label: "커뮤니티" }] : []),
         { href: '/help', label: "고객센터" },
     ];
 
@@ -488,19 +488,21 @@ export function MainHeader({ session }: MainHeaderProps) {
                         </div>
 
                         {/* Column 4: 커뮤니티 */}
-                        <div className="space-y-4">
-                            <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4">커뮤니티</h4>
-                            <div className="grid grid-cols-1 gap-y-3 text-[14px] font-medium text-gray-600">
-                                <Link href="/community?tab=free" className="hover:text-primary transition-colors">자유게시판</Link>
-                                <Link href="/community?tab=freemarket" className="hover:text-primary transition-colors">자유장터</Link>
-                                <Link href="/community?tab=foxtalk" className="hover:text-primary transition-colors flex items-center gap-1">
-                                    폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span>
-                                </Link>
-                                <Link href="/community?tab=foxmarket" className="hover:text-primary transition-colors">폭스장터</Link>
-                                <Link href="/community?tab=business" className="hover:text-primary transition-colors">업소장터</Link>
-                                <Link href="/community?tab=reviews" className="hover:text-primary transition-colors">업소후기·제보</Link>
+                        {session?.user?.role !== 'VIEWER' && (
+                            <div className="space-y-4">
+                                <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4">커뮤니티</h4>
+                                <div className="grid grid-cols-1 gap-y-3 text-[14px] font-medium text-gray-600">
+                                    <Link href="/community?tab=free" className="hover:text-primary transition-colors">자유게시판</Link>
+                                    <Link href="/community?tab=freemarket" className="hover:text-primary transition-colors">자유장터</Link>
+                                    <Link href="/community?tab=foxtalk" className="hover:text-primary transition-colors flex items-center gap-1">
+                                        폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span>
+                                    </Link>
+                                    <Link href="/community?tab=foxmarket" className="hover:text-primary transition-colors">폭스장터</Link>
+                                    <Link href="/community?tab=business" className="hover:text-primary transition-colors">업소장터</Link>
+                                    <Link href="/community?tab=reviews" className="hover:text-primary transition-colors">업소후기·제보</Link>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Column 5: 고객센터 */}
                         <div className="space-y-4">
@@ -574,22 +576,24 @@ export function MainHeader({ session }: MainHeaderProps) {
                             </div>
 
                             {/* 커뮤니티 */}
-                            <div className="border-b border-gray-100">
-                                <button onClick={() => setMobileExpanded(mobileExpanded === 'community' ? null : 'community')} className="w-full flex items-center justify-between py-4 font-black text-gray-900">
-                                    <span>커뮤니티</span>
-                                    <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${mobileExpanded === 'community' ? 'rotate-90 text-primary' : ''}`} />
-                                </button>
-                                {mobileExpanded === 'community' && (
-                                    <div className="flex flex-col gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
-                                        <Link href="/community?tab=free">자유게시판</Link>
-                                        <Link href="/community?tab=freemarket">자유장터</Link>
-                                        <Link href="/community?tab=foxtalk" className="flex items-center gap-2">폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
-                                        <Link href="/community?tab=foxmarket">폭스장터</Link>
-                                        <Link href="/community?tab=business">업소장터</Link>
-                                        <Link href="/community?tab=reviews">업소후기·제보</Link>
-                                    </div>
-                                )}
-                            </div>
+                            {session?.user?.role !== 'VIEWER' && (
+                                <div className="border-b border-gray-100">
+                                    <button onClick={() => setMobileExpanded(mobileExpanded === 'community' ? null : 'community')} className="w-full flex items-center justify-between py-4 font-black text-gray-900">
+                                        <span>커뮤니티</span>
+                                        <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${mobileExpanded === 'community' ? 'rotate-90 text-primary' : ''}`} />
+                                    </button>
+                                    {mobileExpanded === 'community' && (
+                                        <div className="flex flex-col gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
+                                            <Link href="/community?tab=free">자유게시판</Link>
+                                            <Link href="/community?tab=freemarket">자유장터</Link>
+                                            <Link href="/community?tab=foxtalk" className="flex items-center gap-2">폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
+                                            <Link href="/community?tab=foxmarket">폭스장터</Link>
+                                            <Link href="/community?tab=business">업소장터</Link>
+                                            <Link href="/community?tab=reviews">업소후기·제보</Link>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {/* 고객센터 */}
                             <div className="border-b border-gray-100">

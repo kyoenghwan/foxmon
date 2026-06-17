@@ -410,7 +410,7 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
 
             {/* --- Bottom Board Section --- */}
             <section className="border-t pt-10">
-                <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+                <div className={session?.user?.role === 'VIEWER' ? "grid md:grid-cols-2 gap-6 lg:gap-8" : "grid md:grid-cols-3 gap-6 lg:gap-8"}>
                     {/* 1. 구인정보 리스트 */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between pb-2 border-b-2 border-gray-900">
@@ -469,34 +469,36 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                     </div>
 
                     {/* 3. 커뮤니티 리스트 */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between pb-2 border-b-2 border-gray-900">
-                            <h3 className="font-black text-[16px] md:text-lg uppercase tracking-tight text-gray-900 flex items-center gap-2">
-                                💬 커뮤니티 리스트
-                            </h3>
-                            <Link href="/community" className="text-[11px] font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-0.5">
-                                더보기 <ChevronRight className="w-3.5 h-3.5" />
-                            </Link>
+                    {session?.user?.role !== 'VIEWER' && (
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between pb-2 border-b-2 border-gray-900">
+                                <h3 className="font-black text-[16px] md:text-lg uppercase tracking-tight text-gray-900 flex items-center gap-2">
+                                    💬 커뮤니티 리스트
+                                </h3>
+                                <Link href="/community" className="text-[11px] font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-0.5">
+                                    더보기 <ChevronRight className="w-3.5 h-3.5" />
+                                </Link>
+                            </div>
+                            <ul className="space-y-1">
+                                {[
+                                    { title: '오늘 강남쪽 손님 많나요?', comments: 12 },
+                                    { title: '첫 출근인데 팁 좀 알려주세요 ㅠㅠ', comments: 34 },
+                                    { title: '진상 손님 대처법 공유합니다', comments: 8 },
+                                    { title: '이쪽 일 하면서 느낀점 (장문주의)', comments: 55 }
+                                ].map((post, i) => (
+                                    <li key={i} className="group border-b border-gray-100 last:border-none">
+                                        <Link href="/community" className="flex items-center justify-between py-2.5 hover:translate-x-1 transition-transform">
+                                            <div className="flex items-center gap-2 min-w-0 pr-2">
+                                                {i === 0 && <span className="bg-primary text-black text-[8px] font-black px-1 rounded-sm leading-none py-0.5 shrink-0">HOT</span>}
+                                                <span className="text-[13px] text-gray-700 font-medium group-hover:text-primary truncate">{post.title}</span>
+                                            </div>
+                                            <span className="text-[11px] text-purple-600 font-bold whitespace-nowrap shrink-0">[{post.comments}]</span>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
-                        <ul className="space-y-1">
-                            {[
-                                { title: '오늘 강남쪽 손님 많나요?', comments: 12 },
-                                { title: '첫 출근인데 팁 좀 알려주세요 ㅠㅠ', comments: 34 },
-                                { title: '진상 손님 대처법 공유합니다', comments: 8 },
-                                { title: '이쪽 일 하면서 느낀점 (장문주의)', comments: 55 }
-                            ].map((post, i) => (
-                                <li key={i} className="group border-b border-gray-100 last:border-none">
-                                    <Link href="/community" className="flex items-center justify-between py-2.5 hover:translate-x-1 transition-transform">
-                                        <div className="flex items-center gap-2 min-w-0 pr-2">
-                                            {i === 0 && <span className="bg-primary text-black text-[8px] font-black px-1 rounded-sm leading-none py-0.5 shrink-0">HOT</span>}
-                                            <span className="text-[13px] text-gray-700 font-medium group-hover:text-primary truncate">{post.title}</span>
-                                        </div>
-                                        <span className="text-[11px] text-purple-600 font-bold whitespace-nowrap shrink-0">[{post.comments}]</span>
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                    )}
                 </div>
             </section>
         </main>
