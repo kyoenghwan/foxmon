@@ -9,3 +9,7 @@ export function isAdminRole(role?: string | null): boolean {
   const r = normalizeDbEnum(role);
   return r === 'ADMIN' || r === 'SUPER_ADMIN';
 }
+
+export function isViewerRole(role?: string | null): boolean {
+  return normalizeDbEnum(role) === 'VIEWER';
+}

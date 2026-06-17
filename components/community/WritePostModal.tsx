@@ -29,9 +29,21 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
     const [price, setPrice] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isViewer, setIsViewer] = useState(false);
 
     const isMarketBoard = boardId === 'foxmarket' || boardId === 'freemarket';
     const isReport = boardId === 'reviews';
+
+    useEffect(() => {
+        fetch('/api/auth/session')
+            .then(res => res.json())
+            .then(session => {
+                if (session?.user?.role === 'VIEWER') {
+                    setIsViewer(true);
+                }
+            })
+            .catch(() => {});
+    }, []);
 
     useEffect(() => {
         if (isOpen && editPost) {
@@ -48,6 +60,10 @@ export function WritePostModal({ boardId, boardLabel, isOpen, onClose, onSuccess
     }, [isOpen, editPost]);
 
     const handleSubmit = async () => {
+        if (isViewer) {
+            alert('뷰어 계정은 글을 등록하거나 수정할 수 없습니다.');
+            return;
+        }
         setError('');
         setLoading(true);
         nvLog('FW', `${boardLabel} ${editPost ? '글수정' : '글쓰기'} 제출`, { boardId, title });

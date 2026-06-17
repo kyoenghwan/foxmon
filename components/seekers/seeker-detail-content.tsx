@@ -60,6 +60,7 @@ export function SeekerDetailContent({
   onClose?: () => void;
 }) {
   const [isMobileDevice, setIsMobileDevice] = React.useState(false);
+  const [isViewer, setIsViewer] = React.useState(false);
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -67,6 +68,15 @@ export function SeekerDetailContent({
       const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
       setIsMobileDevice(isMobile);
     }
+
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(session => {
+        if (session?.user?.role === 'VIEWER') {
+          setIsViewer(true);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const { ad_title, resumes, users } = job;
@@ -93,18 +103,27 @@ export function SeekerDetailContent({
 
   const snsDisplayList: { label: string; id: string }[] = (() => {
     const raw = sns_links;
+    let list = [];
     if (Array.isArray(raw) && raw.length > 0) {
-      return raw
+      list = raw
         .map((x: Record<string, unknown>) => ({
           label: String(x?.type ?? x?.channel ?? 'SNS'),
           id: String(x?.value ?? x?.account ?? '').trim(),
         }))
         .filter((x) => x.id);
+    } else if (sns_id) {
+      list = [{ label: sns_type || 'SNS', id: sns_id }];
+    } else {
+      list = [];
     }
-    if (sns_id) {
-      return [{ label: sns_type || 'SNS', id: sns_id }];
+
+    if (isViewer) {
+      return list.map(x => ({
+        label: x.label,
+        id: x.id.substring(0, 1) + '*'.repeat(Math.max(1, x.id.length - 1))
+      }));
     }
-    return [];
+    return list;
   })();
 
   const rawName = nickname || users?.name || '익명';
@@ -132,9 +151,13 @@ export function SeekerDetailContent({
   const formattedContact = is_contact_public && contact_number
     ? formatPhoneNumber(contact_number)
     : '미등록';
-  const contactLine = is_contact_public
+  let contactLine = is_contact_public
     ? formattedContact
     : '비공개 (업소 연락 시 공개)';
+
+  if (isViewer && is_contact_public && contact_number) {
+    contactLine = formattedContact.replace(/-(\d{3,4})-/, '-****-');
+  }
   const timeLine = is_anytime_contact ? '언제든지 가능' : contact_time || '무관';
 
   const snsInline =
@@ -349,6 +372,10 @@ export function SeekerDetailContent({
       <div className="shrink-0 bg-white border-t border-orange-100/50 p-4 flex z-40 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] rounded-b-[24px]">
         <button
           onClick={async () => {
+            if (isViewer) {
+              alert('뷰어 계정은 대화하기(채팅 개설) 기능을 사용할 수 없습니다.');
+              return;
+            }
             try {
               const res = await fetch('/api/auth/session');
               const session = await res.json();

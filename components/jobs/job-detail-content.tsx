@@ -11,6 +11,18 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
   const [isScrapped, setIsScrapped] = React.useState(false);
   const [displayJob, setDisplayJob] = React.useState(job);
   const [isDetailLoading, setIsDetailLoading] = React.useState(false);
+  const [isViewer, setIsViewer] = React.useState(false);
+
+  React.useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(session => {
+        if (session?.user?.role === 'VIEWER') {
+          setIsViewer(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // detail_content의 캔버스 데이터 여부 검증 헬퍼
   const isCanvasData = (content?: string) => {
@@ -152,6 +164,10 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
   }, [job]);
 
   const handleToggleScrap = () => {
+    if (isViewer) {
+      alert('뷰어 계정은 스크랩 기능을 사용할 수 없습니다.');
+      return;
+    }
     if (!job?.id) return;
     try {
       const scrapStr = localStorage.getItem('foxmon_scraps') || '[]';
@@ -507,6 +523,10 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
         </Button>
         <div 
             onClick={async () => {
+                if (isViewer) {
+                    alert('뷰어 계정은 지원하기(채팅 개설) 기능을 사용할 수 없습니다.');
+                    return;
+                }
                 try {
                     const res = await fetch('/api/auth/session');
                     const session = await res.json();

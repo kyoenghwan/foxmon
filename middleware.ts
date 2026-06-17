@@ -68,6 +68,14 @@ export default auth((req) => {
         }
     }
 
+    // 1.2 Viewer Restrict Pages Check (Restricting access to recharge and post registration)
+    const isViewerRestrictPath = nextUrl.pathname.startsWith('/biz/points') || 
+                                 nextUrl.pathname.startsWith('/biz/jobs/new') || 
+                                 nextUrl.pathname.startsWith('/biz/ads/new');
+    if (isViewerRestrictPath && session?.user && (session.user as any).role === 'VIEWER') {
+        return NextResponse.redirect(new URL('/', nextUrl));
+    }
+
     // 1.5 Global Authentication Check (Strict Private Mode as requested by user)
     // 로그인이 안 된 상태면 무조건 /login으로 리다이렉트 (회원가입, 로그인, 정적 파일, 홈페이지 제외)
     if (!session?.user && !isLoginPage && !isRegisterPage && !isPublicStatic && !isHomePage) {
