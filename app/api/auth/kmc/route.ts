@@ -78,7 +78,7 @@ export async function POST(req: Request) {
             clientTxId
           };
           
-          return NextResponse.json({ success: true, data: responseData, trace });
+          return NextResponse.json(responseData);
         } catch (err: any) {
           return NextResponse.json({ success: false, message: `KMC 토큰 데이터 생성 오류: ${err.message}`, trace }, { status: 500 });
         }
@@ -134,16 +134,13 @@ async function handleMockAction(action: string, params: any) {
   switch (action) {
     case 'token':
       return NextResponse.json({
-        success: true,
-        data: {
-          usageCode: '01016',
-          serviceId: 'MOCK_SERVICE_ID',
-          encryptReqClientInfo: 'MOCK_ENCRYPTED_REQ_INFO_RSA_OAEP',
-          serviceType: 'telcoAuth',
-          retTransferType: 'MOKToken',
-          returnUrl: `${params.siteUrl || 'https://foxmon.co.kr'}/api/auth/kmc/callback`,
-          clientTxId: 'MOCK_TX_ID_' + Math.random().toString(36).substring(7)
-        }
+        usageCode: '01016',
+        serviceId: 'MOCK_SERVICE_ID',
+        encryptReqClientInfo: 'MOCK_ENCRYPTED_REQ_INFO_RSA_OAEP',
+        serviceType: 'telcoAuth',
+        retTransferType: 'MOKToken',
+        returnUrl: `${params.siteUrl || 'https://foxmon.co.kr'}/api/auth/kmc/callback`,
+        clientTxId: 'MOCK_TX_ID_' + Math.random().toString(36).substring(7)
       });
 
     case 'confirm': {
