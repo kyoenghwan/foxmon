@@ -2070,7 +2070,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             <Briefcase className="w-4 h-4 text-primary" />
                             채용 조건
                         </h3>
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1 max-w-3xl">
                             {/* 직종 */}
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-1.5">
                                 <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
@@ -2194,7 +2194,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 
                                 {/* ─── 공통 배경 이미지 설정 ─── */}
                                 {form.design_mode === 'canvas' && (
-                                <div className="flex flex-col gap-1.5 mb-4 bg-indigo-50/50 p-3 rounded-lg border border-indigo-100">
+                                <div className="flex flex-col gap-1.5 mb-4 bg-indigo-50/50 p-3 rounded-lg border border-indigo-100 max-w-3xl">
                                     <label className="text-[12px] font-bold text-gray-700 flex items-center gap-1.5">
                                         <ImageIcon className="w-3.5 h-3.5 text-indigo-500" /> 공통 배경 이미지 (포스터/전단지 배경 깔기)
                                     </label>
