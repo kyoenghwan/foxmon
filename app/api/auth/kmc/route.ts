@@ -63,7 +63,7 @@ export async function POST(req: Request) {
           
           // 3. 거래요청정보 평문 생성 및 RSA 암호화
           const reqClientInfo = `${clientTxId}|${requestTime}`;
-          const encryptReqClientInfo = encryptKmcTokenRequest(reqClientInfo, keyInfo.ServerPublicKey);
+          const encryptReqClientInfo = encryptKmcTokenRequest(reqClientInfo, keyInfo.ClientPrivateKey);
           
           const usageCode = process.env.KMC_USAGE_CODE || '01016'; // 기본 성인인증용(01016)
           const returnUrl = `${siteUrl}/api/auth/kmc/callback`;
