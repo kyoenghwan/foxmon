@@ -244,25 +244,67 @@ export function encryptKmcTokenRequest(plainText: string, clientPrivateKeyPem: s
 /**
  * 3. KMC로부터 받은 암호화된 결과 복호화 로직
  */
-export function decryptKmcResult(encryptedResult: string, clientPrivateKeyPem: string): any {
+export function decryptKmcResult(encryptedResult: string, clientPrivateKeyPem: string, trace?: string[]): any {
+  const log = (msg: string) => {
+    nvLog('AT', msg);
+    trace?.push(msg);
+  };
+
+  log(`🔑 [DECRYPT_KMC] 복호화 대상 암호문 길이: ${encryptedResult ? encryptedResult.length : 0}`);
+  if (encryptedResult) {
+    log(`🔑 [DECRYPT_KMC] 암호문 앞 100자: [${encryptedResult.substring(0, 100)}]`);
+    log(`🔑 [DECRYPT_KMC] 암호문 뒤 100자: [${encryptedResult.substring(encryptedResult.length - 100)}]`);
+    log(`🔑 [DECRYPT_KMC] 암호문 전체: [${encryptedResult}]`);
+  }
+  
+  log(`🔑 [DECRYPT_KMC] 비밀키 포맷 검사: PEM 형식 여부 = ${clientPrivateKeyPem?.includes('-----BEGIN')}, 길이 = ${clientPrivateKeyPem?.length}`);
+  if (clientPrivateKeyPem) {
+    log(`🔑 [DECRYPT_KMC] 비밀키 앞 64자: [${clientPrivateKeyPem.substring(0, 64).replace(/\n/g, ' ')}]`);
+    log(`🔑 [DECRYPT_KMC] 비밀키 뒤 64자: [${clientPrivateKeyPem.substring(clientPrivateKeyPem.length - 64).replace(/\n/g, ' ')}]`);
+  }
+
   const parts = encryptedResult.split('|');
+  log(`🔑 [DECRYPT_KMC] 암호문 '|' 구분자 분리 갯수: ${parts.length}`);
   if (parts.length !== 2) {
+    log(`❌ [DECRYPT_KMC] 에러: '|' 구분자로 두 부분 분리되지 않음`);
     throw new Error('KMC 결과 데이터 포맷이 올바르지 않습니다.');
   }
 
   const [encryptKeyIvHashData, encryptResultData] = parts;
+  log(`🔑 [DECRYPT_KMC] encryptKeyIvHashData(RSA대상) 길이: ${encryptKeyIvHashData.length}`);
+  log(`🔑 [DECRYPT_KMC] encryptResultData(AES대상) 길이: ${encryptResultData.length}`);
 
-  // 1) 암호화된 대칭키 정보를 서버 개인키로 RSA-OAEP-SHA256 복호화
-  const decryptedKeyIvHash = crypto.privateDecrypt({
-    key: clientPrivateKeyPem,
-    padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-    oaepHash: 'sha256'
-  }, Buffer.from(encryptKeyIvHashData, 'base64'));
+  let decryptedKeyIvHash: Buffer;
+  try {
+    log('🔑 [DECRYPT_KMC] RSA 복호화(privateDecrypt)를 시도합니다 (OAEP Padding + SHA-256)...');
+    decryptedKeyIvHash = crypto.privateDecrypt({
+      key: clientPrivateKeyPem,
+      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+      oaepHash: 'sha256'
+    }, Buffer.from(encryptKeyIvHashData, 'base64'));
+    log('🔑 [DECRYPT_KMC] RSA 복호화 성공!');
+  } catch (err: any) {
+    log(`❌ [DECRYPT_KMC] RSA 복호화 중 에러 발생: ${err.message}`);
+    if (err.stack) {
+      log(`❌ [DECRYPT_KMC] OpenSSL 에러 스택: ${err.stack}`);
+    }
+    throw new Error(`인증 확인 중 오류가 발생했습니다: ${err.message}`);
+  }
 
-  const [base64KeyIv, hashData] = decryptedKeyIvHash.toString('utf8').split('|');
+  const decryptedKeyIvHashStr = decryptedKeyIvHash.toString('utf8');
+  log(`🔑 [DECRYPT_KMC] 복호화된 대칭키 정보 평문 (일부): [${decryptedKeyIvHashStr.substring(0, 50)}...]`);
+
+  const keyIvHashParts = decryptedKeyIvHashStr.split('|');
+  if (keyIvHashParts.length !== 2) {
+    log(`❌ [DECRYPT_KMC] 에러: 복호화된 대칭키 정보가 '|' 로 분리되지 않음`);
+    throw new Error('복호화된 대칭키 정보가 유효하지 않습니다.');
+  }
+
+  const [base64KeyIv, hashData] = keyIvHashParts;
 
   // 2) AES Key & IV 추출
   const keyIv = Buffer.from(base64KeyIv, 'base64');
+  log(`🔑 [DECRYPT_KMC] base64KeyIv 디코딩 후 바이트 길이: ${keyIv.length}`);
   if (keyIv.length !== 48) {
     throw new Error('복호화된 대칭키 길이가 유효하지 않습니다.');
   }
@@ -277,10 +319,12 @@ export function decryptKmcResult(encryptedResult: string, clientPrivateKeyPem: s
   let decryptedResult = decipher.update(Buffer.from(encryptResultData, 'base64'));
   decryptedResult = Buffer.concat([decryptedResult, decipher.final()]);
   const resultText = decryptedResult.toString('utf8');
+  log(`🔑 [DECRYPT_KMC] AES 복호화 성공. 결과 텍스트 길이: ${resultText.length}`);
 
   // 4) 무결성(SHA-256) 검증
   const computedHash = crypto.createHash('sha256').update(Buffer.from(resultText, 'utf8')).digest('base64');
   if (computedHash !== hashData) {
+    log('❌ [DECRYPT_KMC] 에러: 해시 무결성 검증 실패');
     throw new Error('KMC 결과 데이터 해시 검증 실패 (변조 가능성 있음)');
   }
 
@@ -540,7 +584,7 @@ export async function confirmKmcAuth(
     // 3) 결과 복호화
     log('📱 [KMC_CONFIRM] Step 4: KMC 인증 결과 복호화 시작');
     const keyInfo = await decryptMokKeyInfo(trace);
-    const rawUserInfo = decryptKmcResult(result.encryptMOKResult, keyInfo.ClientPrivateKey);
+    const rawUserInfo = decryptKmcResult(result.encryptMOKResult, keyInfo.ClientPrivateKey, trace);
     log('⚡ [KMC_CONFIRM] Step 4-1: KMC 암호화 정보 복호화 완료');
 
     // 4) 19세 이상 나이 검증
@@ -620,7 +664,7 @@ export async function confirmMokStandardAuth(
 
     // 2) 결과 복호화
     log('📱 [MOK_STD_CONFIRM] 드림시큐리티 결과 데이터 복호화 시작');
-    const rawUserInfo = decryptKmcResult(result.encryptMOKResult, keyInfo.ClientPrivateKey);
+    const rawUserInfo = decryptKmcResult(result.encryptMOKResult, keyInfo.ClientPrivateKey, trace);
     log('⚡ [MOK_STD_CONFIRM] 복호화 성공');
 
     // 3) 만 19세 이상 나이 검증

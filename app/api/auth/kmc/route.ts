@@ -63,7 +63,13 @@ export async function POST(req: Request) {
           
           // 3. 거래요청정보 평문 생성 및 RSA 암호화
           const reqClientInfo = `${clientTxId}|${requestTime}`;
+          nvLog('FW', `🔒 [KMC_TOKEN_REQ] [1단계] 평문 정보 생성: [${reqClientInfo}]`);
+          trace.push(`[1단계_평문] reqClientInfo: [${reqClientInfo}]`);
+
           const encryptReqClientInfo = encryptKmcTokenRequest(reqClientInfo, keyInfo.ClientPrivateKey);
+          nvLog('FW', `🔒 [KMC_TOKEN_REQ] [1단계] 이용기관 비밀키(ClientPrivateKey)로 암호화 완료 (길이: ${encryptReqClientInfo.length})`);
+          trace.push(`[1단계_암호문] encryptReqClientInfo (일부): [${encryptReqClientInfo.substring(0, 30)}...]`);
+          trace.push(`[1단계_암호문_전체]: ${encryptReqClientInfo}`);
           
           const usageCode = process.env.KMC_USAGE_CODE || '01016'; // 기본 성인인증용(01016)
           const returnUrl = `${siteUrl}/api/auth/kmc/callback`;
@@ -77,6 +83,9 @@ export async function POST(req: Request) {
             returnUrl,
             clientTxId
           };
+          
+          nvLog('FW', `🔒 [KMC_TOKEN_REQ] [1단계] ServiceId: [${keyInfo.ServiceId}]`);
+          trace.push(`[1단계_ServiceId] serviceId: [${keyInfo.ServiceId}]`);
           
           return NextResponse.json(responseData);
         } catch (err: any) {
