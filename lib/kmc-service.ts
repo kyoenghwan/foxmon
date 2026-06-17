@@ -221,8 +221,9 @@ export function encryptKmcData(plainText: string, serverPublicKeyPem: string): s
   const encryptedKeyIv = crypto.publicEncrypt({
     key: serverPublicKeyPem,
     padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-    oaepHash: 'sha256'
-  }, Buffer.from(encKey, 'utf8'));
+    oaepHash: 'sha256',
+    mgf1Hash: 'sha256'
+  } as any, Buffer.from(encKey, 'utf8'));
   const encryptedKeyIvBase64 = encryptedKeyIv.toString('base64');
 
   // 7) 최종 데이터: encryptedKeyIvBase64 | encData
@@ -280,8 +281,9 @@ export function decryptKmcResult(encryptedResult: string, clientPrivateKeyPem: s
     decryptedKeyIvHash = crypto.privateDecrypt({
       key: clientPrivateKeyPem,
       padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-      oaepHash: 'sha256'
-    }, Buffer.from(encryptKeyIvHashData, 'base64'));
+      oaepHash: 'sha256',
+      mgf1Hash: 'sha256'
+    } as any, Buffer.from(encryptKeyIvHashData, 'base64'));
     log('🔑 [DECRYPT_KMC] RSA 복호화 성공!');
   } catch (err: any) {
     log(`❌ [DECRYPT_KMC] RSA 복호화 중 에러 발생: ${err.message}`);
