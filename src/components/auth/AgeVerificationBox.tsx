@@ -127,37 +127,40 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   /**
    * 본인확인 표준창 팝업 열기
    */
-  const handleStartDreamStandardAuth = async () => {
-    setIsVerifying(true);
-    setStatusMsg('본인인증창 실행 준비 중...');
-    setStatusError('');
+  const handleStartDreamStandardAuth = () => {
+    if (isTestMode) {
+      setIsVerifying(true);
+      setStatusMsg('Mock 모드: 가상 인증창 활성화 중...');
+      setStatusError('');
+      nvLog('FW', '⚠️ Mock 모드로 인증 표준창 시뮬레이션을 실행합니다.');
+      
+      // 1.5초 후 가상 콜백 호출
+      setTimeout(() => {
+        const mockKeyToken = 'MOCK_KEY_TOKEN_' + Math.random().toString(36).substring(7);
+        if ((window as any).result) {
+          (window as any).result(JSON.stringify({
+            success: true,
+            encryptMOKKeyToken: mockKeyToken
+          }));
+        }
+      }, 1500);
+      return;
+    }
+
+    if (!(window as any).MOBILEOK) {
+      alert('드림시큐리티 본인확인 모듈이 아직 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+
     try {
-      if (isTestMode) {
-        nvLog('FW', '⚠️ Mock 모드로 인증 표준창 시뮬레이션을 실행합니다.');
-        setStatusMsg('Mock 모드: 가상 인증창 활성화 중...');
-        
-        // 1.5초 후 가상 콜백 호출
-        setTimeout(() => {
-          const mockKeyToken = 'MOCK_KEY_TOKEN_' + Math.random().toString(36).substring(7);
-          if ((window as any).result) {
-            (window as any).result(JSON.stringify({
-              success: true,
-              encryptMOKKeyToken: mockKeyToken
-            }));
-          }
-        }, 1500);
-        return;
-      }
-
-      if (!(window as any).MOBILEOK) {
-        throw new Error('드림시큐리티 본인확인 모듈이 아직 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.');
-      }
-
+      // 1. 브라우저의 사용자 액션(User Activation) 보안 컨텍스트 보존을 위해 상태 업데이트 전에 SDK 함수를 최우선 동기 실행합니다.
       nvLog('FW', '드림시큐리티 표준창 process 호출 시작');
-      // 첫 번째 인자로 토큰 정보를 발급해주는 Next.js API 경로를 설정합니다.
-      // 두 번째 인자 'WB'는 웹 브라우저 팝업, 세 번째 인자 'result'는 팝업 완료 후 부모창의 window.result 함수 호출을 지정합니다.
       (window as any).MOBILEOK.process('/api/auth/kmc', 'WB', 'result');
+
+      // 2. 호출 후 트래커 상태 변경 적용
+      setIsVerifying(true);
       setStatusMsg('본인확인 표준창이 실행되었습니다.');
+      setStatusError('');
     } catch (err: any) {
       setStatusError(err.message || '인증 팝업 호출 실패');
       alert(err.message || '본인인증창을 띄우지 못했습니다.');
