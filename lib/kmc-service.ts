@@ -656,6 +656,8 @@ export async function confirmMokStandardAuth(
     log(`⚡ [MOK_STD_CONFIRM] 드림시큐리티 API 응답 수신`);
     log(`   - [OUTPUT] resultCode: [${result.resultCode}]`);
     log(`   - [OUTPUT] resultMsg: [${result.resultMsg}]`);
+    log(`   - [OUTPUT] encryptMOKResult (일부): [${result.encryptMOKResult ? result.encryptMOKResult.substring(0, 30) : '없음'}...]`);
+    log(`[RSA_COMPARE] [2단계_결과요청후_수신값(encryptMOKResult)_전체]: ${result.encryptMOKResult}`);
 
     if (result.resultCode !== '2000') {
       log(`❌ [MOK_STD_CONFIRM] 드림시큐리티 결과 요청 실패: ${result.resultMsg} (${result.resultCode})`);

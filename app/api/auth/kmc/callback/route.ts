@@ -66,6 +66,8 @@ export async function POST(req: Request) {
     }
 
     nvLog('FW', `✅ KMC Callback 성공 - encryptMOKKeyToken 획득: ${encryptMOKKeyToken.substring(0, 15)}...`);
+    trace.push(`[RSA_COMPARE] [콜백수신_encryptMOKKeyToken_전체]: ${encryptMOKKeyToken}`);
+    nvLog('FW', `[RSA_COMPARE] [콜백수신_encryptMOKKeyToken_전체]: ${encryptMOKKeyToken}`);
     
     return NextResponse.json({
       success: true,

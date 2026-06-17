@@ -70,6 +70,7 @@ export async function POST(req: Request) {
           nvLog('FW', `🔒 [KMC_TOKEN_REQ] [1단계] 이용기관 비밀키(ClientPrivateKey)로 암호화 완료 (길이: ${encryptReqClientInfo.length})`);
           trace.push(`[1단계_암호문] encryptReqClientInfo (일부): [${encryptReqClientInfo.substring(0, 30)}...]`);
           trace.push(`[1단계_암호문_전체]: ${encryptReqClientInfo}`);
+          trace.push(`[RSA_COMPARE] [1단계_토큰요청전_생성값(encryptReqClientInfo)_전체]: ${encryptReqClientInfo}`);
           
           const usageCode = process.env.KMC_USAGE_CODE || '01016'; // 기본 성인인증용(01016)
           const returnUrl = `${siteUrl}/api/auth/kmc/callback`;
@@ -98,6 +99,8 @@ export async function POST(req: Request) {
         if (!encryptMOKKeyToken) {
           return NextResponse.json({ success: false, message: '필수 검증 파라미터(encryptMOKKeyToken)가 누락되었습니다.', trace }, { status: 400 });
         }
+
+        trace.push(`[RSA_COMPARE] [2단계_검증요청시_수신값(encryptMOKKeyToken)_전체]: ${encryptMOKKeyToken}`);
 
         const confirmResult = await confirmMokStandardAuth({
           encryptMOKKeyToken
