@@ -230,11 +230,9 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
       <div className="flex-1 overflow-y-auto pb-28 bg-gray-50/50">
         
         {/* ================= 메인 콘텐츠 영역 ================= */}
-        <div className="max-w-[1100px] mx-auto p-4 md:p-6 lg:p-8 flex flex-col gap-8 md:gap-10">
+        <div className="max-w-[1100px] mx-auto p-4 md:p-6 lg:p-8 flex flex-col gap-10 md:gap-12 w-full">
             
-            <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden flex flex-col p-4 md:p-8 space-y-12">
-                
-                {/* 1. 업체 정보 */}
+            {/* 1. 업체 정보 */}
                 <section>
                     <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
                        <span className="w-1 h-5 bg-primary rounded-full"></span> 업체 정보
@@ -485,10 +483,9 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                     </div>
                 </section>
 
-                <div className="mt-12 pt-6 border-t border-gray-100 text-center text-[11px] text-gray-400 leading-relaxed font-medium pb-4 px-4">
-                    본 정보는 <b className="text-gray-500">{displayJob.company_name || displayJob.company || '해당 업체'}</b>에서 제공한 자료이며, 폭스몬은 기재된 내용에 대한 오류와 사용자가 이를 신뢰하여 취한 조치에 대해 책임을 지지 않습니다.<br className="hidden sm:block"/>
-                    또한 누구든 본 정보를 폭스몬의 사전 동의 없이 무단 전재 및 크롤링, 재배포 할 수 없습니다.
-                </div>
+            <div className="pt-6 border-t border-gray-200 text-center text-[11px] text-gray-400 leading-relaxed font-medium pb-4 px-4">
+                본 정보는 <b className="text-gray-500">{displayJob.company_name || displayJob.company || '해당 업체'}</b>에서 제공한 자료이며, 폭스몬은 기재된 내용에 대한 오류와 사용자가 이를 신뢰하여 취한 조치에 대해 책임을 지지 않습니다.<br className="hidden sm:block"/>
+                또한 누구든 본 정보를 폭스몬의 사전 동의 없이 무단 전재 및 크롤링, 재배포 할 수 없습니다.
             </div>
         </div>
       </div>
