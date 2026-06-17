@@ -641,33 +641,52 @@ export async function confirmMokStandardAuth(
   try {
     const keyInfo = await decryptMokKeyInfo(trace);
 
-    // 1) 드림시큐리티 결과 요청 API 호출
+    // [Step 1] 본인확인 검증결과 요청 (본인확인 결과 토큰)
     const apiUrl = TEST_MODE
       ? 'https://scert.mobile-ok.com/gui/service/v1/result/request'
       : 'https://cert.mobile-ok.com/gui/service/v1/result/request';
 
-    log(`📡 [MOK_STD_CONFIRM] 결과 요청 API 호출 (Fixie 프록시) - URL: ${apiUrl}`);
+    log('==================================================');
+    log('▶️ [Step 1] 본인확인 검증결과 요청 (본인확인 결과 토큰)');
+    log(`   - API URL: ${apiUrl}`);
+    log(`   - encryptMOKKeyToken(전체): ${params.encryptMOKKeyToken}`);
+    log('==================================================');
 
     const response = await kmcClient.post(apiUrl, {
       encryptMOKKeyToken: params.encryptMOKKeyToken
     });
 
     const result = response.data;
-    log(`⚡ [MOK_STD_CONFIRM] 드림시큐리티 API 응답 수신`);
-    log(`   - [OUTPUT] resultCode: [${result.resultCode}]`);
-    log(`   - [OUTPUT] resultMsg: [${result.resultMsg}]`);
-    log(`   - [OUTPUT] encryptMOKResult (일부): [${result.encryptMOKResult ? result.encryptMOKResult.substring(0, 30) : '없음'}...]`);
-    log(`[RSA_COMPARE] [2단계_결과요청후_수신값(encryptMOKResult)_전체]: ${result.encryptMOKResult}`);
+    
+    // [Step 2] 본인확인 결과 응답 (개인정보 CI, DI)
+    log('==================================================');
+    log('◀️ [Step 2] 본인확인 결과 응답 (개인정보 CI, DI)');
+    log(`   - 응답 결과 (JSON 전체): ${JSON.stringify(result)}`);
+    log(`   - resultCode: [${result.resultCode}]`);
+    log(`   - resultMsg: [${result.resultMsg}]`);
+    log(`   - encryptMOKResult(전체): ${result.encryptMOKResult || '없음'}`);
+    log('==================================================');
 
     if (result.resultCode !== '2000') {
-      log(`❌ [MOK_STD_CONFIRM] 드림시큐리티 결과 요청 실패: ${result.resultMsg} (${result.resultCode})`);
+      log(`❌ [Step 2 실패] 드림시큐리티 결과 요청 실패: ${result.resultMsg} (${result.resultCode})`);
       return { success: false, message: `${result.resultMsg} (${result.resultCode})` };
     }
 
-    // 2) 결과 복호화
-    log('📱 [MOK_STD_CONFIRM] 드림시큐리티 결과 데이터 복호화 시작');
-    const rawUserInfo = decryptKmcResult(result.encryptMOKResult, keyInfo.ClientPrivateKey, trace);
-    log('⚡ [MOK_STD_CONFIRM] 복호화 성공');
+    // [Step 3] 본인확인 결과 RSA 비밀키 복호화
+    log('==================================================');
+    log('🔒 [Step 3] 본인확인 결과 RSA 비밀키 복호화 시작');
+    log(`   - 복호화 대상 암호문 (전체): ${result.encryptMOKResult}`);
+    
+    let rawUserInfo;
+    try {
+      rawUserInfo = decryptKmcResult(result.encryptMOKResult, keyInfo.ClientPrivateKey, trace);
+      log('✅ [Step 3 성공] RSA 및 AES 복호화 성공!');
+      log(`   - 복호화된 개인정보 원본 JSON: ${JSON.stringify(rawUserInfo)}`);
+    } catch (decryptErr: any) {
+      log(`❌ [Step 3 실패] 복호화 도중 에러 발생: ${decryptErr.message}`);
+      throw decryptErr;
+    }
+    log('==================================================');
 
     // 3) 만 19세 이상 나이 검증
     const birthYear = parseInt(rawUserInfo.userBirthday.substring(0, 4), 10);
