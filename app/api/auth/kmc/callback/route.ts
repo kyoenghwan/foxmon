@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     if (!dataString) {
       nvLog('FW', '❌ KMC Callback - data 파라미터 없음');
-      return new NextResponse('Error: Missing data parameter', { status: 400 });
+      return NextResponse.json({ success: false, error: 'Missing data parameter', trace }, { status: 400 });
     }
 
     let encryptMOKKeyToken = '';
@@ -55,56 +55,26 @@ export async function POST(req: Request) {
           encryptMOKKeyToken = resultObj.encryptMOKKeyToken || '';
         } catch (err2: any) {
           nvLog('FW', '❌ KMC Callback - 모든 데이터 파싱 실패');
-          return new NextResponse('Error: Failed to parse data parameter', { status: 400 });
+          return NextResponse.json({ success: false, error: 'Failed to parse data parameter', trace }, { status: 400 });
         }
       }
     }
 
     if (!encryptMOKKeyToken) {
       nvLog('FW', '❌ KMC Callback - encryptMOKKeyToken 추출 실패');
-      return new NextResponse('Error: encryptMOKKeyToken is missing in response', { status: 400 });
+      return NextResponse.json({ success: false, error: 'encryptMOKKeyToken is missing in response', trace }, { status: 400 });
     }
 
     nvLog('FW', `✅ KMC Callback 성공 - encryptMOKKeyToken 획득: ${encryptMOKKeyToken.substring(0, 15)}...`);
     
-    // 부모 창(window.opener)의 콜백 함수 result()를 호출하고 팝업창을 닫는 HTML 리턴
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>본인인증 완료</title>
-      </head>
-      <body>
-        <script>
-          try {
-            if (window.opener) {
-              window.opener.result(JSON.stringify({
-                success: true,
-                encryptMOKKeyToken: ${JSON.stringify(encryptMOKKeyToken)}
-              }));
-            } else {
-              console.error('부모창(window.opener)을 찾을 수 없습니다.');
-            }
-          } catch (e) {
-            console.error('부모창 콜백 호출 오류:', e);
-          } finally {
-            window.close();
-          }
-        </script>
-      </body>
-      </html>
-    `;
-
-    return new NextResponse(html, {
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-      },
+    return NextResponse.json({
+      success: true,
+      encryptMOKKeyToken
     });
 
   } catch (error: any) {
     nvLog('FW', `❌ KMC Callback 에러: ${error.message}`);
-    return new NextResponse(`Server Error: ${error.message}`, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
@@ -114,43 +84,14 @@ export async function GET(req: Request) {
     const encryptMOKKeyToken = searchParams.get('encryptMOKKeyToken');
 
     if (!encryptMOKKeyToken) {
-      return new NextResponse('Error: Missing encryptMOKKeyToken in query string', { status: 400 });
+      return NextResponse.json({ success: false, error: 'Missing encryptMOKKeyToken in query string' }, { status: 400 });
     }
 
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>본인인증 완료 (GET)</title>
-      </head>
-      <body>
-        <script>
-          try {
-            if (window.opener) {
-              window.opener.result(JSON.stringify({
-                success: true,
-                encryptMOKKeyToken: ${JSON.stringify(encryptMOKKeyToken)}
-              }));
-            } else {
-              console.error('부모창(window.opener)을 찾을 수 없습니다.');
-            }
-          } catch (e) {
-            console.error('부모창 콜백 호출 오류:', e);
-          } finally {
-            window.close();
-          }
-        </script>
-      </body>
-      </html>
-    `;
-
-    return new NextResponse(html, {
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-      },
+    return NextResponse.json({
+      success: true,
+      encryptMOKKeyToken
     });
   } catch (error: any) {
-    return new NextResponse(`Server Error: ${error.message}`, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
