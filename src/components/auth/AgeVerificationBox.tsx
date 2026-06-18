@@ -33,10 +33,6 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   const [isVerified, setIsVerified] = useState(false);
   const [verifiedData, setVerifiedData] = useState<any>(null);
   const [blockedMessage, setBlockedMessage] = useState<string | null>(null);
-  
-  // 실시간 진행 상세 상태 트래킹 메시지
-  const [statusMsg, setStatusMsg] = useState('인증 시작 전');
-  const [statusError, setStatusError] = useState('');
 
   // 마운트 시점에 드림시큐리티 JS SDK 로드 및 전역 콜백 등록
   useEffect(() => {
@@ -58,19 +54,14 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
     // 전역 콜백 함수 등록 (팝업 완료 시 호출됨)
     (window as any).result = async (resultDataStr: string) => {
       try {
-        nvLog('FW', '드림시큐리티 표준창 인증 완료 콜백 수신');
         const resultObj = JSON.parse(resultDataStr);
         if (resultObj.success && resultObj.encryptMOKKeyToken) {
-          setStatusMsg('인증 토큰 획득 완료: 서버에 검증 요청 중...');
           await handleConfirmStandardAuth(resultObj.encryptMOKKeyToken);
         } else {
-          setStatusError('인증 데이터가 유효하지 않습니다.');
           setIsVerifying(false);
           alert('본인인증 결과가 올바르지 않습니다.');
         }
       } catch (err: any) {
-        nvLog('FW', '인증 결과 파싱 오류', err.message);
-        setStatusError('결과 처리 도중 에러가 발생했습니다.');
         setIsVerifying(false);
         alert('본인인증 결과 처리 중 오류가 발생했습니다.');
       }
@@ -98,34 +89,23 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       });
 
       const result = await response.json();
-      if (result.trace && Array.isArray(result.trace)) {
-        result.trace.forEach((line: string) => nvLog('AT', `[SERVER_TRACE] ${line}`));
-      }
 
       if (response.ok && result.success && result.data) {
-        nvLog('FW', '본인인증 및 성인인증 최종 승인 성공', result.data);
-        setStatusMsg('인증 완료: 성인 인증에 성공했습니다.');
-        
-        // 쿠키 굽기 (max-age 없음 = 세션 쿠키: 브라우저 닫으면 자동 소멸, PC방 보안)
         document.cookie = "age_verified=true; path=/; SameSite=Lax";
         if (result.data && result.data.gender) {
           document.cookie = `guest_gender=${result.data.gender}; path=/; SameSite=Lax`;
         }
-        // 클라이언트 sessionStorage에는 개인정보(phoneNumber)를 제외하고 저장 (개인정보 보호)
         const { phoneNumber: _phone, ...safeData } = result.data;
         sessionStorage.setItem('foxmon_verified_user', JSON.stringify(safeData));
 
         setIsVerified(true);
         setVerifiedData(result.data);
 
-        // 인증 완료 → 자동으로 메인 화면 이동 (버튼 클릭 불필요)
         if (onVerifySuccess) {
           onVerifySuccess(result.data);
         }
       } else {
         const msg = result.message || '인증 확인에 실패했습니다.';
-        setStatusError(msg);
-        // 만 19세 미만 차단 메시지 감지 시 차단 UI 표시
         if (msg.includes('19세 미만')) {
           setBlockedMessage(msg);
         } else {
@@ -133,24 +113,15 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         }
       }
     } catch (err: any) {
-      setStatusError(`서버 통신 에러: ${err.message}`);
       alert(`서버 응답 확인 중 오류가 발생했습니다: ${err.message}`);
     } finally {
       setIsVerifying(false);
     }
   };
 
-  /**
-   * 본인확인 표준창 팝업 열기
-   */
   const handleStartDreamStandardAuth = () => {
     if (isTestMode) {
       setIsVerifying(true);
-      setStatusMsg('Mock 모드: 가상 인증창 활성화 중...');
-      setStatusError('');
-      nvLog('FW', '⚠️ Mock 모드로 인증 표준창 시뮬레이션을 실행합니다.');
-      
-      // 1.5초 후 가상 콜백 호출
       setTimeout(() => {
         const mockKeyToken = 'MOCK_KEY_TOKEN_' + Math.random().toString(36).substring(7);
         if ((window as any).result) {
@@ -169,25 +140,14 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
     }
 
     try {
-      // 1. 브라우저의 사용자 액션(User Activation) 보안 컨텍스트 보존을 위해 상태 업데이트 전에 SDK 함수를 최우선 동기 실행합니다.
-      nvLog('FW', '드림시큐리티 표준창 process 호출 시작');
       (window as any).MOBILEOK.process('/api/auth/kmc', 'WB', 'result');
 
-      // 2. 호출 후 트래커 상태 변경 적용
       setIsVerifying(true);
-      setStatusMsg('본인확인 표준창이 실행되었습니다.');
-      setStatusError('');
 
-      // 3. 팝업 취소/닫기 감지: 사용자가 팝업을 닫으면 부모 창에 포커스가 돌아오므로,
-      //    일정 시간 후에도 콜백이 호출되지 않았으면 isVerifying을 리셋합니다.
       const handleWindowFocus = () => {
-        // 팝업에서 포커스가 돌아온 후 2초 대기 (콜백이 호출될 시간 보장)
         setTimeout(() => {
-          // isVerified가 아직 false이고 콜백이 호출되지 않았다면 취소로 간주
           setIsVerifying((prev) => {
             if (prev && !isVerified) {
-              nvLog('FW', '팝업 포커스 복귀 감지: 인증 취소로 간주하여 버튼 재활성화');
-              setStatusMsg('인증이 취소되었습니다. 다시 시도해 주세요.');
               return false;
             }
             return prev;
@@ -197,7 +157,6 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       };
       window.addEventListener('focus', handleWindowFocus);
     } catch (err: any) {
-      setStatusError(err.message || '인증 팝업 호출 실패');
       alert(err.message || '본인인증창을 띄우지 못했습니다.');
       setIsVerifying(false);
     }
@@ -248,58 +207,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
             </div>
             <ChevronRight className="w-5 h-5 text-purple-400 group-hover:text-purple-600 transition-colors" />
           </button>
-        ) : (
-          <form onSubmit={handleEnterFoxmon} className="w-full">
-            <div className="flex flex-col items-center justify-center p-6 bg-green-50 border border-green-200 rounded-2xl mb-4">
-              <CheckCircle className="w-10 h-10 text-green-500 mb-2" />
-              <div className="text-sm font-black text-green-950">성인 인증이 완료되었습니다.</div>
-              <div className="text-xs text-green-600 mt-1">{verifiedData?.name} 님 환영합니다.</div>
-            </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white font-black text-sm rounded-xl shadow-md transition-all active:scale-[0.98]"
-            >
-              폭스몬 들어가기
-            </Button>
-          </form>
-        )}
-
-        {isTestMode && !isVerified && (
-          <div className="mt-2 text-center text-xs text-blue-500 font-bold bg-blue-50 py-1.5 rounded-lg border border-blue-100">
-            ⚡ 현재 임시 테스트(Mock) 모드가 활성화되었습니다.
-          </div>
-        )}
-
-        {/* 인증 진행 상태 로그 보드 */}
-        {process.env.NEXT_PUBLIC_ENABLE_LOGS !== 'false' && (
-          <div className="mt-4 p-3 bg-gray-50 border border-gray-100 rounded-xl text-[11px] font-mono text-gray-500 space-y-1.5 animate-in fade-in duration-300">
-            <div className="font-bold text-gray-700 border-b border-gray-200/60 pb-1 mb-1 flex justify-between items-center">
-              <span>🔄 본인인증 실시간 트래커</span>
-              <span className="text-[9px] px-1.5 py-0.2 bg-purple-100 text-purple-700 rounded-full font-sans font-bold">Standard Window</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className={cn("inline-block w-2 h-2 rounded-full", isVerifying || isVerified ? "bg-green-500" : "bg-gray-300")} />
-              <span className={cn(isVerifying || isVerified ? "text-gray-700 font-semibold" : "text-gray-400")}>Step 1: 본인인증 표준창 호출 및 진행</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className={cn("inline-block w-2 h-2 rounded-full", isVerified ? "bg-green-500" : "bg-gray-300")} />
-              <span className={cn(isVerified ? "text-gray-700 font-semibold" : "text-gray-400")}>Step 2: 토큰 검증 및 게스트 세션 승인</span>
-            </div>
-            <div className="mt-2 pt-1.5 border-t border-gray-200/60 text-[10px] space-y-0.5">
-              <div className="text-gray-600 font-semibold flex gap-1 items-start">
-                <span className="text-purple-600 shrink-0">➔ Status:</span>
-                <span className="break-all">{statusMsg}</span>
-              </div>
-              {statusError && (
-                <div className="text-red-600 font-semibold flex gap-1 items-start">
-                  <span className="shrink-0">⚠️ Error:</span>
-                  <span className="break-all">{statusError}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -312,4 +220,3 @@ export function AgeVerificationBox(props: AgeVerificationBoxProps) {
     </Suspense>
   );
 }
-

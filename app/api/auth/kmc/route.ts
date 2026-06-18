@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { nvLog } from '@/lib/logger';
 import { 
   decryptMokKeyInfo, 
   encryptKmcTokenRequest, 
@@ -12,7 +11,6 @@ import { OA_CREATE_GUEST_SESSION } from '@/src/atoms/oa/auth/OA_CREATE_GUEST_SES
 import { RA_PARSE_EXTERNAL_AUTH_DATA } from '@/src/atoms/ra/auth/RA_PARSE_EXTERNAL_AUTH_DATA';
 
 export async function POST(req: Request) {
-  const trace: string[] = [];
   try {
     let action = 'token';
     let params: any = {};
@@ -22,16 +20,13 @@ export async function POST(req: Request) {
       action = body.action || 'token';
       params = body;
     } catch (e) {
-      trace.push('📡 [API_ROUTE] JSON 파싱 실패 또는 바디 없음. 기본 action: [token] 설정');
+      // JSON 파싱 실패 시 기본 action: token
     }
-
-    nvLog('FW', `▶️ KMC API 요청 수신 - action: ${action}`);
 
     const isTestMode = process.env.NEXT_PUBLIC_KMC_TEST_MODE === 'true';
     const isMock = isTestMode && ((await isMockMode()) || params.isMock === true);
 
     if (isMock) {
-      nvLog('FW', '⚠️ Mock 모드로 요청을 시뮬레이션합니다.');
       return handleMockAction(action, params);
     }
 
@@ -39,44 +34,27 @@ export async function POST(req: Request) {
     switch (action) {
       case 'token': {
         let { siteUrl } = params;
-        trace.push(`📡 [API_ROUTE] 프론트엔드 전달 siteUrl: [${params.siteUrl || '없음'}]`);
         if (process.env.NEXT_PUBLIC_KMC_TEST_MODE !== 'true') {
-          const envSiteUrl = process.env.KMC_SITE_URL;
-          trace.push(`📡 [API_ROUTE] 환경변수 KMC_SITE_URL 로드: [${envSiteUrl || '미지정'}]`);
-          siteUrl = envSiteUrl || 'https://foxmon.co.kr';
+          siteUrl = process.env.KMC_SITE_URL || 'https://foxmon.co.kr';
         }
-        trace.push(`📡 [API_ROUTE] KMC로 송신할 최종 siteUrl 결정: [${siteUrl}]`);
         
         if (!siteUrl) {
-          return NextResponse.json({ success: false, message: 'siteUrl 파라미터가 누락되었습니다.', trace }, { status: 400 });
+          return NextResponse.json({ success: false, message: 'siteUrl 파라미터가 누락되었습니다.' }, { status: 400 });
         }
         
         try {
-          const keyInfo = await decryptMokKeyInfo(trace);
+          const keyInfo = await decryptMokKeyInfo();
           
-          // 1. 거래 ID 생성 (20자 이상 40자 이내 고유값)
           const clientTxId = `foxmon-${crypto.randomBytes(12).toString('hex')}`;
-          trace.push(`📡 [API_ROUTE] clientTxId 생성: [${clientTxId}]`);
-          
-          // 2. 현재 요청 시간 (YYYYMMDDHHmmss)
           const requestTime = new Date().toISOString().replace(/[-T:.Z]/g, '').substring(0, 14);
-          
-          // 3. 거래요청정보 평문 생성 (벤더 가이드 표준: clientTxId|requestTime 파이프 구분 문자열)
           const reqClientInfo = `${clientTxId}|${requestTime}`;
-          nvLog('FW', `🔒 [KMC_TOKEN_REQ] [1단계] 평문 정보 생성: [${reqClientInfo}]`);
-          trace.push(`[1단계_평문] reqClientInfo: [${reqClientInfo}]`);
 
-          // 4. 이용기관 개인키(ClientPrivateKey)로 privateEncrypt + RSA_PKCS1_PADDING 암호화
           const encryptReqClientInfo = encryptKmcTokenRequest(reqClientInfo, keyInfo.ClientPrivateKey);
-          nvLog('FW', `🔒 [KMC_TOKEN_REQ] [1단계] 이용기관 개인키(ClientPrivateKey)로 암호화 완료 (길이: ${encryptReqClientInfo.length})`);
-          trace.push(`[1단계_암호문] encryptReqClientInfo (일부): [${encryptReqClientInfo.substring(0, 30)}...]`);
-          trace.push(`[1단계_암호문_전체]: ${encryptReqClientInfo}`);
-          trace.push(`[RSA_COMPARE] [1단계_토큰요청전_생성값(encryptReqClientInfo)_전체]: ${encryptReqClientInfo}`);
           
-          const usageCode = process.env.KMC_USAGE_CODE || '01016'; // 기본 성인인증용(01016)
+          const usageCode = process.env.KMC_USAGE_CODE || '01016';
           const returnUrl = `${siteUrl}/api/auth/kmc/callback`;
           
-          const responseData = {
+          return NextResponse.json({
             usageCode,
             serviceId: keyInfo.ServiceId,
             encryptReqClientInfo,
@@ -84,50 +62,40 @@ export async function POST(req: Request) {
             retTransferType: 'MOKToken',
             returnUrl,
             clientTxId
-          };
-          
-          nvLog('FW', `🔒 [KMC_TOKEN_REQ] [1단계] ServiceId: [${keyInfo.ServiceId}]`);
-          trace.push(`[1단계_ServiceId] serviceId: [${keyInfo.ServiceId}]`);
-          
-          return NextResponse.json(responseData);
+          });
         } catch (err: any) {
-          return NextResponse.json({ success: false, message: `KMC 토큰 데이터 생성 오류: ${err.message}`, trace }, { status: 500 });
+          return NextResponse.json({ success: false, message: `KMC 토큰 데이터 생성 오류: ${err.message}` }, { status: 500 });
         }
       }
 
       case 'confirm': {
         const { encryptMOKKeyToken } = params;
         if (!encryptMOKKeyToken) {
-          return NextResponse.json({ success: false, message: '필수 검증 파라미터(encryptMOKKeyToken)가 누락되었습니다.', trace }, { status: 400 });
+          return NextResponse.json({ success: false, message: '필수 검증 파라미터(encryptMOKKeyToken)가 누락되었습니다.' }, { status: 400 });
         }
 
-        trace.push(`[RSA_COMPARE] [2단계_검증요청시_수신값(encryptMOKKeyToken)_전체]: ${encryptMOKKeyToken}`);
-
-        const confirmResult = await confirmMokStandardAuth({
-          encryptMOKKeyToken
-        }, trace);
+        const confirmResult = await confirmMokStandardAuth({ encryptMOKKeyToken });
 
         if (!confirmResult.success || !confirmResult.userInfo) {
-          return NextResponse.json({ success: false, message: confirmResult.message, trace }, { status: 400 });
+          return NextResponse.json({ success: false, message: confirmResult.message }, { status: 400 });
         }
 
-        // 만 19세 이상 나이 검증 추가 필터링 (RA 원자 호출)
+        // 만 19세 이상 나이 검증
         const parseResult = await RA_PARSE_EXTERNAL_AUTH_DATA('MOBILE', confirmResult.userInfo);
         if (!parseResult.success || !parseResult.data) {
-          return NextResponse.json({ success: false, message: parseResult.error || '나이 검증에 실패했습니다.', trace }, { status: 400 });
+          return NextResponse.json({ success: false, message: parseResult.error || '나이 검증에 실패했습니다.' }, { status: 400 });
         }
 
         // 게스트 세션 쿠키 생성 및 발급
         const sessionResult = await OA_CREATE_GUEST_SESSION(parseResult.data);
         if (!sessionResult.success) {
-          return NextResponse.json({ success: false, message: '세션 발급 오류가 발생했습니다.', trace }, { status: 500 });
+          return NextResponse.json({ success: false, message: '세션 발급 오류가 발생했습니다.' }, { status: 500 });
         }
 
         return NextResponse.json({
           success: true,
           message: '성인 인증이 완료되었습니다.',
-          data: confirmResult.userInfo,
-          trace
+          data: confirmResult.userInfo
         });
       }
 
@@ -135,8 +103,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: false, message: '지원하지 않는 action입니다.' }, { status: 400 });
     }
   } catch (err: any) {
-    nvLog('FW', '❌ KMC API 라우트 핸들러 에러', err.message);
-    return NextResponse.json({ success: false, message: `서버 내부 에러: ${err.message}`, trace }, { status: 500 });
+    return NextResponse.json({ success: false, message: `서버 내부 에러: ${err.message}` }, { status: 500 });
   }
 }
 
@@ -159,7 +126,6 @@ async function handleMockAction(action: string, params: any) {
     case 'confirm': {
       const { encryptMOKKeyToken } = params;
       
-      // Mock 토큰 데이터 검증
       if (!encryptMOKKeyToken || (!encryptMOKKeyToken.startsWith('MOCK_KEY_TOKEN') && !encryptMOKKeyToken.startsWith('MOCK_TOKEN'))) {
         return NextResponse.json({ success: false, message: '올바른 Mock 토큰 정보가 아닙니다.' }, { status: 400 });
       }
@@ -174,7 +140,7 @@ async function handleMockAction(action: string, params: any) {
         verifiedMethod: 'MOBILE'
       };
 
-      // 만 19세 이상 나이 검증 추가 필터링 (RA 원자 호출)
+      // 만 19세 이상 나이 검증
       const parseResult = await RA_PARSE_EXTERNAL_AUTH_DATA('MOBILE', mockUserInfo);
       if (!parseResult.success || !parseResult.data) {
         return NextResponse.json({ success: false, message: parseResult.error || '나이 검증에 실패했습니다. (만 19세 미만)' }, { status: 400 });
@@ -186,7 +152,6 @@ async function handleMockAction(action: string, params: any) {
         return NextResponse.json({ success: false, message: '세션 발급 오류가 발생했습니다.' }, { status: 500 });
       }
 
-      nvLog('FW', '✅ [Mock 인증성공] 게스트 세션 쿠키 발급 완료');
       return NextResponse.json({
         success: true,
         message: '성인 인증이 완료되었습니다. (Mock 모드)',
@@ -195,6 +160,6 @@ async function handleMockAction(action: string, params: any) {
     }
 
     default:
-      return NextResponse.json({ success: false, message: '지원하지 않는 action입니다.' }, { status: 400 });
+      return NextResponse.json({ success: false, message: '지원하지 않는 Mock action입니다.' }, { status: 400 });
   }
 }
