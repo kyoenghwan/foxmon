@@ -22,6 +22,36 @@ export function RegisterForm() {
   const [step, setStep] = useState(1); // 1: Auth, 2: Role, 3: TOS, 4: Info, 5: Business
   const [role, setRole] = useState<'EMPLOYER' | 'GENERAL' | null>(null);
   const [isAgeVerified, setIsAgeVerified] = useState(false);
+
+  // 생년월일(YYYYMMDD) → 만 나이 + 연대 라벨 (예: "23 (20대초)")
+  const getAgeLabel = (birthDate: string) => {
+    if (!birthDate || birthDate.length !== 8) return '';
+    const birthYear = parseInt(birthDate.substring(0, 4), 10);
+    const birthMonth = parseInt(birthDate.substring(4, 6), 10);
+    const birthDay = parseInt(birthDate.substring(6, 8), 10);
+    const today = new Date();
+    let age = today.getFullYear() - birthYear;
+    const monthNow = today.getMonth() + 1;
+    if (monthNow < birthMonth || (monthNow === birthMonth && today.getDate() < birthDay)) {
+      age--;
+    }
+    const decade = Math.floor(age / 10) * 10;
+    const remainder = age - decade;
+    let sub = '초';
+    if (remainder >= 7) sub = '후';
+    else if (remainder >= 4) sub = '중';
+    return `만 ${age}세 (${decade}대${sub}반)`;
+  };
+
+  // 휴대폰 번호 마스킹 (01012345678 → 010-****-5678)
+  const maskPhoneNumber = (phone: string) => {
+    if (!phone) return '';
+    const digits = phone.replace(/[^0-9]/g, '');
+    if (digits.length === 11) {
+      return `${digits.substring(0, 3)}-****-${digits.substring(7)}`;
+    }
+    return phone;
+  };
   const [agreements, setAgreements] = useState({
     service: false,
     privacy: false,
@@ -53,11 +83,14 @@ export function RegisterForm() {
     if (isAgeVerifiedCookie && storedUser) {
       try {
         const parsed = JSON.parse(storedUser);
-        setVerifiedData(parsed);
-        setIsAgeVerified(true);
-        setStep(2); // 본인인증 단계를 건너뛰고 회원유형 선택 단계로 즉시 도약!
+        // 회원가입에는 phoneNumber가 필수이므로, 없으면 Step 1(본인인증)부터 시작
+        if (parsed.name && parsed.birthDate && parsed.phoneNumber) {
+          setVerifiedData(parsed);
+          setIsAgeVerified(true);
+          setStep(2);
+        }
       } catch (e) {
-        console.error('본인인증 세션 데이터 복구 실패:', e);
+        // 세션 복구 실패 시 Step 1부터 시작
       }
     }
   }, []);
@@ -302,6 +335,8 @@ export function RegisterForm() {
   }) => {
     setVerifiedData(data);
     setIsAgeVerified(true);
+    // 회원가입 경로에서는 phoneNumber 포함하여 세션에 저장 (가입 완료 시 DB에 필요)
+    sessionStorage.setItem('foxmon_verified_user', JSON.stringify(data));
     handleNext();
   };
 
@@ -607,12 +642,18 @@ export function RegisterForm() {
                       <span>{verifiedData.birthDate}</span>
                       <span className="w-px h-3 bg-gray-200" />
                       <span>{verifiedData.gender === 'MALE' ? '남성' : '여성'}</span>
+                      {verifiedData.birthDate && (
+                        <>
+                          <span className="w-px h-3 bg-gray-200" />
+                          <span className="text-purple-500 font-bold">{getAgeLabel(verifiedData.birthDate)}</span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
                     <Label className="text-gray-400 text-[11px] font-black uppercase">휴대폰 <span className="text-purple-600">*</span></Label>
                     <div className="h-10 bg-gray-50/70 border border-gray-100 rounded-xl flex items-center px-4 text-gray-400 text-sm font-medium">
-                      {verifiedData.phoneNumber}
+                      {maskPhoneNumber(verifiedData.phoneNumber)}
                     </div>
                   </div>
                 </div>
