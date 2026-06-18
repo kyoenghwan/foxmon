@@ -13,6 +13,7 @@ interface CreateUserParams {
   phone_number: string;
   nationality: string;
   is_age_verified: boolean;
+  ci?: string | null;
   business_name?: string;
   representative_name?: string;
   business_number?: string;
@@ -59,6 +60,7 @@ export async function OA_CREATE_USER(input: CreateUserParams): Promise<{ success
           phone_number: input.phone_number,
           nationality: input.nationality,
           is_age_verified: input.is_age_verified,
+          ci: input.ci || null,
           business_name: input.business_name || null,
           representative_name: input.representative_name || null,
           business_number: input.business_number || null,

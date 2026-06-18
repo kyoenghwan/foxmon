@@ -78,6 +78,7 @@ export interface KmcUserInfo {
   nationality: 'KOREAN' | 'FOREIGNER';
   isAdult: boolean;
   verifiedMethod: string;
+  ci?: string; // KMC 본인인증 CI (연계정보)
 }
 
 export interface KmcKeyInfo {
@@ -706,7 +707,8 @@ export async function confirmKmcAuth(
       phoneNumber: rawUserInfo.userPhone,
       nationality: rawUserInfo.userNation === '0' ? 'KOREAN' : 'FOREIGNER',
       isAdult: true,
-      verifiedMethod: rawUserInfo.reqAuthType || 'MOBILE'
+      verifiedMethod: rawUserInfo.reqAuthType || 'MOBILE',
+      ci: rawUserInfo.ci || undefined
     };
 
     log(`✅ [KMC_CONFIRM] 본인확인 및 성인인증 완료. 성명: [${userInfo.name.substring(0, 1)}**]`);
@@ -807,7 +809,8 @@ export async function confirmMokStandardAuth(
       phoneNumber: rawUserInfo.userPhone,
       nationality: rawUserInfo.userNation === '0' ? 'KOREAN' : 'FOREIGNER',
       isAdult: true,
-      verifiedMethod: rawUserInfo.reqAuthType || 'MOBILE'
+      verifiedMethod: rawUserInfo.reqAuthType || 'MOBILE',
+      ci: rawUserInfo.ci || undefined
     };
 
     log(`✅ [MOK_STD_CONFIRM] 본인확인 및 성인인증 완료. 성명: [${userInfo.name.substring(0, 1)}**]`);

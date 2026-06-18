@@ -18,6 +18,7 @@
 | `phone_number` | String | Not Null | 휴대폰 번호 (본인인증 기반, 외국인은 이메일/해외번호) |
 | `nationality` | String | Not Null, Default 'KOREAN' | 국적 (KOREAN, FOREIGNER) |
 | `is_age_verified` | Boolean | Not Null, Default false | 성인 인증 완료 여부 |
+| `ci` | String | Unique, Nullable | KMC 본인인증 CI (연계정보, 본인 고유 식별값) |
 | `business_name` | String | Nullable | 업체 상호명 (사장님 전용) |
 | `representative_name` | String | Nullable | 대표자 성명 (사장님 전용) |
 | `business_number` | String | Nullable | 사업자 번호 (사장님 전용, 10자리) |

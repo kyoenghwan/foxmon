@@ -73,6 +73,7 @@ export function RegisterForm() {
     gender: '',
     phoneNumber: '',
     nationality: 'KOREAN' as 'KOREAN' | 'FOREIGNER',
+    ci: '',
   });
 
   useEffect(() => {

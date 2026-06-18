@@ -16,6 +16,7 @@ interface RegisterInput {
   phoneNumber: string;
   nationality: string;
   is_age_verified: boolean;
+  ci?: string;
   business_name?: string;
   representative_name?: string;
   business_number?: string;
@@ -72,6 +73,7 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
       phone_number: input.phoneNumber,
       nationality: input.nationality,
       is_age_verified: input.is_age_verified,
+      ci: input.ci || null,
       business_name: input.business_name,
       representative_name: input.representative_name,
       business_number: input.business_number,
