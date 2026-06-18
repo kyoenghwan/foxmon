@@ -32,6 +32,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   const [isVerifying, setIsVerifying] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [verifiedData, setVerifiedData] = useState<any>(null);
+  const [blockedMessage, setBlockedMessage] = useState<string | null>(null);
   
   // 실시간 진행 상세 상태 트래킹 메시지
   const [statusMsg, setStatusMsg] = useState('인증 시작 전');
@@ -117,8 +118,14 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         setIsVerified(true);
         setVerifiedData(result.data);
       } else {
-        setStatusError(result.message || '인증 결과 검증에 실패했습니다.');
-        alert(result.message || '인증 확인에 실패했습니다.');
+        const msg = result.message || '인증 확인에 실패했습니다.';
+        setStatusError(msg);
+        // 만 19세 미만 차단 메시지 감지 시 차단 UI 표시
+        if (msg.includes('19세 미만')) {
+          setBlockedMessage(msg);
+        } else {
+          alert(msg);
+        }
       }
     } catch (err: any) {
       setStatusError(`서버 통신 에러: ${err.message}`);
@@ -205,7 +212,20 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   return (
     <div className={cn("flex flex-col w-full", className)}>
       <div className="flex flex-col gap-3 relative">
-        {!isVerified ? (
+        {blockedMessage ? (
+          <div className="flex flex-col items-center justify-center p-6 bg-red-50 border-2 border-red-300 rounded-2xl text-center">
+            <div className="w-16 h-16 rounded-full border-[5px] border-red-200 flex items-center justify-center mb-3">
+              <span className="text-2xl font-black text-red-500">19</span>
+            </div>
+            <div className="text-sm font-black text-red-700 mb-1">접속이 제한되었습니다</div>
+            <div className="text-xs text-red-600 font-semibold leading-relaxed">
+              {blockedMessage}
+            </div>
+            <p className="text-[10px] text-red-400 mt-3 leading-relaxed">
+              청소년 보호법에 의거하여 만 19세 미만은<br/>본 서비스를 이용할 수 없습니다.
+            </p>
+          </div>
+        ) : !isVerified ? (
           <button 
             type="button"
             onClick={handleStartDreamStandardAuth}
