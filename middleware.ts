@@ -103,14 +103,11 @@ export const config = {
     matcher: [
         // 1. 관리자 경로는 보안 검증을 위해 무조건 미들웨어를 거치게 설정
         '/fox-office/:path*',
-        // 2. 일반 경로는 'age_verified=true' 쿠키가 없을 때만 미들웨어를 실행하여 성인게이트(/age-gate)로 보냄
-        // 이미 성인인증 쿠키가 있다면 미들웨어를 완전히 우회(Bypass)하여 NextAuth 세션 로드 부하를 차단(0ms)
-        {
-            source: '/((?!api|_next/static|_next/image|fox-office|.*\\.png$).*)',
-            missing: [
-                { type: 'cookie', key: 'age_verified', value: 'true' },
-                { type: 'cookie', key: 'foxmon_guest_session' }
-            ]
-        }
+        // 2. 일반 경로: 미들웨어 내부에서 age_verified + foxmon_guest_session 2중 체크를 수행합니다.
+        //    ⚠️ 이전에 missing 조건으로 미들웨어를 우회하던 최적화가 있었으나,
+        //    missing 배열은 AND 조건(모두 없어야 실행)이므로 쿠키 하나만 있어도 미들웨어가
+        //    통째로 건너뛰어져 인증 우회 보안 버그가 발생했습니다.
+        //    정확한 2중 체크를 위해 항상 미들웨어를 실행합니다.
+        '/((?!api|_next/static|_next/image|fox-office|.*\\.png$).*)'
     ],
 };
