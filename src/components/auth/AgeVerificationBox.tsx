@@ -117,6 +117,11 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
 
         setIsVerified(true);
         setVerifiedData(result.data);
+
+        // 인증 완료 → 자동으로 메인 화면 이동 (버튼 클릭 불필요)
+        if (onVerifySuccess) {
+          onVerifySuccess(result.data);
+        }
       } else {
         const msg = result.message || '인증 확인에 실패했습니다.';
         setStatusError(msg);
