@@ -324,8 +324,8 @@ export function SettingsModal() {
             
             <DialogContent 
                 className="sm:max-w-[480px] p-0 overflow-hidden bg-white flex flex-col max-h-[90vh] border-none rounded-2xl shadow-xl"
-                onPointerDownOutside={(e) => { if (isReauthModalOpen) e.preventDefault(); }}
-                onInteractOutside={(e) => { if (isReauthModalOpen) e.preventDefault(); }}
+                onPointerDownOutside={(e) => e.preventDefault()}
+                onInteractOutside={(e) => e.preventDefault()}
             >
                 {/* Header */}
                 <DialogHeader className="px-5 py-4 flex-shrink-0 bg-white z-10 flex flex-row items-center justify-between">
@@ -449,6 +449,7 @@ export function SettingsModal() {
                                                         <DialogContent 
                                                             className="sm:max-w-[400px] p-0 overflow-hidden bg-white border-none rounded-xl shadow-xl"
                                                             onCloseAutoFocus={(e) => e.preventDefault()}
+                                                            onPointerDownOutside={(e) => e.preventDefault()}
                                                             onInteractOutside={(e) => e.preventDefault()}
                                                         >
                                                             <DialogHeader className="px-4 py-3 border-b bg-gray-50">
