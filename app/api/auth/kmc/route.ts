@@ -92,6 +92,31 @@ export async function POST(req: Request) {
           return NextResponse.json({ success: false, message: '세션 발급 오류가 발생했습니다.' }, { status: 500 });
         }
 
+        // 로그인된 사용자의 CI가 비어있으면 자동 업데이트 (기존 회원 CI 채우기)
+        if (confirmResult.userInfo.ci) {
+          try {
+            const { auth } = await import('@/auth');
+            const session = await auth();
+            if (session?.user?.id) {
+              const { supabase } = await import('@/lib/supabase');
+              const { data: existingUser } = await supabase
+                .from('users')
+                .select('ci')
+                .eq('id', session.user.id)
+                .single();
+              
+              if (existingUser && !existingUser.ci) {
+                await supabase
+                  .from('users')
+                  .update({ ci: confirmResult.userInfo.ci })
+                  .eq('id', session.user.id);
+              }
+            }
+          } catch (_) {
+            // CI 업데이트 실패는 무시 (메인 흐름에 영향 없음)
+          }
+        }
+
         return NextResponse.json({
           success: true,
           message: '성인 인증이 완료되었습니다.',
