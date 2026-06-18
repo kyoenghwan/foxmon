@@ -61,10 +61,17 @@ export function SettingsModal() {
     const [pwMessage, setPwMessage] = useState('');
     const [pwError, setPwError] = useState('');
 
+    // 1. 컴포넌트 마운트 시 최초 1회 프로필 데이터 백그라운드 사전 페칭 (Pre-fetching)
+    useEffect(() => {
+        fetchUserData(true);
+        setAutoLogin(document.cookie.includes('foxmon_auto_login=1'));
+    }, []);
+
+    // 2. 모달이 열릴 때 데이터가 이미 있다면 백그라운드 갱신(SWR)을 수행하고, 없다면 로딩과 함께 가져옴
     useEffect(() => {
         if (isOpen) {
-            fetchUserData();
-            setAutoLogin(document.cookie.includes('foxmon_auto_login=1'));
+            const hasData = nickname || email || phoneNumber;
+            fetchUserData(!hasData); // 데이터가 이미 있다면 로딩UI(loadingData) 없이 백그라운드로 가져옴
         } else {
             resetFields();
         }
@@ -81,12 +88,8 @@ export function SettingsModal() {
     };
 
     const resetFields = () => {
-        setNickname('');
-        setEmail('');
-        setPhoneNumber('');
-        setProfileUrl('');
-        setSnsLinks([]);
-        setNewSnsType('kakao');
+        // 백그라운드에 페칭된 프로필 기본값(닉네임, 폰번호 등)은 그대로 유지하고,
+        // 사용자 임시 입력값이나 결과 메시지, 패스워드 등만 리셋합니다.
         setNewSnsValue('');
         setCurrentPassword('');
         setNewPassword('');
@@ -98,8 +101,10 @@ export function SettingsModal() {
         setActiveTab('profile');
     }
 
-    const fetchUserData = async () => {
-        setLoadingData(true);
+    const fetchUserData = async (isBackground = false) => {
+        if (!isBackground) {
+            setLoadingData(true);
+        }
         try {
             const res = await userSettingsAction('GET_PROFILE');
             if (res.success && res.data) {
@@ -131,12 +136,18 @@ export function SettingsModal() {
                     setSnsLinks(legacySns);
                 }
             } else {
-                setError('사용자 정보를 불러올 수 없습니다.');
+                if (!isBackground) {
+                    setError('사용자 정보를 불러올 수 없습니다.');
+                }
             }
         } catch (err) {
-            setError('데이터 로딩 중 오류가 발생했습니다.');
+            if (!isBackground) {
+                setError('데이터 로딩 중 오류가 발생했습니다.');
+            }
         } finally {
-            setLoadingData(false);
+            if (!isBackground) {
+                setLoadingData(false);
+            }
         }
     };
 
