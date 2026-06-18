@@ -30,20 +30,26 @@ export async function FA_USER_SETTINGS_FLOW(input: UserSettingsFlowInput) {
     try {
         switch (input.actionType) {
             case 'GET_PROFILE': {
+                console.time('🕒 [GET_PROFILE] TOTAL');
+                console.time('🕒 [GET_PROFILE] QA_GET_USER_PROFILE');
                 const profileResult = await QA_GET_USER_PROFILE(input.userId);
+                console.timeEnd('🕒 [GET_PROFILE] QA_GET_USER_PROFILE');
                 
                 // 텔레그램 연동 버튼을 위해 시스템 설정의 봇 아이디도 함께 가져옴
                 let botUsername = '';
                 try {
+                    console.time('🕒 [GET_PROFILE] site_settings');
                     const { data: setting } = await supabaseAdmin
                         .from('site_settings')
                         .select('key_value')
                         .eq('key_name', 'telegram_bot_username')
                         .single();
                     if (setting) botUsername = setting.key_value;
+                    console.timeEnd('🕒 [GET_PROFILE] site_settings');
                 } catch (e) {
                     console.error("Failed to fetch bot username:", e);
                 }
+                console.timeEnd('🕒 [GET_PROFILE] TOTAL');
 
                 return { 
                     success: profileResult.success, 

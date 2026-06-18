@@ -84,7 +84,9 @@ export async function getSeekerAdByIdAction(id: string) {
 }
 
 export async function userSettingsAction(actionType: UserSettingsFlowInput['actionType'], payloads?: any) {
+    console.time('🕒 [userSettingsAction] auth() session fetch');
     const session = await auth();
+    console.timeEnd('🕒 [userSettingsAction] auth() session fetch');
     if (!session?.user?.id) {
         return { success: false, message: '로그인이 필요합니다.', data: null };
     }
