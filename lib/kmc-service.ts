@@ -9,6 +9,8 @@ import { supabaseAdmin } from './supabase';
 
 // 벤더 라이브러리 동적 로드
 let mobileOK: any = null;
+let isKeyInitialized = false;
+
 try {
   const tryPaths = [
     path.resolve(process.cwd(), 'mok', 'mok_Key_Manager_v1.0.3.js'),
@@ -23,9 +25,6 @@ try {
     if (fs.existsSync(p)) {
       mobileOK = require(p);
       nvLog('AT', `📦 [MOK_VENDOR] 벤더 라이브러리 로드 성공: [${p}]`);
-      if (mobileOK) {
-        nvLog('AT', `📦 [MOK_VENDOR] 라이브러리 export 속성: [${Object.keys(mobileOK).join(', ')}]`);
-      }
       loaded = true;
       break;
     }
@@ -37,6 +36,7 @@ try {
 } catch (err: any) {
   nvLog('AT', `⚠️ [MOK_VENDOR] 벤더 라이브러리 로드 중 예외 발생 (순수 crypto 모드로 작동): ${err.message}`);
 }
+
 
 
 // Fixie 고정 IP 프록시 설정
@@ -121,22 +121,25 @@ export async function decryptMokKeyInfo(trace?: string[]): Promise<KmcKeyInfo> {
   };
 
   // 벤더 라이브러리 시도
-  const decryptFn = mobileOK?.decryptMokKeyInfo || mobileOK?.decryptKeyInfo;
-  if (decryptFn) {
-    log('🔑 [KMC_DECRYPT] 벤더 라이브러리를 사용해 mok_keyInfo.dat 복호화를 진행합니다.');
+  if (mobileOK?.keyInit) {
+    log('🔑 [KMC_DECRYPT] 벤더 라이브러리(mobileOK.keyInit) 초기화를 시작합니다.');
     try {
-      const keyFilePath = KMC_KEY_FILE_PATH ? path.resolve(KMC_KEY_FILE_PATH) : '';
-      const decryptedText = decryptFn(keyFilePath, KMC_KEY_PASSWORD);
-      log('⚡ [KMC_DECRYPT] 벤더 라이브러리 복호화 수행 성공');
-      const keyInfoJson = JSON.parse(decryptedText);
+      if (!isKeyInitialized) {
+        const keyFilePath = KMC_KEY_FILE_PATH ? path.resolve(KMC_KEY_FILE_PATH) : '';
+        mobileOK.keyInit(keyFilePath, KMC_KEY_PASSWORD);
+        isKeyInitialized = true;
+        log('⚡ [KMC_DECRYPT] 벤더 라이브러리(mobileOK.keyInit) 초기화 성공!');
+      }
+      const serviceId = mobileOK.getServiceId();
+      log(`⚡ [KMC_DECRYPT] 벤더 라이브러리 serviceId 획득 성공: [${serviceId}]`);
       cachedKeyInfo = {
-        ServiceId: keyInfoJson.ServiceId,
-        ClientPrivateKey: formatPem(keyInfoJson.ClientPrivateKey, 'PRIVATE'),
-        ServerPublicKey: formatPem(keyInfoJson.ServerPublicKey, 'PUBLIC')
+        ServiceId: serviceId,
+        ClientPrivateKey: '', // 벤더 모듈 사용 시 개별 PEM 키는 필요 없으므로 공백 처리
+        ServerPublicKey: ''
       };
       return cachedKeyInfo;
     } catch (vendorErr: any) {
-      log(`⚠️ [KMC_DECRYPT] 벤더 라이브러리 복호화 실패 (${vendorErr.message}). 순수 crypto 복호화로 전환합니다.`);
+      log(`⚠️ [KMC_DECRYPT] 벤더 라이브러리 초기화 실패 (${vendorErr.message}). 순수 crypto 복호화로 전환합니다.`);
     }
   }
   try {
@@ -294,15 +297,10 @@ export function encryptKmcData(plainText: string, serverPublicKeyPem: string): s
  * - 토큰 요청 거래정보(encryptReqClientInfo)는 대칭키 암호화를 하지 않고, 평문 JSON을 RSA로 직접 암호화합니다.
  */
 export function encryptKmcTokenRequest(plainText: string, serverPublicKeyPem: string): string {
-  const encryptFn = mobileOK?.generateEncryptReqClientInfo || mobileOK?.RSAEncrypt || mobileOK?.encryptReqClientInfo;
-  if (encryptFn) {
-    nvLog('AT', '🔑 [KMC_ENCRYPT] 벤더 라이브러리를 사용해 1단계 토큰 요청 데이터를 암호화합니다.');
+  if (mobileOK?.RSAEncrypt) {
+    nvLog('AT', '🔑 [KMC_ENCRYPT] 벤더 라이브러리(mobileOK.RSAEncrypt)를 사용해 1단계 데이터를 암호화합니다.');
     try {
-      const cleanPublicKey = serverPublicKeyPem
-        .replace(/-----BEGIN[^-]*-----/g, '')
-        .replace(/-----END[^-]*-----/g, '')
-        .replace(/\s+/g, '');
-      return encryptFn(plainText, cleanPublicKey);
+      return mobileOK.RSAEncrypt(plainText);
     } catch (err: any) {
       nvLog('AT', `⚠️ [KMC_ENCRYPT] 벤더 라이브러리 암호화 실패: ${err.message}. 순수 crypto 암호화로 폴백합니다.`);
     }
@@ -342,15 +340,10 @@ export function decryptKmcResult(encryptedResult: string, clientPrivateKeyPem: s
   }
 
   // 벤더 라이브러리 복호화 시도
-  const decryptFn = mobileOK?.decryptMOKResult || mobileOK?.getResult || mobileOK?.decryptResult;
-  if (decryptFn) {
-    log('🔑 [DECRYPT_KMC] 벤더 라이브러리를 사용해 본인인증 결과 복호화를 진행합니다.');
+  if (mobileOK?.getResult) {
+    log('🔑 [DECRYPT_KMC] 벤더 라이브러리(mobileOK.getResult)를 사용해 본인인증 결과를 복호화합니다.');
     try {
-      const cleanPrivateKey = clientPrivateKeyPem
-        .replace(/-----BEGIN[^-]*-----/g, '')
-        .replace(/-----END[^-]*-----/g, '')
-        .replace(/\s+/g, '');
-      const decryptedText = decryptFn(encryptedResult, cleanPrivateKey);
+      const decryptedText = mobileOK.getResult(encryptedResult);
       log('🔑 [DECRYPT_KMC] 벤더 라이브러리 복호화 성공!');
       return JSON.parse(decryptedText);
     } catch (vendorErr: any) {
