@@ -61,8 +61,12 @@ export async function POST(req: Request) {
           // 2. 현재 요청 시간 (YYYYMMDDHHmmss)
           const requestTime = new Date().toISOString().replace(/[-T:.Z]/g, '').substring(0, 14);
           
-          // 3. 거래요청정보 평문 생성 및 RSA 암호화 (벤더 모듈 및 가이드 규격인 clientTxId|requestTime 형식)
-          const reqClientInfo = `${clientTxId}|${requestTime}`;
+          // 3. 거래요청정보 평문 생성 및 RSA 암호화 (KMC V3 REST API 규격에 맞게 JSON 문자열로 전송)
+          const reqClientInfo = JSON.stringify({
+            version: 'V2',
+            clientTxId,
+            requestTime
+          });
           nvLog('FW', `🔒 [KMC_TOKEN_REQ] [1단계] 평문 정보 생성: [${reqClientInfo}]`);
           trace.push(`[1단계_평문] reqClientInfo: [${reqClientInfo}]`);
 
