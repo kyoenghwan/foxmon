@@ -55,7 +55,7 @@ export function RegisterForm() {
   const [agreements, setAgreements] = useState({
     service: false,
     privacy: false,
-    sms: true
+    sms: false
   });
   const [viewedPolicies, setViewedPolicies] = useState({
     service: false,
@@ -523,7 +523,7 @@ export function RegisterForm() {
 
               <div className="space-y-4">
                 <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
-                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">아이디 <span className="text-purple-600">*</span></Label>
+                  <Label className="text-gray-600 text-[13px] font-black tracking-wider">아이디 <span className="text-purple-600">*</span></Label>
                   <div className="flex gap-2">
                     <Input
                       placeholder="4~15자 영문 소문자·숫자"
@@ -539,7 +539,7 @@ export function RegisterForm() {
                     <Button
                       type="button"
                       onClick={checkId}
-                      className={`h-11 rounded-xl px-4 text-[10px] font-black transition-all shrink-0 ${duplicateChecked.id
+                      className={`h-11 rounded-xl px-4 text-xs font-black transition-all shrink-0 ${duplicateChecked.id
                           ? "bg-green-500 text-white"
                           : "bg-purple-50 text-purple-700 border border-purple-100"
                         }`}
@@ -550,7 +550,7 @@ export function RegisterForm() {
                 </div>
 
                 <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
-                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">비밀번호 <span className="text-purple-600">*</span></Label>
+                  <Label className="text-gray-600 text-[13px] font-black tracking-wider">비밀번호 <span className="text-purple-600">*</span></Label>
                   <div className="relative w-full">
                     <Input
                       type={showPassword ? "text" : "password"}
@@ -571,7 +571,7 @@ export function RegisterForm() {
                   </div>
                 </div>
                 <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
-                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">비밀번호 확인 <span className="text-purple-600">*</span></Label>
+                  <Label className="text-gray-600 text-[13px] font-black tracking-wider">비밀번호 확인 <span className="text-purple-600">*</span></Label>
                   <div className="relative w-full">
                     <Input
                       type={showConfirmPassword ? "text" : "password"}
@@ -593,7 +593,7 @@ export function RegisterForm() {
                 </div>
 
                 <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
-                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">닉네임 <span className="text-purple-600">*</span></Label>
+                  <Label className="text-gray-600 text-[13px] font-black tracking-wider">닉네임 <span className="text-purple-600">*</span></Label>
                   <div className="flex gap-2">
                     <Input
                       placeholder="활발한 닉네임"
@@ -608,7 +608,7 @@ export function RegisterForm() {
                     <Button
                       type="button"
                       onClick={checkNickname}
-                      className={`h-11 rounded-xl px-4 text-[10px] font-black transition-all shrink-0 ${duplicateChecked.nickname
+                      className={`h-11 rounded-xl px-4 text-xs font-black transition-all shrink-0 ${duplicateChecked.nickname
                           ? "bg-green-500 text-white"
                           : "bg-purple-50 text-purple-700 border border-purple-100"
                         }`}
@@ -619,7 +619,7 @@ export function RegisterForm() {
                 </div>
 
                 <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
-                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">이메일 (선택)</Label>
+                  <Label className="text-gray-600 text-[13px] font-black tracking-wider">이메일 (선택)</Label>
                   <Input
                     placeholder="email@example.com"
                     value={formData.email}
@@ -631,13 +631,13 @@ export function RegisterForm() {
 
                 <div className="py-2 border-t border-gray-50 border-dashed space-y-3 pt-4 mt-2">
                   <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
-                    <Label className="text-gray-400 text-[11px] font-black uppercase">이름 <span className="text-purple-600">*</span></Label>
+                    <Label className="text-gray-400 text-[13px] font-black">이름 <span className="text-purple-600">*</span></Label>
                     <div className="h-10 bg-gray-50/70 border border-gray-100 rounded-xl flex items-center px-4 text-purple-400 text-sm font-bold italic">
                       {verifiedData.name}
                     </div>
                   </div>
                   <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
-                    <Label className="text-gray-400 text-[11px] font-black uppercase">생년월일/성별 <span className="text-purple-600">*</span></Label>
+                    <Label className="text-gray-400 text-[13px] font-black">생년월일/성별 <span className="text-purple-600">*</span></Label>
                     <div className="h-10 bg-gray-50/70 border border-gray-100 rounded-xl flex items-center px-4 text-gray-400 text-sm font-medium gap-3">
                       <span>{verifiedData.birthDate}</span>
                       <span className="w-px h-3 bg-gray-200" />
@@ -651,9 +651,9 @@ export function RegisterForm() {
                     </div>
                   </div>
                   <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
-                    <Label className="text-gray-400 text-[11px] font-black uppercase">휴대폰 <span className="text-purple-600">*</span></Label>
+                    <Label className="text-gray-400 text-[13px] font-black">휴대폰 <span className="text-purple-600">*</span></Label>
                     <div className="h-10 bg-gray-50/70 border border-gray-100 rounded-xl flex items-center px-4 text-gray-400 text-sm font-medium">
-                      {maskPhoneNumber(verifiedData.phoneNumber)}
+                      {verifiedData.phoneNumber}
                     </div>
                   </div>
                 </div>
