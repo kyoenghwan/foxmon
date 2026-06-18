@@ -306,13 +306,28 @@ export function encryptKmcTokenRequest(plainText: string, serverPublicKeyPem: st
     }
   }
 
+  // 폴백 모드 (순수 crypto): 벤더 규격의 'clientTxId|requestTime' 문자열을 KMC REST API가 요구하는 V2 JSON으로 재조립합니다.
+  let finalPlainText = plainText;
+  if (plainText.includes('|')) {
+    const parts = plainText.split('|');
+    if (parts.length === 2) {
+      const [clientTxId, requestTime] = parts;
+      finalPlainText = JSON.stringify({
+        version: 'V2',
+        clientTxId,
+        requestTime
+      });
+      nvLog('AT', `🔑 [KMC_ENCRYPT] 폴백 모드 감지 - 문자열 평문을 JSON 평문으로 재조립 완료: ${finalPlainText}`);
+    }
+  }
+
   // 순수 crypto 암호화 로직 (RSA-OAEP-SHA256 규격 적용)
   const encrypted = crypto.publicEncrypt({
     key: serverPublicKeyPem,
     padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
     oaepHash: 'sha256',
     mgf1Hash: 'sha256'
-  } as any, Buffer.from(plainText, 'utf8'));
+  } as any, Buffer.from(finalPlainText, 'utf8'));
   return encrypted.toString('base64');
 }
 
