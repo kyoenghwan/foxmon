@@ -25,16 +25,16 @@ export async function OA_CREATE_GUEST_SESSION(parsedData: any) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 // 24 hours
+      // maxAge 없음 = 세션 쿠키: 브라우저를 닫으면 자동 소멸 (PC방 보안)
     });
 
     // Also set the age_verified flag loosely for frontend Middleware usage
     (await cookieStore).set('age_verified', 'true', {
-      httpOnly: false, // Accessible to JS if needed, but best restricted
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24
+      // maxAge 없음 = 세션 쿠키: 브라우저를 닫으면 자동 소멸 (PC방 보안)
     });
 
     nvLog('AT', '✅ OA_CREATE_GUEST_SESSION 성공: 쿠키 발급 완료');

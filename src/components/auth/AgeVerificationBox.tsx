@@ -105,10 +105,10 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         nvLog('FW', '본인인증 및 성인인증 최종 승인 성공', result.data);
         setStatusMsg('인증 완료: 성인 인증에 성공했습니다.');
         
-        // 쿠키 굽기
-        document.cookie = "age_verified=true; path=/; max-age=3600; SameSite=Lax";
+        // 쿠키 굽기 (max-age 없음 = 세션 쿠키: 브라우저 닫으면 자동 소멸, PC방 보안)
+        document.cookie = "age_verified=true; path=/; SameSite=Lax";
         if (result.data && result.data.gender) {
-          document.cookie = `guest_gender=${result.data.gender}; path=/; max-age=3600; SameSite=Lax`;
+          document.cookie = `guest_gender=${result.data.gender}; path=/; SameSite=Lax`;
         }
         sessionStorage.setItem('foxmon_verified_user', JSON.stringify(result.data));
 

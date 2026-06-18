@@ -26,7 +26,7 @@ function LoginCombinedContent() {
 
     const handleVerifySuccess = () => {
         nvLog('FW', 'Login Gate: 방문자 성인 인증 성공');
-        document.cookie = "age_verified=true; path=/; max-age=86400; SameSite=Lax";
+        document.cookie = "age_verified=true; path=/; SameSite=Lax"; // 세션 쿠키: 브라우저 닫으면 소멸 (PC방 보안)
         window.location.href = '/';
     };
 
