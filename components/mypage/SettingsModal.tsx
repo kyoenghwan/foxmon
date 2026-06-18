@@ -646,7 +646,7 @@ export function SettingsModal() {
         </Dialog>
 
         {/* 완전히 독립된 재인증 다이얼로그 (중첩 모달 충돌 방지를 위해 병렬 분리) */}
-        <Dialog open={isReauthModalOpen} onOpenChange={setIsReauthModalOpen}>
+        <Dialog open={isReauthModalOpen} onOpenChange={setIsReauthModalOpen} preventPopState={true}>
             <DialogContent 
                 className="sm:max-w-[400px] p-0 overflow-hidden bg-white border-none rounded-xl shadow-xl z-[9999]"
                 onCloseAutoFocus={(e) => e.preventDefault()}
