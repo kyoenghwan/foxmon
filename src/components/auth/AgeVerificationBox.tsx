@@ -64,11 +64,13 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
           await handleConfirmStandardAuth(resultObj.encryptMOKKeyToken);
         } else {
           setStatusError('인증 데이터가 유효하지 않습니다.');
+          setIsVerifying(false);
           alert('본인인증 결과가 올바르지 않습니다.');
         }
       } catch (err: any) {
         nvLog('FW', '인증 결과 파싱 오류', err.message);
         setStatusError('결과 처리 도중 에러가 발생했습니다.');
+        setIsVerifying(false);
         alert('본인인증 결과 처리 중 오류가 발생했습니다.');
       }
     };
@@ -161,6 +163,25 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       setIsVerifying(true);
       setStatusMsg('본인확인 표준창이 실행되었습니다.');
       setStatusError('');
+
+      // 3. 팝업 취소/닫기 감지: 사용자가 팝업을 닫으면 부모 창에 포커스가 돌아오므로,
+      //    일정 시간 후에도 콜백이 호출되지 않았으면 isVerifying을 리셋합니다.
+      const handleWindowFocus = () => {
+        // 팝업에서 포커스가 돌아온 후 2초 대기 (콜백이 호출될 시간 보장)
+        setTimeout(() => {
+          // isVerified가 아직 false이고 콜백이 호출되지 않았다면 취소로 간주
+          setIsVerifying((prev) => {
+            if (prev && !isVerified) {
+              nvLog('FW', '팝업 포커스 복귀 감지: 인증 취소로 간주하여 버튼 재활성화');
+              setStatusMsg('인증이 취소되었습니다. 다시 시도해 주세요.');
+              return false;
+            }
+            return prev;
+          });
+        }, 2000);
+        window.removeEventListener('focus', handleWindowFocus);
+      };
+      window.addEventListener('focus', handleWindowFocus);
     } catch (err: any) {
       setStatusError(err.message || '인증 팝업 호출 실패');
       alert(err.message || '본인인증창을 띄우지 못했습니다.');
