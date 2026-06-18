@@ -311,7 +311,11 @@ export function SettingsModal() {
                 </button>
             </DialogTrigger>
             
-            <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden bg-white flex flex-col max-h-[90vh] border-none rounded-2xl shadow-xl">
+            <DialogContent 
+                className="sm:max-w-[480px] p-0 overflow-hidden bg-white flex flex-col max-h-[90vh] border-none rounded-2xl shadow-xl"
+                onPointerDownOutside={(e) => { if (isReauthModalOpen) e.preventDefault(); }}
+                onInteractOutside={(e) => { if (isReauthModalOpen) e.preventDefault(); }}
+            >
                 {/* Header */}
                 <DialogHeader className="px-5 py-4 flex-shrink-0 bg-white z-10 flex flex-row items-center justify-between">
                     <div>
@@ -431,7 +435,11 @@ export function SettingsModal() {
                                                         <DialogTrigger asChild>
                                                             <button type="button" className="shrink-0 px-2.5 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-md text-[11px] font-bold hover:bg-gray-50">재인증</button>
                                                         </DialogTrigger>
-                                                        <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden bg-white border-none rounded-xl shadow-xl">
+                                                        <DialogContent 
+                                                            className="sm:max-w-[400px] p-0 overflow-hidden bg-white border-none rounded-xl shadow-xl"
+                                                            onCloseAutoFocus={(e) => e.preventDefault()}
+                                                            onInteractOutside={(e) => e.preventDefault()}
+                                                        >
                                                             <DialogHeader className="px-4 py-3 border-b bg-gray-50">
                                                                 <DialogTitle className="font-extrabold text-[15px] flex items-center gap-2">
                                                                     <Smartphone className="w-4 h-4 text-[#F26E22]" /> 휴대폰 재인증

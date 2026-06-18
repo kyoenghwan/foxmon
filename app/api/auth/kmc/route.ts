@@ -98,22 +98,31 @@ export async function POST(req: Request) {
             const { auth } = await import('@/auth');
             const session = await auth();
             if (session?.user?.id) {
-              const { supabase } = await import('@/lib/supabase');
-              const { data: existingUser } = await supabase
+              const { supabaseAdmin } = await import('@/lib/supabase');
+              const { data: existingUser, error: selectError } = await supabaseAdmin
                 .from('users')
                 .select('ci')
                 .eq('id', session.user.id)
                 .single();
               
-              if (existingUser && !existingUser.ci) {
-                await supabase
+              if (selectError) {
+                console.error('[KMC API] 기존 유저 조회 에러:', selectError);
+              }
+              
+              if (existingUser && existingUser.ci !== confirmResult.userInfo.ci) {
+                const { error: updateError } = await supabaseAdmin
                   .from('users')
                   .update({ ci: confirmResult.userInfo.ci })
                   .eq('id', session.user.id);
+                if (updateError) {
+                  console.error('[KMC API] CI 업데이트 에러:', updateError);
+                } else {
+                  console.log('[KMC API] CI 업데이트 성공:', session.user.id, confirmResult.userInfo.ci);
+                }
               }
             }
-          } catch (_) {
-            // CI 업데이트 실패는 무시 (메인 흐름에 영향 없음)
+          } catch (err: any) {
+            console.error('[KMC API] CI 업데이트 트라이캐치 에러:', err.message);
           }
         }
 
@@ -162,7 +171,8 @@ async function handleMockAction(action: string, params: any) {
         phoneNumber: '01012345678',
         nationality: 'KOREAN',
         isAdult: true,
-        verifiedMethod: 'MOBILE'
+        verifiedMethod: 'MOBILE',
+        ci: 'MOCK_CI_1234567890abcdef'
       };
 
       // 만 19세 이상 나이 검증
@@ -175,6 +185,41 @@ async function handleMockAction(action: string, params: any) {
       const sessionResult = await OA_CREATE_GUEST_SESSION(parseResult.data);
       if (!sessionResult.success) {
         return NextResponse.json({ success: false, message: '세션 발급 오류가 발생했습니다.' }, { status: 500 });
+      }
+
+      // 로그인된 사용자의 CI가 비어있으면 자동 업데이트 (기존 회원 CI 채우기 - Mock 대응)
+      if (mockUserInfo.ci) {
+        try {
+          const { auth } = await import('@/auth');
+          const session = await auth();
+          if (session?.user?.id) {
+            const { supabaseAdmin } = await import('@/lib/supabase');
+            const { data: existingUser, error: selectError } = await supabaseAdmin
+              .from('users')
+              .select('ci')
+              .eq('id', session.user.id)
+              .single();
+            
+            if (selectError) {
+              console.error('[KMC Mock API] 기존 유저 조회 에러:', selectError);
+            }
+            
+            if (existingUser && existingUser.ci !== mockUserInfo.ci) {
+              const { error: updateError } = await supabaseAdmin
+                .from('users')
+                .update({ ci: mockUserInfo.ci })
+                .eq('id', session.user.id);
+              
+              if (updateError) {
+                console.error('[KMC Mock API] CI 업데이트 에러:', updateError);
+              } else {
+                console.log('[KMC Mock API] CI 업데이트 성공:', session.user.id, mockUserInfo.ci);
+              }
+            }
+          }
+        } catch (err: any) {
+          console.error('[KMC Mock API] CI 업데이트 트라이캐치 에러:', err.message);
+        }
       }
 
       return NextResponse.json({

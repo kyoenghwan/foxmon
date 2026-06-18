@@ -14,6 +14,7 @@ interface AgeVerificationBoxProps {
     gender: 'MALE' | 'FEMALE'; 
     phoneNumber: string;
     nationality: 'KOREAN' | 'FOREIGNER';
+    ci?: string;
   }) => void;
   className?: string;
 }

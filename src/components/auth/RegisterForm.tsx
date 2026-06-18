@@ -332,9 +332,17 @@ export function RegisterForm() {
     birthDate: string;
     gender: string;
     phoneNumber: string;
-    nationality: 'KOREAN' | 'FOREIGNER'
+    nationality: 'KOREAN' | 'FOREIGNER';
+    ci?: string;
   }) => {
-    setVerifiedData(data);
+    setVerifiedData({
+      name: data.name,
+      birthDate: data.birthDate,
+      gender: data.gender,
+      phoneNumber: data.phoneNumber,
+      nationality: data.nationality,
+      ci: data.ci || '',
+    });
     setIsAgeVerified(true);
     // 회원가입 경로에서는 phoneNumber 포함하여 세션에 저장 (가입 완료 시 DB에 필요)
     sessionStorage.setItem('foxmon_verified_user', JSON.stringify(data));
