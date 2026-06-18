@@ -110,7 +110,9 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         if (result.data && result.data.gender) {
           document.cookie = `guest_gender=${result.data.gender}; path=/; SameSite=Lax`;
         }
-        sessionStorage.setItem('foxmon_verified_user', JSON.stringify(result.data));
+        // 클라이언트 sessionStorage에는 개인정보(phoneNumber)를 제외하고 저장 (개인정보 보호)
+        const { phoneNumber: _phone, ...safeData } = result.data;
+        sessionStorage.setItem('foxmon_verified_user', JSON.stringify(safeData));
 
         setIsVerified(true);
         setVerifiedData(result.data);

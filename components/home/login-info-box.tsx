@@ -39,18 +39,11 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
             if (verified) {
                 try {
                     const data = JSON.parse(verified);
-                    let tempNum = '';
-                    if (data.phoneNumber) {
-                        const numbers = data.phoneNumber.replace(/[^0-9]/g, '');
-                        tempNum = numbers.slice(-4);
-                    }
+                    // 임시 아이디용 랜덤 4자리 번호 (세션 동안 고정 유지)
+                    let tempNum = sessionStorage.getItem('foxmon_temp_rand');
                     if (!tempNum) {
-                        let rand = sessionStorage.getItem('foxmon_temp_rand');
-                        if (!rand) {
-                            rand = Math.floor(1000 + Math.random() * 9000).toString();
-                            sessionStorage.setItem('foxmon_temp_rand', rand);
-                        }
-                        tempNum = rand;
+                        tempNum = Math.floor(1000 + Math.random() * 9000).toString();
+                        sessionStorage.setItem('foxmon_temp_rand', tempNum);
                     }
                     setGuestUser({ tempId: `user-${tempNum}` });
                 } catch (e) {
