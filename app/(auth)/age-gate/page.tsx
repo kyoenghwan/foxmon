@@ -85,7 +85,7 @@ function AgeGateContent() {
 
                         {/* RIGHT: Non-Member */}
                         <div className="flex-1 px-6 pb-6 md:px-8 md:pb-8 flex flex-col bg-white">
-                            <div className="flex flex-col items-center justify-center pt-5 mb-3 md:pt-6 md:mb-4">
+                            <div className="flex flex-col items-center justify-center pt-12 lg:pt-5 mb-3 md:pt-6 md:mb-4">
                                 <div className="flex items-center justify-center gap-2 text-[#444]">
                                     <div className="p-2 bg-blue-50 rounded-lg">
                                         <Info className="text-blue-500 w-4 h-4 md:w-5 md:h-5" />

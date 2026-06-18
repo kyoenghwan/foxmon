@@ -97,7 +97,7 @@ function LoginCombinedContent() {
 
                         {/* RIGHT: Non-Member */}
                         <div className="flex-1 px-6 pb-6 md:px-8 md:pb-8 flex flex-col bg-white justify-center">
-                            <div className="w-full flex flex-col items-center justify-center gap-6">
+                            <div className="w-full flex flex-col items-center justify-center gap-6 pt-12 lg:pt-0">
                                 <div className="flex flex-col items-center justify-center">
                                     <div className="flex items-center justify-center gap-2 text-[#444]">
                                         <div className="p-2 bg-blue-50 rounded-lg">

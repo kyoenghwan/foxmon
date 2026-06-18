@@ -127,18 +127,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
           </div>
         </div>
 
-        {/* 자동 로그인 (로그인 유지) 체크박스 */}
-        <div className="w-full flex items-center justify-start gap-2 px-1 mb-3 mt-1">
-          <label className="flex items-center gap-1.5 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={formData.autoLogin}
-              onChange={(e) => setFormData(prev => ({...prev, autoLogin: e.target.checked}))}
-              className="w-3.5 h-3.5 rounded text-purple-600 focus:ring-purple-500/30 border-gray-300"
-            />
-            <span className="text-[11px] font-black text-gray-500">로그인 유지</span>
-          </label>
-        </div>
+
 
         {error && <p className="text-red-500 text-[10px] font-bold mb-5 animate-bounce">⚠️ {error}</p>}
 
@@ -228,18 +217,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
         </div>
       </div>
 
-      {/* 자동 로그인 (로그인 유지) 체크박스 */}
-      <div className="w-full max-w-[280px] mx-auto flex items-center justify-start mb-4 mt-1">
-        <label className="flex items-center gap-2 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={formData.autoLogin}
-            onChange={(e) => setFormData(prev => ({...prev, autoLogin: e.target.checked}))}
-            className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500/30 border-gray-300 transition-all cursor-pointer"
-          />
-          <span className="text-[13px] font-black text-gray-500">로그인 상태 유지</span>
-        </label>
-      </div>
+
 
       {error && (
         <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-500 text-[11px] font-bold mb-5">

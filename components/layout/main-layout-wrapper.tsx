@@ -23,6 +23,7 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
         pathname.startsWith('/login') ||
         pathname.startsWith('/register') ||
         pathname.startsWith('/age-gate') ||
+        pathname.startsWith('/find-account') ||
         pathname.startsWith('/employer') ||
         pathname.startsWith('/job-seeker');
 
