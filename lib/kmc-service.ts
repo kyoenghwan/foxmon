@@ -293,21 +293,32 @@ export function encryptKmcData(plainText: string, serverPublicKeyPem: string): s
 }
 
 /**
- * 2-1. KMC 최초 토큰 요청 데이터 암호화 로직 (순수 RSA-OAEP-SHA256 단일 암호화)
- * - 토큰 요청 거래정보(encryptReqClientInfo)는 대칭키 암호화를 하지 않고, 평문 JSON을 RSA로 직접 암호화합니다.
+ * 2-1. KMC 표준창 1단계 토큰 요청 데이터 암호화 로직
+ * - 벤더 가이드(mok_server_std.js) 및 벤더 라이브러리(mok_Key_Manager) 역공학 분석 결과:
+ *   이용기관 개인키(ClientPrivateKey)로 crypto.privateEncrypt + RSA_PKCS1_PADDING을 수행하며,
+ *   평문에 "V2|" 접두사를 자동으로 결합합니다.
+ * - 입력 평문 포맷: "clientTxId|YYYYMMDDHHmmss" (파이프 구분 문자열)
  */
-export function encryptKmcTokenRequest(plainText: string, serverPublicKeyPem: string): string {
-  // 1단계 거래 토큰 발급 API(/agent/v2/token/get)용 암호화는 반드시 KMC 서버 공개키로 RSA-OAEP-SHA256 암호화를 해야 합니다.
-  // 벤더 라이브러리의 mobileOK.RSAEncrypt는 이용기관 개인키로 privateEncrypt를 수행하는 레거시(V2) 방식이므로 사용하지 않고,
-  // 항상 순수 crypto 모듈을 사용해 RSA-OAEP-SHA256 암호화를 적용합니다.
+export function encryptKmcTokenRequest(plainText: string, clientPrivateKeyPem: string): string {
+  // 벤더 라이브러리 사용 가능 시: mobileOK.RSAEncrypt는 내부적으로 이용기관 개인키 + RSA_PKCS1_PADDING으로 암호화
+  if (mobileOK?.RSAEncrypt) {
+    nvLog('AT', '🔑 [KMC_ENCRYPT] 벤더 라이브러리(mobileOK.RSAEncrypt)를 사용해 1단계 데이터를 암호화합니다.');
+    try {
+      return mobileOK.RSAEncrypt(plainText);
+    } catch (err: any) {
+      nvLog('AT', `⚠️ [KMC_ENCRYPT] 벤더 라이브러리 암호화 실패: ${err.message}. 순수 crypto 암호화로 폴백합니다.`);
+    }
+  }
 
-  // 순수 crypto 암호화 로직 (RSA-OAEP-SHA256 규격 적용)
-  const encrypted = crypto.publicEncrypt({
-    key: serverPublicKeyPem,
-    padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-    oaepHash: 'sha256',
-    mgf1Hash: 'sha256'
-  } as any, Buffer.from(plainText, 'utf8'));
+  // 순수 crypto 폴백: 벤더 RSAEncrypt와 동일한 방식 재현
+  // - 평문에 "V2|" 접두사 결합
+  // - 이용기관 개인키(ClientPrivateKey)로 privateEncrypt
+  // - RSA_PKCS1_PADDING 사용
+  nvLog('AT', `🔑 [KMC_ENCRYPT] 순수 crypto 모드로 1단계 데이터를 암호화합니다. (privateEncrypt + RSA_PKCS1_PADDING)`);
+  const encrypted = crypto.privateEncrypt({
+    key: clientPrivateKeyPem,
+    padding: crypto.constants.RSA_PKCS1_PADDING
+  }, Buffer.from('V2|' + plainText, 'utf8'));
   return encrypted.toString('base64');
 }
 
@@ -447,22 +458,16 @@ export async function getKmcToken(siteUrl: string, trace?: string[]): Promise<{ 
     const clientTxId = `foxmon-${crypto.randomBytes(12).toString('hex')}`;
     log(`⚡ [KMC_TOKEN] Step 1-1: clientTxId 생성 완료 = [${clientTxId}] (길이: ${clientTxId.length})`);
 
-    // Step 2. 본인확인 토큰요청 데이터 생성
+    // Step 2. 본인확인 토큰요청 데이터 생성 (벤더 가이드 표준: clientTxId|requestTime 파이프 구분)
     log('📡 [KMC_TOKEN] Step 2: 본인확인 토큰요청 데이터 생성 시작');
-    
-    // Step 2-1 & 2-2. 암호화 전 데이터(JSONData) 생성 및 직렬화
     const requestTime = new Date().toISOString().replace(/[-T:.Z]/g, '').substring(0, 14); // YYYYMMDDHHmmss
-    const requestJson = JSON.stringify({
-      version: 'V2',
-      clientTxId,
-      requestTime
-    });
-    log(`⚡ [KMC_TOKEN] Step 2-1 & 2-2: JSON 객체 생성 및 직렬화 완료 = ${requestJson}`);
+    const reqClientInfo = `${clientTxId}|${requestTime}`;
+    log(`⚡ [KMC_TOKEN] Step 2-1: 거래요청 평문 생성 완료 = [${reqClientInfo}]`);
 
-    // Step 2-3. 암호화 진행 (RSA 암호화)
-    log('📡 [KMC_TOKEN] Step 2-3: RSA-OAEP 방식으로 JSON 직렬화 데이터 암호화 및 Base64 인코딩 시작');
-    const encryptReqClientInfo = encryptKmcTokenRequest(requestJson, keyInfo.ServerPublicKey);
-    log(`⚡ [KMC_TOKEN] Step 3-1: Base64 인코딩된 본인확인 요청 토큰(encryptReqClientInfo) 생성 성공 (${encryptReqClientInfo.substring(0, 20)}...)`);
+    // Step 2-2. 암호화 진행 (이용기관 개인키 + privateEncrypt + RSA_PKCS1_PADDING)
+    log('📡 [KMC_TOKEN] Step 2-2: 이용기관 개인키(ClientPrivateKey)로 privateEncrypt 암호화 시작');
+    const encryptReqClientInfo = encryptKmcTokenRequest(reqClientInfo, keyInfo.ClientPrivateKey);
+    log(`⚡ [KMC_TOKEN] Step 2-3: 본인확인 요청 토큰(encryptReqClientInfo) 생성 성공 (${encryptReqClientInfo.substring(0, 20)}...)`);
 
     // 3) KMC 서버로 토큰 요청 API 호출
     const apiUrl = TEST_MODE 
