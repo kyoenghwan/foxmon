@@ -311,6 +311,7 @@ export function SettingsModal() {
     ];
 
     return (
+        <>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <button 
@@ -442,59 +443,13 @@ export function SettingsModal() {
                                                 <label className="text-[11px] font-bold text-gray-500 w-[60px] sm:w-[80px] shrink-0">전화번호</label>
                                                 <div className="flex gap-2 flex-1">
                                                     <input type="text" value={phoneNumber} readOnly className="w-full px-2.5 py-1.5 border border-gray-200 bg-gray-50 text-gray-500 rounded-md outline-none text-[13px] font-bold flex-1" />
-                                                    <Dialog open={isReauthModalOpen} onOpenChange={setIsReauthModalOpen}>
-                                                        <DialogTrigger asChild>
-                                                            <button type="button" className="shrink-0 px-2.5 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-md text-[11px] font-bold hover:bg-gray-50">재인증</button>
-                                                        </DialogTrigger>
-                                                        <DialogContent 
-                                                            className="sm:max-w-[400px] p-0 overflow-hidden bg-white border-none rounded-xl shadow-xl"
-                                                            onCloseAutoFocus={(e) => e.preventDefault()}
-                                                            onPointerDownOutside={(e) => e.preventDefault()}
-                                                            onInteractOutside={(e) => e.preventDefault()}
-                                                        >
-                                                            <DialogHeader className="px-4 py-3 border-b bg-gray-50">
-                                                                <DialogTitle className="font-extrabold text-[15px] flex items-center gap-2">
-                                                                    <Smartphone className="w-4 h-4 text-[#F26E22]" /> 휴대폰 재인증
-                                                                </DialogTitle>
-                                                                <DialogDescription className="text-[11px] text-gray-500">
-                                                                    본인인증으로 전화번호를 변경합니다.
-                                                                </DialogDescription>
-                                                            </DialogHeader>
-                                                            <div className="p-4">
-                                                                {reauthLoading ? (
-                                                                    <div className="flex flex-col items-center py-8 gap-2">
-                                                                        <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
-                                                                        <p className="text-sm font-bold text-gray-500">처리 중...</p>
-                                                                    </div>
-                                                                ) : (
-                                                                    <AgeVerificationBox onVerifySuccess={async (data: any) => {
-                                                                        setReauthLoading(true);
-                                                                        try {
-                                                                            if (data.phoneNumber) {
-                                                                                setPhoneNumber(data.phoneNumber);
-                                                                            }
-                                                                            const res = await userSettingsAction('UPDATE_PROFILE', {
-                                                                                profileData: {
-                                                                                    phoneNumber: data.phoneNumber || phoneNumber,
-                                                                                    nickname,
-                                                                                    email,
-                                                                                    profile_image_url: profileUrl,
-                                                                                    sns_links: snsLinks,
-                                                                                    currentNickname: initialNickname,
-                                                                                }
-                                                                            });
-                                                                            if (res.success) {
-                                                                                setMessage('전화번호가 변경되었습니다.');
-                                                                                setTimeout(() => setMessage(''), 3000);
-                                                                            }
-                                                                        } catch (_) {}
-                                                                        setReauthLoading(false);
-                                                                        setIsReauthModalOpen(false);
-                                                                    }} />
-                                                                )}
-                                                            </div>
-                                                        </DialogContent>
-                                                    </Dialog>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => setIsReauthModalOpen(true)}
+                                                        className="shrink-0 px-2.5 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-md text-[11px] font-bold hover:bg-gray-50"
+                                                    >
+                                                        재인증
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -689,5 +644,56 @@ export function SettingsModal() {
                 )}
             </DialogContent>
         </Dialog>
+
+        {/* 완전히 독립된 재인증 다이얼로그 (중첩 모달 충돌 방지를 위해 병렬 분리) */}
+        <Dialog open={isReauthModalOpen} onOpenChange={setIsReauthModalOpen}>
+            <DialogContent 
+                className="sm:max-w-[400px] p-0 overflow-hidden bg-white border-none rounded-xl shadow-xl z-[9999]"
+                onCloseAutoFocus={(e) => e.preventDefault()}
+            >
+                <DialogHeader className="px-4 py-3 border-b bg-gray-50">
+                    <DialogTitle className="font-extrabold text-[15px] flex items-center gap-2">
+                        <Smartphone className="w-4 h-4 text-[#F26E22]" /> 휴대폰 재인증
+                    </DialogTitle>
+                    <DialogDescription className="text-[11px] text-gray-500">
+                        본인인증으로 전화번호를 변경합니다.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="p-4">
+                    {reauthLoading ? (
+                        <div className="flex flex-col items-center py-8 gap-2">
+                            <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+                            <p className="text-sm font-bold text-gray-500">처리 중...</p>
+                        </div>
+                    ) : (
+                        <AgeVerificationBox onVerifySuccess={async (data: any) => {
+                            setReauthLoading(true);
+                            try {
+                                if (data.phoneNumber) {
+                                    setPhoneNumber(data.phoneNumber);
+                                }
+                                const res = await userSettingsAction('UPDATE_PROFILE', {
+                                    profileData: {
+                                        phoneNumber: data.phoneNumber || phoneNumber,
+                                        nickname,
+                                        email,
+                                        profile_image_url: profileUrl,
+                                        sns_links: snsLinks,
+                                        currentNickname: initialNickname,
+                                    }
+                                });
+                                if (res.success) {
+                                    setMessage('전화번호가 변경되었습니다.');
+                                    setTimeout(() => setMessage(''), 3000);
+                                }
+                            } catch (_) {}
+                            setReauthLoading(false);
+                            setIsReauthModalOpen(false);
+                        }} />
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
+        </>
     );
 }
