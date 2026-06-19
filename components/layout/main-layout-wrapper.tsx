@@ -25,7 +25,8 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
         pathname.startsWith('/age-gate') ||
         pathname.startsWith('/find-account') ||
         pathname.startsWith('/employer') ||
-        pathname.startsWith('/job-seeker');
+        pathname.startsWith('/job-seeker') ||
+        pathname.startsWith('/render-banners');
 
     if (isExcluded) {
         return <>{children}</>;
