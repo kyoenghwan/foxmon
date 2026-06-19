@@ -31,7 +31,7 @@ type RetroBoard = {
 type ActiveTab = 'roulette' | 'luckybox' | 'attendance' | 'retro';
 
 export default function PlayDashboardClient() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('roulette');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('attendance');
   const [loading, setLoading] = useState(true);
   const [activityPoints, setActivityPoints] = useState(0);
   const [dailyStatus, setDailyStatus] = useState<DailyStatus>({
@@ -93,32 +93,10 @@ export default function PlayDashboardClient() {
     <div className="space-y-8 animate-in fade-in duration-700">
       
       {/* 탭 네비게이션 */}
-      <div className="flex flex-wrap justify-center gap-2 p-1.5 bg-gray-900/80 border border-gray-800 rounded-2xl max-w-2xl mx-auto backdrop-blur-lg">
-        <button
-          onClick={() => setActiveTab('roulette')}
-          className={`flex items-center gap-2 px-5 py-3.5 rounded-xl text-xs font-black tracking-tight transition-all uppercase ${
-            activeTab === 'roulette'
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-600/20'
-              : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-          }`}
-        >
-          <Compass className="w-4 h-4" />
-          회전 룰렛
-        </button>
-        <button
-          onClick={() => setActiveTab('luckybox')}
-          className={`flex items-center gap-2 px-5 py-3.5 rounded-xl text-xs font-black tracking-tight transition-all uppercase ${
-            activeTab === 'luckybox'
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-600/20'
-              : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-          }`}
-        >
-          <Gift className="w-4 h-4" />
-          랜덤상자
-        </button>
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 p-1.5 bg-gray-900/80 border border-gray-800 rounded-2xl max-w-2xl mx-auto backdrop-blur-lg w-full">
         <button
           onClick={() => setActiveTab('attendance')}
-          className={`flex items-center gap-2 px-5 py-3.5 rounded-xl text-xs font-black tracking-tight transition-all uppercase ${
+          className={`flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-5 py-3 rounded-xl text-xs font-black tracking-tight transition-all uppercase ${
             activeTab === 'attendance'
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-600/20'
               : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
@@ -128,8 +106,30 @@ export default function PlayDashboardClient() {
           출석체크
         </button>
         <button
+          onClick={() => setActiveTab('luckybox')}
+          className={`flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-5 py-3 rounded-xl text-xs font-black tracking-tight transition-all uppercase ${
+            activeTab === 'luckybox'
+              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-600/20'
+              : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+          }`}
+        >
+          <Gift className="w-4 h-4" />
+          랜덤상자
+        </button>
+        <button
+          onClick={() => setActiveTab('roulette')}
+          className={`flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-5 py-3 rounded-xl text-xs font-black tracking-tight transition-all uppercase ${
+            activeTab === 'roulette'
+              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-600/20'
+              : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+          }`}
+        >
+          <Compass className="w-4 h-4" />
+          회전 룰렛
+        </button>
+        <button
           onClick={() => setActiveTab('retro')}
-          className={`flex items-center gap-2 px-5 py-3.5 rounded-xl text-xs font-black tracking-tight transition-all uppercase ${
+          className={`flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-5 py-3 rounded-xl text-xs font-black tracking-tight transition-all uppercase ${
             activeTab === 'retro'
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-600/20'
               : 'text-gray-400 hover:text-white hover:bg-gray-800/50'

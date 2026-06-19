@@ -161,7 +161,7 @@ export default function RetroDrawGame({ board, activityPoints, onPullSuccess, on
       </div>
 
       {/* 10x10 격자 보드판 */}
-      <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 w-full p-4 bg-amber-950/20 border border-amber-900/30 rounded-2xl shadow-inner">
+      <div className="grid grid-cols-10 gap-1 sm:gap-2 w-full p-2 sm:p-4 bg-amber-950/20 border border-amber-900/30 rounded-2xl shadow-inner">
         {board.slots.map((slot) => {
           const isCurrentPulling = pullingSlot === slot.slotNumber;
           
@@ -170,32 +170,32 @@ export default function RetroDrawGame({ board, activityPoints, onPullSuccess, on
               key={slot.id}
               onClick={() => !slot.isPulled && handlePullSlot(slot.slotNumber)}
               disabled={slot.isPulled || pullingSlot !== null}
-              className={`relative aspect-square flex flex-col items-center justify-center rounded-lg border-2 text-xs font-bold transition-all ${
+              className={`relative aspect-square flex flex-col items-center justify-center rounded-md sm:rounded-lg border sm:border-2 text-[9px] sm:text-xs font-bold transition-all ${
                 slot.isPulled
                   ? 'bg-gray-800/40 border-gray-800 text-gray-600 shadow-none cursor-default'
                   : 'bg-gradient-to-br from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-amber-100 border-amber-400/30 hover:border-amber-300 shadow-md active:scale-95 hover:-translate-y-0.5'
               } ${isCurrentPulling ? 'rip-animation' : ''}`}
             >
               {slot.isPulled ? (
-                <div className="flex flex-col items-center justify-center p-0.5 scale-90">
-                  <span className="text-[10px] text-gray-500 truncate max-w-full">
+                <div className="flex flex-col items-center justify-center p-0.5 scale-90 sm:scale-100">
+                  <span className="text-[7px] sm:text-[10px] text-gray-500 truncate max-w-full">
                     {slot.userNickname}
                   </span>
-                  <span className="text-[9px] font-black text-yellow-600/70 mt-0.5">
+                  <span className="text-[7px] sm:text-[9px] font-black text-yellow-600/70 mt-0.5">
                     {slot.rewardAmount && slot.rewardAmount > 0 ? `+${slot.rewardAmount}p` : '꽝'}
                   </span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center">
-                  <span className="text-[10px] opacity-75 font-normal">No.</span>
-                  <span className="text-sm font-black">{slot.slotNumber}</span>
+                  <span className="text-[7px] sm:text-[10px] opacity-75 font-normal">No.</span>
+                  <span className="text-[9px] sm:text-sm font-black leading-none">{slot.slotNumber}</span>
                 </div>
               )}
 
               {/* 뜯는 중 스피너 */}
               {isCurrentPulling && (
-                <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
-                  <Loader2 className="w-5 h-5 animate-spin text-yellow-500" />
+                <div className="absolute inset-0 bg-black/50 rounded-md sm:rounded-lg flex items-center justify-center">
+                  <Loader2 className="w-3 h-3 sm:w-5 sm:h-5 animate-spin text-yellow-500" />
                 </div>
               )}
             </button>
