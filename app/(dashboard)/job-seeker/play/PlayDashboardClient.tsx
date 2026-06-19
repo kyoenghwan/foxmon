@@ -141,7 +141,7 @@ export default function PlayDashboardClient() {
       </div>
 
       {/* 게임 콘텐츠 컨테이너 */}
-      <div className="w-full flex items-center justify-center">
+      <div className="w-full max-w-2xl mx-auto flex flex-col items-center justify-center">
         {activeTab === 'roulette' && (
           <RouletteGame
             isPlayedToday={dailyStatus.roulettePlayed}

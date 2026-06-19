@@ -58,13 +58,18 @@ export default function LuckyBoxGame({ isPlayedToday, activityPoints, onPlaySucc
     }
   };
 
-  const resetBox = () => {
+  const resetBox = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     setStatus('idle');
     setReward(null);
+    setError(null);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 bg-gray-900/60 rounded-3xl border border-gray-800 shadow-2xl max-w-md mx-auto relative overflow-hidden backdrop-blur-md">
+    <div className="flex flex-col items-center justify-center p-6 bg-gray-900/60 rounded-3xl border border-gray-800 shadow-2xl max-w-2xl w-full mx-auto relative overflow-hidden backdrop-blur-md">
       
       {/* 커스텀 흔들림(shake) 애니메이션 스타일 주입 */}
       <style jsx global>{`
@@ -101,8 +106,8 @@ export default function LuckyBoxGame({ isPlayedToday, activityPoints, onPlaySucc
         </div>
       </div>
 
-      {/* 선물 상자 그래픽 영역 (높이를 56으로 콤팩트화) */}
-      <div className="relative w-full h-56 flex items-center justify-center">
+      {/* 선물 상자 그래픽 영역 (유연한 최소 높이 설정) */}
+      <div className="relative w-full min-h-[14rem] h-auto py-4 flex items-center justify-center">
         
         {/* 아우라 빛 효과 */}
         <div className={`absolute w-36 h-36 rounded-full bg-purple-500/20 blur-3xl transition-all duration-1000 ${
@@ -168,8 +173,8 @@ export default function LuckyBoxGame({ isPlayedToday, activityPoints, onPlaySucc
             )}
             
             <button
-              onClick={resetBox}
-              className="mt-3 text-xs text-purple-400 hover:text-purple-300 font-bold underline underline-offset-4"
+              onClick={(e) => resetBox(e)}
+              className="mt-4 text-xs text-purple-400 hover:text-purple-300 font-bold underline underline-offset-4 relative z-30 cursor-pointer"
             >
               다시 하기
             </button>

@@ -136,7 +136,7 @@ export default function RetroDrawGame({ board, activityPoints, onPullSuccess, on
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 bg-gray-900/60 rounded-3xl border border-gray-800 shadow-2xl w-full max-w-4xl mx-auto backdrop-blur-md">
+    <div className="flex flex-col items-center justify-center p-4 bg-gray-900/60 rounded-3xl border border-gray-800 shadow-2xl w-full max-w-2xl mx-auto backdrop-blur-md">
       
       {/* 뜯기 찌리릭 및 흔들림 애니메이션 CSS 주입 */}
       <style jsx global>{`

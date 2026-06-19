@@ -93,7 +93,7 @@ export default function AttendanceCheck({ isPlayedToday, activityPoints, onPlayS
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-gray-900/60 rounded-3xl border border-gray-800 shadow-2xl max-w-lg mx-auto relative overflow-hidden backdrop-blur-md w-full">
+    <div className="flex flex-col items-center justify-center p-6 bg-gray-900/60 rounded-3xl border border-gray-800 shadow-2xl max-w-2xl w-full mx-auto relative overflow-hidden backdrop-blur-md">
       {/* 도장 애니메이션 CSS 주입 */}
       <style jsx global>{`
         @keyframes stamp-bang {
