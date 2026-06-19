@@ -23,7 +23,8 @@ try {
   let loaded = false;
   for (const p of tryPaths) {
     if (fs.existsSync(p)) {
-      mobileOK = require(p);
+      const dynamicRequire = eval('require');
+      mobileOK = dynamicRequire(p);
       nvLog('AT', `📦 [MOK_VENDOR] 벤더 라이브러리 로드 성공: [${p}]`);
       loaded = true;
       break;
