@@ -18,10 +18,15 @@ export function PlayDashboardModal() {
     const handleOpen = () => {
       setOpen(true);
     };
+    const handleClose = () => {
+      setOpen(false);
+    };
 
     window.addEventListener('open_play_modal', handleOpen);
+    window.addEventListener('close_play_modal', handleClose);
     return () => {
       window.removeEventListener('open_play_modal', handleOpen);
+      window.removeEventListener('close_play_modal', handleClose);
     };
   }, []);
 

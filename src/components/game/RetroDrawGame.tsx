@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Loader2, HelpCircle } from 'lucide-react';
 
@@ -36,9 +37,16 @@ export default function RetroDrawGame({
   isPostRewardAvailable = false,
   isPlayedToday = false,
 }: RetroDrawGameProps) {
+  const router = useRouter();
   const [pullingSlot, setPullingSlot] = useState<number | null>(null);
   const [showConfirmSlot, setShowConfirmSlot] = useState<number | null>(null);
   const [result, setResult] = useState<{ amount: number; tier: number } | null>(null);
+
+  const handleWriteCert = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.dispatchEvent(new CustomEvent('close_play_modal'));
+    router.push(`/community?tab=free&write=true&category=놀이터 인증&title=${encodeURIComponent('추억의 종이뽑기 당첨 인증! 🥇')}&content=${encodeURIComponent(`여우들의 놀이터 [추억의 종이뽑기] 제 ${board?.boardRound}회차에서 딱지를 뜯어 ${result?.amount} 포인트를 획득했습니다! 🦊\n\n기 받아가세요!`)}&prefillImage=${encodeURIComponent('/images/playground/retrodraw_win_banner.png')}`);
+  };
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -229,12 +237,12 @@ export default function RetroDrawGame({
             </div>
             {result.amount > 0 && (
               <div className="text-center">
-                <a
-                  href={`/community?tab=free&write=true&category=놀이터 인증&title=${encodeURIComponent('추억의 종이뽑기 당첨 인증! 🥇')}&content=${encodeURIComponent(`여우들의 놀이터 [추억의 종이뽑기] 제 ${board.boardRound}회차에서 딱지를 뜯어 ${result.amount} 포인트를 획득했습니다! 🦊\n\n기 받아가세요!`)}&prefillImage=${encodeURIComponent('/images/playground/retrodraw_win_banner.png')}`}
+                <button
+                  onClick={handleWriteCert}
                   className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer text-center"
                 >
                   📝 당첨 인증글 쓰기{isPostRewardAvailable ? ' (+50p 적립)' : ''}
-                </a>
+                </button>
               </div>
             )}
           </div>

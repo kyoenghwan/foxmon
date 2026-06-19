@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Loader2, RotateCw } from 'lucide-react';
 
@@ -26,9 +27,16 @@ export default function RouletteGame({
   onPlaySuccess,
   isPostRewardAvailable = false,
 }: RouletteGameProps) {
+  const router = useRouter();
   const [isSpinning, setIsSpinning] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [reward, setReward] = useState<{ amount: number; label: string } | null>(null);
+
+  const handleWriteCert = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.dispatchEvent(new CustomEvent('close_play_modal'));
+    router.push(`/community?tab=free&write=true&category=놀이터 인증&title=${encodeURIComponent('회전 룰렛 당첨 인증합니다! 🎉')}&content=${encodeURIComponent(`여우들의 놀이터 [회전 룰렛]에서 ${reward?.amount} 포인트를 획득했습니다! 🦊\n\n모두 기 받아가세요!`)}&prefillImage=${encodeURIComponent('/images/playground/roulette_win_banner.png')}`);
+  };
   const [error, setError] = useState<string | null>(null);
   const rouletteRef = useRef<HTMLDivElement>(null);
   const currentRotation = useRef(0);
@@ -169,12 +177,12 @@ export default function RouletteGame({
                   회전 룰렛에서 <span className="text-yellow-400 font-bold">{reward.label}</span> 보상에<br />당첨되었습니다!
                 </p>
                 <div className="mt-4">
-                  <a
-                    href={`/community?tab=free&write=true&category=놀이터 인증&title=${encodeURIComponent('회전 룰렛 당첨 인증합니다! 🎉')}&content=${encodeURIComponent(`여우들의 놀이터 [회전 룰렛]에서 ${reward.amount} 포인트를 획득했습니다! 🦊\n\n모두 기 받아가세요!`)}&prefillImage=${encodeURIComponent('/images/playground/roulette_win_banner.png')}`}
+                  <button
+                    onClick={handleWriteCert}
                     className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
                   >
                     📝 당첨 인증글 쓰기{isPostRewardAvailable ? ' (+50p 적립)' : ''}
-                  </a>
+                  </button>
                 </div>
               </div>
             ) : (
