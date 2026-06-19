@@ -201,32 +201,82 @@ export default function RouletteGame({
         </div>
       )}
 
-      {/* 당첨 결과 레이어 오버레이 */}
+      {/* 당첨 결과 레이어 오버레이 - 프리미엄 축하 배너 */}
       {reward && (
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm rounded-3xl flex items-center justify-center p-4 z-30 animate-in zoom-in duration-305">
-          <div className="flex flex-col items-center justify-center p-6 bg-gray-800/95 border border-gray-700/60 rounded-2xl max-w-xs w-full text-center shadow-2xl animate-in scale-in duration-300">
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-3xl flex items-center justify-center p-4 z-30 animate-in zoom-in duration-305">
+          <div className="flex flex-col items-center justify-center w-full max-w-xs animate-in scale-in duration-300">
             {reward.amount > 0 ? (
-              <div className="flex flex-col items-center text-center">
-                <div className="w-20 h-20 rounded-full bg-yellow-500/10 border-4 border-yellow-500 flex items-center justify-center text-yellow-500 text-2xl font-black shadow-lg shadow-yellow-500/20 animate-bounce">
-                  +{reward.amount}p
+              <>
+                {/* 🏆 프리미엄 축하 배너 카드 */}
+                <div className="relative w-full rounded-2xl bg-gradient-to-br from-[#24123a] via-[#140a22] to-[#24123a] border-[3px] border-yellow-600/40 shadow-[0_12px_30px_rgba(0,0,0,0.85),_0_0_20px_rgba(217,119,6,0.2)] flex flex-col items-center justify-center p-5 overflow-hidden">
+                  
+                  {/* 금색 테두리 장식 프레임 (SVG) */}
+                  <div className="absolute inset-1.5 pointer-events-none">
+                    <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      <rect x="2" y="2" width="96" height="96" rx="4" fill="none" stroke="#eab308" strokeWidth="0.8" strokeOpacity="0.9" />
+                      <rect x="3.5" y="3.5" width="93" height="93" rx="3" fill="none" stroke="#d97706" strokeWidth="0.4" strokeOpacity="0.7" />
+                      {/* 좌상단 */}
+                      <path d="M 1 8 L 8 1 L 12 5 L 5 12 Z" fill="#d97706" />
+                      <path d="M 2 12 C 5 8, 8 5, 12 2" fill="none" stroke="#fef08a" strokeWidth="1" />
+                      <circle cx="6" cy="6" r="1" fill="#facc15" />
+                      {/* 우상단 */}
+                      <path d="M 99 8 L 92 1 L 88 5 L 95 12 Z" fill="#d97706" />
+                      <path d="M 98 12 C 95 8, 92 5, 88 2" fill="none" stroke="#fef08a" strokeWidth="1" />
+                      <circle cx="94" cy="6" r="1" fill="#facc15" />
+                      {/* 좌하단 */}
+                      <path d="M 1 92 L 8 99 L 12 95 L 5 88 Z" fill="#d97706" />
+                      <path d="M 2 88 C 5 92, 8 95, 12 98" fill="none" stroke="#fef08a" strokeWidth="1" />
+                      <circle cx="6" cy="94" r="1" fill="#facc15" />
+                      {/* 우하단 */}
+                      <path d="M 99 92 L 92 99 L 88 95 L 95 88 Z" fill="#d97706" />
+                      <path d="M 98 88 C 95 92, 92 95, 88 98" fill="none" stroke="#fef08a" strokeWidth="1" />
+                      <circle cx="94" cy="94" r="1" fill="#facc15" />
+                    </svg>
+                  </div>
+
+                  {/* 상단 금색 장식 */}
+                  <div className="w-10 h-5 flex items-center justify-center opacity-85 mb-1 z-10">
+                    <svg className="w-full h-full text-yellow-400" viewBox="0 0 24 12" fill="currentColor">
+                      <path d="M12 2L9 6h6l-3-4zm0 8l3-4H9l3 4z" />
+                    </svg>
+                  </div>
+
+                  {/* 스파클링 광원 효과 */}
+                  <div className="absolute top-4 left-6 w-2 h-2 bg-yellow-200 rounded-full blur-[2px] animate-pulse"></div>
+                  <div className="absolute bottom-4 right-6 w-2 h-2 bg-yellow-200 rounded-full blur-[2px] animate-pulse"></div>
+                  <div className="absolute top-1/2 left-3 w-1.5 h-1.5 bg-amber-300 rounded-full blur-[1px] animate-pulse delay-75"></div>
+
+                  {/* 텍스트 내용 */}
+                  <div className="text-center z-10 flex flex-col items-center">
+                    <h2 className="text-[18px] font-black tracking-tight leading-none text-transparent bg-clip-text bg-gradient-to-b from-yellow-100 via-yellow-400 to-amber-500 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                      축하합니다!
+                    </h2>
+                    <div className="h-[1.5px] w-20 bg-gradient-to-r from-transparent via-yellow-400 to-transparent my-2.5 shadow-glow"></div>
+                    <h1 className="text-[22px] font-black tracking-tight leading-none text-transparent bg-clip-text bg-gradient-to-b from-white via-yellow-300 to-amber-500 drop-shadow-[0_3px_5px_rgba(0,0,0,0.9)]">
+                      룰렛 {reward.label} 당첨!
+                    </h1>
+                  </div>
+
+                  {/* 하단 금색 장식 */}
+                  <div className="w-10 h-5 flex items-center justify-center opacity-85 mt-1 z-10">
+                    <svg className="w-full h-full text-yellow-400" viewBox="0 0 24 12" fill="currentColor">
+                      <path d="M12 10L9 6h6l-3 4zm0-8l3 4H9l3-4z" />
+                    </svg>
+                  </div>
                 </div>
-                <h3 className="text-yellow-400 text-sm font-black mt-3">
-                  룰렛 당첨!
-                </h3>
-                <p className="text-gray-300 text-xs font-semibold mt-1 leading-relaxed">
-                  축하합니다!<br />회전 룰렛에서 <span className="text-yellow-400 font-bold">{reward.label} 당첨되셨습니다!</span>
-                </p>
+
+                {/* 인증글 쓰기 버튼 */}
                 <div className="mt-4">
                   <button
                     onClick={handleOpenCertModal}
-                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
+                    className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
                   >
                     📝 당첨 인증글 쓰기{isPostRewardAvailable ? ' (+50p 적립)' : ''}
                   </button>
                 </div>
-              </div>
+              </>
             ) : (
-              <div className="flex flex-col items-center text-center">
+              <div className="flex flex-col items-center text-center p-6 bg-gray-800/95 border border-gray-700/60 rounded-2xl w-full">
                 <div className="w-20 h-20 rounded-full bg-gray-700/50 border-4 border-gray-600 flex items-center justify-center text-gray-400 text-2xl font-black">
                   꽝
                 </div>
@@ -241,7 +291,7 @@ export default function RouletteGame({
             
             <button
               onClick={(e) => resetRoulette(e)}
-              className="mt-5 text-xs text-purple-400 hover:text-purple-300 font-bold underline underline-offset-4 relative z-30 cursor-pointer"
+              className="mt-4 text-xs text-purple-400 hover:text-purple-300 font-bold underline underline-offset-4 relative z-30 cursor-pointer"
             >
               다시 하기
             </button>
