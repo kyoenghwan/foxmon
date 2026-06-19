@@ -303,6 +303,19 @@ pages:
     files: ["components/seekers/seeker-detail-content.tsx"]
     db_tables: ["resumes", "users"]
 
+  PLAY_PAGE:
+    label: "여우들의 놀이터 페이지"
+    keywords: ["놀이터", "play", "게임", "미니게임", "회전 룰렛", "랜덤상자", "출석체크", "종이뽑기"]
+    files:
+      - "app/(dashboard)/job-seeker/play/page.tsx"
+      - "app/(dashboard)/job-seeker/play/PlayDashboardClient.tsx"
+      - "src/components/game/RouletteGame.tsx"
+      - "src/components/game/LuckyBoxGame.tsx"
+      - "src/components/game/AttendanceCheck.tsx"
+      - "src/components/game/RetroDrawGame.tsx"
+    flows: ["FA_PLAY_MINI_GAME_FLOW"]
+    db_tables: ["users", "mini_game_logs", "activity_point_ledger"]
+
   # ── 커뮤니티 ──
   COMMUNITY_PAGE:
     label: "커뮤니티 게시판 페이지"

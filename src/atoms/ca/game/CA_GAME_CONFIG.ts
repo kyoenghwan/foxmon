@@ -12,7 +12,7 @@ export type GameRewardItem = {
 };
 
 export const ROULETTE_REWARDS: GameRewardItem[] = [
-  { amount: 0, weight: 30, label: '꽝' },
+  { amount: 30, weight: 30, label: '30p' },
   { amount: 10, weight: 40, label: '10p' },
   { amount: 50, weight: 18, label: '50p' },
   { amount: 100, weight: 8, label: '100p' },

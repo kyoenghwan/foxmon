@@ -387,6 +387,7 @@ export default function RetroDrawGame({
           <div className="w-2 h-2 rounded-full bg-gray-500" />
           <span>6~8등: 100p / 50p / 10p (총 60개)</span>
         </div>
+      </div>
       {/* 당첨 인증글 직접 작성 팝업 오버레이 */}
       {showCertModal && (
         <div className="absolute inset-0 bg-black/95 backdrop-blur-md rounded-3xl flex flex-col justify-center p-6 z-40 animate-in zoom-in duration-305">
