@@ -28,8 +28,8 @@ export default function UsersManagementPage() {
         setLoading(true);
         try {
             const res = await adminUserAction('GET_LIST');
-            if (res.success && res.data) {
-                setUsers(res.data);
+            if (res.success && 'data' in res) {
+                setUsers((res as any).data);
             }
         } catch (error) {
             console.error('사용자 목록을 불러오는 중 오류 발생:', error);
