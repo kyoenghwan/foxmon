@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
-import PlayDashboardClient from './PlayDashboardClient';
+import PlayDashboardClient from '@/app/(dashboard)/job-seeker/play/PlayDashboardClient';
 
 export default async function PlayPage() {
   const session = await auth();
