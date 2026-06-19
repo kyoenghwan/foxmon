@@ -36,6 +36,7 @@ export async function GET() {
     };
     let activityPoints = 0;
 
+    let isPostRewardAvailable = false;
     if (userId) {
       const dailyResult = await QA_GET_DAILY_GAME_STATUS({ userId });
       if (dailyResult.success && dailyResult.data) {
@@ -51,6 +52,32 @@ export async function GET() {
       if (user) {
         activityPoints = Number(user.activity_points);
       }
+
+      // 오늘 KST 기준 글쓰기 보상 적립 횟수 조회
+      try {
+        const kstOffset = 9 * 60 * 60 * 1000;
+        const nowKst = new Date(Date.now() + kstOffset);
+        
+        const todayStartKst = new Date(nowKst);
+        todayStartKst.setUTCHours(0, 0, 0, 0);
+        const todayStartUtc = new Date(todayStartKst.getTime() - kstOffset);
+        
+        const todayEndKst = new Date(nowKst);
+        todayEndKst.setUTCHours(23, 59, 59, 999);
+        const todayEndUtc = new Date(todayEndKst.getTime() - kstOffset);
+
+        const { count: postCount } = await supabaseAdmin
+          .from('activity_point_transactions')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .eq('type', 'POST')
+          .gte('created_at', todayStartUtc.toISOString())
+          .lte('created_at', todayEndUtc.toISOString());
+
+        isPostRewardAvailable = (postCount !== null && postCount < 5);
+      } catch (err) {
+        nvLog('FW', '⚠️ status API 글작성 적립 카운트 조회 에러', err);
+      }
     }
 
     return NextResponse.json({
@@ -58,6 +85,7 @@ export async function GET() {
       retroBoard: boardResult.data,
       dailyStatus,
       activityPoints,
+      isPostRewardAvailable,
     });
   } catch (err: any) {
     nvLog('FW', '❌ /api/game/status GET 에러', err.message);

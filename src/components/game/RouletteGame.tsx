@@ -8,6 +8,7 @@ interface RouletteGameProps {
   isPlayedToday: boolean;
   activityPoints: number;
   onPlaySuccess: (rewardAmount: number, balanceAfter: number, playedTodayUpdate: boolean) => void;
+  isPostRewardAvailable?: boolean;
 }
 
 const SECTORS = [
@@ -19,7 +20,12 @@ const SECTORS = [
   { amount: 1000, label: '1,000p', color: '#ef4444' }, // 빨강
 ];
 
-export default function RouletteGame({ isPlayedToday, activityPoints, onPlaySuccess }: RouletteGameProps) {
+export default function RouletteGame({
+  isPlayedToday,
+  activityPoints,
+  onPlaySuccess,
+  isPostRewardAvailable = false,
+}: RouletteGameProps) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
   const [lastRewardAmount, setLastRewardAmount] = useState<number | null>(null);
@@ -178,7 +184,7 @@ export default function RouletteGame({ isPlayedToday, activityPoints, onPlaySucc
               href={`/community?tab=free&write=true&category=놀이터 인증&title=${encodeURIComponent('회전 룰렛 당첨 인증합니다! 🎉')}&content=${encodeURIComponent(`여우들의 놀이터 [회전 룰렛]에서 ${lastRewardAmount} 포인트를 획득했습니다! 🦊\n\n모두 기 받아가세요!`)}`}
               className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer text-center"
             >
-              📝 당첨 인증글 쓰기 (+50p 적립)
+              📝 당첨 인증글 쓰기{isPostRewardAvailable ? ' (+50p 적립)' : ''}
             </a>
           </div>
         )}

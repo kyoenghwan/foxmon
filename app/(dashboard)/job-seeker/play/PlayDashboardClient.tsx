@@ -34,6 +34,7 @@ export default function PlayDashboardClient() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('attendance');
   const [loading, setLoading] = useState(true);
   const [activityPoints, setActivityPoints] = useState(0);
+  const [isPostRewardAvailable, setIsPostRewardAvailable] = useState(false);
   const [dailyStatus, setDailyStatus] = useState<DailyStatus>({
     roulettePlayed: false,
     luckyBoxPlayed: false,
@@ -49,6 +50,7 @@ export default function PlayDashboardClient() {
         setActivityPoints(json.activityPoints);
         setDailyStatus(json.dailyStatus);
         setRetroBoard(json.retroBoard);
+        setIsPostRewardAvailable(!!json.isPostRewardAvailable);
       }
     } catch (err) {
       console.error('현황 조회 중 오류가 발생했습니다.', err);
@@ -147,6 +149,7 @@ export default function PlayDashboardClient() {
             isPlayedToday={dailyStatus.roulettePlayed}
             activityPoints={activityPoints}
             onPlaySuccess={handleMiniGameSuccess}
+            isPostRewardAvailable={isPostRewardAvailable}
           />
         )}
         
@@ -155,6 +158,7 @@ export default function PlayDashboardClient() {
             isPlayedToday={dailyStatus.luckyBoxPlayed}
             activityPoints={activityPoints}
             onPlaySuccess={handleMiniGameSuccess}
+            isPostRewardAvailable={isPostRewardAvailable}
           />
         )}
 
@@ -172,6 +176,7 @@ export default function PlayDashboardClient() {
             activityPoints={activityPoints}
             onPullSuccess={handleRetroPullSuccess}
             onRefreshBoard={fetchStatus}
+            isPostRewardAvailable={isPostRewardAvailable}
           />
         )}
       </div>
