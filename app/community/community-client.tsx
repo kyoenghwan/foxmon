@@ -34,17 +34,21 @@ export function CommunityClient({
     const [localRole, setLocalRole] = useState<string | null>(userRole);
     const [postCategory, setPostCategory] = useState<string>('잡담');
     const [talkFilter, setTalkFilter] = useState<'all' | 'normal' | 'tips'>('all');
+    const [reviewsFilter, setReviewsFilter] = useState<'all' | 'review' | 'report'>('all');
 
     useEffect(() => {
         if (activeTab === 'free') {
             setPostCategory('잡담');
         } else if (activeTab === 'foxtalk') {
             setPostCategory('수다');
+        } else if (activeTab === 'reviews') {
+            setPostCategory('후기');
         }
     }, [activeTab]);
 
     useEffect(() => {
         setTalkFilter('all');
+        setReviewsFilter('all');
     }, [activeTab]);
 
     useEffect(() => {
@@ -82,26 +86,46 @@ export function CommunityClient({
                 setPostCategory('꿀팁 & 노하우');
             } else if (prefillCategory === '수다') {
                 setPostCategory('수다');
+            } else if (prefillCategory === '제보') {
+                setPostCategory('제보');
+            } else if (prefillCategory === '후기') {
+                setPostCategory('후기');
             } else {
-                setPostCategory(activeTab === 'foxtalk' ? '수다' : '잡담');
+                if (activeTab === 'foxtalk') {
+                    setPostCategory('수다');
+                } else if (activeTab === 'reviews') {
+                    setPostCategory('후기');
+                } else {
+                    setPostCategory('잡담');
+                }
             }
             setShowWriteModal(true);
         }
     }, [searchParams, activeTab]);
 
     const filteredPosts = useMemo(() => {
-        if (activeTab !== 'foxtalk') return initialPosts;
-        if (talkFilter === 'all') return initialPosts;
-        if (talkFilter === 'normal') {
-            return initialPosts.filter(post => post.title.startsWith('[수다]'));
+        if (activeTab === 'foxtalk') {
+            if (talkFilter === 'all') return initialPosts;
+            if (talkFilter === 'normal') {
+                return initialPosts.filter(post => post.title.startsWith('[수다]'));
+            }
+            if (talkFilter === 'tips') {
+                return initialPosts.filter(post => 
+                    post.title.startsWith('[꿀팁 & 노하우]') || post.title.startsWith('[꿀팁·노하우]')
+                );
+            }
         }
-        if (talkFilter === 'tips') {
-            return initialPosts.filter(post => 
-                post.title.startsWith('[꿀팁 & 노하우]') || post.title.startsWith('[꿀팁·노하우]')
-            );
+        if (activeTab === 'reviews') {
+            if (reviewsFilter === 'all') return initialPosts;
+            if (reviewsFilter === 'review') {
+                return initialPosts.filter(post => post.title.startsWith('[후기]'));
+            }
+            if (reviewsFilter === 'report') {
+                return initialPosts.filter(post => post.title.startsWith('[제보]'));
+            }
         }
         return initialPosts;
-    }, [activeTab, talkFilter, initialPosts]);
+    }, [activeTab, talkFilter, reviewsFilter, initialPosts]);
 
     const visibleBoards = useMemo(() => getVisibleCommunityBoards(localRole), [localRole]);
     const sidebarSections = useMemo(() => getCommunitySidebarSections(localRole), [localRole]);
@@ -240,7 +264,7 @@ export function CommunityClient({
             }
 
             const { createCommunityPost } = await import('@/lib/actions/community');
-            const finalTitle = (activeTab === 'free' || activeTab === 'foxtalk') ? `[${postCategory}] ${writeTitle}` : writeTitle;
+            const finalTitle = (activeTab === 'free' || activeTab === 'foxtalk' || activeTab === 'reviews') ? `[${postCategory}] ${writeTitle}` : writeTitle;
             const res = await createCommunityPost({
                 board_id: activeTab,
                 title: finalTitle,
@@ -405,6 +429,44 @@ export function CommunityClient({
                         </button>
                     </div>
                 )}
+                {/* 업소후기·제보 게시판 전용 소탭 필터 */}
+                {activeTab === 'reviews' && (
+                    <div className="flex gap-1.5 mb-3 px-1 sm:px-0">
+                        <button
+                            type="button"
+                            onClick={() => setReviewsFilter('all')}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${
+                                reviewsFilter === 'all'
+                                    ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            전체
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setReviewsFilter('review')}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${
+                                reviewsFilter === 'review'
+                                    ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            ⭐ 후기
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setReviewsFilter('report')}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${
+                                reviewsFilter === 'report'
+                                    ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            🚨 제보
+                        </button>
+                    </div>
+                )}
 
                 {/* 게시판 테이블 */}
                 <div className="bg-white border-y md:border rounded-none md:rounded-xl overflow-hidden shadow-sm">
@@ -510,7 +572,7 @@ export function CommunityClient({
                                     🚨 <strong>장터 거래 주의:</strong> 회원 간 자율 거래 공간이오니, 대면 거래 등을 통해 안전하게 거래가 이루어지도록 유의해 주세요.
                                 </div>
                             )}
-                            {(activeTab === 'free' || activeTab === 'foxtalk') && (
+                            {(activeTab === 'free' || activeTab === 'foxtalk' || activeTab === 'reviews') && (
                                 <div>
                                     <label className="text-[11px] font-bold text-gray-500 mb-1.5 block">게시글 구분</label>
                                     <select
@@ -518,15 +580,22 @@ export function CommunityClient({
                                         onChange={(e) => setPostCategory(e.target.value)}
                                         className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-gray-700 cursor-pointer"
                                     >
-                                        {activeTab === 'free' ? (
+                                        {activeTab === 'free' && (
                                             <>
                                                 <option value="잡담">💬 일상 잡담</option>
                                                 <option value="놀이터 인증">🎮 놀이터 대박 인증</option>
                                             </>
-                                        ) : (
+                                        )}
+                                        {activeTab === 'foxtalk' && (
                                             <>
                                                 <option value="수다">💬 수다(일반)</option>
                                                 <option value="꿀팁 & 노하우">💡 꿀팁 & 노하우</option>
+                                            </>
+                                        )}
+                                        {activeTab === 'reviews' && (
+                                            <>
+                                                <option value="후기">⭐ 업소 후기</option>
+                                                <option value="제보">🚨 부당 제보</option>
                                             </>
                                         )}
                                     </select>
