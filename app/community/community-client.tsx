@@ -32,7 +32,20 @@ export function CommunityClient({
     const router = useRouter();
     const searchParams = useSearchParams();
     const [localRole, setLocalRole] = useState<string | null>(userRole);
-    const [postCategory, setPostCategory] = useState<'잡담' | '놀이터 인증'>('잡담');
+    const [postCategory, setPostCategory] = useState<string>('잡담');
+    const [talkFilter, setTalkFilter] = useState<'all' | 'normal' | 'tips'>('all');
+
+    useEffect(() => {
+        if (activeTab === 'free') {
+            setPostCategory('잡담');
+        } else if (activeTab === 'foxtalk') {
+            setPostCategory('수다');
+        }
+    }, [activeTab]);
+
+    useEffect(() => {
+        setTalkFilter('all');
+    }, [activeTab]);
 
     useEffect(() => {
         if (!userRole && typeof window !== 'undefined') {
@@ -65,12 +78,30 @@ export function CommunityClient({
             }
             if (prefillCategory === '놀이터 인증') {
                 setPostCategory('놀이터 인증');
+            } else if (prefillCategory === '꿀팁 & 노하우' || prefillCategory === '꿀팁·노하우') {
+                setPostCategory('꿀팁 & 노하우');
+            } else if (prefillCategory === '수다') {
+                setPostCategory('수다');
             } else {
-                setPostCategory('잡담');
+                setPostCategory(activeTab === 'foxtalk' ? '수다' : '잡담');
             }
             setShowWriteModal(true);
         }
-    }, [searchParams]);
+    }, [searchParams, activeTab]);
+
+    const filteredPosts = useMemo(() => {
+        if (activeTab !== 'foxtalk') return initialPosts;
+        if (talkFilter === 'all') return initialPosts;
+        if (talkFilter === 'normal') {
+            return initialPosts.filter(post => post.title.startsWith('[수다]'));
+        }
+        if (talkFilter === 'tips') {
+            return initialPosts.filter(post => 
+                post.title.startsWith('[꿀팁 & 노하우]') || post.title.startsWith('[꿀팁·노하우]')
+            );
+        }
+        return initialPosts;
+    }, [activeTab, talkFilter, initialPosts]);
 
     const visibleBoards = useMemo(() => getVisibleCommunityBoards(localRole), [localRole]);
     const sidebarSections = useMemo(() => getCommunitySidebarSections(localRole), [localRole]);
@@ -209,7 +240,7 @@ export function CommunityClient({
             }
 
             const { createCommunityPost } = await import('@/lib/actions/community');
-            const finalTitle = activeTab === 'free' ? `[${postCategory}] ${writeTitle}` : writeTitle;
+            const finalTitle = (activeTab === 'free' || activeTab === 'foxtalk') ? `[${postCategory}] ${writeTitle}` : writeTitle;
             const res = await createCommunityPost({
                 board_id: activeTab,
                 title: finalTitle,
@@ -336,6 +367,45 @@ export function CommunityClient({
                     </div>
                 )}
 
+                {/* 폭스수다 게시판 전용 소탭 필터 */}
+                {activeTab === 'foxtalk' && (
+                    <div className="flex gap-1.5 mb-3 px-1 sm:px-0">
+                        <button
+                            type="button"
+                            onClick={() => setTalkFilter('all')}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${
+                                talkFilter === 'all'
+                                    ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            전체
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setTalkFilter('normal')}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${
+                                talkFilter === 'normal'
+                                    ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            💬 수다(일반)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setTalkFilter('tips')}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${
+                                talkFilter === 'tips'
+                                    ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            💡 꿀팁 & 노하우
+                        </button>
+                    </div>
+                )}
+
                 {/* 게시판 테이블 */}
                 <div className="bg-white border-y md:border rounded-none md:rounded-xl overflow-hidden shadow-sm">
                     <table className="w-full text-left border-collapse">
@@ -349,7 +419,7 @@ export function CommunityClient({
                             </tr>
                         </thead>
                         <tbody>
-                            {initialPosts.map((post, i) => (
+                            {filteredPosts.map((post, i) => (
                                 <tr key={post.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors bg-white">
                                     <td className="py-3 md:py-3.5 px-1 md:px-4 text-center text-[11px] md:text-[12px] text-gray-400 font-bold">
                                         {post.is_hot ? <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-sm shadow-sm inline-block">HOT</span> : (totalPosts - i)}
@@ -389,7 +459,7 @@ export function CommunityClient({
                                     </td>
                                 </tr>
                             ))}
-                            {initialPosts.length === 0 && (
+                            {filteredPosts.length === 0 && (
                                 <tr>
                                     <td colSpan={5} className="py-16 text-center text-gray-500">
                                         <div className="flex flex-col items-center gap-3">
@@ -440,16 +510,25 @@ export function CommunityClient({
                                     🚨 <strong>장터 거래 주의:</strong> 회원 간 자율 거래 공간이오니, 대면 거래 등을 통해 안전하게 거래가 이루어지도록 유의해 주세요.
                                 </div>
                             )}
-                            {activeTab === 'free' && (
+                            {(activeTab === 'free' || activeTab === 'foxtalk') && (
                                 <div>
                                     <label className="text-[11px] font-bold text-gray-500 mb-1.5 block">게시글 구분</label>
                                     <select
                                         value={postCategory}
-                                        onChange={(e) => setPostCategory(e.target.value as any)}
+                                        onChange={(e) => setPostCategory(e.target.value)}
                                         className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-gray-700 cursor-pointer"
                                     >
-                                        <option value="잡담">💬 일상 잡담</option>
-                                        <option value="놀이터 인증">🎮 놀이터 대박 인증</option>
+                                        {activeTab === 'free' ? (
+                                            <>
+                                                <option value="잡담">💬 일상 잡담</option>
+                                                <option value="놀이터 인증">🎮 놀이터 대박 인증</option>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <option value="수다">💬 수다(일반)</option>
+                                                <option value="꿀팁 & 노하우">💡 꿀팁 & 노하우</option>
+                                            </>
+                                        )}
                                     </select>
                                 </div>
                             )}

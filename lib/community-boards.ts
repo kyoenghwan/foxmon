@@ -23,7 +23,6 @@ export const COMMUNITY_BOARDS: CommunityBoardDef[] = [
   { id: 'freemarket', label: '자유장터', prefix: '🛒자유장터', audience: 'all', sectionTitle: '전체 이용' },
   { id: 'foxtalk', label: '폭스수다', prefix: '🦊폭스수다', audience: 'women', sectionTitle: '여성 회원 전용' },
   { id: 'foxmarket', label: '폭스장터', prefix: '🛍️폭스장터', audience: 'women', sectionTitle: '여성 회원 전용' },
-  { id: 'tips', label: '꿀팁·노하우', prefix: '💡꿀팁', audience: 'women', sectionTitle: '여성 회원 전용' },
   { id: 'reviews', label: '업소후기·제보', prefix: '⭐후기·제보', audience: 'women', sectionTitle: '여성 회원 전용' },
   { id: 'business', label: '업소장터', prefix: '🏪업소장터', audience: 'employer', sectionTitle: '업소(사업자) 전용' },
 ];
