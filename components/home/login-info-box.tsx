@@ -272,12 +272,15 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             </div>
                             <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">폭스토크</span>
                         </button>
-                        <Link href="/job-seeker/play" className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
+                        <button
+                            onClick={() => window.dispatchEvent(new CustomEvent('open_play_modal'))}
+                            className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1 bg-transparent border-0 p-0 cursor-pointer"
+                        >
                             <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-pink-50 transition-all duration-300 text-gray-400 group-hover:text-pink-500 group-hover:scale-110 mx-auto">
                                 <Gamepad2 className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                             </div>
                             <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">놀이터</span>
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </div>

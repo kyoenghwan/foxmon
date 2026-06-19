@@ -15,6 +15,7 @@ import {
 import { Globe, Search, Menu, FileText, Briefcase, LogOut, ShieldCheck, User, X, ChevronRight } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { useLanguage } from '@/components/providers/language-provider';
+import { PlayDashboardModal } from '@/src/components/game/PlayDashboardModal';
 import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
 import { cn } from '@/lib/utils';
 import {
@@ -500,9 +501,15 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     <Link href="/community?tab=foxmarket" className="hover:text-primary transition-colors">폭스장터</Link>
                                     <Link href="/community?tab=business" className="hover:text-primary transition-colors">업소장터</Link>
                                     <Link href="/community?tab=reviews" className="hover:text-primary transition-colors">업소후기·제보</Link>
-                                    <Link href="/job-seeker/play" className="hover:text-primary transition-colors flex items-center gap-1 text-pink-600 font-bold">
+                                    <button 
+                                        onClick={() => {
+                                            setShowMegaMenu(false);
+                                            window.dispatchEvent(new CustomEvent('open_play_modal'));
+                                        }}
+                                        className="hover:text-primary transition-colors flex items-center gap-1 text-pink-600 font-bold text-left bg-transparent border-0 p-0 cursor-pointer"
+                                    >
                                         여우들의 놀이터 <span className="bg-pink-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">PLAY</span>
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -593,7 +600,15 @@ export function MainHeader({ session }: MainHeaderProps) {
                                             <Link href="/community?tab=foxmarket">폭스장터</Link>
                                             <Link href="/community?tab=business">업소장터</Link>
                                             <Link href="/community?tab=reviews">업소후기·제보</Link>
-                                            <Link href="/job-seeker/play" className="flex items-center gap-2 text-pink-600 font-bold">여우들의 놀이터 <span className="bg-pink-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">PLAY</span></Link>
+                                            <button 
+                                                onClick={() => {
+                                                    setShowMobileMenu(false);
+                                                    window.dispatchEvent(new CustomEvent('open_play_modal'));
+                                                }}
+                                                className="flex items-center gap-2 text-pink-600 font-bold text-left bg-transparent border-0 p-0 cursor-pointer"
+                                            >
+                                                여우들의 놀이터 <span className="bg-pink-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">PLAY</span>
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -631,6 +646,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                     </div>
                 </div>
             )}
+            <PlayDashboardModal />
         </header>
     );
 }

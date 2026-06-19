@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const { gameType } = body;
 
-    if (!gameType || !['ROULETTE', 'LUCKY_BOX', 'LOTTO'].includes(gameType)) {
+    if (!gameType || !['ROULETTE', 'LUCKY_BOX', 'ATTENDANCE'].includes(gameType)) {
       return NextResponse.json({ success: false, message: '올바르지 않은 게임 타입입니다.' }, { status: 400 });
     }
 

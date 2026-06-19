@@ -1,7 +1,7 @@
 export const GAME_COSTS = {
   ROULETTE: 100,
   LUCKY_BOX: 100,
-  LOTTO: 50,
+  ATTENDANCE: 0,
   RETRO_DRAW: 200,
 } as const;
 

@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Compass, Gift, HelpCircle, Hash } from 'lucide-react';
+import { Loader2, Compass, Gift, HelpCircle, Calendar } from 'lucide-react';
 import RouletteGame from '@/src/components/game/RouletteGame';
 import LuckyBoxGame from '@/src/components/game/LuckyBoxGame';
-import LottoGenerator from '@/src/components/game/LottoGenerator';
+import AttendanceCheck from '@/src/components/game/AttendanceCheck';
 import RetroDrawGame from '@/src/components/game/RetroDrawGame';
 
 type DailyStatus = {
   roulettePlayed: boolean;
   luckyBoxPlayed: boolean;
-  lottoPlayed: boolean;
+  attendancePlayed: boolean;
 };
 
 type RetroSlot = {
@@ -28,7 +28,7 @@ type RetroBoard = {
   slots: RetroSlot[];
 };
 
-type ActiveTab = 'roulette' | 'luckybox' | 'lotto' | 'retro';
+type ActiveTab = 'roulette' | 'luckybox' | 'attendance' | 'retro';
 
 export default function PlayDashboardClient() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('roulette');
@@ -37,7 +37,7 @@ export default function PlayDashboardClient() {
   const [dailyStatus, setDailyStatus] = useState<DailyStatus>({
     roulettePlayed: false,
     luckyBoxPlayed: false,
-    lottoPlayed: false,
+    attendancePlayed: false,
   });
   const [retroBoard, setRetroBoard] = useState<RetroBoard | null>(null);
 
@@ -69,7 +69,7 @@ export default function PlayDashboardClient() {
         ...prev,
         roulettePlayed: activeTab === 'roulette' ? true : prev.roulettePlayed,
         luckyBoxPlayed: activeTab === 'luckybox' ? true : prev.luckyBoxPlayed,
-        lottoPlayed: activeTab === 'lotto' ? true : prev.lottoPlayed,
+        attendancePlayed: activeTab === 'attendance' ? true : prev.attendancePlayed,
       }));
     }
   };
@@ -117,15 +117,15 @@ export default function PlayDashboardClient() {
           랜덤상자
         </button>
         <button
-          onClick={() => setActiveTab('lotto')}
+          onClick={() => setActiveTab('attendance')}
           className={`flex items-center gap-2 px-5 py-3.5 rounded-xl text-xs font-black tracking-tight transition-all uppercase ${
-            activeTab === 'lotto'
+            activeTab === 'attendance'
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-600/20'
               : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
           }`}
         >
-          <Hash className="w-4 h-4" />
-          행운로또
+          <Calendar className="w-4 h-4" />
+          출석체크
         </button>
         <button
           onClick={() => setActiveTab('retro')}
@@ -158,9 +158,9 @@ export default function PlayDashboardClient() {
           />
         )}
 
-        {activeTab === 'lotto' && (
-          <LottoGenerator
-            isPlayedToday={dailyStatus.lottoPlayed}
+        {activeTab === 'attendance' && (
+          <AttendanceCheck
+            isPlayedToday={dailyStatus.attendancePlayed}
             activityPoints={activityPoints}
             onPlaySuccess={handleMiniGameSuccess}
           />

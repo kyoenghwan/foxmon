@@ -7,14 +7,13 @@ import type { AtomErrorCode, StandardResult } from '../../da/common/DA_COMMON_ER
 
 export type PlayMiniGameInput = {
   userId: string;
-  gameType: 'ROULETTE' | 'LUCKY_BOX' | 'LOTTO';
+  gameType: 'ROULETTE' | 'LUCKY_BOX' | 'ATTENDANCE';
 };
 
 export type PlayMiniGameResult = {
-  gameType: 'ROULETTE' | 'LUCKY_BOX' | 'LOTTO';
+  gameType: 'ROULETTE' | 'LUCKY_BOX' | 'ATTENDANCE';
   rewardAmount: number;
   label: string;
-  lottoNumbers?: number[];
   isFree: boolean;
   balanceAfter: number;
 };
@@ -30,15 +29,6 @@ function drawReward(rewards: GameRewardItem[]): GameRewardItem {
     random -= item.weight;
   }
   return rewards[rewards.length - 1];
-}
-
-// 로또 번호 생성 함수 (1~45 중 6개)
-function drawLottoNumbers(): number[] {
-  const nums = new Set<number>();
-  while (nums.size < 6) {
-    nums.add(Math.floor(Math.random() * 45) + 1);
-  }
-  return Array.from(nums).sort((a, b) => a - b);
 }
 
 export async function FA_PLAY_MINI_GAME_FLOW(
@@ -71,7 +61,13 @@ export async function FA_PLAY_MINI_GAME_FLOW(
     let isFree = true;
     if (input.gameType === 'ROULETTE' && statusResult.data.roulettePlayed) isFree = false;
     if (input.gameType === 'LUCKY_BOX' && statusResult.data.luckyBoxPlayed) isFree = false;
-    if (input.gameType === 'LOTTO' && statusResult.data.lottoPlayed) isFree = false;
+    if (input.gameType === 'ATTENDANCE' && statusResult.data.attendancePlayed) {
+      return {
+        success: false,
+        errorCode: 'CONFLICT',
+        message: '오늘은 이미 출석체크를 완료하셨습니다.',
+      };
+    }
 
     // 2. 유료 게임인 경우 포인트 차감
     let currentBalance = 0;
@@ -136,12 +132,10 @@ export async function FA_PLAY_MINI_GAME_FLOW(
     // 3. 당첨 및 결과 결정
     let rewardAmount = 0;
     let label = '';
-    let lottoNumbers: number[] | undefined;
 
-    if (input.gameType === 'LOTTO') {
-      lottoNumbers = drawLottoNumbers();
-      rewardAmount = 10; // 로또 발급 보너스 10p 고정
-      label = `로또 번호 발급 보너스 (숫자: ${lottoNumbers.join(', ')})`;
+    if (input.gameType === 'ATTENDANCE') {
+      rewardAmount = 100; // 출석체크 시 100p 고정 적립
+      label = '일일 출석체크 성공 보너스';
     } else {
       const pool = input.gameType === 'ROULETTE' ? ROULETTE_REWARDS : LUCKY_BOX_REWARDS;
       const drawn = drawReward(pool);
@@ -198,7 +192,6 @@ export async function FA_PLAY_MINI_GAME_FLOW(
         gameType: input.gameType,
         rewardAmount,
         label,
-        lottoNumbers,
         isFree,
         balanceAfter: currentBalance,
       },

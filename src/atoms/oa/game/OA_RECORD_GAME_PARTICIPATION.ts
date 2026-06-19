@@ -4,7 +4,7 @@ import type { AtomErrorCode } from '../../da/common/DA_COMMON_ERROR_TYPES';
 
 export async function OA_RECORD_GAME_PARTICIPATION(input: {
   userId: string;
-  gameType: 'ROULETTE' | 'LUCKY_BOX' | 'LOTTO';
+  gameType: 'ROULETTE' | 'LUCKY_BOX' | 'ATTENDANCE';
   rewardAmount: number;
 }): Promise<{
   success: boolean;

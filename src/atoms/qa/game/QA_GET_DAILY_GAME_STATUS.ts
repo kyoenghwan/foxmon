@@ -5,7 +5,7 @@ import type { AtomErrorCode } from '../../da/common/DA_COMMON_ERROR_TYPES';
 export type DailyGameStatus = {
   roulettePlayed: boolean;
   luckyBoxPlayed: boolean;
-  lottoPlayed: boolean;
+  attendancePlayed: boolean;
 };
 
 export async function QA_GET_DAILY_GAME_STATUS(input: {
@@ -42,7 +42,7 @@ export async function QA_GET_DAILY_GAME_STATUS(input: {
     const status: DailyGameStatus = {
       roulettePlayed: playedTypes.includes('ROULETTE'),
       luckyBoxPlayed: playedTypes.includes('LUCKY_BOX'),
-      lottoPlayed: playedTypes.includes('LOTTO')
+      attendancePlayed: playedTypes.includes('ATTENDANCE')
     };
 
     return {
