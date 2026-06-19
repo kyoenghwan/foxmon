@@ -104,7 +104,7 @@ export default function RetroDrawGame({ board, activityPoints, onPullSuccess, on
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-gray-900/60 rounded-3xl border border-gray-800 shadow-2xl w-full max-w-4xl mx-auto backdrop-blur-md">
+    <div className="flex flex-col items-center justify-center p-4 bg-gray-900/60 rounded-3xl border border-gray-800 shadow-2xl w-full max-w-4xl mx-auto backdrop-blur-md">
       
       {/* 뜯기 찌리릭 및 흔들림 애니메이션 CSS 주입 */}
       <style jsx global>{`
@@ -119,49 +119,51 @@ export default function RetroDrawGame({ board, activityPoints, onPullSuccess, on
       `}</style>
 
       {/* 헤더 정보 */}
-      <div className="w-full flex flex-col md:flex-row justify-between items-center border-b border-gray-800 pb-4 mb-6 gap-4">
+      <div className="w-full flex flex-col md:flex-row justify-between items-center border-b border-gray-800 pb-2.5 mb-4 gap-2">
         <div>
-          <h2 className="text-xl font-black text-white flex items-center gap-2">
+          <h2 className="text-lg font-black text-white flex items-center gap-2">
              추억의 종이 뽑기판
-            <span className="text-xs px-2.5 py-0.5 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-full font-bold">
+            <span className="text-[10px] px-2 py-0.5 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-full font-bold">
               제 {board.boardRound}회차
             </span>
           </h2>
-          <p className="text-gray-400 text-xs mt-1">
-            원하는 슬롯을 눌러 딱지를 뜯어보세요. F12 개발자도구를 통한 보상 유출이 불가능하도록 보안 마스킹되어 있습니다.
+          <p className="text-gray-400 text-[11px] mt-0.5">
+            원하는 슬롯을 눌러 딱지를 뜯어보세요. (동시 당첨 차단/실시간 연동 완료)
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="px-3 py-1.5 bg-yellow-500/10 text-yellow-500 rounded-2xl text-xs font-black border border-yellow-500/20">
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="px-2.5 py-1 bg-yellow-500/10 text-yellow-500 rounded-xl text-[11px] font-black border border-yellow-500/20">
             보유: {activityPoints.toLocaleString()}p
           </span>
-          <span className="px-3 py-1.5 bg-red-500/10 text-red-400 rounded-2xl text-xs font-black border border-red-500/20">
-            1회 비용: 200p
+          <span className="px-2.5 py-1 bg-red-500/10 text-red-400 rounded-xl text-[11px] font-black border border-red-500/20">
+            1회: 200p
           </span>
-          <Button onClick={onRefreshBoard} size="sm" variant="outline" className="h-8 rounded-xl font-bold text-xs bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700">
+          <Button onClick={onRefreshBoard} size="sm" variant="outline" className="h-7 px-2.5 rounded-lg font-bold text-[11px] bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700">
             새로고침
           </Button>
         </div>
       </div>
 
       {/* 알림 메시지 영역 */}
-      <div className="w-full mb-4">
+      <div className="w-full mb-2">
         {result && (
-          <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl text-center text-sm font-black text-yellow-400 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="p-2.5 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-center text-xs font-black text-yellow-400 animate-in fade-in slide-in-from-bottom-2 duration-300">
             🎁 당첨 결과: {getTierName(result.tier)}!
             {result.amount > 0 ? ` +${result.amount.toLocaleString()} 포인트 적립 완료!` : ' 아쉽게도 꽝입니다!'}
           </div>
         )}
         {error && (
-          <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-center text-xs font-bold text-red-400">
+          <div className="p-2.5 bg-red-500/10 border border-red-500/30 rounded-xl text-center text-[11px] font-bold text-red-400">
             ⚠️ {error}
           </div>
         )}
       </div>
 
-      {/* 10x10 격자 보드판 */}
-      <div className="grid grid-cols-10 gap-1 sm:gap-2 w-full p-2 sm:p-4 bg-amber-950/20 border border-amber-900/30 rounded-2xl shadow-inner">
+      {/* 20x5 격자 보드판 (데스크톱에서는 가로 20열로 세로 높이 압축) */}
+      <div 
+        className="grid grid-cols-10 md:grid-cols-[repeat(20,minmax(0,1fr))] gap-1 w-full p-2 bg-amber-950/20 border border-amber-900/30 rounded-2xl shadow-inner"
+      >
         {board.slots.map((slot) => {
           const isCurrentPulling = pullingSlot === slot.slotNumber;
           
@@ -170,32 +172,32 @@ export default function RetroDrawGame({ board, activityPoints, onPullSuccess, on
               key={slot.id}
               onClick={() => !slot.isPulled && handlePullSlot(slot.slotNumber)}
               disabled={slot.isPulled || pullingSlot !== null}
-              className={`relative aspect-square flex flex-col items-center justify-center rounded-md sm:rounded-lg border sm:border-2 text-[9px] sm:text-xs font-bold transition-all ${
+              className={`relative aspect-square flex flex-col items-center justify-center rounded-md border text-[8px] md:text-[9px] font-bold transition-all ${
                 slot.isPulled
                   ? 'bg-gray-800/40 border-gray-800 text-gray-600 shadow-none cursor-default'
                   : 'bg-gradient-to-br from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-amber-100 border-amber-400/30 hover:border-amber-300 shadow-md active:scale-95 hover:-translate-y-0.5'
               } ${isCurrentPulling ? 'rip-animation' : ''}`}
             >
               {slot.isPulled ? (
-                <div className="flex flex-col items-center justify-center p-0.5 scale-90 sm:scale-100">
-                  <span className="text-[7px] sm:text-[10px] text-gray-500 truncate max-w-full">
-                    {slot.userNickname}
+                <div className="flex flex-col items-center justify-center p-0.5 scale-90 sm:scale-100 leading-tight">
+                  <span className="text-[6px] md:text-[8px] text-gray-500 truncate max-w-full font-medium">
+                    {slot.userNickname?.slice(0, 3)}
                   </span>
-                  <span className="text-[7px] sm:text-[9px] font-black text-yellow-600/70 mt-0.5">
-                    {slot.rewardAmount && slot.rewardAmount > 0 ? `+${slot.rewardAmount}p` : '꽝'}
+                  <span className="text-[6px] md:text-[8px] font-black text-yellow-600/70">
+                    {slot.rewardAmount && slot.rewardAmount > 0 ? `+${slot.rewardAmount}` : '꽝'}
                   </span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center">
-                  <span className="text-[7px] sm:text-[10px] opacity-75 font-normal">No.</span>
-                  <span className="text-[9px] sm:text-sm font-black leading-none">{slot.slotNumber}</span>
+                <div className="flex flex-col items-center justify-center leading-none">
+                  <span className="text-[6px] md:text-[7px] opacity-75 font-normal">No.</span>
+                  <span className="text-[9px] md:text-xs font-black">{slot.slotNumber}</span>
                 </div>
               )}
 
               {/* 뜯는 중 스피너 */}
               {isCurrentPulling && (
-                <div className="absolute inset-0 bg-black/50 rounded-md sm:rounded-lg flex items-center justify-center">
-                  <Loader2 className="w-3 h-3 sm:w-5 sm:h-5 animate-spin text-yellow-500" />
+                <div className="absolute inset-0 bg-black/50 rounded-md flex items-center justify-center">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-yellow-500" />
                 </div>
               )}
             </button>
@@ -204,21 +206,21 @@ export default function RetroDrawGame({ board, activityPoints, onPullSuccess, on
       </div>
 
       {/* 보드 하단 등수 통계 안내 */}
-      <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 w-full text-xs text-gray-400 border-t border-gray-800 pt-6">
-        <div className="flex items-center gap-2 bg-gray-800/20 p-2.5 rounded-xl border border-gray-800/40">
-          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 w-full text-[11px] text-gray-400 border-t border-gray-800/50 pt-4">
+        <div className="flex items-center gap-1.5 bg-gray-800/20 p-2 rounded-xl border border-gray-800/40">
+          <div className="w-2 h-2 rounded-full bg-yellow-500" />
           <span>1등: 5,000p (1개)</span>
         </div>
-        <div className="flex items-center gap-2 bg-gray-800/20 p-2.5 rounded-xl border border-gray-800/40">
-          <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+        <div className="flex items-center gap-1.5 bg-gray-800/20 p-2 rounded-xl border border-gray-800/40">
+          <div className="w-2 h-2 rounded-full bg-blue-500" />
           <span>2~3등: 3,000p / 2,000p (각 1개)</span>
         </div>
-        <div className="flex items-center gap-2 bg-gray-800/20 p-2.5 rounded-xl border border-gray-800/40">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+        <div className="flex items-center gap-1.5 bg-gray-800/20 p-2 rounded-xl border border-gray-800/40">
+          <div className="w-2 h-2 rounded-full bg-red-500" />
           <span>4~5등: 1,000p(2개) / 500p(5개)</span>
         </div>
-        <div className="flex items-center gap-2 bg-gray-800/20 p-2.5 rounded-xl border border-gray-800/40">
-          <div className="w-2.5 h-2.5 rounded-full bg-gray-500" />
+        <div className="flex items-center gap-1.5 bg-gray-800/20 p-2 rounded-xl border border-gray-800/40">
+          <div className="w-2 h-2 rounded-full bg-gray-500" />
           <span>6~8등: 100p / 50p / 10p (총 60개)</span>
         </div>
       </div>
