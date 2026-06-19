@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { userSettingsAction } from '@/lib/actions';
-import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, Clock } from 'lucide-react';
+import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, Clock, Coins } from 'lucide-react';
 import { TelegramConnectButton } from '@/components/employer/telegram-connect-button';
 import { AgeVerificationBox } from '@/src/components/auth/AgeVerificationBox';
 import { signOut } from 'next-auth/react';
@@ -655,6 +655,20 @@ export function SettingsModal() {
                                             <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">나를 본 업체</span>
                                         </div>
                                         <span className="text-xs text-gray-400 font-bold group-hover:text-emerald-500">바로가기 &rarr;</span>
+                                    </Link>
+
+                                    <Link 
+                                        href={role === 'EMPLOYER' ? '/biz/points' : '/job-seeker/points'} 
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex items-center justify-between p-4 bg-white hover:bg-amber-50/50 rounded-xl border border-gray-100 hover:border-amber-200 shadow-sm transition-all duration-300 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-amber-50 text-amber-500 group-hover:scale-110 transition-transform">
+                                                <Coins className="h-5 w-5" />
+                                            </div>
+                                            <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">포인트 이력 (적립/사용 내역)</span>
+                                        </div>
+                                        <span className="text-xs text-gray-400 font-bold group-hover:text-amber-500">바로가기 &rarr;</span>
                                     </Link>
                                 </div>
                             </div>
