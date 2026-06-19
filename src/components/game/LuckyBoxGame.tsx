@@ -33,10 +33,12 @@ export default function LuckyBoxGame({
         setError('포인트가 부족합니다. (게임 비용: 100p)');
         return;
       }
+      // 포인트가 소모될 때만 팝업 노출
+      setShowConfirm(true);
+    } else {
+      // 무료 기회인 경우 팝업 없이 즉시 실행
+      executeOpenBox();
     }
-
-    // 커스텀 확인 레이어 노출
-    setShowConfirm(true);
   };
 
   const executeOpenBox = async () => {

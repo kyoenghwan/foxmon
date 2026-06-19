@@ -37,6 +37,7 @@ export default function RetroDrawGame({
   isPlayedToday = false,
 }: RetroDrawGameProps) {
   const [pullingSlot, setPullingSlot] = useState<number | null>(null);
+  const [showConfirmSlot, setShowConfirmSlot] = useState<number | null>(null);
   const [result, setResult] = useState<{ amount: number; tier: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -44,7 +45,7 @@ export default function RetroDrawGame({
   // 1초 주기로 실시간 보드판 상태를 동기화 (유저가 슬롯을 뜯고 있는 상태가 아닐 때만 백그라운드 갱신)
   useEffect(() => {
     let intervalId: any;
-    if (pullingSlot === null) {
+    if (pullingSlot === null && showConfirmSlot === null) {
       intervalId = setInterval(async () => {
         try {
           await onRefreshBoard();
@@ -56,7 +57,7 @@ export default function RetroDrawGame({
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [onRefreshBoard, pullingSlot]);
+  }, [onRefreshBoard, pullingSlot, showConfirmSlot]);
 
   const handleManualRefresh = async () => {
     if (isRefreshing) return;
@@ -80,7 +81,7 @@ export default function RetroDrawGame({
     );
   }
 
-  const handlePullSlot = async (slotNumber: number) => {
+  const handlePullSlotClick = (slotNumber: number) => {
     if (pullingSlot !== null) return;
     setError(null);
     setResult(null);
@@ -94,14 +95,20 @@ export default function RetroDrawGame({
       return;
     }
 
-    const confirmMsg = isFree
-      ? `정말로 ${slotNumber}번 딱지를 뜯으시겠습니까?\n[오늘 첫 뽑기: 무료 기회 제공]`
-      : `정말로 ${slotNumber}번 딱지를 뜯으시겠습니까?\n(${cost}포인트가 소모됩니다.)`;
+    if (isFree) {
+      // 무료 기회는 팝업 없이 즉시 실행
+      executePullSlot(slotNumber);
+    } else {
+      // 포인트가 소모될 때만 팝업 노출
+      setShowConfirmSlot(slotNumber);
+    }
+  };
 
-    const confirmPull = confirm(confirmMsg);
-    if (!confirmPull) return;
-
+  const executePullSlot = async (slotNumber: number) => {
+    setShowConfirmSlot(null);
     setPullingSlot(slotNumber);
+
+    const isFree = !isPlayedToday;
 
     try {
       const res = await fetch('/api/game/retro-pull', {
@@ -126,7 +133,7 @@ export default function RetroDrawGame({
       const refreshJson = await refreshRes.json();
       
       if (refreshJson.success && refreshJson.retroBoard) {
-        onPullSuccess(rewardAmount, balanceAfter, refreshJson.retroBoard, isFree);
+         onPullSuccess(rewardAmount, balanceAfter, refreshJson.retroBoard, isFree);
         
         if (newBoardOpened) {
           alert('🎉 대단합니다! 마지막 딱지를 뜯으셨습니다. 새로운 100개 뽑기판이 개설되었습니다!');
@@ -241,7 +248,7 @@ export default function RetroDrawGame({
 
       {/* 10x10 격자 보드판 고정 */}
       <div 
-        className="grid grid-cols-10 gap-1 w-full p-2 bg-amber-950/20 border border-amber-900/30 rounded-2xl shadow-inner"
+        className="relative grid grid-cols-10 gap-1 w-full p-2 bg-amber-950/20 border border-amber-900/30 rounded-2xl shadow-inner"
       >
         {board.slots.map((slot) => {
           const isCurrentPulling = pullingSlot === slot.slotNumber;
@@ -249,8 +256,8 @@ export default function RetroDrawGame({
           return (
             <button
               key={slot.id}
-              onClick={() => !slot.isPulled && handlePullSlot(slot.slotNumber)}
-              disabled={slot.isPulled || pullingSlot !== null}
+              onClick={() => !slot.isPulled && handlePullSlotClick(slot.slotNumber)}
+              disabled={slot.isPulled || pullingSlot !== null || showConfirmSlot !== null}
               className={`relative aspect-square flex flex-col items-center justify-center rounded-md border text-[8px] md:text-[9px] font-bold transition-all ${
                 slot.isPulled
                   ? 'bg-gray-800/40 border-gray-800 text-gray-600 shadow-none cursor-default'
@@ -279,6 +286,41 @@ export default function RetroDrawGame({
             </button>
           );
         })}
+
+        {/* 커스텀 확인 레이어 오버레이 */}
+        {showConfirmSlot !== null && (
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-2xl flex items-center justify-center p-4 z-30 animate-in zoom-in duration-300">
+            <div className="flex flex-col items-center justify-center p-5 bg-gray-900/95 border border-gray-800 rounded-2xl max-w-xs w-full text-center shadow-2xl">
+              <div className="p-3 bg-purple-500/10 text-purple-400 rounded-full mb-3">
+                <HelpCircle className="w-8 h-8 animate-pulse text-purple-400" />
+              </div>
+              <h4 className="text-white text-xs font-black mb-1.5">딱지 뜯기</h4>
+              <p className="text-gray-300 text-[11px] leading-relaxed mb-4">
+                정말로 <span className="text-yellow-400 font-bold">{showConfirmSlot}번</span> 딱지를 뜯으시겠습니까?
+                <br />
+                {!isPlayedToday ? (
+                  <span className="text-emerald-400 font-bold text-[10px] mt-1 block">[오늘 첫 뽑기: 무료 기회 제공]</span>
+                ) : (
+                  <span className="text-purple-400 font-bold text-[10px] mt-1 block">(200포인트가 소모됩니다.)</span>
+                )}
+              </p>
+              <div className="flex gap-2 w-full justify-center">
+                <button
+                  onClick={() => executePullSlot(showConfirmSlot)}
+                  className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-[11px] rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
+                >
+                  뜯기
+                </button>
+                <button
+                  onClick={() => setShowConfirmSlot(null)}
+                  className="px-4 py-1.5 bg-gray-750 hover:bg-gray-700 text-gray-300 hover:text-white font-black text-[11px] rounded-xl transition-all active:scale-95 cursor-pointer border border-gray-700"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 보드 하단 등수 통계 안내 */}
