@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CommunitySidebar } from '@/components/community/CommunitySidebar';
 import { PostDetailModal } from '@/components/community/PostDetailModal';
 import { maskName } from '@/lib/utils';
@@ -30,7 +30,9 @@ export function CommunityClient({
     userRole?: string | null;
 }) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [localRole, setLocalRole] = useState<string | null>(userRole);
+    const [postCategory, setPostCategory] = useState<'잡담' | '놀이터 인증'>('잡담');
 
     useEffect(() => {
         if (!userRole && typeof window !== 'undefined') {
@@ -47,6 +49,24 @@ export function CommunityClient({
             }
         }
     }, [userRole]);
+
+    useEffect(() => {
+        const isWrite = searchParams?.get('write') === 'true';
+        if (isWrite) {
+            const prefillTitle = searchParams.get('title') || '';
+            const prefillContent = searchParams.get('content') || '';
+            const prefillCategory = searchParams.get('category') || '잡담';
+            
+            setWriteTitle(prefillTitle);
+            setWriteContent(prefillContent);
+            if (prefillCategory === '놀이터 인증') {
+                setPostCategory('놀이터 인증');
+            } else {
+                setPostCategory('잡담');
+            }
+            setShowWriteModal(true);
+        }
+    }, [searchParams]);
 
     const visibleBoards = useMemo(() => getVisibleCommunityBoards(localRole), [localRole]);
     const sidebarSections = useMemo(() => getCommunitySidebarSections(localRole), [localRole]);
@@ -185,9 +205,10 @@ export function CommunityClient({
             }
 
             const { createCommunityPost } = await import('@/lib/actions/community');
+            const finalTitle = activeTab === 'free' ? `[${postCategory}] ${writeTitle}` : writeTitle;
             const res = await createCommunityPost({
                 board_id: activeTab,
-                title: writeTitle,
+                title: finalTitle,
                 content: writeContent,
                 thumbnail: writeImages.length > 0 ? writeImages[0] : null,
                 price: finalPrice,
@@ -413,6 +434,19 @@ export function CommunityClient({
                             {isMarketBoard && (
                                 <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-[11px] text-red-800 leading-relaxed font-medium">
                                     🚨 <strong>장터 거래 주의:</strong> 회원 간 자율 거래 공간이오니, 대면 거래 등을 통해 안전하게 거래가 이루어지도록 유의해 주세요.
+                                </div>
+                            )}
+                            {activeTab === 'free' && (
+                                <div>
+                                    <label className="text-[11px] font-bold text-gray-500 mb-1.5 block">게시글 구분</label>
+                                    <select
+                                        value={postCategory}
+                                        onChange={(e) => setPostCategory(e.target.value as any)}
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-gray-700 cursor-pointer"
+                                    >
+                                        <option value="잡담">💬 일상 잡담</option>
+                                        <option value="놀이터 인증">🎮 놀이터 대박 인증</option>
+                                    </select>
                                 </div>
                             )}
                             <div>

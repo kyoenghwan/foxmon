@@ -22,6 +22,7 @@ const SECTORS = [
 export default function RouletteGame({ isPlayedToday, activityPoints, onPlaySuccess }: RouletteGameProps) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
+  const [lastRewardAmount, setLastRewardAmount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const rouletteRef = useRef<HTMLDivElement>(null);
   const currentRotation = useRef(0);
@@ -77,8 +78,10 @@ export default function RouletteGame({ isPlayedToday, activityPoints, onPlaySucc
         setIsSpinning(false);
         if (rewardAmount > 0) {
           setResultMessage(`🎉 축하합니다! ${rewardAmount.toLocaleString()} 포인트를 획득하셨습니다!`);
+          setLastRewardAmount(rewardAmount);
         } else {
           setResultMessage('😢 아쉽게도 꽝입니다! 내일 다시 도전해 보세요.');
+          setLastRewardAmount(null);
         }
         onPlaySuccess(rewardAmount, balanceAfter, true);
       }, 4000);
@@ -126,57 +129,65 @@ export default function RouletteGame({ isPlayedToday, activityPoints, onPlaySucc
           })}
         </div>
 
-        {/* 룰렛 정중앙 데코레이션 코어 */}
-        <div className="absolute w-16 h-16 rounded-full bg-yellow-500 border-4 border-yellow-300 flex items-center justify-center shadow-lg z-10">
-          <RotateCw className="w-6 h-6 text-gray-950 animate-pulse" />
-        </div>
+        {/* 룰렛 정중앙 클릭 버튼 (START) */}
+        <button
+          onClick={handleSpin}
+          disabled={isSpinning}
+          className="absolute w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 border-4 border-yellow-200 flex flex-col items-center justify-center shadow-2xl z-20 cursor-pointer active:scale-90 hover:from-yellow-300 hover:to-yellow-500 transition-all select-none group"
+          title="룰렛 돌리기"
+        >
+          {isSpinning ? (
+            <Loader2 className="w-6 h-6 animate-spin text-gray-950" />
+          ) : (
+            <div className="flex flex-col items-center justify-center leading-none text-gray-950 font-black">
+              <span className="text-[14px] tracking-tight uppercase group-hover:scale-110 transition-transform">START</span>
+              <span className="text-[9px] mt-0.5 opacity-80">
+                {isPlayedToday ? '100p' : '무료'}
+              </span>
+            </div>
+          )}
+        </button>
       </div>
 
       {/* 설명 및 포인트 안내 */}
-      <div className="text-center mt-6 space-y-2">
+      <div className="text-center mt-4 space-y-1.5">
         <p className="text-gray-400 text-xs">
-          매일 1회 무료 플레이! 이후 플레이 시 100포인트가 차감됩니다.
+          매일 1회 무료! 이후 플레이 시 100p 차감 (중앙 START 터치)
         </p>
         <div className="flex items-center justify-center gap-2">
-          <span className="px-3 py-1 bg-yellow-500/10 text-yellow-500 rounded-full text-xs font-bold border border-yellow-500/20">
+          <span className="px-2.5 py-1 bg-yellow-500/10 text-yellow-500 rounded-xl text-xs font-bold border border-yellow-500/20">
             보유: {activityPoints.toLocaleString()}p
           </span>
-          <span className="px-3 py-1 bg-purple-500/10 text-purple-400 rounded-full text-xs font-bold border border-purple-500/20">
+          <span className="px-2.5 py-1 bg-purple-500/10 text-purple-400 rounded-xl text-xs font-bold border border-purple-500/20">
             비용: {isPlayedToday ? '100p' : '무료'}
           </span>
         </div>
       </div>
 
       {/* 조작 및 메시지 영역 */}
-      <div className="w-full mt-6 space-y-4">
+      <div className="w-full mt-4 space-y-3">
         {resultMessage && (
-          <div className="p-3.5 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl text-center text-sm font-black text-yellow-400 animate-bounce">
+          <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl text-center text-xs font-black text-yellow-400 animate-bounce">
             {resultMessage}
           </div>
         )}
 
-        {error && (
-          <div className="p-3.5 bg-red-500/10 border border-red-500/30 rounded-2xl text-center text-xs font-bold text-red-400">
-            ⚠️ {error}
+        {resultMessage && lastRewardAmount && lastRewardAmount > 0 && (
+          <div className="text-center mt-1">
+            <a
+              href={`/community?tab=free&write=true&category=놀이터 인증&title=${encodeURIComponent('회전 룰렛 당첨 인증합니다! 🎉')}&content=${encodeURIComponent(`여우들의 놀이터 [회전 룰렛]에서 ${lastRewardAmount} 포인트를 획득했습니다! 🦊\n\n모두 기 받아가세요!`)}`}
+              className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer text-center"
+            >
+              📝 당첨 인증글 쓰기 (+50p 적립)
+            </a>
           </div>
         )}
 
-        <Button
-          onClick={handleSpin}
-          disabled={isSpinning}
-          className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-gray-950 font-black text-sm rounded-2xl shadow-lg shadow-yellow-500/20 transition-all active:scale-[0.98]"
-        >
-          {isSpinning ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              돌아가는 중...
-            </span>
-          ) : isPlayedToday ? (
-            '100p로 룰렛 돌리기'
-          ) : (
-            '오늘의 무료 룰렛 돌리기!'
-          )}
-        </Button>
+        {error && (
+          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-2xl text-center text-xs font-bold text-red-400">
+            ⚠️ {error}
+          </div>
+        )}
       </div>
     </div>
   );

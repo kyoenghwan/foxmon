@@ -22,9 +22,9 @@ export async function GET() {
                 game_type VARCHAR(50) NOT NULL, -- 'ROULETTE' | 'LUCKY_BOX' | 'ATTENDANCE'
                 participation_date DATE NOT NULL DEFAULT CURRENT_DATE,
                 reward_amount BIGINT NOT NULL,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-                CONSTRAINT unique_user_daily_game UNIQUE (user_id, game_type, participation_date)
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
             );
+            ALTER TABLE public.user_game_logs DROP CONSTRAINT IF EXISTS unique_user_daily_game;
             CREATE INDEX IF NOT EXISTS idx_user_game_logs_user_id ON user_game_logs(user_id);
 
             -- 4. 추억의 뽑기판 라운드 회차 테이블 생성

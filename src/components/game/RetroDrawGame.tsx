@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, HelpCircle } from 'lucide-react';
 
@@ -30,6 +30,38 @@ export default function RetroDrawGame({ board, activityPoints, onPullSuccess, on
   const [pullingSlot, setPullingSlot] = useState<number | null>(null);
   const [result, setResult] = useState<{ amount: number; tier: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // 1초 주기로 실시간 보드판 상태를 동기화 (유저가 슬롯을 뜯고 있는 상태가 아닐 때만 백그라운드 갱신)
+  useEffect(() => {
+    let intervalId: any;
+    if (pullingSlot === null) {
+      intervalId = setInterval(async () => {
+        try {
+          await onRefreshBoard();
+        } catch (e) {
+          console.error("자동 보드 갱신 에러:", e);
+        }
+      }, 1000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [onRefreshBoard, pullingSlot]);
+
+  const handleManualRefresh = async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await onRefreshBoard();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 300);
+    }
+  };
 
   if (!board) {
     return (
@@ -139,18 +171,43 @@ export default function RetroDrawGame({ board, activityPoints, onPullSuccess, on
           <span className="px-2.5 py-1 bg-red-500/10 text-red-400 rounded-xl text-[11px] font-black border border-red-500/20">
             1회: 200p
           </span>
-          <Button onClick={onRefreshBoard} size="sm" variant="outline" className="h-7 px-2.5 rounded-lg font-bold text-[11px] bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700">
+          <button
+            onClick={handleManualRefresh}
+            disabled={isRefreshing}
+            className={`h-7 px-2.5 rounded-lg font-bold text-[11px] flex items-center gap-1.5 transition-all active:scale-95 ${
+              isRefreshing 
+                ? 'bg-gray-800 border border-gray-700 text-gray-500 cursor-not-allowed'
+                : 'bg-emerald-600 hover:bg-emerald-550 text-white shadow-md shadow-emerald-600/10'
+            }`}
+          >
+            {isRefreshing ? (
+              <Loader2 className="w-3 h-3 animate-spin text-gray-500" />
+            ) : (
+              <span className="w-1.5 h-1.5 rounded-full bg-green-300 animate-pulse" />
+            )}
             새로고침
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* 알림 메시지 영역 */}
       <div className="w-full mb-2">
         {result && (
-          <div className="p-2.5 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-center text-xs font-black text-yellow-400 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            🎁 당첨 결과: {getTierName(result.tier)}!
-            {result.amount > 0 ? ` +${result.amount.toLocaleString()} 포인트 적립 완료!` : ' 아쉽게도 꽝입니다!'}
+          <div className="space-y-2">
+            <div className="p-2.5 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-center text-xs font-black text-yellow-400 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              🎁 당첨 결과: {getTierName(result.tier)}!
+              {result.amount > 0 ? ` +${result.amount.toLocaleString()} 포인트 적립 완료!` : ' 아쉽게도 꽝입니다!'}
+            </div>
+            {result.amount > 0 && (
+              <div className="text-center">
+                <a
+                  href={`/community?tab=free&write=true&category=놀이터 인증&title=${encodeURIComponent('추억의 종이뽑기 당첨 인증! 🥇')}&content=${encodeURIComponent(`여우들의 놀이터 [추억의 종이뽑기] 제 ${board.boardRound}회차에서 딱지를 뜯어 ${result.amount} 포인트를 획득했습니다! 🦊\n\n기 받아가세요!`)}`}
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer text-center"
+                >
+                  📝 당첨 인증글 쓰기 (+50p 적립)
+                </a>
+              </div>
+            )}
           </div>
         )}
         {error && (
