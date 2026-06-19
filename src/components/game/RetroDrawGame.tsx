@@ -398,8 +398,8 @@ export default function RetroDrawGame({
             {/* 자동 첨부 이미지 미리보기 */}
             <div>
               <span className="text-[10px] text-gray-500 font-bold mb-1 block">자동 첨부 이미지</span>
-              <div className="w-full h-20 rounded-xl overflow-hidden border border-gray-800 bg-gray-950">
-                <img src="/images/playground/retrodraw_win_banner.png" alt="인증 배너" className="w-full h-full object-cover" />
+              <div className="w-full h-28 rounded-xl overflow-hidden border border-gray-800 bg-gray-950 flex items-center justify-center">
+                <img src="/images/playground/retrodraw_win_banner.png" alt="인증 배너" className="max-w-full max-h-full object-contain" />
               </div>
             </div>
 
