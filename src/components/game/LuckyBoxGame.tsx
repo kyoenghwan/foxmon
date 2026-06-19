@@ -20,10 +20,14 @@ export default function LuckyBoxGame({ isPlayedToday, activityPoints, onPlaySucc
     if (status === 'shaking' || isLoading) return;
     setError(null);
 
-    // 포인트 검증
-    if (isPlayedToday && activityPoints < 100) {
-      setError('포인트가 부족합니다. (게임 비용: 100p)');
-      return;
+    // 포인트 검증 및 사용자 확인 팝업
+    if (isPlayedToday) {
+      if (activityPoints < 100) {
+        setError('포인트가 부족합니다. (게임 비용: 100p)');
+        return;
+      }
+      const confirmOpen = confirm('100포인트를 사용하여 랜덤상자를 여시겠습니까?');
+      if (!confirmOpen) return;
     }
 
     setIsLoading(true);
@@ -119,8 +123,8 @@ export default function LuckyBoxGame({ isPlayedToday, activityPoints, onPlaySucc
             <div className="p-6 bg-purple-600 rounded-full border-4 border-purple-400 text-white shadow-xl transition-all duration-300 hover:scale-105 hover:bg-purple-500 hover:shadow-purple-500/20 active:scale-95">
               <Gift className="w-16 h-16 animate-pulse" />
             </div>
-            <span className="text-purple-300 text-[11px] font-bold mt-3 tracking-wider uppercase group-hover:text-purple-200">
-              상자를 눌러 열어보세요!
+            <span className="text-purple-300 text-[11px] font-black mt-3 tracking-wider group-hover:text-purple-200">
+              상자를 눌러 열어보세요! {isPlayedToday ? '(100p 차감)' : '(무료)'}
             </span>
           </div>
         )}
@@ -182,31 +186,12 @@ export default function LuckyBoxGame({ isPlayedToday, activityPoints, onPlaySucc
         )}
       </div>
 
-      {/* 조작 버튼 및 알림 피드백 (상자 그래픽 바로 아래 밀착 배치) */}
-      {status !== 'opened' && (
-        <div className="w-full mt-3 space-y-2">
-          {error && (
-            <div className="p-2.5 bg-red-500/10 border border-red-500/30 rounded-xl text-center text-xs font-bold text-red-400">
-              ⚠️ {error}
-            </div>
-          )}
-
-          <Button
-            onClick={handleOpenBox}
-            disabled={status === 'shaking' || isLoading}
-            className="w-full h-11 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs rounded-2xl shadow-lg shadow-purple-600/20 transition-all active:scale-[0.98]"
-          >
-            {status === 'shaking' ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                상자 여는 중...
-              </span>
-            ) : isPlayedToday ? (
-              '100p로 랜덤상자 열기'
-            ) : (
-              '오늘의 무료 상자 열기!'
-            )}
-          </Button>
+      {/* 조작 피드백 (상자 그래픽 바로 아래 밀착 배치) */}
+      {status !== 'opened' && error && (
+        <div className="w-full mt-3">
+          <div className="p-2.5 bg-red-500/10 border border-red-500/30 rounded-xl text-center text-xs font-bold text-red-400 animate-in fade-in duration-300">
+            ⚠️ {error}
+          </div>
         </div>
       )}
     </div>
