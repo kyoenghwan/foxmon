@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { User, FileText, Heart, Eye, Clock, LogIn, Mail, Settings, LogOut, Briefcase, MessageCircle, ChevronDown, Gamepad2 } from 'lucide-react';
+import { User, FileText, Heart, Eye, Clock, LogIn, Mail, Settings, LogOut, Briefcase, MessageCircle, ChevronDown, Gamepad2, Coins } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { useLanguage } from '@/components/providers/language-provider';
 import { SettingsModal } from '@/components/mypage/SettingsModal';
@@ -234,27 +234,16 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                     </div>
                 </div>
 
-                {/* Bottom Icons - 5 핵심 기능 (PC에서는 항상 열림 적용) */}
+                {/* Bottom Icons - 3 핵심 기능 (PC에서는 항상 열림 적용) */}
                 <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 pt-3 sm:pt-4 mt-3 lg:mt-auto' : 'grid-rows-[0fr] opacity-0 overflow-hidden min-[800px]:grid-rows-[1fr] min-[800px]:opacity-100 min-[800px]:pt-4 min-[800px]:mt-auto min-[800px]:overflow-visible'}`}>
-                    <div className="overflow-hidden flex justify-between items-center px-0.5">
-                        <Link href="/mypage/scraps" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
-                            <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110 mx-auto">
-                                <Heart className="h-4.5 w-4.5 sm:h-5 sm:w-5 fill-current" />
+                    <div className="overflow-hidden flex justify-around items-center px-2">
+                        <Link href={isEmployer ? '/biz/points' : '/job-seeker/points'} prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
+                            <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-amber-50 transition-all duration-300 text-gray-400 group-hover:text-amber-500 group-hover:scale-110 mx-auto">
+                                <Coins className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                             </div>
-                            <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">스크랩 공고</span>
+                            <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">포인트</span>
                         </Link>
-                        <Link href="/mypage/recent" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
-                            <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-indigo-50 transition-all duration-300 text-gray-400 group-hover:text-indigo-500 group-hover:scale-110 mx-auto">
-                                <Clock className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-                            </div>
-                            <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">최근 본 공고</span>
-                        </Link>
-                        <Link href="/mypage/viewers" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
-                            <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-emerald-50 transition-all duration-300 text-gray-400 group-hover:text-emerald-500 group-hover:scale-110 mx-auto">
-                                <Eye className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-                            </div>
-                            <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">나를 본 업체</span>
-                        </Link>
+                        
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
@@ -272,6 +261,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             </div>
                             <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">폭스토크</span>
                         </button>
+                        
                         <button
                             onClick={() => window.dispatchEvent(new CustomEvent('open_play_modal'))}
                             className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1 bg-transparent border-0 p-0 cursor-pointer"

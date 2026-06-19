@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -11,14 +12,14 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { userSettingsAction } from '@/lib/actions';
-import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone } from 'lucide-react';
+import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, Clock } from 'lucide-react';
 import { TelegramConnectButton } from '@/components/employer/telegram-connect-button';
 import { AgeVerificationBox } from '@/src/components/auth/AgeVerificationBox';
 import { signOut } from 'next-auth/react';
 
 export function SettingsModal() {
     const [isOpen, setIsOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<'profile' | 'settings'>('profile');
+    const [activeTab, setActiveTab] = useState<'profile' | 'activity' | 'settings'>('profile');
     const [isReauthModalOpen, setIsReauthModalOpen] = useState(false);
     const [reauthLoading, setReauthLoading] = useState(false);
     
@@ -345,10 +346,10 @@ export function SettingsModal() {
             <DialogTrigger asChild>
                 <button 
                     className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl text-gray-600 hover:text-gray-900 transition-all shadow-sm active:scale-95 text-[11px] sm:text-xs font-black cursor-pointer"
-                    title="프로필 설정"
+                    title="프로필 정보"
                 >
                     <Settings className="w-3.5 h-3.5" />
-                    <span>프로필 설정</span>
+                    <span>프로필 정보</span>
                 </button>
             </DialogTrigger>
             
@@ -361,7 +362,7 @@ export function SettingsModal() {
                 <DialogHeader className="px-5 py-4 flex-shrink-0 bg-white z-10 flex flex-row items-center justify-between">
                     <div>
                         <DialogTitle className="font-extrabold text-lg flex items-center gap-2 text-gray-900">
-                            <User className="w-4 h-4 text-[#F26E22]" /> 회원 설정
+                            <User className="w-4 h-4 text-[#F26E22]" /> 프로필 정보
                         </DialogTitle>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -374,7 +375,7 @@ export function SettingsModal() {
                                 {savingProfile && <Loader2 className="w-3 h-3 animate-spin mr-1.5" />}
                                 저장
                             </Button>
-                        ) : (
+                        ) : activeTab === 'settings' ? (
                             <Button 
                                 onClick={async () => {
                                     if (currentPassword || newPassword || confirmPassword) {
@@ -391,6 +392,13 @@ export function SettingsModal() {
                             >
                                 {savingPassword && <Loader2 className="w-3 h-3 animate-spin mr-1.5" />}
                                 저장
+                            </Button>
+                        ) : (
+                            <Button 
+                                onClick={() => setIsOpen(false)}
+                                className="bg-[#1A1F2C] hover:bg-black text-white px-4 font-bold rounded-lg h-9 shadow-sm"
+                            >
+                                확인
                             </Button>
                         )}
                         <Button 
@@ -412,10 +420,16 @@ export function SettingsModal() {
                         기본 정보
                     </button>
                     <button 
+                        onClick={() => setActiveTab('activity')} 
+                        className={`flex-1 py-3 text-[13px] font-bold transition-colors ${activeTab === 'activity' ? 'border-b-2 border-primary text-primary bg-primary/5' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
+                        나의 활동 정보
+                    </button>
+                    <button 
                         onClick={() => setActiveTab('settings')} 
                         className={`flex-1 py-3 text-[13px] font-bold transition-colors ${activeTab === 'settings' ? 'border-b-2 border-primary text-primary bg-primary/5' : 'text-gray-500 hover:bg-gray-50'}`}
                     >
-                        환경 및 보안 설정
+                        환경 및 보안
                     </button>
                 </div>
 
@@ -591,6 +605,58 @@ export function SettingsModal() {
                                         </div>
                                     </section>
                                 )}
+                            </div>
+                        )}
+
+                        {/* 탭 3: 나의 활동 정보 */}
+                        {activeTab === 'activity' && (
+                            <div className="p-5 space-y-4">
+                                <h3 className="font-extrabold text-[#333] text-[13px] mb-3 flex items-center gap-1.5">
+                                    나의 활동 정보
+                                </h3>
+                                <div className="grid grid-cols-1 gap-3">
+                                    <Link 
+                                        href="/mypage/scraps" 
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex items-center justify-between p-4 bg-white hover:bg-orange-50/50 rounded-xl border border-gray-100 hover:border-orange-200 shadow-sm transition-all duration-300 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-orange-50 text-primary group-hover:scale-110 transition-transform">
+                                                <Heart className="h-5 w-5 fill-current" />
+                                            </div>
+                                            <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">스크랩 공고</span>
+                                        </div>
+                                        <span className="text-xs text-gray-400 font-bold group-hover:text-primary">바로가기 &rarr;</span>
+                                    </Link>
+                                    
+                                    <Link 
+                                        href="/mypage/recent" 
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex items-center justify-between p-4 bg-white hover:bg-indigo-50/50 rounded-xl border border-gray-100 hover:border-indigo-200 shadow-sm transition-all duration-300 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-indigo-50 text-indigo-500 group-hover:scale-110 transition-transform">
+                                                <Clock className="h-5 w-5" />
+                                            </div>
+                                            <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">최근 본 공고</span>
+                                        </div>
+                                        <span className="text-xs text-gray-400 font-bold group-hover:text-indigo-500">바로가기 &rarr;</span>
+                                    </Link>
+                                    
+                                    <Link 
+                                        href="/mypage/viewers" 
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex items-center justify-between p-4 bg-white hover:bg-emerald-50/50 rounded-xl border border-gray-100 hover:border-emerald-200 shadow-sm transition-all duration-300 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 group-hover:scale-110 transition-transform">
+                                                <Eye className="h-5 w-5" />
+                                            </div>
+                                            <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">나를 본 업체</span>
+                                        </div>
+                                        <span className="text-xs text-gray-400 font-bold group-hover:text-emerald-500">바로가기 &rarr;</span>
+                                    </Link>
+                                </div>
                             </div>
                         )}
 
