@@ -14,8 +14,8 @@ interface RouletteGameProps {
 }
 
 const SECTORS = [
-  { amount: 30, label: '30p', color: '#ec4899' },     // 핑크
   { amount: 10, label: '10p', color: '#3b82f6' },     // 파랑
+  { amount: 30, label: '30p', color: '#ec4899' },     // 핑크
   { amount: 50, label: '50p', color: '#10b981' },     // 초록
   { amount: 100, label: '100p', color: '#f59e0b' },   // 노랑
   { amount: 500, label: '500p', color: '#8b5cf6' },   // 보라
