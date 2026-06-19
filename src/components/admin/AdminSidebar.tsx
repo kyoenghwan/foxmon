@@ -15,12 +15,14 @@ import {
   ArrowLeftRight,
   ShieldCheck,
   Building2,
-  Gift
+  Gift,
+  Coins
 } from 'lucide-react';
 
 const ADMIN_MENUS = [
   { id: 'dashboard', label: '대시보드', icon: BarChart3, href: '/fox-office' },
   { id: 'users', label: '회원 관리', icon: Users, href: '/fox-office/users' },
+  { id: 'point-history', label: '포인트 이력관리', icon: Coins, href: '/fox-office/points/history' },
   { id: 'employers', label: '업체/인증 관리', icon: Building2, href: '/fox-office/employers' },
   { id: 'jobs', label: '공고 승인/관리', icon: FileText, href: '/fox-office/jobs' },
   { id: 'ads', label: '공지 및 이벤트', icon: CreditCard, href: '/fox-office/ads' },

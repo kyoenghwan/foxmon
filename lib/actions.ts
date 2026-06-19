@@ -313,9 +313,10 @@ export async function getActiveFixedAdCountAction() {
 
 import { QA_GET_ALL_USERS } from '@/src/atoms/qa/admin/QA_GET_ALL_USERS';
 import { OA_ADMIN_GIVE_ACTIVITY_POINTS } from '@/src/atoms/oa/admin/OA_ADMIN_GIVE_ACTIVITY_POINTS';
+import { QA_GET_ALL_POINT_HISTORY } from '@/src/atoms/qa/admin/QA_GET_ALL_POINT_HISTORY';
 
 export async function adminUserAction(
-    actionType: 'GET_LIST' | 'GIVE_ACTIVITY_POINTS' | 'GET_ACTIVITY_POINT_HISTORY',
+    actionType: 'GET_LIST' | 'GIVE_ACTIVITY_POINTS' | 'GET_ACTIVITY_POINT_HISTORY' | 'GET_ALL_POINT_HISTORY',
     payloads?: any
 ) {
     const session = await auth();
@@ -326,6 +327,8 @@ export async function adminUserAction(
     switch (actionType) {
         case 'GET_LIST':
             return QA_GET_ALL_USERS();
+        case 'GET_ALL_POINT_HISTORY':
+            return QA_GET_ALL_POINT_HISTORY();
         case 'GIVE_ACTIVITY_POINTS': {
             if (!payloads?.targetUserId || payloads?.amountDiff === undefined || !payloads?.description) {
                 return { success: false, message: '필수 파라미터 누락' };
