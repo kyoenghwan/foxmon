@@ -261,6 +261,15 @@ export function CommunityClient({
                                         </button>
                                     );
                                 })}
+                                {theme === 'all' && (
+                                    <button
+                                        type="button"
+                                        onClick={() => router.push('/job-seeker/play')}
+                                        className="min-h-[30px] sm:min-h-[36px] px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-lg sm:rounded-full text-[10px] sm:text-[13px] font-bold transition-all whitespace-nowrap bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 shadow-sm"
+                                    >
+                                        🎮 여우들의 놀이터
+                                    </button>
+                                )}
                             </div>
                         </div>
                     );

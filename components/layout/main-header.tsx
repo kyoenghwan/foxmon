@@ -500,6 +500,9 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     <Link href="/community?tab=foxmarket" className="hover:text-primary transition-colors">폭스장터</Link>
                                     <Link href="/community?tab=business" className="hover:text-primary transition-colors">업소장터</Link>
                                     <Link href="/community?tab=reviews" className="hover:text-primary transition-colors">업소후기·제보</Link>
+                                    <Link href="/job-seeker/play" className="hover:text-primary transition-colors flex items-center gap-1 text-pink-600 font-bold">
+                                        여우들의 놀이터 <span className="bg-pink-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">PLAY</span>
+                                    </Link>
                                 </div>
                             </div>
                         )}
@@ -590,6 +593,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                             <Link href="/community?tab=foxmarket">폭스장터</Link>
                                             <Link href="/community?tab=business">업소장터</Link>
                                             <Link href="/community?tab=reviews">업소후기·제보</Link>
+                                            <Link href="/job-seeker/play" className="flex items-center gap-2 text-pink-600 font-bold">여우들의 놀이터 <span className="bg-pink-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">PLAY</span></Link>
                                         </div>
                                     )}
                                 </div>
