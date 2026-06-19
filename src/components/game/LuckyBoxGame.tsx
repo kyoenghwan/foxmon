@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Loader2, Gift } from 'lucide-react';
+import { createCommunityPost } from '@/lib/actions/community';
 
 interface LuckyBoxGameProps {
   isPlayedToday: boolean;
@@ -25,10 +26,47 @@ export default function LuckyBoxGame({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleWriteCert = (e: React.MouseEvent) => {
+  // 인증글 모달 관련 상태
+  const [showCertModal, setShowCertModal] = useState(false);
+  const [certTitle, setCertTitle] = useState('');
+  const [certContent, setCertContent] = useState('');
+  const [isCertSubmitting, setIsCertSubmitting] = useState(false);
+
+  const handleOpenCertModal = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.dispatchEvent(new CustomEvent('close_play_modal'));
-    router.push(`/community?tab=free&write=true&category=놀이터 인증&title=${encodeURIComponent('랜덤상자 대박 당첨 인증! 🎁')}&content=${encodeURIComponent(`여우들의 놀이터 [랜덤상자]에서 [${reward?.label}]이(가) 당첨되어 ${reward?.amount} 포인트를 획득했습니다! 🦊\n\n축하해주세요!`)}&prefillImage=${encodeURIComponent('/images/playground/luckybox_win_banner.png')}`);
+    setCertTitle('랜덤상자 대박 당첨 인증합니다! 🎁');
+    setCertContent(`여우들의 놀이터 [랜덤상자]에서 [${reward?.label}]이(가) 당첨되어 ${reward?.amount} 포인트를 획득했습니다! 🦊\n\n축하해주세요!`);
+    setShowCertModal(true);
+  };
+
+  const handleRegisterCert = async () => {
+    if (!certTitle.trim() || !certContent.trim()) {
+      alert('제목과 내용을 모두 입력해 주세요.');
+      return;
+    }
+    setIsCertSubmitting(true);
+    try {
+      const bannerImg = '/images/playground/luckybox_win_banner.png';
+      const res = await createCommunityPost({
+        board_id: 'free',
+        title: `[놀이터 인증] ${certTitle.trim()}`,
+        content: certContent.trim(),
+        thumbnail: bannerImg,
+        detail_images: [bannerImg]
+      });
+
+      if (res.success) {
+        alert('당첨 인증글이 자유게시판에 등록되었습니다! (+50p 적립 완료)');
+        setShowCertModal(false);
+        resetBox();
+      } else {
+        alert(res.message || '인증글 등록에 실패했습니다.');
+      }
+    } catch (err) {
+      alert('인증글 등록 중 오류가 발생했습니다.');
+    } finally {
+      setIsCertSubmitting(false);
+    }
   };
 
   const handleOpenBox = () => {
@@ -196,7 +234,7 @@ export default function LuckyBoxGame({
                 </p>
                 <div className="mt-3">
                   <button
-                    onClick={handleWriteCert}
+                    onClick={handleOpenCertModal}
                     className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
                   >
                     📝 당첨 인증글 쓰기{isPostRewardAvailable ? ' (+50p 적립)' : ''}
@@ -250,6 +288,62 @@ export default function LuckyBoxGame({
           </span>
         </div>
       </div>
+
+      {/* 당첨 인증글 직접 작성 팝업 오버레이 */}
+      {showCertModal && (
+        <div className="absolute inset-0 bg-black/95 backdrop-blur-md rounded-3xl flex flex-col justify-center p-6 z-40 animate-in zoom-in duration-305">
+          <h4 className="text-white text-sm font-black mb-3 text-center border-b border-gray-800/60 pb-2">
+            🏆 놀이터 당첨 인증글 작성
+          </h4>
+          <div className="space-y-3.5 flex-1 flex flex-col justify-center text-left">
+            {/* 자동 첨부 이미지 미리보기 */}
+            <div>
+              <span className="text-[10px] text-gray-500 font-bold mb-1 block">자동 첨부 이미지</span>
+              <div className="w-full h-20 rounded-xl overflow-hidden border border-gray-800 bg-gray-950">
+                <img src="/images/playground/luckybox_win_banner.png" alt="인증 배너" className="w-full h-full object-cover" />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] text-gray-500 font-bold mb-1 block">제목</label>
+              <input
+                type="text"
+                value={certTitle}
+                onChange={(e) => setCertTitle(e.target.value)}
+                placeholder="제목을 입력하세요"
+                className="w-full px-3.5 py-2.5 bg-gray-800/80 border border-gray-700/60 rounded-xl text-xs font-bold text-white outline-none focus:border-purple-500 transition-colors"
+              />
+            </div>
+
+            <div className="flex-1 flex flex-col min-h-[100px]">
+              <label className="text-[10px] text-gray-500 font-bold mb-1 block">내용</label>
+              <textarea
+                value={certContent}
+                onChange={(e) => setCertContent(e.target.value)}
+                placeholder="내용을 입력하세요"
+                className="w-full flex-1 p-3.5 bg-gray-800/80 border border-gray-700/60 rounded-xl text-xs font-medium text-gray-200 outline-none focus:border-purple-500 transition-colors resize-none leading-relaxed"
+              />
+            </div>
+
+            <div className="flex gap-2 w-full justify-center pt-2">
+              <button
+                onClick={handleRegisterCert}
+                disabled={isCertSubmitting}
+                className="flex-1 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+              >
+                {isCertSubmitting ? '등록 중...' : '등록하기'}
+              </button>
+              <button
+                onClick={() => setShowCertModal(false)}
+                disabled={isCertSubmitting}
+                className="px-6 py-2 bg-gray-700 hover:bg-gray-650 text-gray-300 hover:text-white font-black text-xs rounded-xl transition-all active:scale-95 cursor-pointer border border-gray-650 disabled:opacity-50"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
