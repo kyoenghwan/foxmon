@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        const connStr = 'postgresql://postgres.kgwvftaebjkjwwpsftqv:Rudghks!1@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres';
+        const connStr = 'postgresql://postgres:Rudghks!1@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?options=project%3Dkgwvftaebjkjwwpsftqv';
         
         const sql = `
             -- 0. public.execute_sql(sql text) 함수 생성
