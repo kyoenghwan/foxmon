@@ -102,6 +102,7 @@ export function CsAgentDock() {
 
   if (!eligible || !csAdminUserId) return null;
   if (pathname?.startsWith('/fox-office/support/inbox')) return null;
+  if (pathname?.startsWith('/render-banners')) return null;
 
   return (
     <>

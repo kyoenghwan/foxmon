@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 
 const SECTORS = [
   { amount: 10, label: '10p', color: '#3b82f6' },     // 파랑
@@ -16,6 +16,7 @@ function BannerRenderer() {
   const searchParams = useSearchParams();
   const amountStr = searchParams.get('amount') || '100';
   const amount = parseInt(amountStr, 10);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const targetIndex = SECTORS.findIndex((s) => s.amount === amount);
   const sectorAngle = 360 / SECTORS.length; // 60
@@ -24,53 +25,69 @@ function BannerRenderer() {
   const targetAngle = 360 - (targetIndex * sectorAngle) - (sectorAngle / 2);
   const rewardLabel = amount.toLocaleString() + 'p';
 
-  return (
-    // 뷰포트 전체를 덮는 절대 레이어 (z-index 극대화, 채널톡 및 헤더 완벽 차단)
-    <div id="capture-root" className="fixed inset-0 z-[999999] bg-[#090d16] flex items-center justify-center select-none overflow-hidden">
-      
-      {/* Next.js 래퍼 구조(MaxWidthWrapper 등) 내에서 전체 화면 캡처를 위한 CSS 오버라이드 */}
-      <style>{`
-        /* 모든 부모 래퍼를 투명/풀스크린화 */
-        body, html {
-          overflow: hidden !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          background-color: #090d16 !important;
-        }
-        /* MaxWidthWrapper 및 모든 부모 컨테이너 투명화 */
-        body > div,
-        body > div > div {
-          background: transparent !important;
-          box-shadow: none !important;
-          max-width: 100% !important;
-          width: 100% !important;
-          padding: 0 !important;
-          margin: 0 !important;
-          border: none !important;
-        }
-        /* 채널톡/위젯 등 플로팅 요소 완전 숨김 */
-        #channel-io-button, .ch-messenger, [id^="ch-"], [class^="ch-"], .kakao-channel, [class*="talk"], [id*="talk"],
-        #ch-plugin, #ch-plugin-entry, #ch-plugin-core, [id*="channel"], [class*="channel"],
-        #ChannelIOBanner, #ChannelIOLauncher, [data-ch-testid] {
-          display: none !important;
-          visibility: hidden !important;
-          opacity: 0 !important;
-          pointer-events: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        /* Next.js 루트 하위의 모든 iframe 숨김 */
-        iframe {
-          display: none !important;
-        }
-        /* 좌하단 Next.js 개발자 배지 숨김 */
-        [data-nextjs-dialog-overlay], [data-nextjs-toast], nextjs-portal {
-          display: none !important;
-        }
-      `}</style>
+  // 마운트 시 body의 모든 불필요한 요소를 직접 숨기고, 부모 체인을 투명화
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
 
+    // body 스타일 설정
+    document.body.style.cssText = 'overflow:hidden!important;margin:0!important;padding:0!important;background:#090d16!important;';
+    document.documentElement.style.cssText = 'overflow:hidden!important;margin:0!important;padding:0!important;background:#090d16!important;';
+
+    // #capture-root의 부모 체인을 모두 투명/풀스크린화
+    let parent = root.parentElement;
+    const cleanedParents: HTMLElement[] = [];
+    while (parent && parent !== document.body && parent !== document.documentElement) {
+      parent.style.cssText += ';background:transparent!important;box-shadow:none!important;max-width:100vw!important;width:100vw!important;height:100vh!important;padding:0!important;margin:0!important;border:none!important;position:static!important;overflow:visible!important;';
+      cleanedParents.push(parent);
+      parent = parent.parentElement;
+    }
+
+    // body의 직접 자식 중 #capture-root의 부모가 아닌 것들을 모두 숨김
+    const bodyChildren = Array.from(document.body.children);
+    const hiddenElements: HTMLElement[] = [];
+    for (const child of bodyChildren) {
+      if (child instanceof HTMLElement && !child.contains(root) && child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE') {
+        child.style.display = 'none';
+        hiddenElements.push(child);
+      }
+    }
+
+    // 플로팅 위젯들 숨김 (iframe 포함)
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach(iframe => { (iframe as HTMLElement).style.display = 'none'; });
+
+    return () => {
+      // 클린업
+      for (const el of hiddenElements) {
+        el.style.display = '';
+      }
+      for (const p of cleanedParents) {
+        p.style.cssText = '';
+      }
+      document.body.style.cssText = '';
+      document.documentElement.style.cssText = '';
+    };
+  }, []);
+
+  return (
+    <div 
+      ref={rootRef}
+      id="capture-root" 
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 2147483647,
+        backgroundColor: '#090d16',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        userSelect: 'none',
+        overflow: 'hidden',
+      }}
+    >
       {/* 400x400 크기의 정밀 캡처 타겟 영역 */}
-      <div className="w-[400px] h-[400px] bg-[#090d16] relative flex items-center justify-center overflow-hidden">
+      <div style={{ width: 400, height: 400, backgroundColor: '#090d16', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         
         {/* 룰렛 상단 핀 데코레이션 */}
         <div className="absolute top-[15px] z-20 w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[22px] border-t-red-500 filter drop-shadow-[0_3px_5px_rgba(0,0,0,0.6)]"></div>
