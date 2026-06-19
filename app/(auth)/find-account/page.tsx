@@ -257,7 +257,7 @@ function FindAccountContent() {
           </div>
 
           {/* Content Area */}
-          <div className="min-h-[200px] animate-in fade-in duration-300">
+          <div className="min-h-[100px] animate-in fade-in duration-300">
 
             {/* ===== 아이디 찾기 — 본인인증 ===== */}
             {activeTab === 'find-id' && method === 'phone' && (
