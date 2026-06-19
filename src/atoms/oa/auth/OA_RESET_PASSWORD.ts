@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { RA_HASH_PASSWORD } from '@/src/atoms/ra/auth/RA_HASH_PASSWORD';
 
 /**
@@ -12,7 +12,7 @@ export async function OA_RESET_PASSWORD(
   try {
     const hashedPassword = await RA_HASH_PASSWORD(newPassword);
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('users')
       .update({ password: hashedPassword.data })
       .eq('id', userId);

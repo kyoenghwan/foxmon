@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 /**
  * QA_VERIFY_USER_CI: 아이디 + CI 일치 여부 확인
@@ -13,7 +13,7 @@ export async function QA_VERIFY_USER_CI(
   error: string | null;
 }> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .select('id, ci')
       .eq('login_id', loginId)

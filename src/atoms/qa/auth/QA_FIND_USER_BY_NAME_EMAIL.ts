@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 /**
  * QA_FIND_USER_BY_NAME_EMAIL: 이름 + 이메일로 사용자 조회
@@ -13,7 +13,7 @@ export async function QA_FIND_USER_BY_NAME_EMAIL(
   error: string | null;
 }> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .select('login_id, created_at')
       .eq('name', name)

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 /**
  * QA_FIND_USER_BY_CI: CI(연계정보)로 사용자 조회
@@ -9,7 +9,7 @@ export async function QA_FIND_USER_BY_CI(ci: string): Promise<{
   error: string | null;
 }> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .select('login_id, created_at')
       .eq('ci', ci);

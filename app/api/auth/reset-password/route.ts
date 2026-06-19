@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { QA_VERIFY_USER_CI } from '@/src/atoms/qa/auth/QA_VERIFY_USER_CI';
 import { OA_RESET_PASSWORD } from '@/src/atoms/oa/auth/OA_RESET_PASSWORD';
 import { OA_CREATE_RESET_TOKEN } from '@/src/atoms/oa/auth/OA_CREATE_RESET_TOKEN';
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       }
 
       // 아이디 + 이메일 일치 확인
-      const { data: user, error } = await supabase
+      const { data: user, error } = await supabaseAdmin
         .from('users')
         .select('id, name, email')
         .eq('login_id', loginId)
