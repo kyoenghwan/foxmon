@@ -41,8 +41,8 @@ export default function RouletteGame({
 
   const handleOpenCertModal = (e: React.MouseEvent) => {
     e.preventDefault();
-    setCertTitle('회전 룰렛 당첨 인증합니다! 🎉');
-    setCertContent(`여우들의 놀이터 [회전 룰렛]에서 ${reward?.amount} 포인트를 획득했습니다! 🦊\n\n모두 기 받아가세요!`);
+    setCertTitle(`축하합니다! 회전 룰렛에서 ${reward?.amount}p 당첨되셨습니다! 🎉`);
+    setCertContent(`축하합니다! 여우들의 놀이터 [회전 룰렛]에서 ${reward?.amount}p 당첨되셨습니다! 🦊\n\n모두 기 받아가세요!`);
     setShowCertModal(true);
   };
 
@@ -213,7 +213,7 @@ export default function RouletteGame({
                   룰렛 당첨!
                 </h3>
                 <p className="text-gray-300 text-xs font-semibold mt-1 leading-relaxed">
-                  회전 룰렛에서 <span className="text-yellow-400 font-bold">{reward.label}</span> 보상에<br />당첨되었습니다!
+                  축하합니다!<br />회전 룰렛에서 <span className="text-yellow-400 font-bold">{reward.label} 당첨되셨습니다!</span>
                 </p>
                 <div className="mt-4">
                   <button
