@@ -18,24 +18,29 @@ export default function LuckyBoxGame({
   isPostRewardAvailable = false,
 }: LuckyBoxGameProps) {
   const [status, setStatus] = useState<'idle' | 'shaking' | 'opened'>('idle');
+  const [showConfirm, setShowConfirm] = useState(false);
   const [reward, setReward] = useState<{ amount: number; label: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleOpenBox = async () => {
+  const handleOpenBox = () => {
     if (status === 'shaking' || isLoading) return;
     setError(null);
 
-    // 포인트 검증 및 사용자 확인 팝업
+    // 포인트 검증
     if (isPlayedToday) {
       if (activityPoints < 100) {
         setError('포인트가 부족합니다. (게임 비용: 100p)');
         return;
       }
-      const confirmOpen = confirm('100포인트를 사용하여 랜덤상자를 여시겠습니까?');
-      if (!confirmOpen) return;
     }
 
+    // 커스텀 확인 레이어 노출
+    setShowConfirm(true);
+  };
+
+  const executeOpenBox = async () => {
+    setShowConfirm(false);
     setIsLoading(true);
     setStatus('shaking');
 
@@ -55,10 +60,10 @@ export default function LuckyBoxGame({
 
       // 2초 동안 흔들리는 모션 유지 후 상자 개봉
       setTimeout(() => {
-        setStatus('opened');
-        setReward({ amount: rewardAmount, label });
-        setIsLoading(false);
-        onPlaySuccess(rewardAmount, balanceAfter, true);
+         setStatus('opened');
+         setReward({ amount: rewardAmount, label });
+         setIsLoading(false);
+         onPlaySuccess(rewardAmount, balanceAfter, true);
       }, 2000);
 
     } catch (err: any) {
@@ -74,6 +79,7 @@ export default function LuckyBoxGame({
       e.preventDefault();
     }
     setStatus('idle');
+    setShowConfirm(false);
     setReward(null);
     setError(null);
   };
@@ -101,21 +107,6 @@ export default function LuckyBoxGame({
         }
       `}</style>
 
-      {/* 설명 및 포인트 안내 (상단 배치) */}
-      <div className="text-center w-full mb-3 space-y-1.5 border-b border-gray-800 pb-3">
-        <p className="text-gray-400 text-xs">
-          매일 1회 무료! 이후 플레이 시 100p 차감 (상자 터치)
-        </p>
-        <div className="flex items-center justify-center gap-2">
-          <span className="px-2.5 py-1 bg-yellow-500/10 text-yellow-500 rounded-xl text-xs font-bold border border-yellow-500/20">
-            보유: {activityPoints.toLocaleString()}p
-          </span>
-          <span className="px-2.5 py-1 bg-purple-500/10 text-purple-400 rounded-xl text-xs font-bold border border-purple-500/20">
-            비용: {isPlayedToday ? '100p' : '무료'}
-          </span>
-        </div>
-      </div>
-
       {/* 선물 상자 그래픽 영역 (유연한 최소 높이 설정) */}
       <div className="relative w-full min-h-[14rem] h-auto py-4 flex items-center justify-center">
         
@@ -124,7 +115,41 @@ export default function LuckyBoxGame({
           status === 'shaking' ? 'scale-125 bg-pink-500/30' : status === 'opened' ? 'scale-150 bg-yellow-500/30' : ''
         }`} />
 
-        {status === 'idle' && (
+        {showConfirm && (
+          <div className="flex flex-col items-center justify-center p-5 bg-gray-800/90 border border-gray-700/60 rounded-2xl max-w-xs w-full mx-auto text-center animate-in zoom-in duration-300 shadow-2xl relative z-20">
+            <div className="p-3 bg-purple-500/10 text-purple-400 rounded-full mb-3">
+              <Gift className="w-8 h-8 animate-pulse" />
+            </div>
+            <h4 className="text-white text-xs font-black mb-1.5">랜덤상자 개봉</h4>
+            <p className="text-gray-300 text-[11px] leading-relaxed mb-4">
+              {isPlayedToday ? (
+                <>
+                  <span className="text-purple-400 font-bold">100 포인트</span>를 사용하여<br />랜덤상자를 여시겠습니까?
+                </>
+              ) : (
+                <>
+                  오늘 첫 상자 개봉은 <span className="text-emerald-400 font-bold">무료</span>입니다.<br />상자를 여시겠습니까?
+                </>
+              )}
+            </p>
+            <div className="flex gap-2 w-full justify-center">
+              <button
+                onClick={executeOpenBox}
+                className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-[11px] rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
+              >
+                열기
+              </button>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-4 py-1.5 bg-gray-700 hover:bg-gray-650 text-gray-300 hover:text-white font-black text-[11px] rounded-xl transition-all active:scale-95 cursor-pointer border border-gray-650"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        )}
+
+        {status === 'idle' && !showConfirm && (
           <div className="flex flex-col items-center cursor-pointer group" onClick={handleOpenBox}>
             <div className="p-6 bg-purple-600 rounded-full border-4 border-purple-400 text-white shadow-xl transition-all duration-300 hover:scale-105 hover:bg-purple-500 hover:shadow-purple-500/20 active:scale-95">
               <Gift className="w-16 h-16 animate-pulse" />
@@ -200,6 +225,21 @@ export default function LuckyBoxGame({
           </div>
         </div>
       )}
+
+      {/* 설명 및 포인트 안내 (하단 배치) */}
+      <div className="text-center w-full mt-4 pt-4 border-t border-gray-800 space-y-1.5">
+        <p className="text-gray-400 text-xs">
+          매일 1회 무료! 이후 플레이 시 100p 차감 (상자 터치)
+        </p>
+        <div className="flex items-center justify-center gap-2">
+          <span className="px-2.5 py-1 bg-yellow-500/10 text-yellow-500 rounded-xl text-xs font-bold border border-yellow-500/20">
+            보유: {activityPoints.toLocaleString()}p
+          </span>
+          <span className="px-2.5 py-1 bg-purple-500/10 text-purple-400 rounded-xl text-xs font-bold border border-purple-500/20">
+            비용: {isPlayedToday ? '100p' : '무료'}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
