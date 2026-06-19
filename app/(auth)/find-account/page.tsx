@@ -495,16 +495,6 @@ function FindAccountContent() {
               {message.text}
             </div>
           )}
-
-          {/* Footer */}
-          <div className="text-center pt-4 border-t border-gray-100">
-            <button
-              onClick={() => router.push('/age-gate')}
-              className="text-sm font-bold text-gray-400 hover:text-purple-600 transition-colors"
-            >
-              ← 로그인 화면으로 돌아가기
-            </button>
-          </div>
         </div>
       </div>
     </div>
