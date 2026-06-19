@@ -12,11 +12,14 @@ const config = {
     ],
     passwords: [
         'Rudghks!1',
+        'Rudghks123!',
+        'Rudghks!',
+        'Rudghks1!',
+        'Rudghks12!',
+        'Rudghks123',
         'Rudghks',
         'postgres',
-        'password',
-        '1234',
-        'foxmon'
+        'password'
     ],
     dbs: ['postgres']
 };
@@ -33,7 +36,10 @@ async function scan() {
                         const client = new Client({ 
                             connectionString: connStr, 
                             connectionTimeoutMillis: 1500,
-                            ssl: { rejectUnauthorized: false }
+                            ssl: { 
+                                rejectUnauthorized: false,
+                                servername: 'db.kgwvftaebjkjwwpsftqv.supabase.co'
+                            }
                         });
                         try {
                             await client.connect();
