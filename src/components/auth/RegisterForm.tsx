@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import { nvLog } from '@/lib/logger';
-import { FA_REGISTER_FLOW } from '@/src/atoms/fa/auth/FA_REGISTER_FLOW';
 import { FA_CHECK_DUPLICATE_FLOW } from '@/src/atoms/fa/auth/FA_CHECK_DUPLICATE_FLOW';
 import { normalizeLoginId } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
 import { Button } from '@/components/ui/button';
@@ -110,7 +109,12 @@ export function RegisterForm() {
     business_type: '비사업자',
     business_address: '',
     verification_doc_url: '',
+    referrerLoginId: '', // 추천인 아이디 필드
   });
+
+  const [referrerChecked, setReferrerChecked] = useState(false);
+  const [referrerNickname, setReferrerNickname] = useState('');
+  const [referrerError, setReferrerError] = useState<string | null>(null);
 
   const [docFile, setDocFile] = useState<File | null>(null);
 
@@ -227,6 +231,33 @@ export function RegisterForm() {
     }
   };
 
+  const checkReferrer = async () => {
+    const refId = formData.referrerLoginId.trim();
+    if (!refId) return alert('추천인 아이디를 입력해주세요.');
+    if (refId.toLowerCase() === formData.loginId.toLowerCase()) {
+      setReferrerError('본인은 추천인으로 등록할 수 없습니다.');
+      setReferrerChecked(false);
+      setReferrerNickname('');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/auth/check-referrer?loginId=${encodeURIComponent(refId)}`);
+      const data = await res.json();
+      if (data.success) {
+        setReferrerNickname(data.nickname);
+        setReferrerChecked(true);
+        setReferrerError(null);
+      } else {
+        setReferrerError(data.message || '존재하지 않는 추천인 아이디입니다.');
+        setReferrerChecked(false);
+        setReferrerNickname('');
+      }
+    } catch (e) {
+      alert('추천인 확인 중 오류가 발생했습니다.');
+    }
+  };
+
   const validateStep4 = () => {
     if (!formData.loginId) {
       setError('아이디를 입력해주세요.');
@@ -294,14 +325,36 @@ export function RegisterForm() {
         finalDocUrl = uploadResult.url!;
       }
 
-      const result = await FA_REGISTER_FLOW({
-        ...formData,
-        ...verifiedData,
-        role: role!,
-        is_age_verified: isAgeVerified,
-        smsConsent: agreements.sms,
-        verification_doc_url: finalDocUrl,
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          loginId: formData.loginId,
+          password: formData.password,
+          email: formData.email || null,
+          name: verifiedData.name,
+          nickname: formData.nickname,
+          role: role!,
+          birthDate: verifiedData.birthDate,
+          gender: verifiedData.gender,
+          phoneNumber: verifiedData.phoneNumber,
+          nationality: verifiedData.nationality,
+          is_age_verified: isAgeVerified,
+          ci: verifiedData.ci || null,
+          smsConsent: agreements.sms,
+          business_name: formData.business_name || null,
+          representative_name: formData.representative_name || null,
+          business_number: formData.business_number || null,
+          business_category: formData.business_category || null,
+          opening_date: formData.opening_date || null,
+          business_type: formData.business_type || '비사업자',
+          business_address: formData.business_address || null,
+          verification_doc_url: finalDocUrl || null,
+          referrerLoginId: formData.referrerLoginId ? formData.referrerLoginId.trim() : null
+        })
       });
+
+      const result = await response.json();
 
       if (result.success) {
         nvLog('FW', '회원가입 성공 -> 자동 로그인 시도');
@@ -318,7 +371,7 @@ export function RegisterForm() {
           callbackUrl: '/',
         });
       } else {
-        setError(result.message);
+        setError(result.message || '회원가입 중 오류가 발생했습니다.');
       }
     } catch (err) {
       setError('회원가입 중 오류가 발생했습니다.');
@@ -637,6 +690,46 @@ export function RegisterForm() {
                     className="bg-gray-50/50 border-gray-200 h-11 rounded-xl text-sm"
                   />
                 </div>
+
+                <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
+                  <Label className="text-gray-600 text-[13px] font-black tracking-wider">추천인 (선택)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="추천인의 아이디 입력"
+                      value={formData.referrerLoginId}
+                      onChange={(e) => {
+                        setFormData({ ...formData, referrerLoginId: e.target.value });
+                        setReferrerChecked(false);
+                        setReferrerNickname('');
+                        setReferrerError(null);
+                      }}
+                      autoComplete="off"
+                      className="bg-gray-50/50 border-gray-200 h-11 rounded-xl flex-1 text-sm font-bold"
+                    />
+                    <Button
+                      type="button"
+                      onClick={checkReferrer}
+                      className={`h-11 rounded-xl px-4 text-xs font-black transition-all shrink-0 ${referrerChecked
+                          ? "bg-green-500 text-white"
+                          : "bg-purple-50 text-purple-700 border border-purple-100"
+                        }`}
+                    >
+                      {referrerChecked ? "확인완료" : "추천인확인"}
+                    </Button>
+                  </div>
+                </div>
+                {referrerChecked && (
+                  <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] gap-3 -mt-3">
+                    <div />
+                    <span className="text-[11px] text-green-600 font-bold">✓ 확인 완료: {referrerNickname} 님</span>
+                  </div>
+                )}
+                {referrerError && (
+                  <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] gap-3 -mt-3">
+                    <div />
+                    <span className="text-[11px] text-red-500 font-bold">✗ {referrerError}</span>
+                  </div>
+                )}
 
                 <div className="py-2 border-t border-gray-50 border-dashed space-y-3 pt-4 mt-2">
                   <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">

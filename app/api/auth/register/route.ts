@@ -26,7 +26,8 @@ export async function POST(req: Request) {
             representative_name: body.representative_name,
             business_number: body.business_number,
             business_category: body.business_category,
-            opening_date: body.opening_date
+            opening_date: body.opening_date,
+            referrerLoginId: body.referrerLoginId // 추천인 아이디 추가
         });
 
         if (!result.success) {

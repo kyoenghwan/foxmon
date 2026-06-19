@@ -156,6 +156,40 @@ export async function createCommunityPost(input: {
             return { success: false, message: `게시글 저장에 실패했습니다. (${error.message || JSON.stringify(error)})` };
         }
 
+        // --- 활동 포인트 적립 연동 (1일 최대 5회) ---
+        try {
+            const kstOffset = 9 * 60 * 60 * 1000;
+            const nowKst = new Date(Date.now() + kstOffset);
+            
+            const todayStartKst = new Date(nowKst);
+            todayStartKst.setUTCHours(0, 0, 0, 0);
+            const todayStartUtc = new Date(todayStartKst.getTime() - kstOffset);
+            
+            const todayEndKst = new Date(nowKst);
+            todayEndKst.setUTCHours(23, 59, 59, 999);
+            const todayEndUtc = new Date(todayEndKst.getTime() - kstOffset);
+
+            const { count: postCount } = await supabaseAdmin
+                .from('activity_point_transactions')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', userId)
+                .eq('type', 'POST')
+                .gte('created_at', todayStartUtc.toISOString())
+                .lte('created_at', todayEndUtc.toISOString());
+
+            if (postCount !== null && postCount < 5) {
+                await supabaseAdmin.rpc('process_activity_point', {
+                    p_user_id: userId,
+                    p_type: 'POST',
+                    p_amount: 50,
+                    p_description: `커뮤니티 글 작성 보너스 적립 (글번호: ${data.id})`
+                });
+            }
+        } catch (ptError) {
+            nvLog('AT', '⚠️ 글 작성 활동 포인트 적립 중 예외 발생 (무시)', ptError);
+        }
+        // ------------------------------------------
+
         // 새 글 등록 성공 시 해당 게시판의 관련 페이징 캐시 무효화 (Invalidate)
         const keysToInvalidate = Object.keys(communityCache).filter(key => key.startsWith(`${input.board_id}_`));
         keysToInvalidate.forEach(key => {
@@ -326,6 +360,40 @@ export async function createCommunityComment(input: {
             nvLog('AT', '❌ OA_INSERT_COMMUNITY_COMMENT 에러', error);
             return { success: false, message: '댓글 저장에 실패했습니다.' };
         }
+
+        // --- 활동 포인트 적립 연동 (1일 최대 10회) ---
+        try {
+            const kstOffset = 9 * 60 * 60 * 1000;
+            const nowKst = new Date(Date.now() + kstOffset);
+            
+            const todayStartKst = new Date(nowKst);
+            todayStartKst.setUTCHours(0, 0, 0, 0);
+            const todayStartUtc = new Date(todayStartKst.getTime() - kstOffset);
+            
+            const todayEndKst = new Date(nowKst);
+            todayEndKst.setUTCHours(23, 59, 59, 999);
+            const todayEndUtc = new Date(todayEndKst.getTime() - kstOffset);
+
+            const { count: commentCount } = await supabaseAdmin
+                .from('activity_point_transactions')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', userId)
+                .eq('type', 'COMMENT')
+                .gte('created_at', todayStartUtc.toISOString())
+                .lte('created_at', todayEndUtc.toISOString());
+
+            if (commentCount !== null && commentCount < 10) {
+                await supabaseAdmin.rpc('process_activity_point', {
+                    p_user_id: userId,
+                    p_type: 'COMMENT',
+                    p_amount: 10,
+                    p_description: `커뮤니티 댓글 작성 보너스 적립 (댓글번호: ${comment.id})`
+                });
+            }
+        } catch (ptError) {
+            nvLog('AT', '⚠️ 댓글 작성 활동 포인트 적립 중 예외 발생 (무시)', ptError);
+        }
+        // ------------------------------------------
 
         return { success: true, data: comment, message: '댓글이 등록되었습니다.' };
 

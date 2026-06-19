@@ -348,6 +348,11 @@ pages:
       - "src/components/admin/AdminSidebar.tsx"
     flows: ["QA_GET_ALL_USERS"]
     db_tables: ["users"]
+    ui_elements:
+      - name: "GIFT_CARDS_MENU"
+        keywords: ["상품권 교환 관리", "상품권", "gift-cards", "gift cards"]
+        selector: "aside nav a[href='/fox-office/gift-cards']"
+        type: "link"
 
   ADMIN_POINTS_PAGE:
     label: "관리자 포인트 정책 관리"

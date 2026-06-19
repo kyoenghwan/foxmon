@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '../../../../lib/logger';
 
 interface CreateUserParams {
@@ -23,6 +23,7 @@ interface CreateUserParams {
   business_type?: string;
   business_address?: string;
   verification_doc_url?: string;
+  referrer_id?: string | null; // 추천인 식별자 추가
 }
 
 /**
@@ -44,7 +45,7 @@ export async function OA_CREATE_USER(input: CreateUserParams): Promise<{ success
         age--;
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .insert([
         {
@@ -69,6 +70,7 @@ export async function OA_CREATE_USER(input: CreateUserParams): Promise<{ success
           business_type: input.business_type || '비사업자',
           business_address: input.business_address || null,
           verification_doc_url: input.verification_doc_url || null,
+          referrer_id: input.referrer_id || null, // 추천인 매핑
           created_at: new Date().toISOString(),
         }
       ])

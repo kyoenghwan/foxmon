@@ -62,9 +62,16 @@ export function UserNav() {
                         <Link href={isEmployer ? "/employer/profile" : "/job-seeker/profile"}>프로필 설정</Link>
                     </DropdownMenuItem>
                     {!isEmployer && (
-                        <DropdownMenuItem asChild>
-                            <Link href="/job-seeker/applications">지원 내역</Link>
-                        </DropdownMenuItem>
+                        <>
+                            <DropdownMenuItem asChild>
+                                <Link href="/job-seeker/points" className="font-semibold text-purple-600 cursor-pointer">
+                                    💰 활동 포인트/교환
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link href="/job-seeker/applications">지원 내역</Link>
+                            </DropdownMenuItem>
+                        </>
                     )}
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />

@@ -2,6 +2,7 @@ import { RA_HASH_PASSWORD } from '@/src/atoms/ra/auth/RA_HASH_PASSWORD';
 import { RA_VALIDATE_LOGIN_ID } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
 import { QA_CHECK_ID_NICKNAME_EXISTS } from '@/src/atoms/qa/auth/QA_CHECK_ID_NICKNAME_EXISTS';
 import { OA_CREATE_USER } from '@/src/atoms/oa/auth/OA_CREATE_USER';
+import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '../../../../lib/logger';
 
 interface RegisterInput {
@@ -26,6 +27,7 @@ interface RegisterInput {
   business_type?: string;
   business_address?: string;
   verification_doc_url?: string;
+  referrerLoginId?: string; // 추천인 아이디 필드 추가
 }
 
 /**
@@ -57,10 +59,30 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
       return { success: false, message: '이미 사용 중인 닉네임입니다.' };
     }
 
-    // 2. 비밀번호 해싱
+    // 2. 추천인 유효성 체크 및 referrer_id 조회
+    let referrerId: string | null = null;
+    if (input.referrerLoginId) {
+      const trimmedReferrer = input.referrerLoginId.trim();
+      if (trimmedReferrer.toLowerCase() === loginId.toLowerCase()) {
+        return { success: false, message: '본인은 추천인으로 등록할 수 없습니다.' };
+      }
+      
+      const { data: referrer, error: refError } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('login_id', trimmedReferrer)
+        .single();
+
+      if (refError || !referrer) {
+        return { success: false, message: '존재하지 않는 추천인 아이디입니다.' };
+      }
+      referrerId = referrer.id;
+    }
+
+    // 3. 비밀번호 해싱
     const hashResult = await RA_HASH_PASSWORD(input.password);
 
-    // 3. 사용자 생성 (DB 필드명에 맞춰 키 매핑)
+    // 4. 사용자 생성 (DB 필드명에 맞춰 키 매핑)
     const createResult = await OA_CREATE_USER({
       login_id: loginId,
       password: hashResult.data,
@@ -83,10 +105,36 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
       business_address: input.business_address,
       verification_doc_url: input.verification_doc_url,
       sms_consent: input.smsConsent,
+      referrer_id: referrerId, // 추천인 매핑
     });
 
-    if (!createResult.success) {
+    if (!createResult.success || !createResult.data) {
       return { success: false, message: createResult.error || '회원가입 중 오류가 발생했습니다.' };
+    }
+
+    // 5. 가입 성공 후 추천 포인트 지급 연동 (RPC 호출)
+    if (referrerId) {
+      const newUserId = createResult.data.userId;
+      
+      // 신규 가입자 포인트 적립 (+500)
+      const { error: userBonusErr } = await supabaseAdmin.rpc('process_activity_point', {
+        p_user_id: newUserId,
+        p_type: 'REFERRAL_SIGNUP',
+        p_amount: 500,
+        p_description: '가입 추천인 입력 보너스 적립'
+      });
+
+      // 추천한 사람 포인트 적립 (+1000)
+      const { error: refBonusErr } = await supabaseAdmin.rpc('process_activity_point', {
+        p_user_id: referrerId,
+        p_type: 'REFERRAL_BONUS',
+        p_amount: 1000,
+        p_description: `추천 가입 보너스 적립 (가입자: ${loginId})`
+      });
+
+      if (userBonusErr || refBonusErr) {
+        nvLog('AT', '⚠️ 추천 포인트 적립 중 일부 오류 발생', { userBonusErr, refBonusErr });
+      }
     }
 
     nvLog('AT', '✅ FA_REGISTER_FLOW 완료');
