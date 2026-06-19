@@ -69,6 +69,11 @@ export function UserNav() {
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
+                                <Link href="/job-seeker/play" className="font-semibold text-pink-600 cursor-pointer">
+                                    🎮 여우들의 놀이터
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
                                 <Link href="/job-seeker/applications">지원 내역</Link>
                             </DropdownMenuItem>
                         </>
