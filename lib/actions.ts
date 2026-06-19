@@ -311,3 +311,48 @@ export async function getActiveFixedAdCountAction() {
     }
 }
 
+import { QA_GET_ALL_USERS } from '@/src/atoms/qa/admin/QA_GET_ALL_USERS';
+import { OA_ADMIN_GIVE_ACTIVITY_POINTS } from '@/src/atoms/oa/admin/OA_ADMIN_GIVE_ACTIVITY_POINTS';
+
+export async function adminUserAction(
+    actionType: 'GET_LIST' | 'GIVE_ACTIVITY_POINTS' | 'GET_ACTIVITY_POINT_HISTORY',
+    payloads?: any
+) {
+    const session = await auth();
+    if (!session?.user?.id || ((session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'SUPER_ADMIN')) {
+        return { success: false, message: '관리자 권한이 없습니다.' };
+    }
+
+    switch (actionType) {
+        case 'GET_LIST':
+            return QA_GET_ALL_USERS();
+        case 'GIVE_ACTIVITY_POINTS': {
+            if (!payloads?.targetUserId || payloads?.amountDiff === undefined || !payloads?.description) {
+                return { success: false, message: '필수 파라미터 누락' };
+            }
+            return OA_ADMIN_GIVE_ACTIVITY_POINTS({
+                userId: payloads.targetUserId,
+                amountDiff: payloads.amountDiff,
+                description: payloads.description,
+                adminId: session.user.id
+            });
+        }
+        case 'GET_ACTIVITY_POINT_HISTORY': {
+            if (!payloads?.targetUserId) return { success: false, message: '유저 ID 누락' };
+            try {
+                const { data: list, error } = await supabaseAdmin
+                    .from('activity_point_transactions')
+                    .select('*')
+                    .eq('user_id', payloads.targetUserId)
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+                return { success: true, data: { transactions: list || [] } };
+            } catch (e: any) {
+                return { success: false, message: e.message };
+            }
+        }
+        default:
+            return { success: false, message: '잘못된 액션입니다.' };
+    }
+}
+
