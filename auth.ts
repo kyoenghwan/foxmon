@@ -18,8 +18,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     .safeParse(credentials);
 
                 if (parsedCredentials.success) {
+                    const { headers } = await import('next/headers');
+                    const headersList = await headers();
+                    // Get client IP address, fallback to loopback
+                    const ipAddress = headersList.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+                    const userAgent = headersList.get('user-agent') || undefined;
+
                     const { FA_LOGIN_FLOW } = await import('@/src/atoms/fa/auth/FA_LOGIN_FLOW');
-                    const result = await FA_LOGIN_FLOW(parsedCredentials.data);
+                    const result = await FA_LOGIN_FLOW({
+                        ...parsedCredentials.data,
+                        ipAddress,
+                        userAgent
+                    });
                     
                     if (result.success && result.data) {
                         return {

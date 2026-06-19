@@ -14,6 +14,7 @@ import { userSettingsAction } from '@/lib/actions';
 import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone } from 'lucide-react';
 import { TelegramConnectButton } from '@/components/employer/telegram-connect-button';
 import { AgeVerificationBox } from '@/src/components/auth/AgeVerificationBox';
+import { signOut } from 'next-auth/react';
 
 export function SettingsModal() {
     const [isOpen, setIsOpen] = useState(false);
@@ -235,6 +236,34 @@ export function SettingsModal() {
             return false;
         } finally {
             setSavingPassword(false);
+        }
+    };
+
+    const handleWithdraw = async () => {
+        const confirm1 = window.confirm('정말로 회원 탈퇴를 진행하시겠습니까? 탈퇴 시 작성하신 이력서와 모든 활동 데이터가 즉시 삭제되며 복구할 수 없습니다.');
+        if (!confirm1) return;
+
+        const confirm2 = window.confirm('마지막 경고입니다. 탈퇴 후 데이터 복구는 절대 불가능합니다. 계속 진행하시겠습니까?');
+        if (!confirm2) return;
+
+        try {
+            const res = await fetch('/api/auth/withdraw', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                alert('회원 탈퇴가 완료되었습니다. 그동안 서비스를 이용해 주셔서 감사합니다.');
+                document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                await signOut({ callbackUrl: '/' });
+            } else {
+                alert(result.message || '회원 탈퇴 처리 중 오류가 발생했습니다.');
+            }
+        } catch (err) {
+            console.error('Withdraw exception:', err);
+            alert('회원 탈퇴 처리 중 오류가 발생했습니다.');
         }
     };
 
@@ -634,7 +663,10 @@ export function SettingsModal() {
                                 </section>
 
                                 <div className="pt-4 text-center">
-                                    <button className="text-[11px] font-bold text-gray-400 hover:text-red-500 transition-colors underline underline-offset-4">
+                                    <button 
+                                        onClick={handleWithdraw}
+                                        className="text-[11px] font-bold text-gray-400 hover:text-red-500 transition-colors underline underline-offset-4 cursor-pointer"
+                                    >
                                         회원 탈퇴를 생각하시나요?
                                     </button>
                                 </div>

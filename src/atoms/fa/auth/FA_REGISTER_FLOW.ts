@@ -2,6 +2,8 @@ import { RA_HASH_PASSWORD } from '@/src/atoms/ra/auth/RA_HASH_PASSWORD';
 import { RA_VALIDATE_LOGIN_ID } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
 import { QA_CHECK_ID_NICKNAME_EXISTS } from '@/src/atoms/qa/auth/QA_CHECK_ID_NICKNAME_EXISTS';
 import { OA_CREATE_USER } from '@/src/atoms/oa/auth/OA_CREATE_USER';
+import { QA_CHECK_CI_ELIGIBILITY } from '@/src/atoms/qa/auth/QA_CHECK_CI_ELIGIBILITY';
+import { OA_UPSERT_CI_HISTORY } from '@/src/atoms/oa/auth/OA_UPSERT_CI_HISTORY';
 import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '../../../../lib/logger';
 
@@ -112,10 +114,22 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
       return { success: false, message: createResult.error || '회원가입 중 오류가 발생했습니다.' };
     }
 
-    // 5. 가입 성공 후 추천 포인트 지급 연동 (RPC 호출)
-    if (referrerId) {
-      const newUserId = createResult.data.userId;
-      
+    const newUserId = createResult.data.userId;
+
+    // 5. CI 이력 조회를 통한 재가입 포인트 어뷰징 검증
+    let isEligibleForPoints = true;
+    if (input.ci) {
+      const ciEligibility = await QA_CHECK_CI_ELIGIBILITY({ ci: input.ci });
+      if (ciEligibility.success && ciEligibility.data) {
+        if (ciEligibility.data.exists && !ciEligibility.data.isEligible) {
+          isEligibleForPoints = false;
+          nvLog('AT', '⚠️ 재가입 어뷰징 감지: 포인트 지급 대상 제외', { ci: '***' });
+        }
+      }
+    }
+
+    // 6. 가입 성공 후 추천 포인트 지급 연동 (RPC 호출)
+    if (referrerId && isEligibleForPoints) {
       // 신규 가입자 포인트 적립 (+500)
       const { error: userBonusErr } = await supabaseAdmin.rpc('process_activity_point', {
         p_user_id: newUserId,
@@ -134,7 +148,15 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
 
       if (userBonusErr || refBonusErr) {
         nvLog('AT', '⚠️ 추천 포인트 적립 중 일부 오류 발생', { userBonusErr, refBonusErr });
+      } else if (input.ci) {
+        // 포인트 지급 완료 상태 기록 (중복 지급 차단)
+        await OA_UPSERT_CI_HISTORY({ ci: input.ci, action: 'MARK_USED' });
       }
+    }
+
+    // 7. 가입 이력 기록 (재가입 방지용)
+    if (input.ci) {
+      await OA_UPSERT_CI_HISTORY({ ci: input.ci, action: 'SIGNUP' });
     }
 
     nvLog('AT', '✅ FA_REGISTER_FLOW 완료');

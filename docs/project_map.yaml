@@ -508,6 +508,11 @@ atoms:
       description: "광고 등록 시 포인트 차감 플로우"
       uses: ["RA_CALC_DEDUCTION_FIFO", "OA_EXECUTE_BATCH_DEDUCTION"]
 
+    - id: "FA_WITHDRAW_USER_FLOW"
+      file: "src/atoms/fa/auth/FA_WITHDRAW_USER_FLOW.ts"
+      description: "회원 탈퇴 처리 및 이력 기록 플로우"
+      uses: ["OA_UPSERT_CI_HISTORY", "OA_HARD_DELETE_USER"]
+
   query_atoms:
     - id: "QA_GET_USER_AUTH"
       file: "src/atoms/qa/auth/QA_GET_USER_AUTH.ts"
@@ -546,6 +551,9 @@ atoms:
       file: "src/atoms/qa/foxtalk/QA_GET_CHAT_ROOMS.ts"
     - id: "QA_GET_CHAT_MESSAGES"
       file: "src/atoms/qa/foxtalk/QA_GET_CHAT_MESSAGES.ts"
+    - id: "QA_CHECK_CI_ELIGIBILITY"
+      file: "src/atoms/qa/auth/QA_CHECK_CI_ELIGIBILITY.ts"
+      description: "CI 고유 가입/포인트 지급 자격 확인"
 
   operation_atoms:
     - id: "OA_CREATE_USER"
@@ -586,6 +594,18 @@ atoms:
     - id: "OA_UPSERT_RESUME_SEARCH"
       file: "src/atoms/oa/search/OA_UPSERT_RESUME.ts"
       note: "검색 색인용 이력서 upsert (search 도메인)"
+
+    - id: "OA_UPSERT_CI_HISTORY"
+      file: "src/atoms/oa/auth/OA_UPSERT_CI_HISTORY.ts"
+      description: "CI 고유 이력 기록 및 갱신"
+
+    - id: "OA_INSERT_CONNECTION_LOG"
+      file: "src/atoms/oa/auth/OA_INSERT_CONNECTION_LOG.ts"
+      description: "로그인 접속 정보 기록"
+
+    - id: "OA_HARD_DELETE_USER"
+      file: "src/atoms/oa/auth/OA_HARD_DELETE_USER.ts"
+      description: "회원 탈퇴 물리 삭제 처리"
 
   rule_atoms:
     - id: "RA_VALIDATE_LOGIN"
@@ -643,6 +663,10 @@ db_tables:
     schema_doc: "docs/db/point_system_master_schema.md"
   - name: "point_tiers"
     schema_doc: "docs/db/point_system_master_schema.md"
+  - name: "user_ci_history_logs"
+    schema_doc: "docs/db/user_security_logs_schema.md"
+  - name: "user_connection_logs"
+    schema_doc: "docs/db/user_security_logs_schema.md"
 
 # ─────────────────────────────────────────────
 # 5. 공유 스타일 그룹

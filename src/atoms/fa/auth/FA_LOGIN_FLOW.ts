@@ -3,17 +3,24 @@ import { normalizeDbEnum } from '@/lib/normalize-user-role';
 import { RA_VALIDATE_LOGIN } from '@/src/atoms/ra/auth/RA_VALIDATE_LOGIN';
 import { QA_GET_USER_AUTH } from '@/src/atoms/qa/auth/QA_GET_USER_AUTH';
 import { RA_VERIFY_PASSWORD } from '@/src/atoms/ra/auth/RA_VERIFY_PASSWORD';
+import { OA_INSERT_CONNECTION_LOG } from '@/src/atoms/oa/auth/OA_INSERT_CONNECTION_LOG';
 import { nvLog } from '../../../../lib/logger';
 
 /**
  * FA_LOGIN_FLOW: 로그인 로직을 관장하는 핵심 Flow Atom
  * 기반 명세: atoms/auth/flow-atoms/FA_LOGIN_FLOW.yaml
  */
-export const FA_LOGIN_FLOW = async (input: { loginId?: string; password?: string; authContext?: any }) => {
+export const FA_LOGIN_FLOW = async (input: { 
+  loginId?: string; 
+  password?: string; 
+  authContext?: any;
+  ipAddress?: string;
+  userAgent?: string;
+}) => {
   // Context Mapping의 핵심: 모든 입출력은 context 객체 내부에서만 순환합니다.
   const normalizedLoginId = normalizeLoginIdForAuth(input?.loginId ?? '');
   const context: any = { input: { ...input, loginId: normalizedLoginId } };
-  nvLog('AT', '▶️ FA_LOGIN_FLOW 시작', { loginId: context.input.loginId });
+  nvLog('AT', '▶️ FA_LOGIN_FLOW 시작', { loginId: context.input.loginId, ipAddress: context.input.ipAddress });
 
   try {
     // Step 1: 입력값 검증 (RA 호출)
@@ -56,11 +63,22 @@ export const FA_LOGIN_FLOW = async (input: { loginId?: string; password?: string
 
     nvLog('AT', '✅ FA_LOGIN_FLOW 로직 처리 완료 (데이터 포맷팅)');
     
+    const userId = context.authResult.data.id;
+
+    // Step 4: 접속 로그 기록 (OA 호출, 비동기 실행 및 에러 무시 처리로 가벼움 보장)
+    if (context.input.ipAddress) {
+      await OA_INSERT_CONNECTION_LOG({
+        userId,
+        ipAddress: context.input.ipAddress,
+        userAgent: context.input.userAgent
+      });
+    }
+
     // 최종 결과 반환 (UI에서 사용될 형태)
     return {
       success: true,
       data: {
-        userId: context.authResult.data.id,
+        userId,
         loginId: context.authResult.data.login_id,
         email: context.authResult.data.email,
         is_age_verified: context.authResult.data.is_age_verified,
