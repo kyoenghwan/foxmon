@@ -153,6 +153,54 @@ export default function RouletteGame({
         </div>
       )}
 
+      {/* 당첨 결과 레이어 오버레이 */}
+      {reward && (
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm rounded-3xl flex items-center justify-center p-4 z-30 animate-in zoom-in duration-305">
+          <div className="flex flex-col items-center justify-center p-6 bg-gray-800/95 border border-gray-700/60 rounded-2xl max-w-xs w-full text-center shadow-2xl animate-in scale-in duration-300">
+            {reward.amount > 0 ? (
+              <div className="flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full bg-yellow-500/10 border-4 border-yellow-500 flex items-center justify-center text-yellow-500 text-2xl font-black shadow-lg shadow-yellow-500/20 animate-bounce">
+                  +{reward.amount}p
+                </div>
+                <h3 className="text-yellow-400 text-sm font-black mt-3">
+                  룰렛 당첨!
+                </h3>
+                <p className="text-gray-300 text-xs font-semibold mt-1 leading-relaxed">
+                  회전 룰렛에서 <span className="text-yellow-400 font-bold">{reward.label}</span> 보상에<br />당첨되었습니다!
+                </p>
+                <div className="mt-4">
+                  <a
+                    href={`/community?tab=free&write=true&category=놀이터 인증&title=${encodeURIComponent('회전 룰렛 당첨 인증합니다! 🎉')}&content=${encodeURIComponent(`여우들의 놀이터 [회전 룰렛]에서 ${reward.amount} 포인트를 획득했습니다! 🦊\n\n모두 기 받아가세요!`)}`}
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
+                  >
+                    📝 당첨 인증글 쓰기{isPostRewardAvailable ? ' (+50p 적립)' : ''}
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full bg-gray-700/50 border-4 border-gray-600 flex items-center justify-center text-gray-400 text-2xl font-black">
+                  꽝
+                </div>
+                <h3 className="text-gray-400 text-sm font-black mt-3">
+                  아쉽지만 다음 기회에!
+                </h3>
+                <p className="text-gray-300 text-xs mt-1 leading-relaxed">
+                  꽝에 당첨되었습니다.<br />내일 다시 도전해 보세요.
+                </p>
+              </div>
+            )}
+            
+            <button
+              onClick={(e) => resetRoulette(e)}
+              className="mt-5 text-xs text-purple-400 hover:text-purple-300 font-bold underline underline-offset-4 relative z-30 cursor-pointer"
+            >
+              다시 하기
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 룰렛 상단 핀 데코레이션 */}
       <div className="absolute top-8 z-10 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[20px] border-t-red-500 filter drop-shadow-md"></div>
 
@@ -225,51 +273,6 @@ export default function RouletteGame({
 
       {/* 조작 및 메시지 영역 */}
       <div className="w-full mt-4 space-y-3">
-        {reward && (
-          <div className="flex flex-col items-center animate-in zoom-in duration-500 leading-tight border-t border-gray-800/60 pt-4 mt-2">
-            {reward.amount > 0 ? (
-              <div className="flex flex-col items-center text-center">
-                <div className="w-20 h-20 rounded-full bg-yellow-500/10 border-4 border-yellow-500 flex items-center justify-center text-yellow-500 text-2xl font-black shadow-lg shadow-yellow-500/20">
-                  +{reward.amount}p
-                </div>
-                <h3 className="text-yellow-400 text-sm font-black mt-3">
-                  룰렛 당첨!
-                </h3>
-                <p className="text-gray-300 text-xs font-semibold mt-1">
-                  회전 룰렛에서 <span className="text-yellow-400 font-bold">{reward.label}</span> 보상에 당첨되었습니다!
-                </p>
-                <div className="mt-3">
-                  <a
-                    href={`/community?tab=free&write=true&category=놀이터 인증&title=${encodeURIComponent('회전 룰렛 당첨 인증합니다! 🎉')}&content=${encodeURIComponent(`여우들의 놀이터 [회전 룰렛]에서 ${reward.amount} 포인트를 획득했습니다! 🦊\n\n모두 기 받아가세요!`)}`}
-                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
-                  >
-                    📝 당첨 인증글 쓰기{isPostRewardAvailable ? ' (+50p 적립)' : ''}
-                  </a>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center text-center">
-                <div className="w-20 h-20 rounded-full bg-gray-700/50 border-4 border-gray-600 flex items-center justify-center text-gray-400 text-2xl font-black">
-                  꽝
-                </div>
-                <h3 className="text-gray-400 text-sm font-black mt-3">
-                  아쉽지만 다음 기회에!
-                </h3>
-                <p className="text-gray-300 text-xs mt-1">
-                  꽝에 당첨되었습니다. 내일 다시 도전해 보세요.
-                </p>
-              </div>
-            )}
-            
-            <button
-              onClick={(e) => resetRoulette(e)}
-              className="mt-4 text-xs text-purple-400 hover:text-purple-300 font-bold underline underline-offset-4 relative z-30 cursor-pointer"
-            >
-              다시 하기
-            </button>
-          </div>
-        )}
-
         {error && (
           <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-2xl text-center text-xs font-bold text-red-400">
             ⚠️ {error}
