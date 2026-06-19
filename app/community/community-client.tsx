@@ -56,9 +56,13 @@ export function CommunityClient({
             const prefillTitle = searchParams.get('title') || '';
             const prefillContent = searchParams.get('content') || '';
             const prefillCategory = searchParams.get('category') || '잡담';
+            const prefillImage = searchParams.get('prefillImage') || '';
             
             setWriteTitle(prefillTitle);
             setWriteContent(prefillContent);
+            if (prefillImage) {
+                setWriteImages([prefillImage]);
+            }
             if (prefillCategory === '놀이터 인증') {
                 setPostCategory('놀이터 인증');
             } else {
@@ -100,7 +104,7 @@ export function CommunityClient({
         const file = e.target.files?.[0];
         if (!file) return;
         
-        const maxLimit = isMarketBoard ? 5 : 1;
+        const maxLimit = (isMarketBoard || activeTab === 'free') ? 5 : 1;
         if (writeImages.length >= maxLimit) {
             alert(`이미지는 최대 ${maxLimit}장까지 첨부할 수 있습니다.`);
             return;
@@ -509,7 +513,7 @@ export function CommunityClient({
                                     maxLength={2000}
                                 />
                             </div>
-                            {isMarketBoard && (
+                            {(isMarketBoard || activeTab === 'free') && (
                                 <div className="space-y-2">
                                     <label className="text-[12px] font-bold text-gray-500 block">이미지 첨부 (최대 5장, 선택)</label>
                                     <div className="flex flex-wrap items-center gap-3">
