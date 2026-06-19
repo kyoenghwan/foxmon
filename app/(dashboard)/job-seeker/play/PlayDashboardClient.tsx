@@ -11,6 +11,7 @@ type DailyStatus = {
   roulettePlayed: boolean;
   luckyBoxPlayed: boolean;
   attendancePlayed: boolean;
+  retroPlayed: boolean;
 };
 
 type RetroSlot = {
@@ -39,6 +40,7 @@ export default function PlayDashboardClient() {
     roulettePlayed: false,
     luckyBoxPlayed: false,
     attendancePlayed: false,
+    retroPlayed: false,
   });
   const [retroBoard, setRetroBoard] = useState<RetroBoard | null>(null);
 
@@ -77,9 +79,15 @@ export default function PlayDashboardClient() {
   };
 
   // 추억의 딱지 뽑기 성공 시 콜백
-  const handleRetroPullSuccess = (rewardAmount: number, balanceAfter: number, updatedBoard: RetroBoard) => {
+  const handleRetroPullSuccess = (rewardAmount: number, balanceAfter: number, updatedBoard: RetroBoard, isFree?: boolean) => {
     setActivityPoints(balanceAfter);
     setRetroBoard(updatedBoard);
+    if (isFree) {
+      setDailyStatus((prev) => ({
+        ...prev,
+        retroPlayed: true,
+      }));
+    }
   };
 
   if (loading) {
@@ -177,6 +185,7 @@ export default function PlayDashboardClient() {
             onPullSuccess={handleRetroPullSuccess}
             onRefreshBoard={fetchStatus}
             isPostRewardAvailable={isPostRewardAvailable}
+            isPlayedToday={dailyStatus.retroPlayed}
           />
         )}
       </div>

@@ -3,6 +3,8 @@ import { nvLog } from '@/lib/logger';
 import { GAME_COSTS } from '../../ca/game/CA_GAME_CONFIG';
 import { OA_PULL_RETRO_SLOT, OA_PULL_RETRO_SLOT_ROLLBACK } from '../../oa/game/OA_PULL_RETRO_SLOT';
 import { OA_INITIALIZE_RETRO_BOARD } from '../../oa/game/OA_INITIALIZE_RETRO_BOARD';
+import { QA_GET_DAILY_GAME_STATUS } from '../../qa/game/QA_GET_DAILY_GAME_STATUS';
+import { OA_RECORD_GAME_PARTICIPATION, OA_RECORD_GAME_PARTICIPATION_ROLLBACK } from '../../oa/game/OA_RECORD_GAME_PARTICIPATION';
 import type { AtomErrorCode, StandardResult } from '../../da/common/DA_COMMON_ERROR_TYPES';
 
 export type PullRetroSlotInput = {
@@ -17,6 +19,7 @@ export type PullRetroSlotFlowResult = {
   rewardTier: number;
   newBoardOpened: boolean;
   balanceAfter: number;
+  isFree: boolean;
 };
 
 export async function FA_PULL_RETRO_SLOT_FLOW(
@@ -32,10 +35,22 @@ export async function FA_PULL_RETRO_SLOT_FLOW(
     };
   }
 
-  const cost = GAME_COSTS.RETRO_DRAW;
   const completedOAs: Array<() => Promise<void>> = [];
 
   try {
+    // 0. 오늘 무료 기회 확인
+    const statusResult = await QA_GET_DAILY_GAME_STATUS({ userId: input.userId });
+    if (!statusResult.success || !statusResult.data) {
+      return {
+        success: false,
+        errorCode: statusResult.errorCode || 'INTERNAL_ERROR',
+        message: statusResult.message || '오늘 참여 상태를 확인하는 데 실패했습니다.',
+      };
+    }
+
+    const isFree = !statusResult.data.retroPlayed;
+    const cost = isFree ? 0 : GAME_COSTS.RETRO_DRAW;
+
     // 1. 유저 보유 포인트 조회 및 비용 검증
     const { data: user, error: userErr } = await supabaseAdmin
       .from('users')
@@ -52,7 +67,7 @@ export async function FA_PULL_RETRO_SLOT_FLOW(
     }
 
     let currentBalance = Number(user.activity_points);
-    if (currentBalance < cost) {
+    if (!isFree && currentBalance < cost) {
       return {
         success: false,
         errorCode: 'PERMISSION_DENIED',
@@ -60,34 +75,36 @@ export async function FA_PULL_RETRO_SLOT_FLOW(
       };
     }
 
-    // 2. 포인트 차감
-    const { data: deductRes, error: deductErr } = await supabaseAdmin.rpc('process_activity_point', {
-      p_user_id: input.userId,
-      p_type: 'GAME_COST',
-      p_amount: -cost,
-      p_description: `추억의 뽑기판 ${input.slotNumber}번 딱지 뽑기 차감`,
-    });
-
-    if (deductErr || !deductRes?.success) {
-      nvLog('AT', '❌ FA_PULL_RETRO_SLOT_FLOW 포인트 차감 RPC 에러', { deductErr, deductRes });
-      return {
-        success: false,
-        errorCode: 'INTERNAL_ERROR',
-        message: deductRes?.message || '포인트 차감 처리에 실패했습니다.',
-      };
-    }
-
-    currentBalance = Number(deductRes.balance_after);
-
-    // 롤백 예약: 차감 포인트 복구
-    completedOAs.push(async () => {
-      await supabaseAdmin.rpc('process_activity_point', {
+    // 2. 포인트 차감 (무료가 아닐 때만)
+    if (!isFree && cost > 0) {
+      const { data: deductRes, error: deductErr } = await supabaseAdmin.rpc('process_activity_point', {
         p_user_id: input.userId,
-        p_type: 'ADMIN_ADJUST',
-        p_amount: cost,
-        p_description: `[ROLLBACK] 뽑기 비용 복구 (${input.slotNumber}번)`,
+        p_type: 'GAME_COST',
+        p_amount: -cost,
+        p_description: `추억의 뽑기판 ${input.slotNumber}번 딱지 뽑기 차감`,
       });
-    });
+
+      if (deductErr || !deductRes?.success) {
+        nvLog('AT', '❌ FA_PULL_RETRO_SLOT_FLOW 포인트 차감 RPC 에러', { deductErr, deductRes });
+        return {
+          success: false,
+          errorCode: 'INTERNAL_ERROR',
+          message: deductRes?.message || '포인트 차감 처리에 실패했습니다.',
+        };
+      }
+
+      currentBalance = Number(deductRes.balance_after);
+
+      // 롤백 예약: 차감 포인트 복구
+      completedOAs.push(async () => {
+        await supabaseAdmin.rpc('process_activity_point', {
+          p_user_id: input.userId,
+          p_type: 'ADMIN_ADJUST',
+          p_amount: cost,
+          p_description: `[ROLLBACK] 뽑기 비용 복구 (${input.slotNumber}번)`,
+        });
+      });
+    }
 
     // 3. 딱지 선점 및 당첨 결과 획득 (DB 조건부 업데이트로 동시성 방어)
     const pullResult = await OA_PULL_RETRO_SLOT({
@@ -134,6 +151,24 @@ export async function FA_PULL_RETRO_SLOT_FLOW(
       });
     }
 
+    // 4.5 오늘 무료 기회를 쓴 경우 참여 로그 작성
+    if (isFree) {
+      const logResult = await OA_RECORD_GAME_PARTICIPATION({
+        userId: input.userId,
+        gameType: 'RETRO_DRAW',
+        rewardAmount: rewardAmount,
+      });
+
+      if (!logResult.success) {
+        throw logResult;
+      }
+
+      // 롤백 예약: 참여 로그 삭제
+      completedOAs.push(async () => {
+        await OA_RECORD_GAME_PARTICIPATION_ROLLBACK(logResult.rollbackData);
+      });
+    }
+
     // 5. 완판 여부 확인 및 리셋 트리거
     let newBoardOpened = false;
 
@@ -164,6 +199,7 @@ export async function FA_PULL_RETRO_SLOT_FLOW(
         rewardTier,
         newBoardOpened,
         balanceAfter: currentBalance,
+        isFree,
       },
     };
   } catch (err: any) {

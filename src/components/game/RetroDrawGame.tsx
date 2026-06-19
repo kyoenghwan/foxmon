@@ -22,9 +22,10 @@ interface RetroBoard {
 interface RetroDrawGameProps {
   board: RetroBoard | null;
   activityPoints: number;
-  onPullSuccess: (rewardAmount: number, balanceAfter: number, updatedBoard: RetroBoard) => void;
+  onPullSuccess: (rewardAmount: number, balanceAfter: number, updatedBoard: RetroBoard, isFree?: boolean) => void;
   onRefreshBoard: () => Promise<void>;
   isPostRewardAvailable?: boolean;
+  isPlayedToday?: boolean;
 }
 
 export default function RetroDrawGame({
@@ -33,6 +34,7 @@ export default function RetroDrawGame({
   onPullSuccess,
   onRefreshBoard,
   isPostRewardAvailable = false,
+  isPlayedToday = false,
 }: RetroDrawGameProps) {
   const [pullingSlot, setPullingSlot] = useState<number | null>(null);
   const [result, setResult] = useState<{ amount: number; tier: number } | null>(null);
@@ -83,13 +85,20 @@ export default function RetroDrawGame({
     setError(null);
     setResult(null);
 
-    // 포인트 검증 (1회 200p)
-    if (activityPoints < 200) {
-      setError('포인트가 부족합니다. (뽑기 비용: 200p)');
+    const isFree = !isPlayedToday;
+    const cost = isFree ? 0 : 200;
+
+    // 포인트 검증
+    if (activityPoints < cost) {
+      setError(`포인트가 부족합니다. (뽑기 비용: ${cost}p)`);
       return;
     }
 
-    const confirmPull = confirm(`정말로 ${slotNumber}번 딱지를 뜯으시겠습니까?\n200포인트가 소모됩니다.`);
+    const confirmMsg = isFree
+      ? `정말로 ${slotNumber}번 딱지를 뜯으시겠습니까?\n[오늘 첫 뽑기: 무료 기회 제공]`
+      : `정말로 ${slotNumber}번 딱지를 뜯으시겠습니까?\n(${cost}포인트가 소모됩니다.)`;
+
+    const confirmPull = confirm(confirmMsg);
     if (!confirmPull) return;
 
     setPullingSlot(slotNumber);
@@ -117,7 +126,7 @@ export default function RetroDrawGame({
       const refreshJson = await refreshRes.json();
       
       if (refreshJson.success && refreshJson.retroBoard) {
-        onPullSuccess(rewardAmount, balanceAfter, refreshJson.retroBoard);
+        onPullSuccess(rewardAmount, balanceAfter, refreshJson.retroBoard, isFree);
         
         if (newBoardOpened) {
           alert('🎉 대단합니다! 마지막 딱지를 뜯으셨습니다. 새로운 100개 뽑기판이 개설되었습니다!');
@@ -175,9 +184,15 @@ export default function RetroDrawGame({
           <span className="px-2.5 py-1 bg-yellow-500/10 text-yellow-500 rounded-xl text-[11px] font-black border border-yellow-500/20">
             보유: {activityPoints.toLocaleString()}p
           </span>
-          <span className="px-2.5 py-1 bg-red-500/10 text-red-400 rounded-xl text-[11px] font-black border border-red-500/20">
-            1회: 200p
-          </span>
+          {isPlayedToday ? (
+            <span className="px-2.5 py-1 bg-red-500/10 text-red-400 rounded-xl text-[11px] font-black border border-red-500/20">
+              1회: 200p
+            </span>
+          ) : (
+            <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-xl text-[11px] font-black border border-emerald-500/20 animate-pulse">
+              🎁 첫 회 무료!
+            </span>
+          )}
           <button
             onClick={handleManualRefresh}
             disabled={isRefreshing}
@@ -224,9 +239,9 @@ export default function RetroDrawGame({
         )}
       </div>
 
-      {/* 20x5 격자 보드판 (데스크톱에서는 가로 20열로 세로 높이 압축) */}
+      {/* 10x10 격자 보드판 고정 */}
       <div 
-        className="grid grid-cols-10 md:grid-cols-[repeat(20,minmax(0,1fr))] gap-1 w-full p-2 bg-amber-950/20 border border-amber-900/30 rounded-2xl shadow-inner"
+        className="grid grid-cols-10 gap-1 w-full p-2 bg-amber-950/20 border border-amber-900/30 rounded-2xl shadow-inner"
       >
         {board.slots.map((slot) => {
           const isCurrentPulling = pullingSlot === slot.slotNumber;
@@ -243,11 +258,8 @@ export default function RetroDrawGame({
               } ${isCurrentPulling ? 'rip-animation' : ''}`}
             >
               {slot.isPulled ? (
-                <div className="flex flex-col items-center justify-center p-0.5 scale-90 sm:scale-100 leading-tight">
-                  <span className="text-[6px] md:text-[8px] text-gray-500 truncate max-w-full font-medium">
-                    {slot.userNickname?.slice(0, 3)}
-                  </span>
-                  <span className="text-[6px] md:text-[8px] font-black text-yellow-600/70">
+                <div className="flex flex-col items-center justify-center p-0.5 leading-tight">
+                  <span className="text-[7px] md:text-[9px] font-black text-yellow-600/80">
                     {slot.rewardAmount && slot.rewardAmount > 0 ? `+${slot.rewardAmount}` : '꽝'}
                   </span>
                 </div>

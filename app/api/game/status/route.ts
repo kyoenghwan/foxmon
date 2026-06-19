@@ -33,6 +33,7 @@ export async function GET() {
       roulettePlayed: false,
       luckyBoxPlayed: false,
       lottoPlayed: false,
+      retroPlayed: false,
     };
     let activityPoints = 0;
 

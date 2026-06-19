@@ -6,6 +6,7 @@ export type DailyGameStatus = {
   roulettePlayed: boolean;
   luckyBoxPlayed: boolean;
   attendancePlayed: boolean;
+  retroPlayed: boolean;
 };
 
 export async function QA_GET_DAILY_GAME_STATUS(input: {
@@ -42,7 +43,8 @@ export async function QA_GET_DAILY_GAME_STATUS(input: {
     const status: DailyGameStatus = {
       roulettePlayed: playedTypes.includes('ROULETTE'),
       luckyBoxPlayed: playedTypes.includes('LUCKY_BOX'),
-      attendancePlayed: playedTypes.includes('ATTENDANCE')
+      attendancePlayed: playedTypes.includes('ATTENDANCE'),
+      retroPlayed: playedTypes.includes('RETRO_DRAW')
     };
 
     return {
