@@ -346,10 +346,10 @@ export function SettingsModal() {
             <DialogTrigger asChild>
                 <button 
                     className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl text-gray-600 hover:text-gray-900 transition-all shadow-sm active:scale-95 text-[11px] sm:text-xs font-black cursor-pointer"
-                    title="프로필 정보"
+                    title="마이페이지"
                 >
                     <Settings className="w-3.5 h-3.5" />
-                    <span>프로필 정보</span>
+                    <span>마이페이지</span>
                 </button>
             </DialogTrigger>
             
@@ -362,7 +362,7 @@ export function SettingsModal() {
                 <DialogHeader className="px-5 py-4 flex-shrink-0 bg-white z-10 flex flex-row items-center justify-between">
                     <div>
                         <DialogTitle className="font-extrabold text-lg flex items-center gap-2 text-gray-900">
-                            <User className="w-4 h-4 text-[#F26E22]" /> 프로필 정보
+                            <User className="w-4 h-4 text-[#F26E22]" /> 마이페이지
                         </DialogTitle>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
