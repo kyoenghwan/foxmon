@@ -161,64 +161,24 @@ export default function LuckyBoxGame({
         .box-float-animation {
           animation: box-float 3s ease-in-out infinite;
         }
-        /* 폭죽 파티클 튀어오르는 애니메이션 */
-        @keyframes firework-burst-1 {
-          0% { transform: translate(0, 0) scale(1); opacity: 1; }
-          100% { transform: translate(-35px, -70px) scale(0.3); opacity: 0; }
+        /* 컨페티 떨어지는 애니메이션 */
+        @keyframes confetti-fall {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(120px) rotate(720deg); opacity: 0; }
         }
-        @keyframes firework-burst-2 {
-          0% { transform: translate(0, 0) scale(1); opacity: 1; }
-          100% { transform: translate(30px, -65px) scale(0.4); opacity: 0; }
+        /* 폭죽 줄기 퍼지는 애니메이션 */
+        @keyframes firework-line {
+          0% { transform: scaleY(0); opacity: 1; }
+          50% { transform: scaleY(1); opacity: 1; }
+          100% { transform: scaleY(0.3); opacity: 0; }
         }
-        @keyframes firework-burst-3 {
-          0% { transform: translate(0, 0) scale(1); opacity: 1; }
-          100% { transform: translate(-50px, -40px) scale(0.2); opacity: 0; }
-        }
-        @keyframes firework-burst-4 {
-          0% { transform: translate(0, 0) scale(1); opacity: 1; }
-          100% { transform: translate(45px, -45px) scale(0.3); opacity: 0; }
-        }
-        @keyframes firework-burst-5 {
-          0% { transform: translate(0, 0) scale(1); opacity: 1; }
-          100% { transform: translate(-15px, -80px) scale(0.2); opacity: 0; }
-        }
-        @keyframes firework-burst-6 {
-          0% { transform: translate(0, 0) scale(1); opacity: 1; }
-          100% { transform: translate(20px, -75px) scale(0.3); opacity: 0; }
-        }
-        @keyframes firework-burst-7 {
-          0% { transform: translate(0, 0) scale(1); opacity: 1; }
-          100% { transform: translate(-55px, -55px) scale(0.25); opacity: 0; }
-        }
-        @keyframes firework-burst-8 {
-          0% { transform: translate(0, 0) scale(1); opacity: 1; }
-          100% { transform: translate(55px, -30px) scale(0.35); opacity: 0; }
-        }
-        .firework-p1 { animation: firework-burst-1 1.2s ease-out infinite; }
-        .firework-p2 { animation: firework-burst-2 1.4s ease-out infinite; animation-delay: 0.1s; }
-        .firework-p3 { animation: firework-burst-3 1.1s ease-out infinite; animation-delay: 0.2s; }
-        .firework-p4 { animation: firework-burst-4 1.3s ease-out infinite; animation-delay: 0.05s; }
-        .firework-p5 { animation: firework-burst-5 1.0s ease-out infinite; animation-delay: 0.15s; }
-        .firework-p6 { animation: firework-burst-6 1.5s ease-out infinite; animation-delay: 0.08s; }
-        .firework-p7 { animation: firework-burst-7 1.2s ease-out infinite; animation-delay: 0.25s; }
-        .firework-p8 { animation: firework-burst-8 1.1s ease-out infinite; animation-delay: 0.12s; }
-        @keyframes coin-bounce-in {
-          0% { transform: translateY(20px) scale(0.3); opacity: 0; }
-          50% { transform: translateY(-10px) scale(1.1); opacity: 1; }
-          70% { transform: translateY(3px) scale(0.95); }
-          100% { transform: translateY(0) scale(1); opacity: 1; }
-        }
-        .coin-bounce-in {
-          animation: coin-bounce-in 0.8s ease-out forwards;
-          animation-delay: 0.3s;
-          opacity: 0;
-        }
-        @keyframes glow-pulse {
-          0%, 100% { filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.4)); }
-          50% { filter: drop-shadow(0 0 20px rgba(250, 204, 21, 0.8)); }
-        }
-        .glow-pulse {
-          animation: glow-pulse 2s ease-in-out infinite;
+        /* 컨페티 개별 조각 */
+        .confetti-piece {
+          position: absolute;
+          width: 8px;
+          height: 12px;
+          border-radius: 2px;
+          animation: confetti-fall linear infinite;
         }
       `}</style>
 
@@ -320,42 +280,22 @@ export default function LuckyBoxGame({
                 <path d="M 125,117.5 L 125,197.5 L 135,192.5 L 135,112.5 Z" fill="url(#ribbonGrad)" />
               </g>
 
-              {/* ═══ 상자 열림 연출: 폭죽 파티클 + 당첨 코인 ═══ */}
-              {status === 'opened' && (
+              {/* ═══ 상자 열림: 당첨 코인 (SVG 내부) ═══ */}
+              {status === 'opened' && reward && reward.amount > 0 && (
                 <g>
-                  {/* 폭죽 파티클 - 상자 입구(y=90)에서 위로 튀어나감 */}
-                  <circle cx="100" cy="85" r="5" fill="#ef4444" className="firework-p1" />
-                  <circle cx="100" cy="85" r="4" fill="#facc15" className="firework-p2" />
-                  <circle cx="100" cy="85" r="6" fill="#3b82f6" className="firework-p3" />
-                  <circle cx="100" cy="85" r="3.5" fill="#10b981" className="firework-p4" />
-                  <circle cx="100" cy="85" r="4.5" fill="#ec4899" className="firework-p5" />
-                  <circle cx="100" cy="85" r="5" fill="#f59e0b" className="firework-p6" />
-                  <circle cx="100" cy="85" r="3" fill="#8b5cf6" className="firework-p7" />
-                  <circle cx="100" cy="85" r="4" fill="#06b6d4" className="firework-p8" />
-                  
-                  {/* 작은 별 파티클 */}
-                  <path d="M 95,80 L 96,83 L 99,84 L 96,85 L 95,88 L 94,85 L 91,84 L 94,83 Z" fill="#facc15" className="firework-p1" />
-                  <path d="M 105,82 L 106,84 L 108,85 L 106,86 L 105,88 L 104,86 L 102,85 L 104,84 Z" fill="#ef4444" className="firework-p4" />
-                  <rect x="97" y="82" width="3" height="3" rx="0.5" fill="#10b981" className="firework-p6" transform="rotate(45 98.5 83.5)" />
-                  <rect x="103" y="80" width="2.5" height="2.5" rx="0.5" fill="#ec4899" className="firework-p2" transform="rotate(30 104.25 81.25)" />
-                  <rect x="93" y="78" width="2" height="2" rx="0.3" fill="#8b5cf6" className="firework-p7" transform="rotate(60 94 79)" />
-                  <rect x="108" y="84" width="3" height="3" rx="0.5" fill="#facc15" className="firework-p5" transform="rotate(15 109.5 85.5)" />
-
-                  {/* 당첨 코인 (상자 위에 바운스하며 등장) */}
-                  {reward && reward.amount === 0 && (
-                    <g className="coin-bounce-in">
-                      <circle cx="100" cy="50" r="30" fill="#374151" stroke="#4b5563" strokeWidth="3" filter="url(#boxShadow)" />
-                      <text x="100" y="59" textAnchor="middle" fill="#9ca3af" fontSize="18" fontWeight="900">꽝</text>
-                    </g>
-                  )}
-                  {reward && reward.amount > 0 && (
-                    <g className="coin-bounce-in glow-pulse">
-                      <circle cx="100" cy="50" r="33" fill="#1e1b4b" stroke="#eab308" strokeWidth="3.5" filter="url(#boxShadow)" />
-                      <circle cx="100" cy="50" r="28" fill="none" stroke="#facc15" strokeWidth="1" opacity="0.5" />
-                      <text x="100" y="46" textAnchor="middle" fill="#facc15" fontSize="12" fontWeight="900" letterSpacing="-0.5">당첨</text>
-                      <text x="100" y="62" textAnchor="middle" fill="#ffffff" fontSize="14" fontWeight="900">{reward.amount}P</text>
-                    </g>
-                  )}
+                  {/* 빛 광채 */}
+                  <circle cx="100" cy="45" r="40" fill="url(#goldGrad)" opacity="0.12" />
+                  {/* 당첨 코인 */}
+                  <circle cx="100" cy="45" r="35" fill="#1e1b4b" stroke="#eab308" strokeWidth="3.5" filter="url(#boxShadow)" />
+                  <circle cx="100" cy="45" r="30" fill="none" stroke="#facc15" strokeWidth="1" opacity="0.4" />
+                  <text x="100" y="40" textAnchor="middle" fill="#facc15" fontSize="13" fontWeight="900">당첨</text>
+                  <text x="100" y="58" textAnchor="middle" fill="#ffffff" fontSize="16" fontWeight="900">{reward.amount}P</text>
+                </g>
+              )}
+              {status === 'opened' && reward && reward.amount === 0 && (
+                <g>
+                  <circle cx="100" cy="45" r="35" fill="#374151" stroke="#4b5563" strokeWidth="3" filter="url(#boxShadow)" />
+                  <text x="100" y="54" textAnchor="middle" fill="#9ca3af" fontSize="20" fontWeight="900">꽝</text>
                 </g>
               )}
 
@@ -377,6 +317,53 @@ export default function LuckyBoxGame({
                 </g>
               )}
             </svg>
+
+            {/* ═══ 컨페티/폭죽 오버레이 (HTML - SVG 위에 absolute) ═══ */}
+            {status === 'opened' && (
+              <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+                {/* 색종이 조각들 - 다양한 색상, 크기, 위치, 속도 */}
+                {[
+                  { color: '#ef4444', left: '10%', delay: '0s',    dur: '1.8s', w: 10, h: 6,  rot: 45 },
+                  { color: '#facc15', left: '20%', delay: '0.2s',  dur: '2.2s', w: 8,  h: 14, rot: 120 },
+                  { color: '#3b82f6', left: '30%', delay: '0.5s',  dur: '1.6s', w: 12, h: 5,  rot: 200 },
+                  { color: '#10b981', left: '40%', delay: '0.1s',  dur: '2.0s', w: 7,  h: 12, rot: 75 },
+                  { color: '#ec4899', left: '50%', delay: '0.4s',  dur: '1.9s', w: 9,  h: 9,  rot: 150 },
+                  { color: '#8b5cf6', left: '60%', delay: '0.3s',  dur: '2.1s', w: 11, h: 6,  rot: 30 },
+                  { color: '#f59e0b', left: '70%', delay: '0.6s',  dur: '1.7s', w: 8,  h: 13, rot: 260 },
+                  { color: '#06b6d4', left: '80%', delay: '0.15s', dur: '2.3s', w: 10, h: 7,  rot: 90 },
+                  { color: '#ef4444', left: '15%', delay: '0.35s', dur: '2.0s', w: 6,  h: 10, rot: 310 },
+                  { color: '#facc15', left: '85%', delay: '0.45s', dur: '1.5s', w: 9,  h: 5,  rot: 180 },
+                  { color: '#3b82f6', left: '25%', delay: '0.55s', dur: '2.4s', w: 7,  h: 11, rot: 55 },
+                  { color: '#10b981', left: '55%', delay: '0.25s', dur: '1.8s', w: 12, h: 4,  rot: 140 },
+                  { color: '#ec4899', left: '75%', delay: '0.7s',  dur: '2.0s', w: 8,  h: 8,  rot: 220 },
+                  { color: '#8b5cf6', left: '45%', delay: '0.1s',  dur: '1.6s', w: 10, h: 10, rot: 0 },
+                  { color: '#f59e0b', left: '35%', delay: '0.5s',  dur: '2.2s', w: 6,  h: 14, rot: 290 },
+                  { color: '#06b6d4', left: '65%', delay: '0.8s',  dur: '1.9s', w: 11, h: 5,  rot: 110 },
+                ].map((c, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      position: 'absolute',
+                      left: c.left,
+                      top: '-5%',
+                      width: c.w,
+                      height: c.h,
+                      backgroundColor: c.color,
+                      borderRadius: c.h > c.w ? '3px' : '2px',
+                      transform: `rotate(${c.rot}deg)`,
+                      animation: `confetti-fall ${c.dur} linear infinite`,
+                      animationDelay: c.delay,
+                      opacity: 0.9,
+                    }}
+                  />
+                ))}
+
+                {/* 큰 별 모양 장식 */}
+                <div className="absolute top-[10%] left-[12%] text-2xl animate-ping" style={{ animationDuration: '2s' }}>✨</div>
+                <div className="absolute top-[15%] right-[15%] text-xl animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }}>🎉</div>
+                <div className="absolute top-[5%] left-[45%] text-lg animate-ping" style={{ animationDuration: '3s', animationDelay: '0.6s' }}>🎊</div>
+              </div>
+            )}
 
             {/* 하단 텍스트 및 결과 설명 */}
             {status === 'idle' && (
