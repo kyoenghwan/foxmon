@@ -161,13 +161,64 @@ export default function LuckyBoxGame({
         .box-float-animation {
           animation: box-float 3s ease-in-out infinite;
         }
-        @keyframes sparkle-rotate {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        /* 폭죽 파티클 튀어오르는 애니메이션 */
+        @keyframes firework-burst-1 {
+          0% { transform: translate(0, 0) scale(1); opacity: 1; }
+          100% { transform: translate(-35px, -70px) scale(0.3); opacity: 0; }
         }
-        .sparkle-effect {
-          transform-origin: 100px 95px;
-          animation: sparkle-rotate 15s linear infinite;
+        @keyframes firework-burst-2 {
+          0% { transform: translate(0, 0) scale(1); opacity: 1; }
+          100% { transform: translate(30px, -65px) scale(0.4); opacity: 0; }
+        }
+        @keyframes firework-burst-3 {
+          0% { transform: translate(0, 0) scale(1); opacity: 1; }
+          100% { transform: translate(-50px, -40px) scale(0.2); opacity: 0; }
+        }
+        @keyframes firework-burst-4 {
+          0% { transform: translate(0, 0) scale(1); opacity: 1; }
+          100% { transform: translate(45px, -45px) scale(0.3); opacity: 0; }
+        }
+        @keyframes firework-burst-5 {
+          0% { transform: translate(0, 0) scale(1); opacity: 1; }
+          100% { transform: translate(-15px, -80px) scale(0.2); opacity: 0; }
+        }
+        @keyframes firework-burst-6 {
+          0% { transform: translate(0, 0) scale(1); opacity: 1; }
+          100% { transform: translate(20px, -75px) scale(0.3); opacity: 0; }
+        }
+        @keyframes firework-burst-7 {
+          0% { transform: translate(0, 0) scale(1); opacity: 1; }
+          100% { transform: translate(-55px, -55px) scale(0.25); opacity: 0; }
+        }
+        @keyframes firework-burst-8 {
+          0% { transform: translate(0, 0) scale(1); opacity: 1; }
+          100% { transform: translate(55px, -30px) scale(0.35); opacity: 0; }
+        }
+        .firework-p1 { animation: firework-burst-1 1.2s ease-out infinite; }
+        .firework-p2 { animation: firework-burst-2 1.4s ease-out infinite; animation-delay: 0.1s; }
+        .firework-p3 { animation: firework-burst-3 1.1s ease-out infinite; animation-delay: 0.2s; }
+        .firework-p4 { animation: firework-burst-4 1.3s ease-out infinite; animation-delay: 0.05s; }
+        .firework-p5 { animation: firework-burst-5 1.0s ease-out infinite; animation-delay: 0.15s; }
+        .firework-p6 { animation: firework-burst-6 1.5s ease-out infinite; animation-delay: 0.08s; }
+        .firework-p7 { animation: firework-burst-7 1.2s ease-out infinite; animation-delay: 0.25s; }
+        .firework-p8 { animation: firework-burst-8 1.1s ease-out infinite; animation-delay: 0.12s; }
+        @keyframes coin-bounce-in {
+          0% { transform: translateY(20px) scale(0.3); opacity: 0; }
+          50% { transform: translateY(-10px) scale(1.1); opacity: 1; }
+          70% { transform: translateY(3px) scale(0.95); }
+          100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .coin-bounce-in {
+          animation: coin-bounce-in 0.8s ease-out forwards;
+          animation-delay: 0.3s;
+          opacity: 0;
+        }
+        @keyframes glow-pulse {
+          0%, 100% { filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.4)); }
+          50% { filter: drop-shadow(0 0 20px rgba(250, 204, 21, 0.8)); }
+        }
+        .glow-pulse {
+          animation: glow-pulse 2s ease-in-out infinite;
         }
       `}</style>
 
@@ -255,7 +306,7 @@ export default function LuckyBoxGame({
                 }`} 
               />
 
-              {/* 상자 몸체 (Box Body) - 코인보다 먼저 그려야 코인이 앞에 보임 */}
+              {/* 상자 몸체 (Box Body) */}
               <g className="box-body-group" filter="url(#boxShadow)">
                 {/* 상자 입구 안쪽 어두운 그늘 (열렸을 때 보임) */}
                 <path d="M 100,130 L 30,95 L 100,60 L 170,95 Z" fill="#4a0e0e" opacity="0.9" />
@@ -263,75 +314,68 @@ export default function LuckyBoxGame({
                 <path d="M 100,130 L 30,95 L 30,175 L 100,210 Z" fill="#b71c1c" />
                 {/* 오른쪽 앞면 */}
                 <path d="M 100,130 L 170,95 L 170,175 L 100,210 Z" fill="#d32f2f" />
-                
                 {/* 왼쪽 리본 세로 띠 */}
                 <path d="M 65,112.5 L 65,192.5 L 75,197.5 L 75,117.5 Z" fill="url(#ribbonGrad)" />
                 {/* 오른쪽 리본 세로 띠 */}
                 <path d="M 125,117.5 L 125,197.5 L 135,192.5 L 135,112.5 Z" fill="url(#ribbonGrad)" />
               </g>
 
-              {/* [상자 열림 연출용 콘텐츠] 보상 아이템 / 물음표 - 상자 위에 그려짐 */}
-              <g className={`transition-all duration-700 ease-out origin-center ${
-                status === 'opened' ? 'opacity-100' : 'opacity-0 pointer-events-none'
-              }`}>
-                {/* 보상 뒤의 빛 광채 */}
-                <circle cx="100" cy="55" r="45" fill="url(#goldGrad)" opacity="0.15" className="animate-pulse" />
-                
-                {/* 꽝인 경우 */}
-                {reward && reward.amount === 0 && (
-                  <g>
-                    <circle cx="100" cy="55" r="30" fill="#374151" stroke="#4b5563" strokeWidth="3" filter="url(#boxShadow)" />
-                    <text x="100" y="64" textAnchor="middle" fill="#9ca3af" fontSize="18" fontWeight="900">꽝</text>
-                  </g>
-                )}
-                {/* 당첨인 경우 */}
-                {reward && reward.amount > 0 && (
-                  <g className="sparkle-effect">
-                    {/* 회전하며 반짝이는 효과 */}
-                    <circle cx="100" cy="55" r="32" fill="#1e1b4b" stroke="#eab308" strokeWidth="3" filter="url(#boxShadow)" />
-                    
-                    {/* 반짝이 별 장식 */}
-                    <path d="M 80,35 L 82,40 L 87,41 L 82,42 L 80,47 L 78,42 L 73,41 L 78,40 Z" fill="#eab308" className="animate-ping" style={{ animationDuration: '2s' }} />
-                    <path d="M 120,30 L 121,33 L 124,34 L 121,35 L 120,38 L 119,35 L 116,34 L 119,33 Z" fill="#ffee58" />
-                    <path d="M 125,70 L 126,72 L 128,73 L 126,74 L 125,76 L 124,74 L 122,73 L 124,72 Z" fill="#eab308" />
-                    
-                    <text x="100" y="53" textAnchor="middle" fill="#facc15" fontSize="11" fontWeight="900" letterSpacing="-0.5">당첨!</text>
-                    <text x="100" y="68" textAnchor="middle" fill="#ffffff" fontSize="13" fontWeight="900">{reward.amount}P</text>
-                  </g>
-                )}
-              </g>
+              {/* ═══ 상자 열림 연출: 폭죽 파티클 + 당첨 코인 ═══ */}
+              {status === 'opened' && (
+                <g>
+                  {/* 폭죽 파티클 - 상자 입구(y=90)에서 위로 튀어나감 */}
+                  <circle cx="100" cy="85" r="5" fill="#ef4444" className="firework-p1" />
+                  <circle cx="100" cy="85" r="4" fill="#facc15" className="firework-p2" />
+                  <circle cx="100" cy="85" r="6" fill="#3b82f6" className="firework-p3" />
+                  <circle cx="100" cy="85" r="3.5" fill="#10b981" className="firework-p4" />
+                  <circle cx="100" cy="85" r="4.5" fill="#ec4899" className="firework-p5" />
+                  <circle cx="100" cy="85" r="5" fill="#f59e0b" className="firework-p6" />
+                  <circle cx="100" cy="85" r="3" fill="#8b5cf6" className="firework-p7" />
+                  <circle cx="100" cy="85" r="4" fill="#06b6d4" className="firework-p8" />
+                  
+                  {/* 작은 별 파티클 */}
+                  <path d="M 95,80 L 96,83 L 99,84 L 96,85 L 95,88 L 94,85 L 91,84 L 94,83 Z" fill="#facc15" className="firework-p1" />
+                  <path d="M 105,82 L 106,84 L 108,85 L 106,86 L 105,88 L 104,86 L 102,85 L 104,84 Z" fill="#ef4444" className="firework-p4" />
+                  <rect x="97" y="82" width="3" height="3" rx="0.5" fill="#10b981" className="firework-p6" transform="rotate(45 98.5 83.5)" />
+                  <rect x="103" y="80" width="2.5" height="2.5" rx="0.5" fill="#ec4899" className="firework-p2" transform="rotate(30 104.25 81.25)" />
+                  <rect x="93" y="78" width="2" height="2" rx="0.3" fill="#8b5cf6" className="firework-p7" transform="rotate(60 94 79)" />
+                  <rect x="108" y="84" width="3" height="3" rx="0.5" fill="#facc15" className="firework-p5" transform="rotate(15 109.5 85.5)" />
 
-              {/* 상자 뚜껑 (Box Lid) - 열리면 뒤쪽 위로 기울어져 보임 */}
-              <g className={`box-lid-group origin-center transition-all duration-700 ease-out ${
-                status === 'opened' ? 'pointer-events-none' : ''
-              }`} filter="url(#boxShadow)"
-                style={status === 'opened' ? { transform: 'translate(15px, -55px) rotate(-35deg)', opacity: 0.85 } : undefined}
-              >
-                {/* 뚜껑 윗면 마름모 */}
-                <path d="M 100,55 L 20,88 L 100,121 L 180,88 Z" fill="#e53935" />
-                {/* 뚜껑 왼쪽 옆면 */}
-                <path d="M 20,88 L 100,121 L 100,133 L 20,100 Z" fill="#b71c1c" />
-                {/* 뚜껑 오른쪽 옆면 */}
-                <path d="M 100,121 L 180,88 L 180,100 L 100,133 Z" fill="#c62828" />
+                  {/* 당첨 코인 (상자 위에 바운스하며 등장) */}
+                  {reward && reward.amount === 0 && (
+                    <g className="coin-bounce-in">
+                      <circle cx="100" cy="50" r="30" fill="#374151" stroke="#4b5563" strokeWidth="3" filter="url(#boxShadow)" />
+                      <text x="100" y="59" textAnchor="middle" fill="#9ca3af" fontSize="18" fontWeight="900">꽝</text>
+                    </g>
+                  )}
+                  {reward && reward.amount > 0 && (
+                    <g className="coin-bounce-in glow-pulse">
+                      <circle cx="100" cy="50" r="33" fill="#1e1b4b" stroke="#eab308" strokeWidth="3.5" filter="url(#boxShadow)" />
+                      <circle cx="100" cy="50" r="28" fill="none" stroke="#facc15" strokeWidth="1" opacity="0.5" />
+                      <text x="100" y="46" textAnchor="middle" fill="#facc15" fontSize="12" fontWeight="900" letterSpacing="-0.5">당첨</text>
+                      <text x="100" y="62" textAnchor="middle" fill="#ffffff" fontSize="14" fontWeight="900">{reward.amount}P</text>
+                    </g>
+                  )}
+                </g>
+              )}
 
-                {/* 뚜껑 윗면 리본 십자 띠 */}
-                <path d="M 60,71.5 L 140,104.5 L 150,100.5 L 70,67.5 Z" fill="url(#ribbonGrad)" />
-                <path d="M 140,71.5 L 60,104.5 L 50,100.5 L 130,67.5 Z" fill="url(#ribbonGrad)" />
-
-                {/* 뚜껑 왼쪽 옆면 리본 세로 띠 */}
-                <path d="M 56,103 L 56,115 L 66,119 L 66,107 Z" fill="url(#ribbonGrad)" />
-                {/* 뚜껑 오른쪽 옆면 리본 세로 띠 */}
-                <path d="M 134,107 L 134,119 L 144,115 L 144,103 Z" fill="url(#ribbonGrad)" />
-
-                {/* 리본 매듭 (Top Bow) */}
-                <path d="M 100,55 C 80,35 65,45 85,52 C 95,55.5 100,55 100,55 Z" fill="url(#ribbonGrad)" stroke="#f57f17" strokeWidth="1" />
-                <path d="M 100,55 C 120,35 135,45 115,52 C 105,55.5 100,55 100,55 Z" fill="url(#ribbonGrad)" stroke="#f57f17" strokeWidth="1" />
-                <circle cx="100" cy="55" r="7" fill="url(#ribbonGrad)" stroke="#e65100" strokeWidth="1.5" />
-                
-                {/* 흘러내리는 끈 */}
-                <path d="M 96,57 C 85,63 75,75 80,80 C 82,82 85,78 82,75 C 79,72 88,63 96,57 Z" fill="url(#ribbonGrad)" />
-                <path d="M 104,57 C 115,63 125,75 120,80 C 118,82 115,78 118,75 C 121,72 112,63 104,57 Z" fill="url(#ribbonGrad)" />
-              </g>
+              {/* 상자 뚜껑 (닫힌 상태에서만 표시) */}
+              {status !== 'opened' && (
+                <g className="box-lid-group" filter="url(#boxShadow)">
+                  <path d="M 100,55 L 20,88 L 100,121 L 180,88 Z" fill="#e53935" />
+                  <path d="M 20,88 L 100,121 L 100,133 L 20,100 Z" fill="#b71c1c" />
+                  <path d="M 100,121 L 180,88 L 180,100 L 100,133 Z" fill="#c62828" />
+                  <path d="M 60,71.5 L 140,104.5 L 150,100.5 L 70,67.5 Z" fill="url(#ribbonGrad)" />
+                  <path d="M 140,71.5 L 60,104.5 L 50,100.5 L 130,67.5 Z" fill="url(#ribbonGrad)" />
+                  <path d="M 56,103 L 56,115 L 66,119 L 66,107 Z" fill="url(#ribbonGrad)" />
+                  <path d="M 134,107 L 134,119 L 144,115 L 144,103 Z" fill="url(#ribbonGrad)" />
+                  <path d="M 100,55 C 80,35 65,45 85,52 C 95,55.5 100,55 100,55 Z" fill="url(#ribbonGrad)" stroke="#f57f17" strokeWidth="1" />
+                  <path d="M 100,55 C 120,35 135,45 115,52 C 105,55.5 100,55 100,55 Z" fill="url(#ribbonGrad)" stroke="#f57f17" strokeWidth="1" />
+                  <circle cx="100" cy="55" r="7" fill="url(#ribbonGrad)" stroke="#e65100" strokeWidth="1.5" />
+                  <path d="M 96,57 C 85,63 75,75 80,80 C 82,82 85,78 82,75 C 79,72 88,63 96,57 Z" fill="url(#ribbonGrad)" />
+                  <path d="M 104,57 C 115,63 125,75 120,80 C 118,82 115,78 118,75 C 121,72 112,63 104,57 Z" fill="url(#ribbonGrad)" />
+                </g>
+              )}
             </svg>
 
             {/* 하단 텍스트 및 결과 설명 */}

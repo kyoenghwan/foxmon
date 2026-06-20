@@ -196,39 +196,36 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
           {/* 바닥 그림자 */}
           <ellipse cx="100" cy="205" rx="60" ry="12" fill="#000" opacity="0.2" className="scale-90" />
 
-          {/* 보상 코인 (열린 상태) */}
-          <g className="translate-y-[-50px] opacity-100 scale-110" style={{ transform: 'translateY(-50px)', opacity: 1 }}>
-            <circle cx="100" cy="95" r="45" fill="url(#goldGrad2)" opacity="0.15" />
-            <circle cx="100" cy="95" r="32" fill="#1e1b4b" stroke="#eab308" strokeWidth="3" filter="url(#boxShadow2)" />
-            {/* 반짝이 별 장식 */}
-            <path d="M 80,75 L 82,80 L 87,81 L 82,82 L 80,87 L 78,82 L 73,81 L 78,80 Z" fill="#eab308" />
-            <path d="M 120,70 L 121,73 L 124,74 L 121,75 L 120,78 L 119,75 L 116,74 L 119,73 Z" fill="#ffee58" />
-            <path d="M 125,110 L 126,112 L 128,113 L 126,114 L 125,116 L 124,114 L 122,113 L 124,112 Z" fill="#eab308" />
-            <text x="100" y="93" textAnchor="middle" fill="#facc15" fontSize="11" fontWeight="900" letterSpacing="-0.5">당첨!</text>
-            <text x="100" y="108" textAnchor="middle" fill="#ffffff" fontSize="13" fontWeight="900">{amount}P</text>
-          </g>
-
-          {/* 상자 몸체 (열린 상태) */}
+          {/* 상자 몸체 (열린 상태 - 뚜껑 없음) */}
           <g filter="url(#boxShadow2)">
+            <path d="M 100,130 L 30,95 L 100,60 L 170,95 Z" fill="#4a0e0e" opacity="0.9" />
             <path d="M 100,130 L 30,95 L 30,175 L 100,210 Z" fill="#b71c1c" />
             <path d="M 100,130 L 170,95 L 170,175 L 100,210 Z" fill="#d32f2f" />
             <path d="M 65,112.5 L 65,192.5 L 75,197.5 L 75,117.5 Z" fill="url(#ribbonGrad2)" />
             <path d="M 125,117.5 L 125,197.5 L 135,192.5 L 135,112.5 Z" fill="url(#ribbonGrad2)" />
-            <path d="M 100,130 L 30,95 L 100,60 L 170,95 Z" fill="#4a0e0e" opacity="0.9" />
           </g>
 
-          {/* 뚜껑 (열린 상태 - 위로 떠오름) */}
-          <g style={{ transform: 'translateY(-90px) rotate(-15deg)', opacity: 0.15 }} filter="url(#boxShadow2)">
-            <path d="M 100,55 L 20,88 L 100,121 L 180,88 Z" fill="#e53935" />
-            <path d="M 20,88 L 100,121 L 100,133 L 20,100 Z" fill="#b71c1c" />
-            <path d="M 100,121 L 180,88 L 180,100 L 100,133 Z" fill="#c62828" />
-            <path d="M 60,71.5 L 140,104.5 L 150,100.5 L 70,67.5 Z" fill="url(#ribbonGrad2)" />
-            <path d="M 140,71.5 L 60,104.5 L 50,100.5 L 130,67.5 Z" fill="url(#ribbonGrad2)" />
-            <path d="M 56,103 L 56,115 L 66,119 L 66,107 Z" fill="url(#ribbonGrad2)" />
-            <path d="M 134,107 L 134,119 L 144,115 L 144,103 Z" fill="url(#ribbonGrad2)" />
-            <path d="M 100,55 C 80,35 65,45 85,52 C 95,55.5 100,55 100,55 Z" fill="url(#ribbonGrad2)" stroke="#f57f17" strokeWidth="1" />
-            <path d="M 100,55 C 120,35 135,45 115,52 C 105,55.5 100,55 100,55 Z" fill="url(#ribbonGrad2)" stroke="#f57f17" strokeWidth="1" />
-            <circle cx="100" cy="55" r="7" fill="url(#ribbonGrad2)" stroke="#e65100" strokeWidth="1.5" />
+          {/* 폭죽 파티클 (정적 - 상자에서 위로 퍼져나감) */}
+          <circle cx="65" cy="40" r="5" fill="#ef4444" opacity="0.9" />
+          <circle cx="140" cy="35" r="4" fill="#facc15" opacity="0.85" />
+          <circle cx="50" cy="60" r="6" fill="#3b82f6" opacity="0.8" />
+          <circle cx="155" cy="55" r="3.5" fill="#10b981" opacity="0.9" />
+          <circle cx="80" cy="20" r="4.5" fill="#ec4899" opacity="0.85" />
+          <circle cx="125" cy="25" r="5" fill="#f59e0b" opacity="0.9" />
+          <circle cx="45" cy="75" r="3" fill="#8b5cf6" opacity="0.8" />
+          <circle cx="160" cy="70" r="4" fill="#06b6d4" opacity="0.85" />
+          {/* 별 모양 파티클 */}
+          <path d="M 70,30 L 72,35 L 77,36 L 72,37 L 70,42 L 68,37 L 63,36 L 68,35 Z" fill="#facc15" opacity="0.9" />
+          <path d="M 135,45 L 136,48 L 139,49 L 136,50 L 135,53 L 134,50 L 131,49 L 134,48 Z" fill="#ef4444" opacity="0.85" />
+          <rect x="55" y="50" width="4" height="4" rx="0.5" fill="#10b981" opacity="0.8" transform="rotate(45 57 52)" />
+          <rect x="145" y="48" width="3" height="3" rx="0.5" fill="#ec4899" opacity="0.85" transform="rotate(30 146.5 49.5)" />
+
+          {/* 당첨 코인 (상자 위에 표시) */}
+          <g>
+            <circle cx="100" cy="50" r="33" fill="#1e1b4b" stroke="#eab308" strokeWidth="3.5" filter="url(#boxShadow2)" />
+            <circle cx="100" cy="50" r="28" fill="none" stroke="#facc15" strokeWidth="1" opacity="0.5" />
+            <text x="100" y="46" textAnchor="middle" fill="#facc15" fontSize="12" fontWeight="900" letterSpacing="-0.5">당첨</text>
+            <text x="100" y="62" textAnchor="middle" fill="#ffffff" fontSize="14" fontWeight="900">{amount}P</text>
           </g>
         </svg>
 
