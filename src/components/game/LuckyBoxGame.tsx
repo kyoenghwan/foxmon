@@ -255,39 +255,10 @@ export default function LuckyBoxGame({
                 }`} 
               />
 
-              {/* [상자 열림 연출용 콘텐츠] 보상 아이템 / 물음표 */}
-              <g className={`transition-all duration-700 ease-out origin-center ${
-                status === 'opened' ? 'translate-y-[-50px] opacity-100 scale-110' : 'translate-y-[20px] opacity-0 scale-50 pointer-events-none'
-              }`}>
-                {/* 보상 뒤의 빛 광채 */}
-                <circle cx="100" cy="95" r="45" fill="url(#goldGrad)" opacity="0.15" className="animate-pulse" />
-                
-                {/* 꽝인 경우 */}
-                {reward && reward.amount === 0 && (
-                  <g>
-                    <circle cx="100" cy="95" r="30" fill="#374151" stroke="#4b5563" strokeWidth="3" filter="url(#boxShadow)" />
-                    <text x="100" y="104" textAnchor="middle" fill="#9ca3af" fontSize="18" fontWeight="900">꽝</text>
-                  </g>
-                )}
-                {/* 당첨인 경우 */}
-                {reward && reward.amount > 0 && (
-                  <g className="sparkle-effect">
-                    {/* 회전하며 반짝이는 효과 */}
-                    <circle cx="100" cy="95" r="32" fill="#1e1b4b" stroke="#eab308" strokeWidth="3" filter="url(#boxShadow)" />
-                    
-                    {/* 반짝이 별 장식 */}
-                    <path d="M 80,75 L 82,80 L 87,81 L 82,82 L 80,87 L 78,82 L 73,81 L 78,80 Z" fill="#eab308" className="animate-ping" style={{ animationDuration: '2s' }} />
-                    <path d="M 120,70 L 121,73 L 124,74 L 121,75 L 120,78 L 119,75 L 116,74 L 119,73 Z" fill="#ffee58" />
-                    <path d="M 125,110 L 126,112 L 128,113 L 126,114 L 125,116 L 124,114 L 122,113 L 124,112 Z" fill="#eab308" />
-                    
-                    <text x="100" y="93" textAnchor="middle" fill="#facc15" fontSize="11" fontWeight="900" letterSpacing="-0.5">당첨!</text>
-                    <text x="100" y="108" textAnchor="middle" fill="#ffffff" fontSize="13" fontWeight="900">{reward.amount}P</text>
-                  </g>
-                )}
-              </g>
-
-              {/* 상자 몸체 (Box Body) */}
+              {/* 상자 몸체 (Box Body) - 코인보다 먼저 그려야 코인이 앞에 보임 */}
               <g className="box-body-group" filter="url(#boxShadow)">
+                {/* 상자 입구 안쪽 어두운 그늘 (열렸을 때 보임) */}
+                <path d="M 100,130 L 30,95 L 100,60 L 170,95 Z" fill="#4a0e0e" opacity="0.9" />
                 {/* 왼쪽 앞면 */}
                 <path d="M 100,130 L 30,95 L 30,175 L 100,210 Z" fill="#b71c1c" />
                 {/* 오른쪽 앞면 */}
@@ -297,15 +268,45 @@ export default function LuckyBoxGame({
                 <path d="M 65,112.5 L 65,192.5 L 75,197.5 L 75,117.5 Z" fill="url(#ribbonGrad)" />
                 {/* 오른쪽 리본 세로 띠 */}
                 <path d="M 125,117.5 L 125,197.5 L 135,192.5 L 135,112.5 Z" fill="url(#ribbonGrad)" />
-                
-                {/* 상자 입구 안쪽 어두운 그늘 (열렸을 때 보임) */}
-                <path d="M 100,130 L 30,95 L 100,60 L 170,95 Z" fill="#4a0e0e" opacity="0.9" />
               </g>
 
-              {/* 상자 뚜껑 (Box Lid) */}
+              {/* [상자 열림 연출용 콘텐츠] 보상 아이템 / 물음표 - 상자 위에 그려짐 */}
+              <g className={`transition-all duration-700 ease-out origin-center ${
+                status === 'opened' ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}>
+                {/* 보상 뒤의 빛 광채 */}
+                <circle cx="100" cy="55" r="45" fill="url(#goldGrad)" opacity="0.15" className="animate-pulse" />
+                
+                {/* 꽝인 경우 */}
+                {reward && reward.amount === 0 && (
+                  <g>
+                    <circle cx="100" cy="55" r="30" fill="#374151" stroke="#4b5563" strokeWidth="3" filter="url(#boxShadow)" />
+                    <text x="100" y="64" textAnchor="middle" fill="#9ca3af" fontSize="18" fontWeight="900">꽝</text>
+                  </g>
+                )}
+                {/* 당첨인 경우 */}
+                {reward && reward.amount > 0 && (
+                  <g className="sparkle-effect">
+                    {/* 회전하며 반짝이는 효과 */}
+                    <circle cx="100" cy="55" r="32" fill="#1e1b4b" stroke="#eab308" strokeWidth="3" filter="url(#boxShadow)" />
+                    
+                    {/* 반짝이 별 장식 */}
+                    <path d="M 80,35 L 82,40 L 87,41 L 82,42 L 80,47 L 78,42 L 73,41 L 78,40 Z" fill="#eab308" className="animate-ping" style={{ animationDuration: '2s' }} />
+                    <path d="M 120,30 L 121,33 L 124,34 L 121,35 L 120,38 L 119,35 L 116,34 L 119,33 Z" fill="#ffee58" />
+                    <path d="M 125,70 L 126,72 L 128,73 L 126,74 L 125,76 L 124,74 L 122,73 L 124,72 Z" fill="#eab308" />
+                    
+                    <text x="100" y="53" textAnchor="middle" fill="#facc15" fontSize="11" fontWeight="900" letterSpacing="-0.5">당첨!</text>
+                    <text x="100" y="68" textAnchor="middle" fill="#ffffff" fontSize="13" fontWeight="900">{reward.amount}P</text>
+                  </g>
+                )}
+              </g>
+
+              {/* 상자 뚜껑 (Box Lid) - 열리면 뒤쪽 위로 기울어져 보임 */}
               <g className={`box-lid-group origin-center transition-all duration-700 ease-out ${
-                status === 'opened' ? 'translate-y-[-90px] rotate-[-15deg] opacity-0 scale-90 pointer-events-none' : ''
-              }`} filter="url(#boxShadow)">
+                status === 'opened' ? 'pointer-events-none' : ''
+              }`} filter="url(#boxShadow)"
+                style={status === 'opened' ? { transform: 'translate(15px, -55px) rotate(-35deg)', opacity: 0.85 } : undefined}
+              >
                 {/* 뚜껑 윗면 마름모 */}
                 <path d="M 100,55 L 20,88 L 100,121 L 180,88 Z" fill="#e53935" />
                 {/* 뚜껑 왼쪽 옆면 */}
