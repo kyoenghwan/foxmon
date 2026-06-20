@@ -46,7 +46,7 @@ export default function LuckyBoxGame({
     }
     setIsCertSubmitting(true);
     try {
-      const bannerImg = '/images/playground/luckybox_win_banner.png';
+      const bannerImg = `/images/playground/luckybox_win_banner_${reward?.amount ?? 10}.png`;
       const res = await createCommunityPost({
         board_id: 'free',
         title: `[놀이터 인증] ${certTitle.trim()}`,
@@ -266,7 +266,7 @@ export default function LuckyBoxGame({
                 {reward && reward.amount === 0 && (
                   <g>
                     <circle cx="100" cy="95" r="30" fill="#374151" stroke="#4b5563" strokeWidth="3" filter="url(#boxShadow)" />
-                    <text x="100" y="104" textAnchor="middle" fill="#9ca3af" fontSize="24" fontWeight="900">?</text>
+                    <text x="100" y="104" textAnchor="middle" fill="#9ca3af" fontSize="18" fontWeight="900">꽝</text>
                   </g>
                 )}
                 {/* 당첨인 경우 */}
@@ -428,7 +428,7 @@ export default function LuckyBoxGame({
             <div>
               <span className="text-[10px] text-gray-500 font-bold mb-1 block">자동 첨부 이미지</span>
               <div className="w-full h-28 rounded-xl overflow-hidden border border-gray-800 bg-gray-950 flex items-center justify-center">
-                <img src="/images/playground/luckybox_win_banner.png" alt="인증 배너" className="max-w-full max-h-full object-contain" />
+                <img src={`/images/playground/luckybox_win_banner_${reward?.amount ?? 10}.png`} alt="인증 배너" className="max-w-full max-h-full object-contain" />
               </div>
             </div>
 

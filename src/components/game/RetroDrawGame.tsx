@@ -1,10 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Loader2, HelpCircle } from 'lucide-react';
+import { Loader2, HelpCircle, Clock } from 'lucide-react';
 import { createCommunityPost } from '@/lib/actions/community';
+
+// 종이뽑기 마감 시각 (KST 23:55)
+const CLOSING_HOUR = 23;
+const CLOSING_MINUTE = 55;
 
 interface RetroSlot {
   id: string;
@@ -88,6 +92,56 @@ export default function RetroDrawGame({
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // 마감시간 관련 상태
+  const [isClosed, setIsClosed] = useState(false);
+  const [timeLeftStr, setTimeLeftStr] = useState('');
+  const [currentDateStr, setCurrentDateStr] = useState('');
+
+  // KST 현재 시각 유틸
+  const getKSTNow = useCallback(() => {
+    const kstOffset = 9 * 60 * 60 * 1000;
+    return new Date(Date.now() + kstOffset);
+  }, []);
+
+  // 마감시간 체크 및 카운트다운 (매 초 업데이트)
+  useEffect(() => {
+    const checkTime = () => {
+      const nowKst = getKSTNow();
+      const h = nowKst.getUTCHours();
+      const m = nowKst.getUTCMinutes();
+      const s = nowKst.getUTCSeconds();
+
+      const todayStr = nowKst.toISOString().split('T')[0];
+
+      // 마감 여부 판정: 23:55 이후
+      const pastClosing = h > CLOSING_HOUR || (h === CLOSING_HOUR && m >= CLOSING_MINUTE);
+      setIsClosed(pastClosing);
+
+      // 날짜가 변경되면 보드를 새로고침 (자정 리셋)
+      if (currentDateStr && currentDateStr !== todayStr) {
+        onRefreshBoard();
+      }
+      setCurrentDateStr(todayStr);
+
+      // 남은 시간 계산
+      if (!pastClosing) {
+        const closingTotalSec = CLOSING_HOUR * 3600 + CLOSING_MINUTE * 60;
+        const nowTotalSec = h * 3600 + m * 60 + s;
+        const remainSec = closingTotalSec - nowTotalSec;
+        const rH = Math.floor(remainSec / 3600);
+        const rM = Math.floor((remainSec % 3600) / 60);
+        const rS = remainSec % 60;
+        setTimeLeftStr(`${String(rH).padStart(2, '0')}:${String(rM).padStart(2, '0')}:${String(rS).padStart(2, '0')}`);
+      } else {
+        setTimeLeftStr('마감');
+      }
+    };
+
+    checkTime();
+    const timerId = setInterval(checkTime, 1000);
+    return () => clearInterval(timerId);
+  }, [getKSTNow, currentDateStr, onRefreshBoard]);
+
   // 1초 주기로 실시간 보드판 상태를 동기화 (유저가 슬롯을 뜯고 있는 상태가 아닐 때만 백그라운드 갱신)
   useEffect(() => {
     let intervalId: any;
@@ -131,6 +185,12 @@ export default function RetroDrawGame({
     if (pullingSlot !== null) return;
     setError(null);
     setResult(null);
+
+    // 마감시간 체크 (KST 23:55 이후 뽑기 차단)
+    if (isClosed) {
+      setError('오늘의 뽑기 시간이 마감되었습니다. (23:55 마감) 내일 00:00에 다시 시작됩니다!');
+      return;
+    }
 
     const isFree = !isPlayedToday;
     const cost = isFree ? 0 : 200;
@@ -231,6 +291,14 @@ export default function RetroDrawGame({
           <p className="text-gray-400 text-[11px] mt-0.5">
             원하는 슬롯을 눌러 딱지를 뜯어보세요. (동시 당첨 차단/실시간 연동 완료)
           </p>
+          <div className={`flex items-center gap-1.5 mt-1 text-[10px] font-bold ${isClosed ? 'text-red-400' : 'text-cyan-400'}`}>
+            <Clock className="w-3 h-3" />
+            {isClosed ? (
+              <span>🔒 오늘 마감됨 (23:55) — 내일 00:00에 리셋됩니다</span>
+            ) : (
+              <span>마감까지 {timeLeftStr} 남음 (매일 23:55 마감)</span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
