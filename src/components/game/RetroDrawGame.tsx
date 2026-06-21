@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Loader2, HelpCircle, Clock } from 'lucide-react';
 import { createCommunityPost } from '@/lib/actions/community';
 
-// 종이뽑기 마감 시각 (KST 23:55)
+// 종이뽑기 마감 시각 (KST 23:50)
 const CLOSING_HOUR = 23;
-const CLOSING_MINUTE = 55;
+const CLOSING_MINUTE = 50;
 
 interface RetroSlot {
   id: string;
@@ -113,8 +113,8 @@ export default function RetroDrawGame({
 
       const todayStr = nowKst.toISOString().split('T')[0];
 
-      // 마감 여부 판정: 23:55 이후
-      const pastClosing = h > CLOSING_HOUR || (h === CLOSING_HOUR && m >= CLOSING_MINUTE);
+      // 마감 및 점검 여부 판정: 23:50 ~ 00:10 차단
+      const pastClosing = (h === 23 && m >= 50) || (h === 0 && m < 10);
       setIsClosed(pastClosing);
 
       // 날짜가 변경되면 보드를 새로고침 (자정 리셋)
@@ -127,7 +127,11 @@ export default function RetroDrawGame({
       if (!pastClosing) {
         const closingTotalSec = CLOSING_HOUR * 3600 + CLOSING_MINUTE * 60;
         const nowTotalSec = h * 3600 + m * 60 + s;
-        const remainSec = closingTotalSec - nowTotalSec;
+        // 만약 00:10 ~ 23:49 사이일 경우 남은 시간 계산
+        let remainSec = closingTotalSec - nowTotalSec;
+        if (remainSec < 0) {
+          remainSec = 0;
+        }
         const rH = Math.floor(remainSec / 3600);
         const rM = Math.floor((remainSec % 3600) / 60);
         const rS = remainSec % 60;
@@ -186,9 +190,9 @@ export default function RetroDrawGame({
     setError(null);
     setResult(null);
 
-    // 마감시간 체크 (KST 23:55 이후 뽑기 차단)
+    // 마감시간 체크 (23:50 ~ 00:10 차단)
     if (isClosed) {
-      setError('오늘의 뽑기 시간이 마감되었습니다. (23:55 마감) 내일 00:00에 다시 시작됩니다!');
+      setError('오늘의 뽑기 시간이 마감되었습니다. (23:50 ~ 00:10 마감) 매일 00:10에 다시 시작됩니다!');
       return;
     }
 
@@ -294,9 +298,9 @@ export default function RetroDrawGame({
           <div className={`flex items-center gap-1.5 mt-1 text-[10px] font-bold ${isClosed ? 'text-red-400' : 'text-cyan-400'}`}>
             <Clock className="w-3 h-3" />
             {isClosed ? (
-              <span>🔒 오늘 마감됨 (23:55) — 내일 00:00에 리셋됩니다</span>
+              <span>🔒 점검 및 마감 시간 (23:50 ~ 00:10) — 00:10부터 시작됩니다</span>
             ) : (
-              <span>마감까지 {timeLeftStr} 남음 (매일 23:55 마감)</span>
+              <span>마감까지 {timeLeftStr} 남음 (매일 23:50 마감)</span>
             )}
           </div>
         </div>

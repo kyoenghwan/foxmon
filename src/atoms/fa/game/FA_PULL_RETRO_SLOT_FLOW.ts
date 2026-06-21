@@ -38,16 +38,16 @@ export async function FA_PULL_RETRO_SLOT_FLOW(
   const completedOAs: Array<() => Promise<void>> = [];
 
   try {
-    // 0-1. 마감시간 서버 측 검증 (KST 23:55 ~ 23:59 뽑기 차단)
+    // 0-1. 마감시간 서버 측 검증 (23:50 ~ 00:10 뽑기 차단)
     const kstOffset = 9 * 60 * 60 * 1000;
     const nowKst = new Date(Date.now() + kstOffset);
     const h = nowKst.getUTCHours();
     const m = nowKst.getUTCMinutes();
-    if (h === 23 && m >= 55) {
+    if ((h === 23 && m >= 50) || (h === 0 && m < 10)) {
       return {
         success: false,
         errorCode: 'PERMISSION_DENIED' as AtomErrorCode,
-        message: '오늘의 뽑기 시간이 마감되었습니다. (23:55 마감) 내일 00:00에 다시 시작됩니다!',
+        message: '오늘의 뽑기 시간이 마감되었습니다. (23:50 ~ 00:10 마감) 매일 00:10에 다시 시작됩니다!',
       };
     }
 
