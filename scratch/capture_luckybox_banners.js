@@ -22,7 +22,7 @@ const path = require('path');
   await page.waitForTimeout(3000);
   console.log('Login completed.');
 
-  const amounts = [10, 50, 100, 500, 1000];
+  const amounts = [10, 30, 50, 100, 500, 1000];
 
   for (const amount of amounts) {
     const url = `http://localhost:3000/render-banners?type=luckybox&amount=${amount}`;

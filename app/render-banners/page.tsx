@@ -463,6 +463,17 @@ function BannerRouter() {
 export default function RenderBannersPage() {
   return (
     <Suspense fallback={<div className="text-white">Loading...</div>}>
+      {/* 개발용 Next.js 배지 및 포탈 강제 숨김 스타일 (모든 배너 유형 공통 차단) */}
+      <style jsx global>{`
+        nextjs-portal, 
+        #nextjs-dev-indicator,
+        [data-nextjs-dialog-overlay] {
+          display: none !important;
+          visibility: hidden !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+      `}</style>
       <BannerRouter />
     </Suspense>
   );

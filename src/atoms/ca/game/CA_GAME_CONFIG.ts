@@ -21,8 +21,8 @@ export const ROULETTE_REWARDS: GameRewardItem[] = [
 ];
 
 export const LUCKY_BOX_REWARDS: GameRewardItem[] = [
-  { amount: 0, weight: 25, label: '꽝' },
-  { amount: 10, weight: 45, label: '10p' },
+  { amount: 10, weight: 40, label: '10p' },
+  { amount: 30, weight: 30, label: '30p' },
   { amount: 50, weight: 18, label: '50p' },
   { amount: 100, weight: 8, label: '100p' },
   { amount: 500, weight: 3, label: '500p' },
