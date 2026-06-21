@@ -6,40 +6,56 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Gift } from 'lucide-react';
 import { createCommunityPost } from '@/lib/actions/community';
 
-const CONFETTI_COUNT = 32;
+const CONFETTI_COUNT = 45;
 const CONFETTI_PIECES = Array.from({ length: CONFETTI_COUNT }).map((_, i) => {
-  // -165도 ~ -15도 사이에서 균등 분할하여 부채꼴 모양으로 위를 향하도록 각도 정의
-  const minAngle = -165;
-  const maxAngle = -15;
-  const angleDeg = minAngle + ((maxAngle - minAngle) / (CONFETTI_COUNT - 1)) * i + (Math.random() * 12 - 6);
+  const minAngle = -170;
+  const maxAngle = -10;
+  const angleDeg = minAngle + ((maxAngle - minAngle) / (CONFETTI_COUNT - 1)) * i + (Math.random() * 10 - 5);
   const angleRad = (angleDeg * Math.PI) / 180;
   
-  // 날아가는 거리: 110px ~ 240px
-  const distance = 110 + Math.random() * 130;
+  const distance = 120 + Math.random() * 160;
   
-  // 최종 도달 x, y 좌표
   const tx = Math.cos(angleRad) * distance;
   const ty = Math.sin(angleRad) * distance;
   
-  // 초반 솟구치는 단계 (15% 시점)의 x, y 좌표
   const tx15 = Math.cos(angleRad) * (distance * 0.25);
   const ty15 = Math.sin(angleRad) * (distance * 0.25);
 
   const colors = [
-    '#ef4444', '#facc15', '#3b82f6', '#10b981', '#ec4899', 
-    '#8b5cf6', '#f59e0b', '#06b6d4', '#ff7043', '#26a69a',
-    '#ffee58', '#ff4081', '#00e676', '#2979ff', '#d500f9'
+    '#ff2a6d', '#05d9e8', '#01012b', '#f5a623', '#f8e71c', 
+    '#7ed321', '#b8e986', '#bd10e0', '#9013fe', '#4a90e2',
+    '#ff4081', '#00e676', '#2979ff', '#ffee58', '#ff3d00'
   ];
   const color = colors[i % colors.length];
   
-  const w = 5 + Math.floor(Math.random() * 6); // 5px ~ 10px
-  const h = 5 + Math.floor(Math.random() * 11); // 5px ~ 15px
+  const rand = Math.random();
+  let type = 'rect';
+  let w = 6;
+  let h = 6;
+  if (rand < 0.3) {
+    type = 'rect';
+    w = 5 + Math.floor(Math.random() * 6);
+    h = 5 + Math.floor(Math.random() * 10);
+  } else if (rand < 0.55) {
+    type = 'circle';
+    w = 6 + Math.floor(Math.random() * 6);
+    h = w;
+  } else if (rand < 0.8) {
+    type = 'streamer';
+    w = 8 + Math.floor(Math.random() * 4);
+    h = 24 + Math.floor(Math.random() * 12);
+  } else {
+    type = 'star';
+    w = 10 + Math.floor(Math.random() * 6);
+    h = w;
+  }
   
-  const dur = 1.2 + Math.random() * 0.8; // 1.2s ~ 2.0s
-  const delay = Math.random() * 1.5; // 0s ~ 1.5s
+  const dur = 1.3 + Math.random() * 0.9;
+  const delay = Math.random() * 1.8;
   const rotEnd = (Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 720);
 
   return {
+    type,
     color,
     w,
     h,
@@ -332,24 +348,7 @@ export default function LuckyBoxGame({
                 <path d="M 125,117.5 L 125,197.5 L 135,192.5 L 135,112.5 Z" fill="url(#ribbonGrad)" />
               </g>
 
-              {/* ═══ 상자 열림: 당첨 코인 (SVG 내부) ═══ */}
-              {status === 'opened' && reward && reward.amount > 0 && (
-                <g>
-                  {/* 빛 광채 */}
-                  <circle cx="100" cy="45" r="40" fill="url(#goldGrad)" opacity="0.12" />
-                  {/* 당첨 코인 */}
-                  <circle cx="100" cy="45" r="35" fill="#1e1b4b" stroke="#eab308" strokeWidth="3.5" filter="url(#boxShadow)" />
-                  <circle cx="100" cy="45" r="30" fill="none" stroke="#facc15" strokeWidth="1" opacity="0.4" />
-                  <text x="100" y="40" textAnchor="middle" fill="#facc15" fontSize="13" fontWeight="900">당첨</text>
-                  <text x="100" y="58" textAnchor="middle" fill="#ffffff" fontSize="16" fontWeight="900">{reward.amount}P</text>
-                </g>
-              )}
-              {status === 'opened' && reward && reward.amount === 0 && (
-                <g>
-                  <circle cx="100" cy="45" r="35" fill="#374151" stroke="#4b5563" strokeWidth="3" filter="url(#boxShadow)" />
-                  <text x="100" y="54" textAnchor="middle" fill="#9ca3af" fontSize="20" fontWeight="900">꽝</text>
-                </g>
-              )}
+
 
               {/* 상자 뚜껑 (닫힌 상태에서만 표시) */}
               {status !== 'opened' && (
@@ -370,7 +369,7 @@ export default function LuckyBoxGame({
               )}
             </svg>
 
-            {/* ═══ 컨페티/폭죽 오버레이 (HTML - SVG 위에 absolute) ═══ */}
+            {/* ═══ 컨페티/폭죽 오버레이 (HTML - SVG 위에 absolute, z-index: 10) ═══ */}
             {status === 'opened' && (
               <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
                 {/* 색종이 조각들 - 상자 중심에서 뿜어져 나오는 부채꼴 폭죽 */}
@@ -383,8 +382,6 @@ export default function LuckyBoxGame({
                       top: '42%',
                       width: c.w,
                       height: c.h,
-                      backgroundColor: c.color,
-                      borderRadius: c.h > c.w ? '3px' : '2px',
                       // 커스텀 CSS 변수를 전달하여 transform에 사용
                       '--tx': `${c.tx}px`,
                       '--ty': `${c.ty}px`,
@@ -395,8 +392,56 @@ export default function LuckyBoxGame({
                       animationDelay: c.delay,
                       opacity: 0,
                     } as React.CSSProperties}
-                  />
+                  >
+                    {/* 타입별 렌더링 분기 */}
+                    {c.type === 'streamer' && (
+                      <svg viewBox="0 0 10 30" className="w-full h-full">
+                        <path
+                          d="M 5,0 Q 9,5 5,10 Q 1,15 5,20 Q 9,25 5,30"
+                          fill="none"
+                          stroke={c.color}
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    )}
+                    {c.type === 'star' && (
+                      <svg viewBox="0 0 24 24" className="w-full h-full" style={{ fill: c.color }}>
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                      </svg>
+                    )}
+                    {(c.type === 'rect' || c.type === 'circle') && (
+                      <div
+                        className="w-full h-full"
+                        style={{
+                          backgroundColor: c.color,
+                          borderRadius: c.type === 'circle' ? '50%' : '2px',
+                        }}
+                      />
+                    )}
+                  </div>
                 ))}
+              </div>
+            )}
+
+            {/* ═══ 상자 열림: 당첨 코인 (HTML 오버레이 - z-index: 20으로 폭죽보다 위) ═══ */}
+            {status === 'opened' && reward && (
+              <div 
+                className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center justify-center animate-in zoom-in duration-300"
+                style={{
+                  top: '10%', // 상자 바로 위에 둥실 떠오르도록 Y축 설정
+                }}
+              >
+                {reward.amount > 0 ? (
+                  <div className="w-[74px] h-[74px] rounded-full bg-gradient-to-b from-yellow-300 to-yellow-600 border-[3.5px] border-yellow-500 shadow-[0_10px_25px_rgba(0,0,0,0.85),_0_0_20px_rgba(234,179,8,0.45)] flex flex-col items-center justify-center bg-[#1e1b4b]">
+                    <span className="text-yellow-400 font-extrabold text-[11px] leading-tight drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.8)]">당첨</span>
+                    <span className="text-white font-black text-[15px] leading-tight drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.8)]">{reward.amount}P</span>
+                  </div>
+                ) : (
+                  <div className="w-[70px] h-[70px] rounded-full bg-gray-700 border-[3px] border-gray-600 shadow-[0_10px_25px_rgba(0,0,0,0.8)] flex items-center justify-center">
+                    <span className="text-gray-400 font-black text-[18px]">꽝</span>
+                  </div>
+                )}
               </div>
             )}
 

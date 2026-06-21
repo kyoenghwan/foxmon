@@ -227,6 +227,12 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
           <path d="M 52,40 L 53,42.5 L 56,43 L 53,43.8 L 52,46.5 L 51,43.8 L 48,43 L 51,42.5 Z" fill="#00e676" opacity="0.9" />
           <path d="M 150,30 L 151,32.5 L 154,33 L 151,33.8 L 150,36.5 L 149,33.8 L 146,33 L 149,32.5 Z" fill="#ffee58" opacity="0.9" />
 
+          {/* 나선형 스트리머 (구불구불 리본) 파티클 */}
+          <path d="M 65,30 Q 72,35 67,40 Q 62,45 68,50" fill="none" stroke="#bd10e0" strokeWidth="2" strokeLinecap="round" opacity="0.9" />
+          <path d="M 130,25 Q 123,32 132,40 Q 140,48 128,55" fill="none" stroke="#05d9e8" strokeWidth="2.2" strokeLinecap="round" opacity="0.9" />
+          <path d="M 155,45 Q 148,50 152,58 Q 158,66 150,72" fill="none" stroke="#ff4081" strokeWidth="2" strokeLinecap="round" opacity="0.85" />
+          <path d="M 45,55 Q 52,60 48,68 Q 42,76 50,82" fill="none" stroke="#f5a623" strokeWidth="2" strokeLinecap="round" opacity="0.85" />
+
           {/* 사각형/리본 조각 파티클 */}
           <rect x="55" y="50" width="4.5" height="4.5" rx="0.5" fill="#10b981" opacity="0.85" transform="rotate(45 57.25 52.25)" />
           <rect x="145" y="48" width="4.5" height="4.5" rx="0.5" fill="#ec4899" opacity="0.85" transform="rotate(30 147.25 50.25)" />
@@ -234,15 +240,20 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
           <rect x="120" y="50" width="6" height="6" rx="0.5" fill="#ff7043" opacity="0.85" transform="rotate(75 123 53)" />
           <rect x="38" y="65" width="5" height="3" rx="0.5" fill="#06b6d4" opacity="0.8" transform="rotate(60 40.5 66.5)" />
           <rect x="162" y="60" width="3" height="5" rx="0.5" fill="#facc15" opacity="0.8" transform="rotate(120 163.5 62.5)" />
-
-          {/* 당첨 코인 (상자 위에 표시) */}
-          <g>
-            <circle cx="100" cy="50" r="33" fill="#1e1b4b" stroke="#eab308" strokeWidth="3.5" filter="url(#boxShadow2)" />
-            <circle cx="100" cy="50" r="28" fill="none" stroke="#facc15" strokeWidth="1" opacity="0.5" />
-            <text x="100" y="46" textAnchor="middle" fill="#facc15" fontSize="12" fontWeight="900" letterSpacing="-0.5">당첨</text>
-            <text x="100" y="62" textAnchor="middle" fill="#ffffff" fontSize="14" fontWeight="900">{amount}P</text>
-          </g>
         </svg>
+
+        {/* ═══ 당첨 코인 (HTML 오버레이 - z-index: 20으로 폭죽보다 위) ═══ */}
+        <div 
+          className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center justify-center"
+          style={{
+            top: '72px', // 상자 입구 윗부분(Y=50)에 맞춘 수직 좌표
+          }}
+        >
+          <div className="w-[74px] h-[74px] rounded-full bg-gradient-to-b from-yellow-300 to-yellow-600 border-[3.5px] border-yellow-500 shadow-[0_10px_25px_rgba(0,0,0,0.85),_0_0_20px_rgba(234,179,8,0.45)] flex flex-col items-center justify-center bg-[#1e1b4b]">
+            <span className="text-yellow-400 font-extrabold text-[11px] leading-tight drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.8)]">당첨</span>
+            <span className="text-white font-black text-[15px] leading-tight drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.8)]">{rewardLabel}</span>
+          </div>
+        </div>
 
         {/* 스파클링 광원 효과 */}
         <div className="absolute z-20 top-[100px] left-[50px] w-3 h-3 bg-yellow-200 rounded-full blur-[3px] animate-pulse"></div>
