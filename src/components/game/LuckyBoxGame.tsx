@@ -299,87 +299,23 @@ export default function LuckyBoxGame({
             } ${status === 'shaking' ? 'box-shake-animation' : ''}`}
             onClick={status === 'idle' ? handleOpenBox : undefined}
           >
-            {/* SVG 입체 상자 */}
-            <svg viewBox="0 0 200 240" className="w-48 h-56 select-none relative overflow-visible mt-8">
-              <defs>
-                {/* 리본 그라데이션 (빨간색/핑크색) */}
-                <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ff6b8b" stopOpacity={1} />
-                  <stop offset="50%" stopColor="#e83e8c" stopOpacity={1} />
-                  <stop offset="100%" stopColor="#b80f3b" stopOpacity={1} />
-                </linearGradient>
-                
-                {/* 금빛/노란색 그라데이션 (보상용) */}
-                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#ffee58" />
-                  <stop offset="100%" stopColor="#fbc02d" />
-                </linearGradient>
-
-                {/* 그림자 필터 */}
-                <filter id="boxShadow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="6" stdDeviation="4" floodColor="#000" floodOpacity="0.4" />
-                </filter>
-              </defs>
-
-              {/* 바닥 그림자 */}
-              <ellipse 
-                cx="100" 
-                cy="205" 
-                rx="60" 
-                ry="12" 
-                fill="#000" 
-                opacity="0.3" 
-                className={`transition-all duration-700 ${
-                  status === 'opened' ? 'scale-90 opacity-20' : ''
-                }`} 
+            {/* 선물 상자 이미지 (SVG 대체) */}
+            <div className="relative w-44 h-48 select-none overflow-visible mt-6">
+              {/* 상자 몸통 (항상 표시) */}
+              <img 
+                src="/images/playground/random_box_bottom.png" 
+                alt="상자 몸통" 
+                className="absolute inset-0 w-full h-full object-contain z-0" 
               />
-
-              {/* 상자 몸체 (Box Body) */}
-              <g className="box-body-group" filter="url(#boxShadow)">
-                {/* 상자 입구 안쪽 어두운 그늘 (열렸을 때 보임) */}
-                <path d="M 100,130 L 30,95 L 100,60 L 170,95 Z" fill="#3e2723" opacity="0.9" />
-                {/* 왼쪽 앞면 - 어두운 금색 */}
-                <path d="M 100,130 L 30,95 L 30,175 L 100,210 Z" fill="#d19b00" />
-                {/* 오른쪽 앞면 - 밝은 금색 */}
-                <path d="M 100,130 L 170,95 L 170,175 L 100,210 Z" fill="#f3c623" />
-                {/* 왼쪽 리본 세로 띠 */}
-                <path d="M 65,112.5 L 65,192.5 L 75,197.5 L 75,117.5 Z" fill="url(#ribbonGrad)" />
-                {/* 오른쪽 리본 세로 띠 */}
-                <path d="M 125,117.5 L 125,197.5 L 135,192.5 L 135,112.5 Z" fill="url(#ribbonGrad)" />
-              </g>
-
-
-
-              {/* 상자 뚜껑 (닫힌 상태에서만 표시) */}
+              {/* 상자 뚜껑 (열리지 않았을 때만 표시) */}
               {status !== 'opened' && (
-                <g className="box-lid-group" filter="url(#boxShadow)">
-                  {/* 뚜껑 윗면 - 밝은 노랑 */}
-                  <path d="M 100,55 L 20,88 L 100,121 L 180,88 Z" fill="#fdd835" />
-                  {/* 뚜껑 왼쪽 단면 - 어두운 금색 */}
-                  <path d="M 20,88 L 100,121 L 100,133 L 20,100 Z" fill="#d19b00" />
-                  {/* 뚜껑 오른쪽 단면 - 중간 금색 */}
-                  <path d="M 100,121 L 180,88 L 180,100 L 100,133 Z" fill="#f3c623" />
-                  <path d="M 60,71.5 L 140,104.5 L 150,100.5 L 70,67.5 Z" fill="url(#ribbonGrad)" />
-                  <path d="M 140,71.5 L 60,104.5 L 50,100.5 L 130,67.5 Z" fill="url(#ribbonGrad)" />
-                  <path d="M 56,103 L 56,115 L 66,119 L 66,107 Z" fill="url(#ribbonGrad)" />
-                  <path d="M 134,107 L 134,119 L 144,115 L 144,103 Z" fill="url(#ribbonGrad)" />
-                  {/* 2번 이미지 스타일의 통통하고 빵빵한 볼륨 리본 매듭 (꼬리 제거) */}
-                  {/* 왼쪽 큰 리본 고리 (볼륨감 극대화) */}
-                  <path d="M 90,75 C 65,38 42,52 58,80 C 68,95 82,88 90,78 Z" fill="url(#ribbonGrad)" stroke="#920a2b" strokeWidth="1.5" />
-                  {/* 왼쪽 리본 구멍 음영 */}
-                  <path d="M 85,73 C 74,60 62,68 70,80 C 76,86 82,81 85,73 Z" fill="#6b031b" opacity="0.8" />
-
-                  {/* 오른쪽 큰 리본 고리 (볼륨감 극대화) */}
-                  <path d="M 110,75 C 135,38 158,52 142,80 C 132,95 118,88 110,78 Z" fill="url(#ribbonGrad)" stroke="#920a2b" strokeWidth="1.5" />
-                  {/* 오른쪽 리본 구멍 음영 */}
-                  <path d="M 115,73 C 126,60 138,68 130,80 C 124,86 118,81 115,73 Z" fill="#6b031b" opacity="0.8" />
-
-                  {/* 중앙 매듭 가로 밴드 */}
-                  <rect x="88" y="65" width="24" height="18" rx="8" fill="url(#ribbonGrad)" stroke="#920a2b" strokeWidth="1.8" />
-                  <ellipse cx="100" cy="74" rx="10" ry="7" fill="none" stroke="#ff8da1" strokeWidth="0.8" opacity="0.5" />
-                </g>
+                <img 
+                  src="/images/playground/random_box_top.png" 
+                  alt="상자 뚜껑" 
+                  className="absolute inset-0 w-full h-full object-contain z-10 animate-in fade-in duration-300" 
+                />
               )}
-            </svg>
+            </div>
 
             {/* ═══ 컨페티/폭죽 오버레이 (HTML - SVG 위에 absolute, z-index: 10) ═══ */}
             {status === 'opened' && (

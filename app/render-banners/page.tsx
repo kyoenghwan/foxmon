@@ -176,35 +176,18 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         {/* 아우라 빛 효과 */}
         <div className="absolute w-52 h-52 rounded-full bg-yellow-500/15 blur-3xl" />
 
-        {/* SVG 열린 선물 상자 + 당첨금 코인 */}
-        <svg viewBox="0 0 200 240" className="w-56 h-64 select-none relative overflow-visible" style={{ position: 'absolute', top: '40px' }}>
-          <defs>
-            <linearGradient id="ribbonGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ff6b8b" stopOpacity={1} />
-              <stop offset="50%" stopColor="#e83e8c" stopOpacity={1} />
-              <stop offset="100%" stopColor="#b80f3b" stopOpacity={1} />
-            </linearGradient>
-            <linearGradient id="goldGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#ffee58" />
-              <stop offset="100%" stopColor="#fbc02d" />
-            </linearGradient>
-            <filter id="boxShadow2" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="6" stdDeviation="4" floodColor="#000" floodOpacity="0.4" />
-            </filter>
-          </defs>
+        {/* 선물 상자 이미지 (HTML) */}
+        <div className="relative w-48 h-52 select-none overflow-visible z-0" style={{ position: 'absolute', top: '50px' }}>
+          {/* 상자 몸통 (열린 상태 배너이므로 몸통만 표시) */}
+          <img 
+            src="/images/playground/random_box_bottom.png" 
+            alt="상자 몸통" 
+            className="absolute inset-0 w-full h-full object-contain" 
+          />
+        </div>
 
-          {/* 바닥 그림자 */}
-          <ellipse cx="100" cy="205" rx="60" ry="12" fill="#000" opacity="0.2" className="scale-90" />
-
-          {/* 상자 몸체 (열린 상태 - 뚜껑 없음) */}
-          <g filter="url(#boxShadow2)">
-            <path d="M 100,130 L 30,95 L 100,60 L 170,95 Z" fill="#3e2723" opacity="0.9" />
-            <path d="M 100,130 L 30,95 L 30,175 L 100,210 Z" fill="#d19b00" />
-            <path d="M 100,130 L 170,95 L 170,175 L 100,210 Z" fill="#f3c623" />
-            <path d="M 65,112.5 L 65,192.5 L 75,197.5 L 75,117.5 Z" fill="url(#ribbonGrad2)" />
-            <path d="M 125,117.5 L 125,197.5 L 135,192.5 L 135,112.5 Z" fill="url(#ribbonGrad2)" />
-          </g>
-
+        {/* 폭죽 파티클 (정적 - SVG로 겹쳐 그림) */}
+        <svg viewBox="0 0 200 240" className="w-56 h-64 select-none relative overflow-visible z-10 pointer-events-none" style={{ position: 'absolute', top: '40px' }}>
           {/* 폭죽 파티클 (정적 - 상자에서 위로 사방 부채꼴로 퍼져나감, 크기 상향 조정) */}
           {/* 원형 파티클 */}
           <circle cx="65" cy="40" r="8" fill="#ef4444" opacity="0.9" />
