@@ -180,9 +180,9 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         <svg viewBox="0 0 200 240" className="w-56 h-64 select-none relative overflow-visible" style={{ position: 'absolute', top: '40px' }}>
           <defs>
             <linearGradient id="ribbonGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ffee58" stopOpacity={1} />
-              <stop offset="50%" stopColor="#fbc02d" stopOpacity={1} />
-              <stop offset="100%" stopColor="#f57f17" stopOpacity={1} />
+              <stop offset="0%" stopColor="#ff6b8b" stopOpacity={1} />
+              <stop offset="50%" stopColor="#e83e8c" stopOpacity={1} />
+              <stop offset="100%" stopColor="#b80f3b" stopOpacity={1} />
             </linearGradient>
             <linearGradient id="goldGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#ffee58" />
@@ -198,9 +198,9 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
 
           {/* 상자 몸체 (열린 상태 - 뚜껑 없음) */}
           <g filter="url(#boxShadow2)">
-            <path d="M 100,130 L 30,95 L 100,60 L 170,95 Z" fill="#4a0e0e" opacity="0.9" />
-            <path d="M 100,130 L 30,95 L 30,175 L 100,210 Z" fill="#b71c1c" />
-            <path d="M 100,130 L 170,95 L 170,175 L 100,210 Z" fill="#d32f2f" />
+            <path d="M 100,130 L 30,95 L 100,60 L 170,95 Z" fill="#3e2723" opacity="0.9" />
+            <path d="M 100,130 L 30,95 L 30,175 L 100,210 Z" fill="#d19b00" />
+            <path d="M 100,130 L 170,95 L 170,175 L 100,210 Z" fill="#f3c623" />
             <path d="M 65,112.5 L 65,192.5 L 75,197.5 L 75,117.5 Z" fill="url(#ribbonGrad2)" />
             <path d="M 125,117.5 L 125,197.5 L 135,192.5 L 135,112.5 Z" fill="url(#ribbonGrad2)" />
           </g>

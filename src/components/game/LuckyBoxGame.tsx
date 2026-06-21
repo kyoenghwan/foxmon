@@ -302,11 +302,11 @@ export default function LuckyBoxGame({
             {/* SVG 입체 상자 */}
             <svg viewBox="0 0 200 240" className="w-48 h-56 select-none relative overflow-visible mt-8">
               <defs>
-                {/* 리본 그라데이션 */}
+                {/* 리본 그라데이션 (빨간색/핑크색) */}
                 <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ffee58" stopOpacity={1} />
-                  <stop offset="50%" stopColor="#fbc02d" stopOpacity={1} />
-                  <stop offset="100%" stopColor="#f57f17" stopOpacity={1} />
+                  <stop offset="0%" stopColor="#ff6b8b" stopOpacity={1} />
+                  <stop offset="50%" stopColor="#e83e8c" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#b80f3b" stopOpacity={1} />
                 </linearGradient>
                 
                 {/* 금빛/노란색 그라데이션 (보상용) */}
@@ -337,11 +337,11 @@ export default function LuckyBoxGame({
               {/* 상자 몸체 (Box Body) */}
               <g className="box-body-group" filter="url(#boxShadow)">
                 {/* 상자 입구 안쪽 어두운 그늘 (열렸을 때 보임) */}
-                <path d="M 100,130 L 30,95 L 100,60 L 170,95 Z" fill="#4a0e0e" opacity="0.9" />
-                {/* 왼쪽 앞면 */}
-                <path d="M 100,130 L 30,95 L 30,175 L 100,210 Z" fill="#b71c1c" />
-                {/* 오른쪽 앞면 */}
-                <path d="M 100,130 L 170,95 L 170,175 L 100,210 Z" fill="#d32f2f" />
+                <path d="M 100,130 L 30,95 L 100,60 L 170,95 Z" fill="#3e2723" opacity="0.9" />
+                {/* 왼쪽 앞면 - 어두운 금색 */}
+                <path d="M 100,130 L 30,95 L 30,175 L 100,210 Z" fill="#d19b00" />
+                {/* 오른쪽 앞면 - 밝은 금색 */}
+                <path d="M 100,130 L 170,95 L 170,175 L 100,210 Z" fill="#f3c623" />
                 {/* 왼쪽 리본 세로 띠 */}
                 <path d="M 65,112.5 L 65,192.5 L 75,197.5 L 75,117.5 Z" fill="url(#ribbonGrad)" />
                 {/* 오른쪽 리본 세로 띠 */}
@@ -353,26 +353,29 @@ export default function LuckyBoxGame({
               {/* 상자 뚜껑 (닫힌 상태에서만 표시) */}
               {status !== 'opened' && (
                 <g className="box-lid-group" filter="url(#boxShadow)">
-                  <path d="M 100,55 L 20,88 L 100,121 L 180,88 Z" fill="#e53935" />
-                  <path d="M 20,88 L 100,121 L 100,133 L 20,100 Z" fill="#b71c1c" />
-                  <path d="M 100,121 L 180,88 L 180,100 L 100,133 Z" fill="#c62828" />
+                  {/* 뚜껑 윗면 - 밝은 노랑 */}
+                  <path d="M 100,55 L 20,88 L 100,121 L 180,88 Z" fill="#fdd835" />
+                  {/* 뚜껑 왼쪽 단면 - 어두운 금색 */}
+                  <path d="M 20,88 L 100,121 L 100,133 L 20,100 Z" fill="#d19b00" />
+                  {/* 뚜껑 오른쪽 단면 - 중간 금색 */}
+                  <path d="M 100,121 L 180,88 L 180,100 L 100,133 Z" fill="#f3c623" />
                   <path d="M 60,71.5 L 140,104.5 L 150,100.5 L 70,67.5 Z" fill="url(#ribbonGrad)" />
                   <path d="M 140,71.5 L 60,104.5 L 50,100.5 L 130,67.5 Z" fill="url(#ribbonGrad)" />
                   <path d="M 56,103 L 56,115 L 66,119 L 66,107 Z" fill="url(#ribbonGrad)" />
                   <path d="M 134,107 L 134,119 L 144,115 L 144,103 Z" fill="url(#ribbonGrad)" />
                   {/* 개선된 큼직하고 풍성한 나비 리본 매듭 */}
                   {/* 왼쪽 리본 꼬리 (넓은 리본 끈 형태) */}
-                  <path d="M 95,57 L 70,82 L 78,85 L 85,78 L 98,58 Z" fill="url(#ribbonGrad)" stroke="#e65100" strokeWidth="1" />
+                  <path d="M 95,57 L 70,82 L 78,85 L 85,78 L 98,58 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1" />
                   {/* 오른쪽 리본 꼬리 (넓은 리본 끈 형태) */}
-                  <path d="M 105,57 L 130,82 L 122,85 L 115,78 L 102,58 Z" fill="url(#ribbonGrad)" stroke="#e65100" strokeWidth="1" />
+                  <path d="M 105,57 L 130,82 L 122,85 L 115,78 L 102,58 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1" />
                   
                   {/* 왼쪽 리본 큰 고리 */}
-                  <path d="M 100,55 C 80,25 55,35 75,52 C 85,60 95,56 100,55 Z" fill="url(#ribbonGrad)" stroke="#f57f17" strokeWidth="1.2" />
+                  <path d="M 100,55 C 80,25 55,35 75,52 C 85,60 95,56 100,55 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.2" />
                   {/* 오른쪽 리본 큰 고리 */}
-                  <path d="M 100,55 C 120,25 145,35 125,52 C 115,60 105,56 100,55 Z" fill="url(#ribbonGrad)" stroke="#f57f17" strokeWidth="1.2" />
+                  <path d="M 100,55 C 120,25 145,35 125,52 C 115,60 105,56 100,55 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.2" />
                   
                   {/* 중앙 매듭 구슬 */}
-                  <circle cx="100" cy="55" r="9" fill="url(#ribbonGrad)" stroke="#e65100" strokeWidth="1.8" />
+                  <circle cx="100" cy="55" r="9" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.8" />
                 </g>
               )}
             </svg>
