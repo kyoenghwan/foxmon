@@ -435,8 +435,8 @@ function RetroDrawBanner({ amount }: { amount: number }) {
         <div className="absolute z-25 top-[90px] left-[60px] w-2.5 h-2.5 bg-yellow-200 rounded-full blur-[2px] animate-pulse"></div>
         <div className="absolute z-25 top-[80px] right-[60px] w-2.5 h-2.5 bg-pink-200 rounded-full blur-[2px] animate-pulse"></div>
         
-        {/* 축하 배너 카드 (z-index: 30) */}
-        <BannerCard gameLabel="종이뽑기" rewardLabel={rewardLabel} className="z-[30] translate-y-[50px]" />
+        {/* 축하 배너 카드 (z-index: 30, 당첨 딱지가 가려지지 않도록 아래로 75px 하향 이동) */}
+        <BannerCard gameLabel="종이뽑기" rewardLabel={rewardLabel} className="z-[30] translate-y-[75px]" />
       </div>
     </div>
   );
