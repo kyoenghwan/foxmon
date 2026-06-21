@@ -225,7 +225,7 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         <div 
           className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center justify-center"
           style={{
-            top: '96px', // 72px -> 96px 로 하향 조정하여 상자 높이와 맞춤
+            top: '48px', // 박스 입구 바로 위로 올림
           }}
         >
           <div className="w-[74px] h-[74px] rounded-full bg-gradient-to-b from-yellow-300 to-yellow-600 border-[3.5px] border-yellow-500 shadow-[0_10px_25px_rgba(0,0,0,0.85),_0_0_20px_rgba(234,179,8,0.45)] flex flex-col items-center justify-center bg-[#1e1b4b]">

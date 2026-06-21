@@ -382,7 +382,7 @@ export default function LuckyBoxGame({
               <div 
                 className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center justify-center animate-in zoom-in duration-300"
                 style={{
-                  top: '20%', // 상자 바로 위에 둥실 떠오르도록 Y축 설정
+                  top: '2%', // 상자 바로 위에 둥실 떠오르도록 Y축 설정
                 }}
               >
                 {reward.amount > 0 ? (
