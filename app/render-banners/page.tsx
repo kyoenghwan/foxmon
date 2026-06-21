@@ -55,9 +55,9 @@ function useCaptureCleanup(rootRef: React.RefObject<HTMLDivElement | null>) {
 // ═══════════════════════════════════════
 // 공통 배너 카드 플레이트 (축하 텍스트)
 // ═══════════════════════════════════════
-function BannerCard({ gameLabel, rewardLabel }: { gameLabel: string; rewardLabel: string }) {
+function BannerCard({ gameLabel, rewardLabel, className }: { gameLabel: string; rewardLabel: string; className?: string }) {
   return (
-    <div className="absolute z-30 w-[370px] h-[160px] rounded-2xl bg-gradient-to-br from-[#24123a] via-[#140a22] to-[#24123a] border-[3px] border-yellow-600/40 shadow-[0_12px_30px_rgba(0,0,0,0.85),_0_0_20px_rgba(217,119,6,0.2)] flex flex-col items-center justify-center p-3">
+    <div className={`absolute z-30 w-[370px] h-[160px] rounded-2xl bg-gradient-to-br from-[#24123a] via-[#140a22] to-[#24123a] border-[3px] border-yellow-600/40 shadow-[0_12px_30px_rgba(0,0,0,0.85),_0_0_20px_rgba(217,119,6,0.2)] flex flex-col items-center justify-center p-3 ${className || ''}`}>
       
       {/* 금색 테두리 장식 프레임 (SVG) */}
       <div className="absolute inset-1.5 pointer-events-none">
@@ -177,7 +177,7 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         <div className="absolute w-52 h-52 rounded-full bg-yellow-500/15 blur-3xl" />
 
         {/* 선물 상자 이미지 (HTML) */}
-        <div className="relative w-48 h-52 select-none overflow-visible z-0" style={{ position: 'absolute', top: '50px' }}>
+        <div className="relative w-48 h-52 select-none overflow-visible z-0" style={{ position: 'absolute', top: '30px' }}>
           {/* 상자 몸통 (열린 상태 배너이므로 몸통만 표시) */}
           <img 
             src="/images/playground/random_box_bottom.png" 
@@ -187,7 +187,7 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         </div>
 
         {/* 폭죽 파티클 (정적 - SVG로 겹쳐 그림) */}
-        <svg viewBox="0 0 200 240" className="w-56 h-64 select-none relative overflow-visible z-10 pointer-events-none" style={{ position: 'absolute', top: '40px' }}>
+        <svg viewBox="0 0 200 240" className="w-56 h-64 select-none relative overflow-visible z-10 pointer-events-none" style={{ position: 'absolute', top: '20px' }}>
           {/* 폭죽 파티클 (정적 - 상자에서 위로 사방 부채꼴로 퍼져나감, 크기 상향 조정) */}
           {/* 원형 파티클 */}
           <circle cx="65" cy="40" r="8" fill="#ef4444" opacity="0.9" />
@@ -225,7 +225,7 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         <div 
           className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center justify-center"
           style={{
-            top: '48px', // 박스 입구 바로 위로 올림
+            top: '25px', // 박스 입구 바로 위로 올림
           }}
         >
           <div className="w-[74px] h-[74px] rounded-full bg-gradient-to-b from-yellow-300 to-yellow-600 border-[3.5px] border-yellow-500 shadow-[0_10px_25px_rgba(0,0,0,0.85),_0_0_20px_rgba(234,179,8,0.45)] flex flex-col items-center justify-center bg-[#1e1b4b]">
@@ -240,7 +240,7 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         <div className="absolute z-20 top-[60px] left-[140px] w-2 h-2 bg-amber-300 rounded-full blur-[2px] animate-pulse"></div>
 
         {/* 축하 배너 카드 */}
-        <BannerCard gameLabel="랜덤박스" rewardLabel={rewardLabel} />
+        <BannerCard gameLabel="랜덤박스" rewardLabel={rewardLabel} className="bottom-[15px] h-[140px]" />
       </div>
     </div>
   );
