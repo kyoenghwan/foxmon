@@ -255,16 +255,69 @@ function RetroDrawBanner({ amount }: { amount: number }) {
 
   const rewardLabel = amount.toLocaleString() + 'p';
 
+  // 100개 격자 더미 데이터 생성 (일부는 뜯긴 상태로 연출)
+  const dummySlots = Array.from({ length: 100 }).map((_, index) => {
+    const slotNumber = index + 1;
+    const pulledSlots = {
+      4: { reward: '+1000' },
+      25: { reward: '+50' },
+      43: { reward: '꽝' },
+      65: { reward: '+10' },
+      74: { reward: '꽝' },
+      82: { reward: '꽝' },
+      98: { reward: '꽝' }
+    };
+    const isPulled = slotNumber in pulledSlots;
+    const reward = isPulled ? (pulledSlots as any)[slotNumber].reward : null;
+    return { slotNumber, isPulled, reward };
+  });
+
   return (
     <div ref={rootRef} id="capture-root" style={{ position: 'fixed', inset: 0, zIndex: 2147483647, backgroundColor: '#090d16', display: 'flex', alignItems: 'center', justifyContent: 'center', userSelect: 'none', overflow: 'hidden' }}>
+      
+      {/* 개발용 Next.js 배지 및 포탈 강제 숨김 스타일 */}
+      <style jsx global>{`
+        nextjs-portal, 
+        #nextjs-dev-indicator,
+        [data-nextjs-dialog-overlay] {
+          display: none !important;
+          visibility: hidden !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+      `}</style>
+
       <div style={{ width: 400, height: 400, backgroundColor: '#090d16', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         
-        {/* 아우라 빛 효과 (레트로 네온 자홍/청록 조합) */}
-        <div className="absolute w-56 h-56 rounded-full bg-pink-500/10 blur-3xl" style={{ transform: 'translate(-30px, -20px)' }} />
-        <div className="absolute w-56 h-56 rounded-full bg-cyan-500/10 blur-3xl" style={{ transform: 'translate(30px, 20px)' }} />
+        {/* 뒷배경: 10x10 종이뽑기판 (반투명 처리용으로 스케일 낮춰 배치) */}
+        <div className="absolute w-[360px] h-[360px] opacity-15 grid grid-cols-10 gap-0.5 p-1.5 bg-amber-950/20 border border-amber-900/30 rounded-2xl pointer-events-none scale-90 z-0">
+          {dummySlots.map((slot) => (
+            <div
+              key={slot.slotNumber}
+              className={`aspect-square flex items-center justify-center rounded border text-[8px] font-black ${
+                slot.isPulled
+                  ? 'bg-gray-800/40 border-gray-800 text-gray-600'
+                  : 'bg-gradient-to-br from-amber-600/80 to-amber-700/80 text-amber-100 border-amber-500/25'
+              }`}
+            >
+              {slot.isPulled ? (
+                <span className="text-[7px] text-yellow-600/80">{slot.reward}</span>
+              ) : (
+                <span className="text-[8px]">{slot.slotNumber}</span>
+              )}
+            </div>
+          ))}
+        </div>
 
-        {/* 배경 레트로 그리드/도트 장식 (SVG) */}
-        <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 400 400">
+        {/* 반투명 블랙 딤 레이어 (배경 불투명도 조절) */}
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[0.5px] z-10 pointer-events-none" />
+
+        {/* 아우라 빛 효과 (z-index: 15) */}
+        <div className="absolute w-56 h-56 rounded-full bg-pink-500/10 blur-3xl z-15" style={{ transform: 'translate(-30px, -20px)' }} />
+        <div className="absolute w-56 h-56 rounded-full bg-cyan-500/10 blur-3xl z-15" style={{ transform: 'translate(30px, 20px)' }} />
+
+        {/* 배경 레트로 그리드/도트 장식 (SVG, z-index: 15) */}
+        <svg className="absolute inset-0 w-full h-full opacity-15 pointer-events-none z-15" viewBox="0 0 400 400">
           <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
             <rect width="20" height="20" fill="none" />
             <circle cx="10" cy="10" r="1" fill="#a855f7" />
@@ -272,8 +325,8 @@ function RetroDrawBanner({ amount }: { amount: number }) {
           <rect width="400" height="400" fill="url(#grid)" />
         </svg>
 
-        {/* 레트로 종이 꽃가루/별 데코 (정적 SVG) */}
-        <svg viewBox="0 0 200 200" className="w-64 h-64 select-none absolute z-10 pointer-events-none overflow-visible" style={{ top: '30px' }}>
+        {/* 레트로 종이 꽃가루/별 데코 (정적 SVG, z-index: 20) */}
+        <svg viewBox="0 0 200 200" className="w-64 h-64 select-none absolute z-20 pointer-events-none overflow-visible" style={{ top: '30px' }}>
           <path d="M 30,50 L 33,55 L 39,56 L 34,60 L 35,66 L 30,62 L 25,66 L 26,60 L 21,56 L 27,55 Z" fill="#ff79c6" opacity="0.9" />
           <path d="M 170,45 L 173,50 L 179,51 L 174,55 L 175,61 L 170,57 L 165,61 L 166,55 L 161,51 L 167,50 Z" fill="#50fa7b" opacity="0.9" />
           <circle cx="50" cy="35" r="5" fill="#f1fa8c" />
@@ -284,9 +337,9 @@ function RetroDrawBanner({ amount }: { amount: number }) {
           <rect x="110" y="22" width="6" height="8" rx="1" fill="#ff79c6" transform="rotate(15 113 26)" />
         </svg>
 
-        {/* ═══ 레트로 당첨 딱지 일러스트 ═══ */}
+        {/* ═══ 레트로 당첨 딱지 일러스트 (z-index: 25) ═══ */}
         <div 
-          className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center justify-center"
+          className="absolute left-1/2 -translate-x-1/2 z-25 flex flex-col items-center justify-center"
           style={{
             top: '55px',
           }}
@@ -341,12 +394,12 @@ function RetroDrawBanner({ amount }: { amount: number }) {
           </div>
         </div>
 
-        {/* 스파클 네온 광원 장식 */}
-        <div className="absolute z-20 top-[90px] left-[60px] w-2.5 h-2.5 bg-yellow-200 rounded-full blur-[2px] animate-pulse"></div>
-        <div className="absolute z-20 top-[80px] right-[60px] w-2.5 h-2.5 bg-pink-200 rounded-full blur-[2px] animate-pulse"></div>
+        {/* 스파클 네온 광원 장식 (z-index: 25) */}
+        <div className="absolute z-25 top-[90px] left-[60px] w-2.5 h-2.5 bg-yellow-200 rounded-full blur-[2px] animate-pulse"></div>
+        <div className="absolute z-25 top-[80px] right-[60px] w-2.5 h-2.5 bg-pink-200 rounded-full blur-[2px] animate-pulse"></div>
         
-        {/* 축하 배너 카드 */}
-        <BannerCard gameLabel="종이뽑기" rewardLabel={rewardLabel} className="z-[40] translate-y-[50px]" />
+        {/* 축하 배너 카드 (z-index: 30) */}
+        <BannerCard gameLabel="종이뽑기" rewardLabel={rewardLabel} className="z-[30] translate-y-[50px]" />
       </div>
     </div>
   );

@@ -455,7 +455,7 @@ export default function RetroDrawGame({
             <div>
               <span className="text-[10px] text-gray-500 font-bold mb-1 block">자동 첨부 이미지</span>
               <div className="w-full h-28 rounded-xl overflow-hidden border border-gray-800 bg-gray-950 flex items-center justify-center">
-                <img src={`/images/playground/retrodraw_win_banner_${result?.amount ?? 10}.png`} alt="인증 배너" className="max-w-full max-h-full object-contain" />
+                <img src={`/images/playground/retrodraw_win_banner_${result?.amount ?? 10}.png?v=2`} alt="인증 배너" className="max-w-full max-h-full object-contain" />
               </div>
             </div>
 
@@ -505,7 +505,7 @@ export default function RetroDrawGame({
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-3xl flex flex-col items-center justify-center p-6 z-30 animate-in fade-in duration-300">
           <div className="w-[300px] h-[300px] rounded-2xl overflow-hidden border border-gray-800 bg-gray-950 flex items-center justify-center shadow-2xl relative animate-in zoom-in duration-300">
             <img 
-              src={`/images/playground/retrodraw_win_banner_${result.amount}.png`} 
+              src={`/images/playground/retrodraw_win_banner_${result.amount}.png?v=2`} 
               alt="당첨 배너" 
               className="w-full h-full object-contain"
             />
