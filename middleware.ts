@@ -26,6 +26,7 @@ export default auth((req) => {
     const isHomePage = nextUrl.pathname === '/';
     const isFindAccountPage = nextUrl.pathname === '/find-account';
     const isResetPasswordPage = nextUrl.pathname.startsWith('/reset-password');
+    const isRenderBannersPage = nextUrl.pathname.startsWith('/render-banners');
 
     // 0. Transient Session (PC Bang Security) Check
     if (session?.user) {
@@ -81,12 +82,12 @@ export default auth((req) => {
 
     // 1.5 Global Authentication Check (Strict Private Mode as requested by user)
     // 로그인이 안 된 상태면 무조건 /login으로 리다이렉트 (회원가입, 로그인, 정적 파일, 홈페이지 제외)
-    if (!session?.user && !isLoginPage && !isRegisterPage && !isPublicStatic && !isHomePage && !isFindAccountPage && !isResetPasswordPage) {
+    if (!session?.user && !isLoginPage && !isRegisterPage && !isPublicStatic && !isHomePage && !isFindAccountPage && !isResetPasswordPage && !isRenderBannersPage) {
         return NextResponse.redirect(new URL('/login', nextUrl));
     }
  
     // 2. Age Gate Check (Redirect all unverified users to /age-gate EXCEPT if they are trying to login, or access SEO/public pages)
-    if (!isAgeVerified && !isAgeGatePage && !isLoginPage && !isRegisterPage && !isSeoPath && !isPublicStatic && !isAdminPath && !isFindAccountPage && !isResetPasswordPage) {
+    if (!isAgeVerified && !isAgeGatePage && !isLoginPage && !isRegisterPage && !isSeoPath && !isPublicStatic && !isAdminPath && !isFindAccountPage && !isResetPasswordPage && !isRenderBannersPage) {
         return NextResponse.redirect(new URL('/age-gate', nextUrl));
     }
  

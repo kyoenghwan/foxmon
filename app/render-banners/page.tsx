@@ -205,20 +205,35 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
             <path d="M 125,117.5 L 125,197.5 L 135,192.5 L 135,112.5 Z" fill="url(#ribbonGrad2)" />
           </g>
 
-          {/* 폭죽 파티클 (정적 - 상자에서 위로 퍼져나감) */}
+          {/* 폭죽 파티클 (정적 - 상자에서 위로 사방 부채꼴로 퍼져나감) */}
+          {/* 원형 파티클 */}
           <circle cx="65" cy="40" r="5" fill="#ef4444" opacity="0.9" />
-          <circle cx="140" cy="35" r="4" fill="#facc15" opacity="0.85" />
-          <circle cx="50" cy="60" r="6" fill="#3b82f6" opacity="0.8" />
-          <circle cx="155" cy="55" r="3.5" fill="#10b981" opacity="0.9" />
-          <circle cx="80" cy="20" r="4.5" fill="#ec4899" opacity="0.85" />
+          <circle cx="140" cy="35" r="4.5" fill="#facc15" opacity="0.9" />
+          <circle cx="50" cy="60" r="5.5" fill="#3b82f6" opacity="0.85" />
+          <circle cx="155" cy="55" r="4" fill="#10b981" opacity="0.9" />
+          <circle cx="80" cy="20" r="4.5" fill="#ec4899" opacity="0.9" />
           <circle cx="125" cy="25" r="5" fill="#f59e0b" opacity="0.9" />
-          <circle cx="45" cy="75" r="3" fill="#8b5cf6" opacity="0.8" />
-          <circle cx="160" cy="70" r="4" fill="#06b6d4" opacity="0.85" />
+          <circle cx="45" cy="80" r="3.5" fill="#8b5cf6" opacity="0.85" />
+          <circle cx="160" cy="75" r="4" fill="#06b6d4" opacity="0.9" />
+          <circle cx="95" cy="15" r="4" fill="#ef4444" opacity="0.95" />
+          <circle cx="110" cy="15" r="3.5" fill="#00e676" opacity="0.95" />
+          <circle cx="35" cy="95" r="4" fill="#ffee58" opacity="0.9" />
+          <circle cx="170" cy="90" r="3" fill="#2979ff" opacity="0.9" />
+          
           {/* 별 모양 파티클 */}
-          <path d="M 70,30 L 72,35 L 77,36 L 72,37 L 70,42 L 68,37 L 63,36 L 68,35 Z" fill="#facc15" opacity="0.9" />
-          <path d="M 135,45 L 136,48 L 139,49 L 136,50 L 135,53 L 134,50 L 131,49 L 134,48 Z" fill="#ef4444" opacity="0.85" />
-          <rect x="55" y="50" width="4" height="4" rx="0.5" fill="#10b981" opacity="0.8" transform="rotate(45 57 52)" />
-          <rect x="145" y="48" width="3" height="3" rx="0.5" fill="#ec4899" opacity="0.85" transform="rotate(30 146.5 49.5)" />
+          <path d="M 70,30 L 72,35 L 77,36 L 72,37 L 70,42 L 68,37 L 63,36 L 68,35 Z" fill="#facc15" opacity="0.95" />
+          <path d="M 135,45 L 136,48 L 139,49 L 136,50 L 135,53 L 134,50 L 131,49 L 134,48 Z" fill="#ef4444" opacity="0.9" />
+          <path d="M 100,25 L 101.5,28.5 L 105,29.5 L 101.5,30.5 L 100,34 L 98.5,30.5 L 95,29.5 L 98.5,28.5 Z" fill="#ff4081" opacity="0.95" />
+          <path d="M 52,40 L 53,42.5 L 56,43 L 53,43.8 L 52,46.5 L 51,43.8 L 48,43 L 51,42.5 Z" fill="#00e676" opacity="0.9" />
+          <path d="M 150,30 L 151,32.5 L 154,33 L 151,33.8 L 150,36.5 L 149,33.8 L 146,33 L 149,32.5 Z" fill="#ffee58" opacity="0.9" />
+
+          {/* 사각형/리본 조각 파티클 */}
+          <rect x="55" y="50" width="4.5" height="4.5" rx="0.5" fill="#10b981" opacity="0.85" transform="rotate(45 57.25 52.25)" />
+          <rect x="145" y="48" width="4.5" height="4.5" rx="0.5" fill="#ec4899" opacity="0.85" transform="rotate(30 147.25 50.25)" />
+          <rect x="75" y="55" width="4" height="6" rx="0.5" fill="#8b5cf6" opacity="0.85" transform="rotate(15 77 58)" />
+          <rect x="120" y="50" width="6" height="6" rx="0.5" fill="#ff7043" opacity="0.85" transform="rotate(75 123 53)" />
+          <rect x="38" y="65" width="5" height="3" rx="0.5" fill="#06b6d4" opacity="0.8" transform="rotate(60 40.5 66.5)" />
+          <rect x="162" y="60" width="3" height="5" rx="0.5" fill="#facc15" opacity="0.8" transform="rotate(120 163.5 62.5)" />
 
           {/* 당첨 코인 (상자 위에 표시) */}
           <g>

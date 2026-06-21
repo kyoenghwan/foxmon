@@ -6,6 +6,53 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Gift } from 'lucide-react';
 import { createCommunityPost } from '@/lib/actions/community';
 
+const CONFETTI_COUNT = 32;
+const CONFETTI_PIECES = Array.from({ length: CONFETTI_COUNT }).map((_, i) => {
+  // -165도 ~ -15도 사이에서 균등 분할하여 부채꼴 모양으로 위를 향하도록 각도 정의
+  const minAngle = -165;
+  const maxAngle = -15;
+  const angleDeg = minAngle + ((maxAngle - minAngle) / (CONFETTI_COUNT - 1)) * i + (Math.random() * 12 - 6);
+  const angleRad = (angleDeg * Math.PI) / 180;
+  
+  // 날아가는 거리: 110px ~ 240px
+  const distance = 110 + Math.random() * 130;
+  
+  // 최종 도달 x, y 좌표
+  const tx = Math.cos(angleRad) * distance;
+  const ty = Math.sin(angleRad) * distance;
+  
+  // 초반 솟구치는 단계 (15% 시점)의 x, y 좌표
+  const tx15 = Math.cos(angleRad) * (distance * 0.25);
+  const ty15 = Math.sin(angleRad) * (distance * 0.25);
+
+  const colors = [
+    '#ef4444', '#facc15', '#3b82f6', '#10b981', '#ec4899', 
+    '#8b5cf6', '#f59e0b', '#06b6d4', '#ff7043', '#26a69a',
+    '#ffee58', '#ff4081', '#00e676', '#2979ff', '#d500f9'
+  ];
+  const color = colors[i % colors.length];
+  
+  const w = 5 + Math.floor(Math.random() * 6); // 5px ~ 10px
+  const h = 5 + Math.floor(Math.random() * 11); // 5px ~ 15px
+  
+  const dur = 1.2 + Math.random() * 0.8; // 1.2s ~ 2.0s
+  const delay = Math.random() * 1.5; // 0s ~ 1.5s
+  const rotEnd = (Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 720);
+
+  return {
+    color,
+    w,
+    h,
+    tx,
+    ty,
+    tx15,
+    ty15,
+    rotEnd,
+    dur: `${dur.toFixed(2)}s`,
+    delay: `${delay.toFixed(2)}s`,
+  };
+});
+
 interface LuckyBoxGameProps {
   isPlayedToday: boolean;
   activityPoints: number;
@@ -161,24 +208,29 @@ export default function LuckyBoxGame({
         .box-float-animation {
           animation: box-float 3s ease-in-out infinite;
         }
-        /* 컨페티 떨어지는 애니메이션 */
-        @keyframes confetti-fall {
-          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(120px) rotate(720deg); opacity: 0; }
+        /* 컨페티 상자에서 뿜어져 나오는 부채꼴 애니메이션 */
+        @keyframes confetti-burst {
+          0% {
+            transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(0);
+            opacity: 0;
+          }
+          1% {
+            opacity: 1;
+          }
+          15% {
+            transform: translate(-50%, -50%) translate(var(--tx-15), var(--ty-15)) rotate(30deg) scale(1.25);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) rotate(var(--rot-end)) scale(0.3);
+            opacity: 0;
+          }
         }
         /* 폭죽 줄기 퍼지는 애니메이션 */
         @keyframes firework-line {
           0% { transform: scaleY(0); opacity: 1; }
           50% { transform: scaleY(1); opacity: 1; }
           100% { transform: scaleY(0.3); opacity: 0; }
-        }
-        /* 컨페티 개별 조각 */
-        .confetti-piece {
-          position: absolute;
-          width: 8px;
-          height: 12px;
-          border-radius: 2px;
-          animation: confetti-fall linear infinite;
         }
       `}</style>
 
@@ -321,40 +373,28 @@ export default function LuckyBoxGame({
             {/* ═══ 컨페티/폭죽 오버레이 (HTML - SVG 위에 absolute) ═══ */}
             {status === 'opened' && (
               <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
-                {/* 색종이 조각들 - 다양한 색상, 크기, 위치, 속도 */}
-                {[
-                  { color: '#ef4444', left: '10%', delay: '0s',    dur: '1.8s', w: 10, h: 6,  rot: 45 },
-                  { color: '#facc15', left: '20%', delay: '0.2s',  dur: '2.2s', w: 8,  h: 14, rot: 120 },
-                  { color: '#3b82f6', left: '30%', delay: '0.5s',  dur: '1.6s', w: 12, h: 5,  rot: 200 },
-                  { color: '#10b981', left: '40%', delay: '0.1s',  dur: '2.0s', w: 7,  h: 12, rot: 75 },
-                  { color: '#ec4899', left: '50%', delay: '0.4s',  dur: '1.9s', w: 9,  h: 9,  rot: 150 },
-                  { color: '#8b5cf6', left: '60%', delay: '0.3s',  dur: '2.1s', w: 11, h: 6,  rot: 30 },
-                  { color: '#f59e0b', left: '70%', delay: '0.6s',  dur: '1.7s', w: 8,  h: 13, rot: 260 },
-                  { color: '#06b6d4', left: '80%', delay: '0.15s', dur: '2.3s', w: 10, h: 7,  rot: 90 },
-                  { color: '#ef4444', left: '15%', delay: '0.35s', dur: '2.0s', w: 6,  h: 10, rot: 310 },
-                  { color: '#facc15', left: '85%', delay: '0.45s', dur: '1.5s', w: 9,  h: 5,  rot: 180 },
-                  { color: '#3b82f6', left: '25%', delay: '0.55s', dur: '2.4s', w: 7,  h: 11, rot: 55 },
-                  { color: '#10b981', left: '55%', delay: '0.25s', dur: '1.8s', w: 12, h: 4,  rot: 140 },
-                  { color: '#ec4899', left: '75%', delay: '0.7s',  dur: '2.0s', w: 8,  h: 8,  rot: 220 },
-                  { color: '#8b5cf6', left: '45%', delay: '0.1s',  dur: '1.6s', w: 10, h: 10, rot: 0 },
-                  { color: '#f59e0b', left: '35%', delay: '0.5s',  dur: '2.2s', w: 6,  h: 14, rot: 290 },
-                  { color: '#06b6d4', left: '65%', delay: '0.8s',  dur: '1.9s', w: 11, h: 5,  rot: 110 },
-                ].map((c, i) => (
+                {/* 색종이 조각들 - 상자 중심에서 뿜어져 나오는 부채꼴 폭죽 */}
+                {CONFETTI_PIECES.map((c, i) => (
                   <div
                     key={i}
                     style={{
                       position: 'absolute',
-                      left: c.left,
-                      top: '-5%',
+                      left: '50%',
+                      top: '55%',
                       width: c.w,
                       height: c.h,
                       backgroundColor: c.color,
                       borderRadius: c.h > c.w ? '3px' : '2px',
-                      transform: `rotate(${c.rot}deg)`,
-                      animation: `confetti-fall ${c.dur} linear infinite`,
+                      // 커스텀 CSS 변수를 전달하여 transform에 사용
+                      '--tx': `${c.tx}px`,
+                      '--ty': `${c.ty}px`,
+                      '--tx-15': `${c.tx15}px`,
+                      '--ty-15': `${c.ty15}px`,
+                      '--rot-end': `${c.rotEnd}deg`,
+                      animation: `confetti-burst ${c.dur} cubic-bezier(0.1, 0.8, 0.3, 1) infinite`,
                       animationDelay: c.delay,
-                      opacity: 0.9,
-                    }}
+                      opacity: 0,
+                    } as React.CSSProperties}
                   />
                 ))}
 
