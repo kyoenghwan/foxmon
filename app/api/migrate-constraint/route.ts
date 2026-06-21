@@ -76,28 +76,31 @@ export async function GET() {
                 SELECT 
                     new_round,
                     row_number() OVER () AS slot_number,
-                    val.reward_amount,
-                    val.reward_tier
+                    shuffled.reward_amount,
+                    shuffled.reward_tier
                 FROM (
-                    SELECT 5000 AS reward_amount, 1 AS reward_tier FROM generate_series(1, 1) -- 1등: 5,000p 1개
-                    UNION ALL
-                    SELECT 3000, 2 FROM generate_series(1, 1)                               -- 2등: 3,000p 1개
-                    UNION ALL
-                    SELECT 2000, 3 FROM generate_series(1, 1)                               -- 3등: 2,000p 1개
-                    UNION ALL
-                    SELECT 1000, 4 FROM generate_series(1, 2)                               -- 4등: 1,000p 2개
-                    UNION ALL
-                    SELECT 500, 5 FROM generate_series(1, 5)                                -- 5등: 500p 5개
-                    UNION ALL
-                    SELECT 100, 6 FROM generate_series(1, 10)                               -- 6등(아차): 100p 10개
-                    UNION ALL
-                    SELECT 50, 7 FROM generate_series(1, 20)                                -- 7등(아차): 50p 20개
-                    UNION ALL
-                    SELECT 10, 8 FROM generate_series(1, 30)                                -- 8등(아차): 10p 30개
-                    UNION ALL
-                    SELECT 0, 9 FROM generate_series(1, 30)                                 -- 꽝: 0p 30개
-                ) val
-                ORDER BY random();
+                    SELECT reward_amount, reward_tier
+                    FROM (
+                        SELECT 5000 AS reward_amount, 1 AS reward_tier FROM generate_series(1, 1) -- 1등: 5,000p 1개
+                        UNION ALL
+                        SELECT 3000, 2 FROM generate_series(1, 1)                               -- 2등: 3,000p 1개
+                        UNION ALL
+                        SELECT 2000, 3 FROM generate_series(1, 1)                               -- 3등: 2,000p 1개
+                        UNION ALL
+                        SELECT 1000, 4 FROM generate_series(1, 2)                               -- 4등: 1,000p 2개
+                        UNION ALL
+                        SELECT 500, 5 FROM generate_series(1, 5)                                -- 5등: 500p 5개
+                        UNION ALL
+                        SELECT 100, 6 FROM generate_series(1, 10)                               -- 6등(아차): 100p 10개
+                        UNION ALL
+                        SELECT 50, 7 FROM generate_series(1, 20)                                -- 7등(아차): 50p 20개
+                        UNION ALL
+                        SELECT 10, 8 FROM generate_series(1, 30)                                -- 8등(아차): 10p 30개
+                        UNION ALL
+                        SELECT 0, 9 FROM generate_series(1, 30)                                 -- 꽝: 0p 30개
+                    ) val
+                    ORDER BY random()
+                ) shuffled;
 
                 RETURN new_round;
             END;
