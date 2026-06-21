@@ -290,27 +290,27 @@ function RetroDrawBanner({ amount }: { amount: number }) {
       <div style={{ width: 400, height: 400, backgroundColor: '#090d16', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         
         {/* 뒷배경: 10x10 종이뽑기판 (반투명 처리용으로 스케일 낮춰 배치) */}
-        <div className="absolute w-[360px] h-[360px] opacity-15 grid grid-cols-10 gap-0.5 p-1.5 bg-amber-950/20 border border-amber-900/30 rounded-2xl pointer-events-none scale-90 z-0">
+        <div className="absolute w-[360px] h-[360px] opacity-55 grid grid-cols-10 gap-0.5 p-1.5 bg-amber-950/40 border border-amber-850/50 rounded-2xl pointer-events-none scale-90 z-0">
           {dummySlots.map((slot) => (
             <div
               key={slot.slotNumber}
               className={`aspect-square flex items-center justify-center rounded border text-[8px] font-black ${
                 slot.isPulled
-                  ? 'bg-gray-800/40 border-gray-800 text-gray-600'
-                  : 'bg-gradient-to-br from-amber-600/80 to-amber-700/80 text-amber-100 border-amber-500/25'
+                  ? 'bg-gray-800/50 border-gray-700/60 text-gray-500'
+                  : 'bg-gradient-to-br from-amber-600/90 to-amber-700/90 text-amber-100 border-amber-500/35'
               }`}
             >
               {slot.isPulled ? (
-                <span className="text-[7px] text-yellow-600/80">{slot.reward}</span>
+                <span className="text-[7px] text-yellow-600/90 font-black">{slot.reward}</span>
               ) : (
-                <span className="text-[8px]">{slot.slotNumber}</span>
+                <span className="text-[8px] font-black">{slot.slotNumber}</span>
               )}
             </div>
           ))}
         </div>
 
-        {/* 반투명 블랙 딤 레이어 (배경 불투명도 조절) */}
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[0.5px] z-10 pointer-events-none" />
+        {/* 반투명 블랙 딤 레이어 (배경 불투명도 조절, 이전 40%에서 15%로 낮춰 배경이 훨씬 잘 보이게 함) */}
+        <div className="absolute inset-0 bg-black/15 backdrop-blur-[0.5px] z-10 pointer-events-none" />
 
         {/* 아우라 빛 효과 (z-index: 15) */}
         <div className="absolute w-56 h-56 rounded-full bg-pink-500/10 blur-3xl z-15" style={{ transform: 'translate(-30px, -20px)' }} />
@@ -325,16 +325,53 @@ function RetroDrawBanner({ amount }: { amount: number }) {
           <rect width="400" height="400" fill="url(#grid)" />
         </svg>
 
-        {/* 레트로 종이 꽃가루/별 데코 (정적 SVG, z-index: 20) */}
-        <svg viewBox="0 0 200 200" className="w-64 h-64 select-none absolute z-20 pointer-events-none overflow-visible" style={{ top: '30px' }}>
-          <path d="M 30,50 L 33,55 L 39,56 L 34,60 L 35,66 L 30,62 L 25,66 L 26,60 L 21,56 L 27,55 Z" fill="#ff79c6" opacity="0.9" />
-          <path d="M 170,45 L 173,50 L 179,51 L 174,55 L 175,61 L 170,57 L 165,61 L 166,55 L 161,51 L 167,50 Z" fill="#50fa7b" opacity="0.9" />
-          <circle cx="50" cy="35" r="5" fill="#f1fa8c" />
-          <circle cx="150" cy="30" r="6" fill="#ffb86c" />
-          <circle cx="35" cy="110" r="4.5" fill="#8be9fd" />
-          <circle cx="165" cy="115" r="5.5" fill="#ff5555" />
-          <rect x="90" y="20" width="7" height="7" rx="1" fill="#bd93f9" transform="rotate(45 93.5 23.5)" />
-          <rect x="110" y="22" width="6" height="8" rx="1" fill="#ff79c6" transform="rotate(15 113 26)" />
+        {/* ═══ 하늘에서 내리는 듯한 풍성한 레트로 컨페티/폭죽 장식 (정적 SVG, z-index: 20) ═══ */}
+        <svg viewBox="0 0 400 400" className="absolute inset-0 w-full h-full select-none z-20 pointer-events-none overflow-visible">
+          {/* 별 모양 파티클 (하늘에서 흩날림) */}
+          <path d="M 40,30 L 43,36 L 49,37 L 44,41 L 45,47 L 40,43 L 35,47 L 36,41 L 31,37 L 37,36 Z" fill="#ff79c6" opacity="0.95" transform="rotate(15 40 38)" />
+          <path d="M 350,50 L 353,56 L 359,57 L 354,61 L 355,67 L 350,63 L 345,67 L 346,61 L 341,57 L 347,56 Z" fill="#50fa7b" opacity="0.95" transform="rotate(-20 350 58)" />
+          <path d="M 90,80 L 92,84 L 97,85 L 93,88 L 94,93 L 90,90 L 86,93 L 87,88 L 83,85 L 88,84 Z" fill="#ffb86c" opacity="0.9" transform="rotate(45 90 86)" />
+          <path d="M 310,100 L 312,104 L 317,105 L 313,108 L 314,113 L 310,110 L 306,113 L 307,108 L 303,105 L 308,104 Z" fill="#8be9fd" opacity="0.9" transform="rotate(-10 310 106)" />
+          <path d="M 50,180 L 52,184 L 57,185 L 53,188 L 54,193 L 50,190 L 46,193 L 47,188 L 43,185 L 48,184 Z" fill="#ff5555" opacity="0.85" transform="rotate(30 50 186)" />
+          <path d="M 340,200 L 342,204 L 347,205 L 343,208 L 344,213 L 340,210 L 346,213 L 347,208 L 343,205 L 348,204 Z" fill="#f1fa8c" opacity="0.85" transform="rotate(-35 340 206)" />
+
+          {/* 구부러진 스트리머 리본 조각 (하늘에서 흘러내림) */}
+          <path d="M 75,15 Q 85,35 70,55 Q 55,75 75,95" fill="none" stroke="#bd93f9" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
+          <path d="M 325,15 Q 310,35 330,55 Q 350,75 325,95" fill="none" stroke="#ff79c6" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
+          <path d="M 25,120 Q 15,145 30,170 Q 45,195 25,220" fill="none" stroke="#50fa7b" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+          <path d="M 370,130 Q 385,160 365,190 Q 345,220 375,250" fill="none" stroke="#f1fa8c" strokeWidth="2.2" strokeLinecap="round" opacity="0.8" />
+
+          {/* 둥글둥글 원형 꽃가루 */}
+          <circle cx="80" cy="40" r="5" fill="#f1fa8c" opacity="0.9" />
+          <circle cx="120" cy="25" r="4" fill="#ff79c6" opacity="0.9" />
+          <circle cx="160" cy="45" r="6" fill="#8be9fd" opacity="0.9" />
+          <circle cx="240" cy="30" r="5" fill="#50fa7b" opacity="0.9" />
+          <circle cx="280" cy="50" r="4.5" fill="#ffb86c" opacity="0.9" />
+          <circle cx="320" cy="35" r="5.5" fill="#ff5555" opacity="0.9" />
+          
+          <circle cx="60" cy="110" r="4" fill="#ffb86c" opacity="0.85" />
+          <circle cx="110" cy="130" r="5" fill="#bd93f9" opacity="0.85" />
+          <circle cx="140" cy="95" r="3.5" fill="#f1fa8c" opacity="0.85" />
+          <circle cx="260" cy="115" r="5" fill="#ff79c6" opacity="0.85" />
+          <circle cx="290" cy="85" r="4" fill="#8be9fd" opacity="0.85" />
+          
+          <circle cx="30" cy="250" r="5.5" fill="#50fa7b" opacity="0.8" />
+          <circle cx="75" cy="230" r="4" fill="#ff5555" opacity="0.8" />
+          <circle cx="325" cy="270" r="5" fill="#ffb86c" opacity="0.8" />
+          <circle cx="365" cy="240" r="4.5" fill="#bd93f9" opacity="0.8" />
+
+          {/* 사각형 및 흩날리는 색종이 조각들 (다양한 각도로 회전) */}
+          <rect x="100" y="55" width="6" height="10" rx="1" fill="#bd93f9" opacity="0.9" transform="rotate(25 103 60)" />
+          <rect x="290" y="60" width="8" height="6" rx="1" fill="#ff79c6" opacity="0.9" transform="rotate(-15 294 63)" />
+          <rect x="145" y="140" width="7" height="7" rx="1.5" fill="#f1fa8c" opacity="0.85" transform="rotate(45 148.5 143.5)" />
+          <rect x="235" y="150" width="6" height="9" rx="1" fill="#50fa7b" opacity="0.85" transform="rotate(75 238 154.5)" />
+          <rect x="85" y="170" width="9" height="5" rx="1" fill="#8be9fd" opacity="0.85" transform="rotate(-30 89.5 172.5)" />
+          <rect x="300" y="180" width="7" height="7" rx="1.5" fill="#ffb86c" opacity="0.85" transform="rotate(60 303.5 183.5)" />
+          
+          <rect x="50" y="300" width="8" height="8" rx="2" fill="#ff79c6" opacity="0.75" transform="rotate(15 54 304)" />
+          <rect x="340" y="320" width="6" height="10" rx="1" fill="#8be9fd" opacity="0.75" transform="rotate(-45 343 325)" />
+          <rect x="115" y="270" width="7" height="7" rx="1.5" fill="#ff5555" opacity="0.75" transform="rotate(120 118.5 273.5)" />
+          <rect x="270" y="290" width="8" height="6" rx="1" fill="#f1fa8c" opacity="0.75" transform="rotate(-80 274 293)" />
         </svg>
 
         {/* ═══ 레트로 당첨 딱지 일러스트 (z-index: 25) ═══ */}
