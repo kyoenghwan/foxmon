@@ -312,11 +312,9 @@ export default function LuckyBoxGame({
                 <img 
                   src="/images/playground/random_box_top.png" 
                   alt="상자 뚜껑" 
-                  className="absolute z-10 animate-in fade-in duration-300" 
+                  className="absolute inset-0 w-full h-full object-contain z-10 animate-in fade-in duration-300" 
                   style={{
-                    width: '113.5%',
-                    left: '-6.75%',
-                    top: '-1.5%',
+                    transform: 'scale(1.13) translate(-1.5%, -1.8%)',
                   }}
                 />
               )}
