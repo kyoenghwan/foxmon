@@ -67,7 +67,7 @@ export default function RetroDrawGame({
     }
     setIsCertSubmitting(true);
     try {
-      const bannerImg = '/images/playground/retrodraw_win_banner.png';
+      const bannerImg = `/images/playground/retrodraw_win_banner_${result?.amount ?? 10}.png`;
       const res = await createCommunityPost({
         board_id: 'free',
         title: `[놀이터 인증] ${certTitle.trim()}`,
@@ -472,7 +472,7 @@ export default function RetroDrawGame({
             <div>
               <span className="text-[10px] text-gray-500 font-bold mb-1 block">자동 첨부 이미지</span>
               <div className="w-full h-28 rounded-xl overflow-hidden border border-gray-800 bg-gray-950 flex items-center justify-center">
-                <img src="/images/playground/retrodraw_win_banner.png" alt="인증 배너" className="max-w-full max-h-full object-contain" />
+                <img src={`/images/playground/retrodraw_win_banner_${result?.amount ?? 10}.png`} alt="인증 배너" className="max-w-full max-h-full object-contain" />
               </div>
             </div>
 

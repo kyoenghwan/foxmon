@@ -247,7 +247,113 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
 }
 
 // ═══════════════════════════════════════
-// 라우터: ?type=luckybox|roulette 에 따라 분기
+// 종이뽑기 배너 렌더러 (레트로 딱지 디자인)
+// ═══════════════════════════════════════
+function RetroDrawBanner({ amount }: { amount: number }) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  useCaptureCleanup(rootRef);
+
+  const rewardLabel = amount.toLocaleString() + 'p';
+
+  return (
+    <div ref={rootRef} id="capture-root" style={{ position: 'fixed', inset: 0, zIndex: 2147483647, backgroundColor: '#090d16', display: 'flex', alignItems: 'center', justifyContent: 'center', userSelect: 'none', overflow: 'hidden' }}>
+      <div style={{ width: 400, height: 400, backgroundColor: '#090d16', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        
+        {/* 아우라 빛 효과 (레트로 네온 자홍/청록 조합) */}
+        <div className="absolute w-56 h-56 rounded-full bg-pink-500/10 blur-3xl" style={{ transform: 'translate(-30px, -20px)' }} />
+        <div className="absolute w-56 h-56 rounded-full bg-cyan-500/10 blur-3xl" style={{ transform: 'translate(30px, 20px)' }} />
+
+        {/* 배경 레트로 그리드/도트 장식 (SVG) */}
+        <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 400 400">
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <rect width="20" height="20" fill="none" />
+            <circle cx="10" cy="10" r="1" fill="#a855f7" />
+          </pattern>
+          <rect width="400" height="400" fill="url(#grid)" />
+        </svg>
+
+        {/* 레트로 종이 꽃가루/별 데코 (정적 SVG) */}
+        <svg viewBox="0 0 200 200" className="w-64 h-64 select-none absolute z-10 pointer-events-none overflow-visible" style={{ top: '30px' }}>
+          <path d="M 30,50 L 33,55 L 39,56 L 34,60 L 35,66 L 30,62 L 25,66 L 26,60 L 21,56 L 27,55 Z" fill="#ff79c6" opacity="0.9" />
+          <path d="M 170,45 L 173,50 L 179,51 L 174,55 L 175,61 L 170,57 L 165,61 L 166,55 L 161,51 L 167,50 Z" fill="#50fa7b" opacity="0.9" />
+          <circle cx="50" cy="35" r="5" fill="#f1fa8c" />
+          <circle cx="150" cy="30" r="6" fill="#ffb86c" />
+          <circle cx="35" cy="110" r="4.5" fill="#8be9fd" />
+          <circle cx="165" cy="115" r="5.5" fill="#ff5555" />
+          <rect x="90" y="20" width="7" height="7" rx="1" fill="#bd93f9" transform="rotate(45 93.5 23.5)" />
+          <rect x="110" y="22" width="6" height="8" rx="1" fill="#ff79c6" transform="rotate(15 113 26)" />
+        </svg>
+
+        {/* ═══ 레트로 당첨 딱지 일러스트 ═══ */}
+        <div 
+          className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center justify-center"
+          style={{
+            top: '55px',
+          }}
+        >
+          {/* 지그재그 톱니 바퀴 모양의 레트로 딱지 (SVG) */}
+          <div className="relative w-44 h-44 flex items-center justify-center filter drop-shadow-[0_12px_20px_rgba(0,0,0,0.85)]">
+            <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
+              <circle cx="50" cy="50" r="48" fill="#140a22" stroke="#d97706" strokeWidth="2.5" />
+              <g transform="translate(50,50)">
+                {Array.from({ length: 36 }).map((_, i) => (
+                  <path 
+                    key={i} 
+                    d="M -3,-45 L 3,-45 L 2,-49 L -2,-49 Z" 
+                    fill="#f59e0b" 
+                    transform={`rotate(${i * 10})`} 
+                  />
+                ))}
+              </g>
+              <circle cx="50" cy="50" r="41" fill="url(#retro-grad)" stroke="#140a22" strokeWidth="1.5" />
+              <circle cx="50" cy="50" r="36" fill="none" stroke="#d97706" strokeWidth="1.2" strokeDasharray="3, 2" opacity="0.8" />
+              <defs>
+                <linearGradient id="retro-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#f59e0b" />
+                  <stop offset="50%" stopColor="#ea580c" />
+                  <stop offset="100%" stopColor="#b91c1c" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            {/* 딱지 내부 복고 인쇄풍 텍스트 */}
+            <div className="absolute z-10 flex flex-col items-center justify-center text-center">
+              <span 
+                className="text-yellow-300 font-extrabold text-[15px] leading-tight tracking-wider"
+                style={{
+                  textShadow: '2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000',
+                  letterSpacing: '0.15em'
+                }}
+              >
+                당첨
+              </span>
+              <span 
+                className="text-white font-black text-[24px] leading-tight mt-0.5"
+                style={{
+                  textShadow: '3px 3px 0px #140a22, -1px -1px 0px #140a22, 1px -1px 0px #140a22, -1px 1px 0px #140a22',
+                }}
+              >
+                {rewardLabel}
+              </span>
+            </div>
+            
+            <div className="absolute inset-4 rounded-full border border-yellow-400/25 opacity-20 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* 스파클 네온 광원 장식 */}
+        <div className="absolute z-20 top-[90px] left-[60px] w-2.5 h-2.5 bg-yellow-200 rounded-full blur-[2px] animate-pulse"></div>
+        <div className="absolute z-20 top-[80px] right-[60px] w-2.5 h-2.5 bg-pink-200 rounded-full blur-[2px] animate-pulse"></div>
+        
+        {/* 축하 배너 카드 */}
+        <BannerCard gameLabel="종이뽑기" rewardLabel={rewardLabel} className="z-[40] translate-y-[50px]" />
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
+// 라우터: ?type=luckybox|roulette|retro 에 따라 분기
 // ═══════════════════════════════════════
 function BannerRouter() {
   const searchParams = useSearchParams();
@@ -257,6 +363,9 @@ function BannerRouter() {
 
   if (type === 'luckybox') {
     return <LuckyBoxBanner amount={amount} />;
+  }
+  if (type === 'retro') {
+    return <RetroDrawBanner amount={amount} />;
   }
   return <RouletteBanner amount={amount} />;
 }
