@@ -4,7 +4,7 @@ import PlayDashboardClient from '@/app/(dashboard)/job-seeker/play/PlayDashboard
 
 export default async function PlayPage() {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     redirect('/login?session_expired=1');
   }
@@ -12,7 +12,7 @@ export default async function PlayPage() {
   return (
     <div className="w-full min-h-screen bg-gray-950 text-white py-10 px-4">
       <div className="max-w-6xl mx-auto space-y-8">
-        
+
         {/* 타이틀 및 헤더 */}
         <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-500">
           <h1 className="text-3xl md:text-5xl font-black tracking-tight bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-500 bg-clip-text text-transparent filter drop-shadow">
@@ -25,7 +25,7 @@ export default async function PlayPage() {
 
         {/* 클라이언트 사이드 게임 대시보드 조립 */}
         <PlayDashboardClient />
-        
+
       </div>
     </div>
   );

@@ -22,6 +22,10 @@ const TYPE_MAP: Record<string, { label: string; bg: string; text: string }> = {
   POST: { label: '글 작성', bg: 'bg-green-50 text-green-700 border-green-100', text: 'text-green-600' },
   COMMENT: { label: '댓글 작성', bg: 'bg-blue-50 text-blue-700 border-blue-100', text: 'text-blue-600' },
   ATTENDANCE: { label: '출석체크', bg: 'bg-yellow-50 text-yellow-700 border-yellow-100', text: 'text-yellow-600' },
+  GAME_REWARD: { label: '게임 보상', bg: 'bg-pink-50 text-pink-700 border-pink-100', text: 'text-pink-600' },
+  ROULETTE_REWARD: { label: '룰렛 당첨', bg: 'bg-pink-50 text-pink-700 border-pink-100', text: 'text-pink-600' },
+  LUCKYBOX_REWARD: { label: '랜덤박스', bg: 'bg-orange-50 text-orange-700 border-orange-100', text: 'text-orange-600' },
+  RETRODRAW_REWARD: { label: '종이뽑기', bg: 'bg-amber-50 text-amber-700 border-amber-100', text: 'text-amber-600' },
   REFERRAL_SIGNUP: { label: '추천 가입', bg: 'bg-indigo-50 text-indigo-700 border-indigo-100', text: 'text-indigo-600' },
   REFERRAL_BONUS: { label: '추천 보너스', bg: 'bg-purple-50 text-purple-700 border-purple-100', text: 'text-purple-600' },
   GIFT_CARD_REQUEST: { label: '상품권 교환', bg: 'bg-red-50 text-red-700 border-red-100', text: 'text-red-600' },
@@ -107,19 +111,19 @@ export function PointHistoryList({ refreshTrigger = 0, className }: PointHistory
               key={tx.id}
               className="bg-white border border-gray-100 hover:border-gray-200 rounded-2xl p-4 flex justify-between items-center transition-all shadow-sm duration-200 group"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
                 <span className={cn(
-                  "px-2.5 py-1 text-[9px] font-black border rounded-lg shrink-0 select-none",
+                  "px-2.5 py-1 text-[9px] font-black border rounded-lg shrink-0 select-none whitespace-nowrap",
                   typeInfo.bg
                 )}>
                   {typeInfo.label}
                 </span>
-                <div className="text-left min-w-0">
-                  <div className="text-xs font-black text-gray-900 group-hover:text-purple-700 transition-colors truncate">
+                <div className="text-left min-w-0 flex-1">
+                  <div className="text-xs font-black text-gray-900 group-hover:text-purple-700 transition-colors break-keep leading-snug">
                     {tx.description || '포인트 변동'}
                   </div>
                   <div className="text-[9px] text-gray-400 font-medium flex items-center gap-1 mt-0.5">
-                    <Calendar className="w-2.5 h-2.5" />
+                    <Calendar className="w-2.5 h-2.5 shrink-0" />
                     {formattedDate}
                   </div>
                 </div>
