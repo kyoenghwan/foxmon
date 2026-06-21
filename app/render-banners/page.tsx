@@ -177,7 +177,7 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         <div className="absolute w-52 h-52 rounded-full bg-yellow-500/15 blur-3xl" />
 
         {/* SVG 열린 선물 상자 + 당첨금 코인 */}
-        <svg viewBox="0 0 200 240" className="w-56 h-64 select-none relative overflow-visible" style={{ position: 'absolute', top: '15px' }}>
+        <svg viewBox="0 0 200 240" className="w-56 h-64 select-none relative overflow-visible" style={{ position: 'absolute', top: '40px' }}>
           <defs>
             <linearGradient id="ribbonGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#ffee58" stopOpacity={1} />

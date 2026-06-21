@@ -284,7 +284,7 @@ export default function LuckyBoxGame({
             onClick={status === 'idle' ? handleOpenBox : undefined}
           >
             {/* SVG 입체 상자 */}
-            <svg viewBox="0 0 200 240" className="w-48 h-56 select-none relative overflow-visible">
+            <svg viewBox="0 0 200 240" className="w-48 h-56 select-none relative overflow-visible mt-8">
               <defs>
                 {/* 리본 그라데이션 */}
                 <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -380,7 +380,7 @@ export default function LuckyBoxGame({
                     style={{
                       position: 'absolute',
                       left: '50%',
-                      top: '55%',
+                      top: '42%',
                       width: c.w,
                       height: c.h,
                       backgroundColor: c.color,
@@ -397,11 +397,6 @@ export default function LuckyBoxGame({
                     } as React.CSSProperties}
                   />
                 ))}
-
-                {/* 큰 별 모양 장식 */}
-                <div className="absolute top-[10%] left-[12%] text-2xl animate-ping" style={{ animationDuration: '2s' }}>✨</div>
-                <div className="absolute top-[15%] right-[15%] text-xl animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }}>🎉</div>
-                <div className="absolute top-[5%] left-[45%] text-lg animate-ping" style={{ animationDuration: '3s', animationDelay: '0.6s' }}>🎊</div>
               </div>
             )}
 
