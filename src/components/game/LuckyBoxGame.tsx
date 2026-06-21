@@ -360,11 +360,19 @@ export default function LuckyBoxGame({
                   <path d="M 140,71.5 L 60,104.5 L 50,100.5 L 130,67.5 Z" fill="url(#ribbonGrad)" />
                   <path d="M 56,103 L 56,115 L 66,119 L 66,107 Z" fill="url(#ribbonGrad)" />
                   <path d="M 134,107 L 134,119 L 144,115 L 144,103 Z" fill="url(#ribbonGrad)" />
-                  <path d="M 100,55 C 80,35 65,45 85,52 C 95,55.5 100,55 100,55 Z" fill="url(#ribbonGrad)" stroke="#f57f17" strokeWidth="1" />
-                  <path d="M 100,55 C 120,35 135,45 115,52 C 105,55.5 100,55 100,55 Z" fill="url(#ribbonGrad)" stroke="#f57f17" strokeWidth="1" />
-                  <circle cx="100" cy="55" r="7" fill="url(#ribbonGrad)" stroke="#e65100" strokeWidth="1.5" />
-                  <path d="M 96,57 C 85,63 75,75 80,80 C 82,82 85,78 82,75 C 79,72 88,63 96,57 Z" fill="url(#ribbonGrad)" />
-                  <path d="M 104,57 C 115,63 125,75 120,80 C 118,82 115,78 118,75 C 121,72 112,63 104,57 Z" fill="url(#ribbonGrad)" />
+                  {/* 개선된 큼직하고 풍성한 나비 리본 매듭 */}
+                  {/* 왼쪽 리본 꼬리 (넓은 리본 끈 형태) */}
+                  <path d="M 95,57 L 70,82 L 78,85 L 85,78 L 98,58 Z" fill="url(#ribbonGrad)" stroke="#e65100" strokeWidth="1" />
+                  {/* 오른쪽 리본 꼬리 (넓은 리본 끈 형태) */}
+                  <path d="M 105,57 L 130,82 L 122,85 L 115,78 L 102,58 Z" fill="url(#ribbonGrad)" stroke="#e65100" strokeWidth="1" />
+                  
+                  {/* 왼쪽 리본 큰 고리 */}
+                  <path d="M 100,55 C 80,25 55,35 75,52 C 85,60 95,56 100,55 Z" fill="url(#ribbonGrad)" stroke="#f57f17" strokeWidth="1.2" />
+                  {/* 오른쪽 리본 큰 고리 */}
+                  <path d="M 100,55 C 120,25 145,35 125,52 C 115,60 105,56 100,55 Z" fill="url(#ribbonGrad)" stroke="#f57f17" strokeWidth="1.2" />
+                  
+                  {/* 중앙 매듭 구슬 */}
+                  <circle cx="100" cy="55" r="9" fill="url(#ribbonGrad)" stroke="#e65100" strokeWidth="1.8" />
                 </g>
               )}
             </svg>
