@@ -363,19 +363,24 @@ export default function LuckyBoxGame({
                   <path d="M 140,71.5 L 60,104.5 L 50,100.5 L 130,67.5 Z" fill="url(#ribbonGrad)" />
                   <path d="M 56,103 L 56,115 L 66,119 L 66,107 Z" fill="url(#ribbonGrad)" />
                   <path d="M 134,107 L 134,119 L 144,115 L 144,103 Z" fill="url(#ribbonGrad)" />
-                  {/* 개선된 큼직하고 풍성한 나비 리본 매듭 */}
-                  {/* 왼쪽 리본 꼬리 (넓은 리본 끈 형태) */}
-                  <path d="M 95,57 L 70,82 L 78,85 L 85,78 L 98,58 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1" />
-                  {/* 오른쪽 리본 꼬리 (넓은 리본 끈 형태) */}
-                  <path d="M 105,57 L 130,82 L 122,85 L 115,78 L 102,58 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1" />
+                  {/* 3D 아이소메트릭 투시가 적용된 풍성한 나비 리본 매듭 (중심: 100, 88) */}
+                  {/* 왼쪽 리본 꼬리 */}
+                  <path d="M 94,90 C 85,100 70,110 60,118 L 68,122 L 78,114 C 88,105 96,96 96,90 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1" />
+                  {/* 오른쪽 리본 꼬리 */}
+                  <path d="M 106,90 C 115,100 130,110 140,118 L 132,122 L 122,114 C 112,105 104,96 104,90 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1" />
                   
-                  {/* 왼쪽 리본 큰 고리 */}
-                  <path d="M 100,55 C 80,25 55,35 75,52 C 85,60 95,56 100,55 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.2" />
-                  {/* 오른쪽 리본 큰 고리 */}
-                  <path d="M 100,55 C 120,25 145,35 125,52 C 115,60 105,56 100,55 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.2" />
+                  {/* 왼쪽 리본 큰 고리 (투시에 맞게 누운 각도) */}
+                  <path d="M 100,88 C 85,62 55,62 70,85 C 80,96 95,92 100,88 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.2" />
+                  {/* 왼쪽 고리 내부 음영 */}
+                  <path d="M 92,85 C 82,72 65,72 75,85 Z" fill="#b80f3b" opacity="0.3" />
+                  
+                  {/* 오른쪽 리본 큰 고리 (투시에 맞게 누운 각도) */}
+                  <path d="M 100,88 C 115,62 145,62 130,85 C 120,96 105,92 100,88 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.2" />
+                  {/* 오른쪽 고리 내부 음영 */}
+                  <path d="M 108,85 C 118,72 135,72 125,85 Z" fill="#b80f3b" opacity="0.3" />
                   
                   {/* 중앙 매듭 구슬 */}
-                  <circle cx="100" cy="55" r="9" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.8" />
+                  <circle cx="100" cy="88" r="10" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.8" />
                 </g>
               )}
             </svg>
