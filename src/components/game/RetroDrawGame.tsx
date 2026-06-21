@@ -79,6 +79,7 @@ export default function RetroDrawGame({
       if (res.success) {
         alert('당첨 인증글이 자유게시판에 등록되었습니다! (+50p 적립 완료)');
         setShowCertModal(false);
+        setResult(null);
       } else {
         alert(res.message || '인증글 등록에 실패했습니다.');
       }
@@ -340,24 +341,6 @@ export default function RetroDrawGame({
 
       {/* 알림 메시지 영역 */}
       <div className="w-full mb-2">
-        {result && (
-          <div className="space-y-2">
-            <div className="p-2.5 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-center text-xs font-black text-yellow-400 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              🎁 당첨 결과: {getTierName(result.tier)}!
-              {result.amount > 0 ? ` +${result.amount.toLocaleString()} 포인트 적립 완료!` : ' 아쉽게도 꽝입니다!'}
-            </div>
-            {result.amount > 0 && (
-              <div className="text-center">
-                <button
-                  onClick={handleOpenCertModal}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer text-center"
-                >
-                  📝 당첨 인증글 쓰기{isPostRewardAvailable ? ' (+50p 적립)' : ''}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
         {error && (
           <div className="p-2.5 bg-red-500/10 border border-red-500/30 rounded-xl text-center text-[11px] font-bold text-red-400">
             ⚠️ {error}
@@ -513,6 +496,34 @@ export default function RetroDrawGame({
                 취소
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 당첨 결과 레이어 오버레이 */}
+      {result && (
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-3xl flex flex-col items-center justify-center p-6 z-30 animate-in fade-in duration-300">
+          <div className="w-[300px] h-[300px] rounded-2xl overflow-hidden border border-gray-800 bg-gray-950 flex items-center justify-center shadow-2xl relative animate-in zoom-in duration-300">
+            <img 
+              src={`/images/playground/retrodraw_win_banner_${result.amount}.png`} 
+              alt="당첨 배너" 
+              className="w-full h-full object-contain"
+            />
+          </div>
+
+          <div className="flex gap-2 w-[300px] justify-center mt-4 z-10 animate-in slide-in-from-bottom-2 duration-300">
+            <button
+              onClick={handleOpenCertModal}
+              className="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              📝 당첨 인증글 쓰기 (+50p)
+            </button>
+            <button
+              onClick={() => setResult(null)}
+              className="px-6 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-black text-xs rounded-xl border border-gray-750 transition-all active:scale-95 cursor-pointer"
+            >
+              닫기
+            </button>
           </div>
         </div>
       )}
