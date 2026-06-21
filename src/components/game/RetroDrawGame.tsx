@@ -146,7 +146,7 @@ export default function RetroDrawGame({
     return () => clearInterval(timerId);
   }, [getKSTNow, currentDateStr, onRefreshBoard]);
 
-  // 1초 주기로 실시간 보드판 상태를 동기화 (유저가 슬롯을 뜯고 있는 상태가 아닐 때만 백그라운드 갱신)
+  // 8초 주기로 실시간 보드판 상태를 동기화 (유저가 슬롯을 뜯고 있는 상태가 아닐 때만 백그라운드 갱신)
   useEffect(() => {
     let intervalId: any;
     if (pullingSlot === null && showConfirmSlot === null) {
@@ -156,7 +156,7 @@ export default function RetroDrawGame({
         } catch (e) {
           console.error("자동 보드 갱신 에러:", e);
         }
-      }, 1000);
+      }, 8000);
     }
     return () => {
       if (intervalId) clearInterval(intervalId);
