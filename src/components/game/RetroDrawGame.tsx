@@ -257,15 +257,16 @@ export default function RetroDrawGame({
   };
 
   const getTierName = (tier: number): string => {
-    if (tier === 1) return '🥇 1등 (5,000p)';
-    if (tier === 2) return '🥈 2등 (3,000p)';
-    if (tier === 3) return '🥉 3등 (2,000p)';
-    if (tier === 4) return '4등 (1,000p)';
-    if (tier === 5) return '5등 (500p)';
+    if (tier === 1) return '🥇 1등 (3,000p)';
+    if (tier === 2) return '🥈 2등 (2,000p)';
+    if (tier === 3) return '🥉 3등 (1,000p)';
+    if (tier === 4) return '4등 (800p)';
+    if (tier === 5) return '5등 (400p)';
     if (tier === 6) return '6등 (100p)';
     if (tier === 7) return '7등 (50p)';
-    if (tier === 8) return '8등 (10p)';
-    return '꽝 (0p)';
+    if (tier === 8) return '8등 (30p)';
+    if (tier === 9) return '9등 (10p)';
+    return '보상';
   };
 
   return (
@@ -445,19 +446,19 @@ export default function RetroDrawGame({
       <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 w-full text-[11px] text-gray-400 border-t border-gray-800/50 pt-4">
         <div className="flex items-center gap-1.5 bg-gray-800/20 p-2 rounded-xl border border-gray-800/40">
           <div className="w-2 h-2 rounded-full bg-yellow-500" />
-          <span>1등: 5,000p (1개)</span>
+          <span>1등: 3,000p (1개)</span>
         </div>
         <div className="flex items-center gap-1.5 bg-gray-800/20 p-2 rounded-xl border border-gray-800/40">
           <div className="w-2 h-2 rounded-full bg-blue-500" />
-          <span>2~3등: 3,000p / 2,000p (각 1개)</span>
+          <span>2~3등: 2,000p / 1,000p (각 1개)</span>
         </div>
         <div className="flex items-center gap-1.5 bg-gray-800/20 p-2 rounded-xl border border-gray-800/40">
           <div className="w-2 h-2 rounded-full bg-red-500" />
-          <span>4~5등: 1,000p(2개) / 500p(5개)</span>
+          <span>4~5등: 800p(2개) / 400p(5개)</span>
         </div>
         <div className="flex items-center gap-1.5 bg-gray-800/20 p-2 rounded-xl border border-gray-800/40">
           <div className="w-2 h-2 rounded-full bg-gray-500" />
-          <span>6~8등: 100p / 50p / 10p (총 60개)</span>
+          <span>6~9등: 100p(10) / 50p(20) / 30p(30) / 10p(30)</span>
         </div>
       </div>
       {/* 당첨 인증글 직접 작성 팝업 오버레이 */}

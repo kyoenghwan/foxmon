@@ -62,23 +62,23 @@ BEGIN
     FROM (
         SELECT reward_amount, reward_tier
         FROM (
-            SELECT 5000 AS reward_amount, 1 AS reward_tier FROM generate_series(1, 1) -- 1등: 5,000p 1개
+            SELECT 3000 AS reward_amount, 1 AS reward_tier FROM generate_series(1, 1) -- 1등: 3,000p 1개
             UNION ALL
-            SELECT 3000, 2 FROM generate_series(1, 1)                               -- 2등: 3,000p 1개
+            SELECT 2000, 2 FROM generate_series(1, 1)                               -- 2등: 2,000p 1개
             UNION ALL
-            SELECT 2000, 3 FROM generate_series(1, 1)                               -- 3등: 2,000p 1개
+            SELECT 1000, 3 FROM generate_series(1, 1)                               -- 3등: 1,000p 1개
             UNION ALL
-            SELECT 1000, 4 FROM generate_series(1, 2)                               -- 4등: 1,000p 2개
+            SELECT 800, 4 FROM generate_series(1, 2)                                -- 4등: 800p 2개
             UNION ALL
-            SELECT 500, 5 FROM generate_series(1, 5)                                -- 5등: 500p 5개
+            SELECT 400, 5 FROM generate_series(1, 5)                                -- 5등: 400p 5개
             UNION ALL
-            SELECT 100, 6 FROM generate_series(1, 10)                               -- 6등(아차): 100p 10개
+            SELECT 100, 6 FROM generate_series(1, 10)                               -- 6등: 100p 10개
             UNION ALL
-            SELECT 50, 7 FROM generate_series(1, 20)                                -- 7등(아차): 50p 20개
+            SELECT 50, 7 FROM generate_series(1, 20)                                -- 7등: 50p 20개
             UNION ALL
-            SELECT 10, 8 FROM generate_series(1, 30)                                -- 8등(아차): 10p 30개
+            SELECT 30, 8 FROM generate_series(1, 30)                                -- 8등: 30p 30개
             UNION ALL
-            SELECT 0, 9 FROM generate_series(1, 30)                                 -- 꽝: 0p 30개
+            SELECT 10, 9 FROM generate_series(1, 30)                                -- 9등: 10p 30개
         ) val
         ORDER BY random()
     ) shuffled;
