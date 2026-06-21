@@ -240,7 +240,7 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         <div className="absolute z-20 top-[60px] left-[140px] w-2 h-2 bg-amber-300 rounded-full blur-[2px] animate-pulse"></div>
 
         {/* 축하 배너 카드 */}
-        <BannerCard gameLabel="랜덤박스" rewardLabel={rewardLabel} className="bottom-[15px] h-[140px]" />
+        <BannerCard gameLabel="랜덤박스" rewardLabel={rewardLabel} className="bottom-[15px] h-[140px] z-[40]" />
       </div>
     </div>
   );
