@@ -237,12 +237,27 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                 {/* Bottom Icons - 3 핵심 기능 (PC에서는 항상 열림 적용) */}
                 <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 pt-3 sm:pt-4 mt-3 lg:mt-auto' : 'grid-rows-[0fr] opacity-0 overflow-hidden min-[800px]:grid-rows-[1fr] min-[800px]:opacity-100 min-[800px]:pt-4 min-[800px]:mt-auto min-[800px]:overflow-visible'}`}>
                     <div className="overflow-hidden flex justify-around items-center px-2">
-                        <Link href={isEmployer ? '/biz/points' : '/job-seeker/points'} prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
-                            <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-amber-50 transition-all duration-300 text-gray-400 group-hover:text-amber-500 group-hover:scale-110 mx-auto">
-                                <Coins className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-                            </div>
-                            <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">포인트</span>
-                        </Link>
+                        {isEmployer ? (
+                            <Link href="/biz/points" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
+                                <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-amber-50 transition-all duration-300 text-gray-400 group-hover:text-amber-500 group-hover:scale-110 mx-auto">
+                                    <Coins className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+                                </div>
+                                <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">포인트</span>
+                            </Link>
+                        ) : (
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    window.dispatchEvent(new CustomEvent('open_point_modal'));
+                                }}
+                                className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1 bg-transparent border-0 p-0 cursor-pointer"
+                            >
+                                <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-amber-50 transition-all duration-300 text-gray-400 group-hover:text-amber-500 group-hover:scale-110 mx-auto">
+                                    <Coins className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+                                </div>
+                                <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">포인트</span>
+                            </button>
+                        )}
                         
                         <button
                             onClick={(e) => {
@@ -254,7 +269,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110 mx-auto relative">
                                 <MessageCircle className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                                 {unreadCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-4 sm:h-4.5 min-w-[16px] sm:min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[8px] sm:text-[9px] font-black text-white border border-white animate-bounce">
+                                    <span className="absolute -bottom-1 -right-1 flex h-4 sm:h-4.5 min-w-[16px] sm:min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[8px] sm:text-[9px] font-black text-white border-2 border-white shadow-sm">
                                         {unreadCount > 99 ? '99+' : unreadCount}
                                     </span>
                                 )}

@@ -16,6 +16,7 @@ import { Globe, Search, Menu, FileText, Briefcase, LogOut, ShieldCheck, User, X,
 import { signOut } from 'next-auth/react';
 import { useLanguage } from '@/components/providers/language-provider';
 import { PlayDashboardModal } from '@/src/components/game/PlayDashboardModal';
+import { PointDashboardModal } from '@/src/components/mypage/PointDashboardModal';
 import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal';
 import { cn } from '@/lib/utils';
 import {
@@ -647,6 +648,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                 </div>
             )}
             <PlayDashboardModal />
+            <PointDashboardModal />
         </header>
     );
 }

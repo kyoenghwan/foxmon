@@ -61,10 +61,11 @@ export function UserNav() {
                     <DropdownMenuItem asChild>
                         <Link href={isEmployer ? "/employer/profile" : "/job-seeker/profile"}>프로필 설정</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link href="/job-seeker/points" className="font-semibold text-purple-600 cursor-pointer">
-                            💰 활동 포인트/교환
-                        </Link>
+                    <DropdownMenuItem 
+                        onClick={() => window.dispatchEvent(new CustomEvent('open_point_modal'))}
+                        className="font-semibold text-purple-600 cursor-pointer"
+                    >
+                        💰 활동 포인트/교환
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                         onClick={() => window.dispatchEvent(new CustomEvent('open_play_modal'))}

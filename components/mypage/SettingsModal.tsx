@@ -657,19 +657,37 @@ export function SettingsModal() {
                                         <span className="text-xs text-gray-400 font-bold group-hover:text-emerald-500">바로가기 &rarr;</span>
                                     </Link>
 
-                                    <Link 
-                                        href={role === 'EMPLOYER' ? '/biz/points' : '/job-seeker/points'} 
-                                        onClick={() => setIsOpen(false)}
-                                        className="flex items-center justify-between p-4 bg-white hover:bg-amber-50/50 rounded-xl border border-gray-100 hover:border-amber-200 shadow-sm transition-all duration-300 group"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-amber-50 text-amber-500 group-hover:scale-110 transition-transform">
-                                                <Coins className="h-5 w-5" />
+                                    {role === 'EMPLOYER' ? (
+                                        <Link 
+                                            href="/biz/points"
+                                            onClick={() => setIsOpen(false)}
+                                            className="flex items-center justify-between p-4 bg-white hover:bg-amber-50/50 rounded-xl border border-gray-100 hover:border-amber-200 shadow-sm transition-all duration-300 group"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-amber-50 text-amber-500 group-hover:scale-110 transition-transform">
+                                                    <Coins className="h-5 w-5" />
+                                                </div>
+                                                <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">포인트 이력 (적립/사용 내역)</span>
                                             </div>
-                                            <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">포인트 이력 (적립/사용 내역)</span>
-                                        </div>
-                                        <span className="text-xs text-gray-400 font-bold group-hover:text-amber-500">바로가기 &rarr;</span>
-                                    </Link>
+                                            <span className="text-xs text-gray-400 font-bold group-hover:text-amber-500">바로가기 &rarr;</span>
+                                        </Link>
+                                    ) : (
+                                        <button 
+                                            onClick={() => {
+                                                setIsOpen(false);
+                                                window.dispatchEvent(new CustomEvent('open_point_modal'));
+                                            }}
+                                            className="w-full flex items-center justify-between p-4 bg-white hover:bg-amber-50/50 rounded-xl border border-gray-100 hover:border-amber-200 shadow-sm transition-all duration-300 group cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-amber-50 text-amber-500 group-hover:scale-110 transition-transform">
+                                                    <Coins className="h-5 w-5" />
+                                                </div>
+                                                <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">포인트 이력 (적립/사용 내역)</span>
+                                            </div>
+                                            <span className="text-xs text-gray-400 font-bold group-hover:text-amber-500">바로가기 &rarr;</span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         )}
