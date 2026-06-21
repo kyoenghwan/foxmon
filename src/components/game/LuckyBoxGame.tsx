@@ -363,24 +363,20 @@ export default function LuckyBoxGame({
                   <path d="M 140,71.5 L 60,104.5 L 50,100.5 L 130,67.5 Z" fill="url(#ribbonGrad)" />
                   <path d="M 56,103 L 56,115 L 66,119 L 66,107 Z" fill="url(#ribbonGrad)" />
                   <path d="M 134,107 L 134,119 L 144,115 L 144,103 Z" fill="url(#ribbonGrad)" />
-                  {/* 3D 아이소메트릭 투시가 적용된 풍성한 나비 리본 매듭 (중심: 100, 88) */}
-                  {/* 왼쪽 리본 꼬리 */}
-                  <path d="M 94,90 C 85,100 70,110 60,118 L 68,122 L 78,114 C 88,105 96,96 96,90 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1" />
-                  {/* 오른쪽 리본 꼬리 */}
-                  <path d="M 106,90 C 115,100 130,110 140,118 L 132,122 L 122,114 C 112,105 104,96 104,90 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1" />
-                  
-                  {/* 왼쪽 리본 큰 고리 (투시에 맞게 누운 각도) */}
-                  <path d="M 100,88 C 85,62 55,62 70,85 C 80,96 95,92 100,88 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.2" />
-                  {/* 왼쪽 고리 내부 음영 */}
-                  <path d="M 92,85 C 82,72 65,72 75,85 Z" fill="#b80f3b" opacity="0.3" />
-                  
-                  {/* 오른쪽 리본 큰 고리 (투시에 맞게 누운 각도) */}
-                  <path d="M 100,88 C 115,62 145,62 130,85 C 120,96 105,92 100,88 Z" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.2" />
-                  {/* 오른쪽 고리 내부 음영 */}
-                  <path d="M 108,85 C 118,72 135,72 125,85 Z" fill="#b80f3b" opacity="0.3" />
-                  
-                  {/* 중앙 매듭 구슬 */}
-                  <circle cx="100" cy="88" r="10" fill="url(#ribbonGrad)" stroke="#b80f3b" strokeWidth="1.8" />
+                  {/* 2번 이미지 스타일의 통통하고 빵빵한 볼륨 리본 매듭 (꼬리 제거) */}
+                  {/* 왼쪽 큰 리본 고리 (볼륨감 극대화) */}
+                  <path d="M 90,75 C 65,38 42,52 58,80 C 68,95 82,88 90,78 Z" fill="url(#ribbonGrad)" stroke="#920a2b" strokeWidth="1.5" />
+                  {/* 왼쪽 리본 구멍 음영 */}
+                  <path d="M 85,73 C 74,60 62,68 70,80 C 76,86 82,81 85,73 Z" fill="#6b031b" opacity="0.8" />
+
+                  {/* 오른쪽 큰 리본 고리 (볼륨감 극대화) */}
+                  <path d="M 110,75 C 135,38 158,52 142,80 C 132,95 118,88 110,78 Z" fill="url(#ribbonGrad)" stroke="#920a2b" strokeWidth="1.5" />
+                  {/* 오른쪽 리본 구멍 음영 */}
+                  <path d="M 115,73 C 126,60 138,68 130,80 C 124,86 118,81 115,73 Z" fill="#6b031b" opacity="0.8" />
+
+                  {/* 중앙 매듭 가로 밴드 */}
+                  <rect x="88" y="65" width="24" height="18" rx="8" fill="url(#ribbonGrad)" stroke="#920a2b" strokeWidth="1.8" />
+                  <ellipse cx="100" cy="74" rx="10" ry="7" fill="none" stroke="#ff8da1" strokeWidth="0.8" opacity="0.5" />
                 </g>
               )}
             </svg>
