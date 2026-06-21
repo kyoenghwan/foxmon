@@ -174,10 +174,10 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
       <div style={{ width: 400, height: 400, backgroundColor: '#090d16', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         
         {/* 아우라 빛 효과 */}
-        <div className="absolute w-52 h-52 rounded-full bg-yellow-500/15 blur-3xl" style={{ position: 'absolute', top: '180px' }} />
+        <div className="absolute w-52 h-52 rounded-full bg-yellow-500/15 blur-3xl" />
 
         {/* 선물 상자 이미지 (HTML) */}
-        <div className="relative w-48 h-52 select-none overflow-visible z-0" style={{ position: 'absolute', top: '190px' }}>
+        <div className="relative w-48 h-52 select-none overflow-visible z-0" style={{ position: 'absolute', top: '50px' }}>
           {/* 상자 몸통 (열린 상태 배너이므로 몸통만 표시) */}
           <img 
             src="/images/playground/random_box_bottom.png" 
@@ -187,7 +187,7 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         </div>
 
         {/* 폭죽 파티클 (정적 - SVG로 겹쳐 그림) */}
-        <svg viewBox="0 0 200 240" className="w-56 h-64 select-none relative overflow-visible z-10 pointer-events-none" style={{ position: 'absolute', top: '180px' }}>
+        <svg viewBox="0 0 200 240" className="w-56 h-64 select-none relative overflow-visible z-10 pointer-events-none" style={{ position: 'absolute', top: '40px' }}>
           {/* 폭죽 파티클 (정적 - 상자에서 위로 사방 부채꼴로 퍼져나감, 크기 상향 조정) */}
           {/* 원형 파티클 */}
           <circle cx="65" cy="40" r="8" fill="#ef4444" opacity="0.9" />
@@ -225,7 +225,7 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         <div 
           className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center justify-center"
           style={{
-            top: '185px', // 박스 입구 바로 위로 올림
+            top: '48px', // 박스 입구 바로 위로 올림
           }}
         >
           <div className="w-[74px] h-[74px] rounded-full bg-gradient-to-b from-yellow-300 to-yellow-600 border-[3.5px] border-yellow-500 shadow-[0_10px_25px_rgba(0,0,0,0.85),_0_0_20px_rgba(234,179,8,0.45)] flex flex-col items-center justify-center bg-[#1e1b4b]">
@@ -240,7 +240,7 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
         <div className="absolute z-20 top-[60px] left-[140px] w-2 h-2 bg-amber-300 rounded-full blur-[2px] animate-pulse"></div>
 
         {/* 축하 배너 카드 */}
-        <BannerCard gameLabel="랜덤박스" rewardLabel={rewardLabel} className="top-[15px] h-[140px] z-[40]" />
+        <BannerCard gameLabel="랜덤박스" rewardLabel={rewardLabel} className="z-[40]" />
       </div>
     </div>
   );
