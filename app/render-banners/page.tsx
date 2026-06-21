@@ -205,48 +205,44 @@ function LuckyBoxBanner({ amount }: { amount: number }) {
             <path d="M 125,117.5 L 125,197.5 L 135,192.5 L 135,112.5 Z" fill="url(#ribbonGrad2)" />
           </g>
 
-          {/* 폭죽 파티클 (정적 - 상자에서 위로 사방 부채꼴로 퍼져나감) */}
+          {/* 폭죽 파티클 (정적 - 상자에서 위로 사방 부채꼴로 퍼져나감, 크기 상향 조정) */}
           {/* 원형 파티클 */}
-          <circle cx="65" cy="40" r="5" fill="#ef4444" opacity="0.9" />
-          <circle cx="140" cy="35" r="4.5" fill="#facc15" opacity="0.9" />
-          <circle cx="50" cy="60" r="5.5" fill="#3b82f6" opacity="0.85" />
-          <circle cx="155" cy="55" r="4" fill="#10b981" opacity="0.9" />
-          <circle cx="80" cy="20" r="4.5" fill="#ec4899" opacity="0.9" />
-          <circle cx="125" cy="25" r="5" fill="#f59e0b" opacity="0.9" />
-          <circle cx="45" cy="80" r="3.5" fill="#8b5cf6" opacity="0.85" />
-          <circle cx="160" cy="75" r="4" fill="#06b6d4" opacity="0.9" />
-          <circle cx="95" cy="15" r="4" fill="#ef4444" opacity="0.95" />
-          <circle cx="110" cy="15" r="3.5" fill="#00e676" opacity="0.95" />
-          <circle cx="35" cy="95" r="4" fill="#ffee58" opacity="0.9" />
-          <circle cx="170" cy="90" r="3" fill="#2979ff" opacity="0.9" />
+          <circle cx="65" cy="40" r="8" fill="#ef4444" opacity="0.9" />
+          <circle cx="140" cy="35" r="7" fill="#facc15" opacity="0.9" />
+          <circle cx="50" cy="60" r="9" fill="#3b82f6" opacity="0.85" />
+          <circle cx="155" cy="55" r="7.5" fill="#10b981" opacity="0.9" />
+          <circle cx="80" cy="20" r="8" fill="#ec4899" opacity="0.9" />
+          <circle cx="125" cy="25" r="8" fill="#f59e0b" opacity="0.9" />
+          <circle cx="45" cy="80" r="6" fill="#8b5cf6" opacity="0.85" />
+          <circle cx="160" cy="75" r="7" fill="#06b6d4" opacity="0.9" />
+          <circle cx="95" cy="15" r="7" fill="#ef4444" opacity="0.95" />
+          <circle cx="110" cy="15" r="6.5" fill="#00e676" opacity="0.95" />
+          <circle cx="35" cy="95" r="7" fill="#ffee58" opacity="0.9" />
+          <circle cx="170" cy="90" r="5" fill="#2979ff" opacity="0.9" />
           
-          {/* 별 모양 파티클 */}
-          <path d="M 70,30 L 72,35 L 77,36 L 72,37 L 70,42 L 68,37 L 63,36 L 68,35 Z" fill="#facc15" opacity="0.95" />
-          <path d="M 135,45 L 136,48 L 139,49 L 136,50 L 135,53 L 134,50 L 131,49 L 134,48 Z" fill="#ef4444" opacity="0.9" />
-          <path d="M 100,25 L 101.5,28.5 L 105,29.5 L 101.5,30.5 L 100,34 L 98.5,30.5 L 95,29.5 L 98.5,28.5 Z" fill="#ff4081" opacity="0.95" />
-          <path d="M 52,40 L 53,42.5 L 56,43 L 53,43.8 L 52,46.5 L 51,43.8 L 48,43 L 51,42.5 Z" fill="#00e676" opacity="0.9" />
-          <path d="M 150,30 L 151,32.5 L 154,33 L 151,33.8 L 150,36.5 L 149,33.8 L 146,33 L 149,32.5 Z" fill="#ffee58" opacity="0.9" />
+          {/* 별 모양 파티클 (크기 확대) */}
+          <path d="M 70,27 L 73,34 L 81,35 L 73,37 L 70,44 L 67,37 L 59,35 L 67,34 Z" fill="#facc15" opacity="0.95" />
+          <path d="M 135,42 L 137.5,47 L 143.5,48.5 L 137.5,50 L 135,55 L 132.5,50 L 126.5,48.5 L 132.5,47 Z" fill="#ef4444" opacity="0.9" />
+          <path d="M 100,22 L 102.5,27 L 108.5,28.5 L 102.5,30 L 100,35 L 97.5,30 L 91.5,28.5 L 97.5,27 Z" fill="#ff4081" opacity="0.95" />
 
-          {/* 나선형 스트리머 (구불구불 리본) 파티클 */}
-          <path d="M 65,30 Q 72,35 67,40 Q 62,45 68,50" fill="none" stroke="#bd10e0" strokeWidth="2" strokeLinecap="round" opacity="0.9" />
-          <path d="M 130,25 Q 123,32 132,40 Q 140,48 128,55" fill="none" stroke="#05d9e8" strokeWidth="2.2" strokeLinecap="round" opacity="0.9" />
-          <path d="M 155,45 Q 148,50 152,58 Q 158,66 150,72" fill="none" stroke="#ff4081" strokeWidth="2" strokeLinecap="round" opacity="0.85" />
-          <path d="M 45,55 Q 52,60 48,68 Q 42,76 50,82" fill="none" stroke="#f5a623" strokeWidth="2" strokeLinecap="round" opacity="0.85" />
+          {/* 나선형 스트리머 (구불구불 리본) 파티클 (선 굵기 및 크기 확대) */}
+          <path d="M 65,30 Q 75,37 68,44 Q 61,51 69,58" fill="none" stroke="#bd10e0" strokeWidth="3.2" strokeLinecap="round" opacity="0.9" />
+          <path d="M 130,25 Q 120,35 133,45 Q 144,55 129,65" fill="none" stroke="#05d9e8" strokeWidth="3.5" strokeLinecap="round" opacity="0.9" />
+          <path d="M 155,45 Q 146,52 151,62 Q 158,72 148,80" fill="none" stroke="#ff4081" strokeWidth="3.2" strokeLinecap="round" opacity="0.85" />
+          <path d="M 45,55 Q 54,62 49,72 Q 41,82 51,90" fill="none" stroke="#f5a623" strokeWidth="3.2" strokeLinecap="round" opacity="0.85" />
 
-          {/* 사각형/리본 조각 파티클 */}
-          <rect x="55" y="50" width="4.5" height="4.5" rx="0.5" fill="#10b981" opacity="0.85" transform="rotate(45 57.25 52.25)" />
-          <rect x="145" y="48" width="4.5" height="4.5" rx="0.5" fill="#ec4899" opacity="0.85" transform="rotate(30 147.25 50.25)" />
-          <rect x="75" y="55" width="4" height="6" rx="0.5" fill="#8b5cf6" opacity="0.85" transform="rotate(15 77 58)" />
-          <rect x="120" y="50" width="6" height="6" rx="0.5" fill="#ff7043" opacity="0.85" transform="rotate(75 123 53)" />
-          <rect x="38" y="65" width="5" height="3" rx="0.5" fill="#06b6d4" opacity="0.8" transform="rotate(60 40.5 66.5)" />
-          <rect x="162" y="60" width="3" height="5" rx="0.5" fill="#facc15" opacity="0.8" transform="rotate(120 163.5 62.5)" />
+          {/* 사각형/리본 조각 파티클 (크기 확대) */}
+          <rect x="55" y="50" width="7" height="7" rx="1" fill="#10b981" opacity="0.85" transform="rotate(45 58.5 53.5)" />
+          <rect x="145" y="48" width="7" height="7" rx="1" fill="#ec4899" opacity="0.85" transform="rotate(30 148.5 51.5)" />
+          <rect x="75" y="55" width="6" height="9" rx="1" fill="#8b5cf6" opacity="0.85" transform="rotate(15 78 59.5)" />
+          <rect x="120" y="50" width="9" height="6" rx="1" fill="#ff7043" opacity="0.85" transform="rotate(75 124.5 53)" />
         </svg>
 
         {/* ═══ 당첨 코인 (HTML 오버레이 - z-index: 20으로 폭죽보다 위) ═══ */}
         <div 
           className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center justify-center"
           style={{
-            top: '72px', // 상자 입구 윗부분(Y=50)에 맞춘 수직 좌표
+            top: '96px', // 72px -> 96px 로 하향 조정하여 상자 높이와 맞춤
           }}
         >
           <div className="w-[74px] h-[74px] rounded-full bg-gradient-to-b from-yellow-300 to-yellow-600 border-[3.5px] border-yellow-500 shadow-[0_10px_25px_rgba(0,0,0,0.85),_0_0_20px_rgba(234,179,8,0.45)] flex flex-col items-center justify-center bg-[#1e1b4b]">

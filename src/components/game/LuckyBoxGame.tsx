@@ -34,19 +34,19 @@ const CONFETTI_PIECES = Array.from({ length: CONFETTI_COUNT }).map((_, i) => {
   let h = 6;
   if (rand < 0.3) {
     type = 'rect';
-    w = 5 + Math.floor(Math.random() * 6);
-    h = 5 + Math.floor(Math.random() * 10);
+    w = 10 + Math.floor(Math.random() * 8); // 10px ~ 17px
+    h = 12 + Math.floor(Math.random() * 15); // 12px ~ 26px
   } else if (rand < 0.55) {
     type = 'circle';
-    w = 6 + Math.floor(Math.random() * 6);
+    w = 12 + Math.floor(Math.random() * 10); // 12px ~ 21px
     h = w;
   } else if (rand < 0.8) {
     type = 'streamer';
-    w = 8 + Math.floor(Math.random() * 4);
-    h = 24 + Math.floor(Math.random() * 12);
+    w = 14 + Math.floor(Math.random() * 8); // 14px ~ 21px
+    h = 45 + Math.floor(Math.random() * 30); // 45px ~ 74px
   } else {
     type = 'star';
-    w = 10 + Math.floor(Math.random() * 6);
+    w = 18 + Math.floor(Math.random() * 12); // 18px ~ 29px
     h = w;
   }
   
@@ -234,11 +234,11 @@ export default function LuckyBoxGame({
             opacity: 1;
           }
           15% {
-            transform: translate(-50%, -50%) translate(var(--tx-15), var(--ty-15)) rotate(30deg) scale(1.25);
+            transform: translate(-50%, -50%) translate(var(--tx-15), var(--ty-15)) rotate(30deg) scale(1.5);
             opacity: 1;
           }
           100% {
-            transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) rotate(var(--rot-end)) scale(0.3);
+            transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) rotate(var(--rot-end)) scale(0.6);
             opacity: 0;
           }
         }
@@ -429,7 +429,7 @@ export default function LuckyBoxGame({
               <div 
                 className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center justify-center animate-in zoom-in duration-300"
                 style={{
-                  top: '10%', // 상자 바로 위에 둥실 떠오르도록 Y축 설정
+                  top: '20%', // 상자 바로 위에 둥실 떠오르도록 Y축 설정
                 }}
               >
                 {reward.amount > 0 ? (
