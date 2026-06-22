@@ -126,10 +126,10 @@ export function FoxTalkWidget() {
     }, [sessionChatUser]);
 
     useEffect(() => {
-        if (userId && appState === 'LOBBY') {
+        if (appState === 'LOBBY') {
             loadRooms();
         }
-    }, [userId, appState]);
+    }, [appState, userId, profile?.sessionId]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -238,7 +238,6 @@ export function FoxTalkWidget() {
             // roomId가 없으면 로비 열기
             setAppState('LOBBY');
             setLobbyTab('1ON1');
-            loadRooms();
         };
         window.addEventListener('open_foxtalk', handleOpenEvent);
         return () => window.removeEventListener('open_foxtalk', handleOpenEvent);
@@ -249,7 +248,6 @@ export function FoxTalkWidget() {
         if (!profile) setAppState('SETUP');
         else {
             setAppState('LOBBY');
-            loadRooms();
         }
     };
 
