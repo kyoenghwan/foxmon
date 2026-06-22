@@ -186,6 +186,9 @@ export default function RetroDrawGame({
     );
   }
 
+  // 포인트 부족 팝업 상태
+  const [showInsufficientPopup, setShowInsufficientPopup] = useState(false);
+
   const handlePullSlotClick = (slotNumber: number) => {
     if (pullingSlot !== null) return;
     setError(null);
@@ -202,7 +205,7 @@ export default function RetroDrawGame({
 
     // 포인트 검증
     if (activityPoints < cost) {
-      setError(`포인트가 부족합니다. (뽑기 비용: ${cost}p)`);
+      setShowInsufficientPopup(true);
       return;
     }
 
@@ -420,6 +423,31 @@ export default function RetroDrawGame({
                   취소
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* 포인트 부족 팝업 오버레이 */}
+        {showInsufficientPopup && (
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-2xl flex items-center justify-center p-4 z-30 animate-in zoom-in duration-300">
+            <div className="flex flex-col items-center justify-center p-5 bg-gray-900/95 border border-gray-800 rounded-2xl max-w-xs w-full text-center shadow-2xl">
+              <div className="p-3 bg-red-500/10 text-red-400 rounded-full mb-3">
+                <span className="text-3xl">⚠️</span>
+              </div>
+              <h4 className="text-white text-xs font-black mb-1.5">포인트 부족</h4>
+              <p className="text-gray-300 text-[11px] leading-relaxed mb-4">
+                보유 포인트가 부족합니다.
+                <br />
+                <span className="text-red-400 font-bold text-[10px] mt-1 block">
+                  뽑기 비용: 200p / 보유: {activityPoints.toLocaleString()}p
+                </span>
+              </p>
+              <button
+                onClick={() => setShowInsufficientPopup(false)}
+                className="px-6 py-1.5 bg-gray-750 hover:bg-gray-700 text-gray-300 hover:text-white font-black text-[11px] rounded-xl transition-all active:scale-95 cursor-pointer border border-gray-700"
+              >
+                확인
+              </button>
             </div>
           </div>
         )}
