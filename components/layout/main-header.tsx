@@ -366,7 +366,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                             <div className="flex items-center gap-2.5 whitespace-nowrap">
                                 <Link href="/login" className="hover:text-gray-900 transition-colors">로그인</Link>
                                 <span className="text-gray-300">|</span>
-                                <Link href="/signup" className="hover:text-gray-900 transition-colors">회원가입</Link>
+                                <Link href="/register" className="hover:text-gray-900 transition-colors">회원가입</Link>
                             </div>
                         )}
                     </div>
