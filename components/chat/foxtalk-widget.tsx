@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { X, MessageCircle, Send, Plus, Users, Shield, ArrowLeft, Headset, LogOut, MoreVertical } from 'lucide-react';
+import { X, MessageCircle, Send, Plus, Users, Shield, ArrowLeft, Headset, LogOut, MoreVertical, Radio } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM';
 import { OA_INSERT_CHAT_PARTICIPANT } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_PARTICIPANT';
@@ -12,11 +12,14 @@ import { OA_INSERT_CHAT_MESSAGE } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ME
 import { OA_LEAVE_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_LEAVE_CHAT_ROOM';
 import { QA_GET_CHAT_ROOMS } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_ROOMS';
 import { QA_GET_CHAT_MESSAGES } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_MESSAGES';
+import { QA_GET_LIVE_CHAT_ROOM } from '@/src/atoms/qa/foxtalk/QA_GET_LIVE_CHAT_ROOM';
+import { QA_GET_CHAT_PROFILE } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_PROFILE';
+import { OA_UPSERT_CHAT_PROFILE } from '@/src/atoms/oa/foxtalk/OA_UPSERT_CHAT_PROFILE';
 import { FA_CS_CHAT_FLOW } from '@/src/atoms/fa/support/FA_CS_CHAT_FLOW';
 import { QA_GET_CS_MESSAGES } from '@/src/atoms/qa/support/QA_GET_CS_MESSAGES';
 import { OA_INSERT_CS_MESSAGE } from '@/src/atoms/oa/support/OA_INSERT_CS_MESSAGE';
 
-type AppState = 'CLOSED' | 'MENU' | 'SETUP' | 'LOBBY' | 'CREATE_ROOM' | 'ROOM' | 'CS_SETUP' | 'CS_CHAT';
+type AppState = 'CLOSED' | 'MENU' | 'SETUP' | 'LOBBY' | 'CREATE_ROOM' | 'ROOM' | 'CS_SETUP' | 'CS_CHAT' | 'LIVE_CHAT';
 
 interface Profile {
     sessionId: string;
@@ -38,6 +41,13 @@ export function FoxTalkWidget() {
     const participantsMapRef = useRef<Record<string, any>>({});
     const [myParticipant, setMyParticipant] = useState<any | null>(null);
     const [isSending, setIsSending] = useState(false);
+
+    // 실시간채팅 관련 상태
+    const [liveChatNick, setLiveChatNick] = useState('');
+    const [liveChatAvatar, setLiveChatAvatar] = useState('fox1');
+    const [liveOnlineCount, setLiveOnlineCount] = useState(0);
+    const [isJoiningLive, setIsJoiningLive] = useState(false);
+    const [liveChatProfileLoaded, setLiveChatProfileLoaded] = useState(false);
     
     useEffect(() => {
         participantsMapRef.current = participantsMap;
@@ -136,7 +146,7 @@ export function FoxTalkWidget() {
     };
 
     useEffect(() => {
-        if (appState === 'ROOM' || appState === 'CS_CHAT') {
+        if (appState === 'ROOM' || appState === 'CS_CHAT' || appState === 'LIVE_CHAT') {
             scrollToBottom();
         }
     }, [messages, appState]);
@@ -445,6 +455,138 @@ export function FoxTalkWidget() {
             setMessages(res.data || []);
         }
     };
+
+    // ===== 여우 실시간채팅 로직 =====
+    // OPEN 탭 전환 시 채팅 프로필 로드
+    useEffect(() => {
+        if (lobbyTab === 'OPEN' && userId && !liveChatProfileLoaded) {
+            (async () => {
+                const res = await QA_GET_CHAT_PROFILE(userId);
+                if (res.success && res.data) {
+                    setLiveChatNick(res.data.chat_nickname);
+                    setLiveChatAvatar(res.data.avatar_type || 'fox1');
+                } else {
+                    // 프로필이 없으면 로그인 닉네임을 기본값으로
+                    setLiveChatNick(sessionChatUser?.nickname || '');
+                }
+                setLiveChatProfileLoaded(true);
+            })();
+        }
+    }, [lobbyTab, userId, liveChatProfileLoaded, sessionChatUser]);
+
+    const handleJoinLiveChat = async () => {
+        if (!userId || !liveChatNick.trim()) return;
+        setIsJoiningLive(true);
+        try {
+            // 1. 프로필 저장
+            await OA_UPSERT_CHAT_PROFILE({
+                user_id: userId,
+                chat_nickname: liveChatNick.trim(),
+                avatar_type: liveChatAvatar
+            });
+
+            // 2. LIVE 방 조회
+            const roomRes = await QA_GET_LIVE_CHAT_ROOM();
+            if (!roomRes.success || !roomRes.data) {
+                alert('실시간 채팅방을 찾을 수 없습니다.');
+                return;
+            }
+
+            const liveRoom = roomRes.data;
+
+            // 3. 참여자 등록
+            const currentProfile: Profile = {
+                sessionId: userId,
+                nickname: liveChatNick.trim(),
+                avatarType: liveChatAvatar
+            };
+            setProfile(currentProfile);
+            localStorage.setItem('foxtalk_profile', JSON.stringify(currentProfile));
+
+            await OA_INSERT_CHAT_PARTICIPANT({
+                room_id: liveRoom.id,
+                session_id: userId,
+                nickname: liveChatNick.trim(),
+                avatar_type: liveChatAvatar
+            });
+
+            setMessages([]);
+            setCurrentRoom(liveRoom);
+            setAppState('LIVE_CHAT');
+
+            // 4. 참여자 로딩 & 메시지 로딩
+            await loadParticipants(liveRoom.id, currentProfile);
+            await loadMessages(liveRoom.id);
+        } catch (err: any) {
+            console.error('[LiveChat] 참여 실패:', err);
+            alert('실시간 채팅 참여에 실패했습니다.');
+        } finally {
+            setIsJoiningLive(false);
+        }
+    };
+
+    // LIVE_CHAT 상태에서 Supabase Presence로 접속자 수 추적
+    useEffect(() => {
+        if (appState !== 'LIVE_CHAT' || !currentRoom || !userId) return;
+
+        const presenceChannel = supabase.channel(`live-presence:${currentRoom.id}`, {
+            config: { presence: { key: userId } }
+        });
+
+        presenceChannel
+            .on('presence', { event: 'sync' }, () => {
+                const state = presenceChannel.presenceState();
+                setLiveOnlineCount(Object.keys(state).length);
+            })
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    await presenceChannel.track({ user_id: userId, nickname: liveChatNick });
+                }
+            });
+
+        return () => {
+            supabase.removeChannel(presenceChannel);
+        };
+    }, [appState, currentRoom, userId, liveChatNick]);
+
+    // LIVE_CHAT 상태에서 실시간 메시지 수신 (기존 ROOM과 동일 로직)
+    useEffect(() => {
+        if (appState !== 'LIVE_CHAT' || !currentRoom) return;
+
+        const channel = supabase.channel(`live-messages:${currentRoom.id}`)
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'foxtalk_messages',
+                filter: `room_id=eq.${currentRoom.id}`
+            }, async (payload) => {
+                const newMessage = payload.new as any;
+                if (!newMessage) return;
+
+                let participant = newMessage.participant_id ? participantsMapRef.current[newMessage.participant_id] : null;
+                if (!participant && newMessage.participant_id) {
+                    const { data: p } = await supabase
+                        .from('foxtalk_participants')
+                        .select('*')
+                        .eq('id', newMessage.participant_id)
+                        .single();
+                    if (p) {
+                        setParticipantsMap(prev => ({ ...prev, [p.id]: p }));
+                        participant = p;
+                    }
+                }
+                setMessages((prev) => {
+                    if (prev.some((m: { id?: string }) => m.id === newMessage.id)) return prev;
+                    const filtered = prev.filter(m => !(m.id?.startsWith('temp-') && m.content === newMessage.content));
+                    return [...filtered, { ...newMessage, participant }];
+                });
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [appState, currentRoom]);
 
     // CS Chat Methods
     const handleOpenCS = async () => {
@@ -1045,65 +1187,117 @@ export function FoxTalkWidget() {
                                     onClick={() => setLobbyTab('OPEN')}
                                     className={`flex-1 py-3.5 text-[13px] font-black transition-colors ${lobbyTab === 'OPEN' ? 'text-primary border-b-2 border-primary' : 'text-gray-400 hover:bg-gray-50'}`}
                                 >
-                                    👥 여우 오픈채팅
+                                    💬 여우 실시간채팅
                                 </button>
                             </div>
                         )}
 
-                        <div className="p-3 bg-gray-50 border-b sticky top-0 z-10 flex justify-between items-center shadow-sm">
-                            <h3 className="font-black text-[12px] text-gray-500 flex items-center gap-1.5">
-                                {lobbyTab === '1ON1' ? '내 다이렉트 대화방' : '참여 가능한 오픈채팅방'}
-                            </h3>
-                            {lobbyTab === 'OPEN' && (
-                                <button 
-                                    onClick={() => setAppState('CREATE_ROOM')}
-                                    className="bg-gray-900 hover:bg-black text-white text-[11px] font-black px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition-colors"
-                                >
-                                    <Plus className="w-3.5 h-3.5" /> 방 만들기
-                                </button>
-                            )}
-                        </div>
-                        <ul className="divide-y divide-gray-100 flex-1 overflow-y-auto">
-                            {rooms.filter(r => lobbyTab === '1ON1' ? r.type === '1ON1' : (r.type === 'OPEN' || r.type === 'SECRET')).length === 0 ? (
-                                <li className="text-center text-sm font-bold text-gray-400 py-16 flex flex-col items-center gap-3">
-                                    <MessageCircle className="w-10 h-10 opacity-20" />
-                                    {lobbyTab === '1ON1' ? '지원 내역이나 대화가 없습니다.' : '개설된 방이 없습니다.'}
-                                </li>
-                            ) : rooms.filter(r => lobbyTab === '1ON1' ? r.type === '1ON1' : (r.type === 'OPEN' || r.type === 'SECRET')).map(room => (
-                                <li key={room.id}>
-                                    <button 
-                                        onClick={() => joinRoom(room)}
-                                        className="w-full text-left p-4 hover:bg-orange-50/50 transition-colors group flex items-center gap-3"
-                                    >
-                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                                            {room.type === '1ON1' ? <Users className="w-5 h-5 text-gray-400" /> : <MessageCircle className="w-5 h-5 text-orange-400" />}
-                                        </div>
-                                        <div className="flex-1 overflow-hidden">
-                                            <div className="flex justify-between items-start mb-0.5">
-                                                <h4 className="font-black text-[14px] text-gray-900 group-hover:text-primary transition-colors flex items-center gap-1.5 truncate">
-                                                    {room.type === 'SECRET' && <Shield className="w-3.5 h-3.5 text-red-500 shrink-0" />}
-                                                    {getRoomDisplayTitle(room)}
-                                                </h4>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                {room.type !== '1ON1' && (
-                                                    <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                                                        N명 참여
-                                                    </span>
+                        {/* 1ON1 탭 콘텐츠 */}
+                        {lobbyTab === '1ON1' && (
+                            <>
+                                <div className="p-3 bg-gray-50 border-b sticky top-0 z-10 flex justify-between items-center shadow-sm">
+                                    <h3 className="font-black text-[12px] text-gray-500 flex items-center gap-1.5">
+                                        내 다이렉트 대화방
+                                    </h3>
+                                </div>
+                                <ul className="divide-y divide-gray-100 flex-1 overflow-y-auto">
+                                    {rooms.filter(r => r.type === '1ON1').length === 0 ? (
+                                        <li className="text-center text-sm font-bold text-gray-400 py-16 flex flex-col items-center gap-3">
+                                            <MessageCircle className="w-10 h-10 opacity-20" />
+                                            지원 내역이나 대화가 없습니다.
+                                        </li>
+                                    ) : rooms.filter(r => r.type === '1ON1').map(room => (
+                                        <li key={room.id}>
+                                            <button 
+                                                onClick={() => joinRoom(room)}
+                                                className="w-full text-left p-4 hover:bg-orange-50/50 transition-colors group flex items-center gap-3"
+                                            >
+                                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                                    <Users className="w-5 h-5 text-gray-400" />
+                                                </div>
+                                                <div className="flex-1 overflow-hidden">
+                                                    <div className="flex justify-between items-start mb-0.5">
+                                                        <h4 className="font-black text-[14px] text-gray-900 group-hover:text-primary transition-colors flex items-center gap-1.5 truncate">
+                                                            {getRoomDisplayTitle(room)}
+                                                        </h4>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[11px] text-gray-500 font-medium truncate">{room.latest_message || '최근 대화내용이 여기에 표시됩니다...'}</span>
+                                                    </div>
+                                                </div>
+                                                {room.unread_count > 0 && (
+                                                    <div className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center shrink-0 animate-pulse">
+                                                        N
+                                                    </div>
                                                 )}
-                                                {room.type === 'SECRET' && <span className="text-[10px] text-red-500 font-bold bg-red-50 px-1.5 py-0.5 rounded-full">비밀방</span>}
-                                                {room.type === '1ON1' && <span className="text-[11px] text-gray-500 font-medium truncate">{room.latest_message || '최근 대화내용이 여기에 표시됩니다...'}</span>}
-                                            </div>
-                                        </div>
-                                        {room.unread_count > 0 && (
-                                            <div className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center shrink-0 animate-pulse">
-                                                N
-                                            </div>
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </>
+                        )}
+
+                        {/* 실시간채팅 탭 콘텐츠 - 프로필 설정 + 참여 버튼 */}
+                        {lobbyTab === 'OPEN' && (
+                            <div className="flex-1 flex flex-col p-5 overflow-y-auto">
+                                {/* 프로필 설정 영역 */}
+                                <div className="flex flex-col items-center gap-4 mb-6">
+                                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center text-4xl shadow-inner border-2 border-orange-200">
+                                        {liveChatAvatar === 'fox1' ? '🦊' : liveChatAvatar === 'fox2' ? '🐱' : liveChatAvatar === 'fox3' ? '🐻' : liveChatAvatar === 'fox4' ? '🐰' : liveChatAvatar === 'fox5' ? '🐶' : '🦊'}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        {['fox1', 'fox2', 'fox3', 'fox4', 'fox5'].map((av) => (
+                                            <button
+                                                key={av}
+                                                onClick={() => setLiveChatAvatar(av)}
+                                                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all ${
+                                                    liveChatAvatar === av
+                                                        ? 'bg-primary/20 border-2 border-primary scale-110 shadow-md'
+                                                        : 'bg-gray-100 border-2 border-transparent hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                {av === 'fox1' ? '🦊' : av === 'fox2' ? '🐱' : av === 'fox3' ? '🐻' : av === 'fox4' ? '🐰' : '🐶'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3 mb-6">
+                                    <div>
+                                        <label className="text-xs font-bold text-gray-600 mb-1.5 block">채팅 닉네임</label>
+                                        <input
+                                            type="text"
+                                            value={liveChatNick}
+                                            onChange={(e) => setLiveChatNick(e.target.value.slice(0, 20))}
+                                            placeholder="채팅에서 사용할 닉네임"
+                                            className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-primary focus:ring-0 outline-none text-sm font-bold"
+                                        />
+                                        <span className="text-[10px] text-gray-400 mt-1 block text-right">{liveChatNick.length}/20</span>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 leading-relaxed">
+                                        채팅방에서 사용할 닉네임과 아바타를 설정할 수 있습니다.
+                                        기본 닉네임은 회원 닉네임이 자동으로 설정됩니다.
+                                    </p>
+                                </div>
+
+                                <div className="mt-auto">
+                                    <button
+                                        onClick={handleJoinLiveChat}
+                                        disabled={!liveChatNick.trim() || isJoiningLive || !userId}
+                                        className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black py-4 rounded-xl disabled:opacity-50 transition-all shadow-md flex items-center justify-center gap-2 text-[14px]"
+                                    >
+                                        {isJoiningLive ? (
+                                            <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> 참여 중...</>
+                                        ) : (
+                                            <><Radio className="w-5 h-5" /> 실시간 채팅 참여</>
                                         )}
                                     </button>
-                                </li>
-                            ))}
-                        </ul>
+                                    {!userId && (
+                                        <p className="text-[11px] text-red-400 font-bold text-center mt-2">로그인 후 이용 가능합니다.</p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -1150,6 +1344,83 @@ export function FoxTalkWidget() {
                         >
                             만들고 입장하기
                         </button>
+                    </div>
+                )}\n\n                {appState === 'LIVE_CHAT' && currentRoom && (
+                    <div className="flex flex-col h-full bg-[#f8f9fa]">
+                        {/* 상단 헤더 */}
+                        <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-3 shrink-0 flex items-center justify-between">
+                            <button
+                                onClick={() => {
+                                    setAppState('LOBBY');
+                                    setCurrentRoom(null);
+                                    setMessages([]);
+                                }}
+                                className="text-white/80 hover:text-white transition-colors"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
+                            <div className="text-center">
+                                <h3 className="text-white font-black text-[14px]">🦊 여우 실시간채팅</h3>
+                                <span className="text-white/80 text-[10px] font-bold flex items-center justify-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-300 animate-pulse" />
+                                    {liveOnlineCount}명 참여 중
+                                </span>
+                            </div>
+                            <div className="w-5" />
+                        </div>
+
+                        {/* 메시지 목록 */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                            {messages.length === 0 && (
+                                <div className="text-center text-sm font-bold text-gray-400 py-16 flex flex-col items-center gap-3">
+                                    <Radio className="w-10 h-10 opacity-20" />
+                                    아직 대화가 없습니다. 첫 메시지를 보내보세요!
+                                </div>
+                            )}
+                            {messages.map((m, i) => {
+                                if (m.message_type?.startsWith('SYSTEM')) {
+                                    return (
+                                        <div key={m.id || i} className="flex justify-center my-2">
+                                            <span className="bg-black/20 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm backdrop-blur-sm">
+                                                {m.content}
+                                            </span>
+                                        </div>
+                                    );
+                                }
+                                
+                                const isMe = m.participant?.session_id === profile?.sessionId;
+
+                                return (
+                                    <div key={m.id || i} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2`}>
+                                        {!isMe && <span className="text-[11px] font-bold text-gray-500 mb-1 ml-1">{m.participant?.nickname || '익명'}</span>}
+                                        <div className={`px-4 py-2.5 rounded-2xl max-w-[85%] text-[13px] shadow-sm leading-relaxed ${isMe ? 'bg-primary text-black rounded-tr-sm font-medium' : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm font-medium'}`}>
+                                            {m.content}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {/* 메시지 입력 */}
+                        <form onSubmit={sendMessage} className="p-3 bg-white border-t shrink-0">
+                            <div className="relative flex items-center">
+                                <input
+                                    type="text"
+                                    value={msgInput}
+                                    onChange={(e) => setMsgInput(e.target.value)}
+                                    placeholder="메시지를 입력하세요..."
+                                    className="w-full bg-gray-100 border-transparent focus:bg-white focus:border-primary focus:ring-0 rounded-full pl-4 pr-12 py-2.5 text-[13px] font-medium transition-all"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={!msgInput.trim()}
+                                    className="absolute right-1 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white disabled:opacity-50 disabled:bg-gray-300 transition-colors shadow-sm"
+                                >
+                                    <Send className="w-4 h-4 ml-0.5" />
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 )}
 
