@@ -17,7 +17,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             .limit(100);
 
         let isAdmin = false;
-        if (normalizedUserId) {
+        if (normalizedUserId && (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN')) {
             // 사이트 관리자인지 확인 (RLS 우회를 위해 supabaseAdmin 사용)
             const { data: adminSetting } = await supabaseAdmin
                 .from('site_settings')
