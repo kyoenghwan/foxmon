@@ -6,13 +6,13 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
     try {
         const normalizedUserId = userId ? userId.toLowerCase().trim() : undefined;
         
+        // 1. 방 정보 조회 (my_participant만 조인)
         let query = supabase
             .from('foxtalk_rooms')
             .select(`
                 *,
                 employer:employer_id(id, login_id, nickname, name, business_name),
                 seeker:seeker_id(id, login_id, nickname, name),
-                latest_message:foxtalk_messages(content, created_at, participant_id),
                 my_participant:foxtalk_participants(id, room_id, last_read_at, session_id)
             `)
             .eq('is_active', true);
@@ -50,10 +50,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             query = query.eq('my_participant.session_id', normalizedUserId);
         }
 
-        // 최신 메시지 순 정렬 및 최신 1건으로 제한 (referencedTable 지정)
         query = query
-            .order('created_at', { referencedTable: 'foxtalk_messages', ascending: false })
-            .limit(1, { referencedTable: 'foxtalk_messages' })
             .order('created_at', { ascending: false })
             .limit(100);
 
@@ -66,7 +63,28 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             return { success: true, data: [] };
         }
 
-        // 안읽은 메시지 맵 구축 (room_id -> count)
+        const roomIds = roomList.map(r => r.id);
+
+        // 2. 메시지 일괄 조회 (in 쿼리 1회) -> 각 방의 최신 메시지 매핑용
+        const { data: allMessages, error: msgError } = await supabase
+            .from('foxtalk_messages')
+            .select('room_id, content, created_at, participant_id')
+            .in('room_id', roomIds)
+            .order('created_at', { ascending: false });
+
+        if (msgError) throw msgError;
+
+        // 최신 메시지 맵 구축 (가장 먼저 매핑되는 것이 order by created_at desc 에 의해 최신임)
+        const latestMsgMap: Record<string, any> = {};
+        if (allMessages) {
+            allMessages.forEach(msg => {
+                if (!latestMsgMap[msg.room_id]) {
+                    latestMsgMap[msg.room_id] = msg;
+                }
+            });
+        }
+
+        // 3. 안읽은 메시지 맵 구축 (room_id -> count)
         const unreadCountMap: Record<string, number> = {};
         roomList.forEach(r => {
             unreadCountMap[r.id] = 0;
@@ -100,7 +118,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
         }
 
         const decoratedRooms = roomList.map((room: any) => {
-            const latestMsg = room.latest_message?.[0];
+            const latestMsg = latestMsgMap[room.id];
             const unreadCount = unreadCountMap[room.id] || 0;
 
             return {
