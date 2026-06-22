@@ -9,14 +9,15 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
     try {
         const normalizedUserId = userId ? userId.toLowerCase().trim() : undefined;
         
-        // 1. 방 정보 조회 (my_participant 조인 완전히 제거하여 렉 해소)
+        // 1. 방 정보 및 참여자 정보 일괄 조인 조회 (네트워크 RTT 1회로 단축)
         const tStep1Start = performance.now();
         let query = supabaseAdmin
             .from('foxtalk_rooms')
             .select(`
                 *,
                 employer:employer_id(id, login_id, nickname, name, business_name),
-                seeker:seeker_id(id, login_id, nickname, name)
+                seeker:seeker_id(id, login_id, nickname, name),
+                foxtalk_participants(id, last_read_at, session_id)
             `)
             .eq('is_active', true);
 
@@ -69,37 +70,17 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             };
         }
 
-        const roomIds = roomList.map(r => r.id);
-
-        // 2단계: 내 참가 정보 조회를 병렬 실행 (메시지 조회 제거)
-        const tParallel1Start = performance.now();
-        let myParticipants: any[] = [];
-        const promises1: PromiseLike<void>[] = [];
-
-        // 내 참가 정보 일괄 조회 프로미스
-        const tPartStart = performance.now();
-        if (normalizedUserId) {
-            const partPromise = supabaseAdmin
-                .from('foxtalk_participants')
-                .select('id, room_id, last_read_at, session_id')
-                .in('room_id', roomIds)
-                .eq('session_id', normalizedUserId)
-                .then(res => {
-                    perfStats['detail_participant_ms'] = performance.now() - tPartStart;
-                    if (res.error) throw res.error;
-                    myParticipants = res.data || [];
-                });
-            promises1.push(partPromise);
-        }
-
-        // 병렬 쿼리 실행 대기
-        await Promise.all(promises1);
-        perfStats['step2_3_parallel_ms'] = performance.now() - tParallel1Start;
+        // 2단계: (삭제됨 - 1단계 조인 쿼리로 통합됨)
+        perfStats['step2_3_parallel_ms'] = 0;
+        perfStats['detail_participant_ms'] = 0;
 
         // 3단계 & 4단계: 타임스탬프 비교로 안읽음 상태(EXISTS)를 O(1)로 판정하고 매핑
         const tStep4Start = performance.now();
         const decoratedRooms = roomList.map((room: any) => {
-            const myPart = myParticipants.find(p => p.room_id === room.id);
+            // 조인된 전체 참여자 목록에서 내 정보 추출
+            const myPart = room.foxtalk_participants?.find(
+                (p: any) => p.session_id?.toLowerCase().trim() === normalizedUserId
+            );
             
             // 타임스탬프 비교를 통해 안읽은 메시지 존재 여부 판정
             let hasNew = false;
@@ -111,8 +92,11 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
                 hasNew = lastMsgTime > lastReadTime;
             }
 
+            // 프론트 전달 시 foxtalk_participants 필드는 제외하여 패이로드 크기 축소 (보안 및 데이터 최소화)
+            const { foxtalk_participants, ...roomData } = room;
+
             return {
-                ...room,
+                ...roomData,
                 // 로비에서는 최신 메시지 텍스트를 로딩하지 않으므로 null 처리하거나 기본 안내
                 latest_message: room.last_message_at ? "새로운 대화가 있습니다." : "대화 내용이 없습니다.",
                 latest_message_at: room.last_message_at || null,
