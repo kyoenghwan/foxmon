@@ -22,6 +22,17 @@ export function SettingsModal() {
     const [activeTab, setActiveTab] = useState<'profile' | 'activity' | 'settings'>('profile');
     const [isReauthModalOpen, setIsReauthModalOpen] = useState(false);
     const [reauthLoading, setReauthLoading] = useState(false);
+
+    useEffect(() => {
+        const handleOpen = () => {
+            setIsOpen(true);
+            setActiveTab('profile');
+        };
+        window.addEventListener('open_settings_modal', handleOpen);
+        return () => {
+            window.removeEventListener('open_settings_modal', handleOpen);
+        };
+    }, []);
     
     // Profile State
     const [initialNickname, setInitialNickname] = useState('');
@@ -655,6 +666,20 @@ export function SettingsModal() {
                                             <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">나를 본 업체</span>
                                         </div>
                                         <span className="text-xs text-gray-400 font-bold group-hover:text-emerald-500">바로가기 &rarr;</span>
+                                    </Link>
+
+                                    <Link 
+                                        href="/mypage/activity" 
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex items-center justify-between p-4 bg-white hover:bg-blue-50/50 rounded-xl border border-gray-100 hover:border-blue-200 shadow-sm transition-all duration-300 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 group-hover:scale-110 transition-transform">
+                                                <FileText className="h-5 w-5" />
+                                            </div>
+                                            <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">내 활동 (작성 글/댓글)</span>
+                                        </div>
+                                        <span className="text-xs text-gray-400 font-bold group-hover:text-blue-500">바로가기 &rarr;</span>
                                     </Link>
 
                                     {role === 'EMPLOYER' ? (

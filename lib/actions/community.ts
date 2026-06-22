@@ -449,3 +449,84 @@ export async function syncPostCommentCount(postId: string, actualCount: number) 
     }
 }
 
+// ============================================
+// QA: 사용자 활동 개수 조회 (글, 댓글 수)
+// ============================================
+export async function getUserActivityCounts(userId: string) {
+    nvLog('AT', '▶️ QA_GET_USER_ACTIVITY_COUNTS', { userId });
+    try {
+        const [postsRes, commentsRes] = await Promise.all([
+            supabaseAdmin
+                .from('community_posts')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', userId),
+            supabaseAdmin
+                .from('community_comments')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', userId)
+        ]);
+
+        return {
+            success: true,
+            postCount: postsRes.count || 0,
+            commentCount: commentsRes.count || 0
+        };
+    } catch (err) {
+        nvLog('AT', '❌ QA_GET_USER_ACTIVITY_COUNTS 예외', err);
+        return { success: false, postCount: 0, commentCount: 0 };
+    }
+}
+
+// ============================================
+// QA: 사용자가 작성한 글 목록 조회
+// ============================================
+export async function getUserPosts(userId: string, page: number = 1, limit: number = 20) {
+    nvLog('AT', '▶️ QA_GET_USER_POSTS', { userId, page, limit });
+    try {
+        const offset = (page - 1) * limit;
+        const { data, error, count } = await supabaseAdmin
+            .from('community_posts')
+            .select('*', { count: 'exact' })
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        if (error) {
+            nvLog('AT', '❌ QA_GET_USER_POSTS 에러', error);
+            return { success: false, posts: [], total: 0 };
+        }
+
+        return { success: true, posts: data || [], total: count || 0 };
+    } catch (err) {
+        nvLog('AT', '❌ QA_GET_USER_POSTS 예외', err);
+        return { success: false, posts: [], total: 0 };
+    }
+}
+
+// ============================================
+// QA: 사용자가 작성한 댓글 목록 조회 (조인 포함)
+// ============================================
+export async function getUserComments(userId: string, page: number = 1, limit: number = 20) {
+    nvLog('AT', '▶️ QA_GET_USER_COMMENTS', { userId, page, limit });
+    try {
+        const offset = (page - 1) * limit;
+        const { data, error, count } = await supabaseAdmin
+            .from('community_comments')
+            .select('*, post:community_posts(title, board_id)', { count: 'exact' })
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        if (error) {
+            nvLog('AT', '❌ QA_GET_USER_COMMENTS 에러', error);
+            return { success: false, comments: [], total: 0 };
+        }
+
+        return { success: true, comments: data || [], total: count || 0 };
+    } catch (err) {
+        nvLog('AT', '❌ QA_GET_USER_COMMENTS 예외', err);
+        return { success: false, comments: [], total: 0 };
+    }
+}
+
+
