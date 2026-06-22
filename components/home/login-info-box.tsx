@@ -338,6 +338,17 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             </div>
                             <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">놀이터</span>
                         </button>
+                        
+                        <Link 
+                            href="/mypage/activity"
+                            prefetch={false}
+                            className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1 cursor-pointer"
+                        >
+                            <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-blue-50 text-blue-500 group-hover:bg-blue-100 transition-all duration-300 group-hover:scale-110 mx-auto">
+                                <FileText className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+                            </div>
+                            <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">내 활동</span>
+                        </Link>
                     </div>
                 </div>
             </div>
