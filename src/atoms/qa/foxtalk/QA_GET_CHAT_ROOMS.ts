@@ -71,27 +71,12 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
 
         const roomIds = roomList.map(r => r.id);
 
-        // 2단계: 최신 메시지와 내 참가 정보 조회를 병렬 실행 (PromiseLike<void>[] 사용)
+        // 2단계: 내 참가 정보 조회를 병렬 실행 (메시지 조회 제거)
         const tParallel1Start = performance.now();
-        let allMessages: any[] = [];
         let myParticipants: any[] = [];
         const promises1: PromiseLike<void>[] = [];
 
-        // 2-1. 메시지 일괄 조회 프로미스
-        const tMsgStart = performance.now();
-        const msgPromise = supabase
-            .from('foxtalk_messages')
-            .select('room_id, content, created_at, participant_id')
-            .in('room_id', roomIds)
-            .order('created_at', { ascending: false })
-            .then(res => {
-                perfStats['detail_msg_ms'] = performance.now() - tMsgStart;
-                if (res.error) throw res.error;
-                allMessages = res.data || [];
-            });
-        promises1.push(msgPromise);
-
-        // 2-2. 내 참가 정보 일괄 조회 프로미스 (조인 분리)
+        // 내 참가 정보 일괄 조회 프로미스
         const tPartStart = performance.now();
         if (normalizedUserId) {
             const partPromise = supabase
@@ -109,61 +94,31 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
 
         // 병렬 쿼리 실행 대기
         await Promise.all(promises1);
-        perfStats['step2_3_parallel_ms'] = performance.now() - tParallel1Start; // widget 로그명과 일치시킴
+        perfStats['step2_3_parallel_ms'] = performance.now() - tParallel1Start;
 
-        // 3단계: 내 참가 정보를 기반으로 안읽은 메시지 쿼리 실행
-        const tStep3Start = performance.now();
-        const unreadCountMap: Record<string, number> = {};
-        roomList.forEach(r => {
-            unreadCountMap[r.id] = 0;
-        });
-
-        let unreadMsgs: any[] = [];
-        if (normalizedUserId && myParticipants.length > 0) {
-            const orConditions = myParticipants.map(p => {
-                const lastRead = p.last_read_at || '1970-01-01T00:00:00.000Z';
-                return `and(room_id.eq.${p.room_id},created_at.gt.${lastRead},participant_id.neq.${p.id})`;
-            }).join(',');
-
-            const { data: msgs, error: unreadError } = await supabase
-                .from('foxtalk_messages')
-                .select('room_id')
-                .or(orConditions);
-
-            perfStats['detail_unread_ms'] = performance.now() - tStep3Start;
-            if (unreadError) throw unreadError;
-            unreadMsgs = msgs || [];
-
-            unreadMsgs.forEach(msg => {
-                if (unreadCountMap[msg.room_id] !== undefined) {
-                    unreadCountMap[msg.room_id] += 1;
-                }
-            });
-        }
-        perfStats['step3_unread_ms'] = performance.now() - tStep3Start;
-
-        // 4단계: 메모리 매핑 및 데이터 데코레이션
+        // 3단계 & 4단계: 타임스탬프 비교로 안읽음 상태(EXISTS)를 O(1)로 판정하고 매핑
         const tStep4Start = performance.now();
-        const latestMsgMap: Record<string, any> = {};
-        if (allMessages) {
-            allMessages.forEach(msg => {
-                if (!latestMsgMap[msg.room_id]) {
-                    latestMsgMap[msg.room_id] = msg;
-                }
-            });
-        }
-
         const decoratedRooms = roomList.map((room: any) => {
-            const latestMsg = latestMsgMap[room.id];
-            const unreadCount = unreadCountMap[room.id] || 0;
             const myPart = myParticipants.find(p => p.room_id === room.id);
+            
+            // 타임스탬프 비교를 통해 안읽은 메시지 존재 여부 판정
+            let hasNew = false;
+            if (myPart) {
+                const lastReadTime = myPart.last_read_at ? new Date(myPart.last_read_at).getTime() : 0;
+                const lastMsgTime = room.last_message_at ? new Date(room.last_message_at).getTime() : 0;
+                
+                // 마지막 읽은 시간보다 마지막 메시지 시간이 더 뒤라면 새 메시지 있음
+                hasNew = lastMsgTime > lastReadTime;
+            }
 
             return {
                 ...room,
-                latest_message: latestMsg ? latestMsg.content : null,
-                latest_message_at: latestMsg ? latestMsg.created_at : null,
-                unread_count: unreadCount,
-                my_participant: myPart ? [myPart] : [] // 프론트엔드가 기대하는 my_participant 배열 복원
+                // 로비에서는 최신 메시지 텍스트를 로딩하지 않으므로 null 처리하거나 기본 안내
+                latest_message: room.last_message_at ? "새로운 대화가 있습니다." : "대화 내용이 없습니다.",
+                latest_message_at: room.last_message_at || null,
+                // 프론트 호환성을 위해 unread_count가 1이상이면 뱃지를 띄우게 세팅 (뱃지 내부 텍스트는 N으로 표시될 것임)
+                unread_count: hasNew ? 1 : 0,
+                my_participant: myPart ? [myPart] : []
             };
         });
         perfStats['step4_decorate_ms'] = performance.now() - tStep4Start;

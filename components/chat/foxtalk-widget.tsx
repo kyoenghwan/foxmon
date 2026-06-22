@@ -1097,7 +1097,7 @@ export function FoxTalkWidget() {
                                         </div>
                                         {room.unread_count > 0 && (
                                             <div className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center shrink-0 animate-pulse">
-                                                n
+                                                N
                                             </div>
                                         )}
                                     </button>
