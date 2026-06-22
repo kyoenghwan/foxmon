@@ -183,14 +183,20 @@ export function FoxTalkWidget() {
                     setAppState('ROOM');
                     loadMessages(room.id);
                     
-                    // 1:1 방의 경우 "입장하셨습니다" 도배를 방지 (첫 채팅으로 시작 유도)
-                    if (room.type !== '1ON1') {
+                    // 1:1 방의 경우 읽음 처리 수행
+                    if (room.type === '1ON1') {
+                        await OA_UPDATE_PARTICIPANT_READ({
+                            room_id: room.id,
+                            session_id: currentProfile.sessionId
+                        });
+                    } else {
                         await OA_INSERT_CHAT_MESSAGE({
                             room_id: room.id,
                             content: `${currentProfile.nickname}님이 입장하셨습니다.`,
                             message_type: 'SYSTEM_JOIN'
                         });
                     }
+                    window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
                     return;
                 }
             }
@@ -307,6 +313,15 @@ export function FoxTalkWidget() {
         setAppState('ROOM');
         loadMessages(room.id);
 
+        // 1:1 방은 읽음 처리 수행
+        if (profile?.sessionId && room.type === '1ON1') {
+            await OA_UPDATE_PARTICIPANT_READ({
+                room_id: room.id,
+                session_id: profile.sessionId
+            });
+        }
+        window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
+
         // 시스템 메시지 발송 (입장) - 1ON1은 제외하여 채팅창 도배 방지
         if (room.type !== '1ON1') {
             await OA_INSERT_CHAT_MESSAGE({
@@ -404,6 +419,7 @@ export function FoxTalkWidget() {
         if (res.success) {
             setMsgInput('');
             await loadCSMessages(currentRoom.id);
+            window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
         } else {
             alert(res.error || '메시지 전송에 실패했습니다.');
         }
@@ -424,6 +440,7 @@ export function FoxTalkWidget() {
                         room_id: currentRoom.id,
                         session_id: profile.sessionId
                     });
+                    window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
                 }
 
                 let participant: Record<string, unknown> | null = null;
@@ -472,6 +489,7 @@ export function FoxTalkWidget() {
                 session_id: profile.sessionId
             });
         }
+        window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
     };
 
     const confirmLeaveRoom = async () => {
@@ -484,6 +502,7 @@ export function FoxTalkWidget() {
             setCurrentRoom(null);
             setShowLeaveConfirm(false);
             setShowRoomMenu(false);
+            window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
         } else {
             alert(res.error || '대화방 나가기에 실패했습니다.');
         }

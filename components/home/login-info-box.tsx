@@ -81,33 +81,67 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         fetchProfile();
     }, [session?.user?.id]);
 
+    // 실시간 안읽은 카운트 감지 채널 구독 최적화
     useEffect(() => {
         const userId = session?.user?.id;
         if (!userId) return;
 
         fetchUnreadCount();
 
-        // 실시간 안읽은 카운트 감지를 위한 채널 구독
-        const channel = supabase.channel(`unread-count-box:${userId}`)
-            .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'foxtalk_messages'
-            }, () => {
-                fetchUnreadCount();
-            })
-            .on('postgres_changes', {
+        // 1. 로컬 브라우저 이벤트 리스너 등록 (동일 브라우저 내 0ms 동기화)
+        const handleLocalUnreadChange = () => {
+            fetchUnreadCount();
+        };
+        window.addEventListener('foxtalk_unread_changed', handleLocalUnreadChange);
+
+        // 2. Supabase Realtime 채널 설정 (타 유저로부터의 실시간 수신 감지)
+        let channel: any = null;
+
+        const initRealtime = async () => {
+            const normalizedUserId = userId.toLowerCase().trim();
+            
+            // 유저가 참여 중인 활성 대화방 ID 리스트 조회
+            const { data: participants } = await supabase
+                .from('foxtalk_participants')
+                .select('room_id')
+                .eq('session_id', normalizedUserId);
+
+            const activeRoomIds = (participants || []).map(p => p.room_id).filter(Boolean);
+
+            channel = supabase.channel(`unread-count-box:${normalizedUserId}`);
+
+            // 본인이 속한 방에 새로운 메시지가 추가된 경우만 감지하여 갱신
+            activeRoomIds.forEach((roomId) => {
+                channel.on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'foxtalk_messages',
+                    filter: `room_id=eq.${roomId}`
+                }, () => {
+                    fetchUnreadCount();
+                });
+            });
+
+            // 내 참여 상태나 읽음 상태가 변경(UPDATE)될 때 감지하여 갱신
+            channel.on('postgres_changes', {
                 event: 'UPDATE',
                 schema: 'public',
                 table: 'foxtalk_participants',
-                filter: `session_id=eq.${userId}`
+                filter: `session_id=eq.${normalizedUserId}`
             }, () => {
                 fetchUnreadCount();
-            })
-            .subscribe();
+            });
+
+            channel.subscribe();
+        };
+
+        initRealtime();
 
         return () => {
-            supabase.removeChannel(channel);
+            window.removeEventListener('foxtalk_unread_changed', handleLocalUnreadChange);
+            if (channel) {
+                supabase.removeChannel(channel);
+            }
         };
     }, [session?.user?.id]);
 
