@@ -36,6 +36,8 @@ export function FoxTalkWidget() {
     const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
     const [participantsMap, setParticipantsMap] = useState<Record<string, any>>({});
     const participantsMapRef = useRef<Record<string, any>>({});
+    const [myParticipant, setMyParticipant] = useState<any | null>(null);
+    const [isSending, setIsSending] = useState(false);
     
     useEffect(() => {
         participantsMapRef.current = participantsMap;
@@ -190,7 +192,7 @@ export function FoxTalkWidget() {
 
                     setCurrentRoom(room);
                     setAppState('ROOM');
-                    await loadParticipants(room.id);
+                    await loadParticipants(room.id, currentProfile);
                     loadMessages(room.id);
                     
                     // 1:1 방의 경우 읽음 처리 수행
@@ -334,7 +336,7 @@ export function FoxTalkWidget() {
 
         setCurrentRoom(room);
         setAppState('ROOM');
-        await loadParticipants(room.id);
+        await loadParticipants(room.id, profile);
         loadMessages(room.id);
 
         // 1:1 방은 읽음 처리 수행
@@ -356,7 +358,7 @@ export function FoxTalkWidget() {
         }
     };
 
-    const loadParticipants = async (roomId: string) => {
+    const loadParticipants = async (roomId: string, currentProfile?: Profile | null) => {
         const { data: pList } = await supabase
             .from('foxtalk_participants')
             .select('*')
@@ -364,10 +366,16 @@ export function FoxTalkWidget() {
         
         if (pList) {
             const pMap: Record<string, any> = {};
+            let myP = null;
+            const targetProfile = currentProfile || profile;
             pList.forEach(p => {
                 pMap[p.id] = p;
+                if (targetProfile && p.session_id === targetProfile.sessionId) {
+                    myP = p;
+                }
             });
             setParticipantsMap(pMap);
+            if (myP) setMyParticipant(myP);
             return pMap;
         }
         return {};
@@ -420,7 +428,7 @@ export function FoxTalkWidget() {
         if (res.success && res.data) {
             setCurrentRoom(res.data);
             setAppState('CS_CHAT');
-            await loadParticipants(res.data.id);
+            await loadParticipants(res.data.id, prof);
             loadCSMessages(res.data.id);
         } else {
             alert('고객센터 연결에 실패했습니다.');
@@ -447,11 +455,14 @@ export function FoxTalkWidget() {
 
     const sendCSMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!msgInput.trim() || !currentRoom || !profile) return;
+        if (!msgInput.trim() || !currentRoom || !profile || isSending) return;
+
+        setIsSending(true);
+        const currentInput = msgInput.trim();
+        setMsgInput('');
 
         const { maskBadWords } = await import('@/lib/utils/bad-words');
-        const maskedContent = await maskBadWords(msgInput);
-        setMsgInput('');
+        const maskedContent = await maskBadWords(currentInput);
 
         // 낙관적 업데이트: 임시 CS 메시지 즉시 추가 (0ms 렌더링)
         const tempId = `temp-${crypto.randomUUID()}`;
@@ -469,19 +480,26 @@ export function FoxTalkWidget() {
         };
         setMessages(prev => [...prev, tempMsg]);
 
-        const res = await OA_INSERT_CS_MESSAGE({
-            room_id: currentRoom.id,
-            participant_id: profile.sessionId, // This acts as session_id for customers, and 'CS_ADMIN' for admins
-            content: maskedContent,
-            sender_nickname: profile.nickname
-        });
-        
-        if (res.success) {
-            window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
-        } else {
-            // 실패 시 롤백
+        try {
+            const res = await OA_INSERT_CS_MESSAGE({
+                room_id: currentRoom.id,
+                participant_id: profile.sessionId, // This acts as session_id for customers, and 'CS_ADMIN' for admins
+                content: maskedContent,
+                sender_nickname: profile.nickname
+            });
+            
+            if (res.success) {
+                window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
+            } else {
+                // 실패 시 롤백
+                setMessages(prev => prev.filter(m => m.id !== tempId));
+                alert(res.error || '메시지 전송에 실패했습니다.');
+            }
+        } catch (err) {
             setMessages(prev => prev.filter(m => m.id !== tempId));
-            alert(res.error || '메시지 전송에 실패했습니다.');
+            console.error(err);
+        } finally {
+            setIsSending(false);
         }
     };
 
@@ -531,15 +549,29 @@ export function FoxTalkWidget() {
 
     const sendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!msgInput.trim() || !currentRoom || !profile) return;
+        if (!msgInput.trim() || !currentRoom || !profile || isSending) return;
 
-        // 먼저 내 세션에 연결된 참여자 ID 가져오기 (원래는 전역 관리 필요)
-        const { data: p } = await supabase.from('foxtalk_participants').select('id').eq('room_id', currentRoom.id).eq('session_id', profile.sessionId).single();
+        let p = myParticipant;
+        if (!p) {
+            const { data: fetchedP } = await supabase
+                .from('foxtalk_participants')
+                .select('*')
+                .eq('room_id', currentRoom.id)
+                .eq('session_id', profile.sessionId)
+                .single();
+            if (fetchedP) {
+                p = fetchedP;
+                setMyParticipant(fetchedP);
+            }
+        }
         if (!p) return;
 
-        const { maskBadWords } = await import('@/lib/utils/bad-words');
-        const maskedContent = await maskBadWords(msgInput);
+        setIsSending(true);
+        const currentInput = msgInput.trim();
         setMsgInput('');
+
+        const { maskBadWords } = await import('@/lib/utils/bad-words');
+        const maskedContent = await maskBadWords(currentInput);
 
         // 낙관적 업데이트: 임시 메시지 즉각 추가 (0ms 렌더링)
         const tempId = `temp-${crypto.randomUUID()}`;
@@ -557,27 +589,32 @@ export function FoxTalkWidget() {
         };
         setMessages(prev => [...prev, tempMsg]);
 
-        const res = await OA_INSERT_CHAT_MESSAGE({
-            room_id: currentRoom.id,
-            participant_id: p.id,
-            content: maskedContent
-        });
-
-        if (!res.success) {
-            // 실패 시 롤백 제거
-            setMessages(prev => prev.filter(m => m.id !== tempId));
-            alert('메시지 전송에 실패했습니다.');
-            return;
-        }
-
-        // 내가 메시지를 보냈으므로 내 읽음 상태 갱신
-        if (profile?.sessionId && currentRoom.type === '1ON1') {
-            await OA_UPDATE_PARTICIPANT_READ({
+        try {
+            const res = await OA_INSERT_CHAT_MESSAGE({
                 room_id: currentRoom.id,
-                session_id: profile.sessionId
+                participant_id: p.id,
+                content: maskedContent
             });
+
+            if (!res.success) {
+                setMessages(prev => prev.filter(m => m.id !== tempId));
+                alert('메시지 전송에 실패했습니다.');
+            } else {
+                // 내가 메시지를 보냈으므로 내 읽음 상태 갱신
+                if (profile?.sessionId && currentRoom.type === '1ON1') {
+                    await OA_UPDATE_PARTICIPANT_READ({
+                        room_id: currentRoom.id,
+                        session_id: profile.sessionId
+                    });
+                }
+                window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
+            }
+        } catch (err) {
+            setMessages(prev => prev.filter(m => m.id !== tempId));
+            console.error(err);
+        } finally {
+            setIsSending(false);
         }
-        window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
     };
 
     const confirmLeaveRoom = async () => {
