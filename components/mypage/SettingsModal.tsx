@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { userSettingsAction } from '@/lib/actions';
-import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, Clock, Coins } from 'lucide-react';
+import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, Clock, Coins, FileText } from 'lucide-react';
 import { TelegramConnectButton } from '@/components/employer/telegram-connect-button';
 import { AgeVerificationBox } from '@/src/components/auth/AgeVerificationBox';
 import { signOut } from 'next-auth/react';
