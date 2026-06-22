@@ -9,15 +9,14 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
     try {
         const normalizedUserId = userId ? userId.toLowerCase().trim() : undefined;
         
-        // 1. 방 정보 조회 (my_participant만 조인)
+        // 1. 방 정보 조회 (my_participant 조인 완전히 제거하여 렉 해소)
         const tStep1Start = performance.now();
         let query = supabase
             .from('foxtalk_rooms')
             .select(`
                 *,
                 employer:employer_id(id, login_id, nickname, name, business_name),
-                seeker:seeker_id(id, login_id, nickname, name),
-                my_participant:foxtalk_participants(id, room_id, last_read_at, session_id)
+                seeker:seeker_id(id, login_id, nickname, name)
             `)
             .eq('is_active', true);
 
@@ -49,11 +48,6 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             }
         }
 
-        // 내 참여자 정보를 session_id 기준으로 RLS 필터링되게 조인 조건 적용
-        if (normalizedUserId) {
-            query = query.eq('my_participant.session_id', normalizedUserId);
-        }
-
         query = query
             .order('created_at', { ascending: false })
             .limit(100);
@@ -77,13 +71,13 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
 
         const roomIds = roomList.map(r => r.id);
 
-        // 2 & 3. 최신 메시지와 안읽은 메시지 쿼리를 동시에 병렬 실행 (네트워크 RTT 1회분 단축)
-        const tParallelStart = performance.now();
+        // 2단계: 최신 메시지와 내 참가 정보 조회를 병렬 실행 (PromiseLike<void>[] 사용)
+        const tParallel1Start = performance.now();
         let allMessages: any[] = [];
-        let unreadMsgs: any[] = [];
-        const promises: PromiseLike<void>[] = [];
+        let myParticipants: any[] = [];
+        const promises1: PromiseLike<void>[] = [];
 
-        // 2. 메시지 일괄 조회 프로미스
+        // 2-1. 메시지 일괄 조회 프로미스
         const tMsgStart = performance.now();
         const msgPromise = supabase
             .from('foxtalk_messages')
@@ -95,44 +89,60 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
                 if (res.error) throw res.error;
                 allMessages = res.data || [];
             });
-        promises.push(msgPromise);
+        promises1.push(msgPromise);
 
-        // 3. 안읽은 메시지 일괄 조회 프로미스
+        // 2-2. 내 참가 정보 일괄 조회 프로미스 (조인 분리)
+        const tPartStart = performance.now();
+        if (normalizedUserId) {
+            const partPromise = supabase
+                .from('foxtalk_participants')
+                .select('id, room_id, last_read_at, session_id')
+                .in('room_id', roomIds)
+                .eq('session_id', normalizedUserId)
+                .then(res => {
+                    perfStats['detail_participant_ms'] = performance.now() - tPartStart;
+                    if (res.error) throw res.error;
+                    myParticipants = res.data || [];
+                });
+            promises1.push(partPromise);
+        }
+
+        // 병렬 쿼리 실행 대기
+        await Promise.all(promises1);
+        perfStats['step2_3_parallel_ms'] = performance.now() - tParallel1Start; // widget 로그명과 일치시킴
+
+        // 3단계: 내 참가 정보를 기반으로 안읽은 메시지 쿼리 실행
+        const tStep3Start = performance.now();
         const unreadCountMap: Record<string, number> = {};
         roomList.forEach(r => {
             unreadCountMap[r.id] = 0;
         });
 
-        const tUnreadStart = performance.now();
-        if (normalizedUserId) {
-            const activeParticipants = roomList
-                .map(r => r.my_participant?.[0])
-                .filter(Boolean);
+        let unreadMsgs: any[] = [];
+        if (normalizedUserId && myParticipants.length > 0) {
+            const orConditions = myParticipants.map(p => {
+                const lastRead = p.last_read_at || '1970-01-01T00:00:00.000Z';
+                return `and(room_id.eq.${p.room_id},created_at.gt.${lastRead},participant_id.neq.${p.id})`;
+            }).join(',');
 
-            if (activeParticipants.length > 0) {
-                const orConditions = activeParticipants.map(p => {
-                    const lastRead = p.last_read_at || '1970-01-01T00:00:00.000Z';
-                    return `and(room_id.eq.${p.room_id},created_at.gt.${lastRead},participant_id.neq.${p.id})`;
-                }).join(',');
+            const { data: msgs, error: unreadError } = await supabase
+                .from('foxtalk_messages')
+                .select('room_id')
+                .or(orConditions);
 
-                const unreadPromise = supabase
-                    .from('foxtalk_messages')
-                    .select('room_id')
-                    .or(orConditions)
-                    .then(res => {
-                        perfStats['detail_unread_ms'] = performance.now() - tUnreadStart;
-                        if (res.error) throw res.error;
-                        unreadMsgs = res.data || [];
-                    });
-                promises.push(unreadPromise);
-            }
+            perfStats['detail_unread_ms'] = performance.now() - tStep3Start;
+            if (unreadError) throw unreadError;
+            unreadMsgs = msgs || [];
+
+            unreadMsgs.forEach(msg => {
+                if (unreadCountMap[msg.room_id] !== undefined) {
+                    unreadCountMap[msg.room_id] += 1;
+                }
+            });
         }
+        perfStats['step3_unread_ms'] = performance.now() - tStep3Start;
 
-        // 병렬 쿼리 실행 대기
-        await Promise.all(promises);
-        perfStats['step2_3_parallel_ms'] = performance.now() - tParallelStart;
-
-        // 최신 메시지 맵 구축 (가장 먼저 매핑되는 것이 order by created_at desc 에 의해 최신임)
+        // 4단계: 메모리 매핑 및 데이터 데코레이션
         const tStep4Start = performance.now();
         const latestMsgMap: Record<string, any> = {};
         if (allMessages) {
@@ -143,24 +153,17 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             });
         }
 
-        // 안읽은 메시지 카운트 누적
-        if (unreadMsgs.length > 0) {
-            unreadMsgs.forEach(msg => {
-                if (unreadCountMap[msg.room_id] !== undefined) {
-                    unreadCountMap[msg.room_id] += 1;
-                }
-            });
-        }
-
         const decoratedRooms = roomList.map((room: any) => {
             const latestMsg = latestMsgMap[room.id];
             const unreadCount = unreadCountMap[room.id] || 0;
+            const myPart = myParticipants.find(p => p.room_id === room.id);
 
             return {
                 ...room,
                 latest_message: latestMsg ? latestMsg.content : null,
                 latest_message_at: latestMsg ? latestMsg.created_at : null,
-                unread_count: unreadCount
+                unread_count: unreadCount,
+                my_participant: myPart ? [myPart] : [] // 프론트엔드가 기대하는 my_participant 배열 복원
             };
         });
         perfStats['step4_decorate_ms'] = performance.now() - tStep4Start;
