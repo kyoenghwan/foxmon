@@ -29,6 +29,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
     const { t } = useLanguage();
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [freeGamesCount, setFreeGamesCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [guestUser, setGuestUser] = useState<{ tempId: string } | null>(null);
 
@@ -117,6 +118,44 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         const handleProfileUpdate = () => fetchProfile();
         window.addEventListener('profile-updated', handleProfileUpdate);
         return () => window.removeEventListener('profile-updated', handleProfileUpdate);
+    }, [session?.user?.id]);
+
+    const fetchGameStatus = async () => {
+        const userId = session?.user?.id;
+        if (!userId) return;
+        try {
+            const res = await fetch('/api/game/status');
+            const data = await res.json();
+            if (data.success && data.dailyStatus) {
+                let freeCount = 0;
+                if (!data.dailyStatus.roulettePlayed) freeCount++;
+                if (!data.dailyStatus.luckyBoxPlayed) freeCount++;
+                if (!data.dailyStatus.retroPlayed) freeCount++;
+                if (!data.dailyStatus.attendancePlayed) freeCount++;
+                setFreeGamesCount(freeCount);
+            }
+        } catch (e) {
+            console.error('Failed to fetch game status:', e);
+        }
+    };
+
+    useEffect(() => {
+        const userId = session?.user?.id;
+        if (!userId) {
+            setFreeGamesCount(0);
+            return;
+        }
+
+        fetchGameStatus();
+
+        const handlePlayModalClose = () => {
+            fetchGameStatus();
+        };
+
+        window.addEventListener('play-modal-closed', handlePlayModalClose);
+        return () => {
+            window.removeEventListener('play-modal-closed', handlePlayModalClose);
+        };
     }, [session?.user?.id]);
 
     // 비회원 성인인증 완료 게스트 상태
@@ -239,7 +278,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                     <div className="overflow-hidden flex justify-around items-center px-2">
                         {isEmployer ? (
                             <Link href="/biz/points" prefetch={false} className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1">
-                                <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-amber-50 transition-all duration-300 text-gray-400 group-hover:text-amber-500 group-hover:scale-110 mx-auto">
+                                <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-amber-50 text-amber-500 group-hover:bg-amber-100 transition-all duration-300 group-hover:scale-110 mx-auto">
                                     <Coins className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                                 </div>
                                 <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">포인트</span>
@@ -252,7 +291,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                                 }}
                                 className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1 bg-transparent border-0 p-0 cursor-pointer"
                             >
-                                <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-amber-50 transition-all duration-300 text-gray-400 group-hover:text-amber-500 group-hover:scale-110 mx-auto">
+                                <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-amber-50 text-amber-500 group-hover:bg-amber-100 transition-all duration-300 group-hover:scale-110 mx-auto">
                                     <Coins className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                                 </div>
                                 <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">포인트</span>
@@ -266,7 +305,11 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             }}
                             className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1 relative bg-transparent border-0 p-0 cursor-pointer"
                         >
-                            <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-orange-50 transition-all duration-300 text-gray-400 group-hover:text-primary group-hover:scale-110 mx-auto relative">
+                            <div className={`h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all duration-300 group-hover:scale-110 mx-auto relative ${
+                                unreadCount > 0 
+                                    ? 'bg-orange-50 text-primary group-hover:bg-orange-100/80' 
+                                    : 'bg-gray-50 text-gray-400 group-hover:bg-orange-50 group-hover:text-primary'
+                            }`}>
                                 <MessageCircle className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                                 {unreadCount > 0 && (
                                     <span className="absolute -bottom-1 -right-1 flex h-4 sm:h-4.5 min-w-[16px] sm:min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[8px] sm:text-[9px] font-black text-white border-2 border-white shadow-sm">
@@ -281,8 +324,17 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             onClick={() => window.dispatchEvent(new CustomEvent('open_play_modal'))}
                             className="flex flex-col items-center gap-1 sm:gap-1.5 group flex-1 bg-transparent border-0 p-0 cursor-pointer"
                         >
-                            <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl bg-gray-50 group-hover:bg-pink-50 transition-all duration-300 text-gray-400 group-hover:text-pink-500 group-hover:scale-110 mx-auto">
+                            <div className={`h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all duration-300 group-hover:scale-110 mx-auto relative ${
+                                freeGamesCount > 0 
+                                    ? 'bg-pink-50 text-pink-500 group-hover:bg-pink-100/80' 
+                                    : 'bg-gray-50 text-gray-400 group-hover:bg-pink-50 group-hover:text-pink-500'
+                            }`}>
                                 <Gamepad2 className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+                                {freeGamesCount > 0 && (
+                                    <span className="absolute -bottom-1 -right-1 flex h-4 sm:h-4.5 min-w-[16px] sm:min-w-[18px] items-center justify-center rounded-full bg-pink-500 px-1 text-[8px] sm:text-[9px] font-black text-white border-2 border-white shadow-sm animate-pulse">
+                                        {freeGamesCount}
+                                    </span>
+                                )}
                             </div>
                             <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 group-hover:text-gray-900 transition-colors whitespace-nowrap text-center mt-1">놀이터</span>
                         </button>

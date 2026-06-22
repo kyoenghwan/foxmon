@@ -14,6 +14,13 @@ import { X } from 'lucide-react';
 export function PlayDashboardModal() {
   const [open, setOpen] = useState(false);
 
+  const handleOpenChange = (val: boolean) => {
+    setOpen(val);
+    if (!val) {
+      window.dispatchEvent(new Event('play-modal-closed'));
+    }
+  };
+
   useEffect(() => {
     const handleOpen = () => {
       setOpen(true);
@@ -31,7 +38,7 @@ export function PlayDashboardModal() {
   }, []);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-3xl w-[95vw] max-h-[92vh] overflow-y-auto bg-gray-950 border border-gray-800 text-white rounded-3xl p-5 md:p-8 scrollbar-hide">
         <div className="max-w-2xl mx-auto w-full space-y-6">
           <DialogHeader className="relative pr-8">
