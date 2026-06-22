@@ -11,7 +11,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
         
         // 1. 방 정보 조회 (my_participant 조인 완전히 제거하여 렉 해소)
         const tStep1Start = performance.now();
-        let query = supabase
+        let query = supabaseAdmin
             .from('foxtalk_rooms')
             .select(`
                 *,
@@ -79,7 +79,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
         // 내 참가 정보 일괄 조회 프로미스
         const tPartStart = performance.now();
         if (normalizedUserId) {
-            const partPromise = supabase
+            const partPromise = supabaseAdmin
                 .from('foxtalk_participants')
                 .select('id, room_id, last_read_at, session_id')
                 .in('room_id', roomIds)
