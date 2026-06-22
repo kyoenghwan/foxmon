@@ -62,7 +62,11 @@ export async function GET() {
             CREATE POLICY select_retro_board ON retro_draw_board FOR SELECT USING (true);
             CREATE POLICY select_retro_slots ON retro_draw_slots FOR SELECT USING (true);
 
-            -- 7. 추억의 뽑기판 100개 무작위 셔플 초기화 RPC 함수
+            -- 7. foxtalk_messages 인덱스 추가 (조회 성능 최적화)
+            CREATE INDEX IF NOT EXISTS idx_foxtalk_messages_room_id ON public.foxtalk_messages(room_id);
+            CREATE INDEX IF NOT EXISTS idx_foxtalk_messages_room_id_created_at ON public.foxtalk_messages(room_id, created_at ASC);
+
+            -- 8. 추억의 뽑기판 100개 무작위 셔플 초기화 RPC 함수
             CREATE OR REPLACE FUNCTION initialize_retro_board_round()
             RETURNS INTEGER AS $$
             DECLARE
