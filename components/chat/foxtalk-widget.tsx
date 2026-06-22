@@ -34,6 +34,13 @@ export function FoxTalkWidget() {
     const [lobbyTab, setLobbyTab] = useState<'1ON1' | 'OPEN'>('1ON1');
     const [showRoomMenu, setShowRoomMenu] = useState(false);
     const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+    const [participantsMap, setParticipantsMap] = useState<Record<string, any>>({});
+    const participantsMapRef = useRef<Record<string, any>>({});
+    
+    useEffect(() => {
+        participantsMapRef.current = participantsMap;
+    }, [participantsMap]);
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const pathname = usePathname();
     const { data: session } = useSession();
@@ -183,6 +190,7 @@ export function FoxTalkWidget() {
 
                     setCurrentRoom(room);
                     setAppState('ROOM');
+                    await loadParticipants(room.id);
                     loadMessages(room.id);
                     
                     // 1:1 방의 경우 읽음 처리 수행
@@ -326,6 +334,7 @@ export function FoxTalkWidget() {
 
         setCurrentRoom(room);
         setAppState('ROOM');
+        await loadParticipants(room.id);
         loadMessages(room.id);
 
         // 1:1 방은 읽음 처리 수행
@@ -345,6 +354,23 @@ export function FoxTalkWidget() {
                 message_type: 'SYSTEM_JOIN'
             });
         }
+    };
+
+    const loadParticipants = async (roomId: string) => {
+        const { data: pList } = await supabase
+            .from('foxtalk_participants')
+            .select('*')
+            .eq('room_id', roomId);
+        
+        if (pList) {
+            const pMap: Record<string, any> = {};
+            pList.forEach(p => {
+                pMap[p.id] = p;
+            });
+            setParticipantsMap(pMap);
+            return pMap;
+        }
+        return {};
     };
 
     const loadMessages = async (roomId: string) => {
@@ -394,6 +420,7 @@ export function FoxTalkWidget() {
         if (res.success && res.data) {
             setCurrentRoom(res.data);
             setAppState('CS_CHAT');
+            await loadParticipants(res.data.id);
             loadCSMessages(res.data.id);
         } else {
             alert('고객센터 연결에 실패했습니다.');
@@ -450,7 +477,6 @@ export function FoxTalkWidget() {
         });
         
         if (res.success) {
-            await loadCSMessages(currentRoom.id);
             window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
         } else {
             // 실패 시 롤백
@@ -477,14 +503,17 @@ export function FoxTalkWidget() {
                     window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
                 }
 
-                let participant: Record<string, unknown> | null = null;
-                if (newMessage.participant_id) {
+                let participant = newMessage.participant_id ? participantsMapRef.current[newMessage.participant_id] : null;
+                if (!participant && newMessage.participant_id) {
                     const { data: p } = await supabase
                         .from('foxtalk_participants')
                         .select('*')
                         .eq('id', newMessage.participant_id)
                         .single();
-                    participant = p;
+                    if (p) {
+                        setParticipantsMap(prev => ({ ...prev, [p.id]: p }));
+                        participant = p;
+                    }
                 }
                 setMessages((prev) => {
                     if (prev.some((m: { id?: string }) => m.id === newMessage.id)) return prev;
