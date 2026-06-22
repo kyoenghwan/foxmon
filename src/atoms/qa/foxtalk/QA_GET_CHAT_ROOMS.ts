@@ -37,7 +37,6 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             query = query.eq('type', '1ON1').eq('employer_id', normalizedUserId);
         } else {
             // 일반 구직자는 본인이 연관된 1ON1 방이거나, OPEN/SECRET 방을 봄
-            // Supabase 쿼리의 or 구문을 활용
             if (normalizedUserId) {
                 query = query.or(`type.in.(OPEN,SECRET),and(type.eq.1ON1,seeker_id.eq.${normalizedUserId})`);
             } else {
@@ -48,42 +47,73 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
         const { data: rooms, error } = await query;
 
         if (error) throw error;
-        
-        // 각 방의 최근 메시지 및 안읽은 카운트 조회
-        const decoratedRooms = await Promise.all((rooms || []).map(async (room: any) => {
-            // 1. 최근 메시지 1개 쿼리
-            const { data: latestMsg } = await supabase
-                .from('foxtalk_messages')
-                .select('content, created_at, participant_id')
-                .eq('room_id', room.id)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .maybeSingle();
 
-            // 2. 안읽은 메시지 카운팅
-            let unreadCount = 0;
-            if (normalizedUserId) {
-                const { data: participant } = await supabase
-                    .from('foxtalk_participants')
-                    .select('id, last_read_at')
-                    .eq('room_id', room.id)
-                    .eq('session_id', normalizedUserId)
-                    .maybeSingle();
+        const roomList = rooms || [];
+        if (roomList.length === 0) {
+            return { success: true, data: [] };
+        }
 
-                if (participant) {
-                    const lastReadAt = participant.last_read_at || '1970-01-01T00:00:00.000Z';
-                    const { count, error: countErr } = await supabase
-                        .from('foxtalk_messages')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('room_id', room.id)
-                        .neq('participant_id', participant.id)
-                        .gt('created_at', lastReadAt);
-                    
-                    if (!countErr && count !== null) {
-                        unreadCount = count;
+        const roomIds = roomList.map(r => r.id);
+
+        // 1. 모든 방에 대한 최근 메시지 일괄 조회 (최신순 정렬)
+        const { data: allMessages, error: msgError } = await supabase
+            .from('foxtalk_messages')
+            .select('room_id, content, created_at, participant_id')
+            .in('room_id', roomIds)
+            .order('created_at', { ascending: false });
+
+        if (msgError) throw msgError;
+
+        // 2. 내 세션이 참여한 방들의 참가자 정보 일괄 조회
+        const participantsMap: Record<string, any> = {};
+        if (normalizedUserId) {
+            const { data: participantsList, error: partError } = await supabase
+                .from('foxtalk_participants')
+                .select('id, room_id, last_read_at')
+                .in('room_id', roomIds)
+                .eq('session_id', normalizedUserId);
+            
+            if (partError) throw partError;
+
+            if (participantsList) {
+                participantsList.forEach(p => {
+                    participantsMap[p.room_id] = p;
+                });
+            }
+        }
+
+        // 3. 메시지 데이터를 바탕으로 최근 메시지 매핑 및 안읽은 개수 카운팅 (0ms)
+        const latestMsgMap: Record<string, any> = {};
+        const unreadCountMap: Record<string, number> = {};
+
+        // 초기화
+        roomIds.forEach(id => {
+            unreadCountMap[id] = 0;
+        });
+
+        if (allMessages) {
+            allMessages.forEach(msg => {
+                // 이미 채워진 것이 최신 메시지이므로, 비어있을 때만 (최초 1회만) 채워 넣음
+                if (!latestMsgMap[msg.room_id]) {
+                    latestMsgMap[msg.room_id] = msg;
+                }
+
+                // 안읽은 메시지 카운트 판정
+                if (normalizedUserId) {
+                    const myParticipant = participantsMap[msg.room_id];
+                    if (myParticipant) {
+                        const lastReadAt = myParticipant.last_read_at || '1970-01-01T00:00:00.000Z';
+                        if (msg.participant_id !== myParticipant.id && msg.created_at > lastReadAt) {
+                            unreadCountMap[msg.room_id] += 1;
+                        }
                     }
                 }
-            }
+            });
+        }
+
+        const decoratedRooms = roomList.map((room: any) => {
+            const latestMsg = latestMsgMap[room.id];
+            const unreadCount = unreadCountMap[room.id] || 0;
 
             return {
                 ...room,
@@ -91,7 +121,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
                 latest_message_at: latestMsg ? latestMsg.created_at : null,
                 unread_count: unreadCount
             };
-        }));
+        });
 
         return { success: true, data: decoratedRooms };
     } catch (error: any) {
