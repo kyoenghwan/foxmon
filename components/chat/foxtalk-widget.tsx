@@ -254,8 +254,11 @@ export function FoxTalkWidget() {
     };
 
     const loadRooms = async () => {
-        // userRole과 userId는 state에서 캡처됨
+        console.log(`[FoxTalk-Lobby] ===== 대화방 목록 조회 시작 (userId: ${userId}, role: ${userRole}) =====`);
+        const tStart = performance.now();
         const res = await QA_GET_CHAT_ROOMS(userId || undefined, userRole || undefined);
+        const tEnd = performance.now();
+        console.log(`[FoxTalk-Lobby] 대화방 목록 조회 완료 - 소요 시간: ${(tEnd - tStart).toFixed(2)}ms`);
         if (res.success) setRooms(res.data || []);
     };
 
