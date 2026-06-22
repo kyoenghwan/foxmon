@@ -11,7 +11,7 @@ import { ResumeManagementModal } from '@/components/resume/ResumeManagementModal
 import { MarqueeText } from '@/components/ui/marquee-text';
 import { userSettingsAction } from '@/lib/actions';
 import { supabase } from '@/lib/supabase';
-import { QA_GET_CHAT_ROOMS } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_ROOMS';
+import { QA_GET_TOTAL_UNREAD_CHAT_COUNT } from '@/src/atoms/qa/foxtalk/QA_GET_TOTAL_UNREAD_CHAT_COUNT';
 
 interface SessionUser {
     id?: string;
@@ -69,13 +69,11 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
 
     const fetchUnreadCount = async () => {
         const userId = session?.user?.id;
-        const userRole = session?.user?.role;
         if (!userId) return;
 
-        const res = await QA_GET_CHAT_ROOMS(userId, userRole);
-        if (res.success && res.data) {
-            const total = res.data.reduce((sum: number, r: any) => sum + (r.unread_count || 0), 0);
-            setUnreadCount(total);
+        const res = await QA_GET_TOTAL_UNREAD_CHAT_COUNT(userId);
+        if (res.success && res.data !== undefined) {
+            setUnreadCount(res.data);
         }
     };
 
