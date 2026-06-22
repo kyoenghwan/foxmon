@@ -65,32 +65,29 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
 
         const roomIds = roomList.map(r => r.id);
 
-        // 2. 메시지 일괄 조회 (in 쿼리 1회) -> 각 방의 최신 메시지 매핑용
-        const { data: allMessages, error: msgError } = await supabase
+        // 2 & 3. 최신 메시지와 안읽은 메시지 쿼리를 동시에 병렬 실행 (네트워크 RTT 1회분 단축)
+        let allMessages: any[] = [];
+        let unreadMsgs: any[] = [];
+        const promises: Promise<any>[] = [];
+
+        // 2. 메시지 일괄 조회 프로미스
+        const msgPromise = supabase
             .from('foxtalk_messages')
             .select('room_id, content, created_at, participant_id')
             .in('room_id', roomIds)
-            .order('created_at', { ascending: false });
-
-        if (msgError) throw msgError;
-
-        // 최신 메시지 맵 구축 (가장 먼저 매핑되는 것이 order by created_at desc 에 의해 최신임)
-        const latestMsgMap: Record<string, any> = {};
-        if (allMessages) {
-            allMessages.forEach(msg => {
-                if (!latestMsgMap[msg.room_id]) {
-                    latestMsgMap[msg.room_id] = msg;
-                }
+            .order('created_at', { ascending: false })
+            .then(res => {
+                if (res.error) throw res.error;
+                allMessages = res.data || [];
             });
-        }
+        promises.push(msgPromise);
 
-        // 3. 안읽은 메시지 맵 구축 (room_id -> count)
+        // 3. 안읽은 메시지 일괄 조회 프로미스
         const unreadCountMap: Record<string, number> = {};
         roomList.forEach(r => {
             unreadCountMap[r.id] = 0;
         });
 
-        // 내 참여 정보(my_participant) 목록을 일괄 수집하여 안읽은 메시지 개수 조건 조회
         if (normalizedUserId) {
             const activeParticipants = roomList
                 .map(r => r.my_participant?.[0])
@@ -102,19 +99,38 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
                     return `and(room_id.eq.${p.room_id},created_at.gt.${lastRead},participant_id.neq.${p.id})`;
                 }).join(',');
 
-                const { data: unreadMsgs, error: unreadError } = await supabase
+                const unreadPromise = supabase
                     .from('foxtalk_messages')
                     .select('room_id')
-                    .or(orConditions);
-
-                if (!unreadError && unreadMsgs) {
-                    unreadMsgs.forEach(msg => {
-                        if (unreadCountMap[msg.room_id] !== undefined) {
-                            unreadCountMap[msg.room_id] += 1;
-                        }
+                    .or(orConditions)
+                    .then(res => {
+                        if (res.error) throw res.error;
+                        unreadMsgs = res.data || [];
                     });
-                }
+                promises.push(unreadPromise);
             }
+        }
+
+        // 병렬 쿼리 실행 대기
+        await Promise.all(promises);
+
+        // 최신 메시지 맵 구축 (가장 먼저 매핑되는 것이 order by created_at desc 에 의해 최신임)
+        const latestMsgMap: Record<string, any> = {};
+        if (allMessages) {
+            allMessages.forEach(msg => {
+                if (!latestMsgMap[msg.room_id]) {
+                    latestMsgMap[msg.room_id] = msg;
+                }
+            });
+        }
+
+        // 안읽은 메시지 카운트 누적
+        if (unreadMsgs.length > 0) {
+            unreadMsgs.forEach(msg => {
+                if (unreadCountMap[msg.room_id] !== undefined) {
+                    unreadCountMap[msg.room_id] += 1;
+                }
+            });
         }
 
         const decoratedRooms = roomList.map((room: any) => {
