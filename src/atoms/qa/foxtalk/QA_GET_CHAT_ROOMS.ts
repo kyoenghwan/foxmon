@@ -3,10 +3,14 @@
 import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
+    const tServerStart = performance.now();
+    const perfStats: Record<string, number> = {};
+    
     try {
         const normalizedUserId = userId ? userId.toLowerCase().trim() : undefined;
         
         // 1. 방 정보 조회 (my_participant만 조인)
+        const tStep1Start = performance.now();
         let query = supabase
             .from('foxtalk_rooms')
             .select(`
@@ -55,28 +59,39 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             .limit(100);
 
         const { data: rooms, error } = await query;
+        perfStats['step1_rooms_ms'] = performance.now() - tStep1Start;
 
         if (error) throw error;
 
         const roomList = rooms || [];
         if (roomList.length === 0) {
-            return { success: true, data: [] };
+            return { 
+                success: true, 
+                data: [],
+                performance: {
+                    ...perfStats,
+                    server_total_ms: performance.now() - tServerStart
+                }
+            };
         }
 
         const roomIds = roomList.map(r => r.id);
 
         // 2 & 3. 최신 메시지와 안읽은 메시지 쿼리를 동시에 병렬 실행 (네트워크 RTT 1회분 단축)
+        const tParallelStart = performance.now();
         let allMessages: any[] = [];
         let unreadMsgs: any[] = [];
         const promises: Promise<any>[] = [];
 
         // 2. 메시지 일괄 조회 프로미스
+        const tMsgStart = performance.now();
         const msgPromise = supabase
             .from('foxtalk_messages')
             .select('room_id, content, created_at, participant_id')
             .in('room_id', roomIds)
             .order('created_at', { ascending: false })
             .then(res => {
+                perfStats['detail_msg_ms'] = performance.now() - tMsgStart;
                 if (res.error) throw res.error;
                 allMessages = res.data || [];
             });
@@ -88,6 +103,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             unreadCountMap[r.id] = 0;
         });
 
+        const tUnreadStart = performance.now();
         if (normalizedUserId) {
             const activeParticipants = roomList
                 .map(r => r.my_participant?.[0])
@@ -104,6 +120,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
                     .select('room_id')
                     .or(orConditions)
                     .then(res => {
+                        perfStats['detail_unread_ms'] = performance.now() - tUnreadStart;
                         if (res.error) throw res.error;
                         unreadMsgs = res.data || [];
                     });
@@ -113,8 +130,10 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
 
         // 병렬 쿼리 실행 대기
         await Promise.all(promises);
+        perfStats['step2_3_parallel_ms'] = performance.now() - tParallelStart;
 
         // 최신 메시지 맵 구축 (가장 먼저 매핑되는 것이 order by created_at desc 에 의해 최신임)
+        const tStep4Start = performance.now();
         const latestMsgMap: Record<string, any> = {};
         if (allMessages) {
             allMessages.forEach(msg => {
@@ -144,11 +163,26 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
                 unread_count: unreadCount
             };
         });
+        perfStats['step4_decorate_ms'] = performance.now() - tStep4Start;
 
-        return { success: true, data: decoratedRooms };
+        return { 
+            success: true, 
+            data: decoratedRooms,
+            performance: {
+                ...perfStats,
+                server_total_ms: performance.now() - tServerStart
+            }
+        };
     } catch (error: any) {
         console.error('QA_GET_CHAT_ROOMS Error:', error);
-        return { success: false, error: '방 목록을 불러오지 못했습니다.' };
+        return { 
+            success: false, 
+            error: '방 목록을 불러오지 못했습니다.',
+            performance: {
+                ...perfStats,
+                server_total_ms: performance.now() - tServerStart
+            }
+        };
     }
 };
 
