@@ -6,7 +6,7 @@ export const QA_GET_CHAT_MESSAGES = async (roomId: string) => {
             .from('foxtalk_messages')
             .select(`
                 *,
-                participant:foxtalk_participants(nickname, avatar_type)
+                participant:foxtalk_participants!foxtalk_messages_participant_id_fkey(nickname, avatar_type)
             `)
             .eq('room_id', roomId)
             .order('created_at', { ascending: true }) // 옛날 것부터 최신으로
