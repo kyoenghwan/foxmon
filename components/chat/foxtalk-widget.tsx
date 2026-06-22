@@ -183,19 +183,37 @@ export function FoxTalkWidget() {
                         }
                     }
                     
+                    console.log(`[FoxTalk-Event] ===== 이벤트 트리거 대화방 진입 프로세스 시작 (방 ID: ${room.id}) =====`);
+                    const tStart = performance.now();
+
+                    // 1. 참여자 등록 시간 측정
+                    const t1 = performance.now();
                     await OA_INSERT_CHAT_PARTICIPANT({
                         room_id: room.id,
                         session_id: currentProfile.sessionId,
                         nickname: currentProfile.nickname,
                         avatar_type: currentProfile.avatarType
                     });
+                    const t2 = performance.now();
+                    console.log(`[FoxTalk-Event] Step 1: 참여자 등록 완료 - 소요 시간: ${(t2 - t1).toFixed(2)}ms`);
 
                     setCurrentRoom(room);
                     setAppState('ROOM');
+
+                    // 2. 참여자 정보 로딩 시간 측정
+                    const t3 = performance.now();
                     await loadParticipants(room.id, currentProfile);
-                    loadMessages(room.id);
+                    const t4 = performance.now();
+                    console.log(`[FoxTalk-Event] Step 2: 참여자 캐시 획득 완료 - 소요 시간: ${(t4 - t3).toFixed(2)}ms`);
+
+                    // 3. 메시지 히스토리 조회 시간 측정
+                    const t5 = performance.now();
+                    await loadMessages(room.id);
+                    const t6 = performance.now();
+                    console.log(`[FoxTalk-Event] Step 3: 과거 대화 내용 조회 완료 - 소요 시간: ${(t6 - t5).toFixed(2)}ms`);
                     
-                    // 1:1 방의 경우 읽음 처리 수행
+                    // 4. 읽음 처리 수행 시간 측정
+                    const t7 = performance.now();
                     if (room.type === '1ON1') {
                         await OA_UPDATE_PARTICIPANT_READ({
                             room_id: room.id,
@@ -208,7 +226,11 @@ export function FoxTalkWidget() {
                             message_type: 'SYSTEM_JOIN'
                         });
                     }
+                    const t8 = performance.now();
+                    console.log(`[FoxTalk-Event] Step 4: 읽음 및 부가 처리 완료 - 소요 시간: ${(t8 - t7).toFixed(2)}ms`);
+
                     window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
+                    console.log(`[FoxTalk-Event] ===== 이벤트 트리거 대화방 진입 완료 - 총 소요 시간: ${(performance.now() - tStart).toFixed(2)}ms =====`);
                     return;
                 }
             }
@@ -442,17 +464,38 @@ export function FoxTalkWidget() {
     };
 
     const startCSChat = async (prof: Profile) => {
+        console.log(`[FoxTalk-CS] ===== 고객센터 대화방 진입 프로세스 시작 =====`);
+        const tStart = performance.now();
+
         setMessages([]); // 이전 대화 내용 즉시 청소
+
+        // 1. CS 룸 생성/획득 흐름 시간 측정
+        const t1 = performance.now();
         const res = await FA_CS_CHAT_FLOW({
             session_id: prof.sessionId,
             nickname: prof.nickname,
             avatar_type: prof.avatarType
         });
+        const t2 = performance.now();
+        console.log(`[FoxTalk-CS] Step 1: CS 대화방 획득 완료 - 소요 시간: ${(t2 - t1).toFixed(2)}ms`);
+
         if (res.success && res.data) {
             setCurrentRoom(res.data);
             setAppState('CS_CHAT');
+
+            // 2. 참가자 정보 로딩 시간 측정
+            const t3 = performance.now();
             await loadParticipants(res.data.id, prof);
-            loadCSMessages(res.data.id);
+            const t4 = performance.now();
+            console.log(`[FoxTalk-CS] Step 2: 참여자 캐시 획득 완료 - 소요 시간: ${(t4 - t3).toFixed(2)}ms`);
+
+            // 3. 메시지 로딩 시간 측정
+            const t5 = performance.now();
+            await loadCSMessages(res.data.id);
+            const t6 = performance.now();
+            console.log(`[FoxTalk-CS] Step 3: CS 대화 내역 조회 완료 - 소요 시간: ${(t6 - t5).toFixed(2)}ms`);
+
+            console.log(`[FoxTalk-CS] ===== 고객센터 대화방 진입 프로세스 완료 - 총 소요 시간: ${(performance.now() - tStart).toFixed(2)}ms =====`);
         } else {
             alert('고객센터 연결에 실패했습니다.');
         }
