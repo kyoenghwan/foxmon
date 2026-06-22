@@ -1,6 +1,6 @@
 import React from 'react';
 import SubPageLayout from '@/components/layout/sub-page-layout';
-import ActivityClient from './activity-client';
+import ActivityClient from '@/app/mypage/activity/activity-client';
 
 export const metadata = {
   title: '내 활동 - 폭스몬',
