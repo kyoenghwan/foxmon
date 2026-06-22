@@ -222,8 +222,9 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
     if (session && session.user) {
         // Logged In State
         const displayName = (session.user as any).nickname || session.user.name || (session.user.email ? session.user.email.split('@')[0] : '회원');
-        const isEmployer = (session.user.role === 'EMPLOYER' || session.user.role === 'ADMIN' || session.user.role === 'SUPER_ADMIN') && session.user.role !== 'VIEWER';
-        const showResumeMenu = session.user.role !== 'EMPLOYER' && session.user.role !== 'VIEWER';
+        const userRole = (session.user as any).role;
+        const isEmployer = userRole === 'EMPLOYER' || userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
+        const showResumeMenu = userRole !== 'EMPLOYER' && userRole !== 'VIEWER';
         
         return (
             <div className="h-full w-full bg-white rounded-2xl border p-4 sm:p-5 flex flex-col justify-between shadow-sm">
