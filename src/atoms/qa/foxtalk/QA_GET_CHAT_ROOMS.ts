@@ -81,7 +81,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
         const tParallelStart = performance.now();
         let allMessages: any[] = [];
         let unreadMsgs: any[] = [];
-        const promises: Promise<any>[] = [];
+        const promises: PromiseLike<void>[] = [];
 
         // 2. 메시지 일괄 조회 프로미스
         const tMsgStart = performance.now();
