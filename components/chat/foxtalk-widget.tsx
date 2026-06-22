@@ -246,9 +246,21 @@ export function FoxTalkWidget() {
                 const newMessage = payload.new as any;
                 if (!newMessage?.room_id) return;
 
-                // 내가 참여 중인 방에 새 메시지가 왔다면 목록 갱신
+                // 내가 참여 중인 방에 새 메시지가 왔다면 로컬 상태 즉시 갱신 (N+1 쿼리 방지)
                 if (userRoomIds.includes(newMessage.room_id)) {
-                    loadRooms();
+                    setRooms(prev => prev.map(room => {
+                        if (room.id === newMessage.room_id) {
+                            return {
+                                ...room,
+                                latest_message: newMessage.content,
+                                latest_message_at: newMessage.created_at,
+                                unread_count: (room.unread_count || 0) + 1
+                            };
+                        }
+                        return room;
+                    }).sort((a, b) => new Date(b.latest_message_at || b.created_at).getTime() - new Date(a.latest_message_at || a.created_at).getTime()));
+                    
+                    window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
                 }
             })
             .subscribe();
@@ -412,6 +424,23 @@ export function FoxTalkWidget() {
 
         const { maskBadWords } = await import('@/lib/utils/bad-words');
         const maskedContent = await maskBadWords(msgInput);
+        setMsgInput('');
+
+        // 낙관적 업데이트: 임시 CS 메시지 즉시 추가 (0ms 렌더링)
+        const tempId = `temp-${crypto.randomUUID()}`;
+        const tempMsg = {
+            id: tempId,
+            room_id: currentRoom.id,
+            content: maskedContent,
+            created_at: new Date().toISOString(),
+            participant_id: profile.sessionId,
+            participant: {
+                session_id: profile.sessionId,
+                nickname: profile.nickname,
+                avatar_type: profile.avatarType
+            }
+        };
+        setMessages(prev => [...prev, tempMsg]);
 
         const res = await OA_INSERT_CS_MESSAGE({
             room_id: currentRoom.id,
@@ -421,10 +450,11 @@ export function FoxTalkWidget() {
         });
         
         if (res.success) {
-            setMsgInput('');
             await loadCSMessages(currentRoom.id);
             window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
         } else {
+            // 실패 시 롤백
+            setMessages(prev => prev.filter(m => m.id !== tempId));
             alert(res.error || '메시지 전송에 실패했습니다.');
         }
     };
@@ -435,7 +465,7 @@ export function FoxTalkWidget() {
         
         const channel = supabase.channel(`room:${currentRoom.id}`)
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'foxtalk_messages', filter: `room_id=eq.${currentRoom.id}` }, async (payload) => {
-                const newMessage = payload.new as Record<string, unknown> & { id?: string; participant_id?: string };
+                const newMessage = payload.new as Record<string, unknown> & { id?: string; participant_id?: string; content?: string };
                 if (!newMessage?.id) return;
                 
                 // 상대방 메시지 수신 시 읽음 처리 수행
@@ -458,7 +488,9 @@ export function FoxTalkWidget() {
                 }
                 setMessages((prev) => {
                     if (prev.some((m: { id?: string }) => m.id === newMessage.id)) return prev;
-                    return [...prev, { ...newMessage, participant }];
+                    // 내가 보낸 실제 메시지가 들어왔다면 기존 임시(temp) 메시지를 필터링하여 대체
+                    const filtered = prev.filter(m => !(m.id?.startsWith('temp-') && m.content === newMessage.content));
+                    return [...filtered, { ...newMessage, participant }];
                 });
             })
             .subscribe();
@@ -478,13 +510,36 @@ export function FoxTalkWidget() {
 
         const { maskBadWords } = await import('@/lib/utils/bad-words');
         const maskedContent = await maskBadWords(msgInput);
+        setMsgInput('');
 
-        await OA_INSERT_CHAT_MESSAGE({
+        // 낙관적 업데이트: 임시 메시지 즉각 추가 (0ms 렌더링)
+        const tempId = `temp-${crypto.randomUUID()}`;
+        const tempMsg = {
+            id: tempId,
+            room_id: currentRoom.id,
+            content: maskedContent,
+            created_at: new Date().toISOString(),
+            participant_id: p.id,
+            participant: {
+                session_id: profile.sessionId,
+                nickname: profile.nickname,
+                avatar_type: profile.avatarType
+            }
+        };
+        setMessages(prev => [...prev, tempMsg]);
+
+        const res = await OA_INSERT_CHAT_MESSAGE({
             room_id: currentRoom.id,
             participant_id: p.id,
             content: maskedContent
         });
-        setMsgInput('');
+
+        if (!res.success) {
+            // 실패 시 롤백 제거
+            setMessages(prev => prev.filter(m => m.id !== tempId));
+            alert('메시지 전송에 실패했습니다.');
+            return;
+        }
 
         // 내가 메시지를 보냈으므로 내 읽음 상태 갱신
         if (profile?.sessionId && currentRoom.type === '1ON1') {
