@@ -316,7 +316,11 @@ export function FoxTalkWidget() {
     // Join Room
     const joinRoom = async (room: any) => {
         if (!profile) return;
+        console.log(`[FoxTalk] ===== 대화방 진입 프로세스 시작 (방 ID: ${room.id}) =====`);
+        const tStart = performance.now();
+
         setMessages([]); // 이전 대화 내용 즉시 청소
+
         if (room.type === 'SECRET' && room.created_by !== profile.sessionId) {
             const pass = prompt('비밀방입니다. 비밀번호를 입력해주세요.');
             // (간단 데모용 평문 비교. 실제론 해시 비교 필요)
@@ -326,26 +330,43 @@ export function FoxTalkWidget() {
             }
         }
         
-        // 참여자 등록
+        // 1. 참여자 등록 시간 측정
+        const t1 = performance.now();
         await OA_INSERT_CHAT_PARTICIPANT({
             room_id: room.id,
             session_id: profile.sessionId,
             nickname: profile.nickname,
             avatar_type: profile.avatarType
         });
+        const t2 = performance.now();
+        console.log(`[FoxTalk] Step 1: 참여자 등록 완료 - 소요 시간: ${(t2 - t1).toFixed(2)}ms`);
 
         setCurrentRoom(room);
         setAppState('ROOM');
-        await loadParticipants(room.id, profile);
-        loadMessages(room.id);
 
-        // 1:1 방은 읽음 처리 수행
+        // 2. 참여자 정보 로딩 시간 측정
+        const t3 = performance.now();
+        await loadParticipants(room.id, profile);
+        const t4 = performance.now();
+        console.log(`[FoxTalk] Step 2: 참여자 캐시 획득 완료 - 소요 시간: ${(t4 - t3).toFixed(2)}ms`);
+
+        // 3. 메시지 히스토리 조회 시간 측정
+        const t5 = performance.now();
+        await loadMessages(room.id);
+        const t6 = performance.now();
+        console.log(`[FoxTalk] Step 3: 과거 대화 내용 조회 완료 - 소요 시간: ${(t6 - t5).toFixed(2)}ms`);
+
+        // 4. 읽음 처리 수행 시간 측정
+        const t7 = performance.now();
         if (profile?.sessionId && room.type === '1ON1') {
             await OA_UPDATE_PARTICIPANT_READ({
                 room_id: room.id,
                 session_id: profile.sessionId
             });
         }
+        const t8 = performance.now();
+        console.log(`[FoxTalk] Step 4: 읽음 상태 갱신 완료 - 소요 시간: ${(t8 - t7).toFixed(2)}ms`);
+
         window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
 
         // 시스템 메시지 발송 (입장) - 1ON1은 제외하여 채팅창 도배 방지
@@ -356,6 +377,8 @@ export function FoxTalkWidget() {
                 message_type: 'SYSTEM_JOIN'
             });
         }
+        
+        console.log(`[FoxTalk] ===== 대화방 진입 프로세스 완료 - 총 소요 시간: ${(performance.now() - tStart).toFixed(2)}ms =====`);
     };
 
     const loadParticipants = async (roomId: string, currentProfile?: Profile | null) => {
