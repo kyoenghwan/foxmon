@@ -163,6 +163,8 @@ export function FoxTalkWidget() {
                         return;
                     }
                     
+                    setMessages([]); // 이전 대화 내용 즉시 청소
+                    
                     // 최신 프로필 정보로 joinRoom 로직 직접 실행 (Stale Closure 방지)
                     if (room.type === 'SECRET' && room.created_by !== currentProfile.sessionId) {
                         const pass = prompt('비밀방입니다. 비밀번호를 입력해주세요.');
@@ -292,6 +294,7 @@ export function FoxTalkWidget() {
     // Join Room
     const joinRoom = async (room: any) => {
         if (!profile) return;
+        setMessages([]); // 이전 대화 내용 즉시 청소
         if (room.type === 'SECRET' && room.created_by !== profile.sessionId) {
             const pass = prompt('비밀방입니다. 비밀번호를 입력해주세요.');
             // (간단 데모용 평문 비교. 실제론 해시 비교 필요)
@@ -370,6 +373,7 @@ export function FoxTalkWidget() {
     };
 
     const startCSChat = async (prof: Profile) => {
+        setMessages([]); // 이전 대화 내용 즉시 청소
         const res = await FA_CS_CHAT_FLOW({
             session_id: prof.sessionId,
             nickname: prof.nickname,
