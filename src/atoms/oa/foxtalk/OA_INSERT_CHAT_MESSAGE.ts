@@ -62,6 +62,33 @@ export const OA_INSERT_CHAT_MESSAGE = async (data: MessageData) => {
                 }
             }
         }
+        // --- Web Push 알림 발송 (비동기, 실패해도 메시지 발송엔 영향 없음) ---
+        if (data.message_type !== 'SYSTEM_JOIN' && data.message_type !== 'SYSTEM_LEAVE') {
+            try {
+                const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://foxmon.co.kr';
+                // 발신자 닉네임 조회
+                let senderNick = '폭스톡';
+                if (data.participant_id) {
+                    const { data: participant } = await supabaseAdmin
+                        .from('foxtalk_participants')
+                        .select('nickname')
+                        .eq('id', data.participant_id)
+                        .single();
+                    senderNick = participant?.nickname || '폭스톡';
+                }
+
+                fetch(`${siteUrl}/api/push/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: `🦊 ${senderNick}`,
+                        body: data.content.length > 100 ? data.content.substring(0, 100) + '...' : data.content,
+                        room_id: data.room_id,
+                        sender_id: data.participant_id || null,
+                    }),
+                }).catch(() => {}); // fire-and-forget
+            } catch {}
+        }
 
         return { success: true, data: message };
     } catch (error: any) {

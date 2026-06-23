@@ -19,6 +19,7 @@ import { FA_CS_CHAT_FLOW } from '@/src/atoms/fa/support/FA_CS_CHAT_FLOW';
 import { QA_GET_CS_MESSAGES } from '@/src/atoms/qa/support/QA_GET_CS_MESSAGES';
 import { OA_INSERT_CS_MESSAGE } from '@/src/atoms/oa/support/OA_INSERT_CS_MESSAGE';
 import { QA_GET_USER_GENDER } from '@/src/atoms/qa/auth/QA_GET_USER_GENDER';
+import { playNotificationSound, showBrowserNotification } from '@/lib/notification-sound';
 
 type AppState = 'CLOSED' | 'MENU' | 'SETUP' | 'LOBBY' | 'CREATE_ROOM' | 'ROOM' | 'CS_SETUP' | 'CS_CHAT' | 'LIVE_CHAT';
 
@@ -317,6 +318,14 @@ export function FoxTalkWidget() {
                     }).sort((a, b) => new Date(b.latest_message_at || b.created_at).getTime() - new Date(a.latest_message_at || a.created_at).getTime()));
                     
                     window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
+
+                    // 알림음 + 브라우저 알림 (내가 보낸 메시지 제외)
+                    if (newMessage.session_id !== userId) {
+                        playNotificationSound();
+                        if (document.hidden) {
+                            showBrowserNotification('🦊 폭스톡', newMessage.content || '새 메시지가 도착했습니다.');
+                        }
+                    }
                 }
             })
             .subscribe();
@@ -774,6 +783,16 @@ export function FoxTalkWidget() {
                     const filtered = prev.filter(m => !(m.id?.startsWith('temp-') && m.content === newMessage.content));
                     return [...filtered, { ...newMessage, participant }];
                 });
+
+                // 알림음 + 브라우저 알림 (타인 메시지만)
+                const isMyMsg = participant?.session_id === profile?.sessionId;
+                if (!isMyMsg && (newMessage as any).message_type !== 'SYSTEM_JOIN') {
+                    playNotificationSound();
+                    if (document.hidden) {
+                        const senderName = participant?.nickname || '알 수 없음';
+                        showBrowserNotification(`🦊 ${senderName}`, (newMessage.content as string) || '새 메시지');
+                    }
+                }
             })
             .subscribe();
 
