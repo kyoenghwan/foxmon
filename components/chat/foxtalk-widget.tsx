@@ -18,6 +18,7 @@ import { OA_UPSERT_CHAT_PROFILE } from '@/src/atoms/oa/foxtalk/OA_UPSERT_CHAT_PR
 import { FA_CS_CHAT_FLOW } from '@/src/atoms/fa/support/FA_CS_CHAT_FLOW';
 import { QA_GET_CS_MESSAGES } from '@/src/atoms/qa/support/QA_GET_CS_MESSAGES';
 import { OA_INSERT_CS_MESSAGE } from '@/src/atoms/oa/support/OA_INSERT_CS_MESSAGE';
+import { QA_GET_USER_GENDER } from '@/src/atoms/qa/auth/QA_GET_USER_GENDER';
 
 type AppState = 'CLOSED' | 'MENU' | 'SETUP' | 'LOBBY' | 'CREATE_ROOM' | 'ROOM' | 'CS_SETUP' | 'CS_CHAT' | 'LIVE_CHAT';
 
@@ -478,6 +479,12 @@ export function FoxTalkWidget() {
         if (!userId || !liveChatNick.trim()) return;
         setIsJoiningLive(true);
         try {
+            // 0. 성별 확인 (여성 전용)
+            const genderRes = await QA_GET_USER_GENDER(userId);
+            if (genderRes.success && genderRes.gender === 'MALE') {
+                alert('여성 회원 전용 채팅방입니다.');
+                return;
+            }
             // 1. 프로필 저장
             await OA_UPSERT_CHAT_PROFILE({
                 user_id: userId,
