@@ -517,6 +517,13 @@ export function FoxTalkWidget() {
             // 4. 참여자 로딩 & 메시지 로딩
             await loadParticipants(liveRoom.id, currentProfile);
             await loadMessages(liveRoom.id);
+
+            // 5. 입장 시스템 메시지
+            await OA_INSERT_CHAT_MESSAGE({
+                room_id: liveRoom.id,
+                content: `${liveChatNick.trim()}님이 입장하셨습니다.`,
+                message_type: 'SYSTEM_JOIN'
+            });
         } catch (err: any) {
             console.error('[LiveChat] 참여 실패:', err);
             alert('실시간 채팅 참여에 실패했습니다.');
