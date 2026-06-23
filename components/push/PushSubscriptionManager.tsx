@@ -26,58 +26,63 @@ export function PushSubscriptionManager() {
     const { data: session } = useSession();
     const subscribedRef = useRef(false);
 
-    useEffect(() => {
+    const trySubscribe = async () => {
         if (!session?.user?.id) return;
         if (subscribedRef.current) return;
         if (!VAPID_PUBLIC_KEY) return;
         if (!('serviceWorker' in navigator)) return;
         if (!('PushManager' in window)) return;
 
-        const subscribe = async () => {
-            try {
-                // 알림 권한 요청
-                const permission = await Notification.requestPermission();
-                if (permission !== 'granted') {
-                    console.log('[Push] 알림 권한 거부됨');
-                    return;
-                }
-
-                // Service Worker 준비 대기
-                const registration = await navigator.serviceWorker.ready;
-
-                // 기존 구독 확인
-                let subscription = await registration.pushManager.getSubscription();
-
-                if (!subscription) {
-                    // 새 구독 생성
-                    subscription = await registration.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
-                    });
-                    console.log('[Push] 새 구독 생성 완료');
-                } else {
-                    console.log('[Push] 기존 구독 재사용');
-                }
-
-                // DB에 저장
-                const result = await OA_SAVE_PUSH_SUBSCRIPTION({
-                    user_id: session.user.id,
-                    subscription: subscription.toJSON(),
-                });
-
-                if (result.success) {
-                    subscribedRef.current = true;
-                    console.log('[Push] 구독 정보 저장 완료');
-                }
-            } catch (err) {
-                console.warn('[Push] 구독 실패:', err);
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                console.log('[Push] 알림 권한 거부됨');
+                return;
             }
-        };
 
-        // 약간의 딜레이 후 구독 시도 (SW 등록 완료 대기)
-        const timer = setTimeout(subscribe, 3000);
+            const registration = await navigator.serviceWorker.ready;
+            let subscription = await registration.pushManager.getSubscription();
+
+            if (!subscription) {
+                subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
+                });
+                console.log('[Push] 새 구독 생성 완료');
+            }
+
+            const result = await OA_SAVE_PUSH_SUBSCRIPTION({
+                user_id: session.user.id,
+                subscription: subscription.toJSON(),
+            });
+
+            if (result.success) {
+                subscribedRef.current = true;
+                console.log('[Push] 구독 정보 저장 완료');
+            }
+        } catch (err) {
+            console.warn('[Push] 구독 실패:', err);
+        }
+    };
+
+    // 설정에서 푸시 알림을 켰을 때 구독
+    useEffect(() => {
+        const handleEnablePush = () => {
+            trySubscribe();
+        };
+        window.addEventListener('foxmon_enable_push', handleEnablePush);
+        return () => window.removeEventListener('foxmon_enable_push', handleEnablePush);
+    }, [session?.user?.id]);
+
+    // 이미 푸시 알림이 켜져 있으면 자동 구독
+    useEffect(() => {
+        if (!session?.user?.id) return;
+        if (typeof window === 'undefined') return;
+        if (localStorage.getItem('foxmon_notif_push') !== '1') return;
+
+        const timer = setTimeout(trySubscribe, 3000);
         return () => clearTimeout(timer);
     }, [session?.user?.id]);
 
-    return null; // 렌더링 없음
+    return null;
 }

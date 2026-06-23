@@ -319,10 +319,12 @@ export function FoxTalkWidget() {
                     
                     window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
 
-                    // 알림음 + 브라우저 알림 (내가 보낸 메시지 제외)
+                    // 알림음 + 브라우저 알림 (내가 보낸 메시지 제외, 설정에서 켠 경우만)
                     if (newMessage.session_id !== userId) {
-                        playNotificationSound();
-                        if (document.hidden) {
+                        if (localStorage.getItem('foxmon_notif_sound') === '1') {
+                            playNotificationSound();
+                        }
+                        if (document.hidden && localStorage.getItem('foxmon_notif_browser') === '1') {
                             showBrowserNotification('🦊 폭스톡', newMessage.content || '새 메시지가 도착했습니다.');
                         }
                     }
@@ -784,11 +786,13 @@ export function FoxTalkWidget() {
                     return [...filtered, { ...newMessage, participant }];
                 });
 
-                // 알림음 + 브라우저 알림 (타인 메시지만)
+                // 알림음 + 브라우저 알림 (타인 메시지만, 설정에서 켠 경우만)
                 const isMyMsg = participant?.session_id === profile?.sessionId;
                 if (!isMyMsg && (newMessage as any).message_type !== 'SYSTEM_JOIN') {
-                    playNotificationSound();
-                    if (document.hidden) {
+                    if (localStorage.getItem('foxmon_notif_sound') === '1') {
+                        playNotificationSound();
+                    }
+                    if (document.hidden && localStorage.getItem('foxmon_notif_browser') === '1') {
                         const senderName = participant?.nickname || '알 수 없음';
                         showBrowserNotification(`🦊 ${senderName}`, (newMessage.content as string) || '새 메시지');
                     }
