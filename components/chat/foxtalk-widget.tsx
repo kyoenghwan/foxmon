@@ -1285,6 +1285,10 @@ export function FoxTalkWidget() {
                                         채팅방에서 사용할 닉네임과 아바타를 설정할 수 있습니다.
                                         기본 닉네임은 회원 닉네임이 자동으로 설정됩니다.
                                     </p>
+                                    <div className="flex items-center gap-1.5 bg-pink-50 border border-pink-200 rounded-lg px-3 py-2 mt-1">
+                                        <span className="text-sm">👩</span>
+                                        <span className="text-[11px] font-black text-pink-500">여성 회원 전용 채팅방입니다</span>
+                                    </div>
                                 </div>
 
                                 <div className="mt-auto">
@@ -1367,7 +1371,7 @@ export function FoxTalkWidget() {
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
                             <div className="text-center">
-                                <h3 className="text-white font-black text-[14px]">🦊 여우 실시간채팅</h3>
+                                <h3 className="text-white font-black text-[14px] flex items-center justify-center gap-1.5">🦊 여우 실시간채팅 <span className="text-[9px] bg-pink-500 text-white px-1.5 py-0.5 rounded-full font-bold">👩 여성전용</span></h3>
                                 <span className="text-white/80 text-[10px] font-bold flex items-center justify-center gap-1">
                                     <span className="w-1.5 h-1.5 rounded-full bg-green-300 animate-pulse" />
                                     {liveOnlineCount}명 참여 중
