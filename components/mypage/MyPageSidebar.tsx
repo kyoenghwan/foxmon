@@ -47,14 +47,6 @@ export function MyPageSidebar({ isMobile = false }: { isMobile?: boolean }) {
             title: '프로필',
             items: [
                 {
-                    id: 'edit-profile',
-                    label: '회원정보 수정',
-                    icon: User,
-                    onClick: () => {
-                        window.dispatchEvent(new Event('open_settings_modal'));
-                    }
-                },
-                {
                     id: 'activity',
                     label: `내 활동 ${postCount}`,
                     icon: FileText,
