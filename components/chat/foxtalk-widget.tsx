@@ -1356,7 +1356,9 @@ export function FoxTalkWidget() {
                             만들고 입장하기
                         </button>
                     </div>
-                )}\n\n                {appState === 'LIVE_CHAT' && currentRoom && (
+                )}
+
+                {appState === 'LIVE_CHAT' && currentRoom && (
                     <div className="flex flex-col h-full bg-[#f8f9fa]">
                         {/* 상단 헤더 */}
                         <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-3 shrink-0 flex items-center justify-between">
