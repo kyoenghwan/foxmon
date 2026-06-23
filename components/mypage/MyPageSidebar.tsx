@@ -110,29 +110,18 @@ export function MyPageSidebar({ isMobile = false }: { isMobile?: boolean }) {
                 <div className="flex gap-1.5 px-4 whitespace-nowrap">
                     {allItems.map((item) => {
                         const isActive = item.href ? pathname === item.href : false;
-                        if (item.href) {
-                            return (
-                                <Link
-                                    key={item.id}
-                                    href={item.href}
-                                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
-                                        isActive
-                                            ? 'bg-primary text-white shadow-sm'
-                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    {item.label}
-                                </Link>
-                            );
-                        }
                         return (
-                            <button
+                            <Link
                                 key={item.id}
-                                onClick={item.onClick}
-                                className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500 hover:bg-gray-200 transition-all"
+                                href={item.href}
+                                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
+                                    isActive
+                                        ? 'bg-primary text-white shadow-sm'
+                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                }`}
                             >
                                 {item.label}
-                            </button>
+                            </Link>
                         );
                     })}
                     <button
@@ -183,18 +172,10 @@ export function MyPageSidebar({ isMobile = false }: { isMobile?: boolean }) {
                                     </>
                                 );
 
-                                if (item.href) {
-                                    return (
-                                        <Link key={item.id} href={item.href} className={className}>
-                                            {content}
-                                        </Link>
-                                    );
-                                }
-
                                 return (
-                                    <button key={item.id} onClick={item.onClick} className={className}>
+                                    <Link key={item.id} href={item.href} className={className}>
                                         {content}
-                                    </button>
+                                    </Link>
                                 );
                             })}
                         </div>

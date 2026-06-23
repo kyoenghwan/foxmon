@@ -52,7 +52,7 @@ export function PushSubscriptionManager() {
                     // 새 구독 생성
                     subscription = await registration.pushManager.subscribe({
                         userVisibleOnly: true,
-                        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+                        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
                     });
                     console.log('[Push] 새 구독 생성 완료');
                 } else {
