@@ -6,7 +6,7 @@ import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import { nvLog } from '@/lib/logger';
 import { FA_CHECK_DUPLICATE_FLOW } from '@/src/atoms/fa/auth/FA_CHECK_DUPLICATE_FLOW';
-import { normalizeLoginId } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
+import { normalizeLoginId, RA_VALIDATE_LOGIN_ID } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -120,6 +120,7 @@ export function RegisterForm() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [idError, setIdError] = useState<string | null>(null);
   const [duplicateChecked, setDuplicateChecked] = useState({ id: false, nickname: false });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -205,15 +206,27 @@ export function RegisterForm() {
   };
 
   const checkId = async () => {
-    if (!formData.loginId) return alert('아이디를 입력해주세요.');
+    if (!formData.loginId) {
+      setIdError('아이디를 입력해주세요.');
+      return alert('아이디를 입력해주세요.');
+    }
+    const validation = RA_VALIDATE_LOGIN_ID(formData.loginId);
+    if (!validation.isValid) {
+      setIdError(validation.error || '올바르지 않은 아이디 형식입니다.');
+      return alert(validation.error || '올바르지 않은 아이디 형식입니다.');
+    }
     const result = await FA_CHECK_DUPLICATE_FLOW({ loginId: formData.loginId });
     if (!result.success) {
-      alert(result.message || '사용할 수 없는 아이디입니다.');
+      const errMsg = result.message || '사용할 수 없는 아이디입니다.';
+      setIdError(errMsg);
+      alert(errMsg);
       setDuplicateChecked((prev) => ({ ...prev, id: false }));
     } else if (result.success) {
+      setIdError(null);
       alert('사용 가능한 아이디입니다.');
       setDuplicateChecked(prev => ({ ...prev, id: true }));
     } else {
+      setIdError('오류가 발생했습니다.');
       alert('오류가 발생했습니다.');
     }
   };
@@ -261,6 +274,13 @@ export function RegisterForm() {
   const validateStep4 = () => {
     if (!formData.loginId) {
       setError('아이디를 입력해주세요.');
+      setIdError('아이디를 입력해주세요.');
+      return false;
+    }
+    const validation = RA_VALIDATE_LOGIN_ID(formData.loginId);
+    if (!validation.isValid) {
+      setError(validation.error || '올바르지 않은 아이디 형식입니다.');
+      setIdError(validation.error || '올바르지 않은 아이디 형식입니다.');
       return false;
     }
     if (!duplicateChecked.id) {
@@ -284,6 +304,7 @@ export function RegisterForm() {
       return false;
     }
     setError(null);
+    setIdError(null);
     return true;
   };
 
@@ -591,7 +612,15 @@ export function RegisterForm() {
                       placeholder="4~15자 영문 소문자·숫자"
                       value={formData.loginId}
                       onChange={(e) => {
-                        setFormData({ ...formData, loginId: normalizeLoginId(e.target.value) });
+                        const val = e.target.value;
+                        const normalized = normalizeLoginId(val);
+                        const hasInvalidChar = val.toLowerCase() !== val.toLowerCase().replace(/[^a-z0-9]/g, '');
+                        if (hasInvalidChar) {
+                          setIdError('영문 소문자와 숫자만 입력 가능합니다.');
+                        } else {
+                          setIdError(null);
+                        }
+                        setFormData({ ...formData, loginId: normalized });
                         setDuplicateChecked(prev => ({ ...prev, id: false }));
                       }}
                       autoComplete="off"
@@ -610,6 +639,12 @@ export function RegisterForm() {
                     </Button>
                   </div>
                 </div>
+                {idError && (
+                  <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] gap-3 -mt-3 animate-in fade-in">
+                    <div />
+                    <span className="text-[11px] text-red-500 font-bold">✗ {idError}</span>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-[90px_1fr] md:grid-cols-[110px_1fr] items-center gap-3">
                   <Label className="text-gray-600 text-[13px] font-black tracking-wider">비밀번호 <span className="text-purple-600">*</span></Label>
