@@ -12,7 +12,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { userSettingsAction } from '@/lib/actions';
-import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, Clock, Coins, FileText } from 'lucide-react';
+import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, Clock, Coins, FileText, LogOut } from 'lucide-react';
+import { playNotificationSound } from '@/lib/notification-sound';
 import { TelegramConnectButton } from '@/components/employer/telegram-connect-button';
 import { AgeVerificationBox } from '@/src/components/auth/AgeVerificationBox';
 import { signOut } from 'next-auth/react';
@@ -740,6 +741,9 @@ export function SettingsModal() {
                                                     const next = !notifSound;
                                                     setNotifSound(next);
                                                     localStorage.setItem('foxmon_notif_sound', next ? '1' : '0');
+                                                    if (next) {
+                                                        playNotificationSound(); // 테스트 소리 재생
+                                                    }
                                                 }}
                                                 className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
                                                     notifSound ? 'bg-primary' : 'bg-gray-300'
