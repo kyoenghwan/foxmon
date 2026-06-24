@@ -54,7 +54,7 @@ export async function POST(req: Request) {
           trace.push(`[1단계_평문] reqClientInfo: [${reqClientInfo}]`);
 
           const encryptReqClientInfo = encryptKmcTokenRequest(reqClientInfo, keyInfo.ClientPrivateKey);
-          trace.push(`[1단계_암호문] encryptReqClientInfo (일부): [${encryptReqClientInfo.substring(0, 30)}...]`);
+          trace.push(`[1단계_암호문] encryptReqClientInfo (일부): [${encryptReqClientInfo ? encryptReqClientInfo.substring(0, 30) : 'null'}...]`);
           trace.push(`[1단계_ServiceId] serviceId: [${keyInfo.ServiceId}]`);
           
           const usageCode = process.env.KMC_USAGE_CODE || '01016';

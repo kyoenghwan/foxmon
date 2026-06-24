@@ -134,14 +134,8 @@ export async function decryptMokKeyInfo(trace?: string[]): Promise<KmcKeyInfo> {
       }
       const serviceId = mobileOK.getServiceId();
       log(`⚡ [KMC_DECRYPT] 벤더 라이브러리 serviceId 획득 성공: [${serviceId}]`);
-      cachedKeyInfo = {
-        ServiceId: serviceId,
-        ClientPrivateKey: '', // 벤더 모듈 사용 시 개별 PEM 키는 필요 없으므로 공백 처리
-        ServerPublicKey: ''
-      };
-      return cachedKeyInfo;
     } catch (vendorErr: any) {
-      log(`⚠️ [KMC_DECRYPT] 벤더 라이브러리 초기화 실패 (${vendorErr.message}). 순수 crypto 복호화로 전환합니다.`);
+      log(`⚠️ [KMC_DECRYPT] 벤더 라이브러리 초기화 실패 (${vendorErr.message}).`);
     }
   }
   try {
@@ -306,7 +300,11 @@ export function encryptKmcTokenRequest(plainText: string, clientPrivateKeyPem: s
   if (mobileOK?.RSAEncrypt) {
     nvLog('AT', '🔑 [KMC_ENCRYPT] 벤더 라이브러리(mobileOK.RSAEncrypt)를 사용해 1단계 데이터를 암호화합니다.');
     try {
-      return mobileOK.RSAEncrypt(plainText);
+      const encrypted = mobileOK.RSAEncrypt(plainText);
+      if (encrypted) {
+        return encrypted;
+      }
+      nvLog('AT', '⚠️ [KMC_ENCRYPT] 벤더 라이브러리 암호화 결과가 비어있습니다. 순수 crypto 암호화로 폴백합니다.');
     } catch (err: any) {
       nvLog('AT', `⚠️ [KMC_ENCRYPT] 벤더 라이브러리 암호화 실패: ${err.message}. 순수 crypto 암호화로 폴백합니다.`);
     }
