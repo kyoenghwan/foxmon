@@ -83,6 +83,9 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
   // 회원가입 전 본인인증 선제 실행 핸들러
   const handleRegisterClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('foxmon_verified_user');
+    }
     router.push('/register');
   };
 
