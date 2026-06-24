@@ -399,21 +399,11 @@ export function SettingsModal() {
                             </Button>
                         ) : activeTab === 'settings' ? (
                             <Button 
-                                onClick={async () => {
-                                    if (currentPassword || newPassword || confirmPassword) {
-                                        const success = await handleSavePassword();
-                                        if (success) {
-                                            setIsOpen(false);
-                                        }
-                                    } else {
-                                        setIsOpen(false);
-                                    }
-                                }}
-                                disabled={savingPassword || loadingData} 
+                                onClick={() => setIsOpen(false)}
+                                disabled={loadingData} 
                                 className="bg-[#1A1F2C] hover:bg-black text-white px-4 font-bold rounded-lg h-9 shadow-sm"
                             >
-                                {savingPassword && <Loader2 className="w-3 h-3 animate-spin mr-1.5" />}
-                                저장
+                                확인
                             </Button>
                         ) : (
                             <Button 
