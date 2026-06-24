@@ -274,13 +274,7 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                         <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500 animate-pulse" /> {t.sections.specialJobsTitle}
                     </h2>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        {isEmployer && (
-                            <Link href="/biz/ads">
-                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-black bg-yellow-400 hover:bg-yellow-500">
-                                     <Plus className="w-4 h-4 mr-1" /> 스페셜 등록
-                                </Button>
-                            </Link>
-                        )}
+
                         {session?.user?.role !== 'VIEWER' && (
                             <Link href="/biz/ads/new">
                                 <span className="text-xs sm:text-sm font-black text-white bg-primary hover:bg-orange-600 px-3 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1">
@@ -331,13 +325,7 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                         <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" /> {t.sections.generalJobsTitle}
                     </h2>
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        {isEmployer && (
-                            <Link href="/biz/ads">
-                                <Button size="sm" className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-gray-700 bg-white border hover:bg-gray-50">
-                                     <Plus className="w-4 h-4 mr-1" /> 일반 등록
-                                </Button>
-                            </Link>
-                        )}
+
                         {session?.user?.role !== 'VIEWER' && (
                             <Link href="/biz/ads/new">
                                 <span className="text-xs sm:text-sm font-black text-white bg-primary hover:bg-orange-600 px-3 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1">
