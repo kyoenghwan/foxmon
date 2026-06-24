@@ -12,11 +12,12 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { userSettingsAction } from '@/lib/actions';
-import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, Clock, Coins, FileText, LogOut } from 'lucide-react';
+import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, Clock, Coins, FileText, LogOut, Briefcase } from 'lucide-react';
 import { playNotificationSound } from '@/lib/notification-sound';
 import { TelegramConnectButton } from '@/components/employer/telegram-connect-button';
 import { AgeVerificationBox } from '@/src/components/auth/AgeVerificationBox';
 import { signOut } from 'next-auth/react';
+import { getMyActivityCounts } from '@/lib/actions/community';
 
 export function SettingsModal() {
     const [isOpen, setIsOpen] = useState(false);
@@ -80,6 +81,14 @@ export function SettingsModal() {
     const [pwMessage, setPwMessage] = useState('');
     const [pwError, setPwError] = useState('');
 
+    // Activity Counts
+    const [activityCounts, setActivityCounts] = useState({
+        postCount: 0,
+        appCount: 0,
+        recentCount: 0,
+        scrapCount: 0,
+    });
+
     // 1. 컴포넌트 마운트 시 최초 1회 프로필 데이터 백그라운드 사전 페칭 (Pre-fetching)
     useEffect(() => {
         fetchUserData(true);
@@ -97,6 +106,30 @@ export function SettingsModal() {
         if (isOpen) {
             const hasData = nickname || email || phoneNumber;
             fetchUserData(!hasData); // 데이터가 이미 있다면 로딩UI(loadingData) 없이 백그라운드로 가져옴
+
+            // 활동 카운트 로드 (localStorage + DB)
+            if (typeof window !== 'undefined') {
+                const apps = localStorage.getItem('foxmon_applications');
+                const recents = localStorage.getItem('foxmon_recent');
+                const scraps = localStorage.getItem('foxmon_scraps');
+                setActivityCounts(prev => ({
+                    ...prev,
+                    appCount: apps ? JSON.parse(apps).length : 0,
+                    recentCount: recents ? JSON.parse(recents).length : 0,
+                    scrapCount: scraps ? JSON.parse(scraps).length : 0,
+                }));
+            }
+            // DB에서 글/댓글 카운트 가져오기
+            (async () => {
+                try {
+                    const res = await getMyActivityCounts();
+                    if (res.success) {
+                        setActivityCounts(prev => ({ ...prev, postCount: res.postCount }));
+                    }
+                } catch (e) {
+                    console.error('활동 카운트 로드 실패:', e);
+                }
+            })();
         } else {
             resetFields();
         }
@@ -630,19 +663,39 @@ export function SettingsModal() {
                                 </h3>
                                 <div className="grid grid-cols-1 gap-3">
                                     <Link 
-                                        href="/mypage/scraps" 
+                                        href="/mypage/activity" 
                                         onClick={() => setIsOpen(false)}
-                                        className="flex items-center justify-between p-4 bg-white hover:bg-orange-50/50 rounded-xl border border-gray-100 hover:border-orange-200 shadow-sm transition-all duration-300 group"
+                                        className="flex items-center justify-between p-4 bg-white hover:bg-blue-50/50 rounded-xl border border-gray-100 hover:border-blue-200 shadow-sm transition-all duration-300 group"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-orange-50 text-primary group-hover:scale-110 transition-transform">
-                                                <Heart className="h-5 w-5 fill-current" />
+                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 group-hover:scale-110 transition-transform">
+                                                <FileText className="h-5 w-5" />
                                             </div>
-                                            <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">스크랩 공고</span>
+                                            <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">내 활동 (작성 글/댓글)</span>
                                         </div>
-                                        <span className="text-xs text-gray-400 font-bold group-hover:text-primary">바로가기 &rarr;</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">{activityCounts.postCount}건</span>
+                                            <span className="text-xs text-gray-400 font-bold group-hover:text-blue-500">&rarr;</span>
+                                        </div>
                                     </Link>
-                                    
+
+                                    <Link 
+                                        href="/mypage/applications" 
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex items-center justify-between p-4 bg-white hover:bg-violet-50/50 rounded-xl border border-gray-100 hover:border-violet-200 shadow-sm transition-all duration-300 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-violet-50 text-violet-500 group-hover:scale-110 transition-transform">
+                                                <Briefcase className="h-5 w-5" />
+                                            </div>
+                                            <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">나의 공고</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-black text-violet-500 bg-violet-50 px-2 py-0.5 rounded-full">{activityCounts.appCount}건</span>
+                                            <span className="text-xs text-gray-400 font-bold group-hover:text-violet-500">&rarr;</span>
+                                        </div>
+                                    </Link>
+
                                     <Link 
                                         href="/mypage/recent" 
                                         onClick={() => setIsOpen(false)}
@@ -654,7 +707,27 @@ export function SettingsModal() {
                                             </div>
                                             <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">최근 본 공고</span>
                                         </div>
-                                        <span className="text-xs text-gray-400 font-bold group-hover:text-indigo-500">바로가기 &rarr;</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">{activityCounts.recentCount}건</span>
+                                            <span className="text-xs text-gray-400 font-bold group-hover:text-indigo-500">&rarr;</span>
+                                        </div>
+                                    </Link>
+
+                                    <Link 
+                                        href="/mypage/scraps" 
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex items-center justify-between p-4 bg-white hover:bg-orange-50/50 rounded-xl border border-gray-100 hover:border-orange-200 shadow-sm transition-all duration-300 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-orange-50 text-primary group-hover:scale-110 transition-transform">
+                                                <Heart className="h-5 w-5 fill-current" />
+                                            </div>
+                                            <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">스크랩 (좋아요)</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-black text-primary bg-orange-50 px-2 py-0.5 rounded-full">{activityCounts.scrapCount}건</span>
+                                            <span className="text-xs text-gray-400 font-bold group-hover:text-primary">&rarr;</span>
+                                        </div>
                                     </Link>
                                     
                                     <Link 
@@ -669,20 +742,6 @@ export function SettingsModal() {
                                             <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">나를 본 업체</span>
                                         </div>
                                         <span className="text-xs text-gray-400 font-bold group-hover:text-emerald-500">바로가기 &rarr;</span>
-                                    </Link>
-
-                                    <Link 
-                                        href="/mypage/activity" 
-                                        onClick={() => setIsOpen(false)}
-                                        className="flex items-center justify-between p-4 bg-white hover:bg-blue-50/50 rounded-xl border border-gray-100 hover:border-blue-200 shadow-sm transition-all duration-300 group"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500 group-hover:scale-110 transition-transform">
-                                                <FileText className="h-5 w-5" />
-                                            </div>
-                                            <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900">내 활동 (작성 글/댓글)</span>
-                                        </div>
-                                        <span className="text-xs text-gray-400 font-bold group-hover:text-blue-500">바로가기 &rarr;</span>
                                     </Link>
 
                                     {role === 'EMPLOYER' ? (

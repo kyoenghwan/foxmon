@@ -468,13 +468,22 @@ export async function getUserActivityCounts(userId: string) {
 
         return {
             success: true,
-            postCount: postsRes.count || 0,
+            postCount: (postsRes.count || 0) + (commentsRes.count || 0),
             commentCount: commentsRes.count || 0
         };
     } catch (err) {
         nvLog('AT', '❌ QA_GET_USER_ACTIVITY_COUNTS 예외', err);
         return { success: false, postCount: 0, commentCount: 0 };
     }
+}
+
+// 세션 기반 활동 카운트 조회 (userId 자동 처리)
+export async function getMyActivityCounts() {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { success: false, postCount: 0, commentCount: 0 };
+    }
+    return getUserActivityCounts(session.user.id);
 }
 
 // ============================================
