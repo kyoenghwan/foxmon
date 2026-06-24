@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '../../../../lib/logger';
 
 export interface ChangePasswordInput {
@@ -14,7 +14,7 @@ export async function OA_CHANGE_PASSWORD(input: ChangePasswordInput) {
   }
 
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('users')
       .update({ password: input.hashedPassword })
       .eq('id', input.userId);

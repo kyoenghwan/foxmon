@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '../../../../lib/logger';
 
 /**
@@ -14,7 +14,7 @@ export async function QA_GET_USER_AUTH_BY_ID(input: { userId: string }): Promise
   nvLog('AT', '▶️ QA_GET_USER_AUTH_BY_ID 시작', { userId: input.userId });
   
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .select('password')
       .eq('id', input.userId)
