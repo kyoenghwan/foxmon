@@ -317,7 +317,7 @@ export function RegisterForm() {
         setError('신분증 또는 사업자등록증 사본을 첨부해주세요.');
         return;
       }
-      if (!formData.business_address) {
+      if (formData.business_type === '사업자' && !formData.business_address) {
         setError('실제 영업장 주소를 입력해주세요.');
         return;
       }
@@ -917,7 +917,7 @@ export function RegisterForm() {
 
                 <div className="grid grid-cols-[100px_1fr] items-center gap-4">
                   <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider flex flex-col">
-                    <span>사업장 주소 <span className="text-purple-600">*</span></span>
+                    <span>사업장 주소 {formData.business_type === '사업자' && <span className="text-purple-600">*</span>}</span>
                   </Label>
                   <div className="space-y-2">
                     <Input
