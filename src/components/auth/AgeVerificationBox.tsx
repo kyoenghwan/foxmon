@@ -95,7 +95,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
 
       const result = await response.json();
       if (result.trace && Array.isArray(result.trace)) {
-        result.trace.forEach((line: string) => nvLog('AT', `[SERVER_TRACE] ${line}`));
+        // result.trace.forEach((line: string) => nvLog('AT', `[SERVER_TRACE] ${line}`));
       }
 
       if (response.ok && result.success && result.data) {
@@ -238,7 +238,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
               </p>
             )}
             
-            {/* 인증 진행 상태 로그 보드 */}
+            {/* 인증 진행 상태 로그 보드 (필요 시 주석 해제하여 사용) */}
+            {/*
             {process.env.NEXT_PUBLIC_ENABLE_LOGS !== 'false' && (
               <div className="mt-4 p-3 bg-gray-50 border border-gray-100 rounded-xl text-[11px] font-mono text-gray-500 space-y-1.5 animate-in fade-in duration-300">
                 <div className="font-bold text-gray-700 border-b border-gray-200/60 pb-1 mb-1 flex justify-between items-center">
@@ -267,6 +268,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
                 </div>
               </div>
             )}
+            */}
           </>
         ) : null}
       </div>
