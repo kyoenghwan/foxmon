@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { X, MessageCircle, Send, Plus, Users, Shield, ArrowLeft, Headset, LogOut, MoreVertical, Radio } from 'lucide-react';
+import { X, MessageCircle, Send, Plus, Users, Shield, ArrowLeft, Headset, LogOut, MoreVertical, Radio, Search, UserPlus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OA_INSERT_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_ROOM';
 import { OA_INSERT_CHAT_PARTICIPANT } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_PARTICIPANT';
@@ -20,6 +20,8 @@ import { QA_GET_CS_MESSAGES } from '@/src/atoms/qa/support/QA_GET_CS_MESSAGES';
 import { OA_INSERT_CS_MESSAGE } from '@/src/atoms/oa/support/OA_INSERT_CS_MESSAGE';
 import { QA_GET_USER_GENDER } from '@/src/atoms/qa/auth/QA_GET_USER_GENDER';
 import { playNotificationSound, showBrowserNotification } from '@/lib/notification-sound';
+import { QA_SEARCH_USERS_FOR_DM } from '@/src/atoms/qa/foxtalk/QA_SEARCH_USERS_FOR_DM';
+import { OA_CREATE_DM_ROOM } from '@/src/atoms/oa/foxtalk/OA_CREATE_DM_ROOM';
 
 type AppState = 'CLOSED' | 'MENU' | 'SETUP' | 'LOBBY' | 'CREATE_ROOM' | 'ROOM' | 'CS_SETUP' | 'CS_CHAT' | 'LIVE_CHAT';
 
@@ -43,6 +45,14 @@ export function FoxTalkWidget() {
     const participantsMapRef = useRef<Record<string, any>>({});
     const [myParticipant, setMyParticipant] = useState<any | null>(null);
     const [isSending, setIsSending] = useState(false);
+
+    // DM 검색 관련 상태
+    const [dmSearchKeyword, setDmSearchKeyword] = useState('');
+    const [dmSearchResults, setDmSearchResults] = useState<any[]>([]);
+    const [dmSearching, setDmSearching] = useState(false);
+    const [showDmSearch, setShowDmSearch] = useState(false);
+    const [dmCreating, setDmCreating] = useState<string | null>(null);
+    const dmSearchTimer = useRef<NodeJS.Timeout | null>(null);
 
     // 실시간채팅 관련 상태
     const [liveChatNick, setLiveChatNick] = useState('');
@@ -402,6 +412,59 @@ export function FoxTalkWidget() {
         setProfile(newProfile);
         setAppState('LOBBY');
         loadRooms();
+    };
+
+    // DM 검색 핸들러
+    const handleDmSearch = (keyword: string) => {
+        setDmSearchKeyword(keyword);
+        if (dmSearchTimer.current) clearTimeout(dmSearchTimer.current);
+        
+        if (!keyword.trim() || keyword.trim().length < 2) {
+            setDmSearchResults([]);
+            return;
+        }
+
+        dmSearchTimer.current = setTimeout(async () => {
+            setDmSearching(true);
+            try {
+                const res = await QA_SEARCH_USERS_FOR_DM(keyword);
+                if (res.success) {
+                    setDmSearchResults(res.data);
+                } else {
+                    setDmSearchResults([]);
+                }
+            } catch (e) {
+                console.error('DM 검색 오류:', e);
+                setDmSearchResults([]);
+            } finally {
+                setDmSearching(false);
+            }
+        }, 400);
+    };
+
+    // DM 방 생성 및 입장 핸들러
+    const handleStartDm = async (targetUser: any) => {
+        if (!profile || !userId) return;
+        setDmCreating(targetUser.id);
+        try {
+            const res = await OA_CREATE_DM_ROOM(targetUser.id);
+            if (res.success && res.data) {
+                // 검색 UI 초기화
+                setShowDmSearch(false);
+                setDmSearchKeyword('');
+                setDmSearchResults([]);
+                // 방 목록 새로고침 후 입장
+                await loadRooms();
+                joinRoom(res.data);
+            } else {
+                alert(res.error || '대화방 생성에 실패했습니다.');
+            }
+        } catch (e) {
+            console.error('DM 방 생성 오류:', e);
+            alert('대화방 생성 중 오류가 발생했습니다.');
+        } finally {
+            setDmCreating(null);
+        }
     };
 
     // Create Room
@@ -1289,12 +1352,100 @@ export function FoxTalkWidget() {
                                     <h3 className="font-black text-[12px] text-gray-500 flex items-center gap-1.5">
                                         내 다이렉트 대화방
                                     </h3>
+                                    <button
+                                        onClick={() => {
+                                            setShowDmSearch(!showDmSearch);
+                                            if (showDmSearch) {
+                                                setDmSearchKeyword('');
+                                                setDmSearchResults([]);
+                                            }
+                                        }}
+                                        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-black transition-all ${
+                                            showDmSearch
+                                                ? 'bg-primary text-white'
+                                                : 'bg-white text-gray-500 hover:bg-gray-100 border border-gray-200'
+                                        }`}
+                                    >
+                                        {showDmSearch ? <X className="w-3 h-3" /> : <UserPlus className="w-3 h-3" />}
+                                        {showDmSearch ? '닫기' : '새 대화'}
+                                    </button>
                                 </div>
+
+                                {/* DM 검색 패널 */}
+                                {showDmSearch && (
+                                    <div className="border-b bg-orange-50/30">
+                                        <div className="p-3">
+                                            <div className="relative">
+                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                <input
+                                                    type="text"
+                                                    value={dmSearchKeyword}
+                                                    onChange={(e) => handleDmSearch(e.target.value)}
+                                                    placeholder="닉네임 또는 아이디로 검색..."
+                                                    className="w-full pl-9 pr-3 py-2.5 border-2 border-orange-200 rounded-xl focus:border-primary focus:ring-0 outline-none text-[13px] font-bold bg-white"
+                                                    autoFocus
+                                                />
+                                            </div>
+                                            {dmSearchKeyword.trim().length > 0 && dmSearchKeyword.trim().length < 2 && (
+                                                <p className="text-[10px] text-gray-400 mt-1.5 px-1">2글자 이상 입력해주세요.</p>
+                                            )}
+                                        </div>
+
+                                        {/* 검색 결과 */}
+                                        {dmSearching && (
+                                            <div className="px-3 pb-3 flex items-center justify-center gap-2 text-[12px] text-gray-400">
+                                                <span className="w-3 h-3 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                                                검색 중...
+                                            </div>
+                                        )}
+                                        {!dmSearching && dmSearchResults.length > 0 && (
+                                            <ul className="max-h-48 overflow-y-auto">
+                                                {dmSearchResults.map((user) => (
+                                                    <li key={user.id} className="px-3 py-2.5 flex items-center gap-3 hover:bg-orange-50 transition-colors">
+                                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center text-lg shrink-0 border border-orange-200">
+                                                            🦊
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-[13px] font-black text-gray-900 truncate">{user.nickname || user.login_id}</p>
+                                                            {user.login_id && user.nickname && (
+                                                                <p className="text-[10px] text-gray-400 truncate">@{user.login_id}</p>
+                                                            )}
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleStartDm(user)}
+                                                            disabled={dmCreating === user.id}
+                                                            className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-[11px] font-black rounded-lg disabled:opacity-50 transition-all flex items-center gap-1 shrink-0"
+                                                        >
+                                                            {dmCreating === user.id ? (
+                                                                <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                            ) : (
+                                                                <MessageCircle className="w-3 h-3" />
+                                                            )}
+                                                            대화
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                        {!dmSearching && dmSearchKeyword.trim().length >= 2 && dmSearchResults.length === 0 && (
+                                            <div className="px-3 pb-3 text-center text-[12px] text-gray-400 py-4">
+                                                검색 결과가 없습니다.
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 <ul className="divide-y divide-gray-100 flex-1 overflow-y-auto">
                                     {rooms.filter(r => r.type === '1ON1').length === 0 ? (
                                         <li className="text-center text-sm font-bold text-gray-400 py-16 flex flex-col items-center gap-3">
                                             <MessageCircle className="w-10 h-10 opacity-20" />
-                                            지원 내역이나 대화가 없습니다.
+                                            대화 내역이 없습니다.
+                                            <button
+                                                onClick={() => setShowDmSearch(true)}
+                                                className="mt-2 px-4 py-2 bg-primary text-white text-[12px] font-black rounded-lg hover:bg-primary/90 transition-all flex items-center gap-1.5"
+                                            >
+                                                <UserPlus className="w-4 h-4" /> 새 대화 시작하기
+                                            </button>
                                         </li>
                                     ) : rooms.filter(r => r.type === '1ON1').map(room => (
                                         <li key={room.id}>
