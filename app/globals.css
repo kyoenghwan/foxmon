@@ -286,3 +286,14 @@
     100% { transform: translateX(calc(-50% - 1.5rem)); }
   }
 }
+
+/* 브라우저 기본 비밀번호 보기 아이콘 숨기기 */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-textfield-decoration-container {
+  display: none !important;
+}

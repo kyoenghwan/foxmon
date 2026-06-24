@@ -891,7 +891,7 @@ export function SettingsModal() {
                                         <div className="flex items-center gap-2">
                                             <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">현재 비밀번호</label>
                                             <div className="relative flex-1">
-                                                <input type={showCurrentPw ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} autoComplete="off" className="w-full px-2.5 py-1.5 pr-8 border border-gray-200 rounded-md outline-none text-[13px] focus:border-primary" />
+                                                <input type={showCurrentPw ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} autoComplete="one-time-code" className="w-full px-2.5 py-1.5 pr-8 border border-gray-200 rounded-md outline-none text-[13px] focus:border-primary" />
                                                 <button type="button" onClick={() => setShowCurrentPw(!showCurrentPw)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
                                                     {showCurrentPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                                 </button>
@@ -900,7 +900,7 @@ export function SettingsModal() {
                                         <div className="flex items-center gap-2">
                                             <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">새 비밀번호</label>
                                             <div className="relative flex-1">
-                                                <input type={showNewPw ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} autoComplete="off" className="w-full px-2.5 py-1.5 pr-8 border border-gray-200 rounded-md outline-none text-[13px] focus:border-primary" />
+                                                <input type={showNewPw ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} autoComplete="one-time-code" className="w-full px-2.5 py-1.5 pr-8 border border-gray-200 rounded-md outline-none text-[13px] focus:border-primary" />
                                                 <button type="button" onClick={() => setShowNewPw(!showNewPw)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
                                                     {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                                 </button>
@@ -909,7 +909,7 @@ export function SettingsModal() {
                                         <div className="flex items-center gap-2">
                                             <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">새 비밀번호 확인</label>
                                             <div className="relative flex-1">
-                                                <input type={showConfirmPw ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} autoComplete="off" className="w-full px-2.5 py-1.5 pr-8 border border-gray-200 rounded-md outline-none text-[13px] focus:border-primary" />
+                                                <input type={showConfirmPw ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} autoComplete="one-time-code" className="w-full px-2.5 py-1.5 pr-8 border border-gray-200 rounded-md outline-none text-[13px] focus:border-primary" />
                                                 <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
                                                     {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                                 </button>
