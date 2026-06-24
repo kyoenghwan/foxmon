@@ -814,7 +814,7 @@ export function SettingsModal() {
                                         <div className="flex items-center justify-between">
                                             <div className="flex flex-col">
                                                 <span className="text-[13px] font-bold text-gray-800">🔔 실시간 알림 받기</span>
-                                                <span className="text-[11px] text-gray-500">앱에서 소리로 실시간 알림을 받습니다.</span>
+                                                <span className="text-[11px] text-gray-500">웹 브라우저에서 소리로 알림을 받습니다.</span>
                                             </div>
                                             <button
                                                 type="button"
