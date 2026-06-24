@@ -821,25 +821,6 @@ export function SettingsModal() {
                                     </div>
                                 </section>
 
-                                {/* 텔레그램 푸시 알림 (업체 전용) */}
-                                {role === 'EMPLOYER' && (
-                                    <section>
-                                        <h3 className="font-extrabold text-[#333] text-[13px] mb-3 flex items-center gap-1.5">
-                                            <Smartphone className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 텔레그램 연동
-                                        </h3>
-                                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                                            <div className="flex flex-col mb-3">
-                                                <span className="text-[13px] font-bold text-gray-800">텔레그램 실시간 알림 연동</span>
-                                                <span className="text-[11px] text-gray-500">지원자 알림 등을 텔레그램으로 즉시 받습니다.</span>
-                                            </div>
-                                            {userId ? (
-                                                <TelegramConnectButton userId={userId} botUsername={botUsername} isLinked={!!telegramChatId} />
-                                            ) : (
-                                                <div className="text-xs text-gray-400">로딩 중...</div>
-                                            )}
-                                        </div>
-                                    </section>
-                                )}
 
                                 {/* 비밀번호 변경 */}
                                 <section>
