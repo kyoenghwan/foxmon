@@ -45,9 +45,7 @@ export function SettingsModal() {
     const [autoLogin, setAutoLogin] = useState(false);
     
     // Notification Settings
-    const [notifSound, setNotifSound] = useState(false);
-    const [notifBrowser, setNotifBrowser] = useState(false);
-    const [notifPush, setNotifPush] = useState(false);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     
     // Dynamic SNS State
     const [snsLinks, setSnsLinks] = useState<{type: string; value: string}[]>([]);
@@ -98,9 +96,10 @@ export function SettingsModal() {
         setAutoLogin(document.cookie.includes('foxmon_auto_login=1'));
         // 알림 설정 로드
         if (typeof window !== 'undefined') {
-            setNotifSound(localStorage.getItem('foxmon_notif_sound') === '1');
-            setNotifBrowser(localStorage.getItem('foxmon_notif_browser') === '1');
-            setNotifPush(localStorage.getItem('foxmon_notif_push') === '1');
+            const sound = localStorage.getItem('foxmon_notif_sound') === '1';
+            const browser = localStorage.getItem('foxmon_notif_browser') === '1';
+            const push = localStorage.getItem('foxmon_notif_push') === '1';
+            setNotificationsEnabled(sound || browser || push);
         }
     }, []);
 
@@ -161,6 +160,26 @@ export function SettingsModal() {
         setPwError('');
         setActiveTab('profile');
     }
+
+    const handleToggleNotifications = async () => {
+        const next = !notificationsEnabled;
+        setNotificationsEnabled(next);
+        const val = next ? '1' : '0';
+        
+        localStorage.setItem('foxmon_notif_sound', val);
+        localStorage.setItem('foxmon_notif_browser', val);
+        localStorage.setItem('foxmon_notif_push', val);
+
+        if (next) {
+            playNotificationSound(); // 테스트 소리 재생
+            
+            if ('Notification' in window && Notification.permission === 'default') {
+                await Notification.requestPermission();
+            }
+            
+            window.dispatchEvent(new Event('foxmon_enable_push'));
+        }
+    };
 
     const fetchUserData = async (isBackground = false) => {
         if (!isBackground) {
@@ -791,87 +810,21 @@ export function SettingsModal() {
                                     <h3 className="font-extrabold text-[#333] text-[13px] mb-3 flex items-center gap-1.5">
                                         <Bell className="w-4 h-4 text-gray-400 stroke-[2.5]" /> 알림 설정
                                     </h3>
-                                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-3">
-                                        {/* 알림음 */}
+                                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                                         <div className="flex items-center justify-between">
                                             <div className="flex flex-col">
-                                                <span className="text-[13px] font-bold text-gray-800">🔊 알림음</span>
-                                                <span className="text-[11px] text-gray-500">새 메시지 도착 시 '띵동' 소리를 재생합니다.</span>
+                                                <span className="text-[13px] font-bold text-gray-800">🔔 실시간 알림 받기</span>
+                                                <span className="text-[11px] text-gray-500">소리, 브라우저 팝업, 앱 푸시 알림을 모두 받습니다.</span>
                                             </div>
                                             <button
                                                 type="button"
-                                                onClick={() => {
-                                                    const next = !notifSound;
-                                                    setNotifSound(next);
-                                                    localStorage.setItem('foxmon_notif_sound', next ? '1' : '0');
-                                                    if (next) {
-                                                        playNotificationSound(); // 테스트 소리 재생
-                                                    }
-                                                }}
+                                                onClick={handleToggleNotifications}
                                                 className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
-                                                    notifSound ? 'bg-primary' : 'bg-gray-300'
+                                                    notificationsEnabled ? 'bg-primary' : 'bg-gray-300'
                                                 }`}
                                             >
                                                 <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
-                                                    notifSound ? 'translate-x-5' : 'translate-x-0'
-                                                }`} />
-                                            </button>
-                                        </div>
-
-                                        <div className="border-t border-gray-100" />
-
-                                        {/* 브라우저 알림 */}
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex flex-col">
-                                                <span className="text-[13px] font-bold text-gray-800">🔔 브라우저 알림</span>
-                                                <span className="text-[11px] text-gray-500">탭이 백그라운드일 때 알림 팝업을 표시합니다.</span>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={async () => {
-                                                    if (!notifBrowser) {
-                                                        if ('Notification' in window && Notification.permission === 'default') {
-                                                            await Notification.requestPermission();
-                                                        }
-                                                    }
-                                                    const next = !notifBrowser;
-                                                    setNotifBrowser(next);
-                                                    localStorage.setItem('foxmon_notif_browser', next ? '1' : '0');
-                                                }}
-                                                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
-                                                    notifBrowser ? 'bg-primary' : 'bg-gray-300'
-                                                }`}
-                                            >
-                                                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
-                                                    notifBrowser ? 'translate-x-5' : 'translate-x-0'
-                                                }`} />
-                                            </button>
-                                        </div>
-
-                                        <div className="border-t border-gray-100" />
-
-                                        {/* 푸시 알림 */}
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex flex-col">
-                                                <span className="text-[13px] font-bold text-gray-800">📱 푸시 알림</span>
-                                                <span className="text-[11px] text-gray-500">브라우저를 닫아도 알림을 받습니다. (PWA)</span>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const next = !notifPush;
-                                                    setNotifPush(next);
-                                                    localStorage.setItem('foxmon_notif_push', next ? '1' : '0');
-                                                    if (next) {
-                                                        window.dispatchEvent(new Event('foxmon_enable_push'));
-                                                    }
-                                                }}
-                                                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
-                                                    notifPush ? 'bg-primary' : 'bg-gray-300'
-                                                }`}
-                                            >
-                                                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
-                                                    notifPush ? 'translate-x-5' : 'translate-x-0'
+                                                    notificationsEnabled ? 'translate-x-5' : 'translate-x-0'
                                                 }`} />
                                             </button>
                                         </div>
