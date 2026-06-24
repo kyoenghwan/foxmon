@@ -66,9 +66,7 @@ interface HomeJobSectionsProps {
 
 export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
     const { data: session } = useSession();
-    const isEmployer = (session?.user as any)?.role === 'EMPLOYER';
-    const isBusinessVerified = (session?.user as any)?.business_number ? true : false;
-    const showAdRegisterButtons = isEmployer && isBusinessVerified;
+
     const { t } = useLanguage();
     const [noticeIndex, setNoticeIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
@@ -223,30 +221,6 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                                 {t.sections.premiumJobsTitle}
                             </h2>
                         </div>
-                        {showAdRegisterButtons && (
-                            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
-                                <Link href="/biz/ads?tier=premium">
-                                    <span className="text-[10px] sm:text-xs font-black bg-primary text-black px-2 py-1 rounded-md shadow-sm hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap">
-                                        프리미엄 등록
-                                    </span>
-                                </Link>
-                                <Link href="/biz/ads?tier=special">
-                                    <span className="text-[10px] sm:text-xs font-black bg-yellow-400 text-black px-2 py-1 rounded-md shadow-sm hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap">
-                                        스페셜 등록
-                                    </span>
-                                </Link>
-                                <Link href="/biz/ads?tier=general">
-                                    <span className="text-[10px] sm:text-xs font-black bg-white text-gray-700 border px-2 py-1 rounded-md shadow-sm hover:bg-gray-50 hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap">
-                                        일반 등록
-                                    </span>
-                                </Link>
-                                <Link href="/biz/ads?tier=side">
-                                    <span className="text-[10px] sm:text-xs font-black bg-gray-800 text-white px-2 py-1 rounded-md shadow-sm hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap">
-                                        사이드배너 등록
-                                    </span>
-                                </Link>
-                            </div>
-                        )}
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-3 ml-auto">
                         {session?.user?.role !== 'VIEWER' && (
