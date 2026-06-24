@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const loginId = searchParams.get('loginId')?.trim();
+    const loginId = searchParams.get('loginId')?.trim()?.toLowerCase();
 
     if (!loginId) {
       return NextResponse.json({ success: false, message: '아이디를 입력해주세요.' }, { status: 400 });

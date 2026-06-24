@@ -245,9 +245,9 @@ export function RegisterForm() {
   };
 
   const checkReferrer = async () => {
-    const refId = formData.referrerLoginId.trim();
+    const refId = formData.referrerLoginId.trim().toLowerCase();
     if (!refId) return alert('추천인 아이디를 입력해주세요.');
-    if (refId.toLowerCase() === formData.loginId.toLowerCase()) {
+    if (refId === formData.loginId.toLowerCase()) {
       setReferrerError('본인은 추천인으로 등록할 수 없습니다.');
       setReferrerChecked(false);
       setReferrerNickname('');
@@ -733,7 +733,7 @@ export function RegisterForm() {
                       placeholder="추천인의 아이디 입력"
                       value={formData.referrerLoginId}
                       onChange={(e) => {
-                        setFormData({ ...formData, referrerLoginId: e.target.value });
+                        setFormData({ ...formData, referrerLoginId: normalizeLoginId(e.target.value) });
                         setReferrerChecked(false);
                         setReferrerNickname('');
                         setReferrerError(null);
