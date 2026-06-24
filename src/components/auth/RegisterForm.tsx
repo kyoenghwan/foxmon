@@ -967,6 +967,11 @@ export function RegisterForm() {
                 )}
               </div>
 
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs font-bold animate-in fade-in">
+                  {error}
+                </div>
+              )}
               <div className="flex gap-3 pt-6 border-t border-gray-100 mt-6">
                   <Button type="button" variant="ghost" className="h-14 font-bold text-gray-500 flex-1 rounded-2xl" onClick={handlePrev}>
                     <ChevronLeft size={18} /> 이전
