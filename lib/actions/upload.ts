@@ -36,13 +36,13 @@ export async function uploadVerificationDocument(formData: FormData) {
 
         if (error) {
             console.error('Storage upload error:', error);
-            return { success: false, message: '파일 업로드에 실패했습니다.' };
+            return { success: false, message: `파일 업로드 실패: ${error.message}` };
         }
 
         // Return the public URL or just the path (it's a private bucket, so we store the path)
         return { success: true, url: filePath };
     } catch (err: any) {
         console.error('Upload system error:', err);
-        return { success: false, message: '업로드 시스템 오류가 발생했습니다.' };
+        return { success: false, message: `업로드 시스템 오류: ${err.message}` };
     }
 }
