@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { userSettingsAction } from '@/lib/actions';
-import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, Clock, Coins, FileText, LogOut, Briefcase } from 'lucide-react';
+import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, EyeOff, Clock, Coins, FileText, LogOut, Briefcase } from 'lucide-react';
 import { playNotificationSound } from '@/lib/notification-sound';
 import { TelegramConnectButton } from '@/components/employer/telegram-connect-button';
 import { AgeVerificationBox } from '@/src/components/auth/AgeVerificationBox';
@@ -71,6 +71,9 @@ export function SettingsModal() {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showCurrentPw, setShowCurrentPw] = useState(false);
+    const [showNewPw, setShowNewPw] = useState(false);
+    const [showConfirmPw, setShowConfirmPw] = useState(false);
     
     // Status
     const [loadingData, setLoadingData] = useState(false);
@@ -887,15 +890,30 @@ export function SettingsModal() {
                                         
                                         <div className="flex items-center gap-2">
                                             <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">현재 비밀번호</label>
-                                            <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} autoComplete="current-password" className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
+                                            <div className="relative flex-1">
+                                                <input type={showCurrentPw ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} autoComplete="current-password" className="w-full px-2.5 py-1.5 pr-8 border border-gray-200 rounded-md outline-none text-[13px] focus:border-primary" />
+                                                <button type="button" onClick={() => setShowCurrentPw(!showCurrentPw)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
+                                                    {showCurrentPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                </button>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">새 비밀번호</label>
-                                            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} autoComplete="new-password" className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
+                                            <div className="relative flex-1">
+                                                <input type={showNewPw ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} autoComplete="new-password" className="w-full px-2.5 py-1.5 pr-8 border border-gray-200 rounded-md outline-none text-[13px] focus:border-primary" />
+                                                <button type="button" onClick={() => setShowNewPw(!showNewPw)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
+                                                    {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                </button>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">새 비밀번호 확인</label>
-                                            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} autoComplete="new-password" className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
+                                            <div className="relative flex-1">
+                                                <input type={showConfirmPw ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} autoComplete="new-password" className="w-full px-2.5 py-1.5 pr-8 border border-gray-200 rounded-md outline-none text-[13px] focus:border-primary" />
+                                                <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
+                                                    {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                </button>
+                                            </div>
                                         </div>
                                         <Button onClick={handleSavePassword} disabled={savingPassword} className="w-full mt-2 font-bold h-9 bg-[#1A1F2C] hover:bg-black text-white border-none shadow-sm rounded-lg">
                                             {savingPassword ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Check className="w-3 h-3 mr-1.5" />} 비밀번호 변경하기
