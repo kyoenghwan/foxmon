@@ -377,7 +377,8 @@ export function SettingsModal() {
             </DialogTrigger>
             
             <DialogContent 
-                className="sm:max-w-[480px] p-0 overflow-hidden bg-white flex flex-col max-h-[90vh] border-none rounded-2xl shadow-xl"
+                className="sm:max-w-[480px] p-0 overflow-hidden bg-white flex flex-col max-h-[90vh] border-none rounded-2xl shadow-xl pointer-events-auto"
+                overlayClassName="pointer-events-none"
                 onPointerDownOutside={(e) => e.preventDefault()}
                 onInteractOutside={(e) => e.preventDefault()}
             >
