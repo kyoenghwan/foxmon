@@ -11,6 +11,7 @@ import { OA_CREATE_GUEST_SESSION } from '@/src/atoms/oa/auth/OA_CREATE_GUEST_SES
 import { RA_PARSE_EXTERNAL_AUTH_DATA } from '@/src/atoms/ra/auth/RA_PARSE_EXTERNAL_AUTH_DATA';
 
 export async function POST(req: Request) {
+  const trace: string[] = [];
   try {
     let action = 'token';
     let params: any = {};
@@ -37,19 +38,24 @@ export async function POST(req: Request) {
         if (process.env.NEXT_PUBLIC_KMC_TEST_MODE !== 'true') {
           siteUrl = process.env.KMC_SITE_URL || siteUrl || 'https://foxmon.co.kr';
         }
+        trace.push(`📡 [API_ROUTE] KMC로 송신할 최종 siteUrl 결정: [${siteUrl}]`);
         
         if (!siteUrl) {
-          return NextResponse.json({ success: false, message: 'siteUrl 파라미터가 누락되었습니다.' }, { status: 400 });
+          return NextResponse.json({ success: false, message: 'siteUrl 파라미터가 누락되었습니다.', trace }, { status: 400 });
         }
         
         try {
-          const keyInfo = await decryptMokKeyInfo();
+          const keyInfo = await decryptMokKeyInfo(trace);
           
           const clientTxId = `foxmon-${crypto.randomBytes(12).toString('hex')}`;
+          trace.push(`📡 [API_ROUTE] clientTxId 생성: [${clientTxId}]`);
           const requestTime = new Date().toISOString().replace(/[-T:.Z]/g, '').substring(0, 14);
           const reqClientInfo = `${clientTxId}|${requestTime}`;
+          trace.push(`[1단계_평문] reqClientInfo: [${reqClientInfo}]`);
 
           const encryptReqClientInfo = encryptKmcTokenRequest(reqClientInfo, keyInfo.ClientPrivateKey);
+          trace.push(`[1단계_암호문] encryptReqClientInfo (일부): [${encryptReqClientInfo.substring(0, 30)}...]`);
+          trace.push(`[1단계_ServiceId] serviceId: [${keyInfo.ServiceId}]`);
           
           const usageCode = process.env.KMC_USAGE_CODE || '01016';
           const returnUrl = `${siteUrl}/api/auth/kmc/callback`;
@@ -61,35 +67,37 @@ export async function POST(req: Request) {
             serviceType: 'telcoAuth',
             retTransferType: 'MOKToken',
             returnUrl,
-            clientTxId
+            clientTxId,
+            trace
           });
         } catch (err: any) {
-          return NextResponse.json({ success: false, message: `KMC 토큰 데이터 생성 오류: ${err.message}` }, { status: 500 });
+          return NextResponse.json({ success: false, message: `KMC 토큰 데이터 생성 오류: ${err.message}`, trace }, { status: 500 });
         }
       }
 
       case 'confirm': {
         const { encryptMOKKeyToken } = params;
         if (!encryptMOKKeyToken) {
-          return NextResponse.json({ success: false, message: '필수 검증 파라미터(encryptMOKKeyToken)가 누락되었습니다.' }, { status: 400 });
+          return NextResponse.json({ success: false, message: '필수 검증 파라미터(encryptMOKKeyToken)가 누락되었습니다.', trace }, { status: 400 });
         }
 
-        const confirmResult = await confirmMokStandardAuth({ encryptMOKKeyToken });
+        trace.push(`[2단계_검증요청시_수신값(encryptMOKKeyToken)_일부]: ${encryptMOKKeyToken.substring(0, 30)}...`);
+        const confirmResult = await confirmMokStandardAuth({ encryptMOKKeyToken }, trace);
 
         if (!confirmResult.success || !confirmResult.userInfo) {
-          return NextResponse.json({ success: false, message: confirmResult.message }, { status: 400 });
+          return NextResponse.json({ success: false, message: confirmResult.message, trace }, { status: 400 });
         }
 
         // 만 19세 이상 나이 검증
         const parseResult = await RA_PARSE_EXTERNAL_AUTH_DATA('MOBILE', confirmResult.userInfo);
         if (!parseResult.success || !parseResult.data) {
-          return NextResponse.json({ success: false, message: parseResult.error || '나이 검증에 실패했습니다.' }, { status: 400 });
+          return NextResponse.json({ success: false, message: parseResult.error || '나이 검증에 실패했습니다.', trace }, { status: 400 });
         }
 
         // 게스트 세션 쿠키 생성 및 발급
         const sessionResult = await OA_CREATE_GUEST_SESSION(parseResult.data);
         if (!sessionResult.success) {
-          return NextResponse.json({ success: false, message: '세션 발급 오류가 발생했습니다.' }, { status: 500 });
+          return NextResponse.json({ success: false, message: '세션 발급 오류가 발생했습니다.', trace }, { status: 500 });
         }
 
         // 로그인된 사용자의 CI가 비어있으면 자동 업데이트 (기존 회원 CI 채우기)
@@ -129,15 +137,16 @@ export async function POST(req: Request) {
         return NextResponse.json({
           success: true,
           message: '성인 인증이 완료되었습니다.',
-          data: confirmResult.userInfo
+          data: confirmResult.userInfo,
+          trace
         });
       }
 
       default:
-        return NextResponse.json({ success: false, message: '지원하지 않는 action입니다.' }, { status: 400 });
+        return NextResponse.json({ success: false, message: '지원하지 않는 action입니다.', trace }, { status: 400 });
     }
   } catch (err: any) {
-    return NextResponse.json({ success: false, message: `서버 내부 에러: ${err.message}` }, { status: 500 });
+    return NextResponse.json({ success: false, message: `서버 내부 에러: ${err.message}`, trace }, { status: 500 });
   }
 }
 

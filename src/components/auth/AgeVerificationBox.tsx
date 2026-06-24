@@ -36,6 +36,8 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   const [isVerified, setIsVerified] = useState(false);
   const [verifiedData, setVerifiedData] = useState<any>(null);
   const [blockedMessage, setBlockedMessage] = useState<string | null>(null);
+  const [statusMsg, setStatusMsg] = useState('인증 전입니다.');
+  const [statusError, setStatusError] = useState('');
 
   // 마운트 시점에 드림시큐리티 JS SDK 로드 및 전역 콜백 등록
   useEffect(() => {
@@ -92,8 +94,14 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       });
 
       const result = await response.json();
+      if (result.trace && Array.isArray(result.trace)) {
+        result.trace.forEach((line: string) => nvLog('AT', `[SERVER_TRACE] ${line}`));
+      }
 
       if (response.ok && result.success && result.data) {
+        nvLog('FW', '본인인증 및 성인인증 최종 승인 성공', result.data);
+        setStatusMsg('인증 완료: 성인 인증에 성공했습니다.');
+
         document.cookie = "age_verified=true; path=/; SameSite=Lax";
         if (result.data && result.data.gender) {
           document.cookie = `guest_gender=${result.data.gender}; path=/; SameSite=Lax`;
@@ -109,6 +117,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         }
       } else {
         const msg = result.message || '인증 확인에 실패했습니다.';
+        setStatusError(msg);
         if (msg.includes('19세 미만')) {
           setBlockedMessage(msg);
         } else {
@@ -116,6 +125,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
         }
       }
     } catch (err: any) {
+      setStatusError(`서버 통신 에러: ${err.message}`);
       alert(`서버 응답 확인 중 오류가 발생했습니다: ${err.message}`);
     } finally {
       setIsVerifying(false);
@@ -125,6 +135,10 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   const handleStartDreamStandardAuth = () => {
     if (isTestMode) {
       setIsVerifying(true);
+      setStatusMsg('Mock 모드: 가상 인증창 활성화 중...');
+      setStatusError('');
+      nvLog('FW', '⚠️ Mock 모드로 인증 표준창 시뮬레이션을 실행합니다.');
+      
       setTimeout(() => {
         const mockKeyToken = 'MOCK_KEY_TOKEN_' + Math.random().toString(36).substring(7);
         if ((window as any).result) {
@@ -138,19 +152,25 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
     }
 
     if (!(window as any).MOBILEOK) {
+      setStatusError('드림시큐리티 SDK 미로드');
       alert('드림시큐리티 본인확인 모듈이 아직 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.');
       return;
     }
 
     try {
+      nvLog('FW', '드림시큐리티 표준창 process 호출 시작');
       (window as any).MOBILEOK.process('/api/auth/kmc', 'WB', 'result');
 
       setIsVerifying(true);
+      setStatusMsg('본인확인 표준창이 실행되었습니다.');
+      setStatusError('');
 
       const handleWindowFocus = () => {
         setTimeout(() => {
           setIsVerifying((prev) => {
             if (prev && !isVerified) {
+              nvLog('FW', '팝업 포커스 복귀 감지: 인증 취소로 간주하여 버튼 재활성화');
+              setStatusMsg('인증이 취소되었습니다. 다시 시도해 주세요.');
               return false;
             }
             return prev;
@@ -160,6 +180,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
       };
       window.addEventListener('focus', handleWindowFocus);
     } catch (err: any) {
+      setStatusError(err.message || '인증 팝업 호출 실패');
       alert(err.message || '본인인증창을 띄우지 못했습니다.');
       setIsVerifying(false);
     }
@@ -215,6 +236,36 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
               <p className="text-[10px] text-center text-purple-600 font-bold mt-1">
                 ⚙️ 개발자 테스트 모드: 모의(Mock) 본인인증이 진행됩니다.
               </p>
+            )}
+            
+            {/* 인증 진행 상태 로그 보드 */}
+            {process.env.NEXT_PUBLIC_ENABLE_LOGS !== 'false' && (
+              <div className="mt-4 p-3 bg-gray-50 border border-gray-100 rounded-xl text-[11px] font-mono text-gray-500 space-y-1.5 animate-in fade-in duration-300">
+                <div className="font-bold text-gray-700 border-b border-gray-200/60 pb-1 mb-1 flex justify-between items-center">
+                  <span>🔄 본인인증 실시간 트래커</span>
+                  <span className="text-[9px] px-1.5 py-0.2 bg-purple-100 text-purple-700 rounded-full font-sans font-bold">Standard Window</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className={cn("inline-block w-2 h-2 rounded-full", isVerifying || isVerified ? "bg-green-500" : "bg-gray-300")} />
+                  <span className={cn(isVerifying || isVerified ? "text-gray-700 font-semibold" : "text-gray-400")}>Step 1: 본인인증 표준창 호출 및 진행</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className={cn("inline-block w-2 h-2 rounded-full", isVerified ? "bg-green-500" : "bg-gray-300")} />
+                  <span className={cn(isVerified ? "text-gray-700 font-semibold" : "text-gray-400")}>Step 2: 토큰 검증 및 게스트 세션 승인</span>
+                </div>
+                <div className="mt-2 pt-1.5 border-t border-gray-200/60 text-[10px] space-y-0.5">
+                  <div className="text-gray-600 font-semibold flex gap-1 items-start">
+                    <span className="text-purple-600 shrink-0">➔ Status:</span>
+                    <span className="break-all">{statusMsg}</span>
+                  </div>
+                  {statusError && (
+                    <div className="text-red-600 font-semibold flex gap-1 items-start">
+                      <span className="shrink-0">⚠️ Error:</span>
+                      <span className="break-all">{statusError}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </>
         ) : null}
