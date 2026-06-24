@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       case 'token': {
         let { siteUrl } = params;
         if (process.env.NEXT_PUBLIC_KMC_TEST_MODE !== 'true') {
-          siteUrl = process.env.KMC_SITE_URL || 'https://foxmon.co.kr';
+          siteUrl = process.env.KMC_SITE_URL || siteUrl || 'https://foxmon.co.kr';
         }
         
         if (!siteUrl) {
