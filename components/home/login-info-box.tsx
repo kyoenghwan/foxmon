@@ -30,7 +30,7 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
     const [unreadCount, setUnreadCount] = useState(0);
     const [freeGamesCount, setFreeGamesCount] = useState(0);
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(true);
     const [guestUser, setGuestUser] = useState<{ tempId: string } | null>(null);
 
     // 성인인증된 게스트 정보가 있는지 체크하여 임시 아이디 발급
