@@ -828,15 +828,15 @@ export function SettingsModal() {
                                         
                                         <div className="flex items-center gap-2">
                                             <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">현재 비밀번호</label>
-                                            <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
+                                            <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} autoComplete="current-password" className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">새 비밀번호</label>
-                                            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
+                                            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} autoComplete="new-password" className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <label className="text-[11px] font-bold text-gray-500 w-[110px] shrink-0">새 비밀번호 확인</label>
-                                            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
+                                            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} autoComplete="new-password" className="w-full px-2.5 py-1.5 border border-gray-200 rounded-md outline-none text-[13px] flex-1 focus:border-primary" />
                                         </div>
                                         <Button onClick={handleSavePassword} disabled={savingPassword} className="w-full mt-2 font-bold h-9 bg-[#1A1F2C] hover:bg-black text-white border-none shadow-sm rounded-lg">
                                             {savingPassword ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Check className="w-3 h-3 mr-1.5" />} 비밀번호 변경하기
