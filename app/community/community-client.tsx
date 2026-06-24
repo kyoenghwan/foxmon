@@ -35,6 +35,7 @@ export function CommunityClient({
     const [postCategory, setPostCategory] = useState<string>('잡담');
     const [talkFilter, setTalkFilter] = useState<'all' | 'normal' | 'tips'>('all');
     const [reviewsFilter, setReviewsFilter] = useState<'all' | 'review' | 'report'>('all');
+    const [freeFilter, setFreeFilter] = useState<'all' | 'normal' | 'playground'>('all');
 
     useEffect(() => {
         if (activeTab === 'free') {
@@ -49,6 +50,7 @@ export function CommunityClient({
     useEffect(() => {
         setTalkFilter('all');
         setReviewsFilter('all');
+        setFreeFilter('all');
     }, [activeTab]);
 
     useEffect(() => {
@@ -104,6 +106,15 @@ export function CommunityClient({
     }, [searchParams, activeTab]);
 
     const filteredPosts = useMemo(() => {
+        if (activeTab === 'free') {
+            if (freeFilter === 'all') return initialPosts;
+            if (freeFilter === 'normal') {
+                return initialPosts.filter(post => !post.title.startsWith('[놀이터 인증]'));
+            }
+            if (freeFilter === 'playground') {
+                return initialPosts.filter(post => post.title.startsWith('[놀이터 인증]'));
+            }
+        }
         if (activeTab === 'foxtalk') {
             if (talkFilter === 'all') return initialPosts;
             if (talkFilter === 'normal') {
@@ -125,7 +136,7 @@ export function CommunityClient({
             }
         }
         return initialPosts;
-    }, [activeTab, talkFilter, reviewsFilter, initialPosts]);
+    }, [activeTab, freeFilter, talkFilter, reviewsFilter, initialPosts]);
 
     const visibleBoards = useMemo(() => getVisibleCommunityBoards(localRole), [localRole]);
     const sidebarSections = useMemo(() => getCommunitySidebarSections(localRole), [localRole]);
@@ -388,6 +399,45 @@ export function CommunityClient({
                             <p className="font-bold">익명 후기·제보 게시판</p>
                             <p className="mt-1">작성자명이 '익명'으로 표시됩니다. 업소 방문 후기 및 부당 대우, 임금 체불 등의 제보를 안전하게 나눠주세요.</p>
                         </div>
+                    </div>
+                )}
+
+                {/* 자유게시판 전용 소탭 필터 */}
+                {activeTab === 'free' && (
+                    <div className="flex gap-1.5 mb-3 px-1 sm:px-0">
+                        <button
+                            type="button"
+                            onClick={() => setFreeFilter('all')}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${
+                                freeFilter === 'all'
+                                    ? 'bg-gradient-to-r from-primary to-orange-500 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            전체
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFreeFilter('normal')}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${
+                                freeFilter === 'normal'
+                                    ? 'bg-gradient-to-r from-primary to-orange-500 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            💬 일반
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFreeFilter('playground')}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${
+                                freeFilter === 'playground'
+                                    ? 'bg-gradient-to-r from-primary to-orange-500 text-white shadow-sm'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            🎮 놀이터 인증
+                        </button>
                     </div>
                 )}
 
