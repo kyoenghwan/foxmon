@@ -337,6 +337,59 @@ export function FoxTalkWidget() {
         };
     }, [appState, userId, roomIdsString]);
 
+    // 글로벌 알림 구독 - 폭스톡 위젯 상태와 무관하게 항상 동작
+    useEffect(() => {
+        if (!sessionChatUser?.id) return;
+        const mySessionId = sessionChatUser.id;
+
+        const globalChannel = supabase.channel(`global_notif:${mySessionId}`)
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'foxtalk_messages'
+            }, async (payload) => {
+                const msg = payload.new as any;
+                if (!msg?.room_id || !msg?.participant_id) return;
+
+                // 시스템 메시지 제외
+                if (msg.message_type === 'SYSTEM_JOIN' || msg.message_type === 'SYSTEM_LEAVE') return;
+
+                // 내가 보낸 메시지인지 확인 (participant_id로 조회)
+                const { data: participant } = await supabase
+                    .from('foxtalk_participants')
+                    .select('session_id')
+                    .eq('id', msg.participant_id)
+                    .single();
+
+                if (participant?.session_id === mySessionId) return; // 내 메시지 제외
+
+                // 알림음 재생
+                if (localStorage.getItem('foxmon_notif_sound') === '1') {
+                    playNotificationSound();
+                }
+
+                // 브라우저 알림
+                if (localStorage.getItem('foxmon_notif_browser') === '1') {
+                    const senderName = participant?.session_id || '알 수 없음';
+                    // 닉네임 조회
+                    const { data: pData } = await supabase
+                        .from('foxtalk_participants')
+                        .select('nickname')
+                        .eq('id', msg.participant_id)
+                        .single();
+                    showBrowserNotification(
+                        `🦊 ${pData?.nickname || '폭스톡'}`,
+                        msg.content || '새 메시지가 도착했습니다.'
+                    );
+                }
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(globalChannel);
+        };
+    }, [sessionChatUser?.id]);
+
     // Save Profile
     const saveProfile = () => {
         if (!setupNick) return;

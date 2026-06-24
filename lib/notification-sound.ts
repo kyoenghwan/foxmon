@@ -119,7 +119,7 @@ export function showBrowserNotification(title: string, body: string, onClick?: (
             badge: '/icons/icon-72x72.png',
             tag: 'foxtalk-message',
             renotify: true,
-        });
+        } as NotificationOptions);
 
         if (onClick) {
             notification.onclick = () => {
