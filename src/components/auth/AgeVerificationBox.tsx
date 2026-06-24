@@ -28,8 +28,7 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   useEffect(() => {
     const isTest = searchParams?.get('test') === '1' || 
                    searchParams?.get('bypass') === '1' || 
-                   searchParams?.get('mock') === '1' ||
-                   process.env.NODE_ENV === 'development';
+                   searchParams?.get('mock') === '1';
     setIsTestMode(isTest);
   }, [searchParams]);
 
