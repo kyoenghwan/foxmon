@@ -59,7 +59,7 @@ export async function GET() {
     let dailyStatus = {
       roulettePlayed: false,
       luckyBoxPlayed: false,
-      lottoPlayed: false,
+      attendancePlayed: false,
       retroPlayed: false,
     };
     let activityPoints = 0;

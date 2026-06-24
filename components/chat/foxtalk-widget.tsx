@@ -274,23 +274,10 @@ export function FoxTalkWidget() {
     };
 
     const loadRooms = async () => {
-        console.log(`[FoxTalk-Lobby] ===== 대화방 목록 조회 시작 (userId: ${userId}, role: ${userRole}) =====`);
-        const tStart = performance.now();
         const res = await QA_GET_CHAT_ROOMS(userId || undefined, userRole || undefined) as any;
-        const tEnd = performance.now();
-        console.log(`[FoxTalk-Lobby] 대화방 목록 조회 완료 - 브라우저 체감 총 소요: ${(tEnd - tStart).toFixed(2)}ms`);
         
         if (res.success) {
             setRooms(res.data || []);
-            if (res.performance) {
-                console.log(`[FoxTalk-Lobby-ServerPerf] 
-  - [1단계] 방 목록 조회 (my_participant 조인): ${res.performance.step1_rooms_ms ? res.performance.step1_rooms_ms.toFixed(2) : 0}ms
-  - [2-3단계] 병렬 조회 대기: ${res.performance.step2_3_parallel_ms ? res.performance.step2_3_parallel_ms.toFixed(2) : 0}ms
-    · (세부) 최신 메시지 조회: ${res.performance.detail_msg_ms ? res.performance.detail_msg_ms.toFixed(2) : 0}ms
-    · (세부) 안읽은 메시지 조회: ${res.performance.detail_unread_ms ? res.performance.detail_unread_ms.toFixed(2) : 0}ms
-  - [4단계] 데이터 매핑/가공: ${res.performance.step4_decorate_ms ? res.performance.step4_decorate_ms.toFixed(2) : 0}ms
-  - [서버 실행 순수 총합]: ${res.performance.server_total_ms ? res.performance.server_total_ms.toFixed(2) : 0}ms`);
-            }
         }
     };
 
