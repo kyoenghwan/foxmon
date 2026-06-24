@@ -26,6 +26,33 @@ export async function GET() {
       }
       // 개설 후 다시 조회
       boardResult = await QA_GET_CURRENT_RETRO_BOARD();
+    } else {
+      // 보드가 있지만 날짜가 지난 경우 일일 리셋
+      // retro_draw_board의 created_at을 KST 기준으로 오늘과 비교
+      const kstOffset = 9 * 60 * 60 * 1000;
+      const nowKst = new Date(Date.now() + kstOffset);
+      const todayKstStr = nowKst.toISOString().split('T')[0]; // YYYY-MM-DD
+
+      const { data: currentBoard } = await supabaseAdmin
+        .from('retro_draw_board')
+        .select('board_round, created_at')
+        .eq('is_completed', false)
+        .order('board_round', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (currentBoard) {
+        const boardCreatedKst = new Date(new Date(currentBoard.created_at).getTime() + kstOffset);
+        const boardDateStr = boardCreatedKst.toISOString().split('T')[0];
+
+        if (boardDateStr !== todayKstStr) {
+          nvLog('FW', `⚠️ 뽑기판 날짜 변경 감지 (${boardDateStr} → ${todayKstStr}), 리셋 진행`);
+          const initResult = await OA_INITIALIZE_RETRO_BOARD({ currentBoardRound: currentBoard.board_round });
+          if (initResult.success) {
+            boardResult = await QA_GET_CURRENT_RETRO_BOARD();
+          }
+        }
+      }
     }
 
     // 2. 로그인된 경우 참여 여부 및 포인트 조회
