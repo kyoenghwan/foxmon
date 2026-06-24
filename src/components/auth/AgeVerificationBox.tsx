@@ -26,7 +26,10 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   const [isTestMode, setIsTestMode] = useState(false);
   
   useEffect(() => {
-    const isTest = searchParams?.get('test') === '1' || searchParams?.get('bypass') === '1' || searchParams?.get('mock') === '1';
+    const isTest = searchParams?.get('test') === '1' || 
+                   searchParams?.get('bypass') === '1' || 
+                   searchParams?.get('mock') === '1' ||
+                   process.env.NODE_ENV === 'development';
     setIsTestMode(isTest);
   }, [searchParams]);
 
@@ -191,23 +194,30 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
             </p>
           </div>
         ) : !isVerified ? (
-          <button 
-            type="button"
-            onClick={handleStartDreamStandardAuth}
-            disabled={isVerifying}
-            className="flex items-center justify-between py-3 px-4 bg-purple-50/50 border border-purple-200 rounded-2xl shadow-sm hover:border-purple-300 hover:bg-purple-50 transition-all group active:scale-[0.98] disabled:opacity-50 w-full"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100/50 rounded-xl flex items-center justify-center group-hover:bg-purple-200/50 transition-colors">
-                <Smartphone className="w-5 h-5 text-purple-600" />
+          <>
+            <button 
+              type="button"
+              onClick={handleStartDreamStandardAuth}
+              disabled={isVerifying}
+              className="flex items-center justify-between py-3 px-4 bg-purple-50/50 border border-purple-200 rounded-2xl shadow-sm hover:border-purple-300 hover:bg-purple-50 transition-all group active:scale-[0.98] disabled:opacity-50 w-full"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100/50 rounded-xl flex items-center justify-center group-hover:bg-purple-200/50 transition-colors">
+                  <Smartphone className="w-5 h-5 text-purple-600" />
+                </div>
+                <div className="text-left">
+                  <div className="text-[13px] sm:text-sm font-black text-purple-950">휴대폰 본인 인증</div>
+                  <div className="text-[11px] text-purple-600/70 font-semibold">간편한 드림시큐리티 표준창 인증</div>
+                </div>
               </div>
-              <div className="text-left">
-                <div className="text-[13px] sm:text-sm font-black text-purple-950">휴대폰 본인 인증</div>
-                <div className="text-[11px] text-purple-600/70 font-semibold">간편한 드림시큐리티 표준창 인증</div>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-purple-400 group-hover:text-purple-600 transition-colors" />
-          </button>
+              <ChevronRight className="w-5 h-5 text-purple-400 group-hover:text-purple-600 transition-colors" />
+            </button>
+            {isTestMode && (
+              <p className="text-[10px] text-center text-purple-600 font-bold mt-1">
+                ⚙️ 개발자 테스트 모드: 모의(Mock) 본인인증이 진행됩니다.
+              </p>
+            )}
+          </>
         ) : null}
       </div>
     </div>
