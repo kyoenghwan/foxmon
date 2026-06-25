@@ -26,9 +26,13 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   const [isTestMode, setIsTestMode] = useState(false);
   
   useEffect(() => {
+    const isLocal = typeof window !== 'undefined' && 
+                    (window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1');
     const isTest = searchParams?.get('test') === '1' || 
                    searchParams?.get('bypass') === '1' || 
-                   searchParams?.get('mock') === '1';
+                   searchParams?.get('mock') === '1' ||
+                   isLocal;
     setIsTestMode(isTest);
   }, [searchParams]);
 

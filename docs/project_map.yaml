@@ -294,8 +294,15 @@ pages:
   SEEKERS_LIST_PAGE:
     label: "구직자 목록 페이지 (공개)"
     keywords: ["구직 목록", "구직자 리스트", "구직 정보"]
-    files: ["app/seekers/page.tsx"]
+    files:
+      - "app/seekers/page.tsx"
+      - "app/seekers/seekers-list-content.tsx"
     db_tables: ["resumes"]
+    ui_elements:
+      - name: "RESUME_REGISTER_BUTTON"
+        keywords: ["등록하기", "이력서 등록", "구직 등록 버튼"]
+        selector: "button:contains('등록하기')"
+        type: "button"
 
   SEEKER_DETAIL_MODAL:
     label: "구직자 이력서 상세 팝업"

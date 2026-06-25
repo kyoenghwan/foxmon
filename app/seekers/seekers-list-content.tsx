@@ -101,8 +101,11 @@ export function SeekersListContent({ isEmployer: propIsEmployer, session: propSe
     const handleResumeRegisterClick = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+
         if (!session || !session.user) {
-            router.push('/login');
+            if (confirm('로그인 후 이용할 수 있습니다. 로그인 페이지로 이동하시겠습니까?')) {
+                router.push('/login');
+            }
             return;
         }
         setIsResumeModalOpen(true);
