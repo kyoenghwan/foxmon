@@ -537,50 +537,62 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
         >
            <Heart className={`w-6 h-6 ${isScrapped ? 'fill-current' : ''}`} />
         </Button>
-        <div 
-            onClick={async () => {
-                if (displayJob.status === 'CLAIM_PENDING') {
-                    alert('인증 대기중 업체입니다.');
-                    return;
-                }
-                if (isViewer) {
-                    alert('뷰어 계정은 지원하기(채팅 개설) 기능을 사용할 수 없습니다.');
-                    return;
-                }
-                try {
-                    const res = await fetch('/api/auth/session');
-                    const session = await res.json();
-                    if (!session?.user?.id) { 
-                        if (confirm('로그인 후 이용할 수 있습니다. 로그인 페이지로 이동하시겠습니까?')) {
-                            window.location.href = '/login'; 
-                        }
-                        return; 
-                    }
-                    if (session.user.role === 'EMPLOYER') { alert('업체회원은 지원자만 대화를 걸 수 있습니다.'); return; }
-                    if (session.user.id === displayJob.user_id) {
-                        alert('본인이 작성한 구인글에는 대화를 신청할 수 없습니다.');
+        {displayJob.claim_code ? (
+            <div 
+                onClick={() => {
+                    alert('아직 해당 업체에서 소유권을 인수하지 않은 광고입니다. 업체가 가입 후 광고 코드를 입력하여 인수를 완료하면 폭스토크 지원이 가능합니다.');
+                }}
+                className="flex-1 h-[52px] bg-gray-100 text-gray-400 font-black text-[15px] sm:text-[16px] flex items-center justify-center gap-2 rounded-2xl cursor-not-allowed transition-all"
+            >
+                <span className="text-gray-300 text-[20px] mb-0.5">⚡</span>
+                인수 대기중 (지원 불가)
+            </div>
+        ) : (
+            <div 
+                onClick={async () => {
+                    if (displayJob.status === 'CLAIM_PENDING') {
+                        alert('인증 대기중 업체입니다.');
                         return;
                     }
-                    
-                    const createRes = await OA_INSERT_CHAT_ROOM({
-                        title: `${displayJob.company_name || displayJob.company || '업소명 미상'} - ${displayJob.title || '구인구직 대화방'}`,
-                        type: '1ON1', max_participants: 2, created_by: session.user.id, job_id: displayJob.id, employer_id: displayJob.user_id, seeker_id: session.user.id
-                    });
-                    if (createRes.success) {
-                        handleRecordApplication();
-                        if (onClose) {
-                            onClose();
-                        }
-                        window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
+                    if (isViewer) {
+                        alert('뷰어 계정은 지원하기(채팅 개설) 기능을 사용할 수 없습니다.');
+                        return;
                     }
-                    else alert('채팅방을 생성하지 못했습니다.');
-                } catch (err) {}
-            }}
-            className="flex-1 h-[52px] bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white font-black text-[15px] sm:text-[16px] shadow-lg flex items-center justify-center gap-2 rounded-2xl cursor-pointer transition-transform active:scale-[0.98] group"
-        >
-            <span className="text-primary text-[20px] mb-0.5">⚡</span>
-            FoxTalk 지원하기
-        </div>
+                    try {
+                        const res = await fetch('/api/auth/session');
+                        const session = await res.json();
+                        if (!session?.user?.id) { 
+                            if (confirm('로그인 후 이용할 수 있습니다. 로그인 페이지로 이동하시겠습니까?')) {
+                                window.location.href = '/login'; 
+                            }
+                            return; 
+                        }
+                        if (session.user.role === 'EMPLOYER') { alert('업체회원은 지원자만 대화를 걸 수 있습니다.'); return; }
+                        if (session.user.id === displayJob.user_id) {
+                            alert('본인이 작성한 구인글에는 대화를 신청할 수 없습니다.');
+                            return;
+                        }
+                        
+                        const createRes = await OA_INSERT_CHAT_ROOM({
+                            title: `${displayJob.company_name || displayJob.company || '업소명 미상'} - ${displayJob.title || '구인구직 대화방'}`,
+                            type: '1ON1', max_participants: 2, created_by: session.user.id, job_id: displayJob.id, employer_id: displayJob.user_id, seeker_id: session.user.id
+                        });
+                        if (createRes.success) {
+                            handleRecordApplication();
+                            if (onClose) {
+                                onClose();
+                            }
+                            window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
+                        }
+                        else alert('채팅방을 생성하지 못했습니다.');
+                    } catch (err) {}
+                }}
+                className="flex-1 h-[52px] bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white font-black text-[15px] sm:text-[16px] shadow-lg flex items-center justify-center gap-2 rounded-2xl cursor-pointer transition-transform active:scale-[0.98] group"
+            >
+                <span className="text-primary text-[20px] mb-0.5">⚡</span>
+                FoxTalk 지원하기
+            </div>
+        )}
         
         {isModal ? (
           <Button
