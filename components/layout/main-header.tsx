@@ -132,7 +132,7 @@ export function MainHeader({ session }: MainHeaderProps) {
         setLanguage(language === 'KO' ? 'EN' : 'KO');
     };
 
-    const isEmployer = (session?.user?.role === 'EMPLOYER' || session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN') && session?.user?.role !== 'VIEWER';
+    const isEmployer = (session?.user?.role === 'EMPLOYER' || session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN');
     const showResumeMenu = session?.user?.role !== 'EMPLOYER' && session?.user?.role !== 'VIEWER';
     const isBusinessVerified = (session?.user as any)?.business_number ? true : false;
     /** 홈·구인 등은 프로필 카드에 로그아웃이 있음. `/biz`, `/help`만 헤더에 유지 */
