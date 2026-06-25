@@ -58,8 +58,14 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
   const [searchDateTo, setSearchDateTo] = useState('');
   const [searchContent, setSearchContent] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<CsRoomSearchFilters>({});
+  const [onlyUnanswered, setOnlyUnanswered] = useState(false);
 
-  const selectedRoom = rooms.find((r) => r.id === selectedId);
+  const displayRooms = useMemo(() => {
+    if (!onlyUnanswered) return rooms;
+    return rooms.filter((r) => r.has_unread);
+  }, [rooms, onlyUnanswered]);
+
+  const selectedRoom = displayRooms.find((r) => r.id === selectedId);
 
   const buildFilters = useCallback((): CsRoomSearchFilters => {
     const f: CsRoomSearchFilters = {};
@@ -209,7 +215,20 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
       <div className="border-b sm:border-b-0 sm:border-r border-gray-100 flex flex-col min-h-[120px] max-h-[280px] sm:max-h-none">
         <div className="p-2 border-b bg-gray-50 shrink-0 space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-[11px] font-black text-gray-600">문의 {rooms.length}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-black text-gray-600">
+                문의 {onlyUnanswered ? displayRooms.length : rooms.length}
+              </span>
+              <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 cursor-pointer select-none bg-orange-50/50 hover:bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100/50 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={onlyUnanswered}
+                  onChange={(e) => setOnlyUnanswered(e.target.checked)}
+                  className="w-3 h-3 rounded text-primary focus:ring-primary border-gray-300 cursor-pointer"
+                />
+                미답변만
+              </label>
+            </div>
             <div className="flex gap-1">
               {hasSearch ? (
                 <button
@@ -280,7 +299,7 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
         </div>
 
         <ul className="flex-1 overflow-y-auto divide-y divide-gray-50">
-          {rooms.map((room) => (
+          {displayRooms.map((room) => (
             <li key={room.id}>
               <button
                 type="button"
@@ -318,7 +337,7 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
           {listError ? (
             <li className="p-4 text-center text-[11px] text-red-600 font-bold">{listError}</li>
           ) : null}
-          {rooms.length === 0 && !listError ? (
+          {displayRooms.length === 0 && !listError ? (
             <li className="p-6 text-center text-[12px] text-gray-400">
               {hasSearch ? '검색 결과 없음' : '문의 없음'}
             </li>
