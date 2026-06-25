@@ -121,12 +121,12 @@
   }
   @media (min-width: 1920px) {
     .container {
-      max-width: 1298px !important; /* 6열 고정: 195*6 + 16*5 + 48 = 1298px */
+      max-width: 1087px !important;
     }
   }
   @media (min-width: 2560px) {
     .container {
-      max-width: 1720px !important; /* 8열 고정: 195*8 + 16*7 + 48 = 1720px */
+      max-width: 1087px !important;
     }
   }
 }
@@ -145,10 +145,7 @@
   .limit-2-rows > *:nth-child(n+9) { display: block !important; }
   .limit-2-rows > *:nth-child(n+11) { display: none !important; }
 }
-@media (min-width: 2560px) {
-  .limit-2-rows > *:nth-child(n+11) { display: block !important; }
-  .limit-2-rows > *:nth-child(n+17) { display: none !important; }
-}
+
 
 @layer utilities {
   /* ✨ Gold Shimmer Effect */
