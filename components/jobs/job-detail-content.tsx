@@ -539,6 +539,10 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
         </Button>
         <div 
             onClick={async () => {
+                if (displayJob.status === 'CLAIM_PENDING') {
+                    alert('인증 대기중 업체입니다.');
+                    return;
+                }
                 if (isViewer) {
                     alert('뷰어 계정은 지원하기(채팅 개설) 기능을 사용할 수 없습니다.');
                     return;
