@@ -83,7 +83,9 @@ export default auth((req) => {
     // 1.5 Global Authentication Check (Strict Private Mode as requested by user)
     // 로그인이 안 된 상태면 무조건 /login으로 리다이렉트 (회원가입, 로그인, 정적 파일, 홈페이지 제외)
     if (!session?.user && !hasGuestSession && !isLoginPage && !isRegisterPage && !isPublicStatic && !isHomePage && !isFindAccountPage && !isResetPasswordPage && !isRenderBannersPage) {
-        return NextResponse.redirect(new URL('/login', nextUrl));
+        const loginUrl = new URL('/login', nextUrl);
+        loginUrl.searchParams.set('message', 'login_required');
+        return NextResponse.redirect(loginUrl);
     }
  
     // 2. Age Gate Check (Redirect all unverified users to /age-gate EXCEPT if they are trying to login, or access SEO/public pages)

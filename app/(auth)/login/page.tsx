@@ -21,6 +21,9 @@ function LoginCombinedContent() {
             signOut({ redirect: false }).then(() => {
                 router.replace('/login');
             });
+        } else if (searchParams?.get('message') === 'login_required') {
+            alert('로그인 후 이용할 수 있습니다.');
+            router.replace('/login');
         }
     }, [searchParams, router]);
 
