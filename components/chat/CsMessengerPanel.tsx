@@ -62,7 +62,7 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
 
   const displayRooms = useMemo(() => {
     if (!onlyUnanswered) return rooms;
-    return rooms.filter((r) => r.has_unread);
+    return rooms.filter((r) => r.last_sender_is_customer);
   }, [rooms, onlyUnanswered]);
 
   const selectedRoom = displayRooms.find((r) => r.id === selectedId);

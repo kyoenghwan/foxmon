@@ -18,6 +18,7 @@ export type CsRoomListItem = {
   customer_login_hint: string | null;
   last_message_preview: string | null;
   has_unread: boolean;
+  last_sender_is_customer: boolean;
 };
 
 
@@ -109,15 +110,18 @@ export async function QA_LIST_CS_ROOMS(
 
     const lastByRoom = new Map<string, { content: string; created_at: string }>();
     const lastCustomerByRoom = new Map<string, { content: string; created_at: string }>();
+    const lastSenderIsCustomerByRoom = new Map<string, boolean>();
 
     for (const m of lastMessages || []) {
-      if (!lastByRoom.has(m.room_id)) {
-        lastByRoom.set(m.room_id, { content: m.content, created_at: m.created_at });
-      }
       const sid = m.participant_id
         ? sessionByParticipantId.get(m.participant_id)
         : undefined;
       const isCustomerMsg = !!sid && sid !== adminId;
+
+      if (!lastByRoom.has(m.room_id)) {
+        lastByRoom.set(m.room_id, { content: m.content, created_at: m.created_at });
+        lastSenderIsCustomerByRoom.set(m.room_id, isCustomerMsg);
+      }
       if (isCustomerMsg && !lastCustomerByRoom.has(m.room_id)) {
         lastCustomerByRoom.set(m.room_id, { content: m.content, created_at: m.created_at });
       }
@@ -161,6 +165,7 @@ export async function QA_LIST_CS_ROOMS(
         customer_login_hint: room.created_by?.slice(0, 8) || null,
         last_message_preview: last?.content?.slice(0, 80) || null,
         has_unread,
+        last_sender_is_customer: lastSenderIsCustomerByRoom.get(room.id) ?? false,
       };
     });
 
