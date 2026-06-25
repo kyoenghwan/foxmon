@@ -546,7 +546,12 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 try {
                     const res = await fetch('/api/auth/session');
                     const session = await res.json();
-                    if (!session?.user?.id) { alert('로그인이 필요합니다.'); window.location.href = '/login'; return; }
+                    if (!session?.user?.id) { 
+                        if (confirm('로그인 후 이용할 수 있습니다. 로그인 페이지로 이동하시겠습니까?')) {
+                            window.location.href = '/login'; 
+                        }
+                        return; 
+                    }
                     if (session.user.role === 'EMPLOYER') { alert('업체회원은 지원자만 대화를 걸 수 있습니다.'); return; }
                     if (session.user.id === displayJob.user_id) {
                         alert('본인이 작성한 구인글에는 대화를 신청할 수 없습니다.');
