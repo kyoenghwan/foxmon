@@ -37,13 +37,18 @@ export const authConfig = {
             if (user) {
                 token.is_age_verified = (user as any).is_age_verified;
                 token.role = (user as any).role;
+                token.login_id = (user as any).login_id;
+                token.staff_team = (user as any).staff_team;
             }
             return token;
         },
         async session({ session, token }) {
             if (session.user) {
+                session.user.id = token.sub as string;
                 (session.user as any).is_age_verified = token.is_age_verified;
                 (session.user as any).role = token.role;
+                (session.user as any).login_id = token.login_id;
+                (session.user as any).staff_team = (token as any).staff_team;
             }
             return session;
         },
