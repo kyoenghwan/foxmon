@@ -30,7 +30,7 @@ export function GeneralJobListRow(job: AdItem) {
 
     return (
         <div 
-            onClick={() => router.push(`/jobs/${id}`)}
+            onClick={() => router.push(`/jobs/${id}`, { scroll: false })}
             className={`p-4 active:scale-[0.99] transition-all border-b flex flex-col gap-2.5 cursor-pointer relative group ${
                 hasBg ? 'border-l-4' : 'hover:bg-gray-50/80 border-gray-100'
             }`}
@@ -128,7 +128,7 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
         <tr 
             onClick={() => {
                 if (onClick) onClick();
-                else router.push(`/jobs/${id}`);
+                else router.push(`/jobs/${id}`, { scroll: false });
             }}
             className={`hover:bg-gray-50/50 transition-colors group cursor-pointer border-b ${
                 hasBg ? 'border-l-4 border-l-primary' : 'border-gray-100'

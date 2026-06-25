@@ -66,7 +66,7 @@ export function GeneralSeekerListRow({ job, onClick }: { job: SeekerJobType; onC
                     return;
                 }
                 if (onClick) onClick();
-                else router.push(`/seekers/${job.id}`);
+                else router.push(`/seekers/${job.id}`, { scroll: false });
             }}
             className={`p-4 sm:p-5 hover:bg-gray-50/50 active:scale-[0.99] transition-all border border-gray-200/80 rounded-xl bg-white shadow-sm hover:shadow-md hover:border-primary/30 flex flex-col gap-2.5 cursor-pointer relative group ${isInactive ? 'opacity-50 grayscale' : ''}`}
         >
@@ -172,7 +172,7 @@ export function GeneralSeekerListRowDesktop({ job, onClick }: { job: SeekerJobTy
                     return;
                 }
                 if (onClick) onClick();
-                else router.push(`/seekers/${job.id}`);
+                else router.push(`/seekers/${job.id}`, { scroll: false });
             }}
             className={`hover:bg-gray-50/50 transition-colors group cursor-pointer border-b border-gray-100 ${isInactive ? 'opacity-50 grayscale' : ''}`}
         >
