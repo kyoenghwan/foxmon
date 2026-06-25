@@ -545,7 +545,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
                 className="flex-1 h-[52px] bg-gray-100 text-gray-400 font-black text-[15px] sm:text-[16px] flex items-center justify-center gap-2 rounded-2xl cursor-not-allowed transition-all"
             >
                 <span className="text-gray-300 text-[20px] mb-0.5">⚡</span>
-                인수 대기중 (지원 불가)
+                인증 대기중
             </div>
         ) : (
             <div 
