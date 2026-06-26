@@ -82,6 +82,10 @@ export function SettingsModal() {
     const [pwMessage, setPwMessage] = useState('');
     const [pwError, setPwError] = useState('');
 
+    // Withdraw State (인라인 탈퇴 확인 UI - Radix Dialog에서 window.confirm 사용 불가)
+    const [withdrawStep, setWithdrawStep] = useState<0 | 1 | 2>(0);
+    const [withdrawing, setWithdrawing] = useState(false);
+
     // Activity Counts
     const [activityCounts, setActivityCounts] = useState({
         postCount: 0,
@@ -106,6 +110,7 @@ export function SettingsModal() {
     // 2. 모달이 열릴 때 데이터가 이미 있다면 백그라운드 갱신(SWR)을 수행하고, 없다면 로딩과 함께 가져옴
     useEffect(() => {
         if (isOpen) {
+            setWithdrawStep(0);
             const hasData = nickname || email || phoneNumber;
             fetchUserData(!hasData); // 데이터가 이미 있다면 로딩UI(loadingData) 없이 백그라운드로 가져옴
 
@@ -318,13 +323,8 @@ export function SettingsModal() {
         }
     };
 
-    const handleWithdraw = async () => {
-        const confirm1 = window.confirm('정말로 회원 탈퇴를 진행하시겠습니까? 탈퇴 시 작성하신 이력서와 모든 활동 데이터가 즉시 삭제되며 복구할 수 없습니다.');
-        if (!confirm1) return;
-
-        const confirm2 = window.confirm('마지막 경고입니다. 탈퇴 후 데이터 복구는 절대 불가능합니다. 계속 진행하시겠습니까?');
-        if (!confirm2) return;
-
+    const handleWithdrawExecute = async () => {
+        setWithdrawing(true);
         try {
             const res = await fetch('/api/auth/withdraw', {
                 method: 'POST',
@@ -333,16 +333,19 @@ export function SettingsModal() {
             const result = await res.json();
 
             if (result.success) {
-                alert('회원 탈퇴가 완료되었습니다. 그동안 서비스를 이용해 주셔서 감사합니다.');
                 document.cookie = "foxmon_auto_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 document.cookie = "foxmon_transient=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 await signOut({ callbackUrl: '/' });
             } else {
-                alert(result.message || '회원 탈퇴 처리 중 오류가 발생했습니다.');
+                setError(result.message || '회원 탈퇴 처리 중 오류가 발생했습니다.');
+                setWithdrawStep(0);
             }
         } catch (err) {
             console.error('Withdraw exception:', err);
-            alert('회원 탈퇴 처리 중 오류가 발생했습니다.');
+            setError('회원 탈퇴 처리 중 오류가 발생했습니다.');
+            setWithdrawStep(0);
+        } finally {
+            setWithdrawing(false);
         }
     };
 
@@ -891,13 +894,40 @@ export function SettingsModal() {
                                     </div>
                                 </section>
 
-                                <div className="pt-4 text-center">
-                                    <button 
-                                        onClick={handleWithdraw}
-                                        className="text-[11px] font-bold text-gray-400 hover:text-red-500 transition-colors underline underline-offset-4 cursor-pointer"
-                                    >
-                                        회원 탈퇴를 생각하시나요?
-                                    </button>
+                                <div className="pt-4">
+                                    {withdrawStep === 0 && (
+                                        <div className="text-center">
+                                            <button 
+                                                onClick={() => setWithdrawStep(1)}
+                                                className="text-[11px] font-bold text-gray-400 hover:text-red-500 transition-colors underline underline-offset-4 cursor-pointer"
+                                            >
+                                                회원 탈퇴를 생각하시나요?
+                                            </button>
+                                        </div>
+                                    )}
+                                    {withdrawStep === 1 && (
+                                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
+                                            <p className="text-[13px] font-bold text-red-600">⚠️ 정말로 회원 탈퇴를 진행하시겠습니까?</p>
+                                            <p className="text-[11px] text-gray-500">탈퇴 시 작성하신 이력서와 모든 활동 데이터가 즉시 삭제되며 복구할 수 없습니다.</p>
+                                            <div className="flex gap-2 justify-end">
+                                                <button onClick={() => setWithdrawStep(0)} className="px-3 py-1.5 text-[12px] font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">취소</button>
+                                                <button onClick={() => setWithdrawStep(2)} className="px-3 py-1.5 text-[12px] font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors">탈퇴 진행</button>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {withdrawStep === 2 && (
+                                        <div className="bg-red-100 border-2 border-red-300 rounded-xl p-4 space-y-3">
+                                            <p className="text-[13px] font-black text-red-700">🚨 마지막 경고입니다</p>
+                                            <p className="text-[11px] text-red-600 font-bold">탈퇴 후 데이터 복구는 절대 불가능합니다. 정말 계속 진행하시겠습니까?</p>
+                                            <div className="flex gap-2 justify-end">
+                                                <button onClick={() => setWithdrawStep(0)} className="px-3 py-1.5 text-[12px] font-bold text-gray-500 bg-white hover:bg-gray-100 rounded-lg transition-colors border border-gray-200">취소</button>
+                                                <button onClick={handleWithdrawExecute} disabled={withdrawing} className="px-3 py-1.5 text-[12px] font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1">
+                                                    {withdrawing && <Loader2 className="w-3 h-3 animate-spin" />}
+                                                    {withdrawing ? '처리 중...' : '최종 탈퇴 확인'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
