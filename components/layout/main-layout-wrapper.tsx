@@ -40,19 +40,21 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
 
             <main className="flex-1 flex flex-col w-full relative">
                 {/* 상단 고정 영역 (메인 배너 & 데스크톱 로그인 정보) */}
-                <div className="sticky top-[96px] tablet:top-[144px] z-30 bg-gray-50 border-b w-full shrink-0">
-                    <div className="container mx-auto px-4 py-4 md:py-6">
-                        <div className="relative flex flex-col tablet:flex-row gap-3 tablet:gap-6 items-stretch tablet:h-[203px]">
-                            {/* 메인 배너: 모바일/데스크톱 항시 노출 및 상단 고정 */}
-                            <div className="w-full tablet:flex-1 tablet:h-[203px] overflow-hidden rounded-xl bg-white shadow-sm">
-                                <div className="w-full h-full">
-                                    <MainBanner />
+                <div className="sticky top-[96px] tablet:top-[144px] z-30 bg-transparent w-full shrink-0 pointer-events-none">
+                    <div className="container mx-auto px-4 py-2.5 md:py-3.5">
+                        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-3 md:p-4 shadow-sm pointer-events-auto relative z-30">
+                            <div className="relative flex flex-col tablet:flex-row gap-3 tablet:gap-6 items-stretch tablet:h-[203px]">
+                                {/* 메인 배너: 모바일/데스크톱 항시 노출 및 상단 고정 */}
+                                <div className="w-full tablet:flex-1 tablet:h-[203px] overflow-hidden rounded-xl bg-white shadow-sm">
+                                    <div className="w-full h-full">
+                                        <MainBanner />
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* 유저 로그인 정보 박스 (데스크톱 전용: 배너 우측에 함께 고정) */}
-                            <div className="hidden tablet:block w-full tablet:w-[320px] tablet:h-[203px] z-20 shrink-0">
-                                <LoginInfoBox session={session} />
+                                {/* 유저 로그인 정보 박스 (데스크톱 전용: 배너 우측에 함께 고정) */}
+                                <div className="hidden tablet:block w-full tablet:w-[320px] tablet:h-[203px] z-20 shrink-0">
+                                    <LoginInfoBox session={session} />
+                                </div>
                             </div>
                         </div>
                     </div>
