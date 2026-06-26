@@ -38,11 +38,11 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
             <SideBanners />
 
             {/* 헤더 + 메인 배너를 하나의 sticky 그룹으로 묶어 함께 고정 */}
-            <div className="sticky top-0 z-40 bg-white">
+            <div className="sticky top-0 z-40">
                 <MainHeader session={session} />
 
                 {/* 메인 배너 & 데스크톱 로그인 정보 */}
-                <div className="bg-white w-full shrink-0 border-b border-gray-100">
+                <div className="w-full shrink-0">
                     <div className="container mx-auto px-4 py-2.5 md:py-3.5">
                         <div className="bg-gray-50 border border-gray-100 rounded-2xl p-3 md:p-4 shadow-sm">
                             <div className="relative flex flex-col tablet:flex-row gap-3 tablet:gap-6 items-stretch tablet:h-[203px]">
