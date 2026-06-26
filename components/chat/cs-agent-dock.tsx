@@ -126,7 +126,7 @@ export function CsAgentDock() {
         </button>
       ) : (
         <div
-          className="fixed z-[55] left-4 bottom-4 w-[min(100vw-2rem,400px)] h-[min(72vh,560px)] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
+          className="fixed z-[55] left-4 bottom-4 w-[min(100vw-2rem,680px)] h-[min(85vh,800px)] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
           style={{ maxWidth: 'calc(100vw - 2rem)' }}
         >
           <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-400 text-white shrink-0">
