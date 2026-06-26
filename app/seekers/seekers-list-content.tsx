@@ -300,7 +300,7 @@ export function SeekersListContent({ isEmployer: propIsEmployer, session: propSe
             try {
                 // 만약 검색 조건이 없는 기본 조회인데 단지 캐시가 없어서 조회를 돌린 경우라면 Zustand에도 캐싱해줌
                 if (combinedTerms === '') {
-                    await fetchStoreJobs(refreshKey > 0);
+                    await fetchStoreJobs('', refreshKey > 0);
                     setPremiumJobs(useAdStore.getState().premiumJobs);
                     setSpecialJobs(useAdStore.getState().specialJobs);
                     setLineJobs(useAdStore.getState().lineJobs);

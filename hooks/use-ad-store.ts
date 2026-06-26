@@ -19,7 +19,7 @@ interface AdState {
     
     fetchSideAds: () => Promise<void>;
     fetchPremiumMainAds: () => Promise<void>;
-    fetchJobs: (searchTerms?: string) => Promise<void>;
+    fetchJobs: (searchTerms?: string, forceRefresh?: boolean) => Promise<void>;
     setInitialData: (data: {
         sideAds: AdItem[];
         premiumMainAds: AdItem[];
@@ -81,8 +81,8 @@ export const useAdStore = create<AdState>((set, get) => ({
         }
     },
 
-    fetchJobs: async (searchTerms = '') => {
-        if (searchTerms === '' && (get().isJobsLoaded || get().isFetchingJobs)) return;
+    fetchJobs: async (searchTerms = '', forceRefresh = false) => {
+        if (searchTerms === '' && !forceRefresh && (get().isJobsLoaded || get().isFetchingJobs)) return;
         set({ isFetchingJobs: true });
         const start = performance.now();
         // console.log(`[Store Performance] fetchJobs (general/premium/special) started...`);

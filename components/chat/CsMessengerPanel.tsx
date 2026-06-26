@@ -7,6 +7,7 @@ import {
   listCsRoomsForAdmin,
   markCsRoomRead,
   sendCsAdminReply,
+  closeCsRoom,
 } from '@/actions/admin/csMessenger';
 import type { CsRoomListItem } from '@/src/atoms/qa/support/QA_LIST_CS_ROOMS';
 import type { CsRoomSearchFilters } from '@/lib/cs-search';
@@ -198,6 +199,29 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
     await refreshRooms(appliedFilters);
   };
 
+  const handleCloseRoom = async () => {
+    if (!selectedId) return;
+    if (
+      !confirm(
+        '이 상담을 종료하시겠습니까?\n종료 시 목록에서 사라지지만 이전 상담 이력은 안전하게 보존됩니다.'
+      )
+    ) {
+      return;
+    }
+    
+    setSending(true);
+    const res = await closeCsRoom(selectedId);
+    setSending(false);
+    
+    if (res.success) {
+      alert('상담이 종료되었습니다.');
+      setSelectedId(null);
+      await refreshRooms(appliedFilters);
+    } else {
+      alert(res.error || '상담을 종료하지 못했습니다.');
+    }
+  };
+
   const hasSearch =
     !!searchLogin.trim() ||
     !!searchDateFrom ||
@@ -349,15 +373,27 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
         {selectedRoom ? (
           <>
             <div className="p-2.5 border-b shrink-0">
-              <p className="font-black text-[13px] flex items-center gap-1">
-                <Headset className="w-4 h-4 text-primary" />
-                {selectedRoom.customer_nickname || selectedRoom.title}
-              </p>
-              {selectedRoom.customer_login_id ? (
-                <p className="text-[11px] text-gray-500 font-bold mt-0.5">
-                  아이디: {selectedRoom.customer_login_id}
-                </p>
-              ) : null}
+              <div className="flex justify-between items-center gap-2">
+                <div>
+                  <p className="font-black text-[13px] flex items-center gap-1">
+                    <Headset className="w-4 h-4 text-primary" />
+                    {selectedRoom.customer_nickname || selectedRoom.title}
+                  </p>
+                  {selectedRoom.customer_login_id ? (
+                    <p className="text-[11px] text-gray-500 font-bold mt-0.5">
+                      아이디: {selectedRoom.customer_login_id}
+                    </p>
+                  ) : null}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleCloseRoom}
+                  className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 font-black text-[11px] rounded-lg border border-red-200/50 transition-all active:scale-[0.98] shrink-0"
+                >
+                  상담 종료
+                </button>
+              </div>
               {contentQuery ? (
                 <p className="text-[10px] text-primary font-bold mt-1">
                   대화 내 「{contentQuery}」 검색 · {displayMessages.length}건

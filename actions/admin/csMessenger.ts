@@ -124,3 +124,28 @@ export async function markCsRoomRead(roomId: string, csAdminUserId: string) {
   }
   return { success: true };
 }
+
+/** 고객센터 상담 종료 (방 비활성화) */
+export async function closeCsRoom(roomId: string) {
+  const session = await auth();
+  const user = session?.user as SessionUser | undefined;
+  if (!session?.user || !canAccessCsMessenger(user)) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  if (!roomId) {
+    return { success: false, error: "방 식별자가 없습니다." };
+  }
+
+  const { error } = await supabaseAdmin
+    .from("foxtalk_rooms")
+    .update({ is_active: false })
+    .eq("id", roomId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/fox-office/support/inbox");
+  return { success: true };
+}
