@@ -139,19 +139,15 @@ function AgeVerificationBoxContent({ onVerifySuccess, className }: AgeVerificati
   const handleStartDreamStandardAuth = () => {
     if (isTestMode) {
       setIsVerifying(true);
-      setStatusMsg('Mock 모드: 가상 인증창 활성화 중...');
+      setStatusMsg('Mock 모드: 가상 인증 진행 중...');
       setStatusError('');
       nvLog('FW', '⚠️ Mock 모드로 인증 표준창 시뮬레이션을 실행합니다.');
       
-      setTimeout(() => {
+      setTimeout(async () => {
         const mockKeyToken = 'MOCK_KEY_TOKEN_' + Math.random().toString(36).substring(7);
-        if ((window as any).result) {
-          (window as any).result(JSON.stringify({
-            success: true,
-            encryptMOKKeyToken: mockKeyToken
-          }));
-        }
-      }, 1500);
+        nvLog('FW', `Mock 토큰 생성 완료: ${mockKeyToken}, 직접 API 호출`);
+        await handleConfirmStandardAuth(mockKeyToken);
+      }, 1000);
       return;
     }
 
