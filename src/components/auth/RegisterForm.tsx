@@ -317,13 +317,31 @@ export function RegisterForm() {
         setError('신분증 또는 사업자등록증 사본을 첨부해주세요.');
         return;
       }
-      if (formData.business_type === '사업자' && !formData.business_address) {
-        setError('실제 영업장 주소를 입력해주세요.');
+      if (!formData.business_name.trim()) {
+        setError('회사/점포명을 입력해주세요.');
         return;
       }
-      if (formData.business_type === '사업자' && !formData.business_category) {
-        setError('필수 사업자 정보(업종)를 선택해주세요.');
+      if (!formData.representative_name.trim()) {
+        setError('대표자 성명을 입력해주세요.');
         return;
+      }
+      if (formData.business_type === '사업자') {
+        if (!formData.business_number.trim()) {
+          setError('사업자등록번호를 입력해주세요.');
+          return;
+        }
+        if (formData.business_number.replace(/[^0-9]/g, '').length !== 10) {
+          setError('사업자등록번호는 숫자 10자리여야 합니다.');
+          return;
+        }
+        if (!formData.business_address.trim()) {
+          setError('실제 영업장 주소를 입력해주세요.');
+          return;
+        }
+        if (!formData.business_category) {
+          setError('업종을 선택해주세요.');
+          return;
+        }
       }
     }
 
@@ -888,7 +906,7 @@ export function RegisterForm() {
 
                 {formData.business_type === '사업자' && (
                   <div className="grid grid-cols-[100px_1fr] items-center gap-4">
-                    <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">업종 선택</Label>
+                    <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">업종 선택 <span className="text-purple-600">*</span></Label>
                     <select
                       value={formData.business_category}
                       onChange={(e) => setFormData({ ...formData, business_category: e.target.value })}
@@ -905,7 +923,7 @@ export function RegisterForm() {
                 )}
 
                 <div className="grid grid-cols-[100px_1fr] items-center gap-4">
-                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">회사/점포명</Label>
+                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">회사/점포명 <span className="text-purple-600">*</span></Label>
                   <Input
                     placeholder={formData.business_type === '사업자' ? "사업자등록증 상호명" : "실제 일하시는 가게 이름"}
                     value={formData.business_name}
@@ -931,7 +949,7 @@ export function RegisterForm() {
                 </div>
 
                 <div className="grid grid-cols-[100px_1fr] items-center gap-4">
-                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">대표자 성명</Label>
+                  <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">대표자 성명 <span className="text-purple-600">*</span></Label>
                   <Input
                     placeholder={formData.business_type === '사업자' ? "사업자등록증 대표자명" : "본인 이름 (또는 사장님 이름)"}
                     value={formData.representative_name}
@@ -944,7 +962,7 @@ export function RegisterForm() {
                 {formData.business_type === '사업자' && (
                   <>
                     <div className="grid grid-cols-[100px_1fr] items-center gap-4">
-                      <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">사업자 번호</Label>
+                      <Label className="text-gray-600 text-[11px] font-black uppercase tracking-wider">사업자 번호 <span className="text-purple-600">*</span></Label>
                       <Input
                         placeholder="숫자 10자리"
                         value={formData.business_number}

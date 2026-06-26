@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Megaphone, Coins, Users, Building2, Briefcase } from 'lucide-react';
+import { LayoutDashboard, Megaphone, Coins, Users, Building2, Briefcase, ImageIcon } from 'lucide-react';
 import { SidebarNav, SidebarSection } from '@/components/layout/SidebarNav';
 import Link from 'next/link';
 
@@ -9,10 +9,11 @@ const sections: SidebarSection[] = [
     {
         items: [
             { id: '/biz', label: '대시보드', icon: LayoutDashboard, href: '/biz' },
+            { id: '/biz/profile', label: '업체 정보', icon: Building2, href: '/biz/profile' },
+            { id: '/biz/banners', label: '배너 관리', icon: ImageIcon, href: '/biz/banners' },
             { id: '/biz/ads', label: '광고 관리', icon: Megaphone, href: '/biz/ads' },
             { id: '/biz/jobs', label: '구인 관리', icon: Briefcase, href: '/biz/jobs' },
             { id: '/biz/points', label: '포인트 관리', icon: Coins, href: '/biz/points' },
-            { id: '/biz/profile', label: '업체 정보', icon: Building2, href: '/biz/profile' },
         ],
     },
 ];
@@ -26,14 +27,8 @@ export function BizSidebar({ isMobile = false }: { isMobile?: boolean }) {
 
     
     if (isMobile) {
-        // 대시보드(0), 업체 정보(4), 광고 관리(1), 구인 관리(2), 포인트 관리(3)
-        const mobileItems = [
-            sections[0].items[0],
-            sections[0].items[4],
-            sections[0].items[1],
-            sections[0].items[2],
-            sections[0].items[3],
-        ];
+        // 대시보드, 업체 정보, 배너 관리, 광고 관리, 구인 관리, 포인트 관리
+        const mobileItems = sections[0].items;
 
         return (
             <div className="w-full bg-white">
@@ -68,3 +63,4 @@ export function BizSidebar({ isMobile = false }: { isMobile?: boolean }) {
         />
     );
 }
+

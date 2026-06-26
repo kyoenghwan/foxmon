@@ -1,0 +1,74 @@
+import Link from 'next/link';
+import { ImageIcon, Plus } from 'lucide-react';
+import { manageBizAdAction } from '@/lib/actions';
+import { auth } from '@/auth';
+import { supabaseAdmin } from '@/lib/supabase';
+import { BizBannersList } from './BizBannersList';
+
+export const dynamic = 'force-dynamic';
+
+export default async function BizBannersPage() {
+    const res = await manageBizAdAction('GET');
+    const ads = (res.success && res.data ? res.data : []);
+
+    const session = await auth();
+    let isVerified = false;
+    if (session?.user?.id) {
+        const { data: profile } = await supabaseAdmin
+            .from('users')
+            .select('is_business_verified')
+            .eq('id', session.user.id)
+            .single();
+        isVerified = !!profile?.is_business_verified;
+    }
+
+    return (
+        <div className="space-y-6">
+            {/* 페이지 헤더 */}
+            <div className="flex items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
+                        <ImageIcon className="w-5 h-5 text-primary" />
+                        배너 관리
+                    </h2>
+                    <p className="text-[13px] text-gray-500 font-medium mt-1">
+                        광고 배너의 이미지, 등급, 디자인을 관리하세요.
+                    </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                    <Link 
+                        href="/biz/ads/new"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95 shrink-0"
+                    >
+                        <Plus className="w-4 h-4" />
+                        새 배너 등록
+                    </Link>
+                </div>
+            </div>
+
+            {/* 배너 목록 */}
+            {ads.length === 0 ? (
+                <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-16 flex flex-col items-center justify-center text-center gap-4">
+                    <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center">
+                        <ImageIcon className="w-8 h-8 text-primary/60" />
+                    </div>
+                    <div>
+                        <h3 className="font-black text-lg text-gray-800">등록된 배너가 없습니다</h3>
+                        <p className="text-[13px] font-medium text-gray-500 mt-1">
+                            첫 배너를 등록하여 구직자에게 업체를 알려보세요!
+                        </p>
+                    </div>
+                    <Link 
+                        href="/biz/ads/new"
+                        className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-md"
+                    >
+                        <Plus className="w-4 h-4" />
+                        첫 배너 등록하기
+                    </Link>
+                </div>
+            ) : (
+                <BizBannersList initialAds={ads} isVerified={isVerified} />
+            )}
+        </div>
+    );
+}
