@@ -36,13 +36,15 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
     return (
         <div className="flex flex-col min-h-screen bg-white relative">
             <SideBanners />
-            <MainHeader session={session} />
 
-            <main className="flex-1 flex flex-col w-full relative">
-                {/* 상단 고정 영역 (메인 배너 & 데스크톱 로그인 정보) */}
-                <div className="sticky top-[96px] tablet:top-[144px] z-30 bg-transparent w-full shrink-0 pointer-events-none">
+            {/* 헤더 + 메인 배너를 하나의 sticky 그룹으로 묶어 함께 고정 */}
+            <div className="sticky top-0 z-40 bg-white">
+                <MainHeader session={session} />
+
+                {/* 메인 배너 & 데스크톱 로그인 정보 */}
+                <div className="bg-white w-full shrink-0 border-b border-gray-100">
                     <div className="container mx-auto px-4 py-2.5 md:py-3.5">
-                        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-3 md:p-4 shadow-sm pointer-events-auto relative z-30">
+                        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-3 md:p-4 shadow-sm">
                             <div className="relative flex flex-col tablet:flex-row gap-3 tablet:gap-6 items-stretch tablet:h-[203px]">
                                 {/* 메인 배너: 모바일/데스크톱 항시 노출 및 상단 고정 */}
                                 <div className="w-full tablet:flex-1 tablet:h-[203px] overflow-hidden rounded-xl bg-white shadow-sm">
@@ -59,15 +61,14 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* 하단 스크롤 영역 */}
-                <div className="flex-1 flex flex-col w-full">
-                    {/* 유저 로그인 정보 박스 (모바일 전용: 스크롤 영역 상단 배치로 스크롤 시 위로 이동) */}
-                    <div className="block tablet:hidden w-full container mx-auto px-4 pt-4 z-20">
-                        <LoginInfoBox session={session} />
-                    </div>
-                    {children}
+            <main className="flex-1 flex flex-col w-full relative">
+                {/* 유저 로그인 정보 박스 (모바일 전용: 스크롤 영역 상단 배치로 스크롤 시 위로 이동) */}
+                <div className="block tablet:hidden w-full container mx-auto px-4 pt-4 z-20">
+                    <LoginInfoBox session={session} />
                 </div>
+                {children}
             </main>
 
             <MainFooter />

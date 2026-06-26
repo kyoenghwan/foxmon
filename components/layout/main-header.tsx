@@ -149,7 +149,7 @@ export function MainHeader({ session }: MainHeaderProps) {
     ];
 
     return (
-        <header className="bg-white border-b sticky top-0 z-50 relative">
+        <header className="bg-white border-b z-50 relative">
             {/* 상단 툴바 (Top Utility Bar) */}
             <div className="bg-gray-50 border-b border-gray-100">
                 <div className="container mx-auto px-1.5 sm:px-4 lg:px-8 h-9 flex items-center justify-between text-[11px] sm:text-xs font-bold text-gray-500 overflow-x-auto scrollbar-hide whitespace-nowrap">
