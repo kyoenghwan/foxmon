@@ -38,7 +38,7 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
             <SideBanners />
 
             {/* 헤더 + 메인 배너를 하나의 sticky 그룹으로 묶어 함께 고정 */}
-            <div className="sticky top-0 z-40">
+            <div className="sticky top-0 z-40 bg-white">
                 <MainHeader session={session} />
 
                 {/* 메인 배너 & 데스크톱 로그인 정보 */}
