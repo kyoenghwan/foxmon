@@ -1,17 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { requestPointRecharge } from '@/lib/actions';
 import { Info } from 'lucide-react';
 import Link from 'next/link';
 
 interface PointRechargeFormProps {
     isBusinessVerified: boolean;
+    defaultDepositorName: string;
 }
 
-export function PointRechargeForm({ isBusinessVerified }: PointRechargeFormProps) {
+export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: PointRechargeFormProps) {
     const [amount, setAmount] = useState('');
     const [customAmount, setCustomAmount] = useState('');
-    const [depositorName, setDepositorName] = useState('');
+    const [depositorName, setDepositorName] = useState(defaultDepositorName || '');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (defaultDepositorName) {
+            setDepositorName(defaultDepositorName);
+        }
+    }, [defaultDepositorName]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,7 +52,6 @@ export function PointRechargeForm({ isBusinessVerified }: PointRechargeFormProps
                 alert('충전 신청이 완료되었습니다.\n담당자 확인 후 1영업일 이내 포인트가 지급됩니다.');
                 setAmount('');
                 setCustomAmount('');
-                setDepositorName('');
             } else {
                 alert(`신청 실패: ${res.message}`);
             }
@@ -151,13 +157,16 @@ export function PointRechargeForm({ isBusinessVerified }: PointRechargeFormProps
                             )}
                         </div>
                         <div>
-                            <label className="text-[12px] font-bold text-gray-600 mb-1.5 block">입금자명</label>
+                            <div className="flex justify-between items-center mb-1.5">
+                                <label className="text-[12px] font-bold text-gray-600 block">입금자명</label>
+                                <span className="text-[10px] font-bold text-red-500">본인 실명 입금 필수 (수정 불가)</span>
+                            </div>
                             <input
                                 type="text"
                                 value={depositorName}
-                                onChange={(e) => setDepositorName(e.target.value)}
-                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary"
-                                placeholder="실제 입금하실 이름을 입력해주세요"
+                                readOnly
+                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none bg-gray-100 text-gray-500 font-bold select-none"
+                                placeholder="가입자 실명이 자동 입력됩니다"
                             />
                         </div>
                     </div>
