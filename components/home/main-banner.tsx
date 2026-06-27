@@ -23,27 +23,24 @@ export function MainBanner() {
     
     const ads = premiumMainAds;
 
+    const GAP = 16; // 카드 사이 간격 (px)
+
     // 반응형 배너 갯수 및 카드 너비 조절 (컨테이너 크기에 맞춰 동적 계산)
     useEffect(() => {
         const container = document.getElementById('main-banner-container');
         const handleResize = () => {
             const width = window.innerWidth;
             if (width < 800) {
-                setItemsPerView(1.5);
+                setItemsPerView(1);
                 if (container) {
                     const parentWidth = container.clientWidth;
-                    // 중앙배너 1개 너비 = (부모너비 - 16px) / 2
-                    const subWidth = (parentWidth - 16) / 2;
-                    // 메인배너 1개 너비 = 중앙배너 1.5개 너비
-                    const mWidth = subWidth * 1.5;
-                    const mHeight = mWidth / 2; // 2:1 비율
+                    // 모바일: 카드 너비 = 컨테이너 너비에서 약간 줄여 양쪽 모서리가 보이도록
+                    const mWidth = parentWidth - 8;
                     setCardWidth(mWidth);
-                    setCardHeight(mHeight);
+                    setCardHeight(mWidth / 2); // 2:1 비율
                 } else {
-                    // Fallback
                     const parentWidth = Math.min(width - 32, 425 - 32);
-                    const subWidth = (parentWidth - 16) / 2;
-                    const mWidth = subWidth * 1.5;
+                    const mWidth = parentWidth - 8;
                     setCardWidth(mWidth);
                     setCardHeight(mWidth / 2);
                 }
@@ -116,7 +113,7 @@ export function MainBanner() {
             const timer = setTimeout(() => {
                 setIsTransitioning(false);
                 setCurrentIndex(0);
-            }, 700);
+            }, 750);
             return () => clearTimeout(timer);
         }
     }, [currentIndex, originalLength]);
@@ -156,9 +153,10 @@ export function MainBanner() {
             onMouseLeave={() => setIsHovered(false)}
         >
             <div
-                className={`flex gap-4 items-center h-full ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
+                className={`flex items-center h-full ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
                 style={{
-                    transform: `translateX(-${currentIndex * (cardWidth + 16)}px)`,
+                    gap: `${GAP}px`,
+                    transform: `translateX(-${currentIndex * (cardWidth + GAP)}px)`,
                 }}
             >
                 {extendedBanners.map((banner, idx) => {
