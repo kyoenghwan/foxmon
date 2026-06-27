@@ -31,16 +31,21 @@ export function MainBanner() {
         const handleResize = () => {
             const width = window.innerWidth;
             if (width < 800) {
-                setItemsPerView(1);
+                setItemsPerView(1.5);
                 if (container) {
                     const parentWidth = container.clientWidth;
-                    // 모바일: 카드 너비 = 컨테이너 너비에서 약간 줄여 양쪽 모서리가 보이도록
-                    const mWidth = parentWidth - 8;
+                    // 중앙배너 1개 너비 = (부모너비 - 16px) / 2
+                    const subWidth = (parentWidth - GAP) / 2;
+                    // 메인배너 1개 너비 = 중앙배너 1.5개 너비
+                    const mWidth = subWidth * 1.5;
+                    const mHeight = mWidth / 2; // 2:1 비율
                     setCardWidth(mWidth);
-                    setCardHeight(mWidth / 2); // 2:1 비율
+                    setCardHeight(mHeight);
                 } else {
+                    // Fallback
                     const parentWidth = Math.min(width - 32, 425 - 32);
-                    const mWidth = parentWidth - 8;
+                    const subWidth = (parentWidth - GAP) / 2;
+                    const mWidth = subWidth * 1.5;
                     setCardWidth(mWidth);
                     setCardHeight(mWidth / 2);
                 }
