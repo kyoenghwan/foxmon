@@ -199,7 +199,7 @@ export function MainBanner() {
 
                     return (
                         <div
-                            key={`${banner.id}`}
+                            key={`banner_${idx}_${banner.id}`}
                             className={`flex-shrink-0 rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group cursor-pointer`}
                             style={{ 
                                 width: `${cardWidth}px`,
