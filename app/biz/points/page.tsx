@@ -8,7 +8,7 @@ export default async function BizPointsPage() {
     const user = session?.user as any;
     
     // DB에서 실시간 포인트 조회
-    const { data: userData } = await supabase.from('users').select('paid_points, bonus_points').eq('id', user.id).single();
+    const { data: userData } = await supabase.from('users').select('paid_points, bonus_points, business_number').eq('id', user.id).single();
     const paidPoints = userData?.paid_points ?? 0;
     const bonusPoints = userData?.bonus_points ?? 0;
 
@@ -70,23 +70,7 @@ export default async function BizPointsPage() {
                 <h3 className="font-black text-[16px] text-gray-900 mb-5 flex items-center gap-2">
                     <Plus className="w-4 h-4 text-primary" /> 포인트 충전 신청
                 </h3>
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-5 flex items-start gap-3">
-                    <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                    <div>
-                        <p className="font-bold text-[14px] text-blue-800">무통장 입금 방식 안내</p>
-                        <p className="text-[13px] text-blue-700 mt-1 leading-relaxed">
-                            아래 계좌로 입금 후 신청서를 제출해주세요.<br />
-                            영업일 기준 <strong>1일 이내</strong>에 담당자가 확인 후 포인트를 지급해드립니다.
-                        </p>
-                        <div className="mt-3 bg-white rounded-lg p-3 border border-blue-100">
-                            <p className="text-[13px] font-bold text-gray-800">입금 계좌</p>
-                            <p className="text-[15px] font-black text-gray-900 mt-1">{bankName} {accountNumber}</p>
-                            <p className="text-[12px] text-gray-500">(예금주: {accountHolder})</p>
-                        </div>
-                    </div>
-                </div>
-
-                <PointRechargeForm />
+                <PointRechargeForm isBusinessVerified={!!userData?.business_number} />
             </div>
 
             {/* 거래 내역 */}
