@@ -744,18 +744,23 @@ export function SettingsModal() {
                                                 <div className="space-y-3">
                                                     <div className="text-[12px] text-gray-500 font-bold bg-white p-4 rounded-xl border border-gray-150 shadow-sm leading-relaxed">
                                                         현재 일반 (비사업자) 상태입니다. <br/>
-                                                        * 광고/배너 등록은 사업자만 가능하지만, **주민등록증(신분증)을 업로드하여 인증**을 받으시면 일반 구인공고 글 등록이 허용됩니다.
+                                                        * 광고/배너 등록은 사업자만 가능하지만, **주민등록증(신분증)을 업로드하여 인증**을 받으시면 일반 구인공고 글 등록이 허용됩니다. <br/>
+                                                        (가입 정보 대조를 위한 **이름**과 **생년월일**만 확인합니다.)
                                                     </div>
                                                     <div className="pt-2 border-t border-orange-100">
                                                         <label className="text-[11px] font-bold text-gray-500 mb-1 block">주민등록증 / 운전면허증 업로드 (일반회원 구인 검수용)</label>
-                                                        <div className="relative cursor-pointer w-full h-[120px] bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                                                        <div className="relative cursor-pointer w-full h-[140px] bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
                                                             {verificationDocUrl ? (
                                                                 <img src={verificationDocUrl} className="h-full object-contain" />
                                                             ) : (
-                                                                <div className="flex flex-col items-center gap-1.5 text-gray-400 font-bold text-[11px]">
+                                                                <div className="flex flex-col items-center gap-1.5 text-gray-400 font-bold text-[11px] p-3 text-center leading-snug">
                                                                     <Upload className="w-5 h-5 text-gray-400" />
                                                                     <span>클릭하여 신분증 사진 업로드</span>
-                                                                    <span className="text-[10px] text-red-400 font-medium">* 민감한 정보(주민번호 뒷자리 등)는 가리고 올려주세요.</span>
+                                                                    <span className="text-[10px] text-red-500 font-black mt-1">
+                                                                        * 개인정보 보호를 위해 주민번호 뒷자리와 상세 주소는 <br/>
+                                                                        포스트잇 등으로 가리거나 지운 후 올려주세요! <br/>
+                                                                        (이름, 생년월일만 노출되면 승인 가능합니다.)
+                                                                    </span>
                                                                 </div>
                                                             )}
                                                             <input type="file" onChange={handleVerificationDocUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
