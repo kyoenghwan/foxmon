@@ -281,7 +281,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'job' | 'detail'>('job');
     const [isManualAddress, setIsManualAddress] = useState(false);
-    const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | null>(null);
+    const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | null>('basic');
     
     // 동적 SNS 계정 연결 상태 (업체 프로필과 연동)
     const [snsLinks, setSnsLinks] = useState<{type: string; value: string}[]>([]);

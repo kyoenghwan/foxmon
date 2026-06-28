@@ -380,7 +380,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'banner' | 'detail'>('banner');
     const [isManualAddress, setIsManualAddress] = useState(false);
-    const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | 'mainDesign' | null>(null);
+    const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | 'mainDesign' | null>('basic');
     const [userMerchantTier, setUserMerchantTier] = useState<'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP'>('NORMAL');
     
     // 동적 SNS 계정 연결 상태 (업체 프로필과 연동)
