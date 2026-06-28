@@ -754,6 +754,8 @@ export function SettingsModal() {
                                          </div>
                                      </section>
                                  )}
+                            </div>
+                        )}
                         {activeTab === 'activity' && (
                             <div className="p-5 space-y-4">
                                 <h3 className="font-extrabold text-[#333] text-[13px] mb-3 flex items-center gap-1.5">
