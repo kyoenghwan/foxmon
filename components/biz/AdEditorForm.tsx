@@ -878,7 +878,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                 alert('배너 이미지를 등록해주세요. (배너 정보 탭)');
                 return;
             }
-        } else if (form.tier !== 'GENERAL') {
+        } else if (form.tier !== 'GENERAL' && form.tier !== 'AD_GENERAL') {
             if (!form.logo_url && !form.image) {
                 alert('업체 로고를 등록해주세요. (배너 정보 탭)');
                 return;
