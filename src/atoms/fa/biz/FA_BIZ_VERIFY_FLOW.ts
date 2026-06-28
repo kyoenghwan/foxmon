@@ -1,4 +1,5 @@
 import { nvLog } from '../../../../lib/logger';
+import { supabaseAdmin } from '@/lib/supabase';
 
 interface VerifyBizInput {
     userId: string;
@@ -19,11 +20,30 @@ export async function FA_BIZ_VERIFY_FLOW({ userId, bizNumber, ceoName, openDate,
         return { success: false, message: '올바른 사업자등록번호 10자리를 입력해주세요.' };
     }
 
-    const API_KEY = process.env.DATA_GO_KR_API_KEY;
+    // 1. DB site_settings에서 우선 조회
+    let API_KEY = '';
+    try {
+        const { data: dbSetting } = await supabaseAdmin
+            .from('site_settings')
+            .select('key_value')
+            .eq('key_name', 'data_go_kr_api_key')
+            .maybeSingle();
+            
+        if (dbSetting?.key_value) {
+            API_KEY = dbSetting.key_value;
+        }
+    } catch (dbErr) {
+        nvLog('AT', '⚠️ DB site_settings 조회 중 오류 발생 (환경변수로 대체)', dbErr);
+    }
+
+    // 2. DB에 없으면 기존 환경변수 fallback
+    if (!API_KEY) {
+        API_KEY = process.env.DATA_GO_KR_API_KEY || '';
+    }
 
     // 만약 API KEY가 없으면 기존 Mock 모드로 하방 호환성 유지
     if (!API_KEY) {
-        nvLog('AT', '⚠️ DATA_GO_KR_API_KEY 환경변수가 없어 임시 가상 검증으로 우회 처리합니다.');
+        nvLog('AT', '⚠️ DATA_GO_KR_API_KEY 설정이 없어 임시 가상 검증으로 우회 처리합니다.');
         return { 
             success: true, 
             message: '국세청 조회 결과: 정상 사업자로 확인되었습니다. (임시 우회)',

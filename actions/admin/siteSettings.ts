@@ -57,7 +57,7 @@ export async function updateSiteSettings(payload: Record<string, string>) {
         const { error } = await supabaseAdmin
             .from('site_settings')
             .upsert({
-                category: key.includes('api_key') || key.startsWith('kmc_') || key.startsWith('naver_map_')
+                category: key.includes('api_key') || key.startsWith('kmc_') || key.startsWith('naver_map_') || key.startsWith('data_go_kr_')
                     ? 'api_keys'
                     : key.startsWith('cs_')
                       ? 'cs'

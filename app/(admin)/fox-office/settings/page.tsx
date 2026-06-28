@@ -14,6 +14,8 @@ export default function AdminSettingsPage() {
         telegram_bot_username: '',
         naver_map_client_id: '',
         naver_map_client_secret: '',
+        data_go_kr_api_key: '',
+        data_go_kr_key_updated_at: '',
         bank_name: '',
         account_number: '',
         account_holder: ''
@@ -22,6 +24,7 @@ export default function AdminSettingsPage() {
     // Toggle States for passwords
     const [showApiKey, setShowApiKey] = useState(false);
     const [showTelegramToken, setShowTelegramToken] = useState(false);
+    const [showDataGoKrKey, setShowDataGoKrKey] = useState(false);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -33,6 +36,8 @@ export default function AdminSettingsPage() {
                     telegram_bot_username: data.telegram_bot_username || '',
                     naver_map_client_id: data.naver_map_client_id || '',
                     naver_map_client_secret: data.naver_map_client_secret || '',
+                    data_go_kr_api_key: data.data_go_kr_api_key || '',
+                    data_go_kr_key_updated_at: data.data_go_kr_key_updated_at || '',
                     bank_name: data.bank_name || '',
                     account_number: data.account_number || '',
                     account_holder: data.account_holder || ''
@@ -42,6 +47,36 @@ export default function AdminSettingsPage() {
         };
         fetchSettings();
     }, []);
+
+    const getDataGoKrStatus = () => {
+        if (!settings.data_go_kr_key_updated_at) {
+            return { label: '미등록', color: 'bg-gray-100 text-gray-700', dday: null, expiryDate: null };
+        }
+        try {
+            const updatedDate = new Date(settings.data_go_kr_key_updated_at);
+            const expiryDate = new Date(updatedDate);
+            expiryDate.setMonth(expiryDate.getMonth() + 24); // 24개월(2년) 뒤
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            expiryDate.setHours(0, 0, 0, 0);
+
+            const diffTime = expiryDate.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const formattedExpiry = expiryDate.toISOString().split('T')[0];
+
+            if (diffDays < 0) {
+                return { label: '만료됨 (갱신 필요)', color: 'bg-red-100 text-red-700 font-bold', dday: `D+${Math.abs(diffDays)}`, expiryDate: formattedExpiry };
+            } else if (diffDays <= 30) {
+                return { label: '만료 임박 (30일 이내)', color: 'bg-orange-100 text-orange-700 font-bold animate-pulse', dday: `D-${diffDays}`, expiryDate: formattedExpiry };
+            } else {
+                return { label: '사용 가능', color: 'bg-green-100 text-green-700 font-bold', dday: `D-${diffDays}`, expiryDate: formattedExpiry };
+            }
+        } catch (e) {
+            return { label: '날짜 오류', color: 'bg-red-100 text-red-700', dday: null, expiryDate: null };
+        }
+    };
 
     const handleSave = async () => {
         setSaving(true);
@@ -158,6 +193,59 @@ export default function AdminSettingsPage() {
                         <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
                             <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                             네이버 클라우드 플랫폼 인증정보에서 Client ID와 Client Secret을 각각 입력하세요. 지도 표시 및 주소 변환에 사용됩니다.
+                        </p>
+                    </div>
+
+                    <hr className="border-gray-100" />
+
+                    {/* 공공데이터포털 국세청 API Key 설정 */}
+                    <div>
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="block text-[14px] font-bold text-gray-800">공공데이터포털 국세청 API Key (진위확인용)</label>
+                            {settings.data_go_kr_api_key && (
+                                <div className="flex items-center gap-2">
+                                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${getDataGoKrStatus().color}`}>
+                                        {getDataGoKrStatus().label}
+                                    </span>
+                                    {getDataGoKrStatus().expiryDate && (
+                                        <span className="text-[11px] text-gray-500 font-bold">
+                                            만료일: {getDataGoKrStatus().expiryDate} ({getDataGoKrStatus().dday})
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <div className="relative">
+                                <input
+                                    type={showDataGoKrKey ? "text" : "password"}
+                                    value={settings.data_go_kr_api_key}
+                                    onChange={(e) => setSettings({ ...settings, data_go_kr_api_key: e.target.value })}
+                                    placeholder="Decoding / Encoding 인증키 입력"
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowDataGoKrKey(!showDataGoKrKey)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    {showDataGoKrKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                                <label className="text-[12px] font-bold text-gray-500 w-[110px] shrink-0">키 발급/갱신 일자</label>
+                                <input
+                                    type="date"
+                                    value={settings.data_go_kr_key_updated_at}
+                                    onChange={(e) => setSettings({ ...settings, data_go_kr_key_updated_at: e.target.value })}
+                                    className="px-3 py-1.5 border border-gray-300 rounded-lg text-[13px] font-bold outline-none focus:border-primary bg-white"
+                                />
+                            </div>
+                        </div>
+                        <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
+                            <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                            공공데이터포털(data.go.kr)에서 발급받은 '국세청 사업자등록정보 진위확인 API' 인증키입니다. 입력된 발급일 기준으로 24개월간의 유효 기간(D-day)이 모니터링됩니다.
                         </p>
                     </div>
 
