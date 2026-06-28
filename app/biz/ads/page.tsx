@@ -17,12 +17,12 @@ export default async function BizAdsPage() {
     if (session?.user?.id) {
         const { data: profile } = await supabaseAdmin
             .from('users')
-            .select('is_cert_verified, business_number')
+            .select('is_cert_verified, business_registration_number')
             .eq('id', session.user.id)
             .single();
             
-        // 법적 조건: 사업자번호(business_number)가 존재하고, 관리자 승인(is_cert_verified)이 모두 완료되어야 함
-        isVerifiedEmployer = !!profile?.is_cert_verified && !!profile?.business_number;
+        // 법적 조건: 사업자번호(business_registration_number)가 존재하고, 관리자 승인(is_cert_verified)이 모두 완료되어야 함
+        isVerifiedEmployer = !!profile?.is_cert_verified && !!profile?.business_registration_number;
     }
 
     const res = isVerifiedEmployer ? await manageBizAdAction('GET') : { success: true, data: [] };
