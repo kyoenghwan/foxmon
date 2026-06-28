@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { requestPointRecharge } from '@/lib/actions';
 import { Info } from 'lucide-react';
