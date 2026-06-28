@@ -31,7 +31,9 @@ export async function OA_UPDATE_USER_PROFILE(input: UpdateUserProfileInput) {
     const updates: any = {};
 
     if (input.nickname !== undefined) updates.nickname = input.nickname;
-    if (input.email !== undefined) updates.email = input.email;
+    if (input.email !== undefined) {
+      updates.email = input.email.trim() === '' ? null : input.email.trim();
+    }
     if (input.phoneNumber !== undefined) updates.phone_number = input.phoneNumber;
     if (input.profile_image_url !== undefined) updates.profile_image_url = input.profile_image_url;
     if (input.sns_kakao !== undefined) updates.sns_kakao = input.sns_kakao;
