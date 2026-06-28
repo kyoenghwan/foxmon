@@ -59,6 +59,7 @@ export function SettingsModal() {
     const [isBizVerified, setIsBizVerified] = useState(false);
     const [verifiedBizName, setVerifiedBizName] = useState('');
     const [bizCertUrl, setBizCertUrl] = useState('');
+    const [bizType, setBizType] = useState('비사업자');
     
     // Telegram Push Notification State
     const [userId, setUserId] = useState('');
@@ -205,6 +206,7 @@ export function SettingsModal() {
                 setIsBizVerified(data.is_business_verified || false);
                 setVerifiedBizName(data.verified_business_name || '');
                 setBizCertUrl(data.business_cert_image_url || '');
+                setBizType(data.business_type || '비사업자');
                 setUserId(data.userId || '');
                 setTelegramChatId(data.telegram_chat_id || '');
                 setBotUsername(data.botUsername || '');
@@ -267,7 +269,8 @@ export function SettingsModal() {
                     is_business_verified: isBizVerified,
                     verified_ceo_name: ceoName,
                     verified_business_name: verifiedBizName,
-                    business_cert_image_url: bizCertUrl
+                    business_cert_image_url: bizCertUrl,
+                    business_type: bizType
                 }
             });
 
@@ -647,33 +650,73 @@ export function SettingsModal() {
                                             )}
                                         </div>
                                         <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100/50 space-y-3">
-                                            <div className="flex items-center gap-2">
-                                                <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">상호명</label>
-                                                <input type="text" value={verifiedBizName} onChange={e => setVerifiedBizName(e.target.value)} readOnly={isBizVerified} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} />
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">대표자명</label>
-                                                <input type="text" value={ceoName} onChange={e => setCeoName(e.target.value)} readOnly={isBizVerified} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} />
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">사업자등록번호</label>
-                                                <div className="flex gap-2 flex-1">
-                                                    <input type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)} readOnly={isBizVerified} maxLength={10} className={`flex-1 px-2.5 py-1.5 border rounded-md text-[13px] font-bold ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} placeholder="숫자 10자리" />
-                                                    {!isBizVerified && (
-                                                        <Button type="button" onClick={() => { setIsBizVerified(true); alert('가승인되었습니다.'); }} className="h-8 px-3 text-[11px] font-bold shrink-0">인증하기</Button>
-                                                    )}
-                                                    {isBizVerified && (
-                                                        <Button type="button" variant="outline" onClick={() => setIsBizVerified(false)} className="h-8 px-3 text-[11px] font-bold text-red-500 shrink-0">해제</Button>
-                                                    )}
+                                            {/* 가입 유형 선택 */}
+                                            <div className="flex items-center gap-2 pb-2 border-b border-orange-100/30">
+                                                <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">가입 유형</label>
+                                                <div className="flex items-center gap-4 text-xs font-bold">
+                                                    <label className="flex items-center gap-1.5 cursor-pointer">
+                                                        <input 
+                                                            type="radio" 
+                                                            name="bizType" 
+                                                            value="비사업자" 
+                                                            checked={bizType === '비사업자'} 
+                                                            onChange={e => setBizType(e.target.value)} 
+                                                            disabled={isBizVerified}
+                                                            className="accent-primary" 
+                                                        />
+                                                        일반 (비사업자)
+                                                    </label>
+                                                    <label className="flex items-center gap-1.5 cursor-pointer">
+                                                        <input 
+                                                            type="radio" 
+                                                            name="bizType" 
+                                                            value="사업자" 
+                                                            checked={bizType === '사업자'} 
+                                                            onChange={e => setBizType(e.target.value)} 
+                                                            disabled={isBizVerified}
+                                                            className="accent-primary" 
+                                                        />
+                                                        사업자
+                                                    </label>
                                                 </div>
                                             </div>
-                                            <div className="pt-2 border-t border-orange-100">
-                                                <label className="text-[11px] font-bold text-gray-500 mb-1 block">사업자등록증 업로드 (유흥업종 2차 검수용)</label>
-                                                <div className="relative cursor-pointer w-full h-[80px] bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                                                    {bizCertUrl ? <img src={bizCertUrl} className="h-full object-contain" /> : <span className="text-[11px] font-bold text-gray-400">클릭하여 업로드</span>}
-                                                    <input type="file" onChange={handleBizCertUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+
+                                            {bizType === '사업자' ? (
+                                                <>
+                                                    <div className="flex items-center gap-2">
+                                                        <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">상호명</label>
+                                                        <input type="text" value={verifiedBizName} onChange={e => setVerifiedBizName(e.target.value)} readOnly={isBizVerified} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} placeholder="상호명" />
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">대표자명</label>
+                                                        <input type="text" value={ceoName} onChange={e => setCeoName(e.target.value)} readOnly={isBizVerified} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} placeholder="대표자명" />
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">사업자등록번호</label>
+                                                        <div className="flex gap-2 flex-1">
+                                                            <input type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)} readOnly={isBizVerified} maxLength={10} className={`flex-1 px-2.5 py-1.5 border rounded-md text-[13px] font-bold ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} placeholder="숫자 10자리" />
+                                                            {!isBizVerified && (
+                                                                <Button type="button" onClick={() => { setIsBizVerified(true); alert('가승인되었습니다.'); }} className="h-8 px-3 text-[11px] font-bold shrink-0">인증하기</Button>
+                                                            )}
+                                                            {isBizVerified && (
+                                                                <Button type="button" variant="outline" onClick={() => setIsBizVerified(false)} className="h-8 px-3 text-[11px] font-bold text-red-500 shrink-0">해제</Button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="pt-2 border-t border-orange-100">
+                                                        <label className="text-[11px] font-bold text-gray-500 mb-1 block">사업자등록증 업로드 (유흥업종 2차 검수용)</label>
+                                                        <div className="relative cursor-pointer w-full h-[80px] bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                                                            {bizCertUrl ? <img src={bizCertUrl} className="h-full object-contain" /> : <span className="text-[11px] font-bold text-gray-400">클릭하여 업로드</span>}
+                                                            <input type="file" onChange={handleBizCertUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div className="text-[12px] text-gray-500 font-bold bg-white p-4 rounded-xl border border-gray-150 shadow-sm leading-relaxed">
+                                                    현재 일반 (비사업자) 상태입니다. <br/>
+                                                    광고/배너 등록을 진행하시려면 **[사업자]**로 유형을 변경하고 사업자정보 등록과 인증을 완료해 주십시오.
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
                                     </section>
                                 )}
