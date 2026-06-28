@@ -55,12 +55,9 @@ export async function FA_BIZ_VERIFY_FLOW({ userId, bizNumber, ceoName, openDate,
     }
 
     try {
-        // 국세청 진위확인 API 호출 (인코딩 안전장치 적용)
+        // 국세청 상태조회 API 호출 (인코딩 안전장치 적용)
         const serviceKey = API_KEY.includes('%') ? API_KEY : encodeURIComponent(API_KEY);
-        const url = `https://api.odcloud.kr/api/nts-businessman/v1/validate?serviceKey=${serviceKey}`;
-        
-        // 개업일자 정제 (YYYYMMDD 형식, 숫자만 남김)
-        const cleanOpenDate = openDate ? openDate.replace(/[^0-9]/g, '') : '';
+        const url = `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${serviceKey}`;
         
         const response = await fetch(url, {
             method: 'POST',
@@ -69,18 +66,7 @@ export async function FA_BIZ_VERIFY_FLOW({ userId, bizNumber, ceoName, openDate,
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                businesses: [
-                    {
-                        b_no: bizNumber,
-                        start_dt: cleanOpenDate || '',
-                        p_nm: ceoName || '',
-                        p_nm2: '',
-                        b_nm: businessName || '',
-                        corp_no: '',
-                        b_sector: '',
-                        b_type: ''
-                    }
-                ]
+                b_no: [ bizNumber ]
             })
         });
 
@@ -98,32 +84,23 @@ export async function FA_BIZ_VERIFY_FLOW({ userId, bizNumber, ceoName, openDate,
             return { success: false, message: '인증 결과를 반환받지 못했습니다.' };
         }
 
-        // valid 가 "01" 이면 유효(일치)함
-        if (bizResult.valid === '01') {
-            const statusStr = bizResult.status?.b_stt || '계속사업자';
-            
-            // 계속사업자 상태일 경우에만 성공으로 처리
-            if (statusStr === '폐업자') {
-                return { success: false, message: '폐업된 사업자등록번호로 조회됩니다.' };
-            }
-            if (statusStr === '휴업자') {
-                return { success: false, message: '현재 휴업 중인 사업자등록번호입니다.' };
-            }
-
+        const statusStr = bizResult.b_stt; // 계속사업자, 휴업자, 폐업자 또는 빈 문자열
+        
+        if (statusStr === '계속사업자') {
             return {
                 success: true,
-                message: '국세청 조회 결과: 일치하는 사업자로 확인되었습니다.',
+                message: '국세청 조회 결과: 정상 운영 중인 사업자로 확인되었습니다.',
                 data: {
                     isValid: true,
                     status: statusStr
                 }
             };
+        } else if (statusStr === '폐업자') {
+            return { success: false, message: '국세청 조회 결과: 폐업된 사업자등록번호입니다.' };
+        } else if (statusStr === '휴업자') {
+            return { success: false, message: '국세청 조회 결과: 현재 휴업 중인 사업자등록번호입니다.' };
         } else {
-            const failMsg = bizResult.valid_msg || '사업자 정보가 등록된 정보와 일치하지 않습니다.';
-            return { 
-                success: false, 
-                message: `국세청 조회 실패: ${failMsg} (대표자명 및 개업일을 다시 확인하세요.)` 
-            };
+            return { success: false, message: '국세청 조회 결과: 국세청에 등록되지 않은 사업자등록번호입니다.' };
         }
 
     } catch (err: any) {
