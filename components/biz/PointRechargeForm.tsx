@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { requestPointRecharge } from '@/lib/actions';
-import { Info } from 'lucide-react';
+import { createInquiry } from '@/lib/actions/help';
+import { Info, X, MessageSquare, Check, Copy } from 'lucide-react';
 import Link from 'next/link';
 
 interface PointRechargeFormProps {
@@ -16,6 +17,14 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
     const [depositorName, setDepositorName] = useState(defaultDepositorName || '');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // 1:1 계좌 문의 모달 관련 상태
+    const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
+    const [inquiryTitle, setInquiryTitle] = useState('포인트 충전용 입금 계좌 문의');
+    const [inquiryContent, setInquiryContent] = useState('안녕하세요. 광고 등록을 위해 포인트를 충전하고자 합니다. 무통장 입금 계좌번호를 안내해 주세요.');
+    const [isSendingInquiry, setIsSendingInquiry] = useState(false);
+    const [autoReplyText, setAutoReplyText] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
+
     useEffect(() => {
         if (defaultDepositorName) {
             setDepositorName(defaultDepositorName);
@@ -26,7 +35,7 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
         e.preventDefault();
         
         if (!isBusinessVerified) {
-            alert('사업자 인증이 완료된 회원만 포인트 충전을 신청할 수 있습니다.');
+            alert('사업자 또는 본인인증이 완료된 회원만 포인트 충전을 신청할 수 있습니다.');
             return;
         }
         
@@ -65,6 +74,56 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
         }
     };
 
+    // 1:1 문의글 제출 및 자동 계좌 답변 확인
+    const handleSendInquiry = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!inquiryTitle.trim() || !inquiryContent.trim()) {
+            alert('문의 제목과 내용을 입력해 주세요.');
+            return;
+        }
+
+        setIsSendingInquiry(true);
+        try {
+            const res = await createInquiry({
+                category: '포인트·환불',
+                title: inquiryTitle,
+                content: inquiryContent
+            });
+
+            if (res.success && res.inquiry) {
+                // 자동 답변(reply) 존재 시 해당 답변 텍스트 바인딩
+                if (res.inquiry.reply) {
+                    setAutoReplyText(res.inquiry.reply);
+                } else {
+                    setAutoReplyText('문의가 등록되었습니다. 담당자가 순차적으로 답변을 남겨 드리겠습니다.');
+                }
+            } else {
+                alert(res.message || '문의 등록에 실패했습니다.');
+            }
+        } catch (err) {
+            console.error('문의 전송 오류:', err);
+            alert('오류가 발생했습니다. 다시 시도해 주세요.');
+        } finally {
+            setIsSendingInquiry(false);
+        }
+    };
+
+    const handleCopyAccount = (text: string) => {
+        // 계좌번호 파싱 시도 (단순 복사용)
+        const match = text.match(/계좌번호:\s*([^\n]+)/);
+        const account = match ? match[1].trim() : text;
+        navigator.clipboard.writeText(account);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleCloseInquiryModal = () => {
+        setIsInquiryModalOpen(false);
+        setAutoReplyText(null);
+        setInquiryTitle('포인트 충전용 입금 계좌 문의');
+        setInquiryContent('안녕하세요. 광고 등록을 위해 포인트를 충전하고자 합니다. 무통장 입금 계좌번호를 안내해 주세요.');
+    };
+
     return (
         <div className="space-y-6">
             {/* 무통장 입금 안내 가이드 (계좌 직접 노출 대신 고객센터 문의 유도) */}
@@ -78,12 +137,13 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                         영업일 기준 <strong>1일 이내</strong>에 담당자가 확인 후 포인트를 지급해드립니다.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                        <Link 
-                            href="/help/inquiry" 
+                        <button 
+                            type="button"
+                            onClick={() => setIsInquiryModalOpen(true)}
                             className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-[12px] font-bold rounded-lg shadow-sm transition-all"
                         >
                             ✉️ 1:1 계좌 문의하기
-                        </Link>
+                        </button>
                         <button
                             type="button"
                             onClick={() => {
@@ -181,6 +241,123 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                     </button>
                 </form>
             </div>
+
+            {/* 1:1 계좌 문의 모달 팝업 */}
+            {isInquiryModalOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-gray-100 flex flex-col max-h-[90vh]">
+                        {/* 헤더 */}
+                        <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                            <h3 className="font-black text-[16px] text-gray-900 flex items-center gap-2">
+                                <MessageSquare className="w-5 h-5 text-blue-600" />
+                                {autoReplyText ? '입금 계좌 자동 답변 완료' : '1:1 계좌 문의 접수'}
+                            </h3>
+                            <button 
+                                onClick={handleCloseInquiryModal}
+                                className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-lg"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* 바디 */}
+                        <div className="p-6 overflow-y-auto flex-1">
+                            {!autoReplyText ? (
+                                <form onSubmit={handleSendInquiry} className="space-y-4">
+                                    <div>
+                                        <label className="text-[12px] font-bold text-gray-500 block mb-1">카테고리</label>
+                                        <input 
+                                            type="text" 
+                                            value="포인트·환불 (고정)" 
+                                            disabled 
+                                            className="w-full px-3 py-2 border border-gray-200 bg-gray-50 text-gray-400 font-bold rounded-lg text-[13px] outline-none cursor-not-allowed" 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[12px] font-bold text-gray-500 block mb-1">문의 제목</label>
+                                        <input 
+                                            type="text" 
+                                            value={inquiryTitle} 
+                                            onChange={(e) => setInquiryTitle(e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none focus:border-blue-500" 
+                                            placeholder="제목을 입력해 주세요"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[12px] font-bold text-gray-500 block mb-1">문의 내용</label>
+                                        <textarea 
+                                            rows={4}
+                                            value={inquiryContent} 
+                                            onChange={(e) => setInquiryContent(e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] outline-none focus:border-blue-500 resize-none" 
+                                            placeholder="문의하실 상세 내용을 적어주세요."
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="pt-2">
+                                        <button
+                                            type="submit"
+                                            disabled={isSendingInquiry}
+                                            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-[13px] rounded-xl shadow-md transition-all disabled:bg-gray-300"
+                                        >
+                                            {isSendingInquiry ? '문의 전송 중...' : '문의 등록하고 즉시 답변 받기'}
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-start gap-2.5">
+                                        <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="font-bold text-[13px] text-emerald-800">1:1 문의가 안전하게 등록되었습니다.</p>
+                                            <p className="text-[12px] text-emerald-600 mt-0.5">시스템에 의해 즉시 발급된 계좌 정보입니다.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 relative">
+                                        <label className="text-[11px] font-bold text-gray-400 block mb-1.5 uppercase tracking-wider">자동 답변 내용</label>
+                                        <pre className="text-[13px] text-gray-700 font-medium leading-relaxed font-sans whitespace-pre-wrap">
+                                            {autoReplyText}
+                                        </pre>
+
+                                        <button
+                                            onClick={() => handleCopyAccount(autoReplyText)}
+                                            className="absolute top-3 right-3 p-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg transition-all active:scale-95 flex items-center gap-1 text-[11px] font-bold text-gray-600 shadow-sm"
+                                            title="계좌번호 복사"
+                                        >
+                                            {copied ? (
+                                                <>
+                                                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                                                    <span className="text-emerald-600">복사됨</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy className="w-3.5 h-3.5" />
+                                                    <span>계좌복사</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+
+                                    <div className="pt-2 text-center">
+                                        <button
+                                            onClick={handleCloseInquiryModal}
+                                            className="px-6 py-2.5 bg-gray-900 hover:bg-gray-800 active:scale-95 text-white text-[13px] font-bold rounded-xl transition-all shadow-md w-full"
+                                        >
+                                            확인 완료 (계좌 복사 후 닫기)
+                                        </button>
+                                        <p className="text-[11px] text-gray-400 mt-2 font-medium">
+                                            * 이 문의글과 자동 답변 내역은 마이페이지 및 고객센터 문의 내역에서 언제든지 다시 확인하실 수 있습니다.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

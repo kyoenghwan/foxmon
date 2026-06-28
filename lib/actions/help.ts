@@ -223,6 +223,50 @@ export async function createInquiry(input: {
   }
 
   try {
+    // 자동 답변(입금 계좌 안내) 대상인지 판단
+    const isAccountInquiry = 
+      category === '포인트·환불' || 
+      title.includes('계좌') || 
+      title.includes('입금') || 
+      title.includes('포인트') ||
+      content.includes('계좌') || 
+      content.includes('입금') || 
+      content.includes('포인트');
+
+    let reply: string | null = null;
+    let status = 'PENDING';
+    let repliedAt: string | null = null;
+
+    if (isAccountInquiry) {
+      // DB에서 실시간 입금 계좌 설정 조회
+      const { data: settings } = await supabaseAdmin
+        .from('site_settings')
+        .select('key_name, key_value')
+        .in('key_name', ['bank_name', 'account_number', 'account_holder']);
+
+      const settingsMap = (settings || []).reduce((acc, row) => {
+        acc[row.key_name] = row.key_value;
+        return acc;
+      }, {} as Record<string, string>);
+
+      const bankName = settingsMap['bank_name'] || '국민은행';
+      const accountNumber = settingsMap['account_number'] || '123456-78-901234';
+      const accountHolder = settingsMap['account_holder'] || '폭스몬';
+
+      reply = `안녕하세요. 폭스몬 고객센터 자동 안내 시스템입니다.
+요청하신 포인트 충전용 공식 무통장 입금 계좌를 아래와 같이 안내해 드립니다. 
+
+- 은행명: ${bankName}
+- 계좌번호: ${accountNumber}
+- 예금주: ${accountHolder}
+
+⚠️ 입금자명은 가입 시 등록된 대표자(본인) 명의 실명과 일치해야 하며, 타인 명의 계좌로 입금 시 충전 승인이 거부 및 자동 반송 처리될 수 있습니다. 
+
+입금 완료 후 포인트 충전 신청 폼을 통해 신청서를 접수해 주시면 확인 후 신속하게 처리해 드리겠습니다.`;
+      status = 'ANSWERED';
+      repliedAt = new Date().toISOString();
+    }
+
     const { data, error } = await supabaseAdmin
       .from('inquiries')
       .insert({
@@ -230,10 +274,13 @@ export async function createInquiry(input: {
         category,
         title,
         content,
-        status: 'PENDING',
+        status,
+        reply,
+        replied_at: repliedAt,
       })
       .select('*')
       .single();
+
     if (error) {
       nvLog('AT', '❌ createInquiry', error);
       const hint =
@@ -244,10 +291,12 @@ export async function createInquiry(input: {
     }
     return {
       success: true,
-      message: '문의가 접수되었습니다.',
+      message: isAccountInquiry 
+        ? '문의 접수와 동시에 입금 계좌번호 자동 답변이 완료되었습니다.' 
+        : '문의가 접수되었습니다.',
       inquiry: data as UserInquiry,
     };
   } catch (err: unknown) {
-    return { success: false, message: (err as Error)?.message || '시스템 오류' };
+    return { success: false, message: (err as Error)?.message || '오류 발생' };
   }
 }
