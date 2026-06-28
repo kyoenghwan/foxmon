@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { userSettingsAction } from '@/lib/actions';
+import { userSettingsAction, verifyBusinessAction } from '@/lib/actions';
 import { Loader2, Settings, User, Link2, Lock, MessageCircle, Instagram, Send, Check, Upload, Building2, Bell, Plus, Trash2, Smartphone, Heart, Eye, EyeOff, Clock, Coins, FileText, LogOut, Briefcase } from 'lucide-react';
 import { playNotificationSound } from '@/lib/notification-sound';
 import { TelegramConnectButton } from '@/components/employer/telegram-connect-button';
@@ -61,6 +61,7 @@ export function SettingsModal() {
     const [bizCertUrl, setBizCertUrl] = useState('');
     const [bizType, setBizType] = useState('비사업자');
     const [verificationDocUrl, setVerificationDocUrl] = useState('');
+    const [verifyingBiz, setVerifyingBiz] = useState(false);
     
     // Telegram Push Notification State
     const [userId, setUserId] = useState('');
@@ -251,6 +252,27 @@ export function SettingsModal() {
 
     const handleRemoveSns = (index: number) => {
         setSnsLinks(snsLinks.filter((_, i) => i !== index));
+    };
+
+    const handleVerifyBiz = async () => {
+        if (!bizNumber || bizNumber.length !== 10) {
+            alert('올바른 사업자등록번호 10자리를 입력해주세요.');
+            return;
+        }
+        setVerifyingBiz(true);
+        try {
+            const result = await verifyBusinessAction(bizNumber, ceoName, verifiedBizName);
+            if (result.success) {
+                setIsBizVerified(true);
+                alert(result.message);
+            } else {
+                alert(result.message);
+            }
+        } catch (err) {
+            alert('사업자번호 검증 중 오류가 발생했습니다.');
+        } finally {
+            setVerifyingBiz(false);
+        }
     };
 
     const handleSaveProfile = async () => {
@@ -727,7 +749,28 @@ export function SettingsModal() {
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">사업자등록번호</label>
-                                                        <input type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)} readOnly={isBizVerified} maxLength={10} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} placeholder="숫자 10자리" />
+                                                        <div className="flex gap-2 flex-1">
+                                                            <input type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)} readOnly={isBizVerified} maxLength={10} className={`flex-1 px-2.5 py-1.5 border rounded-md text-[13px] font-bold ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} placeholder="숫자 10자리" />
+                                                            {!isBizVerified ? (
+                                                                <Button 
+                                                                    type="button" 
+                                                                    onClick={handleVerifyBiz} 
+                                                                    disabled={verifyingBiz}
+                                                                    className="h-8 px-3 text-[11px] font-bold shrink-0 bg-primary hover:bg-orange-600 text-white"
+                                                                >
+                                                                    {verifyingBiz ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : '인증하기'}
+                                                                </Button>
+                                                            ) : (
+                                                                <Button 
+                                                                    type="button" 
+                                                                    variant="outline" 
+                                                                    onClick={() => setIsBizVerified(false)} 
+                                                                    className="h-8 px-3 text-[11px] font-bold text-red-500 shrink-0"
+                                                                >
+                                                                    인증해제
+                                                                </Button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     <div className="pt-2 border-t border-orange-100">
                                                         <label className="text-[11px] font-bold text-gray-500 mb-1 block">사업자등록증 업로드 (유흥업종 2차 검수용)</label>

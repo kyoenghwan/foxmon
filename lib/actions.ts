@@ -359,3 +359,19 @@ export async function adminUserAction(
     }
 }
 
+import { FA_BIZ_VERIFY_FLOW } from '@/src/atoms/fa/biz/FA_BIZ_VERIFY_FLOW';
+
+export async function verifyBusinessAction(bizNumber: string, ceoName?: string, businessName?: string) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { success: false, message: '로그인이 필요합니다.' };
+    }
+    
+    return FA_BIZ_VERIFY_FLOW({
+        userId: session.user.id,
+        bizNumber,
+        ceoName,
+        businessName
+    });
+}
+
