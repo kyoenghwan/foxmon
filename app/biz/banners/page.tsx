@@ -24,11 +24,7 @@ export default async function BizBannersPage() {
     }
 
     const res = isVerifiedEmployer ? await manageBizAdAction('GET') : { success: true, data: [] };
-    // Draft(배너 템플릿)만 필터링: expires_at이 없거나, 연도가 2000년이거나, is_draft가 true인 광고 레코드
-    const ads = (res.success && res.data ? res.data : []).filter((ad: any) => {
-        const expiresYear = ad.expires_at ? new Date(ad.expires_at).getFullYear() : 2000;
-        return !ad.expires_at || expiresYear === 2000 || ad.is_draft === true;
-    });
+    const ads = (res.success && res.data ? res.data : []);
 
     return (
         <div className="space-y-6">
