@@ -4,6 +4,7 @@ import { manageBizAdAction } from '@/lib/actions';
 import { auth } from '@/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { BizBannersList } from './BizBannersList';
+import { OpenMyPageButton } from '@/components/biz/OpenMyPageButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,12 +71,7 @@ export default async function BizBannersPage() {
                             * 일반 업체회원(신분증 인증)은 포인트 관리/이력서 열람만 가능하며 광고 집행이 제한됩니다. 광고 등록을 원하실 경우 사업자등록증 정보를 먼저 인증해 주시기 바랍니다.
                         </p>
                     </div>
-                    <Link 
-                        href="/mypage"
-                        className="px-6 py-3 bg-primary text-white font-black text-[13px] rounded-xl hover:bg-orange-600 transition-all shadow-md active:scale-95"
-                    >
-                        마이페이지에서 사업자 인증하기
-                    </Link>
+                    <OpenMyPageButton />
                 </div>
             ) : ads.length === 0 ? (
                 <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-16 flex flex-col items-center justify-center text-center gap-4">
