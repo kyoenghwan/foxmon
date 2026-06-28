@@ -150,19 +150,6 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                         >
                             ✉️ 1:1 계좌 문의하기
                         </button>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                // 여우토크 CS 채팅방 열기 커스텀 이벤트 발행 (foxtalk-widget.tsx에서 감지)
-                                if (typeof window !== 'undefined') {
-                                    const event = new CustomEvent('open-foxtalk-cs');
-                                    window.dispatchEvent(event);
-                                }
-                            }}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-gray-50 border border-blue-200 active:scale-95 text-blue-700 text-[12px] font-bold rounded-lg shadow-sm transition-all"
-                        >
-                            💬 여우토크 실시간 문의
-                        </button>
                     </div>
                 </div>
             </div>
