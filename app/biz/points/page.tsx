@@ -10,7 +10,7 @@ export default async function BizPointsPage() {
     const user = session?.user as any;
     
     // DB에서 실시간 포인트 및 사업자 인증 정보, 대표자 실명 조회
-    const { data: userData } = await supabase.from('users').select('paid_points, bonus_points, business_number, representative_name, name, nickname').eq('id', user.id).single();
+    const { data: userData } = await supabase.from('users').select('paid_points, bonus_points, business_number, is_business_verified, representative_name, name, nickname').eq('id', user.id).single();
     const paidPoints = userData?.paid_points ?? 0;
     const bonusPoints = userData?.bonus_points ?? 0;
     const realName = userData?.representative_name || userData?.name || userData?.nickname || '';
@@ -74,7 +74,7 @@ export default async function BizPointsPage() {
                     <Plus className="w-4 h-4 text-primary" /> 포인트 충전 신청
                 </h3>
                 <PointRechargeForm 
-                    isBusinessVerified={!!userData?.business_number} 
+                    isBusinessVerified={!!userData?.is_business_verified} 
                     defaultDepositorName={realName}
                 />
             </div>

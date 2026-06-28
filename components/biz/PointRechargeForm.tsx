@@ -109,9 +109,9 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                         <div className="bg-orange-50 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center text-2xl mb-3">
                             ⚠️
                         </div>
-                        <h4 className="text-[15px] font-black text-gray-800">사업자 인증 대기 / 미인증 회원</h4>
+                        <h4 className="text-[15px] font-black text-gray-800">본인 / 사업자 인증 필요 회원</h4>
                         <p className="text-[12px] text-gray-500 mt-1 max-w-[280px] leading-relaxed">
-                            포인트 충전 신청은 사업자 번호가 검증된 사장님 회원만 이용 가능합니다. 마이페이지에서 먼저 인증을 진행해 주세요.
+                            포인트 충전 신청은 사업자 등록증 또는 신분증(주민등록증) 인증이 최종 승인 완료된 회원만 이용 가능합니다. 마이페이지에서 먼저 인증을 제출해 주세요.
                         </p>
                         <Link 
                             href="/mypage" 
