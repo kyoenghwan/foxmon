@@ -60,6 +60,7 @@ export function SettingsModal() {
     const [verifiedBizName, setVerifiedBizName] = useState('');
     const [bizCertUrl, setBizCertUrl] = useState('');
     const [bizType, setBizType] = useState('비사업자');
+    const [verificationDocUrl, setVerificationDocUrl] = useState('');
     
     // Telegram Push Notification State
     const [userId, setUserId] = useState('');
@@ -207,6 +208,7 @@ export function SettingsModal() {
                 setVerifiedBizName(data.verified_business_name || '');
                 setBizCertUrl(data.business_cert_image_url || '');
                 setBizType(data.business_type || '비사업자');
+                setVerificationDocUrl(data.verification_doc_url || '');
                 setUserId(data.userId || '');
                 setTelegramChatId(data.telegram_chat_id || '');
                 setBotUsername(data.botUsername || '');
@@ -270,7 +272,8 @@ export function SettingsModal() {
                     verified_ceo_name: ceoName,
                     verified_business_name: verifiedBizName,
                     business_cert_image_url: bizCertUrl,
-                    business_type: bizType
+                    business_type: bizType,
+                    verification_doc_url: verificationDocUrl
                 }
             });
 
@@ -397,6 +400,32 @@ export function SettingsModal() {
                 if (ctx) {
                     ctx.drawImage(img, 0, 0, width, height);
                     setBizCertUrl(canvas.toDataURL('image/jpeg', 0.8));
+                }
+            };
+            img.src = event.target?.result as string;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleVerificationDocUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) return alert('사진은 10MB 이하로 업로드해주세요.');
+
+        const reader = new FileReader();
+        reader.onloadend = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
+                let width = img.width; let height = img.height;
+                if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
+                else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                const canvas = document.createElement('canvas');
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    setVerificationDocUrl(canvas.toDataURL('image/jpeg', 0.8));
                 }
             };
             img.src = event.target?.result as string;
@@ -712,9 +741,26 @@ export function SettingsModal() {
                                                     </div>
                                                 </>
                                             ) : (
-                                                <div className="text-[12px] text-gray-500 font-bold bg-white p-4 rounded-xl border border-gray-150 shadow-sm leading-relaxed">
-                                                    현재 일반 (비사업자) 상태입니다. <br/>
-                                                    광고/배너 등록을 진행하시려면 **[사업자]**로 유형을 변경하고 사업자정보 등록과 인증을 완료해 주십시오.
+                                                <div className="space-y-3">
+                                                    <div className="text-[12px] text-gray-500 font-bold bg-white p-4 rounded-xl border border-gray-150 shadow-sm leading-relaxed">
+                                                        현재 일반 (비사업자) 상태입니다. <br/>
+                                                        * 광고/배너 등록은 사업자만 가능하지만, **주민등록증(신분증)을 업로드하여 인증**을 받으시면 일반 구인공고 글 등록이 허용됩니다.
+                                                    </div>
+                                                    <div className="pt-2 border-t border-orange-100">
+                                                        <label className="text-[11px] font-bold text-gray-500 mb-1 block">주민등록증 / 운전면허증 업로드 (일반회원 구인 검수용)</label>
+                                                        <div className="relative cursor-pointer w-full h-[120px] bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                                                            {verificationDocUrl ? (
+                                                                <img src={verificationDocUrl} className="h-full object-contain" />
+                                                            ) : (
+                                                                <div className="flex flex-col items-center gap-1.5 text-gray-400 font-bold text-[11px]">
+                                                                    <Upload className="w-5 h-5 text-gray-400" />
+                                                                    <span>클릭하여 신분증 사진 업로드</span>
+                                                                    <span className="text-[10px] text-red-400 font-medium">* 민감한 정보(주민번호 뒷자리 등)는 가리고 올려주세요.</span>
+                                                                </div>
+                                                            )}
+                                                            <input type="file" onChange={handleVerificationDocUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>

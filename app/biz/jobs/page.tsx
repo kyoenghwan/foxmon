@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { auth } from '@/auth';
-import { Plus, Briefcase, Eye, Pencil, Clock, CreditCard } from 'lucide-react';
+import { Plus, Briefcase, Eye, Pencil, Clock, CreditCard, ShieldAlert } from 'lucide-react';
 
 import { manageAdAction } from '@/lib/actions';
+import { supabaseAdmin } from '@/lib/supabase';
+import { OpenMyPageButton } from '@/components/biz/OpenMyPageButton';
 
 import { PaymentModalTrigger } from '@/components/biz/PaymentModalTrigger';
 import { ToggleJobStatusButton } from '@/src/components/biz/ToggleJobStatusButton';
@@ -64,8 +66,73 @@ const AdStatusBadge = ({ status }: { status: string }) => {
 };
 
 export default async function BizJobsPage() {
-    const res = await manageAdAction('GET');
+    const session = await auth();
+    let isVerified = false;
+    let businessType = '비사업자';
+
+    if (session?.user?.id) {
+        const { data: profile } = await supabaseAdmin
+            .from('users')
+            .select('is_business_verified, business_type')
+            .eq('id', session.user.id)
+            .single();
+
+        if (profile) {
+            isVerified = !!profile.is_business_verified;
+            businessType = profile.business_type || '비사업자';
+        }
+    }
+
+    const res = isVerified ? await manageAdAction('GET') : { success: true, data: [] };
     const mockAds = (res.success && res.data ? res.data : []);
+
+    if (!isVerified) {
+        return (
+            <div className="space-y-6">
+                {/* 페이지 헤더 */}
+                <div className="flex items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
+                            <Briefcase className="w-5 h-5 text-primary" />
+                            구인 관리
+                        </h2>
+                        <p className="text-[13px] text-gray-500 font-medium mt-1">
+                            등록한 구인공고를 관리하세요.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-gray-150 p-8 shadow-sm flex flex-col items-center justify-center text-center gap-6 max-w-2xl mx-auto my-6">
+                    <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-500">
+                        <ShieldAlert className="w-9 h-9" />
+                    </div>
+                    <div className="space-y-2">
+                        <h3 className="font-black text-lg text-gray-900">⚠️ 구인회원 승인 필요 안내</h3>
+                        {businessType === '사업자' ? (
+                            <>
+                                <p className="text-[13px] font-medium text-gray-500 leading-relaxed max-w-lg">
+                                    직업안정법 및 관련 법령에 의거하여, **사업자 회원으로 구인 공고를 등록하시려면 사업자인증(사업자등록번호 제출 및 검증)**이 완료되어야 합니다.
+                                </p>
+                                <p className="text-[12px] font-bold text-red-500 leading-relaxed max-w-lg">
+                                    * 마이페이지에서 사업자등록번호를 입력하시고 사업자등록증 이미지를 등록해 주시면 관리자 검토 후 구인 권한이 활성화됩니다.
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-[13px] font-medium text-gray-500 leading-relaxed max-w-lg">
+                                    구직자의 신원 안전 및 직업안정법 규정에 의거하여, **일반 (비사업자) 회원으로 구인 공고를 등록하시려면 신분증(주민등록증/운전면허증) 인증**을 받으셔야 합니다.
+                                </p>
+                                <p className="text-[12px] font-bold text-red-500 leading-relaxed max-w-lg">
+                                    * 마이페이지에서 신분증 사진을 업로드해 주시면 관리자 확인 및 승인 처리 후 구인글 등록 권한이 부여됩니다. (뒷자리는 가려주셔도 무방합니다.)
+                                </p>
+                            </>
+                        )}
+                    </div>
+                    <OpenMyPageButton />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">

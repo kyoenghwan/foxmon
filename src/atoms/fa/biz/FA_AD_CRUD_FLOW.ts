@@ -17,6 +17,17 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
         if (actionType === 'CREATE') {
             if (!payload) return { success: false, message: 'payload가 필요합니다.' };
 
+            // 0. 서버 측 유저 인증 상태 검증
+            const { data: userProfile, error: profileErr } = await supabase
+                .from('users')
+                .select('is_business_verified')
+                .eq('id', userId)
+                .single();
+
+            if (profileErr || !userProfile || !userProfile.is_business_verified) {
+                return { success: false, message: '구인 공고를 등록하려면 먼저 마이페이지에서 사업자번호 인증 또는 신분증 인증 승인을 완료하셔야 합니다.' };
+            }
+
             // 1. 서버 측에서 최종 결제 포인트 재계산 (보안 검증)
             const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
             const policiesRes = await GET_POINT_POLICIES();

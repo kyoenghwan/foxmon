@@ -246,25 +246,30 @@ export default function EmployersManagementPage() {
                                             </div>
                                         </td>
                                         <td className="py-4 px-6 text-center">
-                                            {emp.business_cert_image_url ? (
+                                            {(emp.business_cert_image_url || emp.verification_doc_url) ? (
                                                 <Dialog>
                                                     <DialogTrigger asChild>
                                                         <Button variant="outline" size="sm" className="h-8 gap-1.5 text-[12px] font-bold">
                                                             <FileImage className="w-3.5 h-3.5" />
-                                                            사진 보기
+                                                            {emp.business_type === '사업자' ? '등록증 보기' : '신분증 보기'}
                                                         </Button>
                                                     </DialogTrigger>
                                                     <DialogContent className="max-w-2xl bg-white p-2 border-0 overflow-hidden shadow-2xl rounded-2xl">
                                                         <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
-                                                            <h3 className="font-bold text-[15px]">{emp.verified_business_name} 등록증 원본</h3>
-                                                            <a href={emp.business_cert_image_url} target="_blank" rel="noreferrer" className="text-primary hover:underline text-[12px] font-bold flex items-center gap-1">
+                                                            <h3 className="font-bold text-[15px]">
+                                                                {emp.business_type === '사업자' 
+                                                                    ? `${emp.verified_business_name || emp.nickname || '업체'} 등록증 원본` 
+                                                                    : `${emp.nickname || '일반업자'} 신분증 원본`
+                                                                }
+                                                            </h3>
+                                                            <a href={emp.business_cert_image_url || emp.verification_doc_url || undefined} target="_blank" rel="noreferrer" className="text-primary hover:underline text-[12px] font-bold flex items-center gap-1">
                                                                 새 창으로 열기 <ExternalLink className="w-3 h-3" />
                                                             </a>
                                                         </div>
                                                         <div className="w-full bg-black/5 flex items-center justify-center p-4">
                                                             <img 
-                                                                src={emp.business_cert_image_url} 
-                                                                alt="Certificate" 
+                                                                src={emp.business_cert_image_url || emp.verification_doc_url || undefined} 
+                                                                alt="Verification Document" 
                                                                 className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-sm border bg-white" 
                                                             />
                                                         </div>
