@@ -83,10 +83,11 @@ export default async function BizJobsPage() {
         }
     }
 
-    const res = isVerified ? await manageAdAction('GET') : { success: true, data: [] };
+    const hasAccess = businessType === '비사업자' || isVerified;
+    const res = hasAccess ? await manageAdAction('GET') : { success: true, data: [] };
     const mockAds = (res.success && res.data ? res.data : []);
 
-    if (!isVerified) {
+    if (!hasAccess) {
         return (
             <div className="space-y-6">
                 {/* 페이지 헤더 */}

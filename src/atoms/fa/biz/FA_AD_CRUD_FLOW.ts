@@ -20,12 +20,20 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             // 0. 서버 측 유저 인증 상태 검증
             const { data: userProfile, error: profileErr } = await supabase
                 .from('users')
-                .select('is_business_verified')
+                .select('is_business_verified, business_type')
                 .eq('id', userId)
                 .single();
 
-            if (profileErr || !userProfile || !userProfile.is_business_verified) {
-                return { success: false, message: '구인 공고를 등록하려면 먼저 마이페이지에서 사업자번호 인증 또는 신분증 인증 승인을 완료하셔야 합니다.' };
+            if (profileErr || !userProfile) {
+                return { success: false, message: '회원 정보를 찾을 수 없습니다.' };
+            }
+
+            const businessType = userProfile.business_type || '비사업자';
+            const isVerified = !!userProfile.is_business_verified;
+
+            // 사업자인 경우에만 실시간 인증이 필수
+            if (businessType === '사업자' && !isVerified) {
+                return { success: false, message: '사업자 회원은 먼저 마이페이지에서 사업자등록번호 인증을 완료하셔야 구인 공고 등록이 가능합니다.' };
             }
 
             // 1. 서버 측에서 최종 결제 포인트 재계산 (보안 검증)
