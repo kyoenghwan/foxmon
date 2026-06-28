@@ -73,12 +73,12 @@ export default async function BizJobsPage() {
     if (session?.user?.id) {
         const { data: profile } = await supabaseAdmin
             .from('users')
-            .select('is_business_verified, business_type')
+            .select('is_cert_verified, business_type')
             .eq('id', session.user.id)
             .single();
 
         if (profile) {
-            isVerified = !!profile.is_business_verified;
+            isVerified = !!profile.is_cert_verified;
             businessType = profile.business_type || '비사업자';
         }
     }

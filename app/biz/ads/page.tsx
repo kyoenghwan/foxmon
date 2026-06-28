@@ -17,12 +17,12 @@ export default async function BizAdsPage() {
     if (session?.user?.id) {
         const { data: profile } = await supabaseAdmin
             .from('users')
-            .select('is_business_verified, business_number')
+            .select('is_cert_verified, business_number')
             .eq('id', session.user.id)
             .single();
             
-        // 법적 조건: 사업자번호(business_number)가 존재하고, 관리자 승인(is_business_verified)이 모두 완료되어야 함
-        isVerifiedEmployer = !!profile?.is_business_verified && !!profile?.business_number;
+        // 법적 조건: 사업자번호(business_number)가 존재하고, 관리자 승인(is_cert_verified)이 모두 완료되어야 함
+        isVerifiedEmployer = !!profile?.is_cert_verified && !!profile?.business_number;
     }
 
     const res = isVerifiedEmployer ? await manageBizAdAction('GET') : { success: true, data: [] };
@@ -69,12 +69,12 @@ export default async function BizAdsPage() {
                         <ShieldAlert className="w-9 h-9" />
                     </div>
                     <div className="space-y-2">
-                        <h3 className="font-black text-lg text-gray-900">⚠️ 사업자 회원 전용 서비스 안내</h3>
+                        <h3 className="font-black text-lg text-gray-900">⚠️ 사업자 2차 인증(수동 검수) 전용 서비스 안내</h3>
                         <p className="text-[13px] font-medium text-gray-500 leading-relaxed max-w-lg">
-                            관련 구인광고 심의 법령 및 직업안정법 규정에 의거하여, <strong>구인 광고 게재 및 광고 관리 대시보드 서비스는 공식 사업자등록번호가 승인된 사업자 회원</strong>만 이용하실 수 있습니다.
+                            관련 구인광고 심의 법령 및 직업안정법 규정에 의거하여, <strong>구인 광고 게재 및 광고 관리 대시보드 서비스는 사업자등록증 수동 검수(2차 인증)가 최종 완료된 회원</strong>만 이용하실 수 있습니다.
                         </p>
                         <p className="text-[12px] font-bold text-red-500 leading-relaxed max-w-lg">
-                            * 일반 업체회원(신분증 인증)은 포인트 관리/이력서 열람만 가능하며 광고 집행이 제한됩니다. 광고 등록을 원하실 경우 사업자등록증 정보를 먼저 인증해 주시기 바랍니다.
+                            * 1차 사업자 인증(번호 인증)만 마친 회원은 배너 생성만 가능하며 광고 집행이 제한됩니다. 광고 등록을 원하실 경우 마이페이지에서 사업자등록증 이미지를 올려 2차 검수 승인을 완료해 주시기 바랍니다.
                         </p>
                     </div>
                     <OpenMyPageButton />

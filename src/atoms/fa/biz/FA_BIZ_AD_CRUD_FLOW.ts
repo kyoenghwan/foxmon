@@ -202,9 +202,9 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
 
             if (isPaymentUpdate) {
                 // 사업자 검증 상태 조회 (보안 락)
-                const { data: userProfile } = await supabase.from('users').select('is_business_verified').eq('id', userId).single();
-                if (!userProfile?.is_business_verified) {
-                    return { success: false, message: '사업자 검증이 완료되지 않은 업체는 광고 결제 및 노출이 불가능합니다.' };
+                const { data: userProfile } = await supabase.from('users').select('is_cert_verified').eq('id', userId).single();
+                if (!userProfile?.is_cert_verified) {
+                    return { success: false, message: '사업자 2차 검증(등록증)이 완료되지 않은 업체는 광고 결제 및 노출이 불가능합니다.' };
                 }
 
                 const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');

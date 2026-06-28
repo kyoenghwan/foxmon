@@ -57,6 +57,7 @@ export function SettingsModal() {
     const [bizNumber, setBizNumber] = useState('');
     const [ceoName, setCeoName] = useState('');
     const [isBizVerified, setIsBizVerified] = useState(false);
+    const [isCertVerified, setIsCertVerified] = useState(false);
     const [verifiedBizName, setVerifiedBizName] = useState('');
     const [bizCertUrl, setBizCertUrl] = useState('');
     const [bizType, setBizType] = useState('비사업자');
@@ -206,6 +207,7 @@ export function SettingsModal() {
                 setBizNumber(data.business_registration_number || '');
                 setCeoName(data.verified_ceo_name || '');
                 setIsBizVerified(data.is_business_verified || false);
+                setIsCertVerified(data.is_cert_verified || false);
                 setVerifiedBizName(data.verified_business_name || '');
                 setBizCertUrl(data.business_cert_image_url || '');
                 setBizType(data.business_type || '비사업자');
@@ -697,10 +699,12 @@ export function SettingsModal() {
                                              <h3 className="font-extrabold text-primary text-[13px] flex items-center gap-1.5">
                                                  <Building2 className="w-4 h-4 stroke-[2]" /> 업체 (사업자) 정보
                                              </h3>
-                                             {isBizVerified ? (
-                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-green-100 text-green-700">인증 완료</span>
+                                             {isCertVerified ? (
+                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">2차 인증 완료</span>
+                                             ) : isBizVerified ? (
+                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-green-50 text-green-700 border border-green-200">1차 인증 완료</span>
                                              ) : bizCertUrl ? (
-                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 animate-pulse">심사 중</span>
+                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">2차 심사 중</span>
                                              ) : (
                                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500">미인증</span>
                                              )}

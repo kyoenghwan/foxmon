@@ -12,9 +12,9 @@ export async function OA_TOGGLE_BUSINESS_VERIFY({ userId, isVerified }: ToggleBu
     try {
         const { data, error } = await supabaseAdmin
             .from('users')
-            .update({ is_business_verified: isVerified })
+            .update({ is_cert_verified: isVerified })
             .eq('id', userId)
-            .select('id, is_business_verified');
+            .select('id, is_cert_verified');
 
         if (error) {
             nvLog('AT', '❌ OA_TOGGLE_BUSINESS_VERIFY 에러', error.message);

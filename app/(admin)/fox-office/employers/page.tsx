@@ -47,8 +47,8 @@ export default function EmployersManagementPage() {
 
     const toggleVerification = async (userId: string, currentStatus: boolean) => {
         const confirmMsg = currentStatus 
-            ? '정말 이 업체의 인증을 해제(반려)하시겠습니까? 해당 업체의 광고 노출이 제한될 수 있습니다.' 
-            : '이 업체의 사업자등록증을 확인하셨으며, 인증을 승인하시겠습니까?';
+            ? '정말 이 업체의 2차 인증(사업자등록증)을 해제(반려)하시겠습니까? 해당 업체의 광고 노출이 제한될 수 있습니다.' 
+            : '이 업체의 사업자등록증을 확인하셨으며, 2차 인증을 승인하시겠습니까?';
         
         if (!confirm(confirmMsg)) return;
 
@@ -60,7 +60,7 @@ export default function EmployersManagementPage() {
             });
             if (res.success) {
                 setEmployers(prev => prev.map(emp => 
-                    emp.id === userId ? { ...emp, is_business_verified: !currentStatus } : emp
+                    emp.id === userId ? { ...emp, is_cert_verified: !currentStatus } : emp
                 ));
             } else {
                 const errorMsg = 'message' in res ? res.message : ('error' in res ? res.error : '알 수 없는 오류');
@@ -116,8 +116,8 @@ export default function EmployersManagementPage() {
         
         if (!matchesSearch) return false;
 
-        if (filterType === 'VERIFIED') return emp.is_business_verified;
-        if (filterType === 'UNVERIFIED') return !emp.is_business_verified;
+        if (filterType === 'VERIFIED') return emp.is_cert_verified;
+        if (filterType === 'UNVERIFIED') return !emp.is_cert_verified;
         return true;
     });
 
@@ -159,13 +159,13 @@ export default function EmployersManagementPage() {
                         onClick={() => setFilterType('VERIFIED')}
                         className={`px-4 py-2 rounded-xl transition-all ${filterType === 'VERIFIED' ? 'bg-green-600 text-white shadow-md' : 'bg-green-50 text-green-700 hover:bg-green-100'}`}
                     >
-                        인증 {employers.filter(e => e.is_business_verified).length}개
+                        2차 승인 {employers.filter(e => e.is_cert_verified).length}개
                     </button>
                     <button 
                         onClick={() => setFilterType('UNVERIFIED')}
                         className={`px-4 py-2 rounded-xl transition-all ${filterType === 'UNVERIFIED' ? 'bg-red-600 text-white shadow-md' : 'bg-red-50 text-red-600 hover:bg-red-100'}`}
                     >
-                        미인증 {employers.filter(e => !e.is_business_verified).length}개
+                        승인 대기/미인증 {employers.filter(e => !e.is_cert_verified).length}개
                     </button>
                 </div>
             </div>
@@ -280,9 +280,13 @@ export default function EmployersManagementPage() {
                                             )}
                                         </td>
                                         <td className="py-4 px-6 text-center">
-                                            {emp.is_business_verified ? (
+                                            {emp.is_cert_verified ? (
+                                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 gap-1 font-bold">
+                                                    <CheckCircle2 className="w-3 h-3" /> 2차 승인됨
+                                                </Badge>
+                                            ) : emp.is_business_verified ? (
                                                 <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1 font-bold">
-                                                    <CheckCircle2 className="w-3 h-3" /> 승인됨
+                                                    <CheckCircle2 className="w-3 h-3" /> 1차 완료 (서류 대기)
                                                 </Badge>
                                             ) : (
                                                 <Badge variant="outline" className="bg-gray-100 text-gray-500 border-gray-200 gap-1 font-bold">
@@ -361,16 +365,16 @@ export default function EmployersManagementPage() {
                                                 </Dialog>
 
                                                 <Button
-                                                    onClick={() => toggleVerification(emp.id, emp.is_business_verified)}
-                                                    variant={emp.is_business_verified ? "outline" : "default"}
+                                                    onClick={() => toggleVerification(emp.id, emp.is_cert_verified)}
+                                                    variant={emp.is_cert_verified ? "outline" : "default"}
                                                     size="sm"
                                                     className={`h-8 px-3 text-[12px] font-bold ${
-                                                        emp.is_business_verified 
+                                                        emp.is_cert_verified 
                                                         ? 'border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700' 
                                                         : 'bg-primary hover:bg-primary/90 text-white'
                                                     }`}
                                                 >
-                                                    {emp.is_business_verified ? '승인 취소' : '수동 승인'}
+                                                    {emp.is_cert_verified ? '승인 취소' : '수동 승인'}
                                                 </Button>
                                             </div>
                                         </td>

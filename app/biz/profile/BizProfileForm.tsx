@@ -39,6 +39,7 @@ export default function BizProfileForm() {
     const [bizNumber, setBizNumber] = useState('');
     const [ceoName, setCeoName] = useState('');
     const [isBizVerified, setIsBizVerified] = useState(false);
+    const [isCertVerified, setIsCertVerified] = useState(false);
     const [verifiedBizName, setVerifiedBizName] = useState('');
     const [bizCertUrl, setBizCertUrl] = useState('');
     
@@ -92,6 +93,7 @@ export default function BizProfileForm() {
                 setBizNumber(data.business_registration_number || '');
                 setCeoName(data.verified_ceo_name || '');
                 setIsBizVerified(data.is_business_verified || false);
+                setIsCertVerified(data.is_cert_verified || false);
                 setVerifiedBizName(data.verified_business_name || '');
                 setBizCertUrl(data.business_cert_image_url || '');
                 setUserId(data.userId || '');
@@ -147,6 +149,7 @@ export default function BizProfileForm() {
                     currentNickname: initialNickname,
                     business_registration_number: bizNumber,
                     is_business_verified: isBizVerified,
+                    is_cert_verified: isCertVerified,
                     verified_ceo_name: ceoName,
                     verified_business_name: verifiedBizName,
                     business_cert_image_url: bizCertUrl
@@ -550,9 +553,17 @@ export default function BizProfileForm() {
                                     <h3 className="font-extrabold text-[#333333] text-[14px] flex items-center gap-1.5">
                                         <Building2 className="w-4 h-4 text-primary stroke-[2]" /> 사업자 정보 관리
                                     </h3>
-                                    {isBizVerified ? (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-green-100 text-green-700">
-                                            <Check className="w-3 h-3 stroke-[3]" /> 인증 완료
+                                    {isCertVerified ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">
+                                            <Check className="w-3 h-3 stroke-[3]" /> 2차 인증 완료
+                                        </span>
+                                    ) : isBizVerified ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-green-50 text-green-700 border border-green-200">
+                                            <Check className="w-3 h-3 stroke-[3]" /> 1차 인증 완료
+                                        </span>
+                                    ) : bizCertUrl ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
+                                            2차 심사 중
                                         </span>
                                     ) : (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500">

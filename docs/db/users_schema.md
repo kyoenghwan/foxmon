@@ -24,6 +24,13 @@
 | `business_number` | String | Nullable | 사업자 번호 (사장님 전용, 10자리) |
 | `business_category` | String | Nullable | 업종 유형 (사장님 전용) |
 | `opening_date` | String | Nullable | 개업 일자 (YYYYMMDD, 사장님 전용) |
+| `business_registration_number` | String | Nullable | 10자리 사업자등록번호 |
+| `is_business_verified` | Boolean | Default false | 국세청 API 사업자 진위 확인 완료 여부 (1차 인증) |
+| `is_cert_verified` | Boolean | Default false | 사업자등록증 수동 검수 승인 완료 여부 (2차 인증) |
+| `verified_ceo_name` | String | Nullable | 진위확인 대표자명 |
+| `verified_business_name` | String | Nullable | 인증된 상호명 |
+| `business_cert_image_url` | String | Nullable | 사업자등록증 이미지 URL |
+| `last_biz_verified_at` | Timestamp | Nullable | 마지막 국세청 폐업조회 시간 |
 | `profile_image_url` | String | Nullable | 프로필 사진 URL |
 | `sns_kakao` | String | Nullable | 카카오톡 아이디 또는 링크 |
 | `sns_instagram` | String | Nullable | 인스타그램 아이디 또는 링크 |

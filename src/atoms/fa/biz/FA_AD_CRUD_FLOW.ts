@@ -20,12 +20,12 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             // 0. 서버 측 유저 인증 상태 검증
             const { data: userProfile, error: profileErr } = await supabase
                 .from('users')
-                .select('is_business_verified')
+                .select('is_cert_verified')
                 .eq('id', userId)
                 .single();
 
-            if (profileErr || !userProfile || !userProfile.is_business_verified) {
-                return { success: false, message: '배너 및 프리미엄 광고를 등록하려면 먼저 마이페이지에서 사업자등록번호 인증을 완료하셔야 합니다.' };
+            if (profileErr || !userProfile || !userProfile.is_cert_verified) {
+                return { success: false, message: '프리미엄 광고를 등록하려면 먼저 사업자 2차 인증(등록증 검수)을 완료하셔야 합니다.' };
             }
 
             // 1. 서버 측에서 최종 결제 포인트 재계산 (보안 검증)
