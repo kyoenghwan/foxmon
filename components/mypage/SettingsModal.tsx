@@ -79,6 +79,7 @@ export function SettingsModal() {
     
     // Status
     const [loadingData, setLoadingData] = useState(false);
+    const [requesting2ndVerify, setRequesting2ndVerify] = useState(false);
     const [savingProfile, setSavingProfile] = useState(false);
     const [savingPassword, setSavingPassword] = useState(false);
     const [message, setMessage] = useState('');
@@ -254,6 +255,47 @@ export function SettingsModal() {
 
     const handleRemoveSns = (index: number) => {
         setSnsLinks(snsLinks.filter((_, i) => i !== index));
+    };
+
+    const handleRequest2ndVerify = async () => {
+        if (!bizCertUrl) {
+            alert('사업자등록증 이미지를 먼저 업로드해주세요.');
+            return;
+        }
+        setRequesting2ndVerify(true);
+        setMessage('');
+        setError('');
+        try {
+            const result = await userSettingsAction('UPDATE_PROFILE', {
+                profileData: {
+                    nickname,
+                    email,
+                    phoneNumber,
+                    profile_image_url: profileUrl,
+                    sns_links: snsLinks,
+                    currentNickname: initialNickname,
+                    business_registration_number: bizNumber,
+                    is_business_verified: isBizVerified,
+                    is_cert_verified: isCertVerified,
+                    verified_ceo_name: ceoName,
+                    verified_business_name: verifiedBizName,
+                    business_cert_image_url: bizCertUrl,
+                    business_type: bizType,
+                    verification_doc_url: verificationDocUrl
+                }
+            });
+            if (result.success) {
+                setMessage('2차 인증 심사 요청이 성공적으로 접수되었습니다.');
+                setTimeout(() => setMessage(''), 4000);
+                await fetchUserData(true);
+            } else {
+                setError(result.message || '심사 요청 중 오류가 발생했습니다.');
+            }
+        } catch (err) {
+            setError('시스템 오류가 발생했습니다.');
+        } finally {
+            setRequesting2ndVerify(false);
+        }
     };
 
     const handleVerifyBiz = async () => {
@@ -747,7 +789,20 @@ export function SettingsModal() {
                                                  </div>
                                              </div>
                                              <div className="pt-2 border-t border-orange-100">
-                                                 <label className="text-[11px] font-bold text-gray-500 mb-1 block">사업자등록증 업로드 (유흥업종 2차 검수용)</label>
+                                                  <div className="flex items-center justify-between mb-1.5">
+                                                      <div className="text-[11px] font-bold text-gray-500 block">사업자등록증 업로드 (유흥업종 2차 검수용)</div>
+                                                      {bizCertUrl && !isCertVerified && (
+                                                          <Button 
+                                                              type="button"
+                                                              onClick={handleRequest2ndVerify}
+                                                              disabled={requesting2ndVerify}
+                                                              className="h-6 px-2.5 text-[10px] font-extrabold bg-[#1A1F2C] hover:bg-black text-white rounded-md shrink-0 shadow-sm flex items-center gap-1 border-none"
+                                                          >
+                                                              {requesting2ndVerify ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : null}
+                                                              {requesting2ndVerify ? '요청 중...' : '2차 인증 요청'}
+                                                          </Button>
+                                                      )}
+                                                  </div>
                                                  <div className="relative w-full h-[80px] bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
                                                      {bizCertUrl ? <img src={bizCertUrl} className="h-full object-contain" /> : <span className="text-[11px] font-bold text-gray-400">클릭하여 업로드</span>}
                                                      <input type="file" accept="image/*" onChange={handleBizCertUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
