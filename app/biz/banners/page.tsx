@@ -23,7 +23,11 @@ export default async function BizBannersPage() {
     }
 
     const res = isVerifiedEmployer ? await manageBizAdAction('GET') : { success: true, data: [] };
-    const ads = (res.success && res.data ? res.data : []);
+    // Draft(배너 템플릿)만 필터링: expires_at이 없거나, 연도가 2000년이거나, is_draft가 true인 광고 레코드
+    const ads = (res.success && res.data ? res.data : []).filter((ad: any) => {
+        const expiresYear = ad.expires_at ? new Date(ad.expires_at).getFullYear() : 2000;
+        return !ad.expires_at || expiresYear === 2000 || ad.is_draft === true;
+    });
 
     return (
         <div className="space-y-6">
@@ -41,7 +45,7 @@ export default async function BizBannersPage() {
                 {isVerifiedEmployer && (
                     <div className="flex items-center gap-3 shrink-0">
                         <Link 
-                            href="/biz/ads/new"
+                            href="/biz/banners/new"
                             className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95 shrink-0"
                         >
                             <Plus className="w-4 h-4" />
@@ -85,7 +89,7 @@ export default async function BizBannersPage() {
                         </p>
                     </div>
                     <Link 
-                        href="/biz/ads/new"
+                        href="/biz/banners/new"
                         className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-md"
                     >
                         <Plus className="w-4 h-4" />

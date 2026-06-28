@@ -1,34 +1,37 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { AdEditorForm, AdFormData } from '@/components/biz/AdEditorForm';
-import { ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { AdSelectorAndPaymentForm } from '@/components/biz/AdSelectorAndPaymentForm';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { manageBizAdAction } from '@/lib/actions';
 import { MobileBlockNotice } from '@/components/biz/MobileBlockNotice';
 
 export default function NewAdPage() {
-    const router = useRouter();
+    const [banners, setBanners] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const handleSubmit = async (data: AdFormData) => {
-        try {
-            const isDraft = data.expires_at ? false : true;
-            const res = await manageBizAdAction('CREATE', { ...data, _isDraft: isDraft });
-            if (res.success) {
-                if (isDraft) {
-                    alert('광고가 등록되었습니다! 리스트에서 노출 기간 및 옵션을 선택하여 게시해주세요.');
-                } else {
-                    alert('광고가 활성화 상태로 즉시 등록되었습니다!');
+    useEffect(() => {
+        const loadBanners = async () => {
+            try {
+                // 내 광고 정보 중 Draft(임시저장 배너 템플릿)만 필터링해서 가져옴
+                const res = await manageBizAdAction('GET');
+                if (res.success && res.data) {
+                    const draftBanners = res.data.filter((ad: any) => {
+                        const expiresYear = ad.expires_at ? new Date(ad.expires_at).getFullYear() : 2000;
+                        return !ad.expires_at || expiresYear === 2000 || ad.is_draft === true;
+                    });
+                    setBanners(draftBanners);
                 }
-                router.push('/biz/ads');
-            } else {
-                alert('등록에 실패했습니다: ' + res.message);
+            } catch (error) {
+                console.error('배너 로드 에러:', error);
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error(error);
-            alert('서버 오류가 발생했습니다.');
-        }
-    };
+        };
+
+        loadBanners();
+    }, []);
 
     return (
         <>
@@ -42,12 +45,19 @@ export default function NewAdPage() {
                     <div>
                         <h2 className="text-xl font-black text-gray-900">새 광고 등록</h2>
                         <p className="text-[13px] text-gray-500 font-medium mt-0.5">
-                            배너 정보와 상세 공고 내용을 작성해주세요.
+                            내가 보관 중인 배너를 선택하고 광고 노출 기간을 결제하여 광고를 시작합니다.
                         </p>
                     </div>
                 </div>
 
-                <AdEditorForm isNew onSubmit={handleSubmit} />
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20 gap-3 bg-white border border-gray-100 rounded-2xl">
+                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                        <p className="text-[12px] text-gray-400 font-bold">내 배너 템플릿 목록 로딩 중...</p>
+                    </div>
+                ) : (
+                    <AdSelectorAndPaymentForm initialBanners={banners} />
+                )}
             </div>
         </>
     );
