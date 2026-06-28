@@ -129,13 +129,19 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
             {/* 무통장 입금 안내 가이드 (계좌 직접 노출 대신 고객센터 문의 유도) */}
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
                 <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                <div>
+                <div className="w-full">
                     <p className="font-bold text-[14px] text-blue-800">무통장 입금 방식 안내</p>
                     <p className="text-[13px] text-blue-700 mt-1 leading-relaxed">
                         보안 및 미인증 입금 방지를 위해 입금 계좌는 고객센터 1:1 문의를 통해 개별 안내해 드립니다.<br />
                         아래 버튼을 눌러 입금 계좌를 안내받으신 후 신청서를 제출해 주세요.<br />
                         영업일 기준 <strong>1일 이내</strong>에 담당자가 확인 후 포인트를 지급해드립니다.
                     </p>
+                    
+                    {/* 수시 변경 경고 안내문 */}
+                    <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3 text-[11px] text-amber-800 font-bold leading-relaxed">
+                        ⚠️ [필독 경고] 회사 입금 계좌는 보안 상 수시로 변경됩니다. 이전에 입금하셨던 내역이 있더라도, <span className="text-red-600 underline">반드시 매 입금 전 1:1 문의를 눌러 실시간 계좌번호를 확인하신 후</span> 입금해 주셔야 합니다. 예전 계좌로 잘못 송금 시 자금 반환 및 포인트 처리가 불가능하거나 지연될 수 있습니다.
+                    </div>
+
                     <div className="mt-4 flex flex-wrap gap-2">
                         <button 
                             type="button"
@@ -231,6 +237,9 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                                 placeholder="가입자 실명이 자동 입력됩니다"
                             />
                         </div>
+                    </div>
+                    <div className="bg-red-50 border border-red-100 rounded-lg p-3 text-[11px] text-red-700 font-bold leading-relaxed">
+                        ※ [입금 전 필독] 회사 공식 계좌는 수시로 변경될 수 있으므로 반드시 상단의 1:1 문의를 거쳐 발급받으신 최신 계좌로만 입금하셔야 합니다. 기존에 저장해 둔 계좌나 다른 계좌로 송금 시 포인트 지급 처리가 되지 않습니다.
                     </div>
                     <button
                         type="submit"
@@ -340,7 +349,9 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                                             )}
                                         </button>
                                     </div>
-
+                                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-[11px] text-amber-800 font-bold leading-relaxed">
+                                        ⚠️ [주의] 안내된 위 계좌번호는 보안상의 이유로 수시로 변경될 수 있습니다. 본 문의를 통해 발급받으신 직후(당일)에만 유효하오니 즉시 입금해 주시기 바랍니다.
+                                    </div>
                                     <div className="pt-2 text-center">
                                         <button
                                             onClick={handleCloseInquiryModal}
