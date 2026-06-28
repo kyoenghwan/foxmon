@@ -697,13 +697,15 @@ export function SettingsModal() {
                                             <h3 className="font-extrabold text-primary text-[13px] flex items-center gap-1.5">
                                                 <Building2 className="w-4 h-4 stroke-[2]" /> 업체 (사업자) 정보
                                             </h3>
-                                            {isBizVerified ? (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-green-100 text-green-700">인증 완료</span>
-                                            ) : (bizCertUrl || verificationDocUrl) ? (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 animate-pulse">심사 중</span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500">미인증</span>
-                                            )}
+                                            {bizType === '사업자' ? (
+                                                isBizVerified ? (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-green-100 text-green-700">인증 완료</span>
+                                                ) : bizCertUrl ? (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 animate-pulse">심사 중</span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500">미인증</span>
+                                                )
+                                            ) : null}
                                         </div>
                                         <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100/50 space-y-3">
                                             {/* 가입 유형 선택 */}
@@ -720,7 +722,7 @@ export function SettingsModal() {
                                                             disabled={isBizVerified}
                                                             className="accent-primary" 
                                                         />
-                                                        일반 (비사업자)
+                                                        비사업자
                                                     </label>
                                                     <label className="flex items-center gap-1.5 cursor-pointer">
                                                         <input 
@@ -785,7 +787,7 @@ export function SettingsModal() {
                                             ) : (
                                                 <div className="space-y-3">
                                                     <div className="text-[12px] text-gray-500 font-bold bg-white p-4 rounded-xl border border-gray-150 shadow-sm leading-relaxed text-center">
-                                                        현재 **일반 (비사업자)** 구인회원 상태입니다. <br/>
+                                                        현재 **비사업자** 구인회원 상태입니다. <br/>
                                                         본인인증(휴대폰인증)이 완료되어, 별도의 신분증 제출 없이 <br/>
                                                         **즉시 구인 공고 등록이 가능합니다.**
                                                     </div>
