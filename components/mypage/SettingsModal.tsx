@@ -674,6 +674,8 @@ export function SettingsModal() {
                                             </h3>
                                             {isBizVerified ? (
                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-green-100 text-green-700">인증 완료</span>
+                                            ) : (bizCertUrl || verificationDocUrl) ? (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 animate-pulse">심사 중</span>
                                             ) : (
                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500">미인증</span>
                                             )}
@@ -722,15 +724,7 @@ export function SettingsModal() {
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <label className="text-[11px] font-bold text-gray-500 w-[90px] shrink-0">사업자등록번호</label>
-                                                        <div className="flex gap-2 flex-1">
-                                                            <input type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)} readOnly={isBizVerified} maxLength={10} className={`flex-1 px-2.5 py-1.5 border rounded-md text-[13px] font-bold ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} placeholder="숫자 10자리" />
-                                                            {!isBizVerified && (
-                                                                <Button type="button" onClick={() => { setIsBizVerified(true); alert('가승인되었습니다.'); }} className="h-8 px-3 text-[11px] font-bold shrink-0">인증하기</Button>
-                                                            )}
-                                                            {isBizVerified && (
-                                                                <Button type="button" variant="outline" onClick={() => setIsBizVerified(false)} className="h-8 px-3 text-[11px] font-bold text-red-500 shrink-0">해제</Button>
-                                                            )}
-                                                        </div>
+                                                        <input type="text" value={bizNumber} onChange={e => setBizNumber(e.target.value)} readOnly={isBizVerified} maxLength={10} className={`w-full px-2.5 py-1.5 border rounded-md text-[13px] font-bold flex-1 ${isBizVerified ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-white border-gray-200 focus:border-primary'}`} placeholder="숫자 10자리" />
                                                     </div>
                                                     <div className="pt-2 border-t border-orange-100">
                                                         <label className="text-[11px] font-bold text-gray-500 mb-1 block">사업자등록증 업로드 (유흥업종 2차 검수용)</label>
@@ -756,23 +750,17 @@ export function SettingsModal() {
                                                                 {!isBizVerified ? (
                                                                     <Button 
                                                                         type="button" 
-                                                                        onClick={() => { 
-                                                                            setIsBizVerified(true); 
-                                                                            alert('신분증 검증이 요청되었습니다. (가승인 처리되었습니다.)'); 
+                                                                        onClick={async () => { 
+                                                                            await handleSaveProfile();
+                                                                            alert('신분증 검증이 요청되었습니다! 관리자 승인 대기 중(심사 중) 상태로 전환됩니다.'); 
                                                                         }} 
+                                                                        disabled={savingProfile}
                                                                         className="h-7 px-2.5 text-[10px] font-bold shrink-0 bg-primary hover:bg-orange-600 text-white"
                                                                     >
                                                                         인증요청
                                                                     </Button>
                                                                 ) : (
-                                                                    <Button 
-                                                                        type="button" 
-                                                                        variant="outline" 
-                                                                        onClick={() => setIsBizVerified(false)} 
-                                                                        className="h-7 px-2.5 text-[10px] font-bold text-red-500 shrink-0"
-                                                                    >
-                                                                        인증해제
-                                                                    </Button>
+                                                                    <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded">인증완료</span>
                                                                 )}
                                                             </div>
                                                         )}
