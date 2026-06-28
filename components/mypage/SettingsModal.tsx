@@ -744,11 +744,9 @@ export function SettingsModal() {
                                              </div>
                                              <div className="pt-2 border-t border-orange-100">
                                                  <label className="text-[11px] font-bold text-gray-500 mb-1 block">사업자등록증 업로드 (유흥업종 2차 검수용)</label>
-                                                 <div className={`relative w-full h-[80px] bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center ${isBizVerified ? 'cursor-not-allowed bg-gray-50' : 'cursor-pointer'}`}>
+                                                 <div className="relative w-full h-[80px] bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
                                                      {bizCertUrl ? <img src={bizCertUrl} className="h-full object-contain" /> : <span className="text-[11px] font-bold text-gray-400">클릭하여 업로드</span>}
-                                                     {!isBizVerified && (
-                                                         <input type="file" onChange={handleBizCertUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
-                                                     )}
+                                                     <input type="file" accept="image/*" onChange={handleBizCertUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
                                                  </div>
                                              </div>
                                          </div>
