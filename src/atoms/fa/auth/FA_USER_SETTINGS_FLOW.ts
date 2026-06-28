@@ -107,6 +107,36 @@ export async function FA_USER_SETTINGS_FLOW(input: UserSettingsFlowInput) {
                     verification_doc_url: input.profileData.verification_doc_url,
                 };
 
+                // 0. 사업자 실시간 검증 트리거 연동 (DATA_GO_KR_API_KEY가 주입된 경우 활성화)
+                if (updatePayload.business_type === '사업자' && updatePayload.business_registration_number) {
+                    const { QA_GET_USER_PROFILE } = await import('@/src/atoms/qa/auth/QA_GET_USER_PROFILE');
+                    const currentProfile = await QA_GET_USER_PROFILE({ userId: input.userId });
+                    
+                    const isAlreadyVerified = currentProfile.success && 
+                        currentProfile.data?.is_business_verified && 
+                        currentProfile.data?.business_registration_number === updatePayload.business_registration_number;
+
+                    if (!isAlreadyVerified) {
+                        const { FA_BIZ_VERIFY_FLOW } = await import('@/src/atoms/fa/biz/FA_BIZ_VERIFY_FLOW');
+                        const verifyResult = await FA_BIZ_VERIFY_FLOW({
+                            userId: input.userId,
+                            bizNumber: updatePayload.business_registration_number,
+                            ceoName: updatePayload.verified_ceo_name || undefined,
+                            businessName: updatePayload.verified_business_name || undefined
+                        });
+
+                        if (!verifyResult.success) {
+                            return { success: false, message: verifyResult.message };
+                        }
+
+                        // 국세청 진위확인이 실제 정상 완료된 경우 즉시 자동 승인 처리
+                        const isLiveKey = !!process.env.DATA_GO_KR_API_KEY;
+                        if (isLiveKey) {
+                            updatePayload.is_business_verified = true;
+                        }
+                    }
+                }
+
                 const updateResult = await OA_UPDATE_USER_PROFILE(updatePayload);
                 if (!updateResult.success) {
                     return { success: false, message: updateResult.error || '프로필 업데이트 중 오류가 발생했습니다.' };

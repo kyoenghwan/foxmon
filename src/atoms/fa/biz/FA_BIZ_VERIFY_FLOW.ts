@@ -35,8 +35,9 @@ export async function FA_BIZ_VERIFY_FLOW({ userId, bizNumber, ceoName, openDate,
     }
 
     try {
-        // 국세청 진위확인 API 호출
-        const url = `https://api.odcloud.kr/api/nts-businessman/v1/validate?serviceKey=${API_KEY}`;
+        // 국세청 진위확인 API 호출 (인코딩 안전장치 적용)
+        const serviceKey = API_KEY.includes('%') ? API_KEY : encodeURIComponent(API_KEY);
+        const url = `https://api.odcloud.kr/api/nts-businessman/v1/validate?serviceKey=${serviceKey}`;
         
         // 개업일자 정제 (YYYYMMDD 형식, 숫자만 남김)
         const cleanOpenDate = openDate ? openDate.replace(/[^0-9]/g, '') : '';
