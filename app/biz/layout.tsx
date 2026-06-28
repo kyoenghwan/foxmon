@@ -41,7 +41,7 @@ export default async function BizLayout({ children }: { children: React.ReactNod
 
             {/* 메인 콘텐츠 영역 (사이드바 + 페이지) */}
             <div className="container px-4 md:px-6 pt-4 pb-6 flex-1">
-                <div className="mb-3 sticky top-[136px] z-20 bg-white border-b pt-2 pb-4">
+                <div className="mb-3 bg-white border-b pt-2 pb-4">
                     <BizSidebar isMobile />
                 </div>
                 <div className="min-w-0">
