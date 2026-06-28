@@ -282,11 +282,14 @@ export function SettingsModal() {
                 setInitialNickname(nickname);
                 window.dispatchEvent(new Event('profile-updated'));
                 setTimeout(() => setMessage(''), 3000);
+                return true;
             } else {
                 setError(result.message);
+                return false;
             }
         } catch (err: any) {
             setError('설정 수정 중 오류가 발생했습니다.');
+            return false;
         } finally {
             setSavingProfile(false);
         }
@@ -751,8 +754,10 @@ export function SettingsModal() {
                                                                     <Button 
                                                                         type="button" 
                                                                         onClick={async () => { 
-                                                                            await handleSaveProfile();
-                                                                            alert('신분증 검증이 요청되었습니다! 관리자 승인 대기 중(심사 중) 상태로 전환됩니다.'); 
+                                                                            const success = await handleSaveProfile();
+                                                                            if (success) {
+                                                                                alert('신분증 검증이 요청되었습니다! 관리자 승인 대기 중(심사 중) 상태로 전환됩니다.'); 
+                                                                            }
                                                                         }} 
                                                                         disabled={savingProfile}
                                                                         className="h-7 px-2.5 text-[10px] font-bold shrink-0 bg-primary hover:bg-orange-600 text-white"
