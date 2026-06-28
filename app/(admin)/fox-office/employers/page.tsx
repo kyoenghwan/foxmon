@@ -251,16 +251,13 @@ export default function EmployersManagementPage() {
                                                     <DialogTrigger asChild>
                                                         <Button variant="outline" size="sm" className="h-8 gap-1.5 text-[12px] font-bold">
                                                             <FileImage className="w-3.5 h-3.5" />
-                                                            {emp.business_type === '사업자' ? '등록증 보기' : '신분증 보기'}
+                                                            서류 보기
                                                         </Button>
                                                     </DialogTrigger>
                                                     <DialogContent className="max-w-2xl bg-white p-2 border-0 overflow-hidden shadow-2xl rounded-2xl">
                                                         <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
                                                             <h3 className="font-bold text-[15px]">
-                                                                {emp.business_type === '사업자' 
-                                                                    ? `${emp.verified_business_name || emp.nickname || '업체'} 등록증 원본` 
-                                                                    : `${emp.nickname || '일반업자'} 신분증 원본`
-                                                                }
+                                                                {`${emp.verified_business_name || emp.nickname || '업체'} 제출 서류 원본`}
                                                             </h3>
                                                             <a href={emp.business_cert_image_url || emp.verification_doc_url || undefined} target="_blank" rel="noreferrer" className="text-primary hover:underline text-[12px] font-bold flex items-center gap-1">
                                                                 새 창으로 열기 <ExternalLink className="w-3 h-3" />
