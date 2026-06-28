@@ -83,7 +83,7 @@ export default async function BizJobsPage() {
         }
     }
 
-    const hasAccess = businessType === '비사업자' || isVerified;
+    const hasAccess = true; // 일반 구인 공고는 누구나 인증 없이 즉시 등록 및 관리 가능
     const res = hasAccess ? await manageAdAction('GET') : { success: true, data: [] };
     const mockAds = (res.success && res.data ? res.data : []);
 
