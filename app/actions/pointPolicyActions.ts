@@ -106,10 +106,10 @@ const DEFAULT_POLICIES = [
     { config_key: 'ACTIVITY_REFERRAL_SIGNUP', config_value: 500 },
     { config_key: 'ACTIVITY_REFERRAL_BONUS', config_value: 1000 },
     { config_key: 'ACTIVITY_POST_WRITE', config_value: 100 },
-    { config_key: 'ACTIVITY_COMMENT_WRITE', config_value: 30 },
+    { config_key: 'ACTIVITY_COMMENT_WRITE', config_value: 20 },
     { config_key: 'LIMIT_DAILY_MAX_EARN_POINTS', config_value: 5000 },
-    { config_key: 'LIMIT_DAILY_POST_COUNT', config_value: 5 },
-    { config_key: 'LIMIT_DAILY_COMMENT_COUNT', config_value: 10 },
+    { config_key: 'LIMIT_DAILY_POST_COUNT', config_value: 3 },
+    { config_key: 'LIMIT_DAILY_COMMENT_COUNT', config_value: 5 },
 ];
 
 export async function GET_POINT_POLICIES() {
