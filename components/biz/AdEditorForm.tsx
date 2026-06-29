@@ -867,10 +867,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             return;
         }
 
-        if (!form.category_1) {
-            alert('직종은 필수 입력 항목입니다. (광고 상세 내용 탭)');
-            return;
-        }
+
         const isPremiumMainUpload = form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload';
         
         if (isPremiumMainUpload) {
@@ -1543,6 +1540,31 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                              </div>
                                          </div>
                                      </div>
+
+                                     {/* 직종/업종 */}
+                                     <div className="flex flex-row items-center gap-2 sm:gap-4 py-1.5">
+                                         <label className="w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                             <Briefcase className="w-3.5 h-3.5 text-gray-400" />
+                                             <span>직종/업종</span>
+                                             <span className="text-gray-300 ml-auto mr-1">-</span>
+                                         </label>
+                                         <div className="flex-1">
+                                             <select
+                                                 value={form.category_1 || ''}
+                                                 onChange={e => {
+                                                     const val = e.target.value;
+                                                     update('category_1', val);
+                                                     update('category_2', '');
+                                                 }}
+                                                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white cursor-pointer"
+                                             >
+                                                 <option value="">선택 안함</option>
+                                                 {categories1.map(c1 => (
+                                                     <option key={c1.code_value} value={c1.code_name}>{c1.code_name}</option>
+                                                 ))}
+                                             </select>
+                                         </div>
+                                     </div>
                                  </div>
                             </div>
                         )}
@@ -2076,7 +2098,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                 <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
                                     <Briefcase className="w-4 h-4 text-gray-400" />
                                     <span>직종</span>
-                                    <span className="text-red-500">*</span>
                                     <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
                                 </label>
                                 <div className="flex-1 w-full">
