@@ -65,6 +65,72 @@ function SingleConfigCard({ configKey, title, desc, unit, pricingOptions, setPri
     );
 }
 
+function CombinedActivityCard({ 
+    title, 
+    desc, 
+    configKeyAmt, 
+    titleAmt, 
+    unitAmt, 
+    configKeyLimit, 
+    titleLimit, 
+    unitLimit, 
+    pricingOptions, 
+    setPricingOptions 
+}: any) {
+    const valAmt = pricingOptions.find((p: PointPolicyItem) => p.config_key === configKeyAmt)?.config_value || 0;
+    const valLimit = pricingOptions.find((p: PointPolicyItem) => p.config_key === configKeyLimit)?.config_value || 0;
+
+    const handleAmtChange = (value: number) => {
+        setPricingOptions((prev: PointPolicyItem[]) => 
+            prev.map(p => p.config_key === configKeyAmt ? { ...p, config_value: value } : p)
+        );
+    };
+
+    const handleLimitChange = (value: number) => {
+        setPricingOptions((prev: PointPolicyItem[]) => 
+            prev.map(p => p.config_key === configKeyLimit ? { ...p, config_value: value } : p)
+        );
+    };
+
+    return (
+        <div className="p-5 border border-amber-100 rounded-2xl bg-amber-50/20 hover:border-amber-300 transition-all shadow-sm flex flex-col justify-between">
+            <div>
+                <div className="text-[12px] font-black text-amber-600 opacity-80 uppercase tracking-widest">
+                    {configKeyAmt} / {configKeyLimit}
+                </div>
+                <div className="font-bold text-[16px] text-gray-900 mt-1">{title}</div>
+                <p className="text-[12px] text-gray-500 mt-1 mb-4 h-8">{desc}</p>
+            </div>
+            
+            <div className="space-y-3 pt-4 border-t border-amber-100/50 mt-4">
+                {/* 작성 보상 */}
+                <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-bold text-gray-600 w-24 shrink-0">{titleAmt}</span>
+                    <input 
+                        type="number" 
+                        value={valAmt} 
+                        onChange={e => handleAmtChange(parseInt(e.target.value) || 0)} 
+                        className="flex-1 min-w-0 px-3 py-2 border-2 border-amber-200 rounded-lg text-right font-black text-lg focus:border-amber-500 outline-none transition-colors" 
+                    />
+                    <span className="text-gray-400 font-black text-sm shrink-0 w-6 text-center">{unitAmt}</span>
+                </div>
+                
+                {/* 하루 최대 횟수 */}
+                <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-bold text-gray-600 w-24 shrink-0">{titleLimit}</span>
+                    <input 
+                        type="number" 
+                        value={valLimit} 
+                        onChange={e => handleLimitChange(parseInt(e.target.value) || 0)} 
+                        className="flex-1 min-w-0 px-3 py-2 border-2 border-amber-200 rounded-lg text-right font-black text-lg focus:border-amber-500 outline-none transition-colors" 
+                    />
+                    <span className="text-gray-400 font-black text-sm shrink-0 w-6 text-center">{unitLimit}</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function OptionCard({ baseOpt, pricingOptions, setPricingOptions }: any) {
     const val30 = pricingOptions.find((p: PointPolicyItem) => p.config_key === `${baseOpt.key}_30`)?.config_value || 0;
     const val60 = pricingOptions.find((p: PointPolicyItem) => p.config_key === `${baseOpt.key}_60`)?.config_value || 0;
@@ -607,19 +673,27 @@ export default function AdminPointsPolicyPage() {
                 pricingOptions={pricingOptions}
                 setPricingOptions={setPricingOptions}
               />
-              <SingleConfigCard
-                configKey="ACTIVITY_POST_WRITE"
-                title="커뮤니티 글쓰기 보상"
-                desc="커뮤니티(게시판)에 새 글을 작성했을 때 지급되는 보너스 포인트입니다."
-                unit="P"
+              <CombinedActivityCard
+                title="커뮤니티 글쓰기 적립 정책"
+                desc="커뮤니티(게시판) 글 작성을 통해 획득할 수 있는 보너스 포인트 설정 및 일일 최대 횟수를 제한합니다."
+                configKeyAmt="ACTIVITY_POST_WRITE"
+                titleAmt="작성 보상"
+                unitAmt="P"
+                configKeyLimit="LIMIT_DAILY_POST_COUNT"
+                titleLimit="하루 최대 횟수"
+                unitLimit="회"
                 pricingOptions={pricingOptions}
                 setPricingOptions={setPricingOptions}
               />
-              <SingleConfigCard
-                configKey="ACTIVITY_COMMENT_WRITE"
-                title="커뮤니티 댓글 작성 보상"
-                desc="게시글에 댓글을 작성했을 때 지급되는 보너스 포인트입니다."
-                unit="P"
+              <CombinedActivityCard
+                title="커뮤니티 댓글 작성 적립 정책"
+                desc="커뮤니티 게시글 댓글 작성을 통해 획득할 수 있는 보너스 포인트 설정 및 일일 최대 횟수를 제한합니다."
+                configKeyAmt="ACTIVITY_COMMENT_WRITE"
+                titleAmt="작성 보상"
+                unitAmt="P"
+                configKeyLimit="LIMIT_DAILY_COMMENT_COUNT"
+                titleLimit="하루 최대 횟수"
+                unitLimit="회"
                 pricingOptions={pricingOptions}
                 setPricingOptions={setPricingOptions}
               />
@@ -628,22 +702,6 @@ export default function AdminPointsPolicyPage() {
                 title="하루 최대 적립포인트 제한"
                 desc="한 회원이 하루 동안 활동 및 보너스로 적립할 수 있는 총 포인트의 최대 한도입니다. (단, 친구 추천 및 게임 보상은 제외)"
                 unit="P"
-                pricingOptions={pricingOptions}
-                setPricingOptions={setPricingOptions}
-              />
-              <SingleConfigCard
-                configKey="LIMIT_DAILY_POST_COUNT"
-                title="하루 최대 글쓰기 적립 횟수"
-                desc="회원이 하루 동안 커뮤니티에 글을 써서 보너스를 받을 수 있는 최대 횟수입니다."
-                unit="회"
-                pricingOptions={pricingOptions}
-                setPricingOptions={setPricingOptions}
-              />
-              <SingleConfigCard
-                configKey="LIMIT_DAILY_COMMENT_COUNT"
-                title="하루 최대 댓글 적립 횟수"
-                desc="회원이 하루 동안 댓글을 작성하여 보너스를 받을 수 있는 최대 횟수입니다."
-                unit="회"
                 pricingOptions={pricingOptions}
                 setPricingOptions={setPricingOptions}
               />
