@@ -178,10 +178,22 @@ export async function createCommunityPost(input: {
                 .lte('created_at', todayEndUtc.toISOString());
 
             if (postCount !== null && postCount < 5) {
+                let writeAmt = 50;
+                try {
+                    const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
+                    const policiesRes = await GET_POINT_POLICIES();
+                    if (policiesRes.success && policiesRes.data) {
+                        const policy = policiesRes.data.find((p: any) => p.config_key === 'ACTIVITY_POST_WRITE');
+                        if (policy) writeAmt = policy.config_value;
+                    }
+                } catch (err: any) {
+                    nvLog('AT', '⚠️ 글쓰기 포인트 정책 조회 실패, 기본값 사용', err?.message);
+                }
+
                 await supabaseAdmin.rpc('process_activity_point', {
                     p_user_id: userId,
                     p_type: 'POST',
-                    p_amount: 50,
+                    p_amount: writeAmt,
                     p_description: `커뮤니티 글 작성 보너스 적립 (글번호: ${data.id})`
                 });
             }
@@ -383,10 +395,22 @@ export async function createCommunityComment(input: {
                 .lte('created_at', todayEndUtc.toISOString());
 
             if (commentCount !== null && commentCount < 10) {
+                let commentAmt = 10;
+                try {
+                    const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
+                    const policiesRes = await GET_POINT_POLICIES();
+                    if (policiesRes.success && policiesRes.data) {
+                        const policy = policiesRes.data.find((p: any) => p.config_key === 'ACTIVITY_COMMENT_WRITE');
+                        if (policy) commentAmt = policy.config_value;
+                    }
+                } catch (err: any) {
+                    nvLog('AT', '⚠️ 댓글 포인트 정책 조회 실패, 기본값 사용', err?.message);
+                }
+
                 await supabaseAdmin.rpc('process_activity_point', {
                     p_user_id: userId,
                     p_type: 'COMMENT',
-                    p_amount: 10,
+                    p_amount: commentAmt,
                     p_description: `커뮤니티 댓글 작성 보너스 적립 (댓글번호: ${comment.id})`
                 });
             }

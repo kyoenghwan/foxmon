@@ -101,6 +101,12 @@ const DEFAULT_POLICIES = [
     { config_key: 'LIMIT_PREMIUM_MAIN_SLOTS', config_value: 10 },
     { config_key: 'LIMIT_SIDE_SLOTS', config_value: 15 },
     { config_key: 'LIMIT_SIDE_FIXED_SLOTS', config_value: 4 },
+
+    // 유저 활동 보너스 포인트 정책
+    { config_key: 'ACTIVITY_REFERRAL_SIGNUP', config_value: 500 },
+    { config_key: 'ACTIVITY_REFERRAL_BONUS', config_value: 1000 },
+    { config_key: 'ACTIVITY_POST_WRITE', config_value: 100 },
+    { config_key: 'ACTIVITY_COMMENT_WRITE', config_value: 30 },
 ];
 
 export async function GET_POINT_POLICIES() {

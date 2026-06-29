@@ -214,7 +214,8 @@ export default function AdminPointsPolicyPage() {
           p.config_key.startsWith('OPTION_PRICE_') || 
           p.config_key.startsWith('TIER_PRICE_') ||
           p.config_key.startsWith('LIMIT_') ||
-          p.config_key.startsWith('DISCOUNT_')
+          p.config_key.startsWith('DISCOUNT_') ||
+          p.config_key.startsWith('ACTIVITY_')
         ));
       }
       setIsLoading(false);
@@ -278,6 +279,12 @@ export default function AdminPointsPolicyPage() {
               className="px-6 py-3 rounded-xl font-black text-[15px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               업체 등급 기준
+            </TabsTrigger>
+            <TabsTrigger 
+              value="activity" 
+              className="px-6 py-3 rounded-xl font-black text-[15px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              활동/추천 포인트 정책
             </TabsTrigger>
           </TabsList>
         </div>
@@ -563,6 +570,60 @@ export default function AdminPointsPolicyPage() {
               </div>
             </div>
             <TierConfigEditor />
+          </section>
+        </TabsContent>
+
+        {/* 탭 4: 활동/추천 포인트 정책 */}
+        <TabsContent value="activity" className="mt-0">
+          <section className="bg-white p-8 rounded-3xl border shadow-sm space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-black tracking-tight flex items-center gap-2">
+                  <Coins className="text-primary h-6 w-6" /> 활동 및 친구 추천 보너스 포인트 정책
+                </h2>
+                <p className="text-[13px] text-gray-500 font-medium mt-1">
+                  유저 가입 추천인 등록, 커뮤니티 글쓰기, 댓글 작성 시 지급되는 보너스 포인트를 실시간으로 제어합니다.
+                </p>
+              </div>
+              <Button onClick={handleSavePricing} disabled={isLoading} className="font-bold gap-2">
+                <Save className="w-4 h-4" /> 일괄 저장
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-2 gap-6 mt-6">
+              <SingleConfigCard
+                configKey="ACTIVITY_REFERRAL_SIGNUP"
+                title="친구 추천 가입자 보상"
+                desc="추천인 코드를 입력하고 가입한 회원(본인)에게 지급되는 보너스 포인트입니다."
+                unit="P"
+                pricingOptions={pricingOptions}
+                setPricingOptions={setPricingOptions}
+              />
+              <SingleConfigCard
+                configKey="ACTIVITY_REFERRAL_BONUS"
+                title="친구 추천 추천인 보상"
+                desc="본인의 추천인 코드로 타 회원이 가입했을 때 추천인에게 지급되는 보너스 포인트입니다."
+                unit="P"
+                pricingOptions={pricingOptions}
+                setPricingOptions={setPricingOptions}
+              />
+              <SingleConfigCard
+                configKey="ACTIVITY_POST_WRITE"
+                title="커뮤니티 글쓰기 보상"
+                desc="커뮤니티(게시판)에 새 글을 작성했을 때 지급되는 보너스 포인트입니다."
+                unit="P"
+                pricingOptions={pricingOptions}
+                setPricingOptions={setPricingOptions}
+              />
+              <SingleConfigCard
+                configKey="ACTIVITY_COMMENT_WRITE"
+                title="커뮤니티 댓글 작성 보상"
+                desc="게시글에 댓글을 작성했을 때 지급되는 보너스 포인트입니다."
+                unit="P"
+                pricingOptions={pricingOptions}
+                setPricingOptions={setPricingOptions}
+              />
+            </div>
           </section>
         </TabsContent>
       </Tabs>

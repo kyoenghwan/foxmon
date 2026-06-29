@@ -130,19 +130,34 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
 
     // 6. 가입 성공 후 추천 포인트 지급 연동 (RPC 호출)
     if (referrerId && isEligibleForPoints) {
-      // 신규 가입자 포인트 적립 (+500)
+      let referralSignupAmt = 500;
+      let referralBonusAmt = 1000;
+      try {
+        const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
+        const policiesRes = await GET_POINT_POLICIES();
+        if (policiesRes.success && policiesRes.data) {
+          const signupPolicy = policiesRes.data.find((p: any) => p.config_key === 'ACTIVITY_REFERRAL_SIGNUP');
+          const bonusPolicy = policiesRes.data.find((p: any) => p.config_key === 'ACTIVITY_REFERRAL_BONUS');
+          if (signupPolicy) referralSignupAmt = signupPolicy.config_value;
+          if (bonusPolicy) referralBonusAmt = bonusPolicy.config_value;
+        }
+      } catch (err: any) {
+        nvLog('AT', '⚠️ 추천 포인트 정책 조회 실패, 기본값 사용', err?.message);
+      }
+
+      // 신규 가입자 포인트 적립
       const { error: userBonusErr } = await supabaseAdmin.rpc('process_activity_point', {
         p_user_id: newUserId,
         p_type: 'REFERRAL_SIGNUP',
-        p_amount: 500,
+        p_amount: referralSignupAmt,
         p_description: '가입 추천인 입력 보너스 적립'
       });
 
-      // 추천한 사람 포인트 적립 (+1000)
+      // 추천한 사람 포인트 적립
       const { error: refBonusErr } = await supabaseAdmin.rpc('process_activity_point', {
         p_user_id: referrerId,
         p_type: 'REFERRAL_BONUS',
-        p_amount: 1000,
+        p_amount: referralBonusAmt,
         p_description: `추천 가입 보너스 적립 (가입자: ${loginId})`
       });
 
