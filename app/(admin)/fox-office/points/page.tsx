@@ -623,6 +623,14 @@ export default function AdminPointsPolicyPage() {
                 pricingOptions={pricingOptions}
                 setPricingOptions={setPricingOptions}
               />
+              <SingleConfigCard
+                configKey="LIMIT_DAILY_MAX_EARN_POINTS"
+                title="하루 최대 적립포인트 제한"
+                desc="한 회원이 하루 동안 활동 및 보너스로 적립할 수 있는 총 포인트의 최대 한도입니다."
+                unit="P"
+                pricingOptions={pricingOptions}
+                setPricingOptions={setPricingOptions}
+              />
             </div>
           </section>
         </TabsContent>

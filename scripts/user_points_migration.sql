@@ -76,8 +76,34 @@ DECLARE
     v_current_points BIGINT;
     v_new_points BIGINT;
     v_tx_id UUID;
+    v_daily_limit BIGINT;
+    v_today_earned BIGINT;
+    v_allowed_amount BIGINT;
 BEGIN
-    -- 사용자 활동 포인트 락 걸고 조회
+    -- 1. 적립(p_amount > 0)인 경우에만 일일 한도 체크
+    IF p_amount > 0 THEN
+        -- 1-1. 설정된 일일 한도 가져오기 (기본값 5000)
+        SELECT COALESCE((SELECT config_value FROM point_policies WHERE config_key = 'LIMIT_DAILY_MAX_EARN_POINTS' LIMIT 1), 5000)
+        INTO v_daily_limit;
+
+        -- 1-2. 오늘 KST 자정 이후의 누적 적립금 합 조회 (Asia/Seoul 타임존 기준 오늘 시작 시점)
+        SELECT COALESCE(SUM(amount), 0) INTO v_today_earned
+        FROM activity_point_transactions
+        WHERE user_id = p_user_id
+          AND amount > 0
+          AND created_at >= (timezone('Asia/Seoul', now())::date)::timestamp;
+
+        -- 1-3. 한도 체크
+        IF v_today_earned >= v_daily_limit THEN
+            RETURN jsonb_build_object('success', false, 'message', '오늘 적립할 수 있는 최대 보너스 한도를 초과하여 더 이상 적립되지 않습니다.');
+        ELSIF (v_today_earned + p_amount) > v_daily_limit THEN
+            -- 남은 한도만큼만 적립금 조정 (부분 적립 허용)
+            v_allowed_amount := v_daily_limit - v_today_earned;
+            p_amount := v_allowed_amount;
+        END IF;
+    END IF;
+
+    -- 2. 사용자 활동 포인트 락 걸고 조회
     SELECT activity_points INTO v_current_points
     FROM users
     WHERE id = p_user_id
