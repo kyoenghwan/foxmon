@@ -81,16 +81,18 @@ DECLARE
     v_allowed_amount BIGINT;
 BEGIN
     -- 1. 적립(p_amount > 0)인 경우에만 일일 한도 체크
-    IF p_amount > 0 THEN
+    -- 단, 가입 추천인(REFERRAL_SIGNUP), 추천 가입(REFERRAL_BONUS), 게임 관련(GAME_REWARD, GAME_PLAY, ROULETTE)은 일일 한도 예외 처리
+    IF p_amount > 0 AND p_type NOT IN ('REFERRAL_SIGNUP', 'REFERRAL_BONUS', 'GAME_REWARD', 'GAME_PLAY', 'ROULETTE') THEN
         -- 1-1. 설정된 일일 한도 가져오기 (기본값 5000)
         SELECT COALESCE((SELECT config_value FROM point_policies WHERE config_key = 'LIMIT_DAILY_MAX_EARN_POINTS' LIMIT 1), 5000)
         INTO v_daily_limit;
 
-        -- 1-2. 오늘 KST 자정 이후의 누적 적립금 합 조회 (Asia/Seoul 타임존 기준 오늘 시작 시점)
+        -- 1-2. 오늘 KST 자정 이후의 누적 적립금 합 조회 (예외 타입은 합산에서 제외)
         SELECT COALESCE(SUM(amount), 0) INTO v_today_earned
         FROM activity_point_transactions
         WHERE user_id = p_user_id
           AND amount > 0
+          AND type NOT IN ('REFERRAL_SIGNUP', 'REFERRAL_BONUS', 'GAME_REWARD', 'GAME_PLAY', 'ROULETTE')
           AND created_at >= (timezone('Asia/Seoul', now())::date)::timestamp;
 
         -- 1-3. 한도 체크

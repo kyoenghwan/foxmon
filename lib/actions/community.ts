@@ -177,19 +177,22 @@ export async function createCommunityPost(input: {
                 .gte('created_at', todayStartUtc.toISOString())
                 .lte('created_at', todayEndUtc.toISOString());
 
-            if (postCount !== null && postCount < 5) {
-                let writeAmt = 50;
-                try {
-                    const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
-                    const policiesRes = await GET_POINT_POLICIES();
-                    if (policiesRes.success && policiesRes.data) {
-                        const policy = policiesRes.data.find((p: any) => p.config_key === 'ACTIVITY_POST_WRITE');
-                        if (policy) writeAmt = policy.config_value;
-                    }
-                } catch (err: any) {
-                    nvLog('AT', '⚠️ 글쓰기 포인트 정책 조회 실패, 기본값 사용', err?.message);
+            let writeAmt = 50;
+            let dailyPostLimit = 5;
+            try {
+                const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
+                const policiesRes = await GET_POINT_POLICIES();
+                if (policiesRes.success && policiesRes.data) {
+                    const policyAmt = policiesRes.data.find((p: any) => p.config_key === 'ACTIVITY_POST_WRITE');
+                    const policyLimit = policiesRes.data.find((p: any) => p.config_key === 'LIMIT_DAILY_POST_COUNT');
+                    if (policyAmt) writeAmt = policyAmt.config_value;
+                    if (policyLimit) dailyPostLimit = policyLimit.config_value;
                 }
+            } catch (err: any) {
+                nvLog('AT', '⚠️ 글쓰기 포인트/한도 정책 조회 실패, 기본값 사용', err?.message);
+            }
 
+            if (postCount !== null && postCount < dailyPostLimit) {
                 await supabaseAdmin.rpc('process_activity_point', {
                     p_user_id: userId,
                     p_type: 'POST',
@@ -394,19 +397,22 @@ export async function createCommunityComment(input: {
                 .gte('created_at', todayStartUtc.toISOString())
                 .lte('created_at', todayEndUtc.toISOString());
 
-            if (commentCount !== null && commentCount < 10) {
-                let commentAmt = 10;
-                try {
-                    const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
-                    const policiesRes = await GET_POINT_POLICIES();
-                    if (policiesRes.success && policiesRes.data) {
-                        const policy = policiesRes.data.find((p: any) => p.config_key === 'ACTIVITY_COMMENT_WRITE');
-                        if (policy) commentAmt = policy.config_value;
-                    }
-                } catch (err: any) {
-                    nvLog('AT', '⚠️ 댓글 포인트 정책 조회 실패, 기본값 사용', err?.message);
+            let commentAmt = 10;
+            let dailyCommentLimit = 10;
+            try {
+                const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
+                const policiesRes = await GET_POINT_POLICIES();
+                if (policiesRes.success && policiesRes.data) {
+                    const policyAmt = policiesRes.data.find((p: any) => p.config_key === 'ACTIVITY_COMMENT_WRITE');
+                    const policyLimit = policiesRes.data.find((p: any) => p.config_key === 'LIMIT_DAILY_COMMENT_COUNT');
+                    if (policyAmt) commentAmt = policyAmt.config_value;
+                    if (policyLimit) dailyCommentLimit = policyLimit.config_value;
                 }
+            } catch (err: any) {
+                nvLog('AT', '⚠️ 댓글 포인트/한도 정책 조회 실패, 기본값 사용', err?.message);
+            }
 
+            if (commentCount !== null && commentCount < dailyCommentLimit) {
                 await supabaseAdmin.rpc('process_activity_point', {
                     p_user_id: userId,
                     p_type: 'COMMENT',

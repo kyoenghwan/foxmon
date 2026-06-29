@@ -626,8 +626,24 @@ export default function AdminPointsPolicyPage() {
               <SingleConfigCard
                 configKey="LIMIT_DAILY_MAX_EARN_POINTS"
                 title="하루 최대 적립포인트 제한"
-                desc="한 회원이 하루 동안 활동 및 보너스로 적립할 수 있는 총 포인트의 최대 한도입니다."
+                desc="한 회원이 하루 동안 활동 및 보너스로 적립할 수 있는 총 포인트의 최대 한도입니다. (단, 친구 추천 및 게임 보상은 제외)"
                 unit="P"
+                pricingOptions={pricingOptions}
+                setPricingOptions={setPricingOptions}
+              />
+              <SingleConfigCard
+                configKey="LIMIT_DAILY_POST_COUNT"
+                title="하루 최대 글쓰기 적립 횟수"
+                desc="회원이 하루 동안 커뮤니티에 글을 써서 보너스를 받을 수 있는 최대 횟수입니다."
+                unit="회"
+                pricingOptions={pricingOptions}
+                setPricingOptions={setPricingOptions}
+              />
+              <SingleConfigCard
+                configKey="LIMIT_DAILY_COMMENT_COUNT"
+                title="하루 최대 댓글 적립 횟수"
+                desc="회원이 하루 동안 댓글을 작성하여 보너스를 받을 수 있는 최대 횟수입니다."
+                unit="회"
                 pricingOptions={pricingOptions}
                 setPricingOptions={setPricingOptions}
               />
