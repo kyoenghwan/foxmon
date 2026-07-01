@@ -98,31 +98,32 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
         <div className="w-full space-y-3 mb-2 mt-0">
           <div className="flex items-center gap-3">
             <Label className="w-[60px] text-right text-[13px] font-black text-[#333] tracking-tight shrink-0">아이디</Label>
-            <Input
+            <input
               id="loginId"
-              name="foxmon-login-id"
+              name="foxmon-id"
               type="text"
+              inputMode="text"
               placeholder="아이디를 입력하세요"
               value={formData.loginId}
               onChange={(e) => setFormData(prev => ({...prev, loginId: e.target.value}))}
               autoComplete="off"
-              style={{ WebkitUserSelect: 'text', userSelect: 'text' }}
-              className="flex-1 bg-white border-[#e5e7eb] rounded-xl h-10 text-[13px] focus-visible:ring-1 focus-visible:ring-purple-500/30 shadow-sm select-text"
+              className="flex-1 bg-white border border-[#e5e7eb] rounded-xl h-10 text-[13px] px-3 focus:outline-none focus:ring-1 focus:ring-purple-500/30 shadow-sm"
               required
             />
           </div>
           <div className="flex items-center gap-3">
             <Label className="w-[60px] text-right text-[13px] font-black text-[#333] tracking-tight shrink-0">비밀번호</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
+            <input
+              id="foxmon-pw"
+              name="foxmon-pw"
+              type="text"
+              inputMode="text"
               placeholder="비밀번호를 입력하세요"
               value={formData.password}
               onChange={(e) => setFormData(prev => ({...prev, password: e.target.value}))}
-              autoComplete="one-time-code"
-              style={{ WebkitUserSelect: 'text', userSelect: 'text' }}
-              className="flex-1 bg-white border-[#e5e7eb] rounded-xl h-10 text-[13px] focus-visible:ring-1 focus-visible:ring-purple-500/30 shadow-sm select-text"
+              autoComplete="off"
+              style={{ WebkitTextSecurity: 'disc' } as React.CSSProperties}
+              className="flex-1 bg-white border border-[#e5e7eb] rounded-xl h-10 text-[13px] px-3 focus:outline-none focus:ring-1 focus:ring-purple-500/30 shadow-sm"
               required
             />
           </div>
@@ -185,32 +186,33 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
       <div className="flex flex-col gap-4 w-full mb-5 mt-2">
         <div className="flex items-center gap-6">
             <Label className="w-24 text-right text-gray-500 text-[13px] font-black uppercase tracking-wider shrink-0">아이디</Label>
-            <Input
+            <input
               id="loginId"
-              name="foxmon-login-id"
+              name="foxmon-id"
               type="text"
+              inputMode="text"
               placeholder="아이디를 입력하세요"
               value={formData.loginId}
               onChange={(e) => setFormData(prev => ({...prev, loginId: e.target.value}))}
               autoComplete="off"
-              style={{ WebkitUserSelect: 'text', userSelect: 'text' }}
-              className="flex-1 bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-13 rounded-2xl px-5 text-sm font-medium focus-visible:ring-purple-500/50 shadow-sm transition-all select-text"
+              className="flex-1 bg-gray-50/50 border border-gray-200 text-gray-900 placeholder:text-gray-400 h-13 rounded-2xl px-5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/50 shadow-sm transition-all"
               required
             />
         </div>
 
         <div className="flex items-center gap-6">
             <Label className="w-24 text-right text-gray-500 text-[13px] font-black uppercase tracking-wider shrink-0">비밀번호</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
+            <input
+              id="foxmon-pw"
+              name="foxmon-pw"
+              type="text"
+              inputMode="text"
               placeholder="비밀번호를 입력하세요"
               value={formData.password}
               onChange={(e) => setFormData(prev => ({...prev, password: e.target.value}))}
-              autoComplete="one-time-code"
-              style={{ WebkitUserSelect: 'text', userSelect: 'text' }}
-              className="flex-1 bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-13 rounded-2xl px-5 text-sm font-medium focus-visible:ring-purple-500/50 shadow-sm transition-all select-text"
+              autoComplete="off"
+              style={{ WebkitTextSecurity: 'disc' } as React.CSSProperties}
+              className="flex-1 bg-gray-50/50 border border-gray-200 text-gray-900 placeholder:text-gray-400 h-13 rounded-2xl px-5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/50 shadow-sm transition-all"
               required
             />
         </div>
