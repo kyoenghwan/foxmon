@@ -612,37 +612,42 @@ export async function deleteCommunityPost(postId: string) {
             .limit(1)
             .maybeSingle();
 
+        let isBeforeCutoff = false;
         if (latestApprovedRequest) {
             const cutoffTime = new Date(latestApprovedRequest.processed_at || latestApprovedRequest.created_at).getTime();
             const postTime = new Date(post.created_at).getTime();
 
-            // 교환 완료 시점 이전에 작성된 글은 삭제 불가
+            // 교환 완료 시점 이전에 작성된 글인지 검증
             if (postTime <= cutoffTime) {
-                return { success: false, message: '포인트 교환 완료 시점 이전에 작성된 게시글은 삭제할 수 없습니다.' };
+                isBeforeCutoff = true;
             }
         }
 
-        // 3. 포인트 회수 처리 (이전 적립 내역 확인)
-        try {
-            const { data: txRecord } = await supabaseAdmin
-                .from('activity_point_transactions')
-                .select('amount')
-                .eq('user_id', post.user_id)
-                .eq('type', 'POST')
-                .like('description', `%글번호: ${postId}%`)
-                .maybeSingle();
+        // 3. 포인트 회수 처리 (이전 적립 내역 확인) - 교환 완료 시점 이후(미래)에 쓴 글만 포인트 차감 진행
+        if (!isBeforeCutoff) {
+            try {
+                const { data: txRecord } = await supabaseAdmin
+                    .from('activity_point_transactions')
+                    .select('amount')
+                    .eq('user_id', post.user_id)
+                    .eq('type', 'POST')
+                    .like('description', `%글번호: ${postId}%`)
+                    .maybeSingle();
 
-            if (txRecord && txRecord.amount > 0) {
-                nvLog('AT', '💡 글 삭제에 따른 포인트 회수 진행', { userId: post.user_id, amount: txRecord.amount });
-                await supabaseAdmin.rpc('process_activity_point', {
-                    p_user_id: post.user_id,
-                    p_type: 'POST_DELETE',
-                    p_amount: -txRecord.amount,
-                    p_description: `커뮤니티 글 삭제에 따른 보너스 포인트 회수 (글번호: ${postId})`
-                });
+                if (txRecord && txRecord.amount > 0) {
+                    nvLog('AT', '💡 글 삭제에 따른 포인트 회수 진행', { userId: post.user_id, amount: txRecord.amount });
+                    await supabaseAdmin.rpc('process_activity_point', {
+                        p_user_id: post.user_id,
+                        p_type: 'POST_DELETE',
+                        p_amount: -txRecord.amount,
+                        p_description: `커뮤니티 글 삭제에 따른 보너스 포인트 회수 (글번호: ${postId})`
+                    });
+                }
+            } catch (ptErr) {
+                nvLog('AT', '⚠️ 글 삭제 포인트 회수 처리 중 오류 발생 (무시)', ptErr);
             }
-        } catch (ptErr) {
-            nvLog('AT', '⚠️ 글 삭제 포인트 회수 처리 중 오류 발생 (무시)', ptErr);
+        } else {
+            nvLog('AT', 'ℹ️ 교환 완료 시점 이전에 작성된 글이므로 포인트 회수(차감) 없이 삭제만 수행');
         }
 
         // 4. 삭제 쿼리 실행
@@ -712,37 +717,42 @@ export async function deleteCommunityComment(commentId: string) {
             .limit(1)
             .maybeSingle();
 
+        let isBeforeCutoff = false;
         if (latestApprovedRequest) {
             const cutoffTime = new Date(latestApprovedRequest.processed_at || latestApprovedRequest.created_at).getTime();
             const commentTime = new Date(comment.created_at).getTime();
 
-            // 교환 완료 시점 이전에 작성된 댓글은 삭제 불가
+            // 교환 완료 시점 이전에 작성된 댓글인지 검증
             if (commentTime <= cutoffTime) {
-                return { success: false, message: '포인트 교환 완료 시점 이전에 작성된 댓글은 삭제할 수 없습니다.' };
+                isBeforeCutoff = true;
             }
         }
 
-        // 3. 포인트 회수 처리 (이전 적립 내역 확인)
-        try {
-            const { data: txRecord } = await supabaseAdmin
-                .from('activity_point_transactions')
-                .select('amount')
-                .eq('user_id', comment.user_id)
-                .eq('type', 'COMMENT')
-                .like('description', `%댓글번호: ${commentId}%`)
-                .maybeSingle();
+        // 3. 포인트 회수 처리 (이전 적립 내역 확인) - 교환 완료 시점 이후(미래)에 쓴 댓글만 포인트 차감 진행
+        if (!isBeforeCutoff) {
+            try {
+                const { data: txRecord } = await supabaseAdmin
+                    .from('activity_point_transactions')
+                    .select('amount')
+                    .eq('user_id', comment.user_id)
+                    .eq('type', 'COMMENT')
+                    .like('description', `%댓글번호: ${commentId}%`)
+                    .maybeSingle();
 
-            if (txRecord && txRecord.amount > 0) {
-                nvLog('AT', '💡 댓글 삭제에 따른 포인트 회수 진행', { userId: comment.user_id, amount: txRecord.amount });
-                await supabaseAdmin.rpc('process_activity_point', {
-                    p_user_id: comment.user_id,
-                    p_type: 'COMMENT_DELETE',
-                    p_amount: -txRecord.amount,
-                    p_description: `커뮤니티 댓글 삭제에 따른 보너스 포인트 회수 (댓글번호: ${commentId})`
-                });
+                if (txRecord && txRecord.amount > 0) {
+                    nvLog('AT', '💡 댓글 삭제에 따른 포인트 회수 진행', { userId: comment.user_id, amount: txRecord.amount });
+                    await supabaseAdmin.rpc('process_activity_point', {
+                        p_user_id: comment.user_id,
+                        p_type: 'COMMENT_DELETE',
+                        p_amount: -txRecord.amount,
+                        p_description: `커뮤니티 댓글 삭제에 따른 보너스 포인트 회수 (댓글번호: ${commentId})`
+                    });
+                }
+            } catch (ptErr) {
+                nvLog('AT', '⚠️ 댓글 삭제 포인트 회수 처리 중 오류 발생 (무시)', ptErr);
             }
-        } catch (ptErr) {
-            nvLog('AT', '⚠️ 댓글 삭제 포인트 회수 처리 중 오류 발생 (무시)', ptErr);
+        } else {
+            nvLog('AT', 'ℹ️ 교환 완료 시점 이전에 작성된 댓글이므로 포인트 회수(차감) 없이 삭제만 수행');
         }
 
         // 4. 삭제 쿼리 실행
