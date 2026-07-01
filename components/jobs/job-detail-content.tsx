@@ -261,7 +261,7 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
       
       {/* 닫기 버튼 이동으로 상단 헤더 제거 */}
 
-      <div className="flex-1 overflow-y-auto pb-28 bg-gray-50/50">
+      <div className="flex-1 overflow-y-auto pb-28 bg-gray-50/50 rounded-t-[24px] sm:rounded-t-[32px]">
         
         {/* ================= 메인 콘텐츠 영역 ================= */}
         <div className="max-w-[1100px] mx-auto p-4 md:p-6 lg:p-8 flex flex-col gap-10 md:gap-12 w-full">
