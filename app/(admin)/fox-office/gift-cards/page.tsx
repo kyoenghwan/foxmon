@@ -11,6 +11,7 @@ interface GiftCardRequest {
   gift_card_type: string;
   amount: number;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  pin_number?: string;
   created_at: string;
   users?: {
     login_id: string;
@@ -50,18 +51,27 @@ export default function AdminGiftCardsPage() {
   }, [filter]);
 
   const handleAction = async (requestId: string, action: 'APPROVE' | 'REJECT') => {
-    const confirmMsg = action === 'APPROVE' 
-      ? '해당 교환 신청을 승인하시겠습니까?' 
-      : '해당 교환 신청을 반려하시겠습니까?\n반려 시 사용자의 포인트가 100% 자동으로 환불(복구)됩니다.';
+    let pinNumber = '';
     
-    if (!window.confirm(confirmMsg)) return;
+    if (action === 'APPROVE') {
+      const inputPin = window.prompt('승인할 상품권의 핀 번호(PIN)를 입력해 주세요:');
+      if (inputPin === null) return; // 취소됨
+      if (inputPin.trim() === '') {
+        alert('핀 번호를 입력하셔야 승인이 가능합니다.');
+        return;
+      }
+      pinNumber = inputPin.trim();
+    } else {
+      const confirmMsg = '해당 교환 신청을 반려하시겠습니까?\n반려 시 사용자의 포인트가 100% 자동으로 환불(복구)됩니다.';
+      if (!window.confirm(confirmMsg)) return;
+    }
 
     setProcessingId(requestId);
     try {
       const res = await fetch('/api/admin/gift-cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId, action })
+        body: JSON.stringify({ requestId, action, pinNumber })
       });
       const data = await res.json();
       if (data.success) {
@@ -159,7 +169,14 @@ export default function AdminGiftCardsPage() {
                         <div className="font-black text-gray-900">{req.users?.nickname || '익명'}</div>
                         <div className="text-[10px] text-gray-400 font-medium">@{req.users?.login_id || 'unknown'}</div>
                       </td>
-                      <td className="p-4 font-black">{TYPE_MAP[req.gift_card_type] || req.gift_card_type}</td>
+                      <td className="p-4">
+                        <div className="font-black">{TYPE_MAP[req.gift_card_type] || req.gift_card_type}</div>
+                        {req.pin_number && (
+                          <div className="text-[10px] text-purple-700 font-mono select-all bg-purple-50 border border-purple-100 rounded px-1.5 py-0.5 mt-1 w-fit font-black">
+                            PIN: {req.pin_number}
+                          </div>
+                        )}
+                      </td>
                       <td className="p-4 text-right font-black text-purple-700">{req.amount.toLocaleString()}p</td>
                       <td className="p-4 text-center">
                         <span className={cn(

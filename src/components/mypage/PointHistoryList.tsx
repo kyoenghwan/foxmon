@@ -10,6 +10,7 @@ interface PointTransaction {
   amount: number;
   balance_after: number;
   description: string | null;
+  pin_number?: string | null;
   created_at: string;
 }
 
@@ -46,6 +47,13 @@ export function PointHistoryList({ refreshTrigger = 0, className }: PointHistory
   const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopyPin = (txId: string, pin: string) => {
+    navigator.clipboard.writeText(pin);
+    setCopiedId(txId);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const fetchHistory = async (p: number, concatData: boolean = false) => {
     setLoading(true);
@@ -140,7 +148,20 @@ export function PointHistoryList({ refreshTrigger = 0, className }: PointHistory
                       </span>
                     </td>
                     <td className="py-3 px-4 text-[12px] font-bold text-gray-700 break-all leading-normal">
-                      {tx.description || '포인트 변동'}
+                      <div>{tx.description || '포인트 변동'}</div>
+                      {tx.pin_number && (
+                        <div className="flex items-center gap-2 mt-1.5 select-none">
+                          <span className="text-[10px] text-purple-700 font-mono font-black bg-purple-50 border border-purple-100 rounded px-1.5 py-0.5">
+                            PIN: {tx.pin_number}
+                          </span>
+                          <button
+                            onClick={() => handleCopyPin(tx.id, tx.pin_number!)}
+                            className="text-[10px] text-purple-600 hover:text-purple-800 underline font-black cursor-pointer bg-transparent border-none p-0"
+                          >
+                            {copiedId === tx.id ? '복사 완료!' : '복사하기'}
+                          </button>
+                        </div>
+                      )}
                     </td>
                     <td className={cn(
                       "py-3 px-4 text-[12px] font-black text-right tracking-tight",
@@ -187,7 +208,23 @@ export function PointHistoryList({ refreshTrigger = 0, className }: PointHistory
                   <div className="text-xs font-black text-gray-900 group-hover:text-purple-700 transition-colors break-keep leading-snug">
                     {tx.description || '포인트 변동'}
                   </div>
-                  <div className="text-[9px] text-gray-400 font-medium flex items-center gap-1 mt-0.5">
+                  {tx.pin_number && (
+                    <div className="flex items-center gap-2 mt-1.5 select-none">
+                      <span className="text-[9px] text-purple-700 font-mono font-black bg-purple-50 border border-purple-100 rounded px-1.5 py-0.5">
+                        PIN: {tx.pin_number}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopyPin(tx.id, tx.pin_number!);
+                        }}
+                        className="text-[9px] text-purple-600 hover:text-purple-800 underline font-black cursor-pointer bg-transparent border-none p-0"
+                      >
+                        {copiedId === tx.id ? '복사됨!' : '복사'}
+                      </button>
+                    </div>
+                  )}
+                  <div className="text-[9px] text-gray-400 font-medium flex items-center gap-1 mt-1">
                     <Calendar className="w-2.5 h-2.5 shrink-0" />
                     {formattedDate}
                   </div>

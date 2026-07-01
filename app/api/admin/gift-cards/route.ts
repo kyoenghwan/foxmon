@@ -87,13 +87,13 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { requestId, action } = body; // action: 'APPROVE' | 'REJECT'
+    const { requestId, action, pinNumber } = body; // action: 'APPROVE' | 'REJECT', pinNumber: string
 
     if (!requestId || !action) {
       return NextResponse.json({ success: false, message: '요청 파라미터가 유효하지 않습니다.' }, { status: 400 });
     }
 
-    nvLog('FW', '어드민 상품권 처리 실행', { adminId, requestId, action });
+    nvLog('FW', '어드민 상품권 처리 실행', { adminId, requestId, action, hasPin: !!pinNumber });
 
     // 1. 해당 신청 건 조회 및 락 (상태 확인)
     const { data: request, error: findError } = await supabaseAdmin
@@ -111,11 +111,16 @@ export async function POST(req: Request) {
     }
 
     if (action === 'APPROVE') {
-      // 승인 처리
+      if (!pinNumber || pinNumber.trim() === '') {
+        return NextResponse.json({ success: false, message: '상품권 승인을 위해서는 핀 번호(PIN)를 입력해야 합니다.' }, { status: 400 });
+      }
+
+      // 1) 승인 처리 (핀번호 포함)
       const { error: updateError } = await supabaseAdmin
         .from('gift_card_requests')
         .update({
           status: 'APPROVED',
+          pin_number: pinNumber.trim(),
           processed_at: new Date().toISOString(),
           processed_by: adminId
         })
@@ -123,7 +128,33 @@ export async function POST(req: Request) {
 
       if (updateError) throw updateError;
 
-      return NextResponse.json({ success: true, message: '승인 처리가 완료되었습니다.' });
+      // 2) 유저 포인트 거래 원장에 핀번호 업데이트 및 상세내역 교정
+      try {
+        const { data: lastTx, error: txError } = await supabaseAdmin
+          .from('activity_point_transactions')
+          .select('id, description')
+          .eq('user_id', request.user_id)
+          .eq('type', 'GIFT_CARD_REQUEST')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (!txError && lastTx && lastTx.length > 0) {
+          const originalDesc = lastTx[0].description || '';
+          const newDesc = originalDesc.replace('신청 차감', '승인 완료').replace('신청차감', '승인완료');
+          
+          await supabaseAdmin
+            .from('activity_point_transactions')
+            .update({
+              pin_number: pinNumber.trim(),
+              description: `${newDesc} (PIN: ${pinNumber.trim()})`
+            })
+            .eq('id', lastTx[0].id);
+        }
+      } catch (txErr: any) {
+        nvLog('FW', '⚠️ 상품권 승인 원장 이력 업데이트 실패 (비치명적)', txErr.message);
+      }
+
+      return NextResponse.json({ success: true, message: '승인 및 상품권 지급이 완료되었습니다.' });
 
     } else if (action === 'REJECT') {
       // 반려 처리 (가장 중요: 사용자의 포인트를 롤백 반환해 줌)
