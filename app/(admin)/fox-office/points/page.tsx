@@ -705,6 +705,14 @@ export default function AdminPointsPolicyPage() {
                 pricingOptions={pricingOptions}
                 setPricingOptions={setPricingOptions}
               />
+              <SingleConfigCard
+                configKey="ACTIVITY_POST_LIKE_RECEIVED"
+                title="게시글 공감 획득 보상"
+                desc="작성한 게시글이 다른 회원에게 공감(좋아요)을 받았을 때 글쓴이에게 적립되는 보너스 포인트입니다."
+                unit="P"
+                pricingOptions={pricingOptions}
+                setPricingOptions={setPricingOptions}
+              />
             </div>
           </section>
         </TabsContent>

@@ -91,10 +91,72 @@ export async function POST(req: Request) {
       });
     }
 
+    // 3. 연속 출석체크 (Streak) 연산 및 추가 보너스 적립
+    let streakMessage = '';
+    let finalBalance = rpcResult.balance_after;
+    try {
+      const startDateStr = new Date(new Date(kstDateStr).getTime() - 35 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const { data: recentLogs } = await supabaseAdmin
+        .from('attendance_logs')
+        .select('attendance_date')
+        .eq('user_id', userId)
+        .gte('attendance_date', startDateStr)
+        .lte('attendance_date', kstDateStr)
+        .order('attendance_date', { ascending: false });
+
+      if (recentLogs && recentLogs.length > 0) {
+        let streak = 0;
+        let expectedDate = new Date(kstDateStr);
+        const loggedDates = new Set((recentLogs || []).map((l: any) => l.attendance_date));
+
+        while (true) {
+          const expectedStr = expectedDate.toISOString().split('T')[0];
+          if (loggedDates.has(expectedStr)) {
+            streak++;
+            expectedDate.setDate(expectedDate.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+
+        let bonusAmount = 0;
+        let streakType = '';
+        if (streak === 3) {
+          bonusAmount = 300;
+          streakType = 'ATTENDANCE_STREAK_3';
+        } else if (streak === 7) {
+          bonusAmount = 700;
+          streakType = 'ATTENDANCE_STREAK_7';
+        } else if (streak === 15) {
+          bonusAmount = 1500;
+          streakType = 'ATTENDANCE_STREAK_15';
+        } else if (streak === 30) {
+          bonusAmount = 5000;
+          streakType = 'ATTENDANCE_STREAK_30';
+        }
+
+        if (bonusAmount > 0) {
+          nvLog('FW', '연속 출석 달성 보너스 지급', { userId, streak, bonusAmount });
+          const { data: streakRpcRes } = await supabaseAdmin.rpc('process_activity_point', {
+            p_user_id: userId,
+            p_type: streakType,
+            p_amount: bonusAmount,
+            p_description: `${kstDateStr} ${streak}일 연속 출석 보너스 적립`
+          });
+          if (streakRpcRes?.success) {
+            finalBalance = streakRpcRes.balance_after;
+            streakMessage = ` (${streak}일 연속 출석 보너스 ${bonusAmount}P 추가 적립!)`;
+          }
+        }
+      }
+    } catch (streakErr: any) {
+      nvLog('FW', '연속 출석 보너스 적립 연산 중 예외 발생 (무시)', streakErr?.message);
+    }
+
     return NextResponse.json({
       success: true,
-      message: '출석체크 완료! 100포인트가 적립되었습니다.',
-      balanceAfter: rpcResult.balance_after
+      message: `출석체크 완료! 100포인트가 적립되었습니다.${streakMessage}`,
+      balanceAfter: finalBalance
     });
 
   } catch (err: any) {

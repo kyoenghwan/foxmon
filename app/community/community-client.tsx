@@ -550,6 +550,11 @@ export function CommunityClient({
                                                         {post.title}
                                                     </span>
                                                     {post.comment_count > 0 && <span className="text-[11px] md:text-[12px] font-black text-purple-600 shrink-0">[{post.comment_count}]</span>}
+                                                    {post.like_count > 0 && (
+                                                        <span className="text-[10px] md:text-[11px] font-bold text-red-500 bg-red-50 border border-red-100 rounded px-1 shrink-0 flex items-center gap-0.5">
+                                                            ❤️ {post.like_count}
+                                                        </span>
+                                                    )}
                                                     {Date.now() - new Date(post.created_at).getTime() < 86400000 && <span className="bg-orange-100 text-orange-600 text-[8px] font-black px-1 rounded-sm shrink-0">N</span>}
                                                 </div>
                                                 {activeTab === 'foxmarket' && post.price && (

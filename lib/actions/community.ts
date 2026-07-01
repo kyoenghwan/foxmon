@@ -193,14 +193,14 @@ export async function createCommunityPost(input: {
             }
 
             const contentLen = (input.content || '').trim().length;
-            if (contentLen >= 10 && postCount !== null && postCount < dailyPostLimit) {
+            if (contentLen >= 5 && postCount !== null && postCount < dailyPostLimit) {
                 await supabaseAdmin.rpc('process_activity_point', {
                     p_user_id: userId,
                     p_type: 'POST',
                     p_amount: writeAmt,
                     p_description: `커뮤니티 글 작성 보너스 적립 (글번호: ${data.id})`
                 });
-            } else if (contentLen < 10) {
+            } else if (contentLen < 5) {
                 nvLog('AT', `ℹ️ 본문 글자수 부족 (${contentLen}자), 포인트 적립 대상 제외`);
             }
         } catch (ptError) {
@@ -570,5 +570,368 @@ export async function getUserComments(userId: string, page: number = 1, limit: n
         return { success: false, comments: [], total: 0 };
     }
 }
+
+// ============================================
+// FA: 사용자 게시글 삭제 Flow (시간 기반 포인트 환불 제한 포함)
+// ============================================
+export async function deleteCommunityPost(postId: string) {
+    nvLog('AT', '▶️ FA_DELETE_COMMUNITY_POST 시작', { postId });
+    try {
+        const session = await auth();
+        if (!session?.user?.id) {
+            return { success: false, message: '로그인이 필요합니다.' };
+        }
+
+        const userId = session.user.id;
+        const userRole = (session.user as any).role || 'USER';
+        const isAdmin = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
+
+        // 1. 게시글 상세 조회
+        const { data: post, error: getError } = await supabaseAdmin
+            .from('community_posts')
+            .select('*')
+            .eq('id', postId)
+            .maybeSingle();
+
+        if (getError || !post) {
+            return { success: false, message: '게시글을 찾을 수 없습니다.' };
+        }
+
+        // 본인 글이 아니고 관리자도 아니라면 차단
+        if (post.user_id !== userId && !isAdmin) {
+            return { success: false, message: '게시글 삭제 권한이 없습니다.' };
+        }
+
+        // 2. 최종 교환 승인 완료 시각 조회
+        const { data: latestApprovedRequest } = await supabaseAdmin
+            .from('gift_card_requests')
+            .select('processed_at, created_at')
+            .eq('user_id', post.user_id)
+            .eq('status', 'APPROVED')
+            .order('processed_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (latestApprovedRequest) {
+            const cutoffTime = new Date(latestApprovedRequest.processed_at || latestApprovedRequest.created_at).getTime();
+            const postTime = new Date(post.created_at).getTime();
+
+            // 교환 완료 시점 이전에 작성된 글은 삭제 불가
+            if (postTime <= cutoffTime) {
+                return { success: false, message: '포인트 교환 완료 시점 이전에 작성된 게시글은 삭제할 수 없습니다.' };
+            }
+        }
+
+        // 3. 포인트 회수 처리 (이전 적립 내역 확인)
+        try {
+            const { data: txRecord } = await supabaseAdmin
+                .from('activity_point_transactions')
+                .select('amount')
+                .eq('user_id', post.user_id)
+                .eq('type', 'POST')
+                .like('description', `%글번호: ${postId}%`)
+                .maybeSingle();
+
+            if (txRecord && txRecord.amount > 0) {
+                nvLog('AT', '💡 글 삭제에 따른 포인트 회수 진행', { userId: post.user_id, amount: txRecord.amount });
+                await supabaseAdmin.rpc('process_activity_point', {
+                    p_user_id: post.user_id,
+                    p_type: 'POST_DELETE',
+                    p_amount: -txRecord.amount,
+                    p_description: `커뮤니티 글 삭제에 따른 보너스 포인트 회수 (글번호: ${postId})`
+                });
+            }
+        } catch (ptErr) {
+            nvLog('AT', '⚠️ 글 삭제 포인트 회수 처리 중 오류 발생 (무시)', ptErr);
+        }
+
+        // 4. 삭제 쿼리 실행
+        const { error: deleteError } = await supabaseAdmin
+            .from('community_posts')
+            .delete()
+            .eq('id', postId);
+
+        if (deleteError) {
+            nvLog('AT', '❌ 게시글 삭제 실패', deleteError);
+            return { success: false, message: '게시글 삭제에 실패했습니다.' };
+        }
+
+        // 캐시 무효화
+        const keysToInvalidate = Object.keys(communityCache).filter(key => key.startsWith(`${post.board_id}_`));
+        keysToInvalidate.forEach(key => {
+            delete communityCache[key];
+        });
+
+        nvLog('AT', '✅ 게시글 삭제 완료', { postId });
+        return { success: true, message: '게시글이 삭제되었습니다.' };
+
+    } catch (err: any) {
+        nvLog('AT', '❌ FA_DELETE_COMMUNITY_POST 예외', err);
+        return { success: false, message: `시스템 오류가 발생했습니다. (${err?.message || ''})` };
+    }
+}
+
+// ============================================
+// FA: 사용자 댓글 삭제 Flow (시간 기반 포인트 환불 제한 포함)
+// ============================================
+export async function deleteCommunityComment(commentId: string) {
+    nvLog('AT', '▶️ FA_DELETE_COMMUNITY_COMMENT 시작', { commentId });
+    try {
+        const session = await auth();
+        if (!session?.user?.id) {
+            return { success: false, message: '로그인이 필요합니다.' };
+        }
+
+        const userId = session.user.id;
+        const userRole = (session.user as any).role || 'USER';
+        const isAdmin = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
+
+        // 1. 댓글 상세 조회
+        const { data: comment, error: getError } = await supabaseAdmin
+            .from('community_comments')
+            .select('*')
+            .eq('id', commentId)
+            .maybeSingle();
+
+        if (getError || !comment) {
+            return { success: false, message: '댓글을 찾을 수 없습니다.' };
+        }
+
+        // 본인 댓글이 아니고 관리자도 아니라면 차단
+        if (comment.user_id !== userId && !isAdmin) {
+            return { success: false, message: '댓글 삭제 권한이 없습니다.' };
+        }
+
+        // 2. 최종 교환 승인 완료 시각 조회
+        const { data: latestApprovedRequest } = await supabaseAdmin
+            .from('gift_card_requests')
+            .select('processed_at, created_at')
+            .eq('user_id', comment.user_id)
+            .eq('status', 'APPROVED')
+            .order('processed_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (latestApprovedRequest) {
+            const cutoffTime = new Date(latestApprovedRequest.processed_at || latestApprovedRequest.created_at).getTime();
+            const commentTime = new Date(comment.created_at).getTime();
+
+            // 교환 완료 시점 이전에 작성된 댓글은 삭제 불가
+            if (commentTime <= cutoffTime) {
+                return { success: false, message: '포인트 교환 완료 시점 이전에 작성된 댓글은 삭제할 수 없습니다.' };
+            }
+        }
+
+        // 3. 포인트 회수 처리 (이전 적립 내역 확인)
+        try {
+            const { data: txRecord } = await supabaseAdmin
+                .from('activity_point_transactions')
+                .select('amount')
+                .eq('user_id', comment.user_id)
+                .eq('type', 'COMMENT')
+                .like('description', `%댓글번호: ${commentId}%`)
+                .maybeSingle();
+
+            if (txRecord && txRecord.amount > 0) {
+                nvLog('AT', '💡 댓글 삭제에 따른 포인트 회수 진행', { userId: comment.user_id, amount: txRecord.amount });
+                await supabaseAdmin.rpc('process_activity_point', {
+                    p_user_id: comment.user_id,
+                    p_type: 'COMMENT_DELETE',
+                    p_amount: -txRecord.amount,
+                    p_description: `커뮤니티 댓글 삭제에 따른 보너스 포인트 회수 (댓글번호: ${commentId})`
+                });
+            }
+        } catch (ptErr) {
+            nvLog('AT', '⚠️ 댓글 삭제 포인트 회수 처리 중 오류 발생 (무시)', ptErr);
+        }
+
+        // 4. 삭제 쿼리 실행
+        const { error: deleteError } = await supabaseAdmin
+            .from('community_comments')
+            .delete()
+            .eq('id', commentId);
+
+        if (deleteError) {
+            nvLog('AT', '❌ 댓글 삭제 실패', deleteError);
+            return { success: false, message: '댓글 삭제에 실패했습니다.' };
+        }
+
+        // 5. 게시글 댓글 카운트 자가 동기화
+        try {
+            const { data: remains } = await supabaseAdmin
+                .from('community_comments')
+                .select('*', { count: 'exact', head: true })
+                .eq('post_id', comment.post_id);
+            
+            await supabaseAdmin
+                .from('community_posts')
+                .update({ comment_count: remains?.length || 0 })
+                .eq('id', comment.post_id);
+        } catch (syncErr) {
+            nvLog('AT', '⚠️ 댓글 삭제 후 카운트 동기화 예외 발생', syncErr);
+        }
+
+        nvLog('AT', '✅ 댓글 삭제 완료', { commentId });
+        return { success: true, message: '댓글이 삭제되었습니다.' };
+
+    } catch (err: any) {
+        nvLog('AT', '❌ FA_DELETE_COMMUNITY_COMMENT 예외', err);
+        return { success: false, message: `시스템 오류가 발생했습니다. (${err?.message || ''})` };
+    }
+}
+
+// ============================================
+// FA: 게시글 공감(좋아요) 토글 Flow (보상 포인트 연동)
+// ============================================
+export async function toggleCommunityPostLike(postId: string) {
+    nvLog('AT', '▶️ FA_TOGGLE_COMMUNITY_POST_LIKE 시작', { postId });
+    try {
+        const session = await auth();
+        if (!session?.user?.id) {
+            return { success: false, message: '로그인이 필요합니다.' };
+        }
+
+        const userId = session.user.id;
+
+        // 1. 게시글 상세 조회
+        const { data: post, error: getError } = await supabaseAdmin
+            .from('community_posts')
+            .select('*')
+            .eq('id', postId)
+            .maybeSingle();
+
+        if (getError || !post) {
+            return { success: false, message: '게시글을 찾을 수 없습니다.' };
+        }
+
+        // 2. 이미 좋아요 했는지 체크
+        const { data: existingLike } = await supabaseAdmin
+            .from('community_post_likes')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('post_id', postId)
+            .maybeSingle();
+
+        let liked = false;
+        let nextCount = post.like_count || 0;
+
+        // 3. 좋아요 보상 정책 조회
+        let likeAmt = 100;
+        try {
+            const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
+            const policiesRes = await GET_POINT_POLICIES();
+            if (policiesRes.success && policiesRes.data) {
+                const policy = policiesRes.data.find((p: any) => p.config_key === 'ACTIVITY_POST_LIKE_RECEIVED');
+                if (policy) likeAmt = policy.config_value;
+            }
+        } catch (err: any) {
+            nvLog('AT', '⚠️ 공감 보상 정책 조회 실패, 기본값 사용', err?.message);
+        }
+
+        if (!existingLike) {
+            // 좋아요 추가
+            const { error: insertError } = await supabaseAdmin
+                .from('community_post_likes')
+                .insert({ user_id: userId, post_id: postId });
+
+            if (insertError) {
+                nvLog('AT', '❌ 좋아요 레코드 생성 실패', insertError);
+                return { success: false, message: '공감 처리에 실패했습니다.' };
+            }
+
+            liked = true;
+            nextCount += 1;
+
+            // 게시글 count 업데이트
+            await supabaseAdmin
+                .from('community_posts')
+                .update({ like_count: nextCount })
+                .eq('id', postId);
+
+            // 본인 글이 아닐 경우 포인트 적립 연동
+            if (post.user_id !== userId) {
+                await supabaseAdmin.rpc('process_activity_point', {
+                    p_user_id: post.user_id,
+                    p_type: 'LIKE_RECEIVED',
+                    p_amount: likeAmt,
+                    p_description: `게시글이 공감(좋아요)을 받아 보너스 포인트 적립 (글번호: ${postId})`
+                });
+            }
+        } else {
+            // 좋아요 취소
+            const { error: deleteError } = await supabaseAdmin
+                .from('community_post_likes')
+                .delete()
+                .eq('user_id', userId)
+                .eq('post_id', postId);
+
+            if (deleteError) {
+                nvLog('AT', '❌ 좋아요 레코드 삭제 실패', deleteError);
+                return { success: false, message: '공감 취소에 실패했습니다.' };
+            }
+
+            liked = false;
+            nextCount = Math.max(0, nextCount - 1);
+
+            // 게시글 count 업데이트
+            await supabaseAdmin
+                .from('community_posts')
+                .update({ like_count: nextCount })
+                .eq('id', postId);
+
+            // 본인 글이 아닐 경우 포인트 회수 차감 연동
+            if (post.user_id !== userId) {
+                await supabaseAdmin.rpc('process_activity_point', {
+                    p_user_id: post.user_id,
+                    p_type: 'LIKE_CANCELED',
+                    p_amount: -likeAmt,
+                    p_description: `게시글 공감(좋아요) 취소로 인한 보너스 포인트 회수 (글번호: ${postId})`
+                });
+            }
+        }
+
+        // 캐시 무효화
+        const keysToInvalidate = Object.keys(communityCache).filter(key => key.startsWith(`${post.board_id}_`));
+        keysToInvalidate.forEach(key => {
+            delete communityCache[key];
+        });
+
+        return { success: true, liked, likeCount: nextCount };
+
+    } catch (err: any) {
+        nvLog('AT', '❌ FA_TOGGLE_COMMUNITY_POST_LIKE 예외', err);
+        return { success: false, message: `시스템 오류가 발생했습니다. (${err?.message || ''})` };
+    }
+}
+
+// ============================================
+// QA: 특정 게시글에 대한 로그인 사용자의 공감(좋아요) 여부 조회
+// ============================================
+export async function checkCommunityPostLiked(postId: string) {
+    try {
+        const session = await auth();
+        if (!session?.user?.id) {
+            return { success: true, liked: false };
+        }
+
+        const userId = session.user.id;
+        const { data, error } = await supabaseAdmin
+            .from('community_post_likes')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('post_id', postId)
+            .maybeSingle();
+
+        if (error) {
+            return { success: false, liked: false };
+        }
+
+        return { success: true, liked: !!data };
+    } catch (err) {
+        return { success: false, liked: false };
+    }
+}
+
+
 
 

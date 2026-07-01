@@ -21,6 +21,41 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+    
+    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [isLiked, setIsLiked] = useState(false);
+    const [likeCount, setLikeCount] = useState(post.like_count || 0);
+
+    useEffect(() => {
+        const fetchSession = async () => {
+            try {
+                const res = await fetch('/api/auth/session');
+                const session = await res.json();
+                if (session?.user) {
+                    setCurrentUser(session.user);
+                }
+            } catch (e) {
+                console.error("Failed to load session", e);
+            }
+        };
+        fetchSession();
+    }, []);
+
+    useEffect(() => {
+        const fetchLikeStatus = async () => {
+            if (!isLoggedIn) return;
+            try {
+                const { checkCommunityPostLiked } = await import('@/lib/actions/community');
+                const res = await checkCommunityPostLiked(post.id);
+                if (res.success) {
+                    setIsLiked(res.liked);
+                }
+            } catch (e) {
+                console.error("Failed to fetch like status", e);
+            }
+        };
+        fetchLikeStatus();
+    }, [post.id, isLoggedIn]);
 
     const isMarketBoard = boardId === 'business' || boardId === 'foxmarket' || boardId === 'freemarket';
 
@@ -61,7 +96,7 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                 onClose();
                 window.dispatchEvent(new CustomEvent('open_foxtalk', { detail: { roomId: createRes.data.id } }));
             } else {
-                alert(createRes.message || '채팅방을 생성하지 못했습니다.');
+                alert((createRes as any).message || '채팅방을 생성하지 못했습니다.');
             }
         } catch (err) {
             alert('채팅방 생성 중 오류가 발생했습니다.');
@@ -121,6 +156,63 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [lightboxIndex, imagesList.length]);
+
+    const handlePostDelete = async () => {
+        if (!confirm('정말로 이 게시글을 삭제하시겠습니까?')) return;
+        try {
+            const { deleteCommunityPost } = await import('@/lib/actions/community');
+            const res = await deleteCommunityPost(post.id);
+            if (res.success) {
+                alert('게시글이 삭제되었습니다.');
+                onClose();
+                router.refresh();
+            } else {
+                alert(res.message || '게시글 삭제에 실패했습니다.');
+            }
+        } catch (e) {
+            alert('삭제 중 오류가 발생했습니다.');
+        }
+    };
+
+    const handleCommentDelete = async (commentId: string) => {
+        if (!confirm('정말로 이 댓글을 삭제하시겠습니까?')) return;
+        try {
+            const { deleteCommunityComment } = await import('@/lib/actions/community');
+            const res = await deleteCommunityComment(commentId);
+            if (res.success) {
+                alert('댓글이 삭제되었습니다.');
+                setComments(prev => prev.filter(c => c.id !== commentId));
+                post.comment_count = Math.max(0, (post.comment_count || 0) - 1);
+            } else {
+                alert(res.message || '댓글 삭제에 실패했습니다.');
+            }
+        } catch (e) {
+            alert('삭제 중 오류가 발생했습니다.');
+        }
+    };
+
+    const handleLikeToggle = async () => {
+        if (!isLoggedIn) {
+            if (confirm('로그인 후 공감할 수 있습니다. 로그인 페이지로 이동하시겠습니까?')) {
+                onClose();
+                router.push('/login');
+            }
+            return;
+        }
+        try {
+            const { toggleCommunityPostLike } = await import('@/lib/actions/community');
+            const res = await toggleCommunityPostLike(post.id);
+            if (res.success) {
+                setIsLiked(res.liked);
+                setLikeCount(res.likeCount);
+                post.like_count = res.likeCount;
+            } else {
+                alert(res.message || '공감 처리에 실패했습니다.');
+            }
+        } catch (e) {
+            alert('오류가 발생했습니다.');
+        }
+    };
 
     const handleCommentSubmit = async () => {
         if (!isLoggedIn) {
@@ -185,12 +277,22 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                     <h3 className="text-[15px] font-black text-gray-900 truncate pr-4">
                         {post.title}
                     </h3>
-                    <button 
-                        onClick={onClose}
-                        className="text-xs font-black text-gray-400 hover:text-gray-600 transition-all active:scale-95 focus:outline-none shrink-0"
-                    >
-                        닫기
-                    </button>
+                    <div className="flex items-center gap-3 shrink-0">
+                        {(currentUser?.id === post.user_id || currentUser?.role === 'ADMIN' || currentUser?.role === 'SUPER_ADMIN') && (
+                            <button
+                                onClick={handlePostDelete}
+                                className="text-xs font-bold text-red-500 hover:text-red-700 transition-all active:scale-95 focus:outline-none"
+                            >
+                                삭제
+                            </button>
+                        )}
+                        <button 
+                            onClick={onClose}
+                            className="text-xs font-black text-gray-400 hover:text-gray-600 transition-all active:scale-95 focus:outline-none"
+                        >
+                            닫기
+                        </button>
+                    </div>
                 </div>
 
                 {/* Body (Scrollable) */}
@@ -254,6 +356,21 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                                 dangerouslySetInnerHTML={{ __html: post.content }}
                             />
 
+                            {/* 공감(좋아요) 버튼 배치 */}
+                            <div className="flex justify-center py-4">
+                                <button
+                                    onClick={handleLikeToggle}
+                                    className={`flex items-center gap-2 px-6 py-2.5 rounded-full border text-[13px] font-black transition-all active:scale-95 shadow-sm ${
+                                        isLiked 
+                                            ? 'bg-red-50 border-red-200 text-red-500 hover:bg-red-100/70' 
+                                            : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <span className="text-[16px]">{isLiked ? '❤️' : '🤍'}</span>
+                                    <span>공감 {likeCount > 0 ? likeCount : ''}</span>
+                                </button>
+                            </div>
+
                             {/* 이미지는 본문 아래에 작게 썸네일로 나열되며, 누르면 커집니다 */}
                             {imagesList.length > 0 && (
                                 <div className="space-y-2 pt-4 border-t border-gray-100">
@@ -315,6 +432,14 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                                                             답글 달기
                                                         </button>
                                                     )}
+                                                    {(currentUser?.id === parent.user_id || currentUser?.role === 'ADMIN' || currentUser?.role === 'SUPER_ADMIN') && (
+                                                        <button 
+                                                            onClick={() => handleCommentDelete(parent.id)}
+                                                            className="text-[11px] font-bold text-red-400 hover:text-red-600 transition-colors"
+                                                        >
+                                                            삭제
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                             <p className="text-[13px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words">
@@ -334,9 +459,19 @@ export function PostDetailModal({ post, boardId, isLoggedIn, onClose }: PostDeta
                                                             <span className="font-bold text-[12px] text-gray-800">
                                                                 {reply.is_anonymous ? '익명' : maskName(reply.author_name)}
                                                             </span>
-                                                            <span className="text-[10px] text-gray-400">
-                                                                {format(new Date(reply.created_at), 'MM-dd HH:mm')}
-                                                            </span>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-[10px] text-gray-400">
+                                                                    {format(new Date(reply.created_at), 'MM-dd HH:mm')}
+                                                                </span>
+                                                                {(currentUser?.id === reply.user_id || currentUser?.role === 'ADMIN' || currentUser?.role === 'SUPER_ADMIN') && (
+                                                                    <button 
+                                                                        onClick={() => handleCommentDelete(reply.id)}
+                                                                        className="text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors"
+                                                                    >
+                                                                        삭제
+                                                                    </button>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                         <p className="text-[12px] md:text-[13px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words">
                                                             {reply.content}

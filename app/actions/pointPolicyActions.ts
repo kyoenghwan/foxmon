@@ -110,6 +110,7 @@ const DEFAULT_POLICIES = [
     { config_key: 'LIMIT_DAILY_MAX_EARN_POINTS', config_value: 5000 },
     { config_key: 'LIMIT_DAILY_POST_COUNT', config_value: 3 },
     { config_key: 'LIMIT_DAILY_COMMENT_COUNT', config_value: 5 },
+    { config_key: 'ACTIVITY_POST_LIKE_RECEIVED', config_value: 100 },
 ];
 
 export async function GET_POINT_POLICIES() {
