@@ -92,7 +92,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
   // --- 1. [Age-Gate 용] Simple Style (Compact & Unified) ---
   if (simpleStyle) {
     return (
-      <form onSubmit={handleSubmit} autoComplete="off" className="w-full max-w-[320px] mx-auto flex flex-col items-center animate-in fade-in duration-500">
+      <form onSubmit={handleSubmit} className="w-full max-w-[320px] mx-auto flex flex-col items-center animate-in fade-in duration-500">
         
         {/* Unified Input - No Toggle needed */}
         <div className="w-full space-y-3 mb-2 mt-0">
@@ -106,7 +106,8 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
               value={formData.loginId}
               onChange={(e) => setFormData(prev => ({...prev, loginId: e.target.value}))}
               autoComplete="off"
-              className="flex-1 bg-white border-[#e5e7eb] rounded-xl h-10 text-[13px] focus-visible:ring-1 focus-visible:ring-purple-500/30 shadow-sm"
+              style={{ WebkitUserSelect: 'text', userSelect: 'text' }}
+              className="flex-1 bg-white border-[#e5e7eb] rounded-xl h-10 text-[13px] focus-visible:ring-1 focus-visible:ring-purple-500/30 shadow-sm select-text"
               required
             />
           </div>
@@ -120,7 +121,8 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
               value={formData.password}
               onChange={(e) => setFormData(prev => ({...prev, password: e.target.value}))}
               autoComplete="one-time-code"
-              className="flex-1 bg-white border-[#e5e7eb] rounded-xl h-10 text-[13px] focus-visible:ring-1 focus-visible:ring-purple-500/30 shadow-sm"
+              style={{ WebkitUserSelect: 'text', userSelect: 'text' }}
+              className="flex-1 bg-white border-[#e5e7eb] rounded-xl h-10 text-[13px] focus-visible:ring-1 focus-visible:ring-purple-500/30 shadow-sm select-text"
               required
             />
           </div>
@@ -177,7 +179,7 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
 
   // --- 2. [Login Page 용] Premium Style (Unified & Modern) ---
   return (
-    <form onSubmit={handleSubmit} autoComplete="off" className="flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <form onSubmit={handleSubmit} className="flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* Unified Inputs Section */}
       <div className="flex flex-col gap-4 w-full mb-5 mt-2">
@@ -191,7 +193,8 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
               value={formData.loginId}
               onChange={(e) => setFormData(prev => ({...prev, loginId: e.target.value}))}
               autoComplete="off"
-              className="flex-1 bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-13 rounded-2xl px-5 text-sm font-medium focus-visible:ring-purple-500/50 shadow-sm transition-all"
+              style={{ WebkitUserSelect: 'text', userSelect: 'text' }}
+              className="flex-1 bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-13 rounded-2xl px-5 text-sm font-medium focus-visible:ring-purple-500/50 shadow-sm transition-all select-text"
               required
             />
         </div>
@@ -206,7 +209,8 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
               value={formData.password}
               onChange={(e) => setFormData(prev => ({...prev, password: e.target.value}))}
               autoComplete="one-time-code"
-              className="flex-1 bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-13 rounded-2xl px-5 text-sm font-medium focus-visible:ring-purple-500/50 shadow-sm transition-all"
+              style={{ WebkitUserSelect: 'text', userSelect: 'text' }}
+              className="flex-1 bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-13 rounded-2xl px-5 text-sm font-medium focus-visible:ring-purple-500/50 shadow-sm transition-all select-text"
               required
             />
         </div>
