@@ -112,7 +112,7 @@ export function PointDashboardModal() {
 
                     <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                       <Button
-                        onClick={() => { setOpen(false); router.push('/job-seeker/play'); }}
+                        onClick={() => { setOpen(false); window.dispatchEvent(new CustomEvent('open_play_modal')); }}
                         className="w-full sm:w-auto h-12 px-6 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-black rounded-2xl shadow-lg transition-all active:scale-[0.98] text-sm flex items-center justify-center gap-2 cursor-pointer border-0"
                       >
                         <Gamepad2 className="w-5 h-5" />
