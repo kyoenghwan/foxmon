@@ -29,7 +29,15 @@ const TYPE_MAP: Record<string, { label: string; bg: string; text: string }> = {
   REFERRAL_SIGNUP: { label: '추천 가입', bg: 'bg-indigo-50 text-indigo-700 border-indigo-100', text: 'text-indigo-600' },
   REFERRAL_BONUS: { label: '추천 보너스', bg: 'bg-purple-50 text-purple-700 border-purple-100', text: 'text-purple-600' },
   GIFT_CARD_REQUEST: { label: '상품권 교환', bg: 'bg-red-50 text-red-700 border-red-100', text: 'text-red-600' },
-  ADMIN_ADJUST: { label: '포인트 조정', bg: 'bg-gray-100 text-gray-700 border-gray-200', text: 'text-gray-600' }
+  ADMIN_ADJUST: { label: '포인트 조정', bg: 'bg-gray-100 text-gray-700 border-gray-200', text: 'text-gray-600' },
+  POST_DELETE: { label: '글 삭제', bg: 'bg-red-50 text-red-700 border-red-100', text: 'text-red-600' },
+  COMMENT_DELETE: { label: '댓글 삭제', bg: 'bg-red-50 text-red-700 border-red-100', text: 'text-red-600' },
+  LIKE_RECEIVED: { label: '공감 획득', bg: 'bg-pink-50 text-pink-700 border-pink-100', text: 'text-pink-600' },
+  LIKE_CANCELED: { label: '공감 취소', bg: 'bg-red-50 text-red-700 border-red-100', text: 'text-red-600' },
+  ATTENDANCE_STREAK_3: { label: '출석 3일', bg: 'bg-yellow-50 text-yellow-700 border-yellow-100', text: 'text-yellow-600' },
+  ATTENDANCE_STREAK_7: { label: '출석 7일', bg: 'bg-yellow-50 text-yellow-700 border-yellow-100', text: 'text-yellow-600' },
+  ATTENDANCE_STREAK_15: { label: '출석 15일', bg: 'bg-yellow-50 text-yellow-700 border-yellow-100', text: 'text-yellow-600' },
+  ATTENDANCE_STREAK_30: { label: '출석 30일', bg: 'bg-yellow-50 text-yellow-700 border-yellow-100', text: 'text-yellow-600' }
 };
 
 export function PointHistoryList({ refreshTrigger = 0, className }: PointHistoryListProps) {
@@ -94,8 +102,65 @@ export function PointHistoryList({ refreshTrigger = 0, className }: PointHistory
         </div>
       )}
 
-      {/* Point Transaction Card List */}
-      <div className="space-y-2">
+      {/* 데스크탑 와이드 테이블 뷰 */}
+      {list.length > 0 && (
+        <div className="hidden sm:block overflow-hidden border border-gray-100 rounded-2xl shadow-sm">
+          <table className="w-full text-left border-collapse bg-white">
+            <thead>
+              <tr className="bg-gray-50/50 border-b border-gray-100 text-[11px] font-black text-gray-500">
+                <th className="py-3 px-4 w-[140px]">일시</th>
+                <th className="py-3 px-4 w-[110px]">구분</th>
+                <th className="py-3 px-4">상세 이용 내역</th>
+                <th className="py-3 px-4 text-right w-[110px]">변동</th>
+                <th className="py-3 px-4 text-right w-[120px]">포인트 잔액</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map((tx) => {
+                const typeInfo = TYPE_MAP[tx.type] || { label: tx.type, bg: 'bg-gray-50 text-gray-700 border-gray-100', text: 'text-gray-600' };
+                const isPositive = tx.amount > 0;
+                const formattedDate = new Date(tx.created_at).toLocaleDateString('ko-KR', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+
+                return (
+                  <tr key={tx.id} className="border-b border-gray-50 hover:bg-gray-50/30 transition-colors">
+                    <td className="py-3 px-4 text-[11px] text-gray-400 font-medium">
+                      {formattedDate}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={cn(
+                        "px-2.5 py-0.5 text-[9px] font-black border rounded-md inline-block select-none whitespace-nowrap",
+                        typeInfo.bg
+                      )}>
+                        {typeInfo.label}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-[12px] font-bold text-gray-700 break-all leading-normal">
+                      {tx.description || '포인트 변동'}
+                    </td>
+                    <td className={cn(
+                      "py-3 px-4 text-[12px] font-black text-right tracking-tight",
+                      isPositive ? "text-purple-600" : "text-red-500"
+                    )}>
+                      {isPositive ? `+${tx.amount}` : tx.amount.toLocaleString()}p
+                    </td>
+                    <td className="py-3 px-4 text-[12px] font-bold text-right text-gray-500">
+                      {tx.balance_after.toLocaleString()}p
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* 모바일 카드 리스트 뷰 */}
+      <div className="sm:hidden space-y-2">
         {list.map((tx) => {
           const typeInfo = TYPE_MAP[tx.type] || { label: tx.type, bg: 'bg-gray-50 text-gray-700 border-gray-100', text: 'text-gray-600' };
           const isPositive = tx.amount > 0;

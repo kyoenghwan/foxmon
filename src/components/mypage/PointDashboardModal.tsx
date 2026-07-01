@@ -66,8 +66,8 @@ export function PointDashboardModal() {
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-4xl w-[95vw] max-h-[92vh] overflow-y-auto bg-white border border-gray-100 text-gray-900 rounded-3xl p-5 md:p-8 scrollbar-hide">
-          <div className="max-w-3xl mx-auto w-full space-y-6">
+        <DialogContent className="max-w-5xl w-[95vw] max-h-[92vh] overflow-y-auto bg-white border border-gray-100 text-gray-900 rounded-3xl p-5 md:p-8 scrollbar-hide">
+          <div className="max-w-4xl mx-auto w-full space-y-6">
             <DialogHeader className="relative pr-8">
               <DialogTitle className="text-xl md:text-2xl font-black text-gray-900 tracking-tight w-fit">
                 마이 포인트 💰
@@ -114,19 +114,14 @@ export function PointDashboardModal() {
                   </div>
                 </div>
 
-                {/* Split Grid Area */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
-                  {/* Attendance (Left/Center) */}
-                  <div className="lg:col-span-2">
-                    <AttendanceCheck onAttendanceSuccess={handleAttendanceSuccess} />
-                  </div>
+                {/* Attendance Check (Full Width) */}
+                <div>
+                  <AttendanceCheck onAttendanceSuccess={handleAttendanceSuccess} />
+                </div>
 
-                  {/* History (Right) */}
-                  <div className="lg:col-span-1">
-                    <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-lg">
-                      <PointHistoryList refreshTrigger={refreshTrigger} />
-                    </div>
-                  </div>
+                {/* Point History List (Full Width, Table style) */}
+                <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+                  <PointHistoryList refreshTrigger={refreshTrigger} />
                 </div>
 
                 {/* Guide Info */}
