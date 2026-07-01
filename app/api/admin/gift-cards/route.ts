@@ -17,6 +17,7 @@ export async function GET(req: Request) {
 
     nvLog('FW', '어드민 상품권 신청 목록 조회', { adminId: session?.user?.id, status });
 
+    // 1차: join 포함 조회 시도
     let query = supabaseAdmin
       .from('gift_card_requests')
       .select('*, users(login_id, nickname)')
@@ -26,8 +27,43 @@ export async function GET(req: Request) {
       query = query.eq('status', status);
     }
 
-    const { data: requests, error } = await query;
-    if (error) throw error;
+    let { data: requests, error } = await query;
+
+    // join 실패 시 join 없이 재시도
+    if (error) {
+      nvLog('FW', '어드민 상품권 조회 join 실패 → join 없이 재시도', error.message);
+      
+      let fallbackQuery = supabaseAdmin
+        .from('gift_card_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (status !== 'ALL') {
+        fallbackQuery = fallbackQuery.eq('status', status);
+      }
+
+      const { data: fallbackData, error: fallbackError } = await fallbackQuery;
+      if (fallbackError) throw fallbackError;
+
+      // user 정보를 별도 조회하여 매핑
+      if (fallbackData && fallbackData.length > 0) {
+        const userIds = [...new Set(fallbackData.map((r: any) => r.user_id))];
+        const { data: usersData } = await supabaseAdmin
+          .from('users')
+          .select('id, login_id, nickname')
+          .in('id', userIds);
+
+        const userMap: Record<string, any> = {};
+        usersData?.forEach((u: any) => { userMap[u.id] = u; });
+
+        requests = fallbackData.map((r: any) => ({
+          ...r,
+          users: userMap[r.user_id] ? { login_id: userMap[r.user_id].login_id, nickname: userMap[r.user_id].nickname } : null
+        }));
+      } else {
+        requests = fallbackData || [];
+      }
+    }
 
     return NextResponse.json({
       success: true,

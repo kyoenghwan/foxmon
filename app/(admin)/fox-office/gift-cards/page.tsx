@@ -28,7 +28,7 @@ export default function AdminGiftCardsPage() {
   const [list, setList] = useState<GiftCardRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING');
+  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL');
 
   const fetchRequests = async () => {
     setLoading(true);
