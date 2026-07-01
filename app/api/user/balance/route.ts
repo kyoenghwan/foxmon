@@ -23,9 +23,22 @@ export async function GET(req: Request) {
       throw error || new Error('사용자 정보를 찾을 수 없습니다.');
     }
 
+    // 포인트 정책 정보도 함께 조회하여 전달 (동적 안내 렌더링용)
+    const { data: policies } = await supabaseAdmin
+      .from('point_policies')
+      .select('config_key, config_value');
+
+    const policyMap: Record<string, number> = {};
+    if (policies) {
+      policies.forEach((p: any) => {
+        policyMap[p.config_key] = Number(p.config_value);
+      });
+    }
+
     return NextResponse.json({
       success: true,
-      balance: user.activity_points || 0
+      balance: user.activity_points || 0,
+      policies: policyMap
     });
 
   } catch (err: any) {
