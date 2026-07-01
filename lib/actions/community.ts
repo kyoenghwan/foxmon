@@ -415,16 +415,13 @@ export async function createCommunityComment(input: {
                 nvLog('AT', '⚠️ 댓글 포인트/한도 정책 조회 실패, 기본값 사용', err?.message);
             }
 
-            const contentLen = (input.content || '').trim().length;
-            if (contentLen >= 5 && commentCount !== null && commentCount < dailyCommentLimit) {
+            if (commentCount !== null && commentCount < dailyCommentLimit) {
                 await supabaseAdmin.rpc('process_activity_point', {
                     p_user_id: userId,
                     p_type: 'COMMENT',
                     p_amount: commentAmt,
                     p_description: `커뮤니티 댓글 작성 보너스 적립 (댓글번호: ${comment.id})`
                 });
-            } else if (contentLen < 5) {
-                nvLog('AT', `ℹ️ 댓글 글자수 부족 (${contentLen}자), 포인트 적립 대상 제외`);
             }
         } catch (ptError) {
             nvLog('AT', '⚠️ 댓글 작성 활동 포인트 적립 중 예외 발생 (무시)', ptError);
