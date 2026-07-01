@@ -128,7 +128,7 @@ export async function POST(req: Request) {
           bonusAmount = 700;
           streakType = 'ATTENDANCE_STREAK_7';
         } else if (streak === 15) {
-          bonusAmount = 1500;
+          bonusAmount = 2000;
           streakType = 'ATTENDANCE_STREAK_15';
         } else if (streak === 30) {
           bonusAmount = 5000;
