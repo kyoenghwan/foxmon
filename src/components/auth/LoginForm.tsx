@@ -114,12 +114,12 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
             <Label className="w-[60px] text-right text-[13px] font-black text-[#333] tracking-tight shrink-0">비밀번호</Label>
             <Input
               id="password"
-              name="foxmon-login-password"
+              name="password"
               type="password"
               placeholder="비밀번호를 입력하세요"
               value={formData.password}
               onChange={(e) => setFormData(prev => ({...prev, password: e.target.value}))}
-              autoComplete="new-password"
+              autoComplete="current-password"
               className="flex-1 bg-white border-[#e5e7eb] rounded-xl h-10 text-[13px] focus-visible:ring-1 focus-visible:ring-purple-500/30 shadow-sm"
               required
             />
@@ -200,12 +200,12 @@ export function LoginForm({ simpleStyle = false }: LoginFormProps) {
             <Label className="w-24 text-right text-gray-500 text-[13px] font-black uppercase tracking-wider shrink-0">비밀번호</Label>
             <Input
               id="password"
-              name="foxmon-login-password"
+              name="password"
               type="password"
               placeholder="비밀번호를 입력하세요"
               value={formData.password}
               onChange={(e) => setFormData(prev => ({...prev, password: e.target.value}))}
-              autoComplete="new-password"
+              autoComplete="current-password"
               className="flex-1 bg-gray-50/50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-13 rounded-2xl px-5 text-sm font-medium focus-visible:ring-purple-500/50 shadow-sm transition-all"
               required
             />
