@@ -193,14 +193,14 @@ export async function createCommunityPost(input: {
             }
 
             const contentLen = (input.content || '').trim().length;
-            if (contentLen >= 20 && postCount !== null && postCount < dailyPostLimit) {
+            if (contentLen >= 10 && postCount !== null && postCount < dailyPostLimit) {
                 await supabaseAdmin.rpc('process_activity_point', {
                     p_user_id: userId,
                     p_type: 'POST',
                     p_amount: writeAmt,
                     p_description: `커뮤니티 글 작성 보너스 적립 (글번호: ${data.id})`
                 });
-            } else if (contentLen < 20) {
+            } else if (contentLen < 10) {
                 nvLog('AT', `ℹ️ 본문 글자수 부족 (${contentLen}자), 포인트 적립 대상 제외`);
             }
         } catch (ptError) {
