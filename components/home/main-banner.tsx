@@ -277,11 +277,6 @@ export function MainBanner() {
             </div>
 
             {/* 좌우 네비게이션 버튼 (필요 시) */}
-            <div className="absolute bottom-4 left-4 flex gap-2 z-20">
-                <div className="bg-black/20 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold">
-                    {((currentIndex % originalLength) + 1)} / {originalLength}
-                </div>
-            </div>
         </div>
     );
 }
