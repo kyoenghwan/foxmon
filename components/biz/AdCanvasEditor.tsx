@@ -526,9 +526,16 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
             | 'silver_mist'
     ) => {
         const canvas = fabricRef.current;
-        if (!canvas) return;
+        if (!canvas) {
+            console.error('[AdCanvasEditor] applyFullTheme: fabricRef.current is null');
+            return;
+        }
 
-        if (!confirm('기존 캔버스 내용이 모두 지워지고 새로운 테마로 덮어씌워집니다. 계속하시겠습니까?')) return;
+        // 빈 캔버스(신규)일 때는 확인 없이 바로 적용, 기존 작업물이 있으면 확인
+        const hasObjects = canvas.getObjects().length > 0;
+        if (hasObjects) {
+            if (!confirm('기존 캔버스 내용이 모두 지워지고 새로운 테마로 덮어씌워집니다. 계속하시겠습니까?')) return;
+        }
 
         canvas.clear();
         canvas.set('backgroundColor', '#ffffff');
@@ -537,11 +544,13 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
         if (onBgImageChange) onBgImageChange('');
 
         try {
+            console.log(`[AdCanvasEditor] Loading theme images: /images/themes/${themeName}_*.png`);
             const [img1, img2, img3] = await Promise.all([
                 FabricImage.fromURL(`/images/themes/${themeName}_1.png`, { crossOrigin: 'anonymous' }),
                 FabricImage.fromURL(`/images/themes/${themeName}_2.png`, { crossOrigin: 'anonymous' }),
                 FabricImage.fromURL(`/images/themes/${themeName}_3.png`, { crossOrigin: 'anonymous' })
             ]);
+            console.log('[AdCanvasEditor] Theme images loaded successfully', { img1W: img1.width, img2W: img2.width, img3W: img3.width });
 
             const scale1 = width / img1.width!;
             img1.set({ scaleX: scale1, scaleY: scale1, left: 0, top: 0, originX: 'left', originY: 'top', selectable: true, evented: true, id: 'bgTop' } as any);
@@ -623,9 +632,11 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
             canvas.add(titleText, bodyBox, bodyText, footerText);
             canvas.renderAll();
             emitChange(canvas);
+            console.log('[AdCanvasEditor] Theme applied successfully:', themeName);
 
-        } catch (err) {
-            alert('테마 이미지를 불러오는데 실패했습니다.');
+        } catch (err: any) {
+            console.error('[AdCanvasEditor] Theme load error:', err);
+            alert(`테마 이미지를 불러오는데 실패했습니다: ${err?.message || err}`);
         }
     };
 
