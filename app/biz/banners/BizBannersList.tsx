@@ -75,12 +75,12 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
         return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-gray-100 text-gray-700 border border-gray-200">{ad.status || '대기'}</span>;
     };
 
-    // 전광판 효과 텍스트 컴포넌트 (상시 자동 롤링 구조, 호버 지진 현상 원천 차단)
-    const TickerText = ({ text, maxWidth = '160px', className = '' }: { text: string; maxWidth?: string; className?: string }) => {
+    // 전광판 효과 텍스트 컴포넌트 (상시 자동 롤링 구조, 한계 글자 수 limit를 넘어서면 작동)
+    const TickerText = ({ text, maxWidth = '160px', className = '', limit = 12 }: { text: string; maxWidth?: string; className?: string; limit?: number }) => {
         if (!text) return <span className="text-gray-400 font-bold">-</span>;
         
-        // 12글자를 초과하여 길어질 경우에만 상시 롤링 전광판 활성화
-        const isLong = text.length > 12;
+        // 컬럼 크기에 맞춰 전달받은 limit 글자 수를 초과할 경우에만 롤링 전광판 활성화
+        const isLong = text.length > limit;
 
         return (
             <div 
@@ -97,7 +97,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                         </div>
                     </div>
                 ) : (
-                    <div className={`w-full truncate ${className}`}>
+                    <div className={`w-full truncate text-center ${className}`}>
                         {text}
                     </div>
                 )}
@@ -129,17 +129,17 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
             `}} />
 
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[1030px] border-collapse text-center table-fixed">
+                <table className="w-full min-w-[900px] border-collapse text-center table-fixed">
                     <thead>
                         <tr className="bg-gray-50/75 border-b border-gray-150 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
-                            <th className="px-4 py-4 text-center w-[140px] min-w-[140px]">배너 종류</th>
-                            <th className="px-4 py-4 text-center w-[100px] min-w-[100px]">로고</th>
-                            <th className="px-6 py-4 text-center w-[260px] min-w-[260px]">제목</th>
-                            <th className="px-4 py-4 text-center w-[120px] min-w-[120px]">업체명</th>
+                            <th className="px-4 py-4 text-center w-[110px] min-w-[110px]">배너 종류</th>
+                            <th className="px-4 py-4 text-center w-[85px] min-w-[85px]">로고</th>
+                            <th className="px-6 py-4 text-center w-[200px] min-w-[200px]">제목</th>
+                            <th className="px-4 py-4 text-center w-[110px] min-w-[110px]">업체명</th>
                             <th className="px-4 py-4 text-center w-[100px] min-w-[100px]">근무지역</th>
-                            <th className="px-4 py-4 text-center w-[80px] min-w-[80px]">상태</th>
-                            <th className="px-4 py-4 text-center w-[110px] min-w-[110px]">노출 만료일</th>
-                            <th className="px-4 py-4 text-center w-[130px] min-w-[130px]">관리</th>
+                            <th className="px-4 py-4 text-center w-[70px] min-w-[70px]">상태</th>
+                            <th className="px-4 py-4 text-center w-[105px] min-w-[105px]">노출 만료일</th>
+                            <th className="px-4 py-4 text-center w-[120px] min-w-[120px]">관리</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-[13px] text-gray-700">
@@ -149,7 +149,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                                 className="hover:bg-gray-50/50 transition-colors cursor-pointer"
                                 onClick={() => router.push(`/biz/banners/${ad.id}/edit`)}
                             >
-                                {/* 배너 종류 (가운데 정렬, 충분한 너비 확보하여 안잘리게 방지) */}
+                                {/* 배너 종류 (가운데 정렬) */}
                                 <td className="px-4 py-4 whitespace-nowrap text-center">
                                     <TierBadge tier={ad.tier} />
                                 </td>
@@ -171,29 +171,32 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                                     </div>
                                 </td>
 
-                                {/* 제목 (가로 폭 240px로 최적화 및 자동 전광판) */}
+                                {/* 제목 (가로 폭 180px로 최적화 및 자동 전광판) */}
                                 <td className="px-6 py-4 text-center">
                                     <TickerText 
                                         text={ad.title} 
-                                        maxWidth="240px" 
+                                        maxWidth="180px" 
+                                        limit={12}
                                         className="font-black text-gray-900 hover:text-primary transition-colors" 
                                     />
                                 </td>
 
-                                {/* 업체명 (가로 폭 110px로 자동 전광판) */}
+                                {/* 업체명 (가로 폭 95px 및 6글자 초과 시 자동 전광판) */}
                                 <td className="px-4 py-4 text-center">
                                     <TickerText 
                                         text={ad.company || ad.company_name} 
-                                        maxWidth="110px" 
+                                        maxWidth="95px" 
+                                        limit={6}
                                         className="font-bold text-gray-600" 
                                     />
                                 </td>
 
-                                {/* 근무지역 (가로 폭 90px로 자동 전광판) */}
+                                {/* 근무지역 (가로 폭 85px 및 5글자 초과 시 자동 전광판) */}
                                 <td className="px-4 py-4 text-center">
                                     <TickerText 
                                         text={ad.location || '전지역'} 
-                                        maxWidth="90px" 
+                                        maxWidth="85px" 
+                                        limit={5}
                                         className="text-gray-500 font-medium" 
                                     />
                                 </td>
