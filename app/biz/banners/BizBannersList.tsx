@@ -133,7 +133,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                     <thead>
                         <tr className="bg-gray-50/75 border-b border-gray-150 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
                             <th className="px-4 py-4 text-center w-[140px] min-w-[140px]">배너 종류</th>
-                            <th className="px-4 py-4 text-center w-[90px] min-w-[90px]">로고</th>
+                            <th className="px-4 py-4 text-center w-[100px] min-w-[100px]">로고</th>
                             <th className="px-6 py-4 text-center w-[260px] min-w-[260px]">제목</th>
                             <th className="px-4 py-4 text-center w-[120px] min-w-[120px]">업체명</th>
                             <th className="px-4 py-4 text-center w-[100px] min-w-[100px]">근무지역</th>
@@ -154,11 +154,11 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                                     <TierBadge tier={ad.tier} />
                                 </td>
 
-                                {/* 로고 (1:1 정사각형 w-14 h-14 비율로 복원하여 좌우 공백 제거 및 꽉 차게 노출) */}
+                                {/* 로고 (2:1 비율 w-[80px] h-[40px] 및 object-cover 적용으로 여백 없는 풀 화면 노출) */}
                                 <td className="px-4 py-4 whitespace-nowrap text-center">
                                     <div className="flex items-center justify-center">
                                         {ad.logo_url ? (
-                                            <div className="w-14 h-14 rounded-xl border border-gray-200 shadow-sm overflow-hidden bg-white flex items-center justify-center shrink-0">
+                                            <div className="w-[80px] h-[40px] rounded-lg border border-gray-200 shadow-sm overflow-hidden bg-white flex items-center justify-center shrink-0">
                                                 <img 
                                                     src={ad.logo_url} 
                                                     alt="로고" 
