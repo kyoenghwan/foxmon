@@ -145,6 +145,7 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
 }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricRef = useRef<Canvas | null>(null);
+    const clipboardRef = useRef<any>(null);
     const [activeObj, setActiveObj] = useState<any>(null);
     const [bgUrl, setBgUrl] = useState('');
     const [isPattern, setIsPattern] = useState(false); // 배경을 패턴으로 깔지 여부
@@ -294,19 +295,46 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
         canvas.on('object:added', () => emitChange(canvas));
         canvas.on('object:removed', () => emitChange(canvas));
 
-        // 키보드 이벤트 (DEL 삭제)
+        // 키보드 이벤트 (DEL 삭제, Ctrl+C 복사, Ctrl+V 붙여넣기)
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Delete' || e.key === 'Backspace') {
-                const active = canvas.getActiveObject() as any;
-                if (!active) return;
-                
-                if (active.isEditing) return; // 텍스트 편집 중이면 삭제 안함
-                if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+            const active = canvas.getActiveObject() as any;
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+            if (active?.isEditing) return; // 텍스트 편집 중이면 단축키 비활성
 
+            // DEL / Backspace → 선택 객체 삭제
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                if (!active) return;
                 canvas.remove(active);
                 canvas.discardActiveObject();
                 canvas.renderAll();
                 emitChange(canvas);
+            }
+
+            // Ctrl+C → 선택 객체 복사 (클립보드에 저장)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+                if (!active) return;
+                e.preventDefault();
+                active.clone().then((cloned: any) => {
+                    clipboardRef.current = cloned;
+                });
+            }
+
+            // Ctrl+V → 클립보드 객체 붙여넣기 (아래쪽에 배치)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+                if (!clipboardRef.current) return;
+                e.preventDefault();
+                clipboardRef.current.clone().then((cloned: any) => {
+                    const origTop = cloned.top || 0;
+                    const origHeight = cloned.getScaledHeight?.() || cloned.height || 50;
+                    cloned.set({
+                        top: origTop + origHeight + 20,
+                        evented: true,
+                    });
+                    canvas.add(cloned);
+                    canvas.setActiveObject(cloned);
+                    canvas.renderAll();
+                    emitChange(canvas);
+                });
             }
         };
         window.addEventListener('keydown', handleKeyDown);
@@ -809,10 +837,12 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
         const obj = canvas?.getActiveObject();
         if (!canvas || !obj) return;
         obj.clone().then((cloned: any) => {
-            cloned.set({ left: (cloned.left || 0) + 20, top: (cloned.top || 0) + 20 });
+            const origHeight = obj.getScaledHeight?.() || obj.height || 50;
+            cloned.set({ top: (cloned.top || 0) + origHeight + 20 });
             canvas.add(cloned);
             canvas.setActiveObject(cloned);
             canvas.renderAll();
+            emitChange(canvas);
         });
     };
 
