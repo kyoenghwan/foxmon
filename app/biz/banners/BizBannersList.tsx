@@ -75,25 +75,32 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
         return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-gray-100 text-gray-700 border border-gray-200">{ad.status || '대기'}</span>;
     };
 
-    // 전광판 효과 텍스트 컴포넌트 (Pure CSS 기반 겹침 차단 구조)
+    // 전광판 효과 텍스트 컴포넌트 (상시 자동 롤링 구조, 호버 지진 현상 원천 차단)
     const TickerText = ({ text, maxWidth = '160px', className = '' }: { text: string; maxWidth?: string; className?: string }) => {
         if (!text) return <span className="text-gray-400 font-bold">-</span>;
+        
+        // 12글자를 초과하여 길어질 경우에만 상시 롤링 전광판 활성화
+        const isLong = text.length > 12;
+
         return (
             <div 
-                className="relative overflow-hidden whitespace-nowrap mx-auto cursor-default py-1 ticker-container text-center"
+                className="relative overflow-hidden whitespace-nowrap mx-auto cursor-default py-1 text-center"
                 style={{ maxWidth }}
             >
-                {/* 평상시 노출되는 기본 말줄임 텍스트 */}
-                <div className={`w-full truncate ticker-static ${className}`}>
-                    {text}
-                </div>
-                {/* 호버 시에만 나타나서 흐르는 텍스트 */}
-                <div className="absolute top-1 left-0 w-max ticker-flow animate-banner-marquee text-left">
-                    <span className={className}>{text}</span>
-                    <span className="inline-block w-8"></span> {/* 간격 확보용 */}
-                    <span className={className}>{text}</span>
-                    <span className="inline-block w-8"></span>
-                </div>
+                {isLong ? (
+                    <div className="w-full overflow-hidden relative h-5">
+                        <div className="absolute top-0 left-0 w-max animate-banner-marquee text-left">
+                            <span className={className}>{text}</span>
+                            <span className="inline-block w-8"></span> {/* 간격 확보용 */}
+                            <span className={className}>{text}</span>
+                            <span className="inline-block w-8"></span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className={`w-full truncate ${className}`}>
+                        {text}
+                    </div>
+                )}
             </div>
         );
     };
@@ -109,7 +116,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
 
     return (
         <div className="bg-white rounded-2xl border border-gray-150 shadow-sm overflow-hidden">
-            {/* 전광판 CSS 키프레임 및 호버 겹침 방지 스타일 주입 */}
+            {/* 상시 전광판 CSS 키프레임 주입 (매우 부드러운 15초 스피드) */}
             <style dangerouslySetInnerHTML={{__html: `
                 @keyframes bannerMarquee {
                     0% { transform: translateX(0); }
@@ -117,19 +124,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                 }
                 .animate-banner-marquee {
                     display: inline-block;
-                    animation: bannerMarquee 8s linear infinite;
-                }
-                .ticker-flow {
-                    display: none;
-                }
-                .ticker-static {
-                    display: block;
-                }
-                .ticker-container:hover .ticker-flow {
-                    display: inline-block;
-                }
-                .ticker-container:hover .ticker-static {
-                    display: none;
+                    animation: bannerMarquee 15s linear infinite;
                 }
             `}} />
 
