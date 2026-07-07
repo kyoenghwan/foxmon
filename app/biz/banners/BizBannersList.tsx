@@ -75,20 +75,20 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
         return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-gray-100 text-gray-700 border border-gray-200">{ad.status || '대기'}</span>;
     };
 
-    // 전광판 효과 텍스트 컴포넌트
+    // 전광판 효과 텍스트 컴포넌트 (Pure CSS 기반 겹침 차단 구조)
     const TickerText = ({ text, maxWidth = '160px', className = '' }: { text: string; maxWidth?: string; className?: string }) => {
         if (!text) return <span className="text-gray-400 font-bold">-</span>;
         return (
             <div 
-                className="relative overflow-hidden whitespace-nowrap mx-auto group/ticker cursor-default py-1"
+                className="relative overflow-hidden whitespace-nowrap mx-auto cursor-default py-1 ticker-container text-center"
                 style={{ maxWidth }}
             >
-                {/* 기본 상태: 중앙 정렬 말줄임표 */}
-                <div className={`w-full truncate group-hover/ticker:invisible text-center ${className}`}>
+                {/* 평상시 노출되는 기본 말줄임 텍스트 */}
+                <div className={`w-full truncate ticker-static ${className}`}>
                     {text}
                 </div>
-                {/* 호버 상태: 왼쪽으로 부드럽게 흐르는 텍스트 */}
-                <div className="absolute top-1 left-0 w-max hidden group-hover/ticker:block animate-banner-marquee text-left">
+                {/* 호버 시에만 나타나서 흐르는 텍스트 */}
+                <div className="absolute top-1 left-0 w-max ticker-flow animate-banner-marquee text-left">
                     <span className={className}>{text}</span>
                     <span className="inline-block w-8"></span> {/* 간격 확보용 */}
                     <span className={className}>{text}</span>
@@ -109,7 +109,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
 
     return (
         <div className="bg-white rounded-2xl border border-gray-150 shadow-sm overflow-hidden">
-            {/* 전광판 CSS 키프레임 주입 */}
+            {/* 전광판 CSS 키프레임 및 호버 겹침 방지 스타일 주입 */}
             <style dangerouslySetInnerHTML={{__html: `
                 @keyframes bannerMarquee {
                     0% { transform: translateX(0); }
@@ -119,6 +119,18 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                     display: inline-block;
                     animation: bannerMarquee 8s linear infinite;
                 }
+                .ticker-flow {
+                    display: none;
+                }
+                .ticker-static {
+                    display: block;
+                }
+                .ticker-container:hover .ticker-flow {
+                    display: inline-block;
+                }
+                .ticker-container:hover .ticker-static {
+                    display: none;
+                }
             `}} />
 
             <div className="overflow-x-auto">
@@ -126,7 +138,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                     <thead>
                         <tr className="bg-gray-50/75 border-b border-gray-150 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
                             <th className="px-6 py-4 text-center">배너 종류</th>
-                            <th className="px-6 py-4 text-center w-[120px]">로고</th>
+                            <th className="px-6 py-4 text-center w-[150px]">로고</th>
                             <th className="px-6 py-4 text-center">제목</th>
                             <th className="px-6 py-4 text-center">업체명</th>
                             <th className="px-6 py-4 text-center">근무지역</th>
@@ -147,15 +159,17 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                                     <TierBadge tier={ad.tier} />
                                 </td>
 
-                                {/* 로고 (넓이 고정 및 크기 확대, 찌그러짐 방지) */}
-                                <td className="px-6 py-4 whitespace-nowrap text-center w-[120px]">
+                                {/* 로고 (2:1 비율인 w-[90px] h-[45px] 적용, 찌그러짐 방지용 object-contain 및 bg-white 처리) */}
+                                <td className="px-6 py-4 whitespace-nowrap text-center w-[150px]">
                                     <div className="flex items-center justify-center">
                                         {ad.logo_url ? (
-                                            <img 
-                                                src={ad.logo_url} 
-                                                alt="로고" 
-                                                className="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-sm shrink-0" 
-                                            />
+                                            <div className="w-[90px] h-[45px] rounded-lg border border-gray-200 shadow-sm overflow-hidden bg-white flex items-center justify-center shrink-0">
+                                                <img 
+                                                    src={ad.logo_url} 
+                                                    alt="로고" 
+                                                    className="w-full h-full object-contain" 
+                                                />
+                                            </div>
                                         ) : (
                                             <span className="text-[11px] text-gray-400 font-medium">없음</span>
                                         )}
