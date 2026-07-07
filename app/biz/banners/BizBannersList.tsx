@@ -154,15 +154,15 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                                     <TierBadge tier={ad.tier} />
                                 </td>
 
-                                {/* 로고 (2:1 비율 w-[80px] h-[40px] 및 object-cover 적용으로 여백 없는 풀 화면 노출) */}
+                                {/* 로고 (표준 1.5:1 비율인 w-[75px] h-[50px] 및 object-contain 적용으로 잘림 없이 원본 그대로 노출) */}
                                 <td className="px-4 py-4 whitespace-nowrap text-center">
                                     <div className="flex items-center justify-center">
                                         {ad.logo_url ? (
-                                            <div className="w-[80px] h-[40px] rounded-lg border border-gray-200 shadow-sm overflow-hidden bg-white flex items-center justify-center shrink-0">
+                                            <div className="w-[75px] h-[50px] rounded-lg border border-gray-200 shadow-sm overflow-hidden bg-white flex items-center justify-center shrink-0">
                                                 <img 
                                                     src={ad.logo_url} 
                                                     alt="로고" 
-                                                    className="w-full h-full object-cover" 
+                                                    className="w-full h-full object-contain" 
                                                 />
                                             </div>
                                         ) : (
