@@ -867,7 +867,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             return;
         }
 
-
         const isPremiumMainUpload = form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload';
         
         if (isPremiumMainUpload) {
@@ -882,19 +881,39 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             }
         }
 
-        if (!form.detail_content || form.detail_content === '<p><br></p>') {
-            alert('광고 상세 내용을 작성하거나 이미지를 첨부해주세요.');
+        // 실시간 캔버스 데이터 선결 동기화
+        let finalDetailContent = form.detail_content;
+        if (form.design_mode === 'canvas' && canvasRef.current) {
+            const latestData = canvasRef.current.saveLatest?.();
+            if (latestData) {
+                finalDetailContent = latestData;
+            }
+        }
+
+        // 본문 내용 누락 유효성 정밀 검증 (캔버스 모드 내 오브젝트 탑재 개수 체크 포함)
+        let isContentEmpty = !finalDetailContent || finalDetailContent === '<p><br></p>';
+        if (form.design_mode === 'canvas' && finalDetailContent) {
+            try {
+                const parsed = JSON.parse(finalDetailContent);
+                if (parsed.isCanvas && parsed.canvasData) {
+                    const canvasJson = JSON.parse(parsed.canvasData);
+                    // 캔버스 오브젝트 리스트가 아예 비어있다면 상세 작성 누락으로 진단
+                    if (!canvasJson.objects || canvasJson.objects.length === 0) {
+                        isContentEmpty = true;
+                    }
+                }
+            } catch (e) {
+                // 일반 텍스트 포맷일 경우 예외 스킵
+            }
+        }
+
+        if (isContentEmpty) {
+            alert('광고 상세 내용을 작성(디자인 요소 추가)하거나 테마 템플릿을 선택하여 적용해주세요.');
             return;
         }
+
         setSaving(true);
         try {
-            let finalDetailContent = form.detail_content;
-            if (form.design_mode === 'canvas' && canvasRef.current) {
-                const latestData = canvasRef.current.saveLatest?.();
-                if (latestData) {
-                    finalDetailContent = latestData;
-                }
-            }
 
             const payload = {
                 ...form,

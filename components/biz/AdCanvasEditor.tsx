@@ -538,9 +538,9 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
 
         try {
             const [img1, img2, img3] = await Promise.all([
-                new Promise<any>((resolve, reject) => FabricImage.fromURL(`/images/themes/${themeName}_1.png`, { crossOrigin: 'anonymous' }).then(resolve).catch(reject)),
-                new Promise<any>((resolve, reject) => FabricImage.fromURL(`/images/themes/${themeName}_2.png`, { crossOrigin: 'anonymous' }).then(resolve).catch(reject)),
-                new Promise<any>((resolve, reject) => FabricImage.fromURL(`/images/themes/${themeName}_3.png`, { crossOrigin: 'anonymous' }).then(resolve).catch(reject))
+                FabricImage.fromURL(`/images/themes/${themeName}_1.png`, { crossOrigin: 'anonymous' }),
+                FabricImage.fromURL(`/images/themes/${themeName}_2.png`, { crossOrigin: 'anonymous' }),
+                FabricImage.fromURL(`/images/themes/${themeName}_3.png`, { crossOrigin: 'anonymous' })
             ]);
 
             const scale1 = width / img1.width!;
