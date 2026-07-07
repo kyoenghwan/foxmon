@@ -50,16 +50,24 @@ export const useAdStore = create<AdState>((set, get) => ({
     isFetchingJobs: false,
 
     fetchSideAds: async () => {
-        if (get().isSideAdsLoaded || get().isFetchingSideAds) return;
+        console.log("[Zustand Store] fetchSideAds triggering...", {
+            isSideAdsLoaded: get().isSideAdsLoaded,
+            isFetchingSideAds: get().isFetchingSideAds
+        });
+        if (get().isSideAdsLoaded || get().isFetchingSideAds) {
+            console.log("[Zustand Store] fetchSideAds fetch skipped due to already loaded/fetching state.");
+            return;
+        }
         set({ isFetchingSideAds: true });
         const start = performance.now();
-        // console.log(`[Store Performance] fetchSideAds started...`);
+        console.log("[Zustand Store] Fetching side ads from server action/service...");
         try {
             const ads = await getRotatedAds('SIDE', 8);
+            console.log("[Zustand Store] Successfully fetched side ads from server:", ads);
             set({ sideAds: ads, isSideAdsLoaded: true });
-            // console.log(`[Store Performance] fetchSideAds completed in ${(performance.now() - start).toFixed(2)}ms`);
+            console.log(`[Zustand Store] fetchSideAds completed in ${(performance.now() - start).toFixed(2)}ms. Store updated.`);
         } catch (error) {
-            console.error("Store failed to fetch side ads:", error);
+            console.error("[Zustand Store] Store failed to fetch side ads:", error);
         } finally {
             set({ isFetchingSideAds: false });
         }
