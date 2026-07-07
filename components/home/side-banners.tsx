@@ -86,10 +86,10 @@ export function SideBanners() {
     };
 
     if (loading) {
-        console.log("[SideBanners] Component rendering: Null (loading...)");
+        // console.log("[SideBanners] Component rendering: Null (loading...)");
         return null;
     }
-    console.log("[SideBanners] Component rendering: Visible");
+    // console.log("[SideBanners] Component rendering: Visible");
 
     const BannerCard = ({ ad }: { ad: AdItem }) => {
         return (
