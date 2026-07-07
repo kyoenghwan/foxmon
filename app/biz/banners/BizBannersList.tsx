@@ -75,6 +75,29 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
         return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-gray-100 text-gray-700 border border-gray-200">{ad.status || '대기'}</span>;
     };
 
+    // 전광판 효과 텍스트 컴포넌트
+    const TickerText = ({ text, maxWidth = '160px', className = '' }: { text: string; maxWidth?: string; className?: string }) => {
+        if (!text) return <span className="text-gray-400 font-bold">-</span>;
+        return (
+            <div 
+                className="relative overflow-hidden whitespace-nowrap mx-auto group/ticker cursor-default py-1"
+                style={{ maxWidth }}
+            >
+                {/* 기본 상태: 중앙 정렬 말줄임표 */}
+                <div className={`w-full truncate group-hover/ticker:invisible text-center ${className}`}>
+                    {text}
+                </div>
+                {/* 호버 상태: 왼쪽으로 부드럽게 흐르는 텍스트 */}
+                <div className="absolute top-1 left-0 w-max hidden group-hover/ticker:block animate-banner-marquee text-left">
+                    <span className={className}>{text}</span>
+                    <span className="inline-block w-8"></span> {/* 간격 확보용 */}
+                    <span className={className}>{text}</span>
+                    <span className="inline-block w-8"></span>
+                </div>
+            </div>
+        );
+    };
+
     if (!ads || ads.length === 0) {
         return (
             <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-gray-400">
@@ -86,17 +109,29 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
 
     return (
         <div className="bg-white rounded-2xl border border-gray-150 shadow-sm overflow-hidden">
+            {/* 전광판 CSS 키프레임 주입 */}
+            <style dangerouslySetInnerHTML={{__html: `
+                @keyframes bannerMarquee {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
+                }
+                .animate-banner-marquee {
+                    display: inline-block;
+                    animation: bannerMarquee 8s linear infinite;
+                }
+            `}} />
+
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px] border-collapse text-left">
+                <table className="w-full min-w-[900px] border-collapse text-center">
                     <thead>
                         <tr className="bg-gray-50/75 border-b border-gray-150 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
-                            <th className="px-6 py-4">배너 종류</th>
-                            <th className="px-6 py-4">로고</th>
-                            <th className="px-6 py-4">제목</th>
-                            <th className="px-6 py-4">업체명</th>
-                            <th className="px-6 py-4">근무지역</th>
-                            <th className="px-6 py-4">상태</th>
-                            <th className="px-6 py-4">노출 만료일</th>
+                            <th className="px-6 py-4 text-center">배너 종류</th>
+                            <th className="px-6 py-4 text-center w-[120px]">로고</th>
+                            <th className="px-6 py-4 text-center">제목</th>
+                            <th className="px-6 py-4 text-center">업체명</th>
+                            <th className="px-6 py-4 text-center">근무지역</th>
+                            <th className="px-6 py-4 text-center">상태</th>
+                            <th className="px-6 py-4 text-center">노출 만료일</th>
                             <th className="px-6 py-4 text-center">관리</th>
                         </tr>
                     </thead>
@@ -107,52 +142,64 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                                 className="hover:bg-gray-50/50 transition-colors cursor-pointer"
                                 onClick={() => router.push(`/biz/banners/${ad.id}/edit`)}
                             >
-                                {/* 배너 종류 */}
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                {/* 배너 종류 (가운데 정렬) */}
+                                <td className="px-6 py-4 whitespace-nowrap text-center">
                                     <TierBadge tier={ad.tier} />
                                 </td>
 
-                                {/* 로고 */}
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    {ad.logo_url ? (
-                                        <img 
-                                            src={ad.logo_url} 
-                                            alt="로고" 
-                                            className="w-8 h-8 rounded-lg object-cover border border-gray-200 shadow-sm" 
-                                        />
-                                    ) : (
-                                        <span className="text-[11px] text-gray-400 font-medium">없음</span>
-                                    )}
+                                {/* 로고 (넓이 고정 및 크기 확대, 찌그러짐 방지) */}
+                                <td className="px-6 py-4 whitespace-nowrap text-center w-[120px]">
+                                    <div className="flex items-center justify-center">
+                                        {ad.logo_url ? (
+                                            <img 
+                                                src={ad.logo_url} 
+                                                alt="로고" 
+                                                className="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-sm shrink-0" 
+                                            />
+                                        ) : (
+                                            <span className="text-[11px] text-gray-400 font-medium">없음</span>
+                                        )}
+                                    </div>
                                 </td>
 
-                                {/* 제목 */}
-                                <td className="px-6 py-4 max-w-[250px] truncate">
-                                    <span className="font-black text-gray-900 hover:text-primary transition-colors">
-                                        {ad.title}
-                                    </span>
+                                {/* 제목 (마우스 호버 시 우측에서 좌측으로 흐르는 전광판) */}
+                                <td className="px-6 py-4 text-center">
+                                    <TickerText 
+                                        text={ad.title} 
+                                        maxWidth="240px" 
+                                        className="font-black text-gray-900 hover:text-primary transition-colors" 
+                                    />
                                 </td>
 
-                                {/* 업체명 */}
-                                <td className="px-6 py-4 whitespace-nowrap font-bold text-gray-600">
-                                    {ad.company || ad.company_name || '업체명 없음'}
+                                {/* 업체명 (마우스 호버 시 우측에서 좌측으로 흐르는 전광판) */}
+                                <td className="px-6 py-4 text-center">
+                                    <TickerText 
+                                        text={ad.company || ad.company_name} 
+                                        maxWidth="130px" 
+                                        className="font-bold text-gray-600" 
+                                    />
                                 </td>
 
-                                {/* 근무지역 */}
-                                <td className="px-6 py-4 whitespace-nowrap text-gray-500 font-medium">
-                                    {ad.location || '전지역'}
+                                {/* 근무지역 (마우스 호버 시 우측에서 좌측으로 흐르는 전광판) */}
+                                <td className="px-6 py-4 text-center">
+                                    <TickerText 
+                                        text={ad.location || '전지역'} 
+                                        maxWidth="120px" 
+                                        className="text-gray-500 font-medium" 
+                                    />
                                 </td>
 
-                                {/* 상태 */}
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                {/* 상태 (가운데 정렬) */}
+                                <td className="px-6 py-4 whitespace-nowrap text-center">
                                     <StatusBadge ad={ad} />
                                 </td>
 
-                                {/* 노출 만료일 */}
-                                <td className="px-6 py-4 whitespace-nowrap font-bold text-gray-600">
+                                {/* 노출 만료일 (가운데 정렬) */}
+                                <td className="px-6 py-4 whitespace-nowrap text-center font-bold text-gray-600">
                                     {formatDate(ad.expires_at)}
                                 </td>
 
-                                {/* 관리 (수정/삭제 버튼) */}
+                                {/* 관리 (가운데 정렬) */}
                                 <td className="px-6 py-4 whitespace-nowrap text-center">
                                     <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
                                         <button
