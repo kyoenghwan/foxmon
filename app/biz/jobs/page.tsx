@@ -180,15 +180,25 @@ export default async function BizJobsPage() {
             ) : (
                 <div className="bg-transparent md:bg-white rounded-2xl md:border md:border-gray-100 md:shadow-sm overflow-hidden">
                     {/* 데스크톱용 테이블 뷰 */}
-                    <table className="w-full hidden md:table">
+                    <style>{`
+                        @keyframes jobMarquee {
+                            0% { transform: translateX(0); }
+                            100% { transform: translateX(-50%); }
+                        }
+                        .animate-job-marquee {
+                            display: inline-flex;
+                            white-space: nowrap;
+                            animation: jobMarquee 15s linear infinite;
+                        }
+                    `}</style>
+                    <table className="w-full hidden md:table table-fixed">
                         <thead>
                             <tr className="border-b border-gray-100 bg-gray-50">
-                                <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500">광고명</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">결제상태</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">구인상태</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">조회수</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">만료일</th>
-                                <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500">관리</th>
+                                <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500 w-[240px]">제목</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[130px]">만료일</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[100px]">구인상태</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[100px]">결재상태</th>
+                                <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500 w-[120px]">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -199,29 +209,29 @@ export default async function BizJobsPage() {
                                             {ad.image && (
                                                 <img src={ad.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
                                             )}
-                                            <div>
-                                                <p className="font-bold text-[14px] text-gray-900">{ad.title}</p>
-                                                <p className="text-[12px] text-gray-500">{ad.company} · {ad.location}</p>
+                                            <div className="w-[170px] overflow-hidden relative h-5 flex items-center justify-start">
+                                                {ad.title.length > 5 ? (
+                                                    <div className="absolute w-max flex items-center gap-4 animate-job-marquee">
+                                                        <span className="font-bold text-[14px] text-gray-900">{ad.title}</span>
+                                                        <span className="font-bold text-[14px] text-gray-900">{ad.title}</span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="font-bold text-[14px] text-gray-900 w-full text-left truncate">{ad.title}</span>
+                                                )}
                                             </div>
                                         </div>
-                                    </td>
-                                    <td className="px-4 py-4 text-center">
-                                        <StatusBadge expiresAt={ad.expires_at} />
-                                    </td>
-                                    <td className="px-4 py-4 text-center">
-                                        <AdStatusBadge status={ad.status} />
-                                    </td>
-                                    <td className="px-4 py-4 text-center">
-                                        <span className="inline-flex items-center justify-center gap-1 text-[13px] font-bold text-gray-700">
-                                            <Eye className="w-3.5 h-3.5 text-gray-400" />
-                                            {ad.view_count?.toLocaleString() || 0}
-                                        </span>
                                     </td>
                                     <td className="px-4 py-4 text-center">
                                         <span className="inline-flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500">
                                             <Clock className="w-3.5 h-3.5" />
                                             {ad.expires_at ? new Date(ad.expires_at).toLocaleDateString() : '무기한'}
                                         </span>
+                                    </td>
+                                    <td className="px-4 py-4 text-center">
+                                        <AdStatusBadge status={ad.status} />
+                                    </td>
+                                    <td className="px-4 py-4 text-center">
+                                        <StatusBadge expiresAt={ad.expires_at} />
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <div className="flex items-center justify-center gap-2">
@@ -246,26 +256,17 @@ export default async function BizJobsPage() {
                                             <img src={ad.image} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0 border border-gray-100" />
                                         )}
                                         <div>
-                                            <div className="flex flex-wrap items-center gap-1 text-[11px] font-bold text-gray-500">
-                                                <span>{ad.company}</span>
-                                                <span className="text-gray-300">|</span>
-                                                <span>{ad.location}</span>
-                                            </div>
-                                            <h4 className="font-extrabold text-[14px] text-gray-900 mt-1.5 leading-snug">{ad.title}</h4>
+                                            <h4 className="font-extrabold text-[14px] text-gray-900 leading-snug">{ad.title}</h4>
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end gap-1.5 shrink-0">
-                                        <StatusBadge expiresAt={ad.expires_at} />
                                         <AdStatusBadge status={ad.status} />
+                                        <StatusBadge expiresAt={ad.expires_at} />
                                     </div>
                                 </div>
 
                                 <div className="flex items-center justify-between border-t border-gray-50 pt-3 text-[11px] font-bold text-gray-500">
                                     <div className="flex items-center gap-3">
-                                        <span className="flex items-center gap-1 text-gray-600">
-                                            <Eye className="w-3.5 h-3.5 text-gray-400" />
-                                            조회 {ad.view_count?.toLocaleString() || 0}
-                                        </span>
                                         <span className="flex items-center gap-1">
                                             <Clock className="w-3.5 h-3.5 text-gray-400" />
                                             만료: {ad.expires_at ? new Date(ad.expires_at).toLocaleDateString() : '무기한'}
