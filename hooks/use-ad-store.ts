@@ -50,22 +50,25 @@ export const useAdStore = create<AdState>((set, get) => ({
     isFetchingJobs: false,
 
     fetchSideAds: async () => {
+        /*
         console.log("[Zustand Store] fetchSideAds triggering...", {
             isSideAdsLoaded: get().isSideAdsLoaded,
             isFetchingSideAds: get().isFetchingSideAds
         });
+        */
         if (get().isSideAdsLoaded || get().isFetchingSideAds) {
-            console.log("[Zustand Store] fetchSideAds fetch skipped due to already loaded/fetching state.");
+            // console.log("[Zustand Store] fetchSideAds fetch skipped due to already loaded/fetching state.");
             return;
         }
         set({ isFetchingSideAds: true });
         const start = performance.now();
-        console.log("[Zustand Store] Fetching side ads from server action/service...");
+        // console.log("[Zustand Store] Fetching side ads from server action/service...");
         try {
-            // 디버그용으로 캐시를 강제 리프레시하도록 forceRefresh=true 적용
-            const res = await getRotatedAdsWithLogs('SIDE', 8, undefined, true);
+            // 실배포 성능 최적화를 위해 forceRefresh=false 로 갱신
+            const res = await getRotatedAdsWithLogs('SIDE', 8, undefined, false);
             
-            // F12 개발자 도구 콘솔에 DB 쿼리 전송 단계별 로그 출력
+            // F12 개발자 도구 콘솔에 DB 쿼리 전송 단계별 로그 출력 주석 처리
+            /*
             console.group("🖥️ [Supabase DB Query Debug Logs] SIDE Banners Fetching Process");
             if (res.queryLogs && res.queryLogs.length > 0) {
                 res.queryLogs.forEach(log => console.log(log));
@@ -73,10 +76,11 @@ export const useAdStore = create<AdState>((set, get) => ({
                 console.log("No server-side query logs returned.");
             }
             console.groupEnd();
+            */
 
-            console.log("[Zustand Store] Successfully fetched side ads from server:", res.ads);
+            // console.log("[Zustand Store] Successfully fetched side ads from server:", res.ads);
             set({ sideAds: res.ads, isSideAdsLoaded: true });
-            console.log(`[Zustand Store] fetchSideAds completed in ${(performance.now() - start).toFixed(2)}ms. Store updated.`);
+            // console.log(`[Zustand Store] fetchSideAds completed in ${(performance.now() - start).toFixed(2)}ms. Store updated.`);
         } catch (error) {
             console.error("[Zustand Store] Store failed to fetch side ads:", error);
         } finally {

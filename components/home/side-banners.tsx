@@ -19,21 +19,23 @@ export function SideBanners() {
     const [loading, setLoading] = useState(!isSideAdsLoaded);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // 디버그 로깅
+    // 디버그 로깅 주석 처리
+    /*
     console.log("[SideBanners] Store state loaded:", {
         sideAdsLength: sideAds?.length,
         isSideAdsLoaded,
         loading
     });
+    */
 
     // 1. 중복 제거된 원본 광고 리스트 추출 (서버 중복 데이터가 섞여올 시 원천 정제)
     const uniqueAds = sideAds.filter(ad => !ad.id.includes('_repeat_'));
-    console.log("[SideBanners] Unique ads after filtering repeated ones:", uniqueAds);
+    // console.log("[SideBanners] Unique ads after filtering repeated ones:", uniqueAds);
     
     // 2. 고정과 일반 광고 분리
     const fixedAds = uniqueAds.filter(ad => ad.is_fixed);
     const rollingAds = uniqueAds.filter(ad => !ad.is_fixed);
-    console.log("[SideBanners] Separated ads:", { fixedAds, rollingAds });
+    // console.log("[SideBanners] Separated ads:", { fixedAds, rollingAds });
     
     // 3. 8개의 화면 슬롯 배치 구성
     const filledAds: AdItem[] = [];
@@ -51,20 +53,20 @@ export function SideBanners() {
             filledAds.push(rollingAds[i % rollingAds.length]);
         }
     }
-    console.log("[SideBanners] Filled ads for 8 slots:", filledAds);
+    // console.log("[SideBanners] Filled ads for 8 slots:", filledAds);
 
     const leftAds = filledAds.slice(0, 4);
     const rightAds = filledAds.slice(4, 8);
-    console.log("[SideBanners] Split wings:", { leftAds, rightAds });
+    // console.log("[SideBanners] Split wings:", { leftAds, rightAds });
 
     useEffect(() => {
         async function initSideAds() {
-            console.log("[SideBanners] useEffect triggered. isSideAdsLoaded:", isSideAdsLoaded);
+            // console.log("[SideBanners] useEffect triggered. isSideAdsLoaded:", isSideAdsLoaded);
             if (!isSideAdsLoaded) {
-                console.log("[SideBanners] Fetching side ads from store...");
+                // console.log("[SideBanners] Fetching side ads from store...");
                 setLoading(true);
                 await fetchSideAds();
-                console.log("[SideBanners] Fetching complete. Setting loading to false.");
+                // console.log("[SideBanners] Fetching complete. Setting loading to false.");
                 setLoading(false);
             }
         }
@@ -72,7 +74,7 @@ export function SideBanners() {
 
         // 1분(60초)마다 로컬 메모리 상에서 배너 순서 순환
         const intervalId = setInterval(() => {
-            console.log("[SideBanners] Rotating ads...");
+            // console.log("[SideBanners] Rotating ads...");
             rotateSideAds();
         }, 60000);
 
