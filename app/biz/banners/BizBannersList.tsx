@@ -91,7 +91,6 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                     <thead>
                         <tr className="bg-gray-50/75 border-b border-gray-150 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
                             <th className="px-6 py-4">배너 종류</th>
-                            <th className="px-6 py-4">배너 이미지</th>
                             <th className="px-6 py-4">로고</th>
                             <th className="px-6 py-4">제목</th>
                             <th className="px-6 py-4">업체명</th>
@@ -111,24 +110,6 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                                 {/* 배너 종류 */}
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <TierBadge tier={ad.tier} />
-                                </td>
-
-                                {/* 배너 이미지 */}
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div 
-                                        className="w-[70px] h-[40px] rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50"
-                                        style={{ backgroundColor: ad.background_color || ad.color }}
-                                    >
-                                        {ad.image ? (
-                                            <img 
-                                                src={ad.image} 
-                                                alt="배너" 
-                                                className="w-full h-full object-cover" 
-                                            />
-                                        ) : (
-                                            <ImageIcon className="w-4 h-4 text-gray-400" />
-                                        )}
-                                    </div>
                                 </td>
 
                                 {/* 로고 */}
