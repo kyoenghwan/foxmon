@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getRotatedAds, AdItem } from '@/lib/ad-service';
+import { getRotatedAds, getRotatedAdsWithLogs, AdItem } from '@/lib/ad-service';
 
 interface AdState {
     sideAds: AdItem[];
@@ -62,9 +62,20 @@ export const useAdStore = create<AdState>((set, get) => ({
         const start = performance.now();
         console.log("[Zustand Store] Fetching side ads from server action/service...");
         try {
-            const ads = await getRotatedAds('SIDE', 8);
-            console.log("[Zustand Store] Successfully fetched side ads from server:", ads);
-            set({ sideAds: ads, isSideAdsLoaded: true });
+            // 디버그용으로 캐시를 강제 리프레시하도록 forceRefresh=true 적용
+            const res = await getRotatedAdsWithLogs('SIDE', 8, undefined, true);
+            
+            // F12 개발자 도구 콘솔에 DB 쿼리 전송 단계별 로그 출력
+            console.group("🖥️ [Supabase DB Query Debug Logs] SIDE Banners Fetching Process");
+            if (res.queryLogs && res.queryLogs.length > 0) {
+                res.queryLogs.forEach(log => console.log(log));
+            } else {
+                console.log("No server-side query logs returned.");
+            }
+            console.groupEnd();
+
+            console.log("[Zustand Store] Successfully fetched side ads from server:", res.ads);
+            set({ sideAds: res.ads, isSideAdsLoaded: true });
             console.log(`[Zustand Store] fetchSideAds completed in ${(performance.now() - start).toFixed(2)}ms. Store updated.`);
         } catch (error) {
             console.error("[Zustand Store] Store failed to fetch side ads:", error);

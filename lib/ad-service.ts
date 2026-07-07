@@ -131,14 +131,28 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5분 캐시 (300초)
 /**
  * DB에서 직접 특정 티어의 활성 광고 데이터를 가져오는 내부 헬퍼 함수
  */
+/**
+ * DB에서 직접 특정 티어의 활성 광고 데이터를 가져오는 내부 헬퍼 함수 (디버그 로그 리턴 포함)
+ */
 async function fetchAdsFromDBInternal(
     tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL'
-): Promise<AdItem[]> {
+): Promise<{ ads: AdItem[]; queryLogs: string[] }> {
     const dbLabel = `  🖥️  [Performance] DB Query for tier: ${tier}`;
+    const queryLogs: string[] = [];
     console.time(dbLabel);
+    
+    queryLogs.push(`[DB Query Start] Requested tier: ${tier}`);
+    queryLogs.push(`[DB Client Info] SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL || 'Missing'}`);
+    
+    const isServiceRoleConfigured = !!process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY !== process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    queryLogs.push(`[DB Auth Status] Service role key configured (bypasses RLS): ${isServiceRoleConfigured}`);
+
     if (!IS_SUPABASE_ENABLED) {
         console.timeEnd(dbLabel);
-        return MOCK_ADS.filter(ad => ad.tier === tier);
+        queryLogs.push(`[DB Status] Supabase is disabled. Falling back to MOCK_ADS.`);
+        const fallback = MOCK_ADS.filter(ad => ad.tier === tier);
+        queryLogs.push(`[DB Status] Mock fallback ads count: ${fallback.length}`);
+        return { ads: fallback, queryLogs };
     }
 
     try {
@@ -147,6 +161,8 @@ async function fetchAdsFromDBInternal(
         const bizAdsSelectFields = 'id, author_id, company_id, company_name, title, content, category, location, pay, image_url, tier, is_big, exposure_count, last_exposed_at, created_at, user_id, status, expires_at, view_count, detail_images, work_type, work_hours, benefits, contact_info, address, updated_at, source_origin, salary_type, salary_amount, logo_url, contact_name, contact_phone, kakao_id, line_id, telegram_id, wechat_id, employment_type, category1, category2, work_time, amenities, keywords, design_mode, detail_bg_color, detail_bg_image, exposure_period, option_bold, option_color, option_bg, option_icon, option_jump, total_points, option_color_value, option_bg_value, option_bold_expires_at, option_color_expires_at, option_bg_expires_at, option_icon_expires_at, option_jump_expires_at, option_highlight, option_highlight_value, option_highlight_expires_at, option_general_icons, option_general_icons_expires_at, color, bg_opacity, theme, effect_intensity, is_subscription, option_double_slot, option_double_slot_expires_at, claim_code';
 
         const nowStr = new Date().toISOString();
+        queryLogs.push(`[DB Target] Table: ${targetTable}, Server Current Time (ISO): ${nowStr}`);
+
         let queryBuilder;
         if (targetTable === 'jobs') {
             queryBuilder = supabaseAdmin
@@ -164,32 +180,42 @@ async function fetchAdsFromDBInternal(
                 .or(`expires_at.is.null,expires_at.gt.${nowStr}`);
         }
 
+        queryLogs.push(`[DB Query Executing] Sending query request to Supabase...`);
         const { data, error } = await queryBuilder;
 
-        if (error || !data || data.length === 0) {
-            if (error) {
-                console.error(`[fetchAdsFromDB] Supabase error for tier ${tier}:`, error);
-            }
-            return [];
+        if (error) {
+            queryLogs.push(`[DB Supabase Error] Code: ${error.code}, Message: ${error.message}, Details: ${error.details}`);
+            console.error(`[fetchAdsFromDB] Supabase error for tier ${tier}:`, error);
+            return { ads: [], queryLogs };
         }
 
+        if (!data || data.length === 0) {
+            queryLogs.push(`[DB Query Result] Empty. 0 records returned from Supabase.`);
+            return { ads: [], queryLogs };
+        }
+
+        queryLogs.push(`[DB Query Result] Received ${data.length} raw ads from Supabase.`);
+        
         let rawAds = data;
         let userMap: Record<string, string> = {};
 
         if (targetTable === 'biz_ads') {
             const userIds = Array.from(new Set(data.map((item: any) => item.user_id).filter(Boolean)));
             if (userIds.length > 0) {
+                queryLogs.push(`[DB Relation Check] Fetching merchant_tier profiles for ${userIds.length} user(s)...`);
                 const { data: usersData, error: usersError } = await supabaseAdmin
                     .from('users')
                     .select('id, merchant_tier')
                     .in('id', userIds);
                 if (usersError) {
+                    queryLogs.push(`[DB Relation Error] Failed to fetch user profiles: ${usersError.message}`);
                     console.error("[fetchAdsFromDB] Error fetching users for merchant_tier:", usersError);
                 }
                 if (usersData) {
                     usersData.forEach((u: any) => {
                         userMap[u.id] = u.merchant_tier || 'NORMAL';
                     });
+                    queryLogs.push(`[DB Relation Check] Successfully mapped merchant tiers.`);
                 }
             }
         }
@@ -197,13 +223,25 @@ async function fetchAdsFromDBInternal(
         const now = new Date();
         const activeRealAds = rawAds.filter((item: any) => {
             const isValidStatus = item.status === 'ACTIVE' || item.status === 'CLAIM_PENDING';
-            if (!isValidStatus) return false;
+            if (!isValidStatus) {
+                queryLogs.push(`[DB Filter Out] Ad ID: ${item.id} excluded. Invalid status: ${item.status}`);
+                return false;
+            }
 
             if (!item.expires_at) return true;
             const expireDate = new Date(item.expires_at);
-            if (expireDate.getFullYear() === 2000) return false;
-            return expireDate > now;
+            if (expireDate.getFullYear() === 2000) {
+                queryLogs.push(`[DB Filter Out] Ad ID: ${item.id} excluded. expires_at is test template year 2000.`);
+                return false;
+            }
+            const isNotExpired = expireDate > now;
+            if (!isNotExpired) {
+                queryLogs.push(`[DB Filter Out] Ad ID: ${item.id} excluded. Expired at ${item.expires_at} (Current Server Time is ${now.toISOString()})`);
+            }
+            return isNotExpired;
         });
+
+        queryLogs.push(`[DB Filter Complete] ${activeRealAds.length} active ads remained after status & expiry check.`);
 
         const ads: AdItem[] = activeRealAds.map((item: any) => {
             let merchant_tier = 'NORMAL';
@@ -229,10 +267,11 @@ async function fetchAdsFromDBInternal(
             };
         });
 
-        return ads;
-    } catch (err) {
+        return { ads, queryLogs };
+    } catch (err: any) {
+        queryLogs.push(`[DB Exception] Caught exception: ${err.message || String(err)}`);
         console.error(`[fetchAdsFromDB] Exception in fetch for tier ${tier}:`, err);
-        return [];
+        return { ads: [], queryLogs };
     } finally {
         console.timeEnd(dbLabel);
     }
@@ -249,39 +288,8 @@ const fetchAdsFromDBCached = unstable_cache(
 
 async function fetchAdsFromDB(
     tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL'
-): Promise<AdItem[]> {
-    return fetchAdsFromDBCached(tier);
-}
-
-/**
- * 캐시 유효성을 검사하고 백그라운드 패치를 진행하는 내부 헬퍼 함수
- */
-async function fetchAndCacheAds(
-    tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL'
-): Promise<AdItem[]> {
-    if (!adCache[tier]) {
-        adCache[tier] = { ads: [], lastFetched: 0, isFetching: false };
-    }
-
-    if (adCache[tier].isFetching) {
-        return adCache[tier].ads;
-    }
-
-    adCache[tier].isFetching = true;
-    const cacheFetchLabel = `♻️ [Performance] Fetch and cache ads for tier: ${tier}`;
-    console.time(cacheFetchLabel);
-    try {
-        const ads = await fetchAdsFromDB(tier);
-        adCache[tier].ads = ads;
-        adCache[tier].lastFetched = Date.now();
-        return ads;
-    } catch (err) {
-        console.error(`[fetchAndCacheAds] Exception for tier ${tier}:`, err);
-        return adCache[tier].ads;
-    } finally {
-        console.timeEnd(cacheFetchLabel);
-        adCache[tier].isFetching = false;
-    }
+): Promise<{ ads: AdItem[]; queryLogs: string[] }> {
+    return fetchAdsFromDBInternal(tier);
 }
 
 /**
@@ -292,6 +300,19 @@ export async function getRotatedAds(
     limitCount: number = 20,
     searchQuery?: string
 ): Promise<AdItem[]> {
+    const res = await getRotatedAdsWithLogs(tier, limitCount, searchQuery, false);
+    return res.ads;
+}
+
+/**
+ * 디버깅용 로그 수집이 포함된 확장 로테이션 API
+ */
+export async function getRotatedAdsWithLogs(
+    tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL', 
+    limitCount: number = 20,
+    searchQuery?: string,
+    forceRefresh: boolean = false
+): Promise<{ ads: AdItem[]; queryLogs: string[] }> {
     const apiLabel = `⚡ [Performance] getRotatedAds API (Server Action) for tier: ${tier}`;
     console.time(apiLabel);
 
@@ -312,22 +333,26 @@ export async function getRotatedAds(
 
     const now = Date.now();
     const cache = adCache[tier];
+    let queryLogs: string[] = [];
 
-    // 캐시가 없거나 만료된 경우 업데이트 트리거
-    if (!cache || now - cache.lastFetched > CACHE_TTL_MS) {
-        if (!cache) {
-            // 최초 패치는 동기적으로 수행하여 빈 화면이 노출되지 않도록 함
-            await fetchAndCacheAds(tier);
-        } else {
-            // 캐시가 만료된 경우 백그라운드 비동기 갱신 수행 (대기 시간 0ms)
-            fetchAndCacheAds(tier);
-        }
+    // 캐시가 없거나 만료되었거나, 강제 고침 요청이 들어오면 DB 패치 수행
+    if (forceRefresh || !cache || now - cache.lastFetched > CACHE_TTL_MS) {
+        const dbResult = await fetchAdsFromDB(tier);
+        queryLogs = [...dbResult.queryLogs];
+        adCache[tier] = {
+            ads: dbResult.ads,
+            lastFetched: now,
+            isFetching: false
+        };
+    } else {
+        queryLogs.push(`[Cache Hit] Serving from memory cache. Cache age: ${Math.floor((now - cache.lastFetched) / 1000)}s`);
     }
 
     let cachedAds = [...(adCache[tier]?.ads || [])];
 
     // 로컬 환경 등에서 DB 연결이 비활성화되거나 데이터가 아예 없는 경우 폴백
     if (cachedAds.length === 0 && !IS_SUPABASE_ENABLED) {
+        queryLogs.push(`[DB Fallback] 0 active ads found and DB is disabled. Injecting MOCK_ADS.`);
         const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
         cachedAds = mockAdsForTier;
     }
@@ -362,8 +387,9 @@ export async function getRotatedAds(
         }
     } else if (rolledAds.length === 0) {
         if (tier === 'SIDE') {
+            queryLogs.push(`[DB SIDE Final] 0 ads returned for SIDE tier wing banners.`);
             console.timeEnd(apiLabel);
-            return [];
+            return { ads: [], queryLogs };
         } else {
             const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
             const filteredMock = (tier === 'GENERAL') ? filterBySearch(mockAdsForTier, searchQuery) : mockAdsForTier;
@@ -372,7 +398,9 @@ export async function getRotatedAds(
     }
 
     console.timeEnd(apiLabel);
-    return rolledAds.slice(0, limitCount);
+    const finalAds = rolledAds.slice(0, limitCount);
+    queryLogs.push(`[DB Rotation Finish] Outputting ${finalAds.length} rotated ads to client.`);
+    return { ads: finalAds, queryLogs };
 }
 
 /**
