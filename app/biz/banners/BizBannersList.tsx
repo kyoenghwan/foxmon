@@ -129,12 +129,12 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
             `}} />
 
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[1040px] border-collapse text-center table-fixed">
+                <table className="w-full min-w-[1030px] border-collapse text-center table-fixed">
                     <thead>
                         <tr className="bg-gray-50/75 border-b border-gray-150 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
-                            <th className="px-4 py-4 text-center w-[100px] min-w-[100px]">배너 종류</th>
-                            <th className="px-4 py-4 text-center w-[80px] min-w-[80px]">로고</th>
-                            <th className="px-6 py-4 text-center w-[320px] min-w-[320px]">제목</th>
+                            <th className="px-4 py-4 text-center w-[140px] min-w-[140px]">배너 종류</th>
+                            <th className="px-4 py-4 text-center w-[90px] min-w-[90px]">로고</th>
+                            <th className="px-6 py-4 text-center w-[260px] min-w-[260px]">제목</th>
                             <th className="px-4 py-4 text-center w-[120px] min-w-[120px]">업체명</th>
                             <th className="px-4 py-4 text-center w-[100px] min-w-[100px]">근무지역</th>
                             <th className="px-4 py-4 text-center w-[80px] min-w-[80px]">상태</th>
@@ -149,7 +149,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                                 className="hover:bg-gray-50/50 transition-colors cursor-pointer"
                                 onClick={() => router.push(`/biz/banners/${ad.id}/edit`)}
                             >
-                                {/* 배너 종류 (가운데 정렬) */}
+                                {/* 배너 종류 (가운데 정렬, 충분한 너비 확보하여 안잘리게 방지) */}
                                 <td className="px-4 py-4 whitespace-nowrap text-center">
                                     <TierBadge tier={ad.tier} />
                                 </td>
@@ -171,11 +171,11 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                                     </div>
                                 </td>
 
-                                {/* 제목 (가로 폭 300px로 크게 확장 및 자동 전광판) */}
+                                {/* 제목 (가로 폭 240px로 최적화 및 자동 전광판) */}
                                 <td className="px-6 py-4 text-center">
                                     <TickerText 
                                         text={ad.title} 
-                                        maxWidth="300px" 
+                                        maxWidth="240px" 
                                         className="font-black text-gray-900 hover:text-primary transition-colors" 
                                     />
                                 </td>
