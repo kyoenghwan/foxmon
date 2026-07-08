@@ -139,7 +139,8 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 option_jump: !!payload.option_jump,
                 total_points: skipDeduction ? 0 : totalPoints,
                 expires_at: expiresAtStr,
-                claim_code: payload.claim_code || null
+                claim_code: payload.claim_code || null,
+                status: 'PAUSED'
             };
 
             const { data, error } = await supabase
@@ -323,7 +324,8 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 effect_intensity: payload.effect_intensity || null,
                 color: payload.color || null,
                 claim_code: payload.claim_code !== undefined ? (payload.claim_code || null) : undefined,
-                updated_at: new Date().toISOString()
+                updated_at: new Date().toISOString(),
+                status: (existingJob.expires_at && new Date(existingJob.expires_at).getFullYear() !== 2000) ? 'ACTIVE' : 'PAUSED'
             };
 
             // 만약 payload.expires_at이 명시적으로 주어졌을 경우 만료일 직접 갱신 처리
@@ -364,6 +366,9 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                     updatePayload.is_subscription = !!payload.is_subscription;
                 }
                 
+                updatePayload.total_points = totalPoints;
+                updatePayload.status = 'ACTIVE';
+
                 // 연속 노출 옵션
                 if (payload.option_double_slot !== undefined) {
                     updatePayload.option_double_slot = !!payload.option_double_slot;
@@ -394,7 +399,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                     }
                 }
 
-                updatePayload.total_points = totalPoints;
+
 
                 // 만료일 설정 (KST 헬퍼를 이용해 결제 시점 기준으로 엄격하게 계산)
                 if (isAlreadyPaid && !isExtension) {
