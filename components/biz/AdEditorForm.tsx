@@ -105,6 +105,8 @@ export interface AdFormData {
     category?: string;
     salary_type?: string;
     salary_amount?: string;
+    created_at?: string;
+    total_points?: number;
     
     // 결제 및 부가 옵션 (팝업)
     exposure_period?: 30 | 60 | 90;

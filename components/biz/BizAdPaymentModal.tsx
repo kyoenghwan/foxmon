@@ -20,6 +20,9 @@ interface BizAdPaymentModalProps {
 export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: BizAdPaymentModalProps) {
     const [saving, setSaving] = useState(false);
     const [submittingInquiry, setSubmittingInquiry] = useState(false);
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+    const [cancelReason, setCancelReason] = useState('가게 폐업');
+    const [cancelDetail, setCancelDetail] = useState('');
     const [userPoints, setUserPoints] = useState<number>(0);
     const [loadingPoints, setLoadingPoints] = useState(true);
     const [policies, setPolicies] = useState<Record<string, number>>({});
@@ -38,32 +41,85 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
         setForm(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleCancelRequest = async () => {
+    // 이미 결제되어 진행 중인 광고인지 판별
+    const isAlreadyPaid = initialData.isPaid === true && initialData.expires_at && new Date(initialData.expires_at).getFullYear() !== 2000;
+    
+    // 남은 일수 및 비율 구하기
+    const now = new Date();
+    const expiresAt = initialData.expires_at ? new Date(initialData.expires_at) : null;
+    const remainingDays = expiresAt && expiresAt > now 
+        ? Math.max(0, Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+        : 0;
+    const prorationRatio = isAlreadyPaid && remainingDays > 0 
+        ? Math.min(1, remainingDays / (form.exposure_period || 30))
+        : 1;
+
+    // 결제일(생성일) 기준 5일(120시간) 이내 여부 계산
+    const createdAt = initialData.created_at ? new Date(initialData.created_at) : null;
+    const daysSinceCreated = createdAt 
+        ? (new Date().getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24) 
+        : 0;
+    const isWithin5Days = createdAt ? daysSinceCreated <= 5 : true;
+
+    // 환불 계산 로직
+    const totalPoints = initialData.total_points || 0;
+    const exposurePeriod = form.exposure_period || 30;
+    const baseRefundPoints = Math.floor(totalPoints * (remainingDays / exposurePeriod));
+    const finalRefundPoints = Math.floor(baseRefundPoints * 0.9);
+
+    const handleCancelRequest = () => {
+        setIsCancelModalOpen(true);
+    };
+
+    const handleFinalCancelSubmit = async () => {
+        if (!isWithin5Days) {
+            alert('결제일로부터 5일이 경과한 광고는 취소/철회가 불가능합니다.');
+            return;
+        }
+
+        if (cancelReason === '기타' && !cancelDetail.trim()) {
+            alert('상세 취소 사유를 입력해 주세요.');
+            return;
+        }
+
         const companyName = form.company_name || form.company || form.business_name || '업체명 없음';
         const adTitle = form.title || '광고 제목 없음';
         const tier = form.tier || 'GENERAL';
-        
-        if (!confirm(`[${companyName}] 광고의 결제 취소/철회 문의를 접수하시겠습니까?`)) {
-            return;
-        }
 
         setSubmittingInquiry(true);
         try {
             const res = await createInquiry({
                 category: '포인트·환불',
-                title: `[광고 결제 취소 문의] ${companyName} - ${adTitle}`,
-                content: `안녕하세요. 해당 광고의 결제 취소 및 철회 처리를 요청합니다.
+                title: `[광고 결제 취소 요청] ${companyName} - ${adTitle}`,
+                content: `안녕하세요. 광고 결제 취소 및 환불 처리를 요청합니다.
 
 [광고 정보]
 - 광고 ID: ${jobId}
 - 업체명: ${companyName}
 - 광고 제목: ${adTitle}
-- 노출 등급(Tier): ${tier}
-- 만료일시: ${initialData.expires_at || '확인 불가'}`
+- 광고 등급(Tier): ${tier}
+- 등록일시: ${initialData.created_at ? new Date(initialData.created_at).toLocaleString() : '확인 불가'}
+- 만료일시: ${initialData.expires_at ? new Date(initialData.expires_at).toLocaleString() : '확인 불가'}
+
+[환불 정책 계산 내역]
+- 원래 결제 포인트: ${totalPoints.toLocaleString()} P
+- 광고 노출 기간: ${exposurePeriod}일
+- 남은 노출 일수: ${remainingDays}일
+- 일할 계산 잔여액: ${baseRefundPoints.toLocaleString()} P
+- 10% 수수료 차감액: -${Math.floor(baseRefundPoints * 0.1).toLocaleString()} P
+- 예상 반환 포인트 (최종): ${finalRefundPoints.toLocaleString()} P
+
+[취소 및 환불 사유]
+- 사유 유형: ${cancelReason}
+- 상세 내용: 
+${cancelDetail || '상세 사유 미기재'}
+
+위 내용을 확인 후 환불(포인트 반환) 및 광고 중단 처리를 진행해 주시기 바랍니다.`
             });
 
             if (res.success) {
                 alert('결제 취소/철회 문의가 정상적으로 접수되었습니다. 담당자 확인 후 신속히 처리해 드리겠습니다.');
+                setIsCancelModalOpen(false);
                 onClose();
             } else {
                 alert(`문의 접수에 실패했습니다: ${res.message}`);
@@ -112,18 +168,7 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
         return policies[`TIER_PRICE_${tier}_${period}`] || 0;
     };
 
-    // 이미 결제되어 진행 중인 광고인지 판별
-    const isAlreadyPaid = initialData.isPaid === true && initialData.expires_at && new Date(initialData.expires_at).getFullYear() !== 2000;
-    
-    // 남은 일수 및 비율 구하기
-    const now = new Date();
-    const expiresAt = initialData.expires_at ? new Date(initialData.expires_at) : null;
-    const remainingDays = expiresAt && expiresAt > now 
-        ? Math.max(0, Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
-        : 0;
-    const prorationRatio = isAlreadyPaid && remainingDays > 0 
-        ? Math.min(1, remainingDays / (form.exposure_period || 30))
-        : 1;
+
     
     const calculateTotalPoints = () => {
         const p = form.exposure_period || 30;
@@ -653,6 +698,118 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                         )}
                     </div>
                 </div>
+                
+                {/* 결제 취소/철회 신청 모달 */}
+                {isCancelModalOpen && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150 text-left">
+                            {/* 헤더 */}
+                            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                <h3 className="font-black text-gray-900 text-lg flex items-center gap-2">
+                                    <span className="text-red-500 font-extrabold">⚠️</span> 광고 결제 취소/철회
+                                </h3>
+                                <button onClick={() => setIsCancelModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            
+                            {/* 본문 */}
+                            <div className="p-6 flex flex-col gap-5 max-h-[70vh] overflow-y-auto">
+                                {!isWithin5Days ? (
+                                    <div className="flex flex-col items-center text-center py-4 gap-3">
+                                        <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center font-bold text-2xl">⚠️</div>
+                                        <h4 className="font-bold text-gray-900 text-[16px]">결제 취소 기간 만료</h4>
+                                        <p className="text-[13px] text-gray-500 leading-relaxed">
+                                            광고 취소 및 철회는 결제일로부터 <span className="font-bold text-red-500">5일 이내</span>에만 접수하실 수 있습니다.<br />
+                                            현재 이 광고는 결제 후 5일이 경과하여 자동 취소가 제한됩니다.<br />
+                                            기타 특별한 사정은 고객센터로 직접 문의해 주시기 바랍니다.
+                                        </p>
+                                        <Button onClick={() => setIsCancelModalOpen(false)} className="w-full mt-4 h-12 rounded-xl bg-gray-900 text-white font-bold">
+                                            확인
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="bg-blue-50 text-blue-800 rounded-xl p-4 text-[12px] font-medium leading-relaxed">
+                                            💡 광고 취소는 결제 후 5일 이내에만 접수 가능합니다. 남은 일수만큼 일할 정산되며, <strong>정산된 포인트의 10% 위약 수수료</strong>가 공제된 후 잔여 포인트가 반환됩니다.
+                                        </div>
+                                        
+                                        {/* 예상 환불 금액 계산 테이블 */}
+                                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex flex-col gap-2.5">
+                                            <h4 className="font-bold text-[13px] text-gray-700">예상 환불 포인트</h4>
+                                            <div className="flex justify-between items-center text-[12px] text-gray-500">
+                                                <span>원래 결제 포인트</span>
+                                                <span className="font-semibold text-gray-700">{totalPoints.toLocaleString()} P</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-[12px] text-gray-500">
+                                                <span>광고 노출 일수</span>
+                                                <span className="font-semibold text-gray-700">{exposurePeriod}일 중 {exposurePeriod - remainingDays}일 노출</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-[12px] text-gray-500">
+                                                <span>남은 노출 일수</span>
+                                                <span className="font-semibold text-gray-700">{remainingDays}일</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-[12px] text-gray-500">
+                                                <span>일할 정산 포인트</span>
+                                                <span className="font-semibold text-gray-700">{baseRefundPoints.toLocaleString()} P</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-[12px] text-red-500">
+                                                <span>취소 운영 수수료 (10%)</span>
+                                                <span className="font-semibold">-{Math.floor(baseRefundPoints * 0.1).toLocaleString()} P</span>
+                                            </div>
+                                            <div className="h-px bg-gray-200 my-1" />
+                                            <div className="flex justify-between items-center text-[13px] font-bold text-gray-900">
+                                                <span>최종 예상 환불 포인트</span>
+                                                <span className="text-primary text-[15px]">{finalRefundPoints.toLocaleString()} P</span>
+                                            </div>
+                                        </div>
+
+                                        {/* 사유 선택 */}
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-[12px] font-bold text-gray-600">취소 사유 선택 *</label>
+                                            <select 
+                                                value={cancelReason}
+                                                onChange={(e) => setCancelReason(e.target.value)}
+                                                className="w-full h-11 border border-gray-200 rounded-xl px-3 text-sm focus:outline-none focus:border-primary font-medium bg-white"
+                                            >
+                                                <option value="가게 폐업">🏢 가게 폐업</option>
+                                                <option value="사업자 변경/양도">💼 사업자 변경 및 양도</option>
+                                                <option value="단순 변심 및 광고 중단">🔄 단순 변심 및 광고 중단</option>
+                                                <option value="기타">✏️ 기타 (직접 작성)</option>
+                                            </select>
+                                        </div>
+
+                                        {/* 상세 작성 */}
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-[12px] font-bold text-gray-600">상세 사유 {cancelReason === '기타' ? '*' : '(선택)'}</label>
+                                            <textarea 
+                                                value={cancelDetail}
+                                                onChange={(e) => setCancelDetail(e.target.value)}
+                                                placeholder="고객센터에 전달할 상세한 사유를 적어주세요."
+                                                className="w-full h-24 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-primary font-medium resize-none"
+                                            />
+                                        </div>
+
+                                        {/* 하단 버튼 */}
+                                        <div className="flex gap-2.5 mt-2">
+                                            <Button variant="outline" onClick={() => setIsCancelModalOpen(false)} className="flex-1 h-12 rounded-xl font-bold border-gray-200">
+                                                취소
+                                            </Button>
+                                            <Button 
+                                                onClick={handleFinalCancelSubmit} 
+                                                disabled={submittingInquiry}
+                                                className="flex-1 h-12 rounded-xl font-black bg-indigo-600 hover:bg-indigo-700 text-white"
+                                            >
+                                                {submittingInquiry ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
+                                                취소 문의 접수
+                                            </Button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
