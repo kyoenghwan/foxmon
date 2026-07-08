@@ -381,7 +381,9 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                     }
                 }
                 
-                // 고정 노출 옵션
+                // 고정 노출 옵션 (DB schema cache 에러 방지 임시 주석 처리)
+                // TODO: Supabase SQL Editor에서 ALTER TABLE public.biz_ads ADD COLUMN IF NOT EXISTS is_fixed... 실행 후 재활성화 필요
+                /*
                 if (payload.option_fixed !== undefined) {
                     updatePayload.is_fixed = !!payload.option_fixed;
                     if (updatePayload.is_fixed && !existingJob.is_fixed) {
@@ -390,6 +392,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                             : getOptionExpiresAt(p);
                     }
                 }
+                */
 
                 // 테마 이펙트 옵션
                 if (payload.option_highlight !== undefined) {
