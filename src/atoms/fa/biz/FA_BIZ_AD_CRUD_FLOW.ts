@@ -191,11 +191,13 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             }
 
             // 1. 기존 공고 확인
-            const { data: existingJob, error: checkError } = await supabase
+            const { data: rawJob, error: checkError } = await supabase
                 .from('biz_ads')
-                .select('user_id, expires_at, option_double_slot, is_fixed, option_highlight')
+                .select('user_id, expires_at, option_double_slot, option_highlight')
                 .eq('id', jobId)
                 .single();
+            
+            const existingJob = rawJob as any;
             
             if (checkError || !existingJob) return { success: false, message: '공고를 찾을 수 없습니다.' };
             if (existingJob.user_id !== userId) return { success: false, message: '수정 권한이 없습니다.' };
