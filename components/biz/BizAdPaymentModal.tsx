@@ -8,6 +8,7 @@ import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { getUserPointsAction } from '@/app/actions/pointActions';
 import { manageBizAdAction, getActiveFixedAdCountAction } from '@/lib/actions';
 import { GET_POINT_POLICIES } from '@/app/actions/pointPolicyActions';
+import { createInquiry } from '@/lib/actions/help';
 
 interface BizAdPaymentModalProps {
     initialData: Partial<AdFormData> & { isPaid?: boolean; is_fixed?: boolean };
@@ -18,6 +19,7 @@ interface BizAdPaymentModalProps {
 
 export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: BizAdPaymentModalProps) {
     const [saving, setSaving] = useState(false);
+    const [submittingInquiry, setSubmittingInquiry] = useState(false);
     const [userPoints, setUserPoints] = useState<number>(0);
     const [loadingPoints, setLoadingPoints] = useState(true);
     const [policies, setPolicies] = useState<Record<string, number>>({});
@@ -34,6 +36,44 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
 
     const update = (field: string, value: any) => {
         setForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleCancelRequest = async () => {
+        const companyName = form.company_name || form.company || form.business_name || '업체명 없음';
+        const adTitle = form.title || '광고 제목 없음';
+        const tier = form.tier || 'GENERAL';
+        
+        if (!confirm(`[${companyName}] 광고의 결제 취소/철회 문의를 접수하시겠습니까?`)) {
+            return;
+        }
+
+        setSubmittingInquiry(true);
+        try {
+            const res = await createInquiry({
+                category: '포인트·환불',
+                title: `[광고 결제 취소 문의] ${companyName} - ${adTitle}`,
+                content: `안녕하세요. 해당 광고의 결제 취소 및 철회 처리를 요청합니다.
+
+[광고 정보]
+- 광고 ID: ${jobId}
+- 업체명: ${companyName}
+- 광고 제목: ${adTitle}
+- 노출 등급(Tier): ${tier}
+- 만료일시: ${initialData.expires_at || '확인 불가'}`
+            });
+
+            if (res.success) {
+                alert('결제 취소/철회 문의가 정상적으로 접수되었습니다. 담당자 확인 후 신속히 처리해 드리겠습니다.');
+                onClose();
+            } else {
+                alert(`문의 접수에 실패했습니다: ${res.message}`);
+            }
+        } catch (error: any) {
+            console.error('취소 문의 접수 중 오류 발생:', error);
+            alert('오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+        } finally {
+            setSubmittingInquiry(false);
+        }
     };
 
     useEffect(() => {
@@ -578,7 +618,12 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                             포인트 충전하기
                                         </Button>
                                     )}
-                                    <Button onClick={() => alert('관리자에게 취소/철회 문의를 접수했습니다. (구현 예정)')} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[15px] shadow-sm bg-red-50 text-red-600 hover:bg-red-100 border border-red-200">
+                                    <Button 
+                                        onClick={handleCancelRequest} 
+                                        disabled={submittingInquiry || saving}
+                                        className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[15px] shadow-sm bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                                    >
+                                        {submittingInquiry ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
                                         결제 취소/철회 문의
                                     </Button>
                                 </>
