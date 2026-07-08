@@ -131,12 +131,21 @@ export async function manageBizAdAction(
         return { success: false, message: '로그인이 필요합니다.' };
     }
 
-    return FA_BIZ_AD_CRUD_FLOW({
+    const res = await FA_BIZ_AD_CRUD_FLOW({
         actionType,
         userId: session.user.id,
         jobId,
         payload
     });
+
+    if (res.success && ['CREATE', 'UPDATE', 'DELETE'].includes(actionType)) {
+        revalidatePath('/');
+        revalidatePath('/jobs');
+        revalidatePath('/biz/ads');
+        revalidatePath('/biz/banners');
+    }
+
+    return res;
 }
 
 import { FA_ADMIN_EMPLOYER_FLOW, AdminEmployerFlowInput } from '@/src/atoms/fa/admin/FA_ADMIN_EMPLOYER_FLOW';
