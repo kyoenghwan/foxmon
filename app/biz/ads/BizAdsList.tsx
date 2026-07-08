@@ -53,7 +53,7 @@ const StatusBadge = ({ ad, isVerified }: { ad: any, isVerified: boolean }) => {
     const labels: Record<string, string> = {
         ACTIVE: '진행 중',
         PAUSED: '일시정지',
-        EXPIRED: '만료',
+        EXPIRED: '노출 종료',
         PENDING: '결제 대기중',
         UNVERIFIED: '사업자 검증 중',
         CLAIM_PENDING: '수락 대기중',

@@ -73,7 +73,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
             return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-gray-100 text-gray-700 border border-gray-200">대기</span>;
         }
         if (isExpired) {
-            return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-800 border border-red-200">만료됨</span>;
+            return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-800 border border-red-200">노출 종료</span>;
         }
         if (ad.status === 'ACTIVE') {
             return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">노출 중</span>;
