@@ -129,6 +129,19 @@ const adCache: Record<string, AdCache> = {};
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5분 캐시 (300초)
 
 /**
+ * 광고 데이터 변경(결제/등록/삭제 등) 시 서버 메모리 캐시를 즉시 무효화하는 함수.
+ * revalidatePath만으로는 이 커스텀 메모리 캐시를 비울 수 없으므로 반드시 호출해야 합니다.
+ */
+export function invalidateAdCache(tier?: string) {
+    if (tier) {
+        delete adCache[tier];
+    } else {
+        // tier 미지정 시 모든 캐시 삭제
+        Object.keys(adCache).forEach(key => delete adCache[key]);
+    }
+}
+
+/**
  * DB에서 직접 특정 티어의 활성 광고 데이터를 가져오는 내부 헬퍼 함수
  */
 /**

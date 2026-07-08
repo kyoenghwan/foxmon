@@ -3,6 +3,7 @@
 import { signIn, signOut, auth } from '@/auth';
 import { AuthError } from 'next-auth';
 import { cookies } from 'next/headers';
+import { invalidateAdCache } from '@/lib/ad-service';
 
 import { FA_MANAGE_RESUME_FLOW } from '@/src/atoms/fa/resume/FA_MANAGE_RESUME_FLOW';
 import { ResumeData } from '@/src/atoms/oa/resume/OA_UPSERT_RESUME';
@@ -139,6 +140,8 @@ export async function manageBizAdAction(
     });
 
     if (res.success && ['CREATE', 'UPDATE', 'DELETE'].includes(actionType)) {
+        // 서버 메모리 캐시 즉시 무효화 (revalidatePath만으로는 커스텀 adCache를 비울 수 없음)
+        invalidateAdCache();
         revalidatePath('/');
         revalidatePath('/jobs');
         revalidatePath('/biz/ads');
