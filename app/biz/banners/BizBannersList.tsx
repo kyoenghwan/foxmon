@@ -65,7 +65,13 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
     };
 
     const StatusBadge = ({ ad }: { ad: any }) => {
-        const isExpired = ad.expires_at ? new Date(ad.expires_at) < new Date() : false;
+        const expiresYear = ad.expires_at ? new Date(ad.expires_at).getFullYear() : 2000;
+        const isTemplate = expiresYear === 2000;
+        const isExpired = ad.expires_at ? (expiresYear !== 2000 && new Date(ad.expires_at) < new Date()) : false;
+
+        if (isTemplate) {
+            return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-200">템플릿</span>;
+        }
         if (isExpired) {
             return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-800 border border-red-200">만료됨</span>;
         }
