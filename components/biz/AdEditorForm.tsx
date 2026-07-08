@@ -55,6 +55,7 @@ function MerchantTierBadge({ tier }: { tier: 'VIP' | 'VVIP' | 'VVVIP' }) {
 export interface AdFormData {
     id?: string;
     company: string;
+    company_name?: string;
     title: string;
     location: string;
     pay: string;
@@ -98,6 +99,12 @@ export interface AdFormData {
     is_address_same?: boolean;
     business_name?: string;
     premium_banner_mode?: 'upload' | 'template';
+    
+    // DB 호환용 필드 (컴포넌트 렌더링용)
+    category1?: string;
+    category?: string;
+    salary_type?: string;
+    salary_amount?: string;
     
     // 결제 및 부가 옵션 (팝업)
     exposure_period?: 30 | 60 | 90;
@@ -543,11 +550,11 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
     const getInitialExpiresAt = () => {
         if (!initialData?.expires_at) {
-            return getOneMonthLaterDate();
+            return '';
         }
         const year = new Date(initialData.expires_at).getFullYear();
         if (year === 2000) {
-            return getOneMonthLaterDate();
+            return '';
         }
         return initialData.expires_at;
     };

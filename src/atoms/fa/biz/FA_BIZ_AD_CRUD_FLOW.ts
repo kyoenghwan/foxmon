@@ -81,19 +81,15 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
 
             // 3. 만료일 계산
             let expiresAtStr = '';
-            if (payload.expires_at) {
+            if (isDraft || !payload.expires_at) {
+                // Draft 모드이거나 결제 전 상태면 즉시 만료 연도 2000년으로 지정 (노출 차단)
+                const expiresAt = new Date();
+                expiresAt.setFullYear(2000);
+                expiresAtStr = expiresAt.toISOString();
+            } else {
                 const rawDate = new Date(payload.expires_at);
                 rawDate.setHours(23, 59, 59, 999);
                 expiresAtStr = rawDate.toISOString();
-            } else {
-                const expiresAt = new Date();
-                if (!isDraft) {
-                    expiresAt.setDate(expiresAt.getDate() + p);
-                } else {
-                    // Draft 모드면 즉시 만료 (노출 안됨)
-                    expiresAt.setFullYear(2000);
-                }
-                expiresAtStr = expiresAt.toISOString();
             }
 
             const dbPayload = {
@@ -215,23 +211,63 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 const p = payload.exposure_period as 30 | 60 | 90;
                 const t = payload.tier || 'GENERAL';
                 const priceTier = t;
-                
-                totalPoints = getPrice(`TIER_PRICE_${priceTier}_${p}`, 0);
-                
-                if (payload.is_subscription) {
-                    totalPoints = Math.floor(totalPoints * 0.95);
-                }
-                
-                if (payload.option_double_slot) {
-                    totalPoints *= 2;
-                }
 
-                if (payload.option_jump) {
-                    totalPoints += getPrice(`OPTION_PRICE_BIZ_JUMP_${p}`, 0);
-                }
+                const basePrice = getPrice(`TIER_PRICE_${priceTier}_${p}`, 0);
+                const themeEffectPrice = getPrice(`OPTION_PRICE_BIZ_THEME_EFFECT_${p}`, 30000);
+                const fixedPrice = getPrice(`OPTION_PRICE_SIDE_FIXED_${p}`, basePrice * 3);
 
-                if (payload.option_double_slot) {
-                    totalPoints = Math.floor(totalPoints * 0.95);
+                // 이미 결제 완료된 유효한 광고가 게재 중인 상태인지 판별
+                const isAlreadyPaid = existingJob.expires_at && new Date(existingJob.expires_at).getFullYear() !== 2000 && new Date(existingJob.expires_at) > new Date();
+                const isExtension = payload.is_extension === true; // 클라이언트로부터 기간 연장 요청 여부
+
+                if (isAlreadyPaid && !isExtension) {
+                    // ─── [도중 옵션 추가 결제: 일할 계산 모드] ───
+                    const now = new Date();
+                    const expiresAt = new Date(existingJob.expires_at!);
+                    const remainingDays = Math.max(0, Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+                    const prorationRatio = Math.min(1, Math.max(0, remainingDays / p));
+
+                    let additionalCost = 0;
+
+                    // 1. 연속 노출 옵션 추가 구매 (기존 미구매였는데 새로 선택된 경우)
+                    if (payload.option_double_slot && !existingJob.option_double_slot) {
+                        const optionBase = payload.option_fixed ? fixedPrice : basePrice;
+                        const doubleCost = Math.floor(optionBase * 0.95); // 더블 슬롯 할인 적용
+                        additionalCost += Math.floor(doubleCost * prorationRatio);
+                    }
+
+                    // 2. 스페셜 테마 이펙트 옵션 추가 구매 (기존 미구매였는데 새로 선택된 경우)
+                    if (payload.option_highlight && !existingJob.option_highlight) {
+                        additionalCost += Math.floor(themeEffectPrice * prorationRatio);
+                    }
+
+                    // 3. 고정 노출 옵션 추가 구매 (기존 미구매였는데 새로 선택된 경우)
+                    if (payload.option_fixed && !existingJob.is_fixed) {
+                        const upgradeDiff = Math.max(0, fixedPrice - basePrice);
+                        additionalCost += Math.floor(upgradeDiff * prorationRatio);
+                    }
+
+                    totalPoints = additionalCost;
+                } else {
+                    // ─── [신규 결제 / 기간 연장 모드] ───
+                    let base = payload.option_fixed ? fixedPrice : basePrice;
+                    totalPoints = base;
+                    
+                    if (payload.is_subscription) {
+                        totalPoints = Math.floor(totalPoints * 0.95);
+                    }
+
+                    if (payload.option_double_slot) {
+                        totalPoints *= 2;
+                    }
+
+                    if (payload.option_highlight) {
+                        totalPoints += themeEffectPrice;
+                    }
+
+                    if (payload.option_double_slot) {
+                        totalPoints = Math.floor(totalPoints * 0.95); // 5% 할인
+                    }
                 }
 
                 if (totalPoints > 0) {
@@ -239,7 +275,9 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                     const deductResult = await FA_DEDUCT_POINT_FOR_AD({
                         userId,
                         adPrice: totalPoints,
-                        description: `구인 공고 연장/옵션 변경 (${p}일)`
+                        description: isAlreadyPaid && !isExtension 
+                            ? `구인 광고 옵션 도중 추가 (남은 ${Math.max(0, Math.ceil((new Date(existingJob.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))}일 일할 계산)`
+                            : `구인 공고 연장/결제 (${p}일)`
                     });
 
                     if (!deductResult.success) {
@@ -298,13 +336,10 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             // 결제 연장인 경우 만료일 및 옵션 갱신
             if (isPaymentUpdate) {
                 const p = payload.exposure_period as 30 | 60 | 90;
-                
-                // 베이스 (공고 자체) 만료일 계산 (기존 남은 기간에 연장)
-                const expiresAt = existingJob.expires_at ? new Date(existingJob.expires_at) : new Date();
-                if (expiresAt < new Date()) expiresAt.setTime(new Date().getTime());
-                expiresAt.setDate(expiresAt.getDate() + p);
-                
-                // 개별 옵션 만료일 계산 헬퍼 함수 (옵션은 현재 결제 시점부터 시작)
+                const isAlreadyPaid = existingJob.expires_at && new Date(existingJob.expires_at).getFullYear() !== 2000 && new Date(existingJob.expires_at) > new Date();
+                const isExtension = payload.is_extension === true;
+
+                // 개별 옵션 만료일 계산 헬퍼 함수
                 const getOptionExpiresAt = (period: 30 | 60 | 90) => {
                     const optDate = new Date();
                     optDate.setDate(optDate.getDate() + period);
@@ -312,21 +347,52 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 };
 
                 updatePayload.exposure_period = p;
-                
+
                 if (payload.is_subscription !== undefined) {
                     updatePayload.is_subscription = !!payload.is_subscription;
                 }
+                
+                // 연속 노출 옵션
                 if (payload.option_double_slot !== undefined) {
                     updatePayload.option_double_slot = !!payload.option_double_slot;
-                    if (updatePayload.option_double_slot) updatePayload.option_double_slot_expires_at = getOptionExpiresAt(p);
+                    if (updatePayload.option_double_slot && !existingJob.option_double_slot) {
+                        updatePayload.option_double_slot_expires_at = isAlreadyPaid && !isExtension
+                            ? existingJob.expires_at
+                            : getOptionExpiresAt(p);
+                    }
                 }
-                if (payload.option_jump !== undefined) {
-                    updatePayload.option_jump = !!payload.option_jump;
-                    if (updatePayload.option_jump) updatePayload.option_jump_expires_at = getOptionExpiresAt(p);
+                
+                // 고정 노출 옵션
+                if (payload.option_fixed !== undefined) {
+                    updatePayload.is_fixed = !!payload.option_fixed;
+                    if (updatePayload.is_fixed && !existingJob.is_fixed) {
+                        updatePayload.option_fixed_expires_at = isAlreadyPaid && !isExtension
+                            ? existingJob.expires_at
+                            : getOptionExpiresAt(p);
+                    }
+                }
+
+                // 테마 이펙트 옵션
+                if (payload.option_highlight !== undefined) {
+                    updatePayload.option_highlight = !!payload.option_highlight;
+                    if (updatePayload.option_highlight && !existingJob.option_highlight) {
+                        updatePayload.option_highlight_expires_at = isAlreadyPaid && !isExtension
+                            ? existingJob.expires_at
+                            : getOptionExpiresAt(p);
+                    }
                 }
 
                 updatePayload.total_points = totalPoints;
-                updatePayload.expires_at = expiresAt.toISOString();
+
+                // 만료일 설정 (기간 연장일 때만 만료일을 늘리고, 단순 도중 옵션 추가일 때는 기존 만료일 유지!)
+                if (isAlreadyPaid && !isExtension) {
+                    updatePayload.expires_at = existingJob.expires_at;
+                } else {
+                    const expiresAt = existingJob.expires_at ? new Date(existingJob.expires_at) : new Date();
+                    if (expiresAt < new Date()) expiresAt.setTime(new Date().getTime());
+                    expiresAt.setDate(expiresAt.getDate() + p);
+                    updatePayload.expires_at = expiresAt.toISOString();
+                }
             }
 
             const { data, error } = await supabase

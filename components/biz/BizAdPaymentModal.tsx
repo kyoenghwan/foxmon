@@ -71,6 +71,19 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
         const tier = form.tier || 'GENERAL';
         return policies[`TIER_PRICE_${tier}_${period}`] || 0;
     };
+
+    // 이미 결제되어 진행 중인 광고인지 판별
+    const isAlreadyPaid = initialData.isPaid === true && initialData.expires_at && new Date(initialData.expires_at).getFullYear() !== 2000;
+    
+    // 남은 일수 및 비율 구하기
+    const now = new Date();
+    const expiresAt = initialData.expires_at ? new Date(initialData.expires_at) : null;
+    const remainingDays = expiresAt && expiresAt > now 
+        ? Math.max(0, Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+        : 0;
+    const prorationRatio = isAlreadyPaid && remainingDays > 0 
+        ? Math.min(1, remainingDays / (form.exposure_period || 30))
+        : 1;
     
     const calculateTotalPoints = () => {
         const p = form.exposure_period || 30;
@@ -78,28 +91,57 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
         const themeEffectPrice = policies['OPTION_PRICE_BIZ_THEME_EFFECT_' + p] || 30000;
         const fixedPrice = policies['OPTION_PRICE_SIDE_FIXED_' + p] || (getBasePrice(p) * 3);
 
-        // 고정 옵션 적용 시 기본 요금을 고정 노출 요금으로 대체
-        let base = form.option_fixed ? fixedPrice : getBasePrice(p);
-        let total = base;
-        
-        if (form.is_subscription) {
-            total = Math.floor(total * 0.95);
-        }
+        if (isAlreadyPaid) {
+            // ─── [도중 옵션 추가 결제: 일할 계산 모드] ───
+            let additionalCost = 0;
 
-        if (form.option_double_slot) {
-            total *= 2;
-        }
+            // 1. 연속 노출 옵션 추가 구매 (기존에 안 샀는데 새로 선택한 경우)
+            if (form.option_double_slot && !initialData.option_double_slot) {
+                const optionBase = form.option_fixed ? fixedPrice : getBasePrice(p);
+                const doubleCost = Math.floor(optionBase * ((100 - doubleDiscount) / 100));
+                additionalCost += Math.floor(doubleCost * prorationRatio);
+            }
 
-        if (form.option_highlight) {
-            total += themeEffectPrice;
-        }
+            // 2. 스페셜 테마 이펙트 옵션 추가 구매 (기존에 안 샀는데 새로 선택한 경우)
+            if (form.option_highlight && !initialData.option_highlight) {
+                additionalCost += Math.floor(themeEffectPrice * prorationRatio);
+            }
 
-        if (form.option_double_slot) {
-            total = Math.floor(total * ((100 - doubleDiscount) / 100));
-        }
+            // 3. 고정 노출 옵션 추가 구매 (기존에 안 샀는데 새로 선택한 경우)
+            if (form.option_fixed && !initialData.is_fixed) {
+                const base = getBasePrice(p);
+                const upgradeDiff = Math.max(0, fixedPrice - base);
+                additionalCost += Math.floor(upgradeDiff * prorationRatio);
+            }
 
-        return total;
+            return additionalCost;
+        } else {
+            // ─── [일반 신규 결제 / 기간 만료 후 연장 모드] ───
+            let base = form.option_fixed ? fixedPrice : getBasePrice(p);
+            let total = base;
+            
+            if (form.is_subscription) {
+                total = Math.floor(total * 0.95);
+            }
+
+            if (form.option_double_slot) {
+                total *= 2;
+            }
+
+            if (form.option_highlight) {
+                total += themeEffectPrice;
+            }
+
+            if (form.option_double_slot) {
+                total = Math.floor(total * ((100 - doubleDiscount) / 100));
+            }
+
+            return total;
+        }
     };
+    
+    // 추가 결제할 금액이 있는지 판별 (도중 추가 결제일 경우)
+    const isProratedUpgrade = isAlreadyPaid && calculateTotalPoints() > 0;
 
     const handleFinalSubmit = async () => {
         setSaving(true);
@@ -108,16 +150,17 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                 ...form,
                 is_fixed: form.option_fixed,
                 option_highlight: form.option_highlight,
-                _isPayment: true
+                _isPayment: true,
+                is_extension: !isAlreadyPaid // 이미 결제된 광고면 기간 연장(extension)이 아니라 단순 옵션 추가
             };
             const res = await manageBizAdAction('UPDATE', finalForm, jobId);
             if (!res.success) {
                 throw new Error(res.message);
             }
             onSuccess();
-        } catch (err) {
+        } catch (err: any) {
             console.error("결제 처리 중 오류", err);
-            alert("결제 처리 중 오류가 발생했습니다.");
+            alert(err?.message || "결제 처리 중 오류가 발생했습니다.");
         } finally {
             setSaving(false);
         }
@@ -231,8 +274,9 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                         <button 
                                             key={opt.id}
                                             type="button"
+                                            disabled={isAlreadyPaid}
                                             onClick={() => {
-                                                if (initialData.isPaid) return;
+                                                if (isAlreadyPaid) return;
                                                 if (opt.sub) {
                                                     update('is_subscription', true);
                                                     update('exposure_period', 30);
@@ -241,11 +285,15 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                                     update('exposure_period', opt.id as 30|60|90);
                                                 }
                                             }}
-                                            className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${isSelected ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' : 'border-gray-200 bg-white'} ${initialData.isPaid ? 'opacity-70 cursor-default' : 'hover:border-gray-300 cursor-pointer'}`}
+                                            className={`flex justify-between items-center p-4 rounded-xl border-2 transition-all text-left outline-none ${
+                                                isSelected 
+                                                    ? 'border-primary bg-primary/5 shadow-sm' 
+                                                    : 'border-gray-200 bg-white hover:border-gray-300'
+                                            } ${isAlreadyPaid ? 'opacity-65 cursor-not-allowed bg-gray-50 text-gray-400' : 'cursor-pointer'}`}
                                         >
-                                            <div className="flex items-center justify-center gap-1.5 mb-1.5">
-                                                {opt.sub && <Clock className={`w-4 h-4 ${isSelected ? 'text-primary' : 'text-gray-400'}`} />}
-                                                <span className={`text-[15px] font-black ${isSelected ? 'text-primary' : 'text-gray-700'}`}>{opt.label}</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-[14px] font-black text-gray-900">{opt.label}</span>
+                                                <span className="text-[11px] font-medium text-gray-400 mt-0.5">기본 요금 결제</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
                                                 {opt.sub && <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">첫 달 5% 할인</span>}
@@ -257,6 +305,12 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                     );
                                 })}
                             </div>
+
+                            {isAlreadyPaid && (
+                                <div className="mt-2.5 p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl text-[12px] font-bold text-indigo-700 text-center animate-in fade-in slide-in-from-top-2">
+                                    💡 현재 광고가 활성화되어 진행 중입니다. (남은 일수: {remainingDays}일) 기간 연장은 만료 시점에 가능합니다.
+                                </div>
+                            )}
 
                             {form.is_subscription && (
                                 <div className="mt-3 p-4 bg-blue-50/50 border border-blue-100 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2">
@@ -288,50 +342,93 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                         <section className="mt-4">
                             <h4 className="text-[15px] font-black text-gray-800 mb-3 flex items-center justify-between">
                                 <span>2. 주목도 100배! 부가 옵션</span>
-                                <span className="text-[12px] font-medium text-gray-400">선택한 기간({form.exposure_period}일) 내내 유지</span>
+                                {isAlreadyPaid ? (
+                                    <span className="text-[11.5px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+                                        💡 남은 기간 ({remainingDays}일) 일할 계산 적용 중
+                                    </span>
+                                ) : (
+                                    <span className="text-[12px] font-medium text-gray-400">선택한 기간({form.exposure_period}일) 내내 유지</span>
+                                )}
                             </h4>
                             <div className="flex flex-col gap-3">
                                 {/* 연속 노출 (더블 슬롯) */}
-                                <div className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${form.option_double_slot ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'} ${initialData.isPaid ? 'opacity-70 cursor-default' : 'cursor-pointer hover:border-gray-300'}`} onClick={() => { if (!initialData.isPaid) update('option_double_slot', !form.option_double_slot); }}>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${form.option_double_slot ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                                <Layers className="w-4 h-4" />
-                                            </div>
-                                            <div>
-                                                <h5 className="font-black text-[14px] text-gray-900">연속 노출 (더블 슬롯)</h5>
-                                                <p className="text-[12px] font-medium text-gray-500">배너 2칸을 나란히 차지하여 압도적인 시선 강탈!</p>
+                                {(() => {
+                                    const p = form.exposure_period || 30;
+                                    const doubleDiscount = policies['DISCOUNT_RATIO_BIZ_DOUBLE_SLOT'] !== undefined ? policies['DISCOUNT_RATIO_BIZ_DOUBLE_SLOT'] : 5;
+                                    const optionBase = form.option_fixed ? (policies['OPTION_PRICE_SIDE_FIXED_' + p] || (getBasePrice(p) * 3)) : getBasePrice(p);
+                                    const doubleCost = Math.floor(optionBase * ((100 - doubleDiscount) / 100));
+                                    const proratedCost = Math.floor(doubleCost * prorationRatio);
+
+                                    const isPurchased = !!initialData.option_double_slot;
+
+                                    return (
+                                        <div 
+                                            className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${
+                                                form.option_double_slot ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'
+                                            } ${
+                                                isPurchased
+                                                    ? 'opacity-70 bg-gray-50/50 cursor-not-allowed'
+                                                    : 'cursor-pointer hover:border-gray-300'
+                                            }`} 
+                                            onClick={() => { 
+                                                if (isPurchased) return;
+                                                update('option_double_slot', !form.option_double_slot); 
+                                            }}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${form.option_double_slot ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                                        <Layers className="w-4 h-4" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <h5 className="font-black text-[14px] text-gray-900">연속 노출 (더블 슬롯)</h5>
+                                                            {isPurchased && (
+                                                                <span className="text-[10px] font-black bg-green-100 text-green-700 px-1.5 py-0.5 rounded border border-green-200">적용 중</span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-[12px] font-medium text-gray-500">배너 2칸을 나란히 차지하여 압도적인 시선 강탈!</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-[14px] font-black text-indigo-600">
+                                                        {isAlreadyPaid && !isPurchased ? `+${proratedCost.toLocaleString()} P` : '총 결제액 5% 할인'}
+                                                    </div>
+                                                    <div className="text-[11px] font-medium text-gray-400">
+                                                        {isAlreadyPaid && !isPurchased ? `(원가 ${doubleCost.toLocaleString()} P)` : '(기본 요금 2배 부과)'}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <div className="text-[14px] font-black text-indigo-600">총 결제액 5% 할인</div>
-                                            <div className="text-[11px] font-medium text-gray-400">(기본 요금 2배 부과)</div>
-                                        </div>
-                                    </div>
-                                </div>
+                                    );
+                                })()}
                                 
                                 {/* 스마트 고정 노출 (Fix Slot) - 사이드 배너 전용 */}
                                 {form.tier === 'SIDE' && (() => {
                                     const maxFixedSlots = policies['LIMIT_SIDE_FIXED_SLOTS'] || 4;
                                     const isLimitReached = fixedAdCount >= maxFixedSlots;
-                                    const isAlreadyFixed = !!initialData.is_fixed;
-                                    const isSelectDisabled = isLimitReached && !isAlreadyFixed;
+                                    const isPurchased = !!initialData.is_fixed;
+                                    const isSelectDisabled = isLimitReached && !isPurchased;
 
                                     const period = form.exposure_period || 30;
                                     const fixedPrice = policies['OPTION_PRICE_SIDE_FIXED_' + period] || (getBasePrice(period) * 3);
-                                    const fixedRatio = getBasePrice(period) > 0 ? Math.round(fixedPrice / getBasePrice(period)) : 3;
+                                    const base = getBasePrice(period);
+                                    const upgradeDiff = Math.max(0, fixedPrice - base);
+                                    const proratedCost = Math.floor(upgradeDiff * prorationRatio);
+
+                                    const fixedRatio = base > 0 ? Math.round(fixedPrice / base) : 3;
 
                                     return (
                                         <div 
                                             className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${
                                                 form.option_fixed ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'
                                             } ${
-                                                initialData.isPaid || isSelectDisabled 
-                                                    ? 'opacity-65 bg-gray-50/50 cursor-not-allowed' 
+                                                isPurchased || isSelectDisabled 
+                                                    ? 'opacity-70 bg-gray-50/50 cursor-not-allowed' 
                                                     : 'cursor-pointer hover:border-gray-300'
                                             }`} 
                                             onClick={() => { 
-                                                if (initialData.isPaid) return;
+                                                if (isPurchased) return;
                                                 if (isSelectDisabled) {
                                                     alert(`죄송합니다. 사이드 배너 고정 옵션은 선착순 ${maxFixedSlots}구좌가 모두 마감되었습니다.`);
                                                     return;
@@ -347,12 +444,15 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                                     <div>
                                                         <div className="flex items-center gap-2">
                                                             <h5 className="font-black text-[14px] text-gray-900">스마트 고정 노출 (Fix Slot)</h5>
-                                                            {isLimitReached && (
+                                                            {isPurchased && (
+                                                                <span className="text-[10px] font-black bg-green-100 text-green-700 px-1.5 py-0.5 rounded border border-green-200">적용 중</span>
+                                                            )}
+                                                            {!isPurchased && isLimitReached && (
                                                                 <span className="text-[10px] font-black bg-red-100 text-red-600 px-2 py-0.5 rounded-full border border-red-200">
                                                                     선착순 마감 ({fixedAdCount}/{maxFixedSlots})
                                                                 </span>
                                                             )}
-                                                            {!isLimitReached && (
+                                                            {!isPurchased && !isLimitReached && (
                                                                 <span className="text-[10px] font-black bg-green-100 text-green-600 px-2 py-0.5 rounded-full border border-green-200">
                                                                     신청 가능 ({fixedAdCount}/{maxFixedSlots})
                                                                 </span>
@@ -362,8 +462,12 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="text-[14px] font-black text-indigo-600">{fixedPrice.toLocaleString()} P</div>
-                                                    <div className="text-[11px] font-medium text-gray-400">({fixedRatio}배 단가 적용)</div>
+                                                    <div className="text-[14px] font-black text-indigo-600">
+                                                        {isAlreadyPaid && !isPurchased ? `+${proratedCost.toLocaleString()} P` : `${fixedPrice.toLocaleString()} P`}
+                                                    </div>
+                                                    <div className="text-[11px] font-medium text-gray-400">
+                                                        {isAlreadyPaid && !isPurchased ? `(업그레이드 단가 차액)` : `(${fixedRatio}배 단가 적용)`}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -374,16 +478,22 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                 {(() => {
                                     const period = form.exposure_period || 30;
                                     const themeEffectPrice = policies['OPTION_PRICE_BIZ_THEME_EFFECT_' + period] || 30000;
+                                    const proratedCost = Math.floor(themeEffectPrice * prorationRatio);
+
+                                    const isPurchased = !!initialData.option_highlight;
 
                                     return (
                                         <div 
                                             className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${
                                                 form.option_highlight ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'
                                             } ${
-                                                initialData.isPaid ? 'opacity-70 cursor-default' : 'cursor-pointer hover:border-gray-300'
+                                                isPurchased
+                                                    ? 'opacity-70 bg-gray-50/50 cursor-not-allowed'
+                                                    : 'cursor-pointer hover:border-gray-300'
                                             }`} 
                                             onClick={() => { 
-                                                if (!initialData.isPaid) update('option_highlight', !form.option_highlight); 
+                                                if (isPurchased) return;
+                                                update('option_highlight', !form.option_highlight); 
                                             }}
                                         >
                                             <div className="flex items-center justify-between">
@@ -392,7 +502,12 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                                                         <Eye className="w-4 h-4" />
                                                     </div>
                                                     <div>
-                                                        <h5 className="font-black text-[14px] text-gray-900">스페셜 테마 이펙트 (Theme Effect)</h5>
+                                                        <div className="flex items-center gap-2">
+                                                            <h5 className="font-black text-[14px] text-gray-900">스페셜 테마 이펙트 (Theme Effect)</h5>
+                                                            {isPurchased && (
+                                                                <span className="text-[10px] font-black bg-green-100 text-green-700 px-1.5 py-0.5 rounded border border-green-200">적용 중</span>
+                                                            )}
+                                                        </div>
                                                         <p className="text-[12px] font-medium text-gray-500">배너 테두리에 화려한 네온, 골드 효과 등을 적용해 시선 강탈!</p>
                                                     </div>
                                                 </div>
@@ -413,7 +528,9 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                 {/* 하단 결제 바 */}
                 <div className="p-4 md:p-6 border-t border-gray-200 bg-white shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="flex flex-col items-center sm:items-start">
-                        <span className="text-[13px] text-gray-500 font-bold mb-1">총 예상 결제 포인트 ({form.exposure_period}일)</span>
+                        <span className="text-[13px] text-gray-500 font-bold mb-1">
+                            {isAlreadyPaid ? '추가 옵션 결제 포인트 (남은 기간 일할)' : `총 예상 결제 포인트 (${form.exposure_period}일)`}
+                        </span>
                         <div className="text-2xl md:text-3xl font-black text-primary tracking-tight flex items-baseline gap-2">
                             {calculateTotalPoints().toLocaleString()} <span className="text-lg font-bold">P</span>
                         </div>
@@ -425,23 +542,47 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
                         </div>
                     </div>
                     <div className="flex gap-2 w-full sm:w-auto">
-                        {initialData.isPaid ? (
-                            <>
-                                <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-14 px-6 rounded-xl font-bold text-[15px] border-gray-300">
-                                    닫기
-                                </Button>
-                                {calculateTotalPoints() > userPoints && !loadingPoints && (
-                                    <Button 
-                                        onClick={() => window.location.href = '/biz/points'} 
-                                        className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-orange-500 hover:bg-orange-600 text-white"
-                                    >
-                                        포인트 충전하기
+                        {isAlreadyPaid ? (
+                            isProratedUpgrade ? (
+                                <>
+                                    <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-14 px-6 rounded-xl font-bold text-[15px] border-gray-300">
+                                        취소
                                     </Button>
-                                )}
-                                <Button onClick={() => alert('관리자에게 취소/철회 문의를 접수했습니다. (구현 예정)')} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[15px] shadow-sm bg-red-50 text-red-600 hover:bg-red-100 border border-red-200">
-                                    결제 취소/철회 문의
-                                </Button>
-                            </>
+                                    {calculateTotalPoints() > userPoints && !loadingPoints && (
+                                        <Button 
+                                            onClick={() => window.location.href = '/biz/points'} 
+                                            className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-orange-500 hover:bg-orange-600 text-white"
+                                        >
+                                            포인트 충전하기
+                                        </Button>
+                                    )}
+                                    <Button 
+                                        onClick={handleFinalSubmit} 
+                                        disabled={saving || loadingPoints || calculateTotalPoints() > userPoints} 
+                                        className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-indigo-600 hover:bg-indigo-700 text-white"
+                                    >
+                                        {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <DollarSign className="w-5 h-5 mr-2" />}
+                                        추가 옵션 결제하기
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-14 px-6 rounded-xl font-bold text-[15px] border-gray-300">
+                                        닫기
+                                    </Button>
+                                    {calculateTotalPoints() > userPoints && !loadingPoints && (
+                                        <Button 
+                                            onClick={() => window.location.href = '/biz/points'} 
+                                            className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-orange-500 hover:bg-orange-600 text-white"
+                                        >
+                                            포인트 충전하기
+                                        </Button>
+                                    )}
+                                    <Button onClick={() => alert('관리자에게 취소/철회 문의를 접수했습니다. (구현 예정)')} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[15px] shadow-sm bg-red-50 text-red-600 hover:bg-red-100 border border-red-200">
+                                        결제 취소/철회 문의
+                                    </Button>
+                                </>
+                            )
                         ) : (
                             <>
                                 <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-14 px-6 rounded-xl font-bold text-[15px] border-gray-300">
