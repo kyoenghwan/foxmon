@@ -110,6 +110,7 @@ export interface AdFormData {
     
     // 결제 및 부가 옵션 (팝업)
     exposure_period?: 30 | 60 | 90;
+    option_fixed?: boolean;
     
     option_bold?: boolean;
     option_bold_period?: 30 | 60 | 90;

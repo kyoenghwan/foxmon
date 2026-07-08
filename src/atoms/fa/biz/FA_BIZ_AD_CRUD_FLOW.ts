@@ -5,8 +5,24 @@ interface AdCrudInput {
     actionType: 'CREATE' | 'UPDATE' | 'DELETE' | 'GET' | 'GET_ONE';
     userId: string;
     jobId?: string;
-    payload?: Partial<AdFormData> & { _isDraft?: boolean; _isPayment?: boolean };
+    payload?: Partial<AdFormData> & { _isDraft?: boolean; _isPayment?: boolean; is_extension?: boolean };
 }
+
+// 한국 표준시(KST, UTC+9) 기준 expires_at 생성 헬퍼 함수
+const getKSTExpiresAt = (period: number, baseDate?: Date) => {
+    const base = baseDate ? new Date(baseDate.getTime()) : new Date();
+    // KST 날짜 객체 연산을 위해 기준 시각 밀리초에 9시간 추가
+    const kstTime = base.getTime() + (9 * 60 * 60 * 1000);
+    const kstDate = new Date(kstTime);
+    
+    kstDate.setUTCDate(kstDate.getUTCDate() + period);
+    
+    const year = kstDate.getUTCFullYear();
+    const month = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(kstDate.getUTCDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T23:59:59.999+09:00`;
+};
 
 // 하드코딩된 JOB_PRICING 상수 제거 (이제 DB에서 동적으로 불러옵니다)
 
@@ -80,17 +96,8 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             }
 
             // 3. 만료일 계산
-            let expiresAtStr = '';
-            if (isDraft || !payload.expires_at) {
-                // Draft 모드이거나 결제 전 상태면 즉시 만료 연도 2000년으로 지정 (노출 차단)
-                const expiresAt = new Date();
-                expiresAt.setFullYear(2000);
-                expiresAtStr = expiresAt.toISOString();
-            } else {
-                const rawDate = new Date(payload.expires_at);
-                rawDate.setHours(23, 59, 59, 999);
-                expiresAtStr = rawDate.toISOString();
-            }
+            // 생성 시에는 무조건 결제 전(임시저장) 상태이므로 즉시 만료 연도 2000년으로 지정 (노출 차단)
+            const expiresAtStr = '2000-01-01T00:00:00.000+09:00';
 
             const dbPayload = {
                 user_id: userId,
@@ -185,7 +192,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             // 1. 기존 공고 확인
             const { data: existingJob, error: checkError } = await supabase
                 .from('biz_ads')
-                .select('user_id, expires_at')
+                .select('user_id, expires_at, option_double_slot, is_fixed, option_highlight')
                 .eq('id', jobId)
                 .single();
             
@@ -321,14 +328,21 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
 
             // 만약 payload.expires_at이 명시적으로 주어졌을 경우 만료일 직접 갱신 처리
             if (payload.expires_at !== undefined) {
-                if (payload.expires_at) {
+                const existingExpiresYear = existingJob.expires_at ? new Date(existingJob.expires_at).getFullYear() : 2000;
+                const isAlreadyPaid = existingJob.expires_at && existingExpiresYear !== 2000;
+
+                if (!isAlreadyPaid) {
+                    // 결제되지 않은 광고라면 수동 지정을 무시하고 2000년 강제 고정
+                    updatePayload.expires_at = '2000-01-01T00:00:00.000+09:00';
+                } else if (payload.expires_at) {
+                    // 이미 결제되어 게재 중인 광고의 관리자 수동 날짜 조절 허용
                     const rawDate = new Date(payload.expires_at);
-                    rawDate.setHours(23, 59, 59, 999);
-                    updatePayload.expires_at = rawDate.toISOString();
+                    const year = rawDate.getFullYear();
+                    const month = String(rawDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(rawDate.getDate()).padStart(2, '0');
+                    updatePayload.expires_at = `${year}-${month}-${day}T23:59:59.999+09:00`;
                 } else {
-                    const date2000 = new Date();
-                    date2000.setFullYear(2000);
-                    updatePayload.expires_at = date2000.toISOString();
+                    updatePayload.expires_at = '2000-01-01T00:00:00.000+09:00';
                 }
             }
 
@@ -339,11 +353,9 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 const isAlreadyPaid = existingJob.expires_at && new Date(existingJob.expires_at).getFullYear() !== 2000 && new Date(existingJob.expires_at) > new Date();
                 const isExtension = payload.is_extension === true;
 
-                // 개별 옵션 만료일 계산 헬퍼 함수
-                const getOptionExpiresAt = (period: 30 | 60 | 90) => {
-                    const optDate = new Date();
-                    optDate.setDate(optDate.getDate() + period);
-                    return optDate.toISOString();
+                // 개별 옵션 만료일 계산 헬퍼 함수 (KST 헬퍼 사용)
+                const getOptionExpiresAt = (period: 30 | 60 | 90, baseDate?: Date) => {
+                    return getKSTExpiresAt(period, baseDate);
                 };
 
                 updatePayload.exposure_period = p;
@@ -384,14 +396,16 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
 
                 updatePayload.total_points = totalPoints;
 
-                // 만료일 설정 (기간 연장일 때만 만료일을 늘리고, 단순 도중 옵션 추가일 때는 기존 만료일 유지!)
+                // 만료일 설정 (KST 헬퍼를 이용해 결제 시점 기준으로 엄격하게 계산)
                 if (isAlreadyPaid && !isExtension) {
+                    // 1. 이미 결제되어 게재 중이며, 단순 옵션 추가 결제인 경우 -> 기존 만료일 유지
                     updatePayload.expires_at = existingJob.expires_at;
+                } else if (isAlreadyPaid && isExtension) {
+                    // 2. 이미 결제되어 게재 중이며, 기간 연장 결제인 경우 -> 기존 만료일 기준으로 KST 기간 더하기
+                    updatePayload.expires_at = getKSTExpiresAt(p, new Date(existingJob.expires_at));
                 } else {
-                    const expiresAt = existingJob.expires_at ? new Date(existingJob.expires_at) : new Date();
-                    if (expiresAt < new Date()) expiresAt.setTime(new Date().getTime());
-                    expiresAt.setDate(expiresAt.getDate() + p);
-                    updatePayload.expires_at = expiresAt.toISOString();
+                    // 3. 미결제/Draft 상태에서 신규 결제하는 경우 -> 결제하는 현재 시각 기준으로 KST 기간 더하기 (수동 설정 무시)
+                    updatePayload.expires_at = getKSTExpiresAt(p);
                 }
             }
 
