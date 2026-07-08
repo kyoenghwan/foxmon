@@ -56,7 +56,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
     const formatDate = (dateStr: string) => {
         if (!dateStr) return '무제한 노출';
         const d = new Date(dateStr);
-        if (d.getFullYear() === 2000) return '템플릿';
+        if (d.getFullYear() === 2000) return '';
         return d.toLocaleDateString('ko-KR', {
             year: 'numeric',
             month: '2-digit',
@@ -70,7 +70,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
         const isExpired = ad.expires_at ? (expiresYear !== 2000 && new Date(ad.expires_at) < new Date()) : false;
 
         if (isTemplate) {
-            return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-200">템플릿</span>;
+            return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-gray-100 text-gray-700 border border-gray-200">대기</span>;
         }
         if (isExpired) {
             return <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-800 border border-red-200">만료됨</span>;
