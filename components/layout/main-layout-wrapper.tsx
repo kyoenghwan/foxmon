@@ -37,8 +37,8 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
         <div className="flex flex-col min-h-screen bg-white relative">
             <SideBanners />
 
-            {/* 헤더 + 메인 배너 (스크롤 시 자연스럽게 올라감) */}
-            <div className="relative z-40 bg-white">
+            {/* 헤더 + 메인 배너 (모바일은 스크롤 해제 / PC는 상단 고정) */}
+            <div className="relative md:sticky md:top-0 z-40 bg-white">
                 <MainHeader session={session} />
 
                 {/* 메인 배너 & 데스크톱 로그인 정보 */}
