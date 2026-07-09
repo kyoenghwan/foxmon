@@ -37,8 +37,8 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
         <div className="flex flex-col min-h-screen bg-white relative">
             <SideBanners />
 
-            {/* 헤더 + 메인 배너를 하나의 sticky 그룹으로 묶어 함께 고정 */}
-            <div className="sticky top-0 z-40 bg-white">
+            {/* 헤더 + 메인 배너 (스크롤 시 자연스럽게 올라감) */}
+            <div className="relative z-40 bg-white">
                 <MainHeader session={session} />
 
                 {/* 메인 배너 & 데스크톱 로그인 정보 */}
