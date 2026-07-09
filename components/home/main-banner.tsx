@@ -8,11 +8,13 @@ import { getRotatedAds, recordAdExposure, AdItem } from '@/lib/ad-service';
 import { useSession } from 'next-auth/react';
 
 import { useAdStore } from '@/hooks/use-ad-store';
+import { useJobModal } from '@/hooks/use-job-modal';
 
 // 메인 배너 컴포넌트
 export function MainBanner() {
     const { data: session } = useSession();
     const { premiumMainAds, isPremiumMainAdsLoaded, fetchPremiumMainAds } = useAdStore();
+    const { openModal } = useJobModal();
     const [loading, setLoading] = useState(!isPremiumMainAdsLoaded);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [cardWidth, setCardWidth] = useState(400);
@@ -123,9 +125,16 @@ export function MainBanner() {
         }
     }, [currentIndex, originalLength]);
 
-    // 광고 클릭 시 노출 데이터 갱신
-    const handleAdClick = (adId: string) => {
-        recordAdExposure(adId);
+    // 광고 클릭 시 노출 데이터 갱신 및 상세 모달 팝업 열기
+    const handleAdClick = (banner: AdItem) => {
+        recordAdExposure(banner.id);
+        const jobDataForModal = {
+            ...banner,
+            content: (banner as any).detail_content || banner.content || '',
+            employer_name: banner.company || banner.company_name || '폭스몬',
+            image_url: banner.image || banner.logo_url || ''
+        };
+        openModal(jobDataForModal);
     };
 
     if (loading) {
@@ -205,7 +214,7 @@ export function MainBanner() {
                                 width: `${cardWidth}px`,
                                 height: `${cardHeight}px`
                             }}
-                            onClick={() => handleAdClick(banner.id)}
+                            onClick={() => handleAdClick(banner)}
                         >
                             {isUploadMode && banner.image ? (
                                 /* 업로드 모드: 이미지만 100% 꽉 채워서 노출 (텍스트 숨김) */
