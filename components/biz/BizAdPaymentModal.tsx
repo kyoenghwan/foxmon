@@ -455,10 +455,12 @@ ${cancelDetail || '상세 사유 미기재'}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <span className="text-[11px] font-medium text-gray-400 mt-0.5">기본 요금 결제</span>
+                                                <span className="text-[11px] font-medium text-gray-400 mt-0.5">
+                                                    {opt.sub ? '30일마다 5%씩 자동 누적할인 (최대 15%)' : '기본 요금 결제'}
+                                                </span>
                                             </div>
-                                            <div className="flex items-center gap-1.5">
-                                                {opt.sub && <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">30일마다 5%씩 누적할인 (최대 15%)</span>}
+                                            <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                                                {opt.sub && <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">최대 15% 할인</span>}
                                                 {!opt.sub && days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
                                                 {!opt.sub && days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
                                                 <span className="text-[14px] font-bold text-gray-500">{price.toLocaleString()} P</span>
