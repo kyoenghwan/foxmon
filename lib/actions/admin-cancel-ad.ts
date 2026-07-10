@@ -108,7 +108,7 @@ export async function adminCancelAdAction(adId: string) {
                 refundPoints: 0
             };
         } else {
-            refundEst = estimateAdRefund(ad);
+            refundEst = await estimateAdRefund(ad);
         }
 
         // 4. 유저 포인트 갱신 및 만료일 업데이트 트랜잭션 수행

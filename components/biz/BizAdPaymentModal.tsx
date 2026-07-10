@@ -34,7 +34,7 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
         is_subscription: initialData.is_subscription || false,
         option_double_slot: initialData.option_double_slot || false,
         option_fixed: initialData.is_fixed || false,
-        option_highlight: initialData.option_highlight || false
+        option_highlight: false
     });
 
     const update = (field: string, value: any) => {
@@ -173,7 +173,6 @@ ${cancelDetail || '상세 사유 미기재'}
     const calculateTotalPoints = () => {
         const p = form.exposure_period || 30;
         const doubleDiscount = policies['DISCOUNT_RATIO_BIZ_DOUBLE_SLOT'] !== undefined ? policies['DISCOUNT_RATIO_BIZ_DOUBLE_SLOT'] : 5;
-        const themeEffectPrice = policies['OPTION_PRICE_BIZ_THEME_EFFECT_' + p] || 30000;
         const fixedPrice = policies['OPTION_PRICE_SIDE_FIXED_' + p] || (getBasePrice(p) * 3);
 
         if (isAlreadyPaid) {
@@ -187,12 +186,7 @@ ${cancelDetail || '상세 사유 미기재'}
                 additionalCost += Math.floor(doubleCost * prorationRatio);
             }
 
-            // 2. 스페셜 테마 이펙트 옵션 추가 구매 (기존에 안 샀는데 새로 선택한 경우)
-            if (form.option_highlight && !initialData.option_highlight) {
-                additionalCost += Math.floor(themeEffectPrice * prorationRatio);
-            }
-
-            // 3. 고정 노출 옵션 추가 구매 (기존에 안 샀는데 새로 선택한 경우)
+            // 2. 고정 노출 옵션 추가 구매 (기존에 안 샀는데 새로 선택한 경우)
             if (form.option_fixed && !initialData.is_fixed) {
                 const base = getBasePrice(p);
                 const upgradeDiff = Math.max(0, fixedPrice - base);
@@ -213,10 +207,6 @@ ${cancelDetail || '상세 사유 미기재'}
                 total *= 2;
             }
 
-            if (form.option_highlight) {
-                total += themeEffectPrice;
-            }
-
             if (form.option_double_slot) {
                 total = Math.floor(total * ((100 - doubleDiscount) / 100));
             }
@@ -234,7 +224,7 @@ ${cancelDetail || '상세 사유 미기재'}
             const finalForm = {
                 ...form,
                 is_fixed: form.option_fixed,
-                option_highlight: form.option_highlight,
+                option_highlight: false,
                 _isPayment: true,
                 is_extension: !isAlreadyPaid // 이미 결제된 광고면 기간 연장(extension)이 아니라 단순 옵션 추가
             };
@@ -552,53 +542,6 @@ ${cancelDetail || '상세 사유 미기재'}
                                                     </div>
                                                     <div className="text-[11px] font-medium text-gray-400">
                                                         {isAlreadyPaid && !isPurchased ? `(업그레이드 단가 차액)` : `(${fixedRatio}배 단가 적용)`}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
-                                
-                                {/* 스페셜 테마 이펙트 (Theme Effect) */}
-                                {(() => {
-                                    const period = form.exposure_period || 30;
-                                    const themeEffectPrice = policies['OPTION_PRICE_BIZ_THEME_EFFECT_' + period] || 30000;
-                                    const proratedCost = Math.floor(themeEffectPrice * prorationRatio);
-
-                                    const isPurchased = !!initialData.option_highlight;
-
-                                    return (
-                                        <div 
-                                            className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${
-                                                form.option_highlight ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'
-                                            } ${
-                                                isPurchased
-                                                    ? 'opacity-70 bg-gray-50/50 cursor-not-allowed'
-                                                    : 'cursor-pointer hover:border-gray-300'
-                                            }`} 
-                                            onClick={() => { 
-                                                if (isPurchased) return;
-                                                update('option_highlight', !form.option_highlight); 
-                                            }}
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${form.option_highlight ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                                        <Eye className="w-4 h-4" />
-                                                    </div>
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <h5 className="font-black text-[14px] text-gray-900">스페셜 테마 이펙트 (Theme Effect)</h5>
-                                                            {isPurchased && (
-                                                                <span className="text-[10px] font-black bg-green-100 text-green-700 px-1.5 py-0.5 rounded border border-green-200">적용 중</span>
-                                                            )}
-                                                        </div>
-                                                        <p className="text-[12px] font-medium text-gray-500">배너 테두리에 화려한 네온, 골드 효과 등을 적용해 시선 강탈!</p>
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-[14px] font-black text-indigo-600">
-                                                        +{themeEffectPrice.toLocaleString()} P
                                                     </div>
                                                 </div>
                                             </div>
