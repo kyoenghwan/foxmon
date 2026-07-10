@@ -130,7 +130,7 @@ export function MainBanner() {
         recordAdExposure(banner.id);
         const jobDataForModal = {
             ...banner,
-            content: (banner as any).detail_content || banner.content || '',
+            content: (banner as any).detail_content || (banner as any).content || '',
             employer_name: banner.company || banner.company_name || '폭스몬',
             image_url: banner.image || banner.logo_url || ''
         };
