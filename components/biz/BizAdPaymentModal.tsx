@@ -228,26 +228,28 @@ ${cancelDetail || '상세 사유 미기재'}
 
             // 3. 도중 기간 추가 연장 구매 (선택했을 경우)
             if (selectedExtensionPeriod !== null) {
+                const prevDays = initialData.exposure_period || 30;
                 const extDays = selectedExtensionPeriod === 'sub' ? 30 : selectedExtensionPeriod;
-                const extBasePrice = getBasePrice(extDays);
-                const extFixedPrice = policies['OPTION_PRICE_SIDE_FIXED_' + extDays] || (extBasePrice * 3);
 
-                let base = form.option_fixed ? extFixedPrice : extBasePrice;
-                let extTotal = base;
-                
-                if (selectedExtensionPeriod === 'sub') {
-                    extTotal = Math.floor(extTotal * 0.95);
+                if (extDays > prevDays) {
+                    const deltaDays = extDays - prevDays;
+                    const extBasePrice = getBasePrice(extDays);
+                    const extFixedPrice = policies['OPTION_PRICE_SIDE_FIXED_' + extDays] || (extBasePrice * 3);
+
+                    const unitBase = (form.option_fixed ? extFixedPrice : extBasePrice) / extDays;
+                    let unitTotal = unitBase;
+
+                    if (selectedExtensionPeriod === 'sub') {
+                        unitTotal = unitTotal * 0.95;
+                    }
+
+                    if (form.option_double_slot) {
+                        unitTotal = unitTotal * 2 * ((100 - doubleDiscount) / 100);
+                    }
+
+                    const extCost = Math.floor(unitTotal * deltaDays);
+                    additionalCost += extCost;
                 }
-
-                if (form.option_double_slot) {
-                    extTotal *= 2;
-                }
-
-                if (form.option_double_slot) {
-                    extTotal = Math.floor(extTotal * ((100 - doubleDiscount) / 100));
-                }
-
-                additionalCost += extTotal;
             }
 
             return additionalCost;

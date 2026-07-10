@@ -272,8 +272,30 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                     } else {
                         totalPoints = additionalCost;
                     }
+                } else if (isAlreadyPaid && isExtension) {
+                    // ─── [이미 결제된 광고의 기간 연장 모드: 추가 연장 기간 비례 계산] ───
+                    const prevDays = existingJob.exposure_period || 30;
+                    const extDays = payload.exposure_period as 30 | 60 | 90;
+
+                    if (extDays > prevDays) {
+                        const deltaDays = extDays - prevDays;
+                        const unitBase = (payload.option_fixed ? fixedPrice : basePrice) / extDays;
+                        let unitTotal = unitBase;
+
+                        if (payload.is_subscription) {
+                            unitTotal = unitTotal * 0.95;
+                        }
+
+                        if (payload.option_double_slot) {
+                            unitTotal = unitTotal * 2 * 0.95; // 더블 슬롯 5% 할인 적용
+                        }
+
+                        totalPoints = Math.floor(unitTotal * deltaDays);
+                    } else {
+                        totalPoints = 0;
+                    }
                 } else {
-                    // ─── [신규 결제 / 기간 연장 모드] ───
+                    // ─── [미결제 상태 광고의 순수 신규 결제 모드] ───
                     let base = payload.option_fixed ? fixedPrice : basePrice;
                     totalPoints = base;
                     
