@@ -84,7 +84,9 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                 <table className="w-full">
                     <thead>
                         <tr className="border-b border-gray-100 bg-gray-50 whitespace-nowrap">
+                            <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-16">로고</th>
                             <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500">광고명</th>
+                            <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-32">지역</th>
                             <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">등급</th>
                             <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">상태</th>
                             <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">만료일</th>
@@ -104,17 +106,27 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                                     onClick={() => router.push(`/biz/ads/${ad.id}/edit`)}
                                     className="border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer"
                                 >
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            {(ad.logo_url || ad.image) && (
-                                                <img src={ad.logo_url || ad.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                                    {/* 1. 로고 컬럼 */}
+                                    <td className="px-4 py-4 text-center">
+                                        <div className="flex items-center justify-center">
+                                            {(ad.logo_url || ad.image) ? (
+                                                <img src={ad.logo_url || ad.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0 border border-gray-100 shadow-xs" />
+                                            ) : (
+                                                <span className="text-[11px] text-gray-400 font-bold">없음</span>
                                             )}
-                                            <div className="max-w-[150px] sm:max-w-[250px]">
-                                                {/* @ts-ignore */}
-                                                <marquee scrollamount="3" className="font-bold text-[14px] text-gray-900 block">{ad.title}</marquee>
-                                                <p className="text-[12px] text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">{ad.company} · {ad.location}</p>
-                                            </div>
                                         </div>
+                                    </td>
+                                    {/* 2. 광고명 컬럼 */}
+                                    <td className="px-6 py-4">
+                                        <div className="max-w-[180px] sm:max-w-[280px]">
+                                            {/* @ts-ignore */}
+                                            <marquee scrollamount="3" className="font-bold text-[14px] text-gray-900 block">{ad.title}</marquee>
+                                            <p className="text-[12px] text-gray-400 mt-0.5 truncate">{ad.company || ad.company_name}</p>
+                                        </div>
+                                    </td>
+                                    {/* 3. 지역 컬럼 */}
+                                    <td className="px-4 py-4 text-center whitespace-nowrap text-[13px] font-bold text-gray-700">
+                                        {ad.location || '전지역'}
                                     </td>
                                     <td className="px-4 py-4 text-center whitespace-nowrap">
                                         <TierBadge tier={ad.tier} />
