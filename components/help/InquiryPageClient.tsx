@@ -8,6 +8,7 @@ import { createInquiry, getMyInquiries } from '@/lib/actions/help';
 import { MarkdownContent } from '@/components/help/MarkdownContent';
 
 const INQUIRY_CATEGORIES = [
+    '계좌 문의',
     '계정 문의',
     '포인트·환불',
     '광고 문의',

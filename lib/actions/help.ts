@@ -223,15 +223,8 @@ export async function createInquiry(input: {
   }
 
   try {
-    // 자동 답변(입금 계좌 안내) 대상인지 판단 (일반 취소/환불 문의에 무통장 계좌가 자동 답변되는 오류 방지)
-    const isAccountInquiry = 
-      title.startsWith('[계좌문의]') || 
-      title.includes('계좌번호') ||
-      content.includes('계좌번호') ||
-      (title.includes('계좌') && (title.includes('입금') || title.includes('안내') || title.includes('문의'))) ||
-      (content.includes('계좌') && (content.includes('입금') || content.includes('안내') || content.includes('문의'))) ||
-      title.includes('무통장') || 
-      content.includes('무통장');
+    // 자동 답변(입금 계좌 안내) 대상인지 판단 (오직 '계좌 문의' 카테고리만 자동 답변 연동)
+    const isAccountInquiry = category === '계좌 문의';
 
     let reply: string | null = null;
     let status = 'PENDING';

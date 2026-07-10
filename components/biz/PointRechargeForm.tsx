@@ -85,8 +85,8 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
         setIsSendingInquiry(true);
         try {
             const res = await createInquiry({
-                category: '포인트·환불',
-                title: `[계좌문의] ${inquiryTitle}`,
+                category: '계좌 문의',
+                title: inquiryTitle,
                 content: inquiryContent
             });
 
