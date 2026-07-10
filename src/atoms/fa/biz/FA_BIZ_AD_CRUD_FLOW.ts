@@ -229,6 +229,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 // 이미 결제 완료된 유효한 광고가 게재 중인 상태인지 판별
                 const isAlreadyPaid = existingJob.expires_at && new Date(existingJob.expires_at).getFullYear() !== 2000 && new Date(existingJob.expires_at) > new Date();
                 const isExtension = payload.is_extension === true; // 클라이언트로부터 기간 연장 요청 여부
+                let refundPoints = 0;
 
                 if (isAlreadyPaid && !isExtension) {
                     // ─── [도중 옵션 추가 결제: 일할 계산 모드] ───
@@ -246,6 +247,14 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                         additionalCost += Math.floor(doubleCost * prorationRatio);
                     }
 
+                    // 1-2. 연속 노출 옵션 중도 해지/취소 (기존 구매 상태였는데 체크 해제한 경우)
+                    if (payload.option_double_slot === false && existingJob.option_double_slot) {
+                        const optionBase = existingJob.is_fixed ? fixedPrice : basePrice;
+                        // 5% 할인되기 전 금액인 optionBase 에 대해 남은 일수만큼 포인트를 환급
+                        const doubleRefund = Math.floor(optionBase * prorationRatio);
+                        additionalCost -= doubleRefund;
+                    }
+
                     // 2. 스페셜 테마 이펙트 옵션 추가 구매 (기존 미구매였는데 새로 선택된 경우)
                     if (payload.option_highlight && !existingJob.option_highlight) {
                         additionalCost += Math.floor(themeEffectPrice * prorationRatio);
@@ -257,7 +266,12 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                         additionalCost += Math.floor(upgradeDiff * prorationRatio);
                     }
 
-                    totalPoints = additionalCost;
+                    if (additionalCost < 0) {
+                        refundPoints = Math.abs(additionalCost);
+                        totalPoints = 0;
+                    } else {
+                        totalPoints = additionalCost;
+                    }
                 } else {
                     // ─── [신규 결제 / 기간 연장 모드] ───
                     let base = payload.option_fixed ? fixedPrice : basePrice;
@@ -278,6 +292,41 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                     if (payload.option_double_slot) {
                         totalPoints = Math.floor(totalPoints * 0.95); // 5% 할인
                     }
+                }
+
+                // 환불할 포인트가 있는 경우 사용자 paid_points 즉시 복구 업데이트
+                if (refundPoints > 0) {
+                    const { data: userPointsCurrent, error: userFetchError } = await supabase
+                        .from('users')
+                        .select('paid_points, bonus_points')
+                        .eq('id', userId)
+                        .single();
+
+                    if (userFetchError || !userPointsCurrent) {
+                        throw new Error(`사용자 포인트 정보를 조회할 수 없습니다: ${userFetchError?.message || ''}`);
+                    }
+
+                    const newPaid = Number(userPointsCurrent.paid_points || 0) + refundPoints;
+                    const { error: userPointsUpdateError } = await supabase
+                        .from('users')
+                        .update({ paid_points: newPaid })
+                        .eq('id', userId);
+
+                    if (userPointsUpdateError) {
+                        throw new Error(`사용자 환불 포인트 적립 실패: ${userPointsUpdateError.message}`);
+                    }
+
+                    // 포인트 거래 트랜잭션 기록 적재
+                    const balanceAfter = newPaid + Number(userPointsCurrent.bonus_points || 0);
+                    await supabase
+                        .from('point_transactions')
+                        .insert({
+                            user_id: userId,
+                            type: 'CHARGE',
+                            amount: refundPoints,
+                            balance_after: balanceAfter,
+                            description: `[구인광고 옵션 철회 환불] ${existingJob.title} 연속 노출 해지 반환`
+                        });
                 }
 
                 if (totalPoints > 0) {

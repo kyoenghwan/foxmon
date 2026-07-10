@@ -44,6 +44,29 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
         setForm(prev => ({ ...prev, [field]: value }));
     };
 
+    // 실시간 정산 명세서 (더블 슬롯 중도 취소에 대한 정보)
+    const getRefundDetails = () => {
+        if (!isAlreadyPaid) return null;
+        const p = form.exposure_period || 30;
+        const optionBase = form.option_fixed 
+            ? (policies['OPTION_PRICE_SIDE_FIXED_' + p] || (getBasePrice(p) * 3))
+            : getBasePrice(p);
+
+        // 기존에 연속 노출(더블 슬롯)이 켜져 있었는데 사용자가 끈 경우
+        if (initialData.option_double_slot && !form.option_double_slot) {
+            const refundAmount = Math.floor(optionBase * prorationRatio);
+            return {
+                type: 'DOUBLE_SLOT_CANCEL',
+                label: '연속 노출 옵션 도중 해지 반환',
+                basePrice: optionBase,
+                refundAmount,
+                remainingDays,
+                totalDays: p
+            };
+        }
+        return null;
+    };
+
     // 이미 결제되어 진행 중인 광고인지 판별
     const isAlreadyPaid = initialData.isPaid === true && initialData.expires_at && new Date(initialData.expires_at).getFullYear() !== 2000;
     
@@ -187,6 +210,13 @@ ${cancelDetail || '상세 사유 미기재'}
                 const optionBase = form.option_fixed ? fixedPrice : getBasePrice(p);
                 const doubleCost = Math.floor(optionBase * ((100 - doubleDiscount) / 100));
                 additionalCost += Math.floor(doubleCost * prorationRatio);
+            }
+
+            // 1-2. 연속 노출 옵션 도중 해지/취소 (기존에 샀는데 체크를 해제한 경우)
+            if (initialData.option_double_slot && !form.option_double_slot) {
+                const optionBase = form.option_fixed ? fixedPrice : getBasePrice(p);
+                const doubleRefund = Math.floor(optionBase * prorationRatio);
+                additionalCost -= doubleRefund;
             }
 
             // 2. 고정 노출 옵션 추가 구매 (기존에 안 샀는데 새로 선택한 경우)
@@ -493,15 +523,10 @@ ${cancelDetail || '상세 사유 미기재'}
 
                                     return (
                                         <div 
-                                            className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none ${
+                                            className={`flex flex-col p-4 rounded-xl border-2 transition-all select-none cursor-pointer hover:border-gray-300 ${
                                                 form.option_double_slot ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 bg-white'
-                                            } ${
-                                                isPurchased
-                                                    ? 'opacity-70 bg-gray-50/50 cursor-not-allowed'
-                                                    : 'cursor-pointer hover:border-gray-300'
                                             }`} 
                                             onClick={() => { 
-                                                if (isPurchased) return;
                                                 update('option_double_slot', !form.option_double_slot); 
                                             }}
                                         >
@@ -522,7 +547,11 @@ ${cancelDetail || '상세 사유 미기재'}
                                                 </div>
                                                 <div className="text-right">
                                                     <div className="text-[14px] font-black text-indigo-600">
-                                                        {isAlreadyPaid && !isPurchased ? `+${proratedCost.toLocaleString()} P` : '총 결제액 5% 할인'}
+                                                        {isPurchased && !form.option_double_slot ? (
+                                                            <span className="text-emerald-600">해지 (환불 예정)</span>
+                                                        ) : (
+                                                            isAlreadyPaid && !isPurchased ? `+${proratedCost.toLocaleString()} P` : '총 결제액 5% 할인'
+                                                        )}
                                                     </div>
                                                     <div className="text-[11px] font-medium text-gray-400">
                                                         {isAlreadyPaid && !isPurchased ? `(원가 ${doubleCost.toLocaleString()} P)` : '(기본 요금 2배 부과)'}
@@ -608,28 +637,55 @@ ${cancelDetail || '상세 사유 미기재'}
                     </div>
                 </div>
 
-                {/* 하단 결제 바 */}
-                <div className="p-4 md:p-6 border-t border-gray-200 bg-white shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="flex flex-col items-center sm:items-start">
-                        <span className="text-[13px] text-gray-500 font-bold mb-1">
-                            {isAlreadyPaid ? '추가 옵션 결제 포인트 (남은 기간 일할)' : `총 예상 결제 포인트 (${form.exposure_period}일)`}
-                        </span>
-                        <div className="text-2xl md:text-3xl font-black text-primary tracking-tight flex items-baseline gap-2">
-                            {calculateTotalPoints().toLocaleString()} <span className="text-lg font-bold">P</span>
+                {/* 정산 영수증 명세서 표출부 */}
+                {(() => {
+                    const refund = getRefundDetails();
+                    if (!refund) return null;
+                    return (
+                        <div className="mx-6 mt-4 p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-[12.5px] font-bold text-emerald-800 space-y-1.5 shadow-sm animate-in fade-in slide-in-from-bottom-2">
+                            <div className="flex items-center gap-1.5 text-[13px] font-black text-emerald-950 mb-1">
+                                <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
+                                💡 옵션 변경 실시간 정산 계산서
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span>{refund.label}</span>
+                                <span className="text-emerald-700 text-[14px] font-black">+{refund.refundAmount.toLocaleString()} P 환급 예정</span>
+                            </div>
+                            <div className="text-[11px] text-emerald-600 font-bold leading-relaxed">
+                                * 계산식: 연속 노출 할인 전 기본 요금 ({refund.basePrice.toLocaleString()} P) &times; 잔여 노출 비율 ({refund.remainingDays}일 / {refund.totalDays}일)
+                            </div>
                         </div>
-                        <div className="mt-1 flex items-center gap-2">
-                            <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded font-medium">내 잔여 포인트: {loadingPoints ? '조회 중...' : `${userPoints.toLocaleString()} P`}</span>
-                            {calculateTotalPoints() > userPoints && !loadingPoints && (
-                                <span className="text-[12px] text-red-500 font-bold animate-pulse">잔액 부족!</span>
-                            )}
+                    );
+                })()}
+
+                {/* 하단 결제 정보 바 */}
+                <div className="p-4 md:p-6 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex flex-col">
+                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                            {isAlreadyPaid 
+                                ? (calculateTotalPoints() < 0 ? "차액 반환 예정 포인트" : "추가 결제할 포인트 (남은 기간 일할)") 
+                                : "총 결제할 포인트"
+                            }
+                        </span>
+                        <div className="flex items-baseline gap-1.5 mt-0.5">
+                            <span className={`text-[24px] font-black ${calculateTotalPoints() < 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
+                                {calculateTotalPoints() < 0 
+                                    ? `+${Math.abs(calculateTotalPoints()).toLocaleString()}` 
+                                    : `${calculateTotalPoints().toLocaleString()}`
+                                } P
+                            </span>
+                            <span className="text-[11.5px] font-bold text-gray-400">
+                                / 내 잔여 포인트: {loadingPoints ? '...' : `${userPoints.toLocaleString()} P`}
+                            </span>
                         </div>
                     </div>
-                    <div className="flex gap-2 w-full sm:w-auto">
+                    
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                         {isAlreadyPaid ? (
-                            isProratedUpgrade ? (
+                            calculateTotalPoints() > 0 ? (
                                 <>
                                     <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-14 px-6 rounded-xl font-bold text-[15px] border-gray-300">
-                                        취소
+                                        닫기
                                     </Button>
                                     {calculateTotalPoints() > userPoints && !loadingPoints && (
                                         <Button 
@@ -642,7 +698,7 @@ ${cancelDetail || '상세 사유 미기재'}
                                     <Button 
                                         onClick={handleFinalSubmit} 
                                         disabled={saving || loadingPoints || calculateTotalPoints() > userPoints} 
-                                        className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-indigo-600 hover:bg-indigo-700 text-white"
+                                        className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-gray-900 hover:bg-black text-white"
                                     >
                                         {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <DollarSign className="w-5 h-5 mr-2" />}
                                         추가 옵션 결제하기
@@ -697,14 +753,14 @@ ${cancelDetail || '상세 사유 미기재'}
                     </div>
                 </div>
                 
-                {/* 결제 취소/철회 신청 모달 */}
+                {/* 광고취소 신청 모달 */}
                 {isCancelModalOpen && (
                     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150 text-left">
                             {/* 헤더 */}
                             <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                                 <h3 className="font-black text-gray-900 text-lg flex items-center gap-2">
-                                    <span className="text-red-500 font-extrabold">⚠️</span> 광고 결제 취소/철회
+                                    <span className="text-red-500 font-extrabold">⚠️</span> 광고 취소/철회
                                 </h3>
                                 <button onClick={() => setIsCancelModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                     <X className="w-5 h-5" />
