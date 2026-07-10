@@ -259,6 +259,12 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                 href={`/jobs/${id}`} 
                 prefetch={false}
                 onClick={(e) => {
+                    if (rawAd?.status === 'COMPLETED' || rawAd?.state === 'COMPLETED') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        alert('구인 완료된 글입니다.');
+                        return;
+                    }
                     if (onClick) {
                         onClick(e);
                     }

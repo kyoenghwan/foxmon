@@ -233,7 +233,7 @@ export default async function BizJobsPage() {
                                         {ad.category1 || '-'}
                                     </td>
                                     <td className="px-4 py-4 text-center">
-                                        <AdStatusBadge status={ad.status} />
+                                        <ToggleJobStatusButton adId={ad.id} initialStatus={ad.status} />
                                     </td>
                                     <td className="px-4 py-4 text-center">
                                         <span className="inline-flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500">
@@ -273,7 +273,7 @@ export default async function BizJobsPage() {
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end gap-1.5 shrink-0">
-                                        <AdStatusBadge status={ad.status} />
+                                        <ToggleJobStatusButton adId={ad.id} initialStatus={ad.status} />
                                     </div>
                                 </div>
 

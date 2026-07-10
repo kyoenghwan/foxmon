@@ -10,7 +10,7 @@ export function GeneralJobListRow(job: AdItem) {
         option_bold, option_color, option_color_value, 
         option_highlight, option_highlight_value, 
         option_bg, option_bg_value, option_icon, 
-        option_general_icons, created_at 
+        option_general_icons, created_at, status 
     } = job;
     
     // 지역 축약
@@ -30,7 +30,13 @@ export function GeneralJobListRow(job: AdItem) {
 
     return (
         <div 
-            onClick={() => router.push(`/jobs/${id}`, { scroll: false })}
+            onClick={() => {
+                if (status === 'COMPLETED') {
+                    alert('구인 완료된 글입니다.');
+                    return;
+                }
+                router.push(`/jobs/${id}`, { scroll: false });
+            }}
             className={`p-4 active:scale-[0.99] transition-all border-b flex flex-col gap-2.5 cursor-pointer relative group ${
                 hasBg ? 'border-l-4' : 'hover:bg-gray-50/80 border-gray-100'
             }`}
@@ -107,7 +113,7 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
         option_bold, option_color, option_color_value, 
         option_highlight, option_highlight_value, 
         option_bg, option_bg_value, option_icon, 
-        option_general_icons, created_at 
+        option_general_icons, created_at, status 
     } = job;
     
     // 지역 축약
@@ -127,6 +133,10 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
     return (
         <tr 
             onClick={() => {
+                if (status === 'COMPLETED') {
+                    alert('구인 완료된 글입니다.');
+                    return;
+                }
                 if (onClick) onClick();
                 else router.push(`/jobs/${id}`, { scroll: false });
             }}

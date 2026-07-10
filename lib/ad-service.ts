@@ -43,6 +43,7 @@ export interface AdItem {
     isRealAd?: boolean; // 실제 DB 연동 광고 여부
     is_fixed?: boolean; // 고정 배너 여부
     merchant_tier?: 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP';
+    status?: string;
 }
 
 const IS_SUPABASE_ENABLED = !!process.env.NEXT_PUBLIC_SUPABASE_URL;

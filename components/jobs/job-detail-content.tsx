@@ -134,6 +134,13 @@ export function JobDetailContent({ job, isModal = false, onClose }: { job: any, 
     }
   }, [job?.id]);
 
+  React.useEffect(() => {
+    if (job?.status === 'COMPLETED' || (displayJob && displayJob.status === 'COMPLETED')) {
+      alert('구인 완료된 글입니다.');
+      window.history.back();
+    }
+  }, [job?.status, displayJob?.status]);
+
   // 클라이언트 사이드 상세 내용 지연 로딩 및 공통 코드 치환 로직
   React.useEffect(() => {
     setDisplayJob(job);
