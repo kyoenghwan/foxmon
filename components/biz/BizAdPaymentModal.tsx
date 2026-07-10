@@ -458,7 +458,7 @@ ${cancelDetail || '상세 사유 미기재'}
                                                 <span className="text-[11px] font-medium text-gray-400 mt-0.5">기본 요금 결제</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
-                                                {opt.sub && <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">첫 달 5% 할인</span>}
+                                                {opt.sub && <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">30일마다 5%씩 누적할인 (최대 15%)</span>}
                                                 {!opt.sub && days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
                                                 {!opt.sub && days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
                                                 <span className="text-[14px] font-bold text-gray-500">{price.toLocaleString()} P</span>
@@ -478,24 +478,21 @@ ${cancelDetail || '상세 사유 미기재'}
                                 <div className="mt-3 p-4 bg-blue-50/50 border border-blue-100 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2">
                                     <p className="text-[13px] font-bold text-blue-800 mb-3 flex items-center gap-2">
                                         <Zap className="w-4 h-4 text-blue-500" />
-                                        구독 유지 기간에 따른 놀라운 추가 할인 혜택!
+                                        자동연장 유지 기간에 따른 놀라운 할인 혜택!
                                     </p>
-                                    <div className="grid grid-cols-6 gap-1.5 text-center">
+                                    <div className="grid grid-cols-3 gap-1.5 text-center">
                                         {[
-                                            { m: '1개월', d: '5%' },
-                                            { m: '2개월', d: '10%' },
-                                            { m: '3개월', d: '15%' },
-                                            { m: '4개월', d: '20%' },
-                                            { m: '5개월', d: '25%' },
-                                            { m: '6개월~', d: '30%' },
+                                            { m: '첫째 달', d: '5% 할인' },
+                                            { m: '둘째 달 (2회차)', d: '10% 할인' },
+                                            { m: '셋째 달 이상 (3회차~)', d: '15% 할인 (최대)' },
                                         ].map((item, idx) => (
                                             <div key={idx} className="flex flex-col bg-white border border-blue-100 rounded py-2">
-                                                <span className="text-[10px] text-gray-500">{item.m}</span>
-                                                <span className="text-[12px] font-black text-blue-600">{item.d}</span>
+                                                <span className="text-[10px] text-gray-500 font-bold">{item.m}</span>
+                                                <span className="text-[12.5px] font-black text-blue-600 mt-0.5">{item.d}</span>
                                             </div>
                                         ))}
                                     </div>
-                                    <p className="text-[11px] text-gray-400 mt-2 text-center">* 위 할인은 결제 연장(갱신) 시점부터 자동으로 순차 적용됩니다.</p>
+                                    <p className="text-[11px] text-gray-400 mt-2 text-center">* 매 30일(자동 연장)마다 5%씩 추가 적용되어 최대 15%까지 상시 할인됩니다.</p>
                                 </div>
                             )}
                         </section>
