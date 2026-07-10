@@ -29,6 +29,7 @@ import { LoadMyDataModal } from './LoadMyDataModal';
 
 export interface AdFormData {
     id?: string;
+    status?: string;
     company: string;
     title: string;
     location: string;

@@ -54,6 +54,7 @@ function MerchantTierBadge({ tier }: { tier: 'VIP' | 'VVIP' | 'VVVIP' }) {
 
 export interface AdFormData {
     id?: string;
+    status?: string;
     company: string;
     company_name?: string;
     title: string;

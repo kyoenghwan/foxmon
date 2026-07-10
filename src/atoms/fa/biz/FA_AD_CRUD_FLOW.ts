@@ -208,35 +208,43 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             }
 
             // 3. 업데이트 데이터 구성
-            const updatePayload: any = {
-                title: payload.title,
-                location: payload.location,
-                company_name: payload.company || payload.business_name,
-                salary_type: payload.pay_type,
-                salary_amount: payload.pay_amount,
-                logo_url: payload.logo_url || payload.image,
-                contact_name: payload.manager_name,
-                contact_phone: payload.contact_phone,
-                kakao_id: payload.kakao_id,
-                line_id: payload.line_id,
-                telegram_id: payload.telegram_id,
-                wechat_id: payload.wechat_id,
-                employment_type: payload.employment_type,
-                category1: payload.category_1,
-                category2: payload.category_2,
-                work_time: payload.work_hours,
-                amenities: payload.amenities || [],
-                keywords: payload.keywords || [],
-                design_mode: payload.design_mode,
-                detail_content: payload.detail_content,
-                detail_bg_color: payload.color,
-                detail_bg_image: payload.detail_bg_image,
-                tier: payload.tier || 'GENERAL',
-                theme: payload.premium_banner_mode === 'upload' ? 'UPLOAD' : (payload.theme || null),
-                effect_intensity: payload.effect_intensity || null,
-                color: payload.color || null,
-                updated_at: new Date().toISOString()
-            };
+            const isStatusOnlyUpdate = payload.status !== undefined && Object.keys(payload).filter(k => k !== 'status' && k !== 'id').length === 0;
+
+            const updatePayload: any = isStatusOnlyUpdate
+                ? {
+                    status: payload.status,
+                    updated_at: new Date().toISOString()
+                  }
+                : {
+                    title: payload.title,
+                    location: payload.location,
+                    company_name: payload.company || payload.business_name,
+                    salary_type: payload.pay_type,
+                    salary_amount: payload.pay_amount,
+                    logo_url: payload.logo_url || payload.image,
+                    contact_name: payload.manager_name,
+                    contact_phone: payload.contact_phone,
+                    kakao_id: payload.kakao_id,
+                    line_id: payload.line_id,
+                    telegram_id: payload.telegram_id,
+                    wechat_id: payload.wechat_id,
+                    employment_type: payload.employment_type,
+                    category1: payload.category_1,
+                    category2: payload.category_2,
+                    work_time: payload.work_hours,
+                    amenities: payload.amenities || [],
+                    keywords: payload.keywords || [],
+                    design_mode: payload.design_mode,
+                    detail_content: payload.detail_content,
+                    detail_bg_color: payload.color,
+                    detail_bg_image: payload.detail_bg_image,
+                    tier: payload.tier || 'GENERAL',
+                    theme: payload.premium_banner_mode === 'upload' ? 'UPLOAD' : (payload.theme || null),
+                    effect_intensity: payload.effect_intensity || null,
+                    color: payload.color || null,
+                    status: payload.status || undefined,
+                    updated_at: new Date().toISOString()
+                };
 
             // 결제 연장인 경우 만료일 및 옵션 갱신
             if (isPaymentUpdate) {

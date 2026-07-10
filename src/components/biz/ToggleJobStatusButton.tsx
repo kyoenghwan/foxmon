@@ -8,7 +8,7 @@ export function ToggleJobStatusButton({ adId, initialStatus }: { adId: string, i
 
     const handleStatusChange = async (newStatus: string) => {
         setLoading(true);
-        const res = await manageAdAction('UPDATE', { id: adId, status: newStatus } as any);
+        const res = await manageAdAction('UPDATE', { status: newStatus } as any, adId);
         if (res.success) {
             setStatus(newStatus);
         } else {
