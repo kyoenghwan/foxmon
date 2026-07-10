@@ -456,7 +456,7 @@ ${cancelDetail || '상세 사유 미기재'}
                                                     )}
                                                 </div>
                                                 <span className="text-[11px] font-medium text-gray-400 mt-0.5">
-                                                    {opt.sub ? '30일마다 5%씩 자동 누적할인 (최대 15%)' : '기본 요금 결제'}
+                                                    {opt.sub ? '30일마다 5%씩 자동 누적할인' : '기본 요금 결제'}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-1.5 shrink-0 ml-2">
