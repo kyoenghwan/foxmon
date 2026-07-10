@@ -135,17 +135,15 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
             `}} />
 
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px] border-collapse text-center table-fixed">
+                <table className="w-full min-w-[800px] border-collapse text-center table-fixed">
                     <thead>
                         <tr className="bg-gray-50/75 border-b border-gray-150 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
-                            <th className="px-4 py-4 text-center w-[110px] min-w-[110px]">배너 종류</th>
-                            <th className="px-4 py-4 text-center w-[85px] min-w-[85px]">로고</th>
-                            <th className="px-6 py-4 text-center w-[200px] min-w-[200px]">제목</th>
-                            <th className="px-4 py-4 text-center w-[110px] min-w-[110px]">업체명</th>
-                            <th className="px-4 py-4 text-center w-[100px] min-w-[100px]">근무지역</th>
-                            <th className="px-4 py-4 text-center w-[70px] min-w-[70px]">상태</th>
-                            <th className="px-4 py-4 text-center w-[105px] min-w-[105px]">노출 만료일</th>
-                            <th className="px-4 py-4 text-center w-[120px] min-w-[120px]">관리</th>
+                            <th className="px-4 py-4 text-center w-[120px] min-w-[120px]">배너 종류</th>
+                            <th className="px-4 py-4 text-center w-[90px] min-w-[90px]">로고</th>
+                            <th className="px-6 py-4 text-center w-[250px] min-w-[250px]">제목</th>
+                            <th className="px-4 py-4 text-center w-[120px] min-w-[120px]">업체명</th>
+                            <th className="px-4 py-4 text-center w-[110px] min-w-[110px]">근무지역</th>
+                            <th className="px-4 py-4 text-center w-[130px] min-w-[130px]">관리</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-[13px] text-gray-700">
@@ -160,7 +158,7 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                                     <TierBadge tier={ad.tier} />
                                 </td>
 
-                                {/* 로고 (표준 1.5:1 비율인 w-[75px] h-[50px] 및 object-contain 적용으로 잘림 없이 원본 그대로 노출) */}
+                                {/* 로고 */}
                                 <td className="px-4 py-4 whitespace-nowrap text-center">
                                     <div className="flex items-center justify-center">
                                         {ad.logo_url ? (
@@ -177,44 +175,34 @@ export function BizBannersList({ initialAds, isVerified }: { initialAds: any[], 
                                     </div>
                                 </td>
 
-                                {/* 제목 (가로 폭 180px로 최적화 및 자동 전광판) */}
+                                {/* 제목 */}
                                 <td className="px-6 py-4 text-center">
                                     <TickerText 
                                         text={ad.title} 
-                                        maxWidth="180px" 
-                                        limit={12}
+                                        maxWidth="230px" 
+                                        limit={15}
                                         className="font-black text-gray-900 hover:text-primary transition-colors" 
                                     />
                                 </td>
 
-                                {/* 업체명 (가로 폭 95px 및 6글자 초과 시 자동 전광판) */}
+                                {/* 업체명 */}
                                 <td className="px-4 py-4 text-center">
                                     <TickerText 
                                         text={ad.company || ad.company_name} 
-                                        maxWidth="95px" 
+                                        maxWidth="100px" 
                                         limit={6}
                                         className="font-bold text-gray-600" 
                                     />
                                 </td>
 
-                                {/* 근무지역 (가로 폭 85px 및 5글자 초과 시 자동 전광판) */}
+                                {/* 근무지역 */}
                                 <td className="px-4 py-4 text-center">
                                     <TickerText 
                                         text={ad.location || '전지역'} 
-                                        maxWidth="85px" 
-                                        limit={5}
+                                        maxWidth="95px" 
+                                        limit={6}
                                         className="text-gray-500 font-medium" 
                                     />
-                                </td>
-
-                                {/* 상태 (가운데 정렬) */}
-                                <td className="px-4 py-4 whitespace-nowrap text-center">
-                                    <StatusBadge ad={ad} />
-                                </td>
-
-                                {/* 노출 만료일 (가운데 정렬) */}
-                                <td className="px-4 py-4 whitespace-nowrap text-center font-bold text-gray-600">
-                                    {formatDate(ad.expires_at)}
                                 </td>
 
                                 {/* 관리 (가운데 정렬) */}
