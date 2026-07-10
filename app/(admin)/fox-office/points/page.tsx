@@ -159,7 +159,7 @@ function OptionCard({ baseOpt, pricingOptions, setPricingOptions }: any) {
 
     const handlePercentChange = (period: number, percent: number) => {
         const months = period / 30;
-        const calculated = Math.floor((val30 * months) * ((100 - percent) / 100) / 1000) * 1000;
+        const calculated = Math.floor((val30 * months) * ((100 - percent) / 100) / 100) * 100;
         handlePriceChange(period, calculated);
     };
 
