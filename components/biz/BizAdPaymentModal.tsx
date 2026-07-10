@@ -67,6 +67,20 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
         return null;
     };
 
+    // 요금제 가격 차이를 이용해 60일/90일 할인율을 동적으로 역산하는 헬퍼 함수
+    const getAdDiscountPercent = (days: number) => {
+        const price30 = getBasePrice(30);
+        if (price30 <= 0) return 0;
+        
+        const pricePeriod = getBasePrice(days);
+        if (pricePeriod <= 0) return 0;
+
+        const months = days / 30;
+        const originalPrice = price30 * months;
+        const discountRatio = ((originalPrice - pricePeriod) / originalPrice) * 100;
+        return Math.round(discountRatio);
+    };
+
     // 이미 결제되어 진행 중인 광고인지 판별
     const isAlreadyPaid = initialData.isPaid === true && initialData.expires_at && new Date(initialData.expires_at).getFullYear() !== 2000;
     
@@ -461,8 +475,8 @@ ${cancelDetail || '상세 사유 미기재'}
                                             </div>
                                             <div className="flex items-center gap-1.5 shrink-0 ml-2">
                                                 {opt.sub && <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">최대 15% 할인</span>}
-                                                {!opt.sub && days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
-                                                {!opt.sub && days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
+                                                {!opt.sub && days === 60 && getAdDiscountPercent(60) > 0 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">{getAdDiscountPercent(60)}% OFF</span>}
+                                                {!opt.sub && days === 90 && getAdDiscountPercent(90) > 0 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">{getAdDiscountPercent(90)}% OFF</span>}
                                                 <span className="text-[14px] font-bold text-gray-500">{price.toLocaleString()} P</span>
                                             </div>
                                         </button>
@@ -551,7 +565,7 @@ ${cancelDetail || '상세 사유 미기재'}
                                                         {isPurchased && !form.option_double_slot ? (
                                                             <span className="text-emerald-600">해지 (환불 예정)</span>
                                                         ) : (
-                                                            isAlreadyPaid && !isPurchased ? `+${proratedCost.toLocaleString()} P` : '총 결제액 5% 할인'
+                                                            isAlreadyPaid && !isPurchased ? `+${proratedCost.toLocaleString()} P` : `총 결제액 ${doubleDiscount}% 할인`
                                                         )}
                                                     </div>
                                                     <div className="text-[11px] font-medium text-gray-400">
