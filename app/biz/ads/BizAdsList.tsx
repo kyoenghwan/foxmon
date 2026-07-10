@@ -78,22 +78,74 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
         window.location.reload();
     };
 
+    // 전광판 효과 텍스트 컴포넌트 (상시 자동 롤링 구조)
+    const TickerText = ({ text, maxWidth = '160px', className = '', limit = 12 }: { text: string; maxWidth?: string; className?: string; limit?: number }) => {
+        if (!text) return <span className="text-gray-400 font-bold">-</span>;
+        const isLong = text.length > limit;
+
+        return (
+            <div 
+                className="relative overflow-hidden whitespace-nowrap mx-auto cursor-default py-1 text-center"
+                style={{ maxWidth }}
+            >
+                {isLong ? (
+                    <div className="w-full overflow-hidden relative h-5">
+                        <div className="absolute top-0 left-0 w-max animate-banner-marquee text-left">
+                            <span className={className}>{text}</span>
+                            <span className="inline-block w-8"></span>
+                            <span className={className}>{text}</span>
+                            <span className="inline-block w-8"></span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className={`w-full truncate text-center ${className}`}>
+                        {text}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const formatDate = (dateStr?: string) => {
+        if (!dateStr) return '결제 대기';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime()) || d.getFullYear() === 2000) return '결제 대기';
+        return d.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).replace(/\. /g, '.').replace(/\.$/, '');
+    };
+
     return (
-        <>
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <table className="w-full">
+        <div className="bg-white rounded-2xl border border-gray-150 shadow-sm overflow-hidden">
+            {/* 상시 전광판 CSS 키프레임 주입 */}
+            <style dangerouslySetInnerHTML={{__html: `
+                @keyframes adMarquee {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
+                }
+                .animate-ad-marquee {
+                    display: inline-block;
+                    animation: adMarquee 15s linear infinite;
+                }
+            `}} />
+
+            <div className="overflow-x-auto">
+                <table className="w-full min-w-[900px] border-collapse text-center table-fixed">
                     <thead>
-                        <tr className="border-b border-gray-100 bg-gray-50 whitespace-nowrap">
-                            <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-16">로고</th>
-                            <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500">광고명</th>
-                            <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-32">지역</th>
-                            <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">등급</th>
-                            <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">상태</th>
-                            <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500">만료일</th>
-                            <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500">관리</th>
+                        <tr className="bg-gray-50/75 border-b border-gray-150 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
+                            <th className="px-4 py-4 text-center w-[110px] min-w-[110px]">배너 종류</th>
+                            <th className="px-4 py-4 text-center w-[85px] min-w-[85px]">로고</th>
+                            <th className="px-6 py-4 text-center w-[200px] min-w-[200px]">제목</th>
+                            <th className="px-4 py-4 text-center w-[110px] min-w-[110px]">업체명</th>
+                            <th className="px-4 py-4 text-center w-[100px] min-w-[100px]">근무지역</th>
+                            <th className="px-4 py-4 text-center w-[70px] min-w-[70px]">상태</th>
+                            <th className="px-4 py-4 text-center w-[105px] min-w-[105px]">노출 만료일</th>
+                            <th className="px-4 py-4 text-center w-[130px] min-w-[130px]">관리</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-100 text-[13px] text-gray-700">
                         {ads.map((ad: any) => {
                             const expiresMs = ad.expires_at ? new Date(ad.expires_at).getTime() : 0;
                             const isInvalidOrPending = !ad.expires_at || isNaN(expiresMs) || new Date(ad.expires_at).getFullYear() === 2000;
@@ -103,49 +155,73 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                             return (
                                 <tr 
                                     key={ad.id} 
-                                    onClick={() => router.push(`/biz/ads/${ad.id}/edit`)}
-                                    className="border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer"
+                                    className="hover:bg-gray-50/50 transition-colors"
                                 >
-                                    {/* 1. 로고 컬럼 */}
-                                    <td className="px-4 py-4 text-center">
+                                    {/* 배너 종류 */}
+                                    <td className="px-4 py-4 whitespace-nowrap text-center">
+                                        <TierBadge tier={ad.tier} />
+                                    </td>
+
+                                    {/* 로고 */}
+                                    <td className="px-4 py-4 whitespace-nowrap text-center">
                                         <div className="flex items-center justify-center">
-                                            {(ad.logo_url || ad.image) ? (
-                                                <img src={ad.logo_url || ad.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0 border border-gray-100 shadow-xs" />
+                                            {ad.logo_url || ad.image ? (
+                                                <div className="w-[75px] h-[50px] rounded-lg border border-gray-200 shadow-sm overflow-hidden bg-white flex items-center justify-center shrink-0">
+                                                    <img 
+                                                        src={ad.logo_url || ad.image} 
+                                                        alt="로고" 
+                                                        className="w-full h-full object-contain" 
+                                                    />
+                                                </div>
                                             ) : (
-                                                <span className="text-[11px] text-gray-400 font-bold">없음</span>
+                                                <span className="text-[11px] text-gray-400 font-medium">없음</span>
                                             )}
                                         </div>
                                     </td>
-                                    {/* 2. 광고명 컬럼 */}
-                                    <td className="px-6 py-4">
-                                        <div className="max-w-[180px] sm:max-w-[280px]">
-                                            {/* @ts-ignore */}
-                                            <marquee scrollamount="3" className="font-bold text-[14px] text-gray-900 block">{ad.title}</marquee>
-                                            <p className="text-[12px] text-gray-400 mt-0.5 truncate">{ad.company || ad.company_name}</p>
-                                        </div>
+
+                                    {/* 제목 */}
+                                    <td className="px-6 py-4 text-center">
+                                        <TickerText 
+                                            text={ad.title} 
+                                            maxWidth="180px" 
+                                            limit={12}
+                                            className="font-black text-gray-900" 
+                                        />
                                     </td>
-                                    {/* 3. 지역 컬럼 */}
-                                    <td className="px-4 py-4 text-center whitespace-nowrap text-[13px] font-bold text-gray-700">
-                                        {ad.location || '전지역'}
+
+                                    {/* 업체명 */}
+                                    <td className="px-4 py-4 text-center">
+                                        <TickerText 
+                                            text={ad.company || ad.company_name} 
+                                            maxWidth="95px" 
+                                            limit={6}
+                                            className="font-bold text-gray-600" 
+                                        />
                                     </td>
-                                    <td className="px-4 py-4 text-center whitespace-nowrap">
-                                        <TierBadge tier={ad.tier} />
+
+                                    {/* 근무지역 */}
+                                    <td className="px-4 py-4 text-center">
+                                        <TickerText 
+                                            text={ad.location || '전지역'} 
+                                            maxWidth="85px" 
+                                            limit={5}
+                                            className="text-gray-500 font-medium" 
+                                        />
                                     </td>
-                                    <td className="px-4 py-4 text-center whitespace-nowrap">
+
+                                    {/* 상태 */}
+                                    <td className="px-4 py-4 whitespace-nowrap text-center">
                                         <StatusBadge ad={ad} isVerified={!!isVerified} />
                                     </td>
-                                    <td className="px-4 py-4 text-center whitespace-nowrap">
-                                        <span className="flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500">
-                                            <Clock className="w-3.5 h-3.5" />
-                                            {ad.expires_at && new Date(ad.expires_at).getFullYear() !== 2000 
-                                                ? new Date(ad.expires_at).toLocaleDateString() 
-                                                : ad.claim_code 
-                                                    ? '수락 대기' 
-                                                    : '결제 대기'}
-                                        </span>
+
+                                    {/* 노출 만료일 */}
+                                    <td className="px-4 py-4 whitespace-nowrap text-center font-bold text-gray-600">
+                                        {formatDate(ad.expires_at)}
                                     </td>
-                                    <td className="px-6 py-4 text-center whitespace-nowrap">
-                                        <div className="flex items-center justify-center gap-2">
+
+                                    {/* 관리 (수정 버튼 제거, 오직 결제 버튼만 제공) */}
+                                    <td className="px-4 py-4 whitespace-nowrap text-center">
+                                        <div className="flex items-center justify-center">
                                             {isPendingOrExpired ? (
                                                 <button 
                                                     onClick={(e) => { 
@@ -156,7 +232,7 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                                                             return;
                                                         }
                                                         setPaymentAd(ad); 
-                                                    }}
+                                                     }}
                                                     className={`text-[11px] font-black px-2.5 py-1.5 rounded flex items-center gap-1 transition-colors ${
                                                         !(isVerified || isAgent || !!ad.claim_code)
                                                             ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
@@ -170,15 +246,12 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                                                     onClick={(e) => { 
                                                         e.stopPropagation(); 
                                                         setPaymentAd({ ...ad, isPaid: true }); 
-                                                    }}
+                                                     }}
                                                     className="text-[11px] font-black px-2.5 py-1.5 rounded flex items-center gap-1 transition-colors bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100"
                                                 >
                                                     <CreditCard className="w-3 h-3" /> 결제 옵션 확인
                                                 </button>
                                             )}
-                                            <div className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="수정">
-                                                <Pencil className="w-4 h-4 text-gray-500" />
-                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -196,6 +269,6 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                     onSuccess={handlePaymentSuccess} 
                 />
             )}
-        </>
+        </div>
     );
 }
