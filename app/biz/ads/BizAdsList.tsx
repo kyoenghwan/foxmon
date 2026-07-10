@@ -239,7 +239,7 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                                                             : 'bg-gray-900 text-white hover:bg-black'
                                                     }`}
                                                 >
-                                                    <CreditCard className="w-3 h-3" /> 결제 및 노출
+                                                    <CreditCard className="w-3 h-3" /> 결제
                                                 </button>
                                             ) : (
                                                 <button 
