@@ -1,16 +1,13 @@
 'use client';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { CheckCircle2, Circle } from 'lucide-react';
 import { manageAdAction } from '@/lib/actions';
 
 export function ToggleJobStatusButton({ adId, initialStatus }: { adId: string, initialStatus: string }) {
     const [status, setStatus] = useState(initialStatus);
     const [loading, setLoading] = useState(false);
 
-    const toggleStatus = async () => {
+    const handleStatusChange = async (newStatus: string) => {
         setLoading(true);
-        const newStatus = status === 'COMPLETED' ? 'ACTIVE' : 'COMPLETED';
         const res = await manageAdAction('UPDATE', { id: adId, status: newStatus } as any);
         if (res.success) {
             setStatus(newStatus);
@@ -21,18 +18,18 @@ export function ToggleJobStatusButton({ adId, initialStatus }: { adId: string, i
     };
 
     return (
-        <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={toggleStatus} 
+        <select
+            value={status}
             disabled={loading}
-            className={`text-xs h-8 px-2 ${status === 'COMPLETED' ? 'text-green-600 border-green-200 bg-green-50' : 'text-gray-500'}`}
+            onChange={(e) => handleStatusChange(e.target.value)}
+            className={`text-[12px] font-black rounded-lg border-2 px-2 py-1 outline-none cursor-pointer transition-all ${
+                status === 'COMPLETED' 
+                    ? 'bg-gray-800 text-white border-gray-900' 
+                    : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100/70'
+            }`}
         >
-            {status === 'COMPLETED' ? (
-                <><CheckCircle2 className="w-3 h-3 mr-1" /> 구인완료</>
-            ) : (
-                <><Circle className="w-3 h-3 mr-1" /> 구인중</>
-            )}
-        </Button>
+            <option value="ACTIVE" className="bg-white text-gray-800 font-bold">구인중</option>
+            <option value="COMPLETED" className="bg-white text-gray-800 font-bold">구인완료</option>
+        </select>
     );
 }
