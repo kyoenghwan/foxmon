@@ -37,6 +37,9 @@ export function BizAdPaymentModal({ initialData, jobId, onClose, onSuccess }: Bi
         option_highlight: false
     });
 
+    // 이미 결제되어 진행 중인 광고일 때 추가 연장할 기간 상태 (null = 연장 안 함)
+    const [selectedExtensionPeriod, setSelectedExtensionPeriod] = useState<number | 'sub' | null>(null);
+
     const update = (field: string, value: any) => {
         setForm(prev => ({ ...prev, [field]: value }));
     };
@@ -193,6 +196,30 @@ ${cancelDetail || '상세 사유 미기재'}
                 additionalCost += Math.floor(upgradeDiff * prorationRatio);
             }
 
+            // 3. 도중 기간 추가 연장 구매 (선택했을 경우)
+            if (selectedExtensionPeriod !== null) {
+                const extDays = selectedExtensionPeriod === 'sub' ? 30 : selectedExtensionPeriod;
+                const extBasePrice = getBasePrice(extDays);
+                const extFixedPrice = policies['OPTION_PRICE_SIDE_FIXED_' + extDays] || (extBasePrice * 3);
+
+                let base = form.option_fixed ? extFixedPrice : extBasePrice;
+                let extTotal = base;
+                
+                if (selectedExtensionPeriod === 'sub') {
+                    extTotal = Math.floor(extTotal * 0.95);
+                }
+
+                if (form.option_double_slot) {
+                    extTotal *= 2;
+                }
+
+                if (form.option_double_slot) {
+                    extTotal = Math.floor(extTotal * ((100 - doubleDiscount) / 100));
+                }
+
+                additionalCost += extTotal;
+            }
+
             return additionalCost;
         } else {
             // ─── [일반 신규 결제 / 기간 만료 후 연장 모드] ───
@@ -226,7 +253,9 @@ ${cancelDetail || '상세 사유 미기재'}
                 is_fixed: form.option_fixed,
                 option_highlight: false,
                 _isPayment: true,
-                is_extension: !isAlreadyPaid // 이미 결제된 광고면 기간 연장(extension)이 아니라 단순 옵션 추가
+                is_extension: !isAlreadyPaid || (isAlreadyPaid && selectedExtensionPeriod !== null),
+                exposure_period: isAlreadyPaid && selectedExtensionPeriod ? ((selectedExtensionPeriod === 'sub' ? 30 : selectedExtensionPeriod) as 30 | 60 | 90) : (form.exposure_period || 30),
+                is_subscription: isAlreadyPaid && selectedExtensionPeriod ? (selectedExtensionPeriod === 'sub') : !!form.is_subscription
             };
             const res = await manageBizAdAction('UPDATE', finalForm, jobId);
             if (!res.success) {
@@ -340,7 +369,9 @@ ${cancelDetail || '상세 사유 미기재'}
                                     { id: 90, label: '90일', sub: false },
                                     { id: 'sub', label: '매월 자동 연장 (구독)', sub: true },
                                 ].map(opt => {
-                                    const isSelected = opt.sub ? form.is_subscription : (!form.is_subscription && form.exposure_period === opt.id);
+                                    const isSelected = isAlreadyPaid 
+                                        ? (opt.sub ? selectedExtensionPeriod === 'sub' : selectedExtensionPeriod === opt.id)
+                                        : (opt.sub ? form.is_subscription : (!form.is_subscription && form.exposure_period === opt.id));
                                     const days = opt.sub ? 30 : opt.id as number;
                                     let price = getBasePrice(days);
                                     if (opt.sub) price = Math.floor(price * 0.95);
@@ -349,22 +380,29 @@ ${cancelDetail || '상세 사유 미기재'}
                                         <button 
                                             key={opt.id}
                                             type="button"
-                                            disabled={isAlreadyPaid}
                                             onClick={() => {
-                                                if (isAlreadyPaid) return;
-                                                if (opt.sub) {
-                                                    update('is_subscription', true);
-                                                    update('exposure_period', 30);
+                                                if (isAlreadyPaid) {
+                                                    // 토글 방식으로 동작 (연장 취소 가능)
+                                                    if (isSelected) {
+                                                        setSelectedExtensionPeriod(null);
+                                                    } else {
+                                                        setSelectedExtensionPeriod(opt.id as any);
+                                                    }
                                                 } else {
-                                                    update('is_subscription', false);
-                                                    update('exposure_period', opt.id as 30|60|90);
+                                                    if (opt.sub) {
+                                                        update('is_subscription', true);
+                                                        update('exposure_period', 30);
+                                                    } else {
+                                                        update('is_subscription', false);
+                                                        update('exposure_period', opt.id as 30|60|90);
+                                                    }
                                                 }
                                             }}
-                                            className={`flex justify-between items-center p-4 rounded-xl border-2 transition-all text-left outline-none ${
+                                            className={`flex justify-between items-center p-4 rounded-xl border-2 transition-all text-left outline-none cursor-pointer ${
                                                 isSelected 
-                                                    ? 'border-primary bg-primary/5 shadow-sm' 
+                                                    ? 'border-primary bg-primary/5 shadow-sm font-bold' 
                                                     : 'border-gray-200 bg-white hover:border-gray-300'
-                                            } ${isAlreadyPaid ? 'opacity-65 cursor-not-allowed bg-gray-50 text-gray-400' : 'cursor-pointer'}`}
+                                            }`}
                                         >
                                             <div className="flex flex-col">
                                                 <span className="text-[14px] font-black text-gray-900">{opt.label}</span>
@@ -383,7 +421,7 @@ ${cancelDetail || '상세 사유 미기재'}
 
                             {isAlreadyPaid && (
                                 <div className="mt-2.5 p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl text-[12px] font-bold text-indigo-700 text-center animate-in fade-in slide-in-from-top-2">
-                                    💡 현재 광고가 활성화되어 진행 중입니다. (남은 일수: {remainingDays}일) 기간 연장은 만료 시점에 가능합니다.
+                                    💡 현재 광고가 활성화되어 진행 중입니다. (남은 일수: {remainingDays}일) 추가로 연장할 노출 기간을 위에서 선택할 수 있습니다.
                                 </div>
                             )}
 
