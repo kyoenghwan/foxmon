@@ -1,21 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { MessageCircle, Send, Clock, CheckCircle2, AlertCircle, ChevronDown, Plus } from 'lucide-react';
 import type { UserInquiry } from '@/lib/actions/help';
 import { createInquiry, getMyInquiries } from '@/lib/actions/help';
 import { MarkdownContent } from '@/components/help/MarkdownContent';
-
-const INQUIRY_CATEGORIES = [
-    '계좌 문의',
-    '계정 문의',
-    '포인트·환불',
-    '광고 문의',
-    '신고·제재',
-    '건의사항',
-    '기타',
-];
+import { QA_GET_COMMON_CODES } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 
 const StatusBadge = ({ status }: { status: string }) => {
     const map: Record<string, { label: string; style: string; icon: React.ReactNode }> = {
@@ -43,6 +34,29 @@ export function InquiryPageClient({
     const router = useRouter();
     const [inquiries, setInquiries] = useState(initialInquiries);
     const [showForm, setShowForm] = useState(false);
+    const [categories, setCategories] = useState<string[]>([]);
+
+    useEffect(() => {
+        async function fetchCategories() {
+            const res = await QA_GET_COMMON_CODES('INQUIRY_TYPE', true);
+            if (res.success && res.data) {
+                const catList = res.data.map(item => item.code_name);
+                setCategories(catList);
+            } else {
+                // Fallback in case of DB read failure
+                setCategories([
+                    '계좌 문의',
+                    '계정 문의',
+                    '포인트·환불',
+                    '광고 문의',
+                    '신고·제재',
+                    '건의사항',
+                    '기타'
+                ]);
+            }
+        }
+        fetchCategories();
+    }, []);
     const [category, setCategory] = useState('');
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -115,7 +129,7 @@ export function InquiryPageClient({
                             className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary font-medium"
                         >
                             <option value="">유형을 선택해주세요</option>
-                            {INQUIRY_CATEGORIES.map((cat) => (
+                             {categories.map((cat) => (
                                 <option key={cat} value={cat}>
                                     {cat}
                                 </option>
