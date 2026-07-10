@@ -419,12 +419,6 @@ export default function AdminPointsPolicyPage() {
                     pricingOptions={pricingOptions} 
                     setPricingOptions={setPricingOptions} 
                   />
-                  {/* 스페셜 테마 이펙트 요금 */}
-                  <OptionCard 
-                    baseOpt={{ key: 'OPTION_PRICE_BIZ_THEME_EFFECT', title: '스페셜 테마 이펙트 요금', desc: '배너 테두리에 화려한 네온, 골드 효과 등을 적용하는 요금입니다.' }}
-                    pricingOptions={pricingOptions} 
-                    setPricingOptions={setPricingOptions} 
-                  />
                 </div>
               </TabsContent>
 
@@ -458,12 +452,6 @@ export default function AdminPointsPolicyPage() {
                   {/* 사이드 고정 요금 */}
                   <OptionCard 
                     baseOpt={{ key: 'OPTION_PRICE_SIDE_FIXED', title: '스마트 고정 노출 (Fix Slot) 요금', desc: '상단 4구좌 영역에 롤링 없이 상시 고정하는 옵션의 요금입니다.' }}
-                    pricingOptions={pricingOptions} 
-                    setPricingOptions={setPricingOptions} 
-                  />
-                  {/* 스페셜 테마 이펙트 요금 */}
-                  <OptionCard 
-                    baseOpt={{ key: 'OPTION_PRICE_BIZ_THEME_EFFECT', title: '스페셜 테마 이펙트 요금', desc: '배너 테두리에 화려한 네온, 골드 효과 등을 적용하는 요금입니다.' }}
                     pricingOptions={pricingOptions} 
                     setPricingOptions={setPricingOptions} 
                   />
