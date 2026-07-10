@@ -369,8 +369,17 @@ ${cancelDetail || '상세 사유 미기재'}
                                     { id: 90, label: '90일', sub: false },
                                     { id: 'sub', label: '매월 자동 연장 (구독)', sub: true },
                                 ].map(opt => {
+                                    // 현재 결제되어 이미 사용 중인 기간인지 여부 판별
+                                    const isCurrentlyActive = isAlreadyPaid && (
+                                        opt.sub 
+                                            ? !!initialData.is_subscription 
+                                            : (!initialData.is_subscription && initialData.exposure_period === opt.id)
+                                    );
+
                                     const isSelected = isAlreadyPaid 
-                                        ? (opt.sub ? selectedExtensionPeriod === 'sub' : selectedExtensionPeriod === opt.id)
+                                        ? (selectedExtensionPeriod === null 
+                                            ? isCurrentlyActive 
+                                            : (opt.sub ? selectedExtensionPeriod === 'sub' : selectedExtensionPeriod === opt.id))
                                         : (opt.sub ? form.is_subscription : (!form.is_subscription && form.exposure_period === opt.id));
                                     const days = opt.sub ? 30 : opt.id as number;
                                     let price = getBasePrice(days);
@@ -382,8 +391,9 @@ ${cancelDetail || '상세 사유 미기재'}
                                             type="button"
                                             onClick={() => {
                                                 if (isAlreadyPaid) {
-                                                    // 토글 방식으로 동작 (연장 취소 가능)
-                                                    if (isSelected) {
+                                                    // 토글 방식으로 동작 (기존 이용 중인 카드 누르면 연장 취소)
+                                                    const clickedActive = opt.sub ? (selectedExtensionPeriod === 'sub') : (selectedExtensionPeriod === opt.id);
+                                                    if (clickedActive || isCurrentlyActive) {
                                                         setSelectedExtensionPeriod(null);
                                                     } else {
                                                         setSelectedExtensionPeriod(opt.id as any);
@@ -405,7 +415,14 @@ ${cancelDetail || '상세 사유 미기재'}
                                             }`}
                                         >
                                             <div className="flex flex-col">
-                                                <span className="text-[14px] font-black text-gray-900">{opt.label}</span>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-[14px] font-black text-gray-900">{opt.label}</span>
+                                                    {isCurrentlyActive && (
+                                                        <span className="text-[9px] font-black bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200">
+                                                            이용 중
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <span className="text-[11px] font-medium text-gray-400 mt-0.5">기본 요금 결제</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
