@@ -110,7 +110,6 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 tier: payload.tier || 'GENERAL',
                 theme: payload.premium_banner_mode === 'upload' ? 'UPLOAD' : (payload.theme || null),
                 effect_intensity: payload.effect_intensity || null,
-                color: payload.color || null,
                 
                 // 결제 및 옵션 추가 컬럼
                 exposure_period: p,
@@ -249,7 +248,6 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                         tier: payload.tier || 'GENERAL',
                         theme: payload.premium_banner_mode === 'upload' ? 'UPLOAD' : (payload.theme || null),
                         effect_intensity: payload.effect_intensity || null,
-                        color: payload.color || null,
                         status: payload.status || undefined,
                         updated_at: new Date().toISOString()
                     });
