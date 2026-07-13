@@ -119,7 +119,7 @@ export function SideBanners() {
     };
 
     return (
-        <div className="fixed top-[220px] left-0 w-full z-[45] pointer-events-none flex justify-center">
+        <div className="fixed top-[220px] left-0 w-full z-[45] pointer-events-none flex justify-center responsive-side-banners">
             <div ref={containerRef} className="container relative h-0">
                 {/* Left Wing */}
                 <div 
