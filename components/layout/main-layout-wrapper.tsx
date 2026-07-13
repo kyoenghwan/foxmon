@@ -37,26 +37,26 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
         <div className="flex flex-col min-h-screen bg-white relative">
             <SideBanners />
 
-            {/* 헤더 + 메인 배너 (모바일은 스크롤 해제 / PC는 상단 고정) */}
-            <div className="relative md:sticky md:top-0 z-40 bg-white">
+            {/* 메뉴 영역만 상단 고정 */}
+            <div className="relative md:sticky md:top-0 z-40 bg-white border-b border-gray-100">
                 <MainHeader session={session} />
+            </div>
 
-                {/* 메인 배너 & 데스크톱 로그인 정보 */}
-                <div className="w-full shrink-0">
-                    <div className="container mx-auto px-4 py-2.5 md:py-3.5">
-                        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-3 md:p-4 shadow-sm">
-                            <div className="relative flex flex-col tablet:flex-row gap-3 tablet:gap-6 items-stretch tablet:h-[203px]">
-                                {/* 메인 배너: 모바일/데스크톱 항시 노출 및 상단 고정 */}
-                                <div className="w-full tablet:flex-1 tablet:h-[203px] overflow-hidden rounded-xl bg-white shadow-sm">
-                                    <div className="w-full h-full">
-                                        <MainBanner />
-                                    </div>
+            {/* 메인 배너 & 데스크톱 로그인 정보 (스크롤 시 상단으로 흘러 올라가도록 고정 해제) */}
+            <div className="w-full shrink-0">
+                <div className="container mx-auto px-4 py-2.5 md:py-3.5">
+                    <div className="bg-gray-50 border border-gray-100 rounded-2xl p-3 md:p-4 shadow-sm">
+                        <div className="relative flex flex-col tablet:flex-row gap-3 tablet:gap-6 items-stretch tablet:h-[203px]">
+                            {/* 메인 배너: 스크롤 시 위로 이동 */}
+                            <div className="w-full tablet:flex-1 tablet:h-[203px] overflow-hidden rounded-xl bg-white shadow-sm">
+                                <div className="w-full h-full">
+                                    <MainBanner />
                                 </div>
+                            </div>
 
-                                {/* 유저 로그인 정보 박스 (데스크톱 전용: 배너 우측에 함께 고정) */}
-                                <div className="hidden tablet:block w-full tablet:w-[320px] tablet:h-[203px] z-20 shrink-0">
-                                    <LoginInfoBox session={session} />
-                                </div>
+                            {/* 유저 로그인 정보 박스 (데스크톱 전용) */}
+                            <div className="hidden tablet:block w-full tablet:w-[320px] tablet:h-[203px] z-20 shrink-0">
+                                <LoginInfoBox session={session} />
                             </div>
                         </div>
                     </div>
