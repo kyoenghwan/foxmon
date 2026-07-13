@@ -398,15 +398,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
     const searchParams = useSearchParams();
     const isPayMode = searchParams.get('pay') === 'true';
 
-    useEffect(() => {
-        if (!isNew && isPayMode && initialData) {
-            // 폼 데이터가 세팅된 후 약간의 딜레이를 주어 모달 오픈
-            const timer = setTimeout(() => {
-                handleSubmit(true);
-            }, 500);
-            return () => clearTimeout(timer);
-        }
-    }, [isNew, isPayMode]);
+
     
     // 초기 모드 결정
     const initialDesignMode = initialData?.detail_content 
@@ -659,7 +651,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
         update('pay', amount ? `${type} ${amount}` : '');
     };
 
-    const handleSubmit = async (autoOpenModal?: boolean) => {
+    const handleSubmit = async () => {
         if (!form.company && !form.business_name) {
             alert('상호명은 필수 입력 항목입니다.');
             return;
@@ -680,7 +672,6 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
             const latestData = canvasRef.current.saveLatest?.();
             if (latestData) {
                 finalDetailContent = latestData;
-                // form 상태도 업데이트하여 JobPaymentModal에 전달되도록 함
                 update('detail_content', latestData);
             }
         }
@@ -690,19 +681,8 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
             return;
         }
         
-        // 폼 검증 후 포인트 로드 및 모달 띄우기
-        setLoadingPoints(true);
-        setShowPaymentModal(true);
-        try {
-            const pointRes = await getUserPointsAction();
-            if (pointRes.success && pointRes.points !== undefined) {
-                setUserPoints(pointRes.points);
-            }
-        } catch (err) {
-            console.error("포인트 로드 실패", err);
-        } finally {
-            setLoadingPoints(false);
-        }
+        // 결제 모달 없이 다이렉트로 저장 수행
+        await handleFinalSubmit(false);
     };
 
     const handleFinalSubmit = async (isPayment: boolean = false) => {
@@ -1822,19 +1802,14 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                 <Button variant="outline" onClick={() => window.history.back()} className="font-bold h-11 px-6 rounded-xl">
                     취소
                 </Button>
-                {isNew ? (
-                    <Button onClick={() => handleSubmit()} disabled={saving} className="font-black h-11 px-8 rounded-xl shadow-md">
-                        {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                        {mode === 'JOB' ? '구인 공고 등록하기' : '광고 등록하기'}
-                    </Button>
-                ) : (
-                    <div className="flex gap-2">
-                        <Button onClick={() => handleFinalSubmit(false)} disabled={saving} className="font-black h-11 px-6 rounded-xl shadow-md bg-primary hover:bg-orange-600 text-white border-0">
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                            저장하기
-                        </Button>
-                    </div>
-                )}
+                <Button 
+                    onClick={() => handleSubmit()} 
+                    disabled={saving} 
+                    className="font-black h-11 px-8 rounded-xl shadow-md bg-primary hover:bg-orange-600 text-white border-0"
+                >
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                    저장하기
+                </Button>
             </div>
 
             {/* ─── HTML 모드 미리보기 모달 ─── */}
