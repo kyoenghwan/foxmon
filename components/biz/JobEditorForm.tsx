@@ -609,12 +609,19 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
     };
 
     const handleLoadAdData = (adData: any) => {
+        const designMode = adData.design_mode || 'canvas';
+        const detailContent = adData.detail_content || '';
+
+        // 로드된 콘텐츠를 레퍼런스 버퍼에 즉각 동기화하여 탭 전환 시 유실 방지
+        canvasContentRef.current = detailContent;
+        htmlContentRef.current = detailContent;
+
         setForm(prev => ({
             ...prev,
             title: adData.title || prev.title,
             company: adData.company_name || prev.company,
-            detail_content: adData.detail_content || prev.detail_content,
-            design_mode: adData.design_mode || prev.design_mode,
+            detail_content: detailContent,
+            design_mode: designMode,
             logo_url: adData.logo_url || prev.logo_url,
             image: adData.image_url || prev.image,
             theme: adData.theme || prev.theme,
@@ -622,9 +629,7 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
             bg_opacity: adData.bg_opacity || prev.bg_opacity,
         }));
         setIsLoadDataModalOpen(false);
-        if (adData.design_mode) {
-            handleDesignModeSwitch(adData.design_mode as any);
-        }
+        alert(`[${adData.title || '광고'}]의 본문 내용을 정상적으로 불러왔습니다!`);
     };
 
     const handleLoadDesignData = (jobData: any) => {
@@ -632,11 +637,9 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
         const detailBgImage = jobData.detail_bg_image || '';
         const detailContent = jobData.detail_content || '';
 
-        if (designMode === 'canvas') {
-            canvasContentRef.current = detailContent;
-        } else {
-            htmlContentRef.current = detailContent;
-        }
+        // 로드된 콘텐츠를 레퍼런스 버퍼에 즉각 동기화하여 탭 전환 시 유실 방지
+        canvasContentRef.current = detailContent;
+        htmlContentRef.current = detailContent;
 
         setForm(prev => ({
             ...prev,
@@ -646,9 +649,6 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
         }));
 
         setIsLoadDesignModalOpen(false);
-        if (designMode) {
-            handleDesignModeSwitch(designMode as any);
-        }
         alert(`[${jobData.title}]의 본문 디자인을 불러왔습니다!`);
     };
 
@@ -1016,19 +1016,29 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
 
                         {/* 오른쪽 컬럼 (기본 정보) */}
                         <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-                            <h3 className="text-[14px] font-black text-gray-900 pb-3 border-b mb-5 flex items-center justify-between">
+                            <h3 className="text-[14px] font-black text-gray-900 pb-3 border-b mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                                 구인 공고 기본 정보
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => setIsLoadDataModalOpen(true)}
-                                className="text-[12px] font-bold text-white bg-primary px-3 py-1.5 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-1.5 shadow-sm"
-                            >
-                                <Megaphone className="w-3.5 h-3.5" />
-                                내 광고 본문 불러오기
-                            </button>
+                            <div className="flex items-center flex-wrap gap-1.5">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsLoadDataModalOpen(true)}
+                                    className="text-[11px] font-bold text-white bg-primary px-3 py-1.5 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-1.5 shadow-sm whitespace-nowrap"
+                                >
+                                    <Megaphone className="w-3.5 h-3.5" />
+                                    광고 내용 가져오기
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsLoadDesignModalOpen(true)}
+                                    className="text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm whitespace-nowrap"
+                                >
+                                    <FolderOpen className="w-3.5 h-3.5" />
+                                    기존글 가져오기
+                                </button>
+                            </div>
                         </h3>
                             <div className="flex flex-col md:flex-row gap-5 items-start mt-4">
                                 {/* 왼쪽 로고 이미지 입력 영역 */}
@@ -1656,13 +1666,6 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                                 직접 작성 (이미지/GIF 첨부)
                                             </label>
                                         </div>
-                                        <button 
-                                            type="button"
-                                            onClick={() => setIsLoadDesignModalOpen(true)}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-[12px] font-bold transition-all shadow-sm ml-auto"
-                                        >
-                                            <FolderOpen className="w-3.5 h-3.5" /> 기존 작성글 불러오기
-                                        </button>
                                     </div>
                                 </div>
                                 
