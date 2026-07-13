@@ -1226,14 +1226,13 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                                 <span>상시채용</span>
                                             </label>
 
-                                            {form.close_date && form.close_date !== '상시채용' && (
-                                                <input
-                                                    type="date"
-                                                    value={form.close_date}
-                                                    onChange={e => update('close_date', e.target.value)}
-                                                    className="px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white cursor-pointer"
-                                                />
-                                            )}
+                                            <input
+                                                type="date"
+                                                value={(!form.close_date || form.close_date === '상시채용') ? '' : form.close_date}
+                                                disabled={!form.close_date || form.close_date === '상시채용'}
+                                                onChange={e => update('close_date', e.target.value)}
+                                                className="px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white cursor-pointer disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                            />
                                         </div>
                                     </div>
                                 </div>
