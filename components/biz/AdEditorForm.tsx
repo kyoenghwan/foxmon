@@ -100,6 +100,7 @@ export interface AdFormData {
     is_address_same?: boolean;
     business_name?: string;
     premium_banner_mode?: 'upload' | 'template';
+    close_date?: string;
     
     // DB 호환용 필드 (컴포넌트 렌더링용)
     category1?: string;

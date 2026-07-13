@@ -10,16 +10,12 @@ export function GeneralJobListRow(job: AdItem) {
         option_bold, option_color, option_color_value, 
         option_highlight, option_highlight_value, 
         option_bg, option_bg_value, option_icon, 
-        option_general_icons, created_at, status 
+        option_general_icons, created_at, status, close_date 
     } = job;
     
     // 지역 축약
     const shortLocation = location?.split(' ').slice(0, 2).join(' ') || location || '지역무관';
     const hasIcons = option_general_icons && option_general_icons.length > 0;
-
-    // 작성일
-    const dateObj = created_at ? new Date(created_at) : new Date();
-    const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
 
     // 리스트 배경색 스타일
     const hasBg = option_bg && option_bg_value;
@@ -42,7 +38,7 @@ export function GeneralJobListRow(job: AdItem) {
             }`}
             style={bgStyle}
         >
-            {/* 1행: 업체명, 지역, 급여, 등록일 */}
+            {/* 1행: 업체명, 지역, 급여, 마감일 */}
             <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] sm:text-[13px]">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span className="font-extrabold text-gray-900 text-[14px] sm:text-[15px] shrink-0">
@@ -65,8 +61,16 @@ export function GeneralJobListRow(job: AdItem) {
                         </>
                     )}
                 </div>
-                <div className="text-gray-400 font-semibold shrink-0 text-[11px] sm:text-[12px] ml-auto">
-                    {dateStr}
+                <div className="shrink-0 ml-auto">
+                    {(!close_date || close_date === '상시채용') ? (
+                        <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded bg-pink-50 text-pink-500 border border-pink-200/50 text-[10px] font-black leading-none whitespace-nowrap tracking-tight">
+                            상시채용
+                        </span>
+                    ) : (
+                        <span className="text-gray-400 font-bold text-[11px] sm:text-[12px]">
+                            {close_date}
+                        </span>
+                    )}
                 </div>
             </div>
             
@@ -113,16 +117,12 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
         option_bold, option_color, option_color_value, 
         option_highlight, option_highlight_value, 
         option_bg, option_bg_value, option_icon, 
-        option_general_icons, created_at, status 
+        option_general_icons, created_at, status, close_date 
     } = job;
     
     // 지역 축약
     const shortLocation = location?.split(' ').slice(0, 2).join(' ') || location || '지역무관';
     const hasIcons = option_general_icons && option_general_icons.length > 0;
-
-    // 작성일
-    const dateObj = created_at ? new Date(created_at) : new Date();
-    const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
 
     // 리스트 배경색 스타일
     const hasBg = option_bg && option_bg_value;
@@ -185,7 +185,17 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
                 <span className="text-[15px] font-black text-[#ff3b30] tracking-tighter whitespace-nowrap">{pay}</span>
             </td>
 
-            <td className="py-4 px-2 text-gray-400 font-medium text-center text-[13px]">{dateStr}</td>
+            <td className="py-4 px-2 text-center text-[13px]">
+                {(!close_date || close_date === '상시채용') ? (
+                    <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-pink-50 text-pink-500 border border-pink-200/50 text-[11px] font-black leading-none whitespace-nowrap tracking-tight">
+                        상시채용
+                    </span>
+                ) : (
+                    <span className="text-gray-500 font-semibold">
+                        {close_date}
+                    </span>
+                )}
+            </td>
         </tr>
     );
 }

@@ -775,7 +775,7 @@ export function JobsListContent({ isEmployer: propIsEmployer, searchQuery }: Job
                                         <th className="py-3 px-4 w-[45%] text-left font-semibold">제목</th>
                                         <th className="py-3 px-2 w-[15%] font-semibold text-gray-500">근무지역</th>
                                         <th className="py-3 px-2 w-[15%] font-semibold text-gray-500">급여</th>
-                                        <th className="py-3 px-2 w-[10%] font-semibold text-gray-500">등록일</th>
+                                        <th className="py-3 px-2 w-[10%] font-semibold text-gray-500">마감일</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">

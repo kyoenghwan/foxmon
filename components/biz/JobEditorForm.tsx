@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, X, Megaphone, Building2, Trash2, Instagram, Send, Link2, Clock, Plus } from 'lucide-react';
+import { Loader2, Save, Image, ImageIcon, Eye, Info, DollarSign, MapPin, AlignLeft, Layers, Crown, Upload, RefreshCw, MessageSquare, Bold, Italic, Underline, AlignCenter, AlignLeft as AlignLeftIcon, AlignRight, List, ListOrdered, Palette, Type, Paintbrush, FolderOpen, Briefcase, Tag, Phone, User, MessageCircle, CheckCircle2, X, Megaphone, Building2, Trash2, Instagram, Send, Link2, Clock, Plus, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
 import { QA_GET_COMMON_CODES, CodeItem } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
@@ -71,6 +71,7 @@ export interface AdFormData {
     business_registration_url?: string;
     is_address_same?: boolean;
     business_name?: string;
+    close_date?: string;
     
     // 결제 및 부가 옵션 (팝업)
     exposure_period?: 30 | 60 | 90;
@@ -441,8 +442,16 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
         option_bg: false,
         option_icon: false,
         option_jump: false,
+        close_date: '상시채용',
         ...initialData,
     });
+    
+    // DB 조회 데이터에 close_date 값이 없는 경우에도 디폴트 세팅
+    useEffect(() => {
+        if (initialData && !initialData.close_date) {
+            setForm(prev => ({ ...prev, close_date: '상시채용' }));
+        }
+    }, [initialData]);
 
     const [regions, setRegions] = useState<CodeItem[]>([]);
     const [categories1, setCategories1] = useState<CodeItem[]>([]);
@@ -1188,6 +1197,43 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                                 />
                                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-gray-500 font-medium">원</span>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 마감일 */}
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-1.5">
+                                        <label className="w-full sm:w-[140px] text-[13px] font-extrabold text-gray-700 shrink-0 flex items-center gap-1.5">
+                                            <Calendar className="w-4 h-4 text-gray-400" />
+                                            <span>마감일</span>
+                                            <span className="text-red-500">*</span>
+                                            <span className="hidden sm:inline text-gray-300 ml-auto">-</span>
+                                        </label>
+                                        <div className="flex-1 w-full flex items-center gap-4">
+                                            <label className="inline-flex items-center gap-1.5 cursor-pointer text-[13px] font-extrabold text-gray-700 select-none bg-gray-50 border border-gray-200 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={!form.close_date || form.close_date === '상시채용'}
+                                                    onChange={e => {
+                                                        if (e.target.checked) {
+                                                            update('close_date', '상시채용');
+                                                        } else {
+                                                            const todayStr = new Date().toISOString().split('T')[0];
+                                                            update('close_date', todayStr);
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300 cursor-pointer"
+                                                />
+                                                <span>상시채용</span>
+                                            </label>
+
+                                            {form.close_date && form.close_date !== '상시채용' && (
+                                                <input
+                                                    type="date"
+                                                    value={form.close_date}
+                                                    onChange={e => update('close_date', e.target.value)}
+                                                    className="px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary bg-white cursor-pointer"
+                                                />
+                                            )}
                                         </div>
                                     </div>
                                 </div>
