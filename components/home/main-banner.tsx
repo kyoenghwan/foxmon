@@ -150,7 +150,7 @@ export function MainBanner() {
             <div className="w-full h-full bg-white border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 text-center">
                 <p className="text-gray-400 font-bold mb-2">등록된 프리미엄 광고가 없습니다.</p>
                 {session?.user?.role !== 'VIEWER' && (
-                    <Link href="/jobs/post">
+                    <Link href="/biz/ads">
                         <Button variant="outline" size="sm" className="font-bold">광고 등록하기</Button>
                     </Link>
                 )}
