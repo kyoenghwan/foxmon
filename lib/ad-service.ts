@@ -388,8 +388,8 @@ export async function getRotatedAdsWithLogs(
                 }))];
             }
             rolledAds = rolledAds.slice(0, limitCount);
-        } else {
-            // 타 등급은 기존대로 mock 광고를 추가하여 채워 넣음
+        } else if (!IS_SUPABASE_ENABLED) {
+            // 로컬 모킹 개발 환경에서만 mock 광고를 추가하여 채워 넣음
             const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
             const filteredMock = (tier === 'GENERAL') ? filterBySearch(mockAdsForTier, searchQuery) : mockAdsForTier;
             // 이미 롤링된 광고의 ID 목록을 추출하여 중복 유입 방지 (_dup 및 _repeat_ 제거한 원본 ID 기준)
@@ -404,10 +404,12 @@ export async function getRotatedAdsWithLogs(
             queryLogs.push(`[DB SIDE Final] 0 ads returned for SIDE tier wing banners.`);
             console.timeEnd(apiLabel);
             return { ads: [], queryLogs };
-        } else {
+        } else if (!IS_SUPABASE_ENABLED) {
             const mockAdsForTier = MOCK_ADS.filter(ad => ad.tier === tier);
             const filteredMock = (tier === 'GENERAL') ? filterBySearch(mockAdsForTier, searchQuery) : mockAdsForTier;
             rolledAds = applyRollingLogic(filteredMock, limitCount);
+        } else {
+            rolledAds = [];
         }
     }
 

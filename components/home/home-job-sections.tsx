@@ -35,7 +35,7 @@ function getResponsiveHideClass(idx: number, maxRows: number): string {
     if (idx >= 15) classes += ' min-[768px]:max-[799px]:hidden';
     if (idx >= 20) classes += ' min-[800px]:max-[1439px]:hidden';
     if (idx >= 25) classes += ' min-[1440px]:max-[1919px]:hidden';
-    if (idx >= 30) classes += ' min-[1920px]:max-[2559px]:hidden';
+    if (idx >= 25) classes += ' min-[1920px]:max-[2559px]:hidden';
     if (idx >= 25) classes += ' min-[2560px]:hidden';
     return classes.trim();
   }
