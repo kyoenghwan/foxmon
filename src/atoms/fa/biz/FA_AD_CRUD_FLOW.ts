@@ -38,25 +38,26 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             const t = payload.tier || 'GENERAL';
             const priceTier = t === 'AD_GENERAL' ? 'GENERAL' : t;
             
-            // 티어 기본료 + 기간 기본료 + 옵션
-            let totalPoints = getPrice(`TIER_PRICE_${priceTier}`, 0);
+            // _isPayment가 명시적으로 true인 경우에만 실질적 포인트 결제를 수행함
+            const isPaymentExecution = payload._isPayment === true;
             
-            // 일반 구인 공고의 경우 기간 요금이 부과될 수 있음 (기획에 따라 다름)
-            if (priceTier === 'GENERAL') {
-                totalPoints += getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, 0);
+            let totalPoints = 0;
+            if (isPaymentExecution) {
+                totalPoints = getPrice(`TIER_PRICE_${priceTier}`, 0);
+                if (priceTier === 'GENERAL') {
+                    totalPoints += getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, 0);
+                }
+                if (payload.is_subscription) {
+                    totalPoints = Math.floor(totalPoints * 0.95);
+                }
+                if (payload.option_bold) totalPoints += getPrice(`OPTION_PRICE_BOLD_${p}`, 0);
+                if (payload.option_color) totalPoints += getPrice(`OPTION_PRICE_COLOR_${p}`, 0);
+                if (payload.option_bg) totalPoints += getPrice(`OPTION_PRICE_BG_${p}`, 0);
+                if (payload.option_icon) totalPoints += getPrice(`OPTION_PRICE_ICON_${p}`, 0);
+                if (payload.option_jump) totalPoints += getPrice(`OPTION_PRICE_JUMP_${p}`, 0);
             }
-            
-            if (payload.is_subscription) {
-                totalPoints = Math.floor(totalPoints * 0.95);
-            }
-            
-            if (payload.option_bold) totalPoints += getPrice(`OPTION_PRICE_BOLD_${p}`, 0);
-            if (payload.option_color) totalPoints += getPrice(`OPTION_PRICE_COLOR_${p}`, 0);
-            if (payload.option_bg) totalPoints += getPrice(`OPTION_PRICE_BG_${p}`, 0);
-            if (payload.option_icon) totalPoints += getPrice(`OPTION_PRICE_ICON_${p}`, 0);
-            if (payload.option_jump) totalPoints += getPrice(`OPTION_PRICE_JUMP_${p}`, 0);
 
-            // 2. 포인트 차감 진행 (무조건 자동 차감)
+            // 2. 포인트 차감 진행 (결제 진행 조건 시에만)
             if (totalPoints > 0) {
                 const { FA_DEDUCT_POINT_FOR_AD } = await import('@/src/atoms/fa/points/FA_DEDUCT_POINT_FOR_AD');
                 const deductResult = await FA_DEDUCT_POINT_FOR_AD({
@@ -72,7 +73,12 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
 
             // 3. 만료일 계산
             const expiresAt = new Date();
-            expiresAt.setDate(expiresAt.getDate() + p);
+            if (isPaymentExecution) {
+                expiresAt.setDate(expiresAt.getDate() + p);
+            } else {
+                // 결제를 패스하는 단순 저장의 경우 만료일을 어제로 강제 세팅하여 미결제(OFF)로 유도
+                expiresAt.setDate(expiresAt.getDate() - 1);
+            }
 
             const dbPayload = {
                 user_id: userId,
