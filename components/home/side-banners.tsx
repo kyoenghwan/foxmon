@@ -37,26 +37,26 @@ export function SideBanners() {
     const rollingAds = uniqueAds.filter(ad => !ad.is_fixed);
     // console.log("[SideBanners] Separated ads:", { fixedAds, rollingAds });
     
-    // 3. 8개의 화면 슬롯 배치 구성
+    // 3. 6개의 화면 슬롯 배치 구성
     const filledAds: AdItem[] = [];
     
-    // 3-1. 고정 광고 배치 (최대 4개)
-    const activeFixedCount = Math.min(fixedAds.length, 4);
+    // 3-1. 고정 광고 배치 (최대 3개)
+    const activeFixedCount = Math.min(fixedAds.length, 3);
     for (let i = 0; i < activeFixedCount; i++) {
         filledAds.push(fixedAds[i]);
     }
     
     // 3-2. 남은 슬롯을 일반 광고의 순환 반복으로 채움 (비어보이지 않게 보장)
-    const remainingSlots = 8 - activeFixedCount;
+    const remainingSlots = 6 - activeFixedCount;
     if (rollingAds.length > 0) {
         for (let i = 0; i < remainingSlots; i++) {
             filledAds.push(rollingAds[i % rollingAds.length]);
         }
     }
-    // console.log("[SideBanners] Filled ads for 8 slots:", filledAds);
+    // console.log("[SideBanners] Filled ads for 6 slots:", filledAds);
 
-    const leftAds = filledAds.slice(0, 4);
-    const rightAds = filledAds.slice(4, 8);
+    const leftAds = filledAds.slice(0, 3);
+    const rightAds = filledAds.slice(3, 6);
     // console.log("[SideBanners] Split wings:", { leftAds, rightAds });
 
     useEffect(() => {
@@ -119,7 +119,7 @@ export function SideBanners() {
     };
 
     return (
-        <div className="fixed top-[220px] left-0 w-full z-[45] pointer-events-none flex justify-center responsive-side-banners">
+        <div className="fixed top-[220px] left-0 w-full z-[45] pointer-events-none flex justify-center">
             <div ref={containerRef} className="container relative h-0">
                 {/* Left Wing */}
                 <div 

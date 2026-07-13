@@ -295,9 +295,4 @@ input::-webkit-textfield-decoration-container {
   display: none !important;
 }
 
-/* 세로 해상도가 850px 이하로 줄어드는 노트북/저해상도 화면에서 사이드 배너를 화면 최상단 부근까지 위로 바짝 끌어올림 */
-@media (max-height: 850px) {
-  .responsive-side-banners {
-    top: 30px !important;
-  }
-}
+
