@@ -214,19 +214,52 @@ export default async function BizJobsPage() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-4 text-center text-[13.5px] font-bold text-gray-700 truncate">
-                                        {ad.company_name || ad.company || ad.business_name || '-'}
-                                    </td>
-                                    <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
-                                        {ad.salary_type && ad.salary_amount
-                                            ? `${ad.salary_type} ${Number(ad.salary_amount).toLocaleString()}원`
-                                            : ad.pay || '-'}
+                                    <td className="px-4 py-4 text-center">
+                                        <div className="w-[110px] overflow-hidden relative h-5 flex items-center justify-center mx-auto">
+                                            {ad.company_name && ad.company_name.length > 5 ? (
+                                                <div className="absolute w-max flex items-center gap-4 animate-job-marquee">
+                                                    <span className="text-[13.5px] font-bold text-gray-700">{ad.company_name}</span>
+                                                    <span className="text-[13.5px] font-bold text-gray-700">{ad.company_name}</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-[13.5px] font-bold text-gray-700 w-full text-center truncate">
+                                                    {ad.company_name || ad.company || ad.business_name || '-'}
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-4 py-4 text-center">
-                                        <span className="inline-flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500">
-                                            <Clock className="w-3.5 h-3.5" />
-                                            {(!ad.close_date || ad.close_date === '상시채용') ? '상시채용' : ad.close_date}
-                                        </span>
+                                        <div className="flex items-center justify-center gap-1.5">
+                                            {ad.salary_type && (
+                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black shrink-0 ${
+                                                    ad.salary_type === '시급' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
+                                                    ad.salary_type === '일급' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                                                    ad.salary_type === '월급' ? 'bg-green-50 text-green-600 border border-green-100' :
+                                                    ad.salary_type === '주급' ? 'bg-purple-50 text-purple-600 border border-purple-100' :
+                                                    ad.salary_type === '건당' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
+                                                    'bg-gray-50 text-gray-600 border border-gray-150'
+                                                }`}>
+                                                    {ad.salary_type}
+                                                </span>
+                                            )}
+                                            <span className="font-extrabold text-[13.5px] text-gray-900 whitespace-nowrap">
+                                                {ad.salary_amount
+                                                    ? `${Number(String(ad.salary_amount).replace(/[^0-9]/g, '')).toLocaleString()}원`
+                                                    : ad.pay || '-'}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-4 text-center">
+                                        {(!ad.close_date || ad.close_date === '상시채용') ? (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-teal-50 text-teal-600 border border-teal-150 whitespace-nowrap">
+                                                ✨ 상시채용
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500 whitespace-nowrap">
+                                                <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                                {ad.close_date}
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <div className="flex items-center justify-center gap-2">
@@ -261,16 +294,36 @@ export default async function BizJobsPage() {
                                 </div>
 
                                 <div className="flex items-center justify-between border-t border-gray-50 pt-3 text-[11px] font-bold text-gray-500">
-                                    <div className="flex items-center gap-3">
-                                        <span className="flex items-center gap-1">
-                                            💰 {ad.salary_type && ad.salary_amount
-                                                ? `${ad.salary_type} ${Number(ad.salary_amount).toLocaleString()}원`
-                                                : ad.pay || '-'}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                            마감: {(!ad.close_date || ad.close_date === '상시채용') ? '상시채용' : ad.close_date}
-                                        </span>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <div className="flex items-center gap-1">
+                                            {ad.salary_type && (
+                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-black shrink-0 ${
+                                                    ad.salary_type === '시급' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
+                                                    ad.salary_type === '일급' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                                                    ad.salary_type === '월급' ? 'bg-green-50 text-green-600 border border-green-100' :
+                                                    ad.salary_type === '주급' ? 'bg-purple-50 text-purple-600 border border-purple-100' :
+                                                    ad.salary_type === '건당' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
+                                                    'bg-gray-50 text-gray-600 border border-gray-150'
+                                                }`}>
+                                                    {ad.salary_type}
+                                                </span>
+                                            )}
+                                            <span className="font-extrabold text-[12px] text-gray-900">
+                                                {ad.salary_amount
+                                                    ? `${Number(String(ad.salary_amount).replace(/[^0-9]/g, '')).toLocaleString()}원`
+                                                    : ad.pay || '-'}
+                                            </span>
+                                        </div>
+                                        {(!ad.close_date || ad.close_date === '상시채용') ? (
+                                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9.5px] font-black bg-teal-50 text-teal-600 border border-teal-100 whitespace-nowrap">
+                                                ✨ 상시
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-1 text-gray-400">
+                                                <Clock className="w-3 h-3" />
+                                                {ad.close_date}
+                                            </span>
+                                        )}
                                     </div>
 
                                     <div className="flex items-center gap-2 shrink-0">
