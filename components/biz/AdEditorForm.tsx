@@ -854,6 +854,23 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         update('detail_content', mode === 'canvas' ? canvasContentRef.current : htmlContentRef.current);
     };
 
+    const formatKoreanAmount = (amountVal: number): string => {
+        if (isNaN(amountVal) || amountVal <= 0) return '원';
+        if (amountVal < 10000) {
+            return `${amountVal.toLocaleString()}원`;
+        }
+        const manValue = Math.floor(amountVal / 10000);
+        if (manValue >= 10000) {
+            const ukValue = Math.floor(manValue / 10000);
+            const remainingMan = manValue % 10000;
+            if (remainingMan > 0) {
+                return `${ukValue.toLocaleString()}억 ${remainingMan.toLocaleString()}원`;
+            }
+            return `${ukValue.toLocaleString()}억원`;
+        }
+        return `${manValue.toLocaleString()}만원`;
+    };
+
     // 급여 업데이트 핸들러
     const handlePayChange = (type: string, amount: string) => {
         update('pay_type', type);

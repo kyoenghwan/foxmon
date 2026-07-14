@@ -131,7 +131,7 @@ const EFFECT_OPTIONS = [
 
 interface AdEditorFormProps {
     initialData?: Partial<AdFormData>;
-    onSubmit: (data: AdFormData) => Promise<void>;
+    onSubmit: (data: AdFormData) => Promise<any>;
     isNew?: boolean;
     mode?: 'JOB' | 'AD';
 }
