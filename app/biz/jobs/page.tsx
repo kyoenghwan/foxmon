@@ -47,8 +47,31 @@ const StatusBadge = ({ expiresAt }: { expiresAt: string | null | undefined }) =>
         );
     }
 };
-
-
+const formatKoreanAmount = (amountVal: number): string => {
+    if (isNaN(amountVal) || amountVal <= 0) return '-';
+    
+    // 만원 단위 미만
+    if (amountVal < 10000) {
+        return `${amountVal.toLocaleString()}원`;
+    }
+    
+    // 만원 단위 이상
+    const manValue = Math.floor(amountVal / 10000);
+    
+    // 억 단위 이상 (1억 = 10000 만원)
+    if (manValue >= 10000) {
+        const ukValue = Math.floor(manValue / 10000);
+        const remainingMan = manValue % 10000;
+        
+        if (remainingMan > 0) {
+            return `${ukValue.toLocaleString()}억 ${remainingMan.toLocaleString()}만원`;
+        }
+        return `${ukValue.toLocaleString()}억원`;
+    }
+    
+    // 억 미만 만원 단위
+    return `${manValue.toLocaleString()}만원`;
+};
 
 export default async function BizJobsPage() {
     const session = await auth();
@@ -244,7 +267,7 @@ export default async function BizJobsPage() {
                                             )}
                                             <span className="font-extrabold text-[13.5px] text-gray-900 whitespace-nowrap">
                                                 {ad.salary_amount
-                                                    ? `${Number(String(ad.salary_amount).replace(/[^0-9]/g, '')).toLocaleString()}원`
+                                                    ? formatKoreanAmount(Number(String(ad.salary_amount).replace(/[^0-9]/g, '')))
                                                     : ad.pay || '-'}
                                             </span>
                                         </div>
@@ -310,7 +333,7 @@ export default async function BizJobsPage() {
                                             )}
                                             <span className="font-extrabold text-[12px] text-gray-900">
                                                 {ad.salary_amount
-                                                    ? `${Number(String(ad.salary_amount).replace(/[^0-9]/g, '')).toLocaleString()}원`
+                                                    ? formatKoreanAmount(Number(String(ad.salary_amount).replace(/[^0-9]/g, '')))
                                                     : ad.pay || '-'}
                                             </span>
                                         </div>
