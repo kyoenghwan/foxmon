@@ -1,13 +1,11 @@
 import Link from 'next/link';
 import { auth } from '@/auth';
-import { Plus, Briefcase, Eye, Pencil, Clock, CreditCard, ShieldAlert } from 'lucide-react';
+import { Plus, Briefcase, Pencil, Clock, ShieldAlert } from 'lucide-react';
 
 import { manageAdAction } from '@/lib/actions';
 import { supabaseAdmin } from '@/lib/supabase';
 import { OpenMyPageButton } from '@/components/biz/OpenMyPageButton';
-
 import { PaymentModalTrigger } from '@/components/biz/PaymentModalTrigger';
-import { ToggleJobStatusButton } from '@/src/components/biz/ToggleJobStatusButton';
 
 const TierBadge = ({ tier }: { tier: string }) => {
     const styles: Record<string, string> = {
@@ -50,20 +48,7 @@ const StatusBadge = ({ expiresAt }: { expiresAt: string | null | undefined }) =>
     }
 };
 
-const AdStatusBadge = ({ status }: { status: string }) => {
-    if (status === 'COMPLETED') {
-        return (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-black bg-gray-800 text-white border border-gray-900">
-                채용마감
-            </span>
-        );
-    }
-    return (
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-black bg-green-50 text-green-600 border border-green-200">
-            구인중
-        </span>
-    );
-};
+
 
 export default async function BizJobsPage() {
     const session = await auth();
@@ -198,8 +183,7 @@ export default async function BizJobsPage() {
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[140px]">업체명</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">근무지역</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">직종</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[100px]">상태</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[130px]">만료일</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[130px]">마감일</th>
                                 <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500 w-[150px]">관리</th>
                             </tr>
                         </thead>
@@ -233,14 +217,9 @@ export default async function BizJobsPage() {
                                         {ad.category1 || '-'}
                                     </td>
                                     <td className="px-4 py-4 text-center">
-                                        <ToggleJobStatusButton adId={ad.id} initialStatus={ad.status} />
-                                    </td>
-                                    <td className="px-4 py-4 text-center">
                                         <span className="inline-flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500">
                                             <Clock className="w-3.5 h-3.5" />
-                                            {ad.expires_at && new Date(ad.expires_at).getFullYear() !== 2000 
-                                                ? new Date(ad.expires_at).toLocaleDateString() 
-                                                : '무기한'}
+                                            {(!ad.close_date || ad.close_date === '상시채용') ? '상시채용' : ad.close_date}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-center">
@@ -272,18 +251,14 @@ export default async function BizJobsPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-end gap-1.5 shrink-0">
-                                        <ToggleJobStatusButton adId={ad.id} initialStatus={ad.status} />
-                                    </div>
+
                                 </div>
 
                                 <div className="flex items-center justify-between border-t border-gray-50 pt-3 text-[11px] font-bold text-gray-500">
                                     <div className="flex items-center gap-3">
                                         <span className="flex items-center gap-1">
                                             <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                            만료: {ad.expires_at && new Date(ad.expires_at).getFullYear() !== 2000 
-                                                ? new Date(ad.expires_at).toLocaleDateString() 
-                                                : '무기한'}
+                                            마감: {(!ad.close_date || ad.close_date === '상시채용') ? '상시채용' : ad.close_date}
                                         </span>
                                     </div>
 
