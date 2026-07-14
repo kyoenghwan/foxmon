@@ -18,15 +18,22 @@ export function SideBanners() {
     const { sideAds, isSideAdsLoaded, fetchSideAds, rotateSideAds } = useAdStore();
     const [loading, setLoading] = useState(!isSideAdsLoaded);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [slotsCount, setSlotsCount] = useState(6);
 
-    // 디버그 로깅 주석 처리
-    /*
-    console.log("[SideBanners] Store state loaded:", {
-        sideAdsLength: sideAds?.length,
-        isSideAdsLoaded,
-        loading
-    });
-    */
+    useEffect(() => {
+        const handleResize = () => {
+            if (typeof window !== 'undefined') {
+                if (window.innerHeight >= 950) {
+                    setSlotsCount(8);
+                } else {
+                    setSlotsCount(6);
+                }
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // 1. 중복 제거된 원본 광고 리스트 추출 (서버 중복 데이터가 섞여올 시 원천 정제)
     const uniqueAds = sideAds.filter(ad => !ad.id.includes('_repeat_'));
@@ -37,26 +44,28 @@ export function SideBanners() {
     const rollingAds = uniqueAds.filter(ad => !ad.is_fixed);
     // console.log("[SideBanners] Separated ads:", { fixedAds, rollingAds });
     
-    // 3. 6개의 화면 슬롯 배치 구성
+    const halfSlots = slotsCount / 2;
+
+    // 3. 화면 슬롯 배치 구성
     const filledAds: AdItem[] = [];
     
-    // 3-1. 고정 광고 배치 (최대 3개)
-    const activeFixedCount = Math.min(fixedAds.length, 3);
+    // 3-1. 고정 광고 배치
+    const activeFixedCount = Math.min(fixedAds.length, halfSlots);
     for (let i = 0; i < activeFixedCount; i++) {
         filledAds.push(fixedAds[i]);
     }
     
     // 3-2. 남은 슬롯을 일반 광고의 순환 반복으로 채움 (비어보이지 않게 보장)
-    const remainingSlots = 6 - activeFixedCount;
+    const remainingSlots = slotsCount - activeFixedCount;
     if (rollingAds.length > 0) {
         for (let i = 0; i < remainingSlots; i++) {
             filledAds.push(rollingAds[i % rollingAds.length]);
         }
     }
-    // console.log("[SideBanners] Filled ads for 6 slots:", filledAds);
+    // console.log("[SideBanners] Filled ads:", filledAds);
 
-    const leftAds = filledAds.slice(0, 3);
-    const rightAds = filledAds.slice(3, 6);
+    const leftAds = filledAds.slice(0, halfSlots);
+    const rightAds = filledAds.slice(halfSlots, slotsCount);
     // console.log("[SideBanners] Split wings:", { leftAds, rightAds });
 
     useEffect(() => {
