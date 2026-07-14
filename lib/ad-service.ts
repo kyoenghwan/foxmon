@@ -271,6 +271,13 @@ async function fetchAdsFromDBInternal(
                     }
                 }
             }
+            const nowTime = new Date().getTime();
+            const checkOpt = (val: any, exp: string | null | undefined) => {
+                if (!val) return false;
+                if (!exp) return true;
+                return new Date(exp).getTime() > nowTime;
+            };
+
             return {
                 ...item,
                 company: item.company_name || item.company || '업체명 없음',
@@ -278,7 +285,17 @@ async function fetchAdsFromDBInternal(
                 image: item.image_url || item.image || item.logo_url || '',
                 merchant_tier: merchant_tier as 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP',
                 isRealAd: true,
-                is_fixed: item.is_fixed || false
+                is_fixed: item.is_fixed || false,
+                
+                // 개별 옵션 실시간 만료 보정
+                option_bold: checkOpt(item.option_bold, item.option_bold_expires_at),
+                option_color: checkOpt(item.option_color, item.option_color_expires_at),
+                option_bg: checkOpt(item.option_bg, item.option_bg_expires_at),
+                option_icon: checkOpt(item.option_icon, item.option_icon_expires_at),
+                option_jump: checkOpt(item.option_jump, item.option_jump_expires_at),
+                option_highlight: checkOpt(item.option_highlight, item.option_highlight_expires_at),
+                option_general_icons: checkOpt(item.option_general_icons, item.option_general_icons_expires_at) ? item.option_general_icons : null,
+                option_double_slot: checkOpt(item.option_double_slot, item.option_double_slot_expires_at)
             };
         });
 
