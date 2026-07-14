@@ -179,10 +179,10 @@ export default async function BizJobsPage() {
                     <table className="w-full hidden md:table table-fixed">
                         <thead>
                             <tr className="border-b border-gray-100 bg-gray-50">
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">근무지역</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">직종</th>
                                 <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500 w-[200px]">제목</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">근무지역</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">업체명</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[100px]">직종</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">업소명</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">급여</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">마감일</th>
                                 <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500 w-[130px]">관리</th>
@@ -191,6 +191,12 @@ export default async function BizJobsPage() {
                         <tbody>
                             {mockAds.map((ad) => (
                                 <tr key={ad.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                                    <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
+                                        {ad.location || ad.address || '-'}
+                                    </td>
+                                    <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
+                                        {ad.category1 || '-'}
+                                    </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             {ad.image && (
@@ -208,14 +214,8 @@ export default async function BizJobsPage() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
-                                        {ad.location || ad.address || '-'}
-                                    </td>
                                     <td className="px-4 py-4 text-center text-[13.5px] font-bold text-gray-700 truncate">
                                         {ad.company_name || ad.company || ad.business_name || '-'}
-                                    </td>
-                                    <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
-                                        {ad.category1 || '-'}
                                     </td>
                                     <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
                                         {ad.salary_type && ad.salary_amount
