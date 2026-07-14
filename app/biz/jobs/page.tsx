@@ -181,11 +181,11 @@ export default async function BizJobsPage() {
                             <tr className="border-b border-gray-100 bg-gray-50">
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">근무지역</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">직종</th>
-                                <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500 w-[200px]">제목</th>
+                                <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500 w-[180px]">제목</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">업소명</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">급여</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">마감일</th>
-                                <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500 w-[130px]">관리</th>
+                                <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500 w-[150px]">관리</th>
                             </tr>
                         </thead>
                         <tbody>
