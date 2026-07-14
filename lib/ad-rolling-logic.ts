@@ -5,8 +5,8 @@ export function applyRollingLogic(ads: AdItem[], count: number, customNowMs?: nu
     const tenMinsMs = 10 * 60 * 1000;
 
     ads.sort((a, b) => {
-        const timeA = new Date(a.created_at || a.last_exposed_at || 0).getTime();
-        const timeB = new Date(b.created_at || b.last_exposed_at || 0).getTime();
+        const timeA = new Date(a.last_exposed_at || a.created_at || 0).getTime();
+        const timeB = new Date(b.last_exposed_at || b.created_at || 0).getTime();
         return timeB - timeA;
     });
 
@@ -15,7 +15,7 @@ export function applyRollingLogic(ads: AdItem[], count: number, customNowMs?: nu
     const oldAds: AdItem[] = [];
 
     for (const ad of ads) {
-        const adTime = new Date(ad.created_at || ad.last_exposed_at || 0).getTime();
+        const adTime = new Date(ad.last_exposed_at || ad.created_at || 0).getTime();
         if (nowMs - adTime <= tenMinsMs) {
             newAds.push(ad);
         } else {
@@ -49,7 +49,7 @@ export function applyRollingLogic(ads: AdItem[], count: number, customNowMs?: nu
     const anchors: { ad: AdItem; targetIndex: number }[] = [];
     
     for (const ad of newAds) {
-        const adTime = new Date(ad.created_at || ad.last_exposed_at || 0).getTime();
+        const adTime = new Date(ad.last_exposed_at || ad.created_at || 0).getTime();
         const ageMins = Math.floor((nowMs - adTime) / 60000);
         const targetIndex = Math.max(0, 9 - ageMins);
         anchors.push({ ad, targetIndex });

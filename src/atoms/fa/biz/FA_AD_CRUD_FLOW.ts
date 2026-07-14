@@ -119,6 +119,9 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 option_bg_value: payload.option_bg_value || null,
                 option_icon: !!payload.option_icon,
                 option_jump: !!payload.option_jump,
+                jump_interval: payload.option_jump ? 1 : 4,
+                last_jumped_at: new Date().toISOString(),
+                last_exposed_at: new Date().toISOString(),
                 total_points: totalPoints,
                 expires_at: expiresAt.toISOString(),
                 close_date: payload.close_date || '상시채용'
@@ -302,11 +305,21 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 }
                 if (payload.option_jump !== undefined) {
                     updatePayload.option_jump = !!payload.option_jump;
+                    updatePayload.jump_interval = updatePayload.option_jump ? 1 : 4;
+                    updatePayload.last_jumped_at = new Date().toISOString();
+                    updatePayload.last_exposed_at = new Date().toISOString();
                     if (updatePayload.option_jump) updatePayload.option_jump_expires_at = getOptionExpiresAt(payload.option_jump_period || 30);
                 }
 
                 updatePayload.total_points = totalPoints;
                 updatePayload.expires_at = expiresAt.toISOString();
+            }
+
+            if (payload.option_jump !== undefined && !isPaymentUpdate) {
+                updatePayload.option_jump = !!payload.option_jump;
+                updatePayload.jump_interval = updatePayload.option_jump ? 1 : 4;
+                updatePayload.last_jumped_at = new Date().toISOString();
+                updatePayload.last_exposed_at = new Date().toISOString();
             }
 
             const { data, error } = await supabase

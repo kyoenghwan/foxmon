@@ -355,7 +355,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                     { id: 'bg', label: '리스트 배경색', desc: '공고 영역 전체 배경색 강조', key: 'OPTION_PRICE_BG' },
                                     { id: 'icon', label: '급구 아이콘', desc: '🚨급구 마크 표시', key: 'OPTION_PRICE_ICON' },
                                     { id: 'general_icons', label: '일반 아이콘', desc: '뱃지 중복 선택 (개당 비용)', key: 'OPTION_PRICE_GENERAL_ICONS' },
-                                    { id: 'jump', label: '자동 점프', desc: '매일 6회 자동 상단 끌어올림', key: 'OPTION_PRICE_JUMP' },
+                                    { id: 'jump', label: '자동 점프', desc: '하루 24번(1시간 마다) 자동 상단 끌어올림', key: 'OPTION_PRICE_JUMP' },
                                 ].map(opt => {
                                     const isChecked = !!form[`option_${opt.id}` as keyof AdFormData];
                                     const periodKey = `option_${opt.id}_period` as keyof AdFormData;

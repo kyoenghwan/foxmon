@@ -137,6 +137,9 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 is_subscription: !!payload.is_subscription,
                 option_double_slot: !!payload.option_double_slot,
                 option_jump: !!payload.option_jump,
+                jump_interval: payload.option_jump ? 1 : 4,
+                last_jumped_at: new Date().toISOString(),
+                last_exposed_at: new Date().toISOString(),
                 total_points: skipDeduction ? 0 : totalPoints,
                 expires_at: expiresAtStr,
                 claim_code: payload.claim_code || null,
@@ -475,6 +478,19 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                     }
                 }
 
+                // 점프 옵션
+                if (payload.option_jump !== undefined) {
+                    updatePayload.option_jump = !!payload.option_jump;
+                    updatePayload.jump_interval = updatePayload.option_jump ? 1 : 4;
+                    updatePayload.last_jumped_at = new Date().toISOString();
+                    updatePayload.last_exposed_at = new Date().toISOString();
+                    if (updatePayload.option_jump) {
+                        updatePayload.option_jump_expires_at = isAlreadyPaid && !isExtension
+                            ? existingJob.expires_at
+                            : getOptionExpiresAt(p);
+                    }
+                }
+
 
 
                 // 만료일 설정 (KST 헬퍼를 이용해 결제 시점 기준으로 엄격하게 계산)
@@ -488,6 +504,13 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                     // 3. 미결제/Draft 상태에서 신규 결제하는 경우 -> 결제하는 현재 시각 기준으로 KST 기간 더하기 (수동 설정 무시)
                     updatePayload.expires_at = getKSTExpiresAt(p);
                 }
+            }
+
+            if (payload.option_jump !== undefined && !isPaymentUpdate) {
+                updatePayload.option_jump = !!payload.option_jump;
+                updatePayload.jump_interval = updatePayload.option_jump ? 1 : 4;
+                updatePayload.last_jumped_at = new Date().toISOString();
+                updatePayload.last_exposed_at = new Date().toISOString();
             }
 
             const { data, error } = await supabase
