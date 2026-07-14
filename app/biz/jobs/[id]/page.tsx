@@ -38,7 +38,7 @@ export default async function BizJobEditPage({ params }: { params: Promise<{ id:
         amenities: job.amenities || [],
         keywords: job.keywords || [],
         design_mode: job.design_mode,
-        detail_content: job.detail_content,
+        detail_content: job.content || job.detail_content,
         color: job.detail_bg_color || '#F97316',
         detail_bg_image: job.detail_bg_image,
         
