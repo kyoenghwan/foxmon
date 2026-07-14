@@ -117,7 +117,8 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
         option_bold, option_color, option_color_value, 
         option_highlight, option_highlight_value, 
         option_bg, option_bg_value, option_icon, 
-        option_general_icons, created_at, status, close_date 
+        option_general_icons, created_at, status, close_date,
+        category1
     } = job;
     
     // 지역 축약
@@ -145,7 +146,11 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
             }`}
             style={bgStyle}
         >
-            <td className="py-4 px-2 font-bold text-gray-800 text-center truncate max-w-[150px]">{company}</td>
+            <td className="py-4 px-2 text-gray-500 text-center">{shortLocation}</td>
+
+            <td className="py-4 px-2 text-gray-600 text-center font-medium truncate max-w-[100px]">
+                {category1 || '-'}
+            </td>
             
             <td className="py-4 px-4 text-left">
                 <div className="flex flex-col gap-1 min-w-0">
@@ -179,7 +184,7 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
                 </div>
             </td>
 
-            <td className="py-4 px-2 text-gray-500 text-center">{shortLocation}</td>
+            <td className="py-4 px-2 font-bold text-gray-800 text-center truncate max-w-[150px]">{company}</td>
             
             <td className="py-4 px-2 text-center">
                 <span className="text-[15px] font-black text-[#ff3b30] tracking-tighter whitespace-nowrap">{pay}</span>
