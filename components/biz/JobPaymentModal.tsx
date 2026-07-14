@@ -199,9 +199,9 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                     {/* 2 & 3. 노출 기간 패키지 및 추가 옵션 */}
                     <div className="w-full flex flex-col gap-6">
                         {/* 노출 기간 선택 */}
-                        <section>
+                        <section className="order-2">
                             <h4 className="text-[15px] font-black text-gray-800 mb-3 flex items-center justify-between">
-                                <span>1. 노출 기간 패키지 (필수)</span>
+                                <span>2. 노출 기간 패키지 (필수)</span>
                                 <span className="text-[12px] font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">장기 결제 시 최대 20% 할인!</span>
                             </h4>
                             <div className="grid grid-cols-2 gap-3">
@@ -273,9 +273,9 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                         </section>
 
                         {/* 부가 옵션 선택 */}
-                        <section>
+                        <section className="order-1">
                             <h4 className="text-[15px] font-black text-gray-800 mb-3 flex items-center justify-between">
-                                <span>2. 주목도 100배! 추가 옵션</span>
+                                <span>1. 주목도 100배! 추가 옵션</span>
                                 <span className="text-[12px] font-medium text-gray-400">선택한 기간({form.exposure_period}일) 적용</span>
                             </h4>
                             <div className="flex flex-col gap-2">
