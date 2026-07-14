@@ -3,6 +3,32 @@
 import { useRouter } from 'next/navigation';
 import { AdItem } from '@/lib/ad-service';
 
+const formatKoreanAmount = (amountVal: number): string => {
+    if (isNaN(amountVal) || amountVal <= 0) return '-';
+    if (amountVal < 10000) {
+        return `${amountVal.toLocaleString()}원`;
+    }
+    const manValue = Math.floor(amountVal / 10000);
+    if (manValue >= 10000) {
+        const ukValue = Math.floor(manValue / 10000);
+        const remainingMan = manValue % 10000;
+        if (remainingMan > 0) {
+            return `${ukValue.toLocaleString()}억 ${remainingMan.toLocaleString()}만원`;
+        }
+        return `${ukValue.toLocaleString()}억원`;
+    }
+    return `${manValue.toLocaleString()}만원`;
+};
+
+const formatPay = (job: AdItem): string => {
+    const { pay, salary_type, salary_amount } = job;
+    if (salary_type && salary_amount) {
+        const num = Number(String(salary_amount).replace(/[^0-9]/g, ''));
+        return `[${salary_type}] ${formatKoreanAmount(num)}`;
+    }
+    return pay || '급여협의';
+};
+
 export function GeneralJobListRow(job: AdItem) {
     const router = useRouter();
     const { 
@@ -50,7 +76,7 @@ export function GeneralJobListRow(job: AdItem) {
                     </span>
                     <span className="text-gray-400 shrink-0">|</span>
                     <span className="bg-red-50 text-[#ff3b30] text-[11px] font-black px-2 py-0.5 rounded-full border border-red-100/50 shrink-0">
-                        {pay}
+                        {formatPay(job)}
                     </span>
                     {time && (
                         <>
@@ -187,7 +213,7 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
             <td className="py-4 px-2 font-bold text-gray-800 text-center truncate max-w-[150px]">{company}</td>
             
             <td className="py-4 px-2 text-center">
-                <span className="text-[15px] font-black text-[#ff3b30] tracking-tighter whitespace-nowrap">{pay}</span>
+                <span className="text-[15px] font-black text-[#ff3b30] tracking-tighter whitespace-nowrap">{formatPay(job)}</span>
             </td>
 
             <td className="py-4 px-2 text-center text-[13px]">

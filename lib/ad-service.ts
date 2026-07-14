@@ -45,6 +45,8 @@ export interface AdItem {
     merchant_tier?: 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP';
     status?: string;
     close_date?: string;
+    salary_type?: string;
+    salary_amount?: string;
 }
 
 const IS_SUPABASE_ENABLED = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
