@@ -16,9 +16,9 @@ const TierBadge = ({ tier }: { tier: string }) => {
         AD_GENERAL: 'bg-orange-100 text-orange-800 border-orange-200',
     };
     const labels: Record<string, string> = {
-        PREMIUM: '🔥 프리미엄',
-        SIDE: '🚀 사이드',
-        SPECIAL: '⚡ 스페셜',
+        PREMIUM: '프리미엄',
+        SIDE: '사이드',
+        SPECIAL: '스페셜',
         GENERAL: '일반',
         AD_GENERAL: '배너(일반)',
     };
@@ -275,7 +275,7 @@ export default async function BizJobsPage() {
                                     <td className="px-4 py-4 text-center">
                                         {(!ad.close_date || ad.close_date === '상시채용') ? (
                                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-teal-50 text-teal-600 border border-teal-150 whitespace-nowrap">
-                                                ✨ 상시채용
+                                                상시채용
                                             </span>
                                         ) : (
                                             <span className="inline-flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500 whitespace-nowrap">
@@ -339,7 +339,7 @@ export default async function BizJobsPage() {
                                         </div>
                                         {(!ad.close_date || ad.close_date === '상시채용') ? (
                                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9.5px] font-black bg-teal-50 text-teal-600 border border-teal-100 whitespace-nowrap">
-                                                ✨ 상시
+                                                상시
                                             </span>
                                         ) : (
                                             <span className="flex items-center gap-1 text-gray-400">

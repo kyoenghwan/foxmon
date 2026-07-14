@@ -411,6 +411,23 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
         return raw ? parseInt(raw, 10).toLocaleString() : '';
     };
 
+    const formatKoreanAmount = (amountVal: number): string => {
+        if (isNaN(amountVal) || amountVal <= 0) return '원';
+        if (amountVal < 10000) {
+            return `${amountVal.toLocaleString()}원`;
+        }
+        const manValue = Math.floor(amountVal / 10000);
+        if (manValue >= 10000) {
+            const ukValue = Math.floor(manValue / 10000);
+            const remainingMan = manValue % 10000;
+            if (remainingMan > 0) {
+                return `${ukValue.toLocaleString()}억 ${remainingMan.toLocaleString()}만원`;
+            }
+            return `${ukValue.toLocaleString()}억원`;
+        }
+        return `${manValue.toLocaleString()}만원`;
+    };
+
     const { pay_amount: initPayAmount, ...restInitialData } = initialData || {};
 
     const [form, setForm] = useState<AdFormData>({
@@ -1222,10 +1239,12 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                                 <input
                                                     type="text" value={form.pay_amount || ''} 
                                                     onChange={e => handlePayChange(form.pay_type || '월급', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary pr-8"
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-[13px] font-medium outline-none focus:border-primary pr-[95px]"
                                                     placeholder="금액 또는 조건 입력"
                                                 />
-                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-gray-500 font-medium">원</span>
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-500 font-black bg-gray-50 border border-gray-200/80 px-2 py-0.5 rounded shadow-sm whitespace-nowrap">
+                                                    {form.pay_amount ? formatKoreanAmount(Number(form.pay_amount.replace(/[^0-9]/g, ''))) : '원'}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
