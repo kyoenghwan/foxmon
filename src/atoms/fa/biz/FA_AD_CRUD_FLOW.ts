@@ -103,13 +103,11 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 amenities: payload.amenities || [],
                 keywords: payload.keywords || [],
                 design_mode: payload.design_mode,
-                detail_content: payload.detail_content,
+                content: payload.detail_content,
                 detail_bg_color: payload.color,
                 detail_bg_image: payload.detail_bg_image,
                 
                 tier: payload.tier || 'GENERAL',
-                theme: payload.premium_banner_mode === 'upload' ? 'UPLOAD' : (payload.theme || null),
-                effect_intensity: payload.effect_intensity || null,
                 
                 // 결제 및 옵션 추가 컬럼
                 exposure_period: p,
@@ -122,7 +120,8 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 option_icon: !!payload.option_icon,
                 option_jump: !!payload.option_jump,
                 total_points: totalPoints,
-                expires_at: expiresAt.toISOString()
+                expires_at: expiresAt.toISOString(),
+                close_date: payload.close_date || '상시채용'
             };
 
             const { data, error } = await supabase
@@ -242,12 +241,11 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                         amenities: payload.amenities || [],
                         keywords: payload.keywords || [],
                         design_mode: payload.design_mode,
-                        detail_content: payload.detail_content,
+                        content: payload.detail_content,
                         detail_bg_color: payload.color,
                         detail_bg_image: payload.detail_bg_image,
                         tier: payload.tier || 'GENERAL',
-                        theme: payload.premium_banner_mode === 'upload' ? 'UPLOAD' : (payload.theme || null),
-                        effect_intensity: payload.effect_intensity || null,
+                        close_date: payload.close_date || '상시채용',
                         status: payload.status || undefined,
                         updated_at: new Date().toISOString()
                     });
