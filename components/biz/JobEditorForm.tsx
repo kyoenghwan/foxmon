@@ -753,14 +753,23 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
 
         setSaving(true);
         try {
-            await onSubmit({
+            const res = await onSubmit({
                 ...form,
                 detail_content: finalDetailContent,
                 keywords: mergeSelectedTagCodes(form.keywords, form.amenities),
                 amenities: [],
                 _isPayment: isPayment,
             });
+            if (res && (res as any).success) {
+                alert('구인 공고가 저장되었습니다!');
+                window.location.href = '/biz/jobs';
+            } else if (res && !(res as any).success) {
+                alert('저장에 실패했습니다: ' + (res as any).message);
+            }
             setShowPaymentModal(false);
+        } catch (err: any) {
+            console.error("Submit error:", err);
+            alert("저장 중 오류가 발생했습니다: " + (err.message || err));
         } finally {
             setSaving(false);
         }

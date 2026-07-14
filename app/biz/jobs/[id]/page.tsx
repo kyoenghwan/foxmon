@@ -75,10 +75,7 @@ export default async function BizJobEditPage({ params }: { params: Promise<{ id:
                     'use server';
                     // 업데이트 액션 호출
                     const updateRes = await manageAdAction('UPDATE', data, resolvedParams.id);
-                    if (!updateRes.success) {
-                        throw new Error(updateRes.message);
-                    }
-                    // 성공 시 반환
+                    return updateRes;
                 }} 
             />
         </div>
