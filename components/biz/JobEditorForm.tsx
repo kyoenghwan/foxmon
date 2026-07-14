@@ -405,13 +405,21 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
         ? (isCanvasData(initialData.detail_content) ? 'canvas' : 'html') 
         : 'canvas';
 
+    const getFormattedPayAmount = (amount?: string) => {
+        if (!amount) return '';
+        const raw = amount.toString().replace(/[^0-9]/g, '');
+        return raw ? parseInt(raw, 10).toLocaleString() : '';
+    };
+
+    const { pay_amount: initPayAmount, ...restInitialData } = initialData || {};
+
     const [form, setForm] = useState<AdFormData>({
         company: '',
         title: '',
         location: '',
         pay: '',
         pay_type: '월급',
-        pay_amount: '',
+        pay_amount: getFormattedPayAmount(initPayAmount),
         image: '',
         color: '#FF6B35',
         tier: 'GENERAL',
@@ -435,13 +443,17 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
         option_icon: false,
         option_jump: false,
         close_date: '상시채용',
-        ...initialData,
+        ...restInitialData,
     });
     
     // DB 조회 데이터에 close_date 값이 없는 경우에도 디폴트 세팅
     useEffect(() => {
-        if (initialData && !initialData.close_date) {
-            setForm(prev => ({ ...prev, close_date: '상시채용' }));
+        if (initialData) {
+            setForm(prev => ({ 
+                ...prev, 
+                close_date: initialData.close_date || '상시채용',
+                pay_amount: getFormattedPayAmount(initialData.pay_amount)
+            }));
         }
     }, [initialData]);
 
@@ -647,8 +659,15 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
     // 급여 업데이트 핸들러
     const handlePayChange = (type: string, amount: string) => {
         update('pay_type', type);
-        update('pay_amount', amount);
-        update('pay', amount ? `${type} ${amount}` : '');
+        if (type === '협의') {
+            update('pay_amount', '');
+            update('pay', '추후협의');
+        } else {
+            const rawValue = amount.replace(/[^0-9]/g, '');
+            const formattedAmount = rawValue ? parseInt(rawValue, 10).toLocaleString() : '';
+            update('pay_amount', formattedAmount);
+            update('pay', formattedAmount ? `${type} ${formattedAmount}` : '');
+        }
     };
 
     const handleSubmit = async () => {
