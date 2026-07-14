@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Crown, X, Eye, CheckCircle2, DollarSign, Loader2, Clock, Zap, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdFormData } from '@/components/biz/AdEditorForm';
@@ -34,6 +34,49 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         ...initialData,
         exposure_period: initialData.exposure_period || 30 // 기본값 30일
     });
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const iconsWrapperRef = useRef<HTMLDivElement>(null);
+    const titleRef = useRef<HTMLSpanElement>(null);
+    const [showTwoLines, setShowTwoLines] = useState(false);
+    const [marqueeDistance, setMarqueeDistance] = useState(0);
+
+    useEffect(() => {
+        const checkLayout = () => {
+            if (containerRef.current) {
+                const containerWidth = containerRef.current.getBoundingClientRect().width;
+                
+                let iconsWidth = 0;
+                if (iconsWrapperRef.current) {
+                    iconsWidth = iconsWrapperRef.current.getBoundingClientRect().width;
+                }
+                
+                const isTwo = iconsWidth > containerWidth * 0.5;
+                setShowTwoLines(isTwo);
+                
+                if (titleRef.current) {
+                    const parentWidth = titleRef.current.parentElement?.getBoundingClientRect().width || containerWidth;
+                    const scrollW = titleRef.current.scrollWidth;
+                    
+                    if (scrollW > parentWidth) {
+                        setMarqueeDistance(parentWidth - scrollW);
+                    } else {
+                        setMarqueeDistance(0);
+                    }
+                }
+            }
+        };
+
+        checkLayout();
+
+        if (containerRef.current) {
+            const observer = new ResizeObserver(() => {
+                checkLayout();
+            });
+            observer.observe(containerRef.current);
+            return () => observer.disconnect();
+        }
+    }, [form.option_icon, form.option_general_icons, form.title, showTwoLines]);
 
     // 필드 업데이트
     const update = (field: keyof AdFormData, value: any) => {
@@ -165,19 +208,45 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                     {form.location || '지역 미입력'}
                                 </div>
                                 <div 
-                                    className={`col-span-2 flex items-center gap-1.5 truncate ${form.option_bold ? 'font-black' : 'font-medium'}`}
+                                    ref={containerRef}
+                                    className={`col-span-2 flex gap-1.5 ${showTwoLines ? 'flex-col items-start' : 'flex-row items-center truncate'} ${form.option_bold ? 'font-black' : 'font-medium'}`}
                                     style={form.option_color && form.option_color_value ? { color: form.option_color_value } : form.option_color ? { color: '#f97316' } : { color: '#111827' }}
                                 >
-                                    {form.option_icon && <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 animate-pulse">급구</span>}
-                                    {form.option_general_icons?.map(icon => (
-                                        <span key={icon} className="text-[12px] font-black shrink-0 px-1 py-0.5 rounded border border-gray-200 bg-white">{icon}</span>
-                                    ))}
-                                    <span 
-                                        className={`truncate ${form.option_highlight ? 'px-1 rounded' : ''}`}
-                                        style={form.option_highlight && form.option_highlight_value ? { backgroundColor: form.option_highlight_value } : form.option_highlight ? { backgroundColor: '#fde047' } : {}}
-                                    >
-                                        {form.title || '공고 제목이 표시됩니다'}
-                                    </span>
+                                    {/* Style Tag 주입 */}
+                                    <style dangerouslySetInnerHTML={{__html: `
+                                        @keyframes marqueeAlternate {
+                                            0%, 15% { transform: translateX(0); }
+                                            85%, 100% { transform: translateX(var(--marquee-dist, 0px)); }
+                                        }
+                                        .animate-marquee-alt {
+                                            display: inline-block;
+                                            animation: marqueeAlternate 6s ease-in-out infinite alternate;
+                                        }
+                                    `}} />
+
+                                    {/* 아이콘 영역 */}
+                                    {(form.option_icon || (form.option_general_icons && form.option_general_icons.length > 0)) && (
+                                        <div ref={iconsWrapperRef} className="flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                            {form.option_icon && <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 animate-pulse">급구</span>}
+                                            {form.option_general_icons?.map(icon => (
+                                                <span key={icon} className="text-[12px] font-black shrink-0 px-1 py-0.5 rounded border border-gray-200 bg-white">{icon}</span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* 제목 영역 */}
+                                    <div className="overflow-hidden w-full whitespace-nowrap relative flex items-center">
+                                        <span 
+                                            ref={titleRef}
+                                            className={`${form.option_highlight ? 'px-1 rounded' : ''} ${marqueeDistance < 0 ? 'animate-marquee-alt' : ''}`}
+                                            style={{
+                                                ...(form.option_highlight && form.option_highlight_value ? { backgroundColor: form.option_highlight_value } : form.option_highlight ? { backgroundColor: '#fde047' } : {}),
+                                                '--marquee-dist': `${marqueeDistance}px`
+                                            } as React.CSSProperties}
+                                        >
+                                            {form.title || '공고 제목이 표시됩니다'}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div className="col-span-1 text-center text-gray-600 truncate px-1">
                                     {form.business_name || form.company || '업체명'}
