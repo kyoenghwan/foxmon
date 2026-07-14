@@ -179,12 +179,13 @@ export default async function BizJobsPage() {
                     <table className="w-full hidden md:table table-fixed">
                         <thead>
                             <tr className="border-b border-gray-100 bg-gray-50">
-                                <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500 w-[220px]">제목</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[140px]">업체명</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">근무지역</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">직종</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[130px]">마감일</th>
-                                <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500 w-[150px]">관리</th>
+                                <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500 w-[200px]">제목</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">근무지역</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">업체명</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[100px]">직종</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">급여</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">마감일</th>
+                                <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500 w-[130px]">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -207,14 +208,19 @@ export default async function BizJobsPage() {
                                             </div>
                                         </div>
                                     </td>
+                                    <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
+                                        {ad.location || ad.address || '-'}
+                                    </td>
                                     <td className="px-4 py-4 text-center text-[13.5px] font-bold text-gray-700 truncate">
                                         {ad.company_name || ad.company || ad.business_name || '-'}
                                     </td>
                                     <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
-                                        {ad.location || ad.address || '-'}
+                                        {ad.category1 || '-'}
                                     </td>
                                     <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
-                                        {ad.category1 || '-'}
+                                        {ad.salary_type && ad.salary_amount
+                                            ? `${ad.salary_type} ${Number(ad.salary_amount).toLocaleString()}원`
+                                            : ad.pay || '-'}
                                     </td>
                                     <td className="px-4 py-4 text-center">
                                         <span className="inline-flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500">
@@ -256,6 +262,11 @@ export default async function BizJobsPage() {
 
                                 <div className="flex items-center justify-between border-t border-gray-50 pt-3 text-[11px] font-bold text-gray-500">
                                     <div className="flex items-center gap-3">
+                                        <span className="flex items-center gap-1">
+                                            💰 {ad.salary_type && ad.salary_amount
+                                                ? `${ad.salary_type} ${Number(ad.salary_amount).toLocaleString()}원`
+                                                : ad.pay || '-'}
+                                        </span>
                                         <span className="flex items-center gap-1">
                                             <Clock className="w-3.5 h-3.5 text-gray-400" />
                                             마감: {(!ad.close_date || ad.close_date === '상시채용') ? '상시채용' : ad.close_date}
