@@ -670,6 +670,27 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
         }
     };
 
+    // 주소 검색 완료 시 지역(sido/sigungu) 정보 자동 동기화
+    const handleAddressComplete = (data: any) => {
+        const fullAddr = data.roadAddress || data.jibunAddress || data.address;
+        update('address', fullAddr);
+
+        if (data.sido) {
+            const targetSido = data.sido.slice(0, 2);
+            const matchedRegion = regions.find(
+                r => r.list_type === 'JOB_REGION_1' && r.code_name.startsWith(targetSido)
+            );
+
+            if (matchedRegion) {
+                const sidoName = matchedRegion.code_name;
+                setSelectedSido(sidoName);
+                const sigunguName = data.sigungu || '';
+                setSelectedSigungus(sigunguName ? [sigunguName] : []);
+                update('location', `${sidoName} ${sigunguName}`.trim());
+            }
+        }
+    };
+
     const handleSubmit = async () => {
         if (!form.company && !form.business_name) {
             alert('상호명은 필수 입력 항목입니다.');
@@ -1471,18 +1492,12 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                             script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
                                             script.onload = () => {
                                                 new (window as any).daum.Postcode({
-                                                    oncomplete: (data: any) => {
-                                                        const fullAddr = data.roadAddress || data.jibunAddress || data.address;
-                                                        update('address', fullAddr);
-                                                    }
+                                                    oncomplete: handleAddressComplete
                                                 }).open();
                                             };
                                             if ((window as any).daum?.Postcode) {
                                                 new (window as any).daum.Postcode({
-                                                    oncomplete: (data: any) => {
-                                                        const fullAddr = data.roadAddress || data.jibunAddress || data.address;
-                                                        update('address', fullAddr);
-                                                    }
+                                                    oncomplete: handleAddressComplete
                                                 }).open();
                                             } else {
                                                 document.head.appendChild(script);
