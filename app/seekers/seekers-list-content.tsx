@@ -557,59 +557,7 @@ export function SeekersListContent({ isEmployer: propIsEmployer, session: propSe
             </section>
 
             {/* Special 20 Banners */}
-            <section>
-                <div className="flex items-center justify-between mb-4 sm:mb-6 border-b pb-4">
-                    <div className="flex items-center gap-1 sm:gap-2">
-                        <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500 animate-pulse" />
-                        <h2 className="text-lg sm:text-2xl font-black text-gray-900 flex items-center gap-1 sm:gap-2 italic uppercase whitespace-nowrap">
-                            {t.sections.specialJobsTitle}
-                        </h2>
-                    </div>
-                    <div className="flex items-center gap-1.5 sm:gap-3">
-                        {isEmployer && (
-                            <Link href="/biz/ads">
-                                <Button 
-                                    size="sm" 
-                                    className="hidden md:flex font-black h-9 px-4 rounded-lg shadow-sm active:scale-95 transition-transform text-black bg-yellow-400 hover:bg-yellow-500"
-                                >
-                                    <Plus className="w-4 h-4 mr-1" /> 스페셜 등록
-                                </Button>
-                            </Link>
-                        )}
-                        <button 
-                            onClick={() => setShowAllSpecial(!showAllSpecial)}
-                            className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
-                        >
-                            {showAllSpecial ? '접기' : '전체보기'} {showAllSpecial ? <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                        </button>
-                    </div>
-                </div>
-                {specialJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 min-[800px]:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-5 4xl:grid-cols-5 gap-2 lg:gap-4 w-fit mx-auto">
-                        {specialJobs.map((job, idx) => (
-                            <div 
-                                key={job.id} 
-                                className={`w-full ${
-                                    !showAllSpecial ? getResponsiveHideClass(idx, 3) : ''
-                                }`}
-                            >
-                                <PremiumJobCard 
-                                    {...(job as any)} 
-                                    impactType="none" 
-                                    effectIntensity="none" 
-                                    tier="SPECIAL" 
-                                    customColor={(job as any).color} 
-                                    bgOpacity={(job as any).bg_opacity}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
-                        <p className="text-gray-400 font-bold">등록된 스페셜 광고가 없습니다.</p>
-                    </div>
-                )}
-            </section>
+
 
             {/* General Job Cards */}
             <section>

@@ -38,7 +38,6 @@ const BASE_OPTIONS = [
 
 const OTHER_TIER_OPTIONS = [
     { key: 'TIER_PRICE_PREMIUM', title: '💎 프리미엄 배너', desc: '본문 최상단 테마 강조 노출' },
-    { key: 'TIER_PRICE_SPECIAL', title: '⭐ 스페셜 배너', desc: '프리미엄 하단 우선 노출' },
     { key: 'TIER_PRICE_GENERAL', title: '📋 일반 배너', desc: '기본 리스트 노출' },
     { key: 'TIER_PRICE_AD_GENERAL', title: '💼 배너 (일반)', desc: '배너 카테고리 일반 노출 요금' }
 ];

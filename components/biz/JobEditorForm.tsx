@@ -113,7 +113,6 @@ const PREMIUM_THEMES = [
 
 const TIER_OPTIONS = [
     { value: 'PREMIUM' as const, label: '프리미엄', price: 300000, priceLabel: '300,000P', desc: '최상단 테마 강조 노출', emoji: '👑' },
-    { value: 'SPECIAL' as const, label: '스페셜', price: 150000, priceLabel: '150,000P', desc: '상단 우선 노출', emoji: '⭐' },
     { value: 'GENERAL' as const, label: '일반', price: 50000, priceLabel: '50,000P', desc: '기본 노출', emoji: '📋' },
 ];
 
@@ -852,7 +851,6 @@ export function JobEditorForm({ initialData, onSubmit, isNew = false }: AdEditor
                                     className={`flex-1 py-2 px-3 rounded-xl border-2 transition-all flex items-center justify-center gap-2 ${
                                         form.tier === t.value
                                             ? t.value === 'PREMIUM' ? 'border-yellow-500 bg-yellow-50 ring-1 ring-yellow-200'
-                                            : t.value === 'SPECIAL' ? 'border-purple-500 bg-purple-50 ring-1 ring-purple-200'
                                             : 'border-gray-500 bg-gray-50 ring-1 ring-gray-200'
                                             : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                                     }`}

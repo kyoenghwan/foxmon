@@ -198,7 +198,6 @@ const TIER_GROUPS: { title: string; options: TierOption[] }[] = [
         title: '본문 리스트 광고 (시선 강탈용)',
         options: [
             { value: 'PREMIUM' as const, label: '프리미엄', price: 300000, priceLabel: '300,000P', desc: '본문 최상단 테마 강조 노출', emoji: '💎' },
-            { value: 'SPECIAL' as const, label: '스페셜', price: 150000, priceLabel: '150,000P', desc: '프리미엄 하단 우선 노출', emoji: '⭐' },
             { value: 'AD_GENERAL' as const, label: '일반 광고', price: 50000, priceLabel: '50,000P', desc: '기본 리스트 노출', emoji: '📋' },
         ]
     }
@@ -1077,7 +1076,6 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                     className={`flex-1 min-w-[140px] py-2.5 px-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 ${
                                                         form.tier === t.value
                                                             ? t.value?.includes('PREMIUM') ? 'border-yellow-500 bg-yellow-50 ring-1 ring-yellow-200'
-                                                            : t.value === 'SPECIAL' ? 'border-purple-500 bg-purple-50 ring-1 ring-purple-200'
                                                             : 'border-gray-500 bg-gray-50 ring-1 ring-gray-200'
                                                             : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100'
                                                     }`}

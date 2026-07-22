@@ -88,7 +88,6 @@ export default function AdminJobsPage() {
         { type: 'PREMIUM_MAIN', label: '메인 배너' },
         { type: 'SIDE', label: '사이드 배너' },
         { type: 'PREMIUM', label: '프리미엄' },
-        { type: 'SPECIAL', label: '스페셜' },
         { type: 'AD_GENERAL', label: '일반 배너' },
         { type: 'GENERAL', label: '구인글' },
     ];

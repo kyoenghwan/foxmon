@@ -107,7 +107,7 @@ export default function AdRankingsPage() {
                     <div>
                         <h2 className="text-lg font-bold text-gray-900 mb-4">{activeTab === 'monitoring' ? '노출 순위 현황' : '옵션/변경 내역'}</h2>
                         <div className="flex gap-2">
-                            {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'SPECIAL', 'GENERAL'].map(t => (
+                            {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'GENERAL'].map(t => (
                                 <button 
                                     key={t}
                                     onClick={() => setTier(t)}
