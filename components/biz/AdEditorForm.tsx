@@ -226,11 +226,9 @@ const OUTER_ACTION_OPTIONS = [
     { value: 'retro', label: '🕺 레트로 펄스', desc: '복고풍 반짝임' },
     { value: 'aura', label: '🔮 신비한 오라', desc: '주변이 일렁이는 기운' },
     { value: 'candy', label: '🍬 캔디 팝', desc: '톡톡 튀는 젤리 느낌' },
-    { value: 'royal', label: '👑 로얄 럭셔리', desc: '고급스러운 보라빛 심연' },
     { value: 'autumn', label: '🍂 가을빛', desc: '따스한 빛의 번짐' },
     { value: 'toxic', label: '👾 맹독 슬라임', desc: '녹아내리는 끈적임' },
     { value: 'storm', label: '🌩️ 뇌우 번개', desc: '강렬한 번개 번쩍임' },
-    { value: 'ghost', label: '👻 유령의 떨림', desc: '음산한 투명도 변화' },
 ];
 
 const INNER_ACTION_OPTIONS = [
