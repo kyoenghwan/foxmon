@@ -229,6 +229,7 @@ const OUTER_ACTION_OPTIONS = [
     { value: 'autumn', label: '🍂 가을빛', desc: '따스한 빛의 번짐' },
     { value: 'toxic', label: '👾 맹독 슬라임', desc: '녹아내리는 끈적임' },
     { value: 'storm', label: '🌩️ 뇌우 번개', desc: '강렬한 번개 번쩍임' },
+    { value: 'rainbow-border', label: '🌈 무지개', desc: '화려한 테두리 회전' },
 ];
 
 const INNER_ACTION_OPTIONS = [
@@ -236,7 +237,6 @@ const INNER_ACTION_OPTIONS = [
     { value: 'emerald', label: '💎 에메랄드', desc: '고급스러운 빛 흐름' },
     { value: 'ocean', label: '🌊 파도 흐름', desc: '부드러운 물결 흐름' },
     { value: 'matrix', label: '⌨️ 매트릭스', desc: '디지털 코드 흐름' },
-    { value: 'rainbow-border', label: '🌈 무지개', desc: '화려한 테두리 회전' },
 ];
 
 const EFFECT_OPTIONS = [

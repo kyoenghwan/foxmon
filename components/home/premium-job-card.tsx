@@ -230,7 +230,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
     let opacityClass = 'opacity-50';
 
     // ── 외부 애니메이션 클래스 빌드 ──
-    if (parsedIntensity === 'none' || outerAction === 'none') {
+    if (parsedIntensity === 'none' || outerAction === 'none' || outerAction === 'rainbow-border') {
         outerAnimClass = '';
     } else if (parsedIntensity === 'low') {
         outerAnimClass = `animate-${outerAction} duration-1000`;
@@ -283,13 +283,13 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
         } min-w-0 group p-[3px]`}>
             
             {/* --- [배로 아래 배경 레이어] --- */}
-            {(isImpact || wrapperAnimClass) && (
+            {(isImpact || wrapperAnimClass || outerAction === 'rainbow-border') && (
                 <div className={`absolute inset-0 overflow-hidden rounded-xl z-0 ${wrapperAnimClass}`}>
-                    {!isCrazy && !isCyber && innerAction !== 'rainbow-border' && isImpact && (
+                    {!isCrazy && !isCyber && innerAction !== 'rainbow-border' && outerAction !== 'rainbow-border' && isImpact && (
                         <div className={`absolute inset-0 ${opacityClass} blur-[1px] ${config.bg}`} />
                     )}
                     {/* 크레이지 테마이거나 액션이 무지개 테두리일 때 */}
-                    {(isCrazy || innerAction === 'rainbow-border') && (
+                    {(isCrazy || innerAction === 'rainbow-border' || outerAction === 'rainbow-border') && (
                         <div className="absolute inset-[-250%] animate-rainbow-border opacity-100" />
                     )}
                 </div>

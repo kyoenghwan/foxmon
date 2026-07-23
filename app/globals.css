@@ -264,8 +264,8 @@
   .animate-toxic { animation: toxic-ooze 4s infinite ease-in-out; }
 
   /* 🌩️ Storm Flash */
-  @keyframes storm-flash { 0%, 90%, 100% { opacity: 0; } 92%, 95% { opacity: 0.8; background: white; } 93% { opacity: 0; } }
-  .animate-storm { animation: storm-flash 5s infinite; }
+  @keyframes storm-flash { 0%, 80%, 100% { opacity: 0; background: transparent; } 82%, 88% { opacity: 0.9; background: white; } 85% { opacity: 0; background: transparent; } }
+  .animate-storm { animation: storm-flash 2.5s infinite; }
 
   /* 👻 Ghost */
   @keyframes ghost-pulse { 0%, 100% { opacity: 0.4; filter: blur(0px); } 50% { opacity: 0.1; filter: blur(2px); } }
