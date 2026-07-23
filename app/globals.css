@@ -216,8 +216,27 @@
   .animate-galaxy { animation: galaxy-twinkle 4s infinite ease-in-out; }
 
   /* ☀️ Sun Flare */
-  @keyframes sun-flare { 0%, 100% { opacity: 0.1; filter: blur(5px); } 50% { opacity: 0.4; filter: blur(2px); } }
+  @keyframes sun-flare {
+    0%, 100% { filter: brightness(1) contrast(1); }
+    50% { filter: brightness(1.15) contrast(1.05) drop-shadow(0 0 10px rgba(255, 220, 100, 0.3)); }
+  }
   .animate-sun { animation: sun-flare 3s infinite ease-in-out; }
+
+  /* ☀️ Sunburst Rays */
+  @keyframes sun-spin-pulse {
+    0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 0.25; }
+    50% { opacity: 0.75; }
+    100% { transform: translate(-50%, -50%) rotate(360deg); opacity: 0.25; }
+  }
+  .animate-sun-rays {
+    background: repeating-conic-gradient(
+      from 0deg,
+      transparent 0% 3%,
+      rgba(255, 215, 0, 0.25) 3.1% 6%,
+      transparent 6.1% 9%
+    );
+    animation: sun-spin-pulse 12s linear infinite;
+  }
 
   /* 🌋 Lava Molten */
   @keyframes lava-molten { 0%, 100% { background-color: #7f1d1d; } 50% { background-color: #b91c1c; } }

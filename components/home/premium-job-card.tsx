@@ -334,7 +334,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                     />
                 )}
                 {/* --- [오버레이 효과 레이어 (글자 뒤)] --- */}
-                {!isCrazy && isOverlayAnim && (
+                {!isCrazy && (isOverlayAnim || outerAction === 'sun') && (
                     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[calc(0.75rem-3px)]">
                         {/* Shimmer / Diamond 효과는 별도의 백그라운드 그라디언트가 필요함 */}
                         {(innerAction === 'shimmer' || innerAction === 'diamond') && (
@@ -344,6 +344,11 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                         {/* 자체 배경이 있는 오버레이 애니메이션 (emerald, matrix, ocean, platinum 등) */}
                         {innerAction !== 'shimmer' && innerAction !== 'diamond' && innerAction !== 'rainbow-border' && isImpact && (
                             <div className={`absolute inset-0 ${innerAnimClass} opacity-30 mix-blend-overlay`} />
+                        )}
+
+                        {/* ☀️ 태양 눈부심 광선 (sun) 회전 데코 */}
+                        {outerAction === 'sun' && (
+                            <div className="absolute w-[250%] aspect-square top-1/2 left-1/2 rounded-full animate-sun-rays pointer-events-none origin-center" />
                         )}
                     </div>
                 )}
