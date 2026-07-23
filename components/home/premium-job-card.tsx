@@ -185,27 +185,75 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
     const isCrazy = impactType === 'neon_crazy';
     const isCyber = impactType === 'glitch';
 
-    const [intensity, action] = effectIntensity && effectIntensity?.includes('::') 
-        ? effectIntensity.split('::') 
-        : [effectIntensity, effectIntensity]; // 하위 호환성
+    // effectIntensity 파싱 (강도::외부액션::내부액션 3단 구조 지원)
+    // 기존 구조 (강도::액션) 또는 단순 강도값인 경우 대응
+    let parsedIntensity = 'medium';
+    let outerAction = 'none';
+    let innerAction = 'none';
 
-    let animClass = config.animClass;
-    let opacityClass = 'opacity-50'; // 기본적으로 액션이 더 잘보이게 50%
-    
-    // 명시적인 액션(애니메이션) 타입 지정 (테마와 액션 분리)
-    if (intensity === 'none' || action === 'none') {
-        animClass = '';
-        opacityClass = 'opacity-10'; // 정적일 땐 은은하게
-    } else if (intensity === 'low') {
+    if (effectIntensity && effectIntensity.includes('::')) {
+        const parts = effectIntensity.split('::');
+        if (parts.length === 3) {
+            parsedIntensity = parts[0] || 'medium';
+            outerAction = parts[1] || 'none';
+            innerAction = parts[2] || 'none';
+        } else if (parts.length === 2) {
+            parsedIntensity = parts[0] || 'medium';
+            const actionVal = parts[1] || 'none';
+            // 기존 2단 구조의 경우 오버레이 애니메이션 배열에 포함되면 내부, 아니면 외부로 분류
+            const overlayAnims = ['shimmer', 'diamond', 'emerald', 'matrix', 'ocean', 'platinum', 'rainbow-border'];
+            if (overlayAnims.includes(actionVal)) {
+                innerAction = actionVal;
+                outerAction = 'none';
+            } else {
+                outerAction = actionVal;
+                innerAction = 'none';
+            }
+        }
+    } else if (effectIntensity) {
+        parsedIntensity = effectIntensity;
+        // 강도값만 들어왔을 때는 기본 설정값들을 땁니다. 
+        // 템플릿 테마 설정(config.animClass)을 기준으로 분석
+        const defaultAction = config.animClass ? config.animClass.replace('animate-', '') : 'none';
+        const overlayAnims = ['shimmer', 'diamond', 'emerald', 'matrix', 'ocean', 'platinum', 'rainbow-border'];
+        if (overlayAnims.includes(defaultAction)) {
+            innerAction = defaultAction;
+            outerAction = 'none';
+        } else {
+            outerAction = defaultAction;
+            innerAction = 'none';
+        }
+    }
+
+    let outerAnimClass = '';
+    let innerAnimClass = '';
+    let opacityClass = 'opacity-50';
+
+    // ── 외부 애니메이션 클래스 빌드 ──
+    if (parsedIntensity === 'none' || outerAction === 'none') {
+        outerAnimClass = '';
+    } else if (parsedIntensity === 'low') {
+        outerAnimClass = `animate-${outerAction} duration-1000`;
+    } else if (parsedIntensity === 'medium' || parsedIntensity === 'high') {
+        outerAnimClass = `animate-${outerAction}`;
+    }
+
+    // ── 내부 애니메이션 클래스 빌드 ──
+    if (parsedIntensity === 'none' || innerAction === 'none') {
+        innerAnimClass = '';
+    } else if (parsedIntensity === 'low') {
+        innerAnimClass = `animate-${innerAction} duration-1000`;
+    } else if (parsedIntensity === 'medium' || parsedIntensity === 'high') {
+        innerAnimClass = `animate-${innerAction}`;
+    }
+
+    // 투명도 설정
+    if (parsedIntensity === 'low') {
         opacityClass = 'opacity-30';
-        animClass = action ? `animate-${action} duration-1000` : (config.animClass ? `${config.animClass} duration-1000` : '');
-    } else if (intensity === 'medium' || intensity === 'high') {
-        opacityClass = intensity === 'high' ? 'opacity-80' : 'opacity-60';
-        animClass = action && action !== 'high' && action !== 'medium' && action !== 'low' ? `animate-${action}` : config.animClass;
-    } else if (action) {
-        // 커스텀 액션 (shimmer, pulse, rainbow-border 등)
+    } else if (parsedIntensity === 'high') {
+        opacityClass = 'opacity-80';
+    } else {
         opacityClass = 'opacity-60';
-        animClass = `animate-${action}`;
     }
 
     // color 파싱 (DB에서 '색상::투명도' 형태로 저장된 경우 대응)
@@ -222,17 +270,9 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
     const validOpacity = isNaN(parsedOpacity) ? 0 : Math.max(0, Math.min(100, parsedOpacity));
     const hexOpacity = Math.round((validOpacity / 100) * 255).toString(16).padStart(2, '0').toUpperCase();
 
-    // 정확한 액션 이름 추출 (intensity 키워드 제외)
-    const actualAction = (action && !['high', 'medium', 'low', 'none'].includes(action || '')) 
-        ? action 
-        : (config.animClass ? config.animClass.replace('animate-', '') : '');
-
-    // 오버레이 형태의 애니메이션 (내부를 스윕하거나 지나가는 효과)
-    const overlayAnims = ['shimmer', 'diamond', 'emerald', 'matrix', 'ocean', 'platinum', 'rainbow-border'];
-    const isOverlayAnim = overlayAnims?.includes(actualAction || '');
-
-    // 래퍼에 애니메이션 클래스를 적용할지 여부 (오버레이 전용이 아니면 래퍼에 적용)
-    const wrapperAnimClass = (!isOverlayAnim && actualAction !== 'rainbow-border') ? animClass : '';
+    // 래퍼에 애니메이션 클래스를 적용할지 여부
+    const isOverlayAnim = innerAction !== 'none';
+    const wrapperAnimClass = outerAnimClass;
 
     return (
         <div className={`relative ${
@@ -245,11 +285,11 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
             {/* --- [배로 아래 배경 레이어] --- */}
             {(isImpact || wrapperAnimClass) && (
                 <div className={`absolute inset-0 overflow-hidden rounded-xl z-0 ${wrapperAnimClass}`}>
-                    {!isCrazy && !isCyber && action !== 'rainbow-border' && isImpact && (
+                    {!isCrazy && !isCyber && innerAction !== 'rainbow-border' && isImpact && (
                         <div className={`absolute inset-0 ${opacityClass} blur-[1px] ${config.bg}`} />
                     )}
                     {/* 크레이지 테마이거나 액션이 무지개 테두리일 때 */}
-                    {(isCrazy || action === 'rainbow-border') && (
+                    {(isCrazy || innerAction === 'rainbow-border') && (
                         <div className="absolute inset-[-250%] animate-rainbow-border opacity-100" />
                     )}
                 </div>
@@ -297,13 +337,13 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                 {!isCrazy && isOverlayAnim && (
                     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[calc(0.75rem-3px)]">
                         {/* Shimmer / Diamond 효과는 별도의 백그라운드 그라디언트가 필요함 */}
-                        {(actualAction === 'shimmer' || actualAction === 'diamond') && (
-                            <div className={`absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/80 to-transparent skew-x-[-25deg] ${animClass}`} style={{ left: '-50%' }} />
+                        {(innerAction === 'shimmer' || innerAction === 'diamond') && (
+                            <div className={`absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/80 to-transparent skew-x-[-25deg] ${innerAnimClass}`} style={{ left: '-50%' }} />
                         )}
                         
                         {/* 자체 배경이 있는 오버레이 애니메이션 (emerald, matrix, ocean, platinum 등) */}
-                        {actualAction !== 'shimmer' && actualAction !== 'diamond' && actualAction !== 'rainbow-border' && isImpact && (
-                            <div className={`absolute inset-0 ${animClass} opacity-30 mix-blend-overlay`} />
+                        {innerAction !== 'shimmer' && innerAction !== 'diamond' && innerAction !== 'rainbow-border' && isImpact && (
+                            <div className={`absolute inset-0 ${innerAnimClass} opacity-30 mix-blend-overlay`} />
                         )}
                     </div>
                 )}

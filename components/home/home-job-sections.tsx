@@ -144,10 +144,12 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
         // effectIntensity 변환 로직 (BizAdPaymentModal과 동일하게 처리)
         let finalEffectIntensity = 'medium';
         if (job.isRealAd) {
-            if (job.action_type === 'none') {
+            if (job.effect_intensity && job.effect_intensity.includes('::')) {
+                finalEffectIntensity = job.effect_intensity;
+            } else if (job.action_type === 'none') {
                 finalEffectIntensity = 'none';
             } else {
-                finalEffectIntensity = `${job.effect_intensity || 'medium'}::${job.action_type || 'none'}`;
+                finalEffectIntensity = `${job.effect_intensity || 'medium'}::${job.action_type || 'none'}::none`;
             }
         }
 

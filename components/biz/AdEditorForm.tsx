@@ -70,6 +70,8 @@ export interface AdFormData {
     theme?: string;
     effect_intensity?: string;
     action_type?: string;
+    outer_action_type?: string;
+    inner_action_type?: string;
     logo_url?: string;
     // 상세 내용
     work_type: string;
@@ -210,19 +212,17 @@ const COLOR_PALETTE = [
     '#EC4899', '#14B8A6', '#EF4444', '#6366F1', '#1F2937',
 ];
 
-const ACTION_OPTIONS = [
+const OUTER_ACTION_OPTIONS = [
+    { value: 'none', label: '⛔ 없음', desc: '외부 애니메이션 끄기' },
     { value: 'neon', label: '⚛️ 네온 펄스', desc: '네온사인 깜빡임' },
     { value: 'flicker', label: '🌃 플리커', desc: '불안정하게 깜빡임' },
     { value: 'fire', label: '🔥 이글거림', desc: '불타는 듯한 효과' },
     { value: 'ice', label: '❄️ 얼음 떨림', desc: '차갑게 떨리는 효과' },
-    { value: 'emerald', label: '💎 에메랄드', desc: '고급스러운 빛 흐름' },
     { value: 'glitch', label: '⚡ 글리치', desc: '사이버펑크 흔들림' },
     { value: 'forest', label: '🍃 숲의 일렁임', desc: '바람에 흔들리는 느낌' },
-    { value: 'ocean', label: '🌊 파도 흐름', desc: '부드러운 물결 흐름' },
     { value: 'galaxy', label: '🌌 은하수', desc: '별빛 반짝임' },
     { value: 'sun', label: '☀️ 태양 눈부심', desc: '강렬한 빛 번짐' },
     { value: 'lava', label: '🌋 마그마', desc: '용암이 끓는 느낌' },
-    { value: 'matrix', label: '⌨️ 매트릭스', desc: '디지털 코드 흐름' },
     { value: 'retro', label: '🕺 레트로 펄스', desc: '복고풍 반짝임' },
     { value: 'aura', label: '🔮 신비한 오라', desc: '주변이 일렁이는 기운' },
     { value: 'candy', label: '🍬 캔디 팝', desc: '톡톡 튀는 젤리 느낌' },
@@ -231,8 +231,14 @@ const ACTION_OPTIONS = [
     { value: 'toxic', label: '👾 맹독 슬라임', desc: '녹아내리는 끈적임' },
     { value: 'storm', label: '🌩️ 뇌우 번개', desc: '강렬한 번개 번쩍임' },
     { value: 'ghost', label: '👻 유령의 떨림', desc: '음산한 투명도 변화' },
+];
+
+const INNER_ACTION_OPTIONS = [
+    { value: 'none', label: '⛔ 없음', desc: '내부 애니메이션 끄기' },
+    { value: 'emerald', label: '💎 에메랄드', desc: '고급스러운 빛 흐름' },
+    { value: 'ocean', label: '🌊 파도 흐름', desc: '부드러운 물결 흐름' },
+    { value: 'matrix', label: '⌨️ 매트릭스', desc: '디지털 코드 흐름' },
     { value: 'rainbow-border', label: '🌈 무지개', desc: '화려한 테두리 회전' },
-    { value: 'none', label: '⛔ 없음', desc: '애니메이션 끄기' },
 ];
 
 const EFFECT_OPTIONS = [
@@ -503,20 +509,45 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         ? (isCanvasData(initialData.detail_content) ? 'canvas' : 'html') 
         : 'canvas';
 
-    // effect_intensity 복합 데이터 파싱 ('강도::액션' 형식)
+    // effect_intensity 복합 데이터 파싱 ('강도::외부액션::내부액션' 또는 기존 '강도::액션')
     const initialIntensityData = initialData?.effect_intensity || 'medium';
     let initIntensity = 'medium';
-    let initAction = 'none';
+    let initOuterAction = 'none';
+    let initInnerAction = 'none';
+
     if (typeof initialIntensityData === 'string' && initialIntensityData.includes('::')) {
         const parts = initialIntensityData.split('::');
-        initIntensity = parts[0] || 'medium';
-        initAction = parts[1] || 'none';
+        if (parts.length === 3) {
+            initIntensity = parts[0] || 'medium';
+            initOuterAction = parts[1] || 'none';
+            initInnerAction = parts[2] || 'none';
+        } else if (parts.length === 2) {
+            initIntensity = parts[0] || 'medium';
+            const oldAction = parts[1] || 'none';
+            const overlayAnims = ['shimmer', 'diamond', 'emerald', 'matrix', 'ocean', 'platinum', 'rainbow-border'];
+            if (overlayAnims.includes(oldAction)) {
+                initInnerAction = oldAction;
+                initOuterAction = 'none';
+            } else {
+                initOuterAction = oldAction;
+                initInnerAction = 'none';
+            }
+        }
     } else if (typeof initialIntensityData === 'string' && ['high', 'medium', 'low', 'none'].includes(initialIntensityData)) {
         initIntensity = initialIntensityData;
-        initAction = 'none';
+        initOuterAction = 'none';
+        initInnerAction = 'none';
     } else {
         initIntensity = 'medium';
-        initAction = initialIntensityData;
+        const oldAction = initialIntensityData || 'none';
+        const overlayAnims = ['shimmer', 'diamond', 'emerald', 'matrix', 'ocean', 'platinum', 'rainbow-border'];
+        if (overlayAnims.includes(oldAction)) {
+            initInnerAction = oldAction;
+            initOuterAction = 'none';
+        } else {
+            initOuterAction = oldAction;
+            initInnerAction = 'none';
+        }
     }
 
     // color 및 bg_opacity 파싱 ('#FF6B35::10' 형식)
@@ -575,7 +606,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         auto_renew: initialData?.auto_renew || false,
         theme: initialData?.theme || 'gold',
         effect_intensity: initIntensity,
-        action_type: initAction,
+        outer_action_type: initOuterAction,
+        inner_action_type: initInnerAction,
         logo_url: initialData?.logo_url || '',
         work_type: initialData?.work_type || '',
         employment_type: initialData?.employment_type || '',
@@ -772,7 +804,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         let theme = form.theme || 'none';
         let color = form.color || '#FF6B35';
         let bg_opacity = form.bg_opacity || '10';
-        let action_type = form.action_type || 'none';
+        let outer_action_type = form.outer_action_type || 'none';
+        let inner_action_type = form.inner_action_type || 'none';
         let effect_intensity = form.effect_intensity || 'medium';
 
         if (isThemeVisible) {
@@ -793,14 +826,19 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         }
 
         if (isAnimVisible) {
-            const validActions = ACTION_OPTIONS.filter(a => a.value !== 'none');
-            const randomAction = validActions[Math.floor(Math.random() * validActions.length)];
-            action_type = randomAction.value;
+            const validOuterActions = OUTER_ACTION_OPTIONS.filter(a => a.value !== 'none');
+            const randomOuter = validOuterActions[Math.floor(Math.random() * validOuterActions.length)];
+            outer_action_type = randomOuter.value;
+
+            const validInnerActions = INNER_ACTION_OPTIONS.filter(a => a.value !== 'none');
+            const randomInner = validInnerActions[Math.floor(Math.random() * validInnerActions.length)];
+            inner_action_type = randomInner.value;
             
             const randomEffect = EFFECT_OPTIONS[Math.floor(Math.random() * EFFECT_OPTIONS.length)];
             effect_intensity = randomEffect.value;
         } else {
-            action_type = 'none';
+            outer_action_type = 'none';
+            inner_action_type = 'none';
             effect_intensity = 'none';
         }
 
@@ -809,7 +847,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             theme,
             color,
             bg_opacity,
-            action_type,
+            outer_action_type,
+            inner_action_type,
             effect_intensity
         }));
     };
@@ -944,11 +983,15 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                 keywords: mergeSelectedTagCodes(form.keywords, form.amenities),
                 amenities: [] as string[],
             };
-            if (payload.action_type && payload.effect_intensity) {
-                payload.effect_intensity = `${payload.effect_intensity}::${payload.action_type}`;
-            } else if (payload.action_type) {
-                payload.effect_intensity = `medium::${payload.action_type}`;
-            }
+            
+            const intensity = payload.effect_intensity || 'medium';
+            const outer = payload.outer_action_type || 'none';
+            const inner = payload.inner_action_type || 'none';
+            payload.effect_intensity = `${intensity}::${outer}::${inner}`;
+            
+            delete (payload as any).action_type;
+            delete (payload as any).outer_action_type;
+            delete (payload as any).inner_action_type;
             
             // color 필드에 투명도 결합
             if (payload.color && payload.bg_opacity) {
@@ -1298,7 +1341,11 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                             pay={form.pay || '급여 정보'}
                                                             image={form.logo_url || form.image}
                                                             impactType={(form.theme as any) || 'gold'}
-                                                            effectIntensity={isSpecial || isGeneral || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'none'}`}
+                                                            effectIntensity={
+                                                                isSpecial || isGeneral || (form.outer_action_type === 'none' && form.inner_action_type === 'none')
+                                                                    ? 'none'
+                                                                    : `${form.effect_intensity || 'medium'}::${form.outer_action_type || 'none'}::${form.inner_action_type || 'none'}`
+                                                            }
                                                             isSide={isSide}
                                                             hideLogo={isGeneral}
                                                             tier={form.tier}
@@ -1793,17 +1840,20 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            <div className="space-y-6">
+                            <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-1">
                                 <div>
-                                    <label className="text-[13px] font-bold text-gray-600 mb-3 block">액션(애니메이션) 선택</label>
+                                    <div className="flex items-center gap-1.5 mb-3">
+                                        <span className="text-[14px]">🖼️</span>
+                                        <label className="text-[13px] font-bold text-gray-800">외부 연출 (전체 흔들림/깜빡임/테두리)</label>
+                                    </div>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                                    {ACTION_OPTIONS.map(opt => (
+                                    {OUTER_ACTION_OPTIONS.map(opt => (
                                         <button
                                             key={opt.value}
                                             type="button"
-                                            onClick={() => update('action_type', opt.value)}
+                                            onClick={() => update('outer_action_type', opt.value)}
                                             className={`py-3 px-2 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center ${
-                                                form.action_type === opt.value
+                                                form.outer_action_type === opt.value
                                                     ? 'border-primary bg-orange-50 text-primary ring-1 ring-primary/30'
                                                     : 'border-gray-200 text-gray-500 hover:border-gray-300'
                                             }`}
@@ -1815,7 +1865,31 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     </div>
                                 </div>
 
-                                {form.action_type !== 'none' && (
+                                <div className="border-t border-gray-100 pt-4">
+                                    <div className="flex items-center gap-1.5 mb-3">
+                                        <span className="text-[14px]">🌊</span>
+                                        <label className="text-[13px] font-bold text-gray-800">내부 연출 (배경 흐름 오버레이)</label>
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                    {INNER_ACTION_OPTIONS.map(opt => (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() => update('inner_action_type', opt.value)}
+                                            className={`py-3 px-2 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center ${
+                                                form.inner_action_type === opt.value
+                                                    ? 'border-primary bg-orange-50 text-primary ring-1 ring-primary/30'
+                                                    : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            <p className="font-black text-[13px] whitespace-nowrap">{opt.label}</p>
+                                            <p className="text-[10px] mt-1 text-gray-400 leading-tight">{opt.desc}</p>
+                                        </button>
+                                    ))}
+                                    </div>
+                                </div>
+
+                                {(form.outer_action_type !== 'none' || form.inner_action_type !== 'none') && (
                                     <div>
                                         <label className="text-[13px] font-bold text-gray-600 mb-3 block">액션 강도</label>
                                         <div className="flex gap-3">

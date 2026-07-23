@@ -310,10 +310,12 @@ export function JobsListContent({ isEmployer: propIsEmployer, searchQuery }: Job
             
         let finalEffectIntensity = 'medium';
         if (job.isRealAd) {
-            if (job.action_type === 'none') {
+            if (job.effect_intensity && job.effect_intensity.includes('::')) {
+                finalEffectIntensity = job.effect_intensity;
+            } else if (job.action_type === 'none') {
                 finalEffectIntensity = 'none';
             } else {
-                finalEffectIntensity = `${job.effect_intensity || 'medium'}::${job.action_type || 'none'}`;
+                finalEffectIntensity = `${job.effect_intensity || 'medium'}::${job.action_type || 'none'}::none`;
             }
         }
 
