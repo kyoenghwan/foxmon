@@ -1659,70 +1659,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                         </>
                     )}
                     
-                    {/* 대행 계정 전용: 소유권 양도 핀코드 설정 */}
-                    {isAgent && (
-                        <div className="bg-orange-50/60 rounded-2xl border border-orange-200 p-5 space-y-4">
-                            <h3 className="font-black text-[15px] text-orange-950 flex items-center gap-2">
-                                <Key className="w-4 h-4 text-primary" />
-                                🔐 대행 등록 전용: 소유권 양도 핀코드 (Claim Code) 설정
-                            </h3>
-                            <p className="text-[12px] text-orange-700 font-medium">
-                                나중에 업체가 가입한 후 이 코드를 마이페이지에 기입하면 본 광고의 소유권을 즉시 안전하게 귀속(양도)해갈 수 있습니다.
-                            </p>
-                            <div className="flex gap-2 max-w-md">
-                                <input
-                                    type="text"
-                                    value={form.claim_code || ''}
-                                    onChange={e => update('claim_code', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                                    className="flex-1 px-3 py-2.5 border border-orange-200 rounded-lg text-[14px] font-black outline-none focus:border-primary bg-white uppercase text-center tracking-wider"
-                                    placeholder="예: FX99AA (대문자/숫자)"
-                                    maxLength={10}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                                        let code = '';
-                                        for (let i = 0; i < 6; i++) {
-                                            code += chars.charAt(Math.floor(Math.random() * chars.length));
-                                        }
-                                        update('claim_code', code);
-                                    }}
-                                    className="px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold text-[13px] rounded-lg transition-colors border border-orange-200 shadow-sm"
-                                >
-                                    🎲 자동 생성
-                                </button>
-                            </div>
-                            
-                            {/* 노출 만료일 직접 지정 */}
-                            <div className="border-t border-orange-200/60 pt-4 space-y-2">
-                                <h4 className="font-black text-[13px] text-orange-950 flex items-center gap-2">
-                                    <Clock className="w-4 h-4 text-primary" />
-                                    📅 임의 광고 노출 기간 (만료일) 설정
-                                </h4>
-                                <p className="text-[12px] text-orange-700 font-medium">
-                                    결제 여부와 상관없이 지정된 만료일까지 광고를 웹사이트에 즉시 강제 노출할 수 있습니다. (설정하지 않으면 결제 대기 상태로 등록됩니다)
-                                </p>
-                                <div className="flex items-center gap-2 max-w-md">
-                                    <input
-                                        type="date"
-                                        value={form.expires_at ? form.expires_at.substring(0, 10) : ''}
-                                        onChange={e => update('expires_at', e.target.value)}
-                                        className="flex-1 px-3 py-2.5 border border-orange-200 rounded-lg text-[14px] font-black outline-none focus:border-primary bg-white text-center"
-                                    />
-                                    {form.expires_at && form.expires_at !== '2000-01-01T00:00:00.000Z' && (
-                                        <button
-                                            type="button"
-                                            onClick={() => update('expires_at', '')}
-                                            className="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[13px] rounded-lg transition-colors border border-gray-200"
-                                        >
-                                            초기화 (결제 대기)
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
+
                     </div>
 
                     {/* ③ 등급별 배너 디자인 설정 */}
@@ -2475,6 +2412,71 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             </div>
                         )}
 
+                    </div>
+                </div>
+            )}
+
+            {/* 대행 계정 전용: 소유권 양도 핀코드 설정 */}
+            {isAgent && (
+                <div className="bg-orange-50/60 rounded-2xl border border-orange-200 p-5 space-y-4 mb-4">
+                    <h3 className="font-black text-[15px] text-orange-950 flex items-center gap-2">
+                        <Key className="w-4 h-4 text-primary" />
+                        🔐 대행 등록 전용: 소유권 양도 핀코드 (Claim Code) 설정
+                    </h3>
+                    <p className="text-[12px] text-orange-700 font-medium">
+                        나중에 업체가 가입한 후 이 코드를 마이페이지에 기입하면 본 광고의 소유권을 즉시 안전하게 귀속(양도)해갈 수 있습니다.
+                    </p>
+                    <div className="flex gap-2 max-w-md">
+                        <input
+                            type="text"
+                            value={form.claim_code || ''}
+                            onChange={e => update('claim_code', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                            className="flex-1 px-3 py-2.5 border border-orange-200 rounded-lg text-[14px] font-black outline-none focus:border-primary bg-white uppercase text-center tracking-wider"
+                            placeholder="예: FX99AA (대문자/숫자)"
+                            maxLength={10}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                                let code = '';
+                                for (let i = 0; i < 6; i++) {
+                                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                                }
+                                update('claim_code', code);
+                            }}
+                            className="px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold text-[13px] rounded-lg transition-colors border border-orange-200 shadow-sm"
+                        >
+                            🎲 자동 생성
+                        </button>
+                    </div>
+                    
+                    {/* 노출 만료일 직접 지정 */}
+                    <div className="border-t border-orange-200/60 pt-4 space-y-2">
+                        <h4 className="font-black text-[13px] text-orange-950 flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-primary" />
+                            📅 임의 광고 노출 기간 (만료일) 설정
+                        </h4>
+                        <p className="text-[12px] text-orange-700 font-medium">
+                            결제 여부와 상관없이 지정된 만료일까지 광고를 웹사이트에 즉시 강제 노출할 수 있습니다. (설정하지 않으면 결제 대기 상태로 등록됩니다)
+                        </p>
+                        <div className="flex items-center gap-2 max-w-md">
+                            <input
+                                type="date"
+                                value={form.expires_at ? form.expires_at.substring(0, 10) : ''}
+                                onChange={e => update('expires_at', e.target.value)}
+                                className="flex-1 px-3 py-2.5 border border-orange-200 rounded-lg text-[14px] font-black outline-none focus:border-primary bg-white text-center"
+                            />
+                            {form.expires_at && form.expires_at !== '2000-01-01T00:00:00.000Z' && (
+                                <button
+                                    type="button"
+                                    onClick={() => update('expires_at', '')}
+                                    className="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[13px] rounded-lg transition-colors border border-gray-200"
+                                >
+                                    초기화 (결제 대기)
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
