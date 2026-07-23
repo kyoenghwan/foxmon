@@ -146,6 +146,7 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricRef = useRef<Canvas | null>(null);
     const clipboardRef = useRef<any>(null);
+    const lastSelectionRef = useRef<{ start: number; end: number } | null>(null);
     const [activeObj, setActiveObj] = useState<any>(null);
     const [bgUrl, setBgUrl] = useState('');
     const [isPattern, setIsPattern] = useState(false); // 배경을 패턴으로 깔지 여부
@@ -265,7 +266,20 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
             handleSelection(e.selected?.[0]);
             updateCoords(e.selected?.[0]);
         });
-        canvas.on('selection:cleared', () => { setActiveObj(null); });
+        canvas.on('selection:cleared', () => { 
+            setActiveObj(null); 
+            lastSelectionRef.current = null;
+        });
+
+        canvas.on('text:selection:changed', (e) => {
+            const obj = e.target as any;
+            if (obj && (obj.type === 'textbox' || obj.type === 'itext')) {
+                lastSelectionRef.current = {
+                    start: obj.selectionStart,
+                    end: obj.selectionEnd
+                };
+            }
+        });
 
         // 자석(스냅) 기능: 중앙 근처로 가면 찰칵 붙음
         canvas.on('object:moving', (e) => {
@@ -784,20 +798,43 @@ const AdCanvasEditor = forwardRef<AdCanvasEditorRef, AdCanvasEditorProps>(({
         if (!canvas || !obj) return;
 
         const isInlineStyleKey = ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'underline', 'linethrough', 'fill', 'textBackgroundColor'].includes(key);
-        const isSelectedText = (obj.type === 'textbox' || obj.type === 'itext') && obj.isEditing;
+        
+        const lastSelection = lastSelectionRef.current;
+        const hasSelection = lastSelection && lastSelection.start !== lastSelection.end;
+        const isTextObj = obj.type === 'textbox' || obj.type === 'itext';
+        const isSelectedText = isTextObj && (obj.isEditing || hasSelection);
 
-        // 선택 영역 정보 임시 저장
+        // 선택 영역 정보 임시 저장 (포커스 잃은 경우 백업 영역 복원)
         let selectionStart = 0;
         let selectionEnd = 0;
         if (isSelectedText) {
-            selectionStart = obj.selectionStart;
-            selectionEnd = obj.selectionEnd;
+            selectionStart = obj.isEditing ? obj.selectionStart : (lastSelection?.start ?? 0);
+            selectionEnd = obj.isEditing ? obj.selectionEnd : (lastSelection?.end ?? 0);
         }
 
         if (isInlineStyleKey && isSelectedText && selectionStart !== selectionEnd) {
+            // 포커스가 해제되어 편집 상태가 아닌 경우 강제 진입 및 블록 재지정
+            if (!obj.isEditing) {
+                obj.enterEditing();
+                obj.setSelection(selectionStart, selectionEnd);
+            }
             obj.setSelectionStyles({ [key]: val });
+            obj.dirty = true;
         } else {
             obj.set(key as any, val);
+            
+            // 텍스트 박스 전체의 폰트 속성(크기, 색 등)을 변경할 때 개별 문자 우선 서식(obj.styles)에 막히지 않도록 스타일 값 동기화
+            if (isInlineStyleKey && isTextObj) {
+                if (obj.styles) {
+                    for (const lineNum in obj.styles) {
+                        const lineStyles = obj.styles[lineNum];
+                        for (const charNum in lineStyles) {
+                            delete lineStyles[charNum][key];
+                        }
+                    }
+                }
+                obj.dirty = true;
+            }
         }
         
         canvas.renderAll();
