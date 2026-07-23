@@ -15,12 +15,13 @@ export default async function BizBannersPage() {
     if (session?.user?.id) {
         const { data: profile } = await supabaseAdmin
             .from('users')
-            .select('is_business_verified, business_registration_number')
+            .select('is_business_verified, business_registration_number, role')
             .eq('id', session.user.id)
             .single();
             
-        // 법적 조건: 사업자번호(business_registration_number)가 존재하고, 관리자 승인(is_business_verified)이 모두 완료되어야 함
-        isVerifiedEmployer = !!profile?.is_business_verified && !!profile?.business_registration_number;
+        const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
+        // 법적 조건: 사업자번호(business_registration_number)가 존재하고, 관리자 승인(is_business_verified)이 모두 완료되어야 함 (관리자 계정은 예외 허용)
+        isVerifiedEmployer = isAdmin || (!!profile?.is_business_verified && !!profile?.business_registration_number);
     }
 
     const res = isVerifiedEmployer ? await manageBizAdAction('GET') : { success: true, data: [] };

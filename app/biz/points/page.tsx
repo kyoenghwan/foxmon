@@ -74,7 +74,7 @@ export default async function BizPointsPage() {
                     <Plus className="w-4 h-4 text-primary" /> 포인트 충전 신청
                 </h3>
                 <PointRechargeForm 
-                    isBusinessVerified={!!userData?.is_business_verified} 
+                    isBusinessVerified={(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') || !!userData?.is_business_verified} 
                     defaultDepositorName={realName}
                 />
             </div>
