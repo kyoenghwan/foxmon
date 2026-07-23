@@ -201,7 +201,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
             parsedIntensity = parts[0] || 'medium';
             const actionVal = parts[1] || 'none';
             // 기존 2단 구조의 경우 오버레이 애니메이션 배열에 포함되면 내부, 아니면 외부로 분류
-            const overlayAnims = ['shimmer', 'diamond', 'emerald', 'matrix', 'ocean', 'platinum', 'rainbow-border'];
+            const overlayAnims = ['shimmer', 'diamond', 'emerald', 'matrix', 'ocean', 'platinum', 'rainbow-border', 'gold-dust', 'aurora', 'cyber-tech', 'magma-flow'];
             if (overlayAnims.includes(actionVal)) {
                 innerAction = actionVal;
                 outerAction = 'none';
@@ -215,7 +215,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
         // 강도값만 들어왔을 때는 기본 설정값들을 땁니다. 
         // 템플릿 테마 설정(config.animClass)을 기준으로 분석
         const defaultAction = config.animClass ? config.animClass.replace('animate-', '') : 'none';
-        const overlayAnims = ['shimmer', 'diamond', 'emerald', 'matrix', 'ocean', 'platinum', 'rainbow-border'];
+        const overlayAnims = ['shimmer', 'diamond', 'emerald', 'matrix', 'ocean', 'platinum', 'rainbow-border', 'gold-dust', 'aurora', 'cyber-tech', 'magma-flow'];
         if (overlayAnims.includes(defaultAction)) {
             innerAction = defaultAction;
             outerAction = 'none';

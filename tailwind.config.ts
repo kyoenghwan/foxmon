@@ -16,6 +16,7 @@ const config = {
         'animate-galaxy', 'animate-sun', 'animate-lava', 'animate-matrix', 'animate-retro',
         'animate-diamond', 'animate-platinum', 'animate-aura', 'animate-candy', 'animate-royal',
         'animate-autumn', 'animate-toxic', 'animate-storm', 'animate-ghost', 'animate-rainbow-border',
+        'animate-gold-dust', 'animate-aurora', 'animate-cyber-tech', 'animate-magma-flow',
         'min-[768px]:max-[799px]:hidden',
         'min-[800px]:max-[1439px]:hidden',
         'min-[1440px]:max-[1919px]:hidden',

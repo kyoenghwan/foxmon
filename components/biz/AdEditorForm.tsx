@@ -237,6 +237,10 @@ const INNER_ACTION_OPTIONS = [
     { value: 'emerald', label: '💎 에메랄드', desc: '고급스러운 빛 흐름' },
     { value: 'ocean', label: '🌊 파도 흐름', desc: '부드러운 물결 흐름' },
     { value: 'matrix', label: '⌨️ 매트릭스', desc: '디지털 코드 흐름' },
+    { value: 'gold-dust', label: '✨ 골드 더스트', desc: '흘러내리는 황금빛 가루' },
+    { value: 'aurora', label: '🌌 오로라', desc: '일렁이는 신비한 장막' },
+    { value: 'cyber-tech', label: '💻 사이버 테크', desc: '미래지향적 회로 흐름' },
+    { value: 'magma-flow', label: '🔥 마그마 흐름', desc: '이글거리는 마그마의 대류' },
 ];
 
 const EFFECT_OPTIONS = [
