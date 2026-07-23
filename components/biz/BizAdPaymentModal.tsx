@@ -376,7 +376,7 @@ ${cancelDetail || '상세 사유 미기재'}
                                                 pay={form.pay || (form.salary_type ? `[${form.salary_type}] ${form.salary_amount}` : form.salary_amount) || (form.pay_amount ? `${form.pay_type} ${form.pay_amount}` : '급여 협의')}
                                                 image={form.logo_url || form.image}
                                                 impactType={isGeneral ? 'none' : (form.option_highlight ? ((form.theme as any) || 'gold') : 'none')}
-                                                effectIntensity={isSpecial || isGeneral || !form.option_highlight || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'shimmer'}`}
+                                                effectIntensity={isSpecial || isGeneral || !form.option_highlight || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'none'}`}
                                                 isSide={isSide}
                                                 hideLogo={isGeneral}
                                                 tier={form.tier as any}

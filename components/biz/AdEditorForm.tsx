@@ -211,8 +211,6 @@ const COLOR_PALETTE = [
 ];
 
 const ACTION_OPTIONS = [
-    { value: 'shimmer', label: '✨ 반짝임', desc: '빛이 지나감' },
-    { value: 'pulse', label: '🫀 숨쉬기', desc: '전체적으로 깜빡임' },
     { value: 'neon', label: '⚛️ 네온 펄스', desc: '네온사인 깜빡임' },
     { value: 'flicker', label: '🌃 플리커', desc: '불안정하게 깜빡임' },
     { value: 'fire', label: '🔥 이글거림', desc: '불타는 듯한 효과' },
@@ -221,14 +219,11 @@ const ACTION_OPTIONS = [
     { value: 'glitch', label: '⚡ 글리치', desc: '사이버펑크 흔들림' },
     { value: 'forest', label: '🍃 숲의 일렁임', desc: '바람에 흔들리는 느낌' },
     { value: 'ocean', label: '🌊 파도 흐름', desc: '부드러운 물결 흐름' },
-    { value: 'sakura', label: '🌸 벚꽃 흩날림', desc: '꽃잎 떨어지는 느낌' },
     { value: 'galaxy', label: '🌌 은하수', desc: '별빛 반짝임' },
     { value: 'sun', label: '☀️ 태양 눈부심', desc: '강렬한 빛 번짐' },
     { value: 'lava', label: '🌋 마그마', desc: '용암이 끓는 느낌' },
     { value: 'matrix', label: '⌨️ 매트릭스', desc: '디지털 코드 흐름' },
     { value: 'retro', label: '🕺 레트로 펄스', desc: '복고풍 반짝임' },
-    { value: 'diamond', label: '💎 다이아몬드', desc: '날카로운 빛 반사' },
-    { value: 'platinum', label: '✨ 플래티넘', desc: '백금빛 흐름' },
     { value: 'aura', label: '🔮 신비한 오라', desc: '주변이 일렁이는 기운' },
     { value: 'candy', label: '🍬 캔디 팝', desc: '톡톡 튀는 젤리 느낌' },
     { value: 'royal', label: '👑 로얄 럭셔리', desc: '고급스러운 보라빛 심연' },
@@ -511,14 +506,14 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     // effect_intensity 복합 데이터 파싱 ('강도::액션' 형식)
     const initialIntensityData = initialData?.effect_intensity || 'medium';
     let initIntensity = 'medium';
-    let initAction = 'shimmer';
+    let initAction = 'none';
     if (typeof initialIntensityData === 'string' && initialIntensityData.includes('::')) {
         const parts = initialIntensityData.split('::');
         initIntensity = parts[0] || 'medium';
-        initAction = parts[1] || 'shimmer';
+        initAction = parts[1] || 'none';
     } else if (typeof initialIntensityData === 'string' && ['high', 'medium', 'low', 'none'].includes(initialIntensityData)) {
         initIntensity = initialIntensityData;
-        initAction = 'shimmer';
+        initAction = 'none';
     } else {
         initIntensity = 'medium';
         initAction = initialIntensityData;
@@ -1303,7 +1298,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                             pay={form.pay || '급여 정보'}
                                                             image={form.logo_url || form.image}
                                                             impactType={(form.theme as any) || 'gold'}
-                                                            effectIntensity={isSpecial || isGeneral || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'shimmer'}`}
+                                                            effectIntensity={isSpecial || isGeneral || form.action_type === 'none' ? 'none' : `${form.effect_intensity || 'medium'}::${form.action_type || 'none'}`}
                                                             isSide={isSide}
                                                             hideLogo={isGeneral}
                                                             tier={form.tier}

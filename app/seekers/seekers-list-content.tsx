@@ -378,7 +378,7 @@ export function SeekersListContent({ isEmployer: propIsEmployer, session: propSe
             if (job.action_type === 'none') {
                 finalEffectIntensity = 'none';
             } else {
-                finalEffectIntensity = `${job.effect_intensity || 'medium'}::${job.action_type || 'shimmer'}`;
+                finalEffectIntensity = `${job.effect_intensity || 'medium'}::${job.action_type || 'none'}`;
             }
         }
 
