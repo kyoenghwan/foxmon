@@ -150,8 +150,8 @@
 @layer utilities {
   /* ✨ Gold Shimmer Effect */
   @keyframes shimmer {
-    0% { transform: translateX(-200%); }
-    100% { transform: translateX(200%); }
+    0% { transform: translateX(-150%); }
+    100% { transform: translateX(150%); }
   }
   .animate-shimmer {
     animation: shimmer 2s infinite linear;
@@ -232,7 +232,7 @@
   .animate-retro { animation: retro-pulse 2s infinite ease-in-out; }
 
   /* ✨ Gold Shimmer (L to R) */
-  @keyframes shimmer { 0% { transform: translateX(-200%); } 100% { transform: translateX(200%); } }
+  @keyframes shimmer { 0% { transform: translateX(-150%); } 100% { transform: translateX(150%); } }
   .animate-shimmer { animation: shimmer 2s infinite linear; }
 
   /* 💎 Diamond Glint */

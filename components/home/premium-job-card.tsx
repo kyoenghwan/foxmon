@@ -298,7 +298,7 @@ export function PremiumJobCard({ company, title, location, category, pay, image,
                     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[calc(0.75rem-3px)]">
                         {/* Shimmer / Diamond 효과는 별도의 백그라운드 그라디언트가 필요함 */}
                         {(actualAction === 'shimmer' || actualAction === 'diamond') && (
-                            <div className={`absolute inset-x-[-100%] inset-y-0 bg-gradient-to-r from-transparent via-white to-transparent skew-x-[-25deg] ${animClass} opacity-70`} />
+                            <div className={`absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/80 to-transparent skew-x-[-25deg] ${animClass}`} style={{ left: '-50%' }} />
                         )}
                         
                         {/* 자체 배경이 있는 오버레이 애니메이션 (emerald, matrix, ocean, platinum 등) */}
