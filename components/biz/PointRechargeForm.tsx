@@ -138,7 +138,7 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                     </p>
                     
                     {/* 수시 변경 경고 안내문 */}
-                    <div className="mt-4 bg-red-50 border-2 border-red-500 rounded-xl p-4 text-[13px] md:text-[14px] text-red-900 font-extrabold leading-relaxed shadow-sm">
+                    <div className="mt-4 bg-red-50 border-2 border-red-500 rounded-xl p-4 text-[13px] md:text-[14px] text-red-900 font-normal leading-relaxed shadow-sm">
                         ⚠️ [필독 경고] 회사 입금 계좌는 보안 상 수시로 변경됩니다. 이전에 입금하셨던 내역이 있더라도, <span className="text-red-650 underline bg-yellow-100 px-1 rounded font-black">반드시 매 입금 전 1:1 문의를 눌러 실시간 계좌번호를 확인하신 후</span> 입금해 주셔야 합니다. 예전 계좌로 잘못 송금 시 자금 반환 및 포인트 지급 처리가 불가능하거나 대단히 지연될 수 있습니다.
                     </div>
 
@@ -225,8 +225,8 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                             />
                         </div>
                     </div>
-                    <div className="bg-red-50 border-2 border-red-400 rounded-xl p-4 text-[13px] md:text-[14px] text-red-800 font-extrabold leading-relaxed shadow-sm">
-                        🚨 [입금 전 필독] 회사 공식 계좌는 수시로 변경될 수 있으므로 반드시 상단의 1:1 문의를 거쳐 발급받으신 최신 계좌로만 입금하셔야 합니다. 기존에 저장해 둔 계좌나 다른 계좌로 송금 시 포인트 지급 처리가 절대 되지 않으므로 각별히 주의하시기 바랍니다.
+                    <div className="bg-red-50 border-2 border-red-400 rounded-xl p-4 text-[13px] md:text-[14px] text-red-800 font-normal leading-relaxed shadow-sm">
+                        🚨 [입금 전 필독] 회사 공식 계좌는 수시로 변경될 수 있으므로 <span className="font-black text-red-700 underline bg-yellow-100 px-1 rounded">반드시 상단의 1:1 문의를 거쳐 발급받으신 최신 계좌로만</span> 입금하셔야 합니다. 기존에 저장해 둔 계좌나 다른 계좌로 송금 시 포인트 지급 처리가 절대 되지 않으므로 각별히 주의하시기 바랍니다.
                     </div>
                     <button
                         type="submit"
