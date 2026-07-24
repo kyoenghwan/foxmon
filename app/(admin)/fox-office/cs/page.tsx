@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase';
 import CsDashboardClient from '@/app/(admin)/fox-office/cs/CsDashboardClient';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,25 @@ export default async function CsDashboardPage() {
   // 관리자 권한 차단
   if (!session?.user?.id || (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN')) {
     redirect('/');
+  }
+
+  // 2. CS 기기 인증 차단 검사 (쿠키 기반)
+  const cookieStore = await cookies();
+  const deviceToken = cookieStore.get('cs_device_token')?.value;
+
+  if (!deviceToken) {
+    redirect('/fox-office/cs/unauthorized');
+  }
+
+  const { data: approvedDevice } = await supabaseAdmin
+    .from('cs_approved_devices')
+    .select('status')
+    .eq('device_token', deviceToken)
+    .eq('status', 'APPROVED')
+    .maybeSingle();
+
+  if (!approvedDevice) {
+    redirect('/fox-office/cs/unauthorized');
   }
 
   // 1. 1:1 고객 문의 목록 조회 (닉네임, 이메일 정보 조인)

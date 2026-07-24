@@ -3,9 +3,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ShieldCheck, Users, Headset, Megaphone, Clock, MessageSquare, Bot } from "lucide-react";
 import { QA_GET_SUPPORT_STAFF_USERS } from "@/src/atoms/qa/admin/QA_GET_SUPPORT_STAFF_USERS";
-import { isSupabaseServiceRoleConfigured } from "@/lib/supabase";
+import { isSupabaseServiceRoleConfigured, supabaseAdmin } from "@/lib/supabase";
 import { getSiteSettings, updateSiteSettings } from "@/actions/admin/siteSettings";
 import { updateUserStaffTeam } from "@/actions/admin/staffTeams";
+import DeviceManager from "@/src/components/admin/DeviceManager";
 import {
   parseCsSettings,
   csSettingsToPayload,
@@ -51,9 +52,13 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
     redirect("/");
   }
 
-  const [usersRes, settingsRes] = await Promise.all([
+  const [usersRes, settingsRes, devicesRes] = await Promise.all([
     QA_GET_SUPPORT_STAFF_USERS(),
     getSiteSettings(),
+    supabaseAdmin
+      .from('cs_approved_devices')
+      .select('*')
+      .order('created_at', { ascending: false }),
   ]);
   const staffUsers = usersRes.success ? ((usersRes.data as unknown) as AdminUserRow[]) : [];
   const usersFetchError = usersRes.success ? null : usersRes.error;
@@ -61,6 +66,7 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
   const settings = settingsRes.success ? (settingsRes.data as Record<string, string>) : {};
   const primaryCsAdminUserId = settings?.cs_admin_user_id || "";
   const csSettings = parseCsSettings(settings);
+  const devices = devicesRes.data || [];
   const dayOptions = [
     { v: 1, l: "월" },
     { v: 2, l: "화" },
@@ -460,6 +466,9 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
           </button>
         </form>
       </div>
+
+      {/* CS 기기 승인 관리 영역 신설 */}
+      <DeviceManager devices={devices} />
     </div>
   );
 }
