@@ -3,8 +3,9 @@
 import { useState, useTransition } from 'react';
 import { replyInquiry, approveRechargeRequest, rejectRechargeRequest } from '@/lib/actions/admin-cs';
 import { logoutCsTerminal } from '@/lib/actions/admin-cs-auth';
+import { CsMessengerPanel } from '@/components/chat/CsMessengerPanel';
 import { useRouter } from 'next/navigation';
-import { MessageSquare, CreditCard, ChevronDown, ChevronUp, Loader2, CheckCircle2, XCircle, LogOut } from 'lucide-react';
+import { MessageSquare, CreditCard, ChevronDown, ChevronUp, Loader2, CheckCircle2, XCircle, LogOut, MessageCircle } from 'lucide-react';
 
 interface Inquiry {
   id: string;
@@ -34,11 +35,13 @@ interface Recharge {
 interface CsDashboardClientProps {
   initialInquiries: Inquiry[];
   initialRecharges: Recharge[];
+  csAdminUserId: string;
 }
 
-export default function CsDashboardClient({ initialInquiries, initialRecharges }: CsDashboardClientProps) {
+export default function CsDashboardClient({ initialInquiries, initialRecharges, csAdminUserId }: CsDashboardClientProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'cs' | 'recharge'>('cs');
+  // 디폴트를 실시간 메신저 상담('chat')으로 배치
+  const [activeTab, setActiveTab] = useState<'chat' | 'cs' | 'recharge'>('chat');
   const [expandedInquiryId, setExpandedInquiryId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState<string>('');
   
@@ -46,7 +49,7 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // 로그아웃 처리
+  // 로그아웃
   const handleLogout = async () => {
     if (!confirm('CS 터미널 로그아웃을 진행하시겠습니까?')) return;
     setIsLoggingOut(true);
@@ -62,7 +65,7 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
     }
   };
 
-  // 1:1 문의 답변 처리
+  // 1:1 문의 답변 등록
   const handleReplySubmit = async (inquiryId: string) => {
     if (!replyText.trim()) {
       alert('답변 내용을 입력해 주세요.');
@@ -84,7 +87,7 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
     });
   };
 
-  // 무통장 입금 승인 처리
+  // 무통장 입금 승인
   const handleApproveRecharge = async (requestId: string) => {
     if (!confirm('정말로 이 무통장 충전을 승인하시겠습니까?\n해당 회원에게 포인트가 즉시 지급됩니다.')) return;
 
@@ -101,7 +104,7 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
     });
   };
 
-  // 무통장 입금 반려 처리
+  // 무통장 입금 반려
   const handleRejectRecharge = async (requestId: string) => {
     if (!confirm('이 무통장 충전 요청을 반려(거절) 처리하시겠습니까?')) return;
 
@@ -118,20 +121,19 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
     });
   };
 
-  // 미해결 건 개수 집계
   const pendingInquiriesCount = initialInquiries.filter(i => i.status === 'PENDING').length;
   const pendingRechargesCount = initialRecharges.filter(r => r.status === 'PENDING').length;
 
   return (
     <div className="w-full space-y-4">
-      {/* 최상단 바 (앱 바 스타일 - 로그아웃 추가) */}
-      <div className="flex items-center justify-between border-b border-gray-900 pb-3 mb-2">
+      {/* 1. 최상단 앱 바 */}
+      <div className="flex items-center justify-between border-b border-gray-900 pb-3 mb-1">
         <div className="space-y-0.5">
           <h1 className="text-base font-black text-white flex items-center gap-1.5">
-            🦊 FOXMON CS 터미널
+            🦊 FOXMON CS 모바일 터미널
           </h1>
           <p className="text-[10px] text-gray-500 font-bold">
-            보안 단말기 전용 실시간 응대 웹앱
+            순수 고객센터 실시간 관리용 웹앱
           </p>
         </div>
         <button
@@ -148,20 +150,32 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
         </button>
       </div>
 
-      {/* 탭 네비게이션 (모바일 세로 최적화) */}
-      <div className="grid grid-cols-2 gap-2 bg-gray-900 p-1.5 rounded-xl border border-gray-800">
+      {/* 2. 3분할 탭 네비게이션 */}
+      <div className="grid grid-cols-3 gap-1.5 bg-gray-900 p-1.5 rounded-xl border border-gray-800">
+        <button
+          onClick={() => setActiveTab('chat')}
+          className={`flex flex-col items-center justify-center py-2.5 rounded-lg text-[10px] font-black transition-all ${
+            activeTab === 'chat'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          <MessageCircle className="w-4 h-4 shrink-0 mb-0.5" />
+          <span>실시간 상담</span>
+        </button>
+
         <button
           onClick={() => setActiveTab('cs')}
-          className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-black transition-all ${
+          className={`flex flex-col items-center justify-center py-2.5 rounded-lg text-[10px] font-black transition-all relative ${
             activeTab === 'cs'
               ? 'bg-blue-600 text-white shadow-md'
               : 'text-gray-400 hover:text-white'
           }`}
         >
-          <MessageSquare className="w-4 h-4 shrink-0" />
-          <span>1:1 문의 응대</span>
+          <MessageSquare className="w-4 h-4 shrink-0 mb-0.5" />
+          <span>1:1 문의</span>
           {pendingInquiriesCount > 0 && (
-            <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full shrink-0 font-bold ml-1 animate-pulse">
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] px-1 rounded-full font-bold animate-pulse">
               {pendingInquiriesCount}
             </span>
           )}
@@ -169,27 +183,40 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
 
         <button
           onClick={() => setActiveTab('recharge')}
-          className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-black transition-all ${
+          className={`flex flex-col items-center justify-center py-2.5 rounded-lg text-[10px] font-black transition-all relative ${
             activeTab === 'recharge'
               ? 'bg-blue-600 text-white shadow-md'
               : 'text-gray-400 hover:text-white'
           }`}
         >
-          <CreditCard className="w-4 h-4 shrink-0" />
+          <CreditCard className="w-4 h-4 shrink-0 mb-0.5" />
           <span>무통장 승인</span>
           {pendingRechargesCount > 0 && (
-            <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full shrink-0 font-bold ml-1 animate-pulse">
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] px-1 rounded-full font-bold animate-pulse">
               {pendingRechargesCount}
             </span>
           )}
         </button>
       </div>
 
-      {/* 1:1 문의 탭 콘텐트 */}
+      {/* 3. 실시간 메신저 상담 탭 */}
+      {activeTab === 'chat' && (
+        <div className="space-y-2">
+          <div className="text-[11px] font-bold text-gray-500 px-1">
+            실시간 메신저 상담방 목록
+          </div>
+          {/* 가독성 증대 및 다크모드 내 블랙 충돌 방지를 위해 white 패널 기입 */}
+          <div className="bg-white rounded-2xl border border-gray-200 min-h-[500px] flex flex-col overflow-hidden text-black">
+            <CsMessengerPanel csAdminUserId={csAdminUserId} compact={true} />
+          </div>
+        </div>
+      )}
+
+      {/* 4. 1:1 문의 탭 */}
       {activeTab === 'cs' && (
         <div className="space-y-3">
           <div className="text-[11px] font-bold text-gray-500 flex justify-between px-1">
-            <span>문의 목록 (최신순)</span>
+            <span>문의 답변 리스트</span>
             <span>대기: {pendingInquiriesCount}건 / 완료: {initialInquiries.length - pendingInquiriesCount}건</span>
           </div>
 
@@ -259,7 +286,7 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
                           rows={4}
                           value={replyText}
                           onChange={(e) => setReplyText(e.target.value)}
-                          placeholder="고객에게 전달할 답변을 입력해 주세요. 작성 후 전송하시면 메인 고객센터 페이지에 실시간 반영됩니다."
+                          placeholder="고객에게 전달할 답변을 입력해 주세요."
                           className="w-full p-3 bg-gray-900 border border-gray-800 rounded-lg text-xs text-white placeholder-gray-600 focus:outline-none focus:border-blue-500"
                         />
 
@@ -287,7 +314,7 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
         </div>
       )}
 
-      {/* 무통장 승인 탭 콘텐트 */}
+      {/* 5. 무통장 승인 탭 */}
       {activeTab === 'recharge' && (
         <div className="space-y-3">
           <div className="text-[11px] font-bold text-gray-500 flex justify-between px-1">

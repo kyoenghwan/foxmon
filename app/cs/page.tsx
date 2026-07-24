@@ -8,10 +8,16 @@ export const dynamic = 'force-dynamic';
 export default async function CsPage() {
   const cookieStore = await cookies();
   
-  // 1. 기기 승인 검증 (쿠키 기반)
+  // 1. CS 독자 세션 검증 (쿠키 기반)
+  const sessionToken = cookieStore.get('cs_session_token')?.value;
+  if (!sessionToken || !sessionToken.startsWith('CS_SESSION_')) {
+    redirect('/cs/login');
+  }
+
+  // 2. 기기 승인 검증 (쿠키 기반)
   const deviceToken = cookieStore.get('cs_device_token')?.value;
   if (!deviceToken) {
-    redirect('/cs/unauthorized');
+    redirect('/cs/login');
   }
 
   const { data: approvedDevice } = await supabaseAdmin
@@ -22,16 +28,13 @@ export default async function CsPage() {
     .maybeSingle();
 
   if (!approvedDevice) {
-    redirect('/cs/unauthorized');
-  }
-
-  // 2. CS 독자 세션 검증 (쿠키 기반)
-  const sessionToken = cookieStore.get('cs_session_token')?.value;
-  if (!sessionToken || !sessionToken.startsWith('CS_SESSION_')) {
     redirect('/cs/login');
   }
 
-  // 3. 문의 및 무통장 신청 목록 조회
+  // 3. 관리자 유저 ID 파싱 (CS_SESSION_ID_TIMESTAMP)
+  const adminUserId = sessionToken.split('_')[2] || '';
+
+  // 4. 문의, 무통장 신청 목록 조회
   const { data: rawInquiries } = await supabaseAdmin
     .from('inquiries')
     .select(`
@@ -90,7 +93,11 @@ export default async function CsPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 py-6 px-4 md:px-8">
       <div className="max-w-md mx-auto">
-        <CsDashboardClient initialInquiries={inquiries} initialRecharges={recharges} />
+        <CsDashboardClient 
+          initialInquiries={inquiries} 
+          initialRecharges={recharges} 
+          csAdminUserId={adminUserId}
+        />
       </div>
     </div>
   );
