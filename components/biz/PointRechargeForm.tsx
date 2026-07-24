@@ -25,6 +25,14 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
     const [autoReplyText, setAutoReplyText] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
 
+    // 계좌 문의 선행 여부 체크 (새로고침 시 유지되도록 sessionStorage 활용)
+    const [hasInquiredAccount, setHasInquiredAccount] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return sessionStorage.getItem('has_inquired_account') === 'true';
+        }
+        return false;
+    });
+
     useEffect(() => {
         if (defaultDepositorName) {
             setDepositorName(defaultDepositorName);
@@ -36,6 +44,11 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
         
         if (!isBusinessVerified) {
             alert('사업자 또는 본인인증이 완료된 회원만 포인트 충전을 신청할 수 있습니다.');
+            return;
+        }
+
+        if (!hasInquiredAccount) {
+            alert('보안 및 오송금 방지를 위해, 충전 신청을 하시기 전에 반드시 먼저 상단의 [1:1 계좌 문의하기] 버튼을 눌러 계좌번호를 안내받으셔야 합니다.');
             return;
         }
         
@@ -91,6 +104,12 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
             });
 
             if (res.success && res.inquiry) {
+                // 문의 완료 처리
+                if (typeof window !== 'undefined') {
+                    sessionStorage.setItem('has_inquired_account', 'true');
+                }
+                setHasInquiredAccount(true);
+
                 // 자동 답변(reply) 존재 시 해당 답변 텍스트 바인딩
                 if (res.inquiry.reply) {
                     setAutoReplyText(res.inquiry.reply);
@@ -226,7 +245,7 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                         </div>
                     </div>
                     <div className="bg-red-50 border-2 border-red-400 rounded-xl p-4 text-[13px] md:text-[14px] text-red-800 font-normal leading-relaxed shadow-sm">
-                        🚨 [입금 전 필독] 회사 공식 계좌는 수시로 변경될 수 있으므로 <span className="font-black text-red-700 underline bg-yellow-100 px-1 rounded">반드시 상단의 1:1 문의를 거쳐 발급받으신 최신 계좌로만</span> 입금하셔야 합니다. 기존에 저장해 둔 계좌나 다른 계좌로 송금 시 포인트 지급 처리가 절대 되지 않으므로 각별히 주의하시기 바랍니다.
+                        🚨 [입금 전 필독] 입금자명이 회원님의 본인 실명(대표자명)과 상이할 경우 포인트 자동 충전이 절대 불가능합니다. <span className="font-black text-red-700 underline bg-yellow-100 px-1 rounded">타인 명의로 잘못 입금 시에는 반송(환불) 처리 절차가 진행되며, 이 과정에서 발생하는 이체 수수료는 본인 부담으로 차감</span>되오니 반드시 본인 실명으로 정확히 입금하여 주시기 바랍니다.
                     </div>
                     <button
                         type="submit"
