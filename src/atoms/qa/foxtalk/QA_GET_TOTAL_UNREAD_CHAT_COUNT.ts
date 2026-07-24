@@ -34,7 +34,7 @@ export const QA_GET_TOTAL_UNREAD_CHAT_COUNT = async (userId?: string) => {
                     console.error(`Count error for room ${participant.room_id}:`, countErr);
                     return 0;
                 }
-                return count || 0;
+                return (count && count > 0) ? 1 : 0;
             })
         );
 
