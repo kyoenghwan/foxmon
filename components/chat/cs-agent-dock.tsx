@@ -109,52 +109,22 @@ export function CsAgentDock() {
 
   return (
     <>
-      {!open ? (
-        <button
-          type="button"
-          onClick={() => {
-            setOpen(true);
-            setUnread(0);
-          }}
-          className="fixed z-[70] left-5 bottom-6 flex items-center gap-2 h-14 pl-4 pr-5 rounded-full bg-gray-900 text-white shadow-2xl hover:bg-black transition-all"
-          aria-label="고객센터 상담 답변"
-        >
-          <Headset className="w-5 h-5 text-primary shrink-0" />
-          <span className="text-[13px] font-black whitespace-nowrap">고객센터 답변</span>
-          {unread > 0 ? (
-            <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-[11px] font-black flex items-center justify-center">
-              {unread > 99 ? '99+' : unread}
-            </span>
-          ) : null}
-        </button>
-      ) : (
-        <div
-          className="fixed z-[55] left-4 bottom-4 w-[min(100vw-2rem,600px)] h-[min(80vh,620px)] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
-          style={{ maxWidth: 'calc(100vw - 2rem)' }}
-        >
-          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-400 text-white shrink-0">
-            <div>
-              <p className="font-black text-[15px]">고객센터 상담</p>
-              <p className="text-[11px] font-medium opacity-90">홈 화면에서 실시간 답변</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="p-2 rounded-full hover:bg-white/20"
-              aria-label="닫기"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          <div className="flex-1 min-h-0 flex flex-col">
-            <CsMessengerPanel
-              csAdminUserId={csAdminUserId}
-              compact
-              onCustomerMessage={() => playCsNotificationSound()}
-            />
-          </div>
-        </div>
-      )}
+      <button
+        type="button"
+        onClick={() => {
+          window.location.href = '/cs';
+        }}
+        className="fixed z-[70] right-5 bottom-6 flex items-center gap-2 h-14 pl-4 pr-5 rounded-full bg-gray-900 text-white shadow-2xl hover:bg-black transition-all border border-gray-800"
+        aria-label="고객센터 상담 답변 페이지 이동"
+      >
+        <Headset className="w-5 h-5 text-primary shrink-0 animate-bounce" />
+        <span className="text-[13px] font-black whitespace-nowrap">고객센터 답변</span>
+        {unread > 0 ? (
+          <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-[11px] font-black flex items-center justify-center animate-pulse">
+            {unread > 99 ? '99+' : unread}
+          </span>
+        ) : null}
+      </button>
     </>
   );
 }
