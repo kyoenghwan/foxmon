@@ -142,10 +142,7 @@ export async function approveRechargeRequest(requestId: string) {
         await supabaseAdmin
           .from('inquiries')
           .update({
-            reply: `안녕하세요. 폭스몬 관리자입니다. 
-요청하신 포인트 충전(금액: ${request.amount.toLocaleString()} 원) 건의 무통장 입금이 정상 확인되어 승인 처리가 완료되었습니다. 
-
-포인트가 계정으로 즉시 지급 완료되었습니다. 이용해 주셔서 감사합니다.`,
+            reply: '포인트 충전이 완료 되었습니다.',
             status: 'ANSWERED',
             replied_at: new Date().toISOString()
           })
