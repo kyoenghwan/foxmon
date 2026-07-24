@@ -216,9 +216,24 @@ export async function requestPointRecharge(payload: { amount: number, depositor_
             throw error;
         }
 
-        // 텔레그램 실시간 알림 전송 (비동기 처리)
+        // 텔레그램 실시간 알림 전송 (신청 회원 신원 상세화 및 Vercel 프리징 대기 방지)
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://foxmon.co.kr';
-        const nickname = session?.user?.name || '익명 회원';
+        let nickname = '익명 회원';
+        if (session?.user?.id) {
+            try {
+                const { data: userData } = await supabaseAdmin
+                    .from('users')
+                    .select('login_id, nickname, name')
+                    .eq('id', session.user.id)
+                    .single();
+                if (userData) {
+                    nickname = `${userData.nickname || userData.name || '회원'} (${userData.login_id})`;
+                }
+            } catch (userErr) {
+                console.error('Telegram fetch user profile error:', userErr);
+            }
+        }
+
         const messageText = `
 <b>🔔 [폭스몬] 새로운 무통장 입금 충전 신청이 접수되었습니다!</b>
 
@@ -229,7 +244,13 @@ export async function requestPointRecharge(payload: { amount: number, depositor_
 
 👉 <a href="${appUrl}/cs">모바일 관리자 CS 페이지 바로가기</a>
 `.trim();
-        sendTelegramMessage(messageText).catch(e => console.error('Telegram notification error:', e));
+        
+        // Vercel Serverless Function이 텔레그램 API 지연으로 프리징되거나 
+        // 백그라운드 스레드가 조기 종료되어 알림이 누락되는 현상을 방지하기 위해 2초 타임아웃 동기식 race를 적용합니다.
+        await Promise.race([
+            sendTelegramMessage(messageText),
+            new Promise((resolve) => setTimeout(resolve, 2000))
+        ]).catch(e => console.error('Telegram notification error:', e));
 
         revalidatePath('/biz/points');
         return { success: true, message: '충전 신청이 완료되었습니다.' };
