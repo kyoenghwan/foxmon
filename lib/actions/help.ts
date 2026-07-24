@@ -193,15 +193,60 @@ export async function getMyInquiries(): Promise<{ inquiries: UserInquiry[]; erro
     return { inquiries: [], error: '로그인이 필요합니다.' };
   }
   try {
-    const { data, error } = await supabaseAdmin
+    // 1. 일반 1:1 문의글 조회
+    const { data: inquiriesData, error: inquiriesError } = await supabaseAdmin
       .from('inquiries')
       .select('*')
-      .eq('user_id', session.user.id)
-      .order('created_at', { ascending: false });
-    if (error) {
-      return { inquiries: [], error: error.message };
+      .eq('user_id', session.user.id);
+
+    if (inquiriesError) {
+      return { inquiries: [], error: inquiriesError.message };
     }
-    return { inquiries: data || [] };
+
+    // 2. 무통장 입금 충전 신청서 조회 (select * 를 사용하여 컬럼 부재 시 오류 방지)
+    const { data: rechargesData } = await supabaseAdmin
+      .from('point_recharge_requests')
+      .select('*')
+      .eq('user_id', session.user.id);
+
+    // 3. 무통장 신청 내역을 가상 1:1 문의 규격으로 에뮬레이션 변환
+    const emulatedRecharges = (rechargesData || []).map((rec: any) => {
+      let replyText: string | null = null;
+      if (rec.status === 'APPROVED') {
+        replyText = `안녕하세요. 폭스몬 관리자입니다. 
+요청하신 포인트 충전(금액: ${Number(rec.amount || 0).toLocaleString()} 원) 건의 무통장 입금이 정상 확인되어 승인 처리가 완료되었습니다. 
+
+포인트가 계정으로 즉시 지급 완료되었습니다. 이용해 주셔서 감사합니다.`;
+      } else if (rec.status === 'REJECTED') {
+        replyText = `안녕하세요. 폭스몬 관리자입니다. 
+요청하신 포인트 충전(금액: ${Number(rec.amount || 0).toLocaleString()} 원) 건이 반려되었습니다.
+
+[반려 사유]
+${rec.reject_reason || '입금자명 불일치 또는 신청금액 상이'}
+
+내용을 확인하신 후 다시 신청해 주시기 바랍니다.`;
+      }
+
+      return {
+        id: rec.id,
+        user_id: rec.user_id,
+        category: '포인트·환불',
+        title: `[포인트 충전 신청] ${Number(rec.amount || 0).toLocaleString()} P`,
+        content: `무통장 입금 방식의 포인트 충전 신청서가 접수되었습니다.\n\n• 입금자 실명: ${rec.depositor_name}\n• 신청금액: ${Number(rec.amount || 0).toLocaleString()} P`,
+        status: rec.status === 'PENDING' ? 'PENDING' : 'ANSWERED',
+        reply: replyText,
+        replied_at: rec.status !== 'PENDING' ? rec.updated_at || rec.created_at : null,
+        created_at: rec.created_at,
+        updated_at: rec.updated_at
+      } as UserInquiry;
+    });
+
+    // 4. 두 목록을 병합 및 생성일 기준 최신순 정렬
+    const merged = [...(inquiriesData || []), ...emulatedRecharges].sort((a, b) => {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    return { inquiries: merged };
   } catch (err: unknown) {
     return { inquiries: [], error: (err as Error)?.message || '조회 실패' };
   }
