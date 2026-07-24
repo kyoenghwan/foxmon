@@ -14,6 +14,7 @@ export default function AdminSettingsPage() {
         telegram_bot_username: '',
         telegram_cs_bot_token: '',
         telegram_cs_bot_username: '',
+        cs_telegram_chat_id: '',
         naver_map_client_id: '',
         naver_map_client_secret: '',
         data_go_kr_api_key: '',
@@ -39,6 +40,7 @@ export default function AdminSettingsPage() {
                     telegram_bot_username: data.telegram_bot_username || '',
                     telegram_cs_bot_token: data.telegram_cs_bot_token || '',
                     telegram_cs_bot_username: data.telegram_cs_bot_username || '',
+                    cs_telegram_chat_id: data.cs_telegram_chat_id || '',
                     naver_map_client_id: data.naver_map_client_id || '',
                     naver_map_client_secret: data.naver_map_client_secret || '',
                     data_go_kr_api_key: data.data_go_kr_api_key || '',
@@ -203,10 +205,17 @@ export default function AdminSettingsPage() {
                                     {showTelegramCsToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
+                            <input
+                                type="text"
+                                value={settings.cs_telegram_chat_id}
+                                onChange={(e) => setSettings({ ...settings, cs_telegram_chat_id: e.target.value })}
+                                placeholder="CS 알림 수신 Chat ID (예: -100123456789 또는 개인 ID)"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight"
+                            />
                         </div>
                         <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
                             <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                            1:1 고객 문의 접수 시 관리자 답변 알림 및 신규 기기 등록 신청이 있을 때 알림 전송에 사용되는 CS 전용 봇 토큰과 아이디입니다.
+                            1:1 고객 문의 접수 시 관리자 답변 알림 및 신규 기기 등록 신청이 있을 때 알림 전송에 사용되는 CS 전용 봇 토큰과 아이디, 그리고 알림을 수신받을 대화방 ID(Chat ID)입니다.
                         </p>
                     </div>
 

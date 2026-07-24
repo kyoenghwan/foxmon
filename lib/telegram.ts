@@ -123,15 +123,34 @@ export async function sendTelegramMessageDirect(chatId: string | number, message
  * @param text 전송할 메시지 내용 (HTML 포맷 지원)
  */
 export async function sendTelegramMessage(text: string): Promise<boolean> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-
-  if (!token || !chatId) {
-    nvLog('FW', '⚠️ TELEGRAM_BOT_TOKEN 또는 TELEGRAM_CHAT_ID 환경 변수가 구성되지 않아 알림 발송을 건너뜁니다.');
-    return false;
-  }
-
   try {
+    // 1. DB에서 CS 전용 봇 토큰 및 Chat ID 조회 시도
+    const { data: settings } = await supabaseAdmin
+      .from('site_settings')
+      .select('key_name, key_value')
+      .in('key_name', ['telegram_cs_bot_token', 'telegram_bot_token', 'cs_telegram_chat_id']);
+
+    const settingsMap = (settings || []).reduce((acc, row) => {
+      acc[row.key_name] = row.key_value;
+      return acc;
+    }, {} as Record<string, string>);
+
+    let token = settingsMap['telegram_cs_bot_token']?.trim() || settingsMap['telegram_bot_token']?.trim();
+    let chatId = settingsMap['cs_telegram_chat_id']?.trim();
+
+    // 2. DB에 없으면 환경 변수로 폴백
+    if (!token) {
+      token = process.env.TELEGRAM_BOT_TOKEN;
+    }
+    if (!chatId) {
+      chatId = process.env.TELEGRAM_CHAT_ID;
+    }
+
+    if (!token || !chatId) {
+      nvLog('FW', '⚠️ 텔레그램 봇 토큰 또는 Chat ID가 구성되지 않아 알림 발송을 건너뜁니다.');
+      return false;
+    }
+
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
     const res = await fetch(url, {
       method: 'POST',
