@@ -47,7 +47,7 @@ export default async function CsPage() {
 
   const { data: rawRecharges } = await supabaseAdmin
     .from('point_recharge_requests')
-    .select('id, amount, depositor_name, status, created_at, user_id')
+    .select('id, amount, depositor_name, status, reject_reason, created_at, user_id')
     .order('created_at', { ascending: false });
 
   // 유저 ID 수집
@@ -91,6 +91,7 @@ export default async function CsPage() {
     amount: rec.amount,
     depositorName: rec.depositor_name,
     status: rec.status,
+    rejectReason: rec.reject_reason,
     createdAt: rec.created_at,
     userId: rec.user_id,
     userNickname: userMap[rec.user_id]?.nickname || '닉네임 없음',

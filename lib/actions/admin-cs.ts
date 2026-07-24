@@ -121,7 +121,7 @@ export async function approveRechargeRequest(requestId: string) {
 /**
  * 무통장 입금 신청 반려(거절) 처리
  */
-export async function rejectRechargeRequest(requestId: string) {
+export async function rejectRechargeRequest(requestId: string, rejectReason?: string) {
   const session = await auth();
   const userRole = (session?.user as any)?.role;
 
@@ -152,6 +152,7 @@ export async function rejectRechargeRequest(requestId: string) {
       .from('point_recharge_requests')
       .update({
         status: 'REJECTED',
+        reject_reason: rejectReason?.trim() || null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', requestId);

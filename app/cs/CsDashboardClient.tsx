@@ -27,6 +27,7 @@ interface Recharge {
   amount: number;
   depositorName: string;
   status: string;
+  rejectReason: string | null;
   createdAt: string;
   userId: string;
   userNickname: string;
@@ -140,11 +141,18 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
 
   // 무통장 입금 반려
   const handleRejectRecharge = async (requestId: string) => {
-    if (!confirm('이 무통장 충전 요청을 반려(거절) 처리하시겠습니까?')) return;
+    const reason = window.prompt('반려 사유를 입력해 주세요 (예: 입금자명 불일치, 금액 불일치 등):');
+    if (reason === null) return; // 취소
+
+    const trimmedReason = reason.trim();
+    if (!trimmedReason) {
+      alert('반려 사유를 반드시 입력해야 처리할 수 있습니다.');
+      return;
+    }
 
     setActionLoadingId(requestId);
     startTransition(async () => {
-      const res = await rejectRechargeRequest(requestId);
+      const res = await rejectRechargeRequest(requestId, trimmedReason);
       setActionLoadingId(null);
       if (res.success) {
         alert(res.message);
@@ -409,6 +417,12 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
                           <span className="text-gray-400">신청금액</span>
                           <span className="font-extrabold text-white text-sm">{rec.amount.toLocaleString()} P</span>
                         </div>
+                        {rec.status === 'REJECTED' && rec.rejectReason && (
+                          <div className="flex justify-between border-t border-gray-800/80 pt-1.5 mt-1.5">
+                            <span className="text-red-400">반려 사유</span>
+                            <span className="font-bold text-red-400">{rec.rejectReason}</span>
+                          </div>
+                        )}
                       </div>
 
                       {rec.status === 'PENDING' && (
