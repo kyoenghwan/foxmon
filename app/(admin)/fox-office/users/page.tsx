@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react';
 import { adminUserAction, adminEmployerAction } from '@/lib/actions';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { Search, Users, ShieldCheck, User, Coins, RefreshCw } from 'lucide-react';
+import { Search, Users, ShieldCheck, User, Coins, RefreshCw, Edit2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AdminPointHistoryModal } from '@/components/admin/points/AdminPointHistoryModal';
+import { OA_ADMIN_UPDATE_USER_PROFILE } from '@/src/atoms/oa/admin/OA_ADMIN_UPDATE_USER_PROFILE';
 
 export default function UsersManagementPage() {
     const [users, setUsers] = useState<any[]>([]);
@@ -23,6 +24,59 @@ export default function UsersManagementPage() {
 
     // 포인트 내역 모달 상태
     const [historyModalUser, setHistoryModalUser] = useState<any | null>(null);
+
+    // 필터 조건 상태
+    const [filterRole, setFilterRole] = useState<string>('ALL');
+    const [filterTier, setFilterTier] = useState<string>('ALL');
+    const [filterStartDate, setFilterStartDate] = useState<string>('');
+    const [filterEndDate, setFilterEndDate] = useState<string>('');
+
+    // 회원 수정 모달 상태
+    const [editUser, setEditUser] = useState<any | null>(null);
+    const [editName, setEditName] = useState('');
+    const [editNickname, setEditNickname] = useState('');
+    const [editPhone, setEditPhone] = useState('');
+    const [editRole, setEditRole] = useState<'GENERAL' | 'EMPLOYER' | 'ADMIN' | 'SUPER_ADMIN' | 'VIEWER'>('GENERAL');
+    const [editTier, setEditTier] = useState<'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP'>('NORMAL');
+    const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+
+    // 수정 모달 시작 핸들러
+    const handleStartEdit = (user: any) => {
+        setEditUser(user);
+        setEditName(user.name || '');
+        setEditNickname(user.nickname || '');
+        setEditPhone(user.phone_number || '');
+        setEditRole(user.role || 'GENERAL');
+        setEditTier(user.merchant_tier || 'NORMAL');
+    };
+
+    // 회원 정보 수정 완료 핸들러
+    const handleUpdateUser = async () => {
+        if (!editUser) return;
+        setIsSubmittingEdit(true);
+        try {
+            const res = await OA_ADMIN_UPDATE_USER_PROFILE({
+                targetUserId: editUser.id,
+                name: editName,
+                nickname: editNickname,
+                phone_number: editPhone,
+                role: editRole,
+                merchant_tier: editTier
+            });
+
+            if (res.success) {
+                alert(res.message);
+                setEditUser(null);
+                fetchUsers();
+            } else {
+                alert(res.message);
+            }
+        } catch (e) {
+            alert('회원 정보 수정 중 오류가 발생했습니다.');
+        } finally {
+            setIsSubmittingEdit(false);
+        }
+    };
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -104,13 +158,42 @@ export default function UsersManagementPage() {
     };
 
     const searchFiltered = users.filter(user => {
+        // 1. 키워드 검색
         const matchesSearch = !searchTerm ||
             (user.name && user.name.includes(searchTerm)) ||
             (user.nickname && user.nickname.includes(searchTerm)) ||
             (user.login_id && user.login_id.includes(searchTerm)) ||
             (user.phone_number && user.phone_number.includes(searchTerm));
-        
-        return matchesSearch;
+        if (!matchesSearch) return false;
+
+        // 2. 권한(role) 필터
+        if (filterRole !== 'ALL') {
+            if (filterRole === 'ADMIN_ALL') {
+                if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') return false;
+            } else {
+                if (user.role !== filterRole) return false;
+            }
+        }
+
+        // 3. 업체 등급(merchant_tier) 필터
+        if (filterTier !== 'ALL') {
+            const userTier = user.merchant_tier || 'NORMAL';
+            if (userTier !== filterTier) return false;
+        }
+
+        // 4. 가입일 범위 필터
+        if (filterStartDate) {
+            const start = new Date(filterStartDate);
+            start.setHours(0, 0, 0, 0);
+            if (new Date(user.created_at) < start) return false;
+        }
+        if (filterEndDate) {
+            const end = new Date(filterEndDate);
+            end.setHours(23, 59, 59, 999);
+            if (new Date(user.created_at) > end) return false;
+        }
+
+        return true;
     });
 
     return (
@@ -147,6 +230,77 @@ export default function UsersManagementPage() {
                             className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-[13px] w-[260px] focus:outline-none focus:border-primary font-medium"
                         />
                     </div>
+                </div>
+            </div>
+
+            {/* 필터 제어 패널 */}
+            <div className="bg-white p-4 rounded-xl border border-gray-150 flex flex-wrap gap-4 items-center text-xs shadow-sm">
+                <div className="flex flex-col gap-1.5">
+                    <span className="font-bold text-gray-500">회원 유형</span>
+                    <select
+                        value={filterRole}
+                        onChange={(e) => setFilterRole(e.target.value)}
+                        className="h-9 px-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary font-bold bg-white text-gray-700 cursor-pointer"
+                    >
+                        <option value="ALL">전체 권한</option>
+                        <option value="GENERAL">일반회원</option>
+                        <option value="EMPLOYER">업체회원</option>
+                        <option value="ADMIN_ALL">관리자 (전체)</option>
+                        <option value="VIEWER">뷰어 (VIEWER)</option>
+                    </select>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                    <span className="font-bold text-gray-500">업체 등급</span>
+                    <select
+                        value={filterTier}
+                        onChange={(e) => setFilterTier(e.target.value)}
+                        className="h-9 px-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary font-bold bg-white text-gray-700 cursor-pointer"
+                    >
+                        <option value="ALL">전체 등급</option>
+                        <option value="NORMAL">일반</option>
+                        <option value="VIP">우수 (VIP)</option>
+                        <option value="VVIP">으뜸 (VVIP)</option>
+                        <option value="VVVIP">명가 (VVVIP)</option>
+                    </select>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                    <span className="font-bold text-gray-500">가입일 범위</span>
+                    <div className="flex items-center gap-1.5">
+                        <input
+                            type="date"
+                            value={filterStartDate}
+                            onChange={(e) => setFilterStartDate(e.target.value)}
+                            className="h-9 px-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary font-bold text-gray-700 font-sans"
+                        />
+                        <span className="text-gray-400">~</span>
+                        <input
+                            type="date"
+                            value={filterEndDate}
+                            onChange={(e) => setFilterEndDate(e.target.value)}
+                            className="h-9 px-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary font-bold text-gray-700 font-sans"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex items-end h-full pt-5">
+                    {(filterRole !== 'ALL' || filterTier !== 'ALL' || filterStartDate || filterEndDate || searchTerm) && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                                setFilterRole('ALL');
+                                setFilterTier('ALL');
+                                setFilterStartDate('');
+                                setFilterEndDate('');
+                                setSearchTerm('');
+                            }}
+                            className="h-9 text-gray-500 font-bold hover:text-red-500"
+                        >
+                            필터 초기화
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -324,6 +478,16 @@ export default function UsersManagementPage() {
                                                 </Dialog>
 
                                                 <Button 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    onClick={() => handleStartEdit(user)}
+                                                    className="h-8 text-xs text-amber-600 border-amber-200 hover:bg-amber-50 font-bold"
+                                                >
+                                                    <Edit2 className="w-3.5 h-3.5 mr-1" />
+                                                    수정
+                                                </Button>
+
+                                                <Button 
                                                     variant="ghost" 
                                                     size="sm" 
                                                     onClick={() => setHistoryModalUser(user)}
@@ -347,6 +511,94 @@ export default function UsersManagementPage() {
                 onClose={() => setHistoryModalUser(null)} 
                 employer={historyModalUser} 
             />
+
+            {/* 회원 정보 수정 모달 */}
+            <Dialog open={!!editUser} onOpenChange={(open) => !open && setEditUser(null)}>
+                <DialogContent className="sm:max-w-[450px] bg-white rounded-2xl">
+                    <div className="p-4">
+                        <h3 className="font-black text-lg mb-1 flex items-center gap-2">
+                            👤 회원 정보 수정
+                        </h3>
+                        <p className="text-[13px] text-gray-500 mb-6 leading-relaxed">
+                            <strong className="text-gray-900">{editUser?.login_id}</strong> 회원의 권한, 등급 및 기본 프로필 정보를 변경합니다.
+                        </p>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-[12px] font-bold text-gray-700 mb-1.5 block">실명 (이름)</label>
+                                <input 
+                                    type="text" 
+                                    value={editName}
+                                    onChange={e => setEditName(e.target.value)}
+                                    placeholder="실명 입력"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-primary text-[14px]"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-[12px] font-bold text-gray-700 mb-1.5 block">닉네임</label>
+                                <input 
+                                    type="text" 
+                                    value={editNickname}
+                                    onChange={e => setEditNickname(e.target.value)}
+                                    placeholder="닉네임 입력"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-primary text-[14px]"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-[12px] font-bold text-gray-700 mb-1.5 block">휴대폰 번호</label>
+                                <input 
+                                    type="text" 
+                                    value={editPhone}
+                                    onChange={e => setEditPhone(e.target.value)}
+                                    placeholder="예: 01012345678"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:border-primary text-[14px]"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-[12px] font-bold text-gray-700 mb-1.5 block">회원 권한 (Role)</label>
+                                    <select
+                                        value={editRole}
+                                        onChange={e => setEditRole(e.target.value as any)}
+                                        className="w-full h-10 px-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary font-bold bg-white text-gray-700 text-xs cursor-pointer"
+                                    >
+                                        <option value="GENERAL">일반회원 (GENERAL)</option>
+                                        <option value="EMPLOYER">업체회원 (EMPLOYER)</option>
+                                        <option value="ADMIN">관리자 (ADMIN)</option>
+                                        <option value="SUPER_ADMIN">최고 관리자</option>
+                                        <option value="VIEWER">뷰어 (VIEWER)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="text-[12px] font-bold text-gray-700 mb-1.5 block">업체 등급 (Tier)</label>
+                                    <select
+                                        value={editTier}
+                                        onChange={e => setEditTier(e.target.value as any)}
+                                        className="w-full h-10 px-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary font-bold bg-white text-gray-700 text-xs cursor-pointer"
+                                    >
+                                        <option value="NORMAL">일반 (NORMAL)</option>
+                                        <option value="VIP">우수 (VIP)</option>
+                                        <option value="VVIP">으뜸 (VVIP)</option>
+                                        <option value="VVVIP">명가 (VVVIP)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <Button 
+                                onClick={handleUpdateUser}
+                                disabled={isSubmittingEdit}
+                                className="w-full mt-4 font-black h-12 bg-primary hover:bg-orange-600 text-white"
+                            >
+                                {isSubmittingEdit ? '수정 중...' : '회원 정보 저장하기'}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
