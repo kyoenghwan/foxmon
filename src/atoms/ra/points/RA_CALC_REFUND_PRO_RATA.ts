@@ -48,9 +48,10 @@ export const RA_CALC_REFUND_PRO_RATA = (input: RefundInput): RefundOutput => {
 
   let totalOriginalCash = 0;
   let totalRemainingCashValue = 0;
+  let totalRefundFee = 0;
   const details: RefundItemDetail[] = [];
 
-  // 💡 1단계: 각 충전 건별 잔여 원금 가치 합산
+  // 💡 1단계: 각 충전 건별 잔여 원금 가치 및 수수료 합산
   for (const item of activeHistory) {
     const usedPoints = item.point_amount - item.remained_point;
     
@@ -66,6 +67,11 @@ export const RA_CALC_REFUND_PRO_RATA = (input: RefundInput): RefundOutput => {
     totalOriginalCash += item.cash_amount;
     totalRemainingCashValue += remainingCashValue;
 
+    // 💡 사용한 건에 한해서만 10% 수수료 공제, 단 1P도 안 쓴 미사용 건은 수수료 0원!
+    const feeRatioForThisItem = usedPoints > 0 ? refundFeeRatio : 0;
+    const feeForThisItem = Math.floor(item.cash_amount * feeRatioForThisItem);
+    totalRefundFee += feeForThisItem;
+
     details.push({
       chargeId: item.id,
       originalCash: item.cash_amount,
@@ -75,16 +81,13 @@ export const RA_CALC_REFUND_PRO_RATA = (input: RefundInput): RefundOutput => {
     });
   }
 
-  // 💡 2단계: 전체 원금 기반 환불 수수료 계산 (보통 원금의 10%)
-  const refundFee = Math.floor(totalOriginalCash * refundFeeRatio);
-
-  // 💡 3단계: 최종 환불액 = 잔여 원금 가치 합계 - 수수료
-  const finalRefundAmount = Math.max(0, totalRemainingCashValue - refundFee);
+  // 💡 2단계: 최종 환불액 = 잔여 원금 가치 합계 - 수수료
+  const finalRefundAmount = Math.max(0, totalRemainingCashValue - totalRefundFee);
 
   nvLog('AT', `▶️ RA_CALC_REFUND_PRO_RATA 산출 완료`, {
     totalOriginalCash,
     totalRemainingCashValue,
-    refundFee,
+    refundFee: totalRefundFee,
     finalRefundAmount
   });
 
@@ -93,7 +96,7 @@ export const RA_CALC_REFUND_PRO_RATA = (input: RefundInput): RefundOutput => {
     data: {
       totalOriginalCash,
       totalRemainingCashValue,
-      refundFee,
+      refundFee: totalRefundFee,
       finalRefundAmount,
       details
     }

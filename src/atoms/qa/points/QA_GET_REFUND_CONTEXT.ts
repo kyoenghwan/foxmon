@@ -46,7 +46,7 @@ export const QA_GET_REFUND_CONTEXT = async (userId: string): Promise<{ success: 
       .limit(1)
       .single();
 
-    const refundFeeRatio = policyError ? 0 : Number(policyData.config_value);
+    const refundFeeRatio = policyError ? 0.1 : Number(policyData.config_value);
 
     const result = {
       userId,
