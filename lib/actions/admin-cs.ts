@@ -5,6 +5,39 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '@/lib/logger';
 import { FA_RECHARGE_POINT_FLOW } from '@/src/atoms/fa/points/FA_RECHARGE_POINT_FLOW';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
+
+/**
+ * NextAuth 세션 및 CS 독립 기기 세션 모두에서 관리자 권한을 안전하게 검증하는 공통 헬퍼
+ */
+async function verifyAdminPermission(): Promise<{ success: boolean; userId?: string }> {
+  // 1. NextAuth 세션 검사
+  const session = await auth();
+  const userRole = (session?.user as any)?.role;
+  if (session?.user?.id && (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN')) {
+    return { success: true, userId: session.user.id };
+  }
+
+  // 2. 독립 CS 세션 쿠키 검사
+  const cookieStore = await cookies();
+  const csSessionToken = cookieStore.get('cs_session_token')?.value;
+  if (csSessionToken && csSessionToken.startsWith('CS_SESSION_')) {
+    const adminUserId = csSessionToken.split('_')[2];
+    if (adminUserId) {
+      const { data: user } = await supabaseAdmin
+        .from('users')
+        .select('role')
+        .eq('id', adminUserId)
+        .single();
+
+      if (user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN')) {
+        return { success: true, userId: adminUserId };
+      }
+    }
+  }
+
+  return { success: false };
+}
 
 /**
  * 1:1 고객 문의에 관리자 답변 등록
@@ -13,10 +46,8 @@ export async function replyInquiry(payload: {
   inquiryId: string;
   replyContent: string;
 }) {
-  const session = await auth();
-  const userRole = (session?.user as any)?.role;
-
-  if (!session?.user?.id || (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN')) {
+  const adminCheck = await verifyAdminPermission();
+  if (!adminCheck.success) {
     return { success: false, message: '관리자 권한이 없습니다.' };
   }
 
@@ -52,10 +83,8 @@ export async function replyInquiry(payload: {
  * 무통장 입금 신청 건 최종 승인 및 포인트 지급
  */
 export async function approveRechargeRequest(requestId: string) {
-  const session = await auth();
-  const userRole = (session?.user as any)?.role;
-
-  if (!session?.user?.id || (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN')) {
+  const adminCheck = await verifyAdminPermission();
+  if (!adminCheck.success) {
     return { success: false, message: '관리자 권한이 없습니다.' };
   }
 
@@ -122,10 +151,8 @@ export async function approveRechargeRequest(requestId: string) {
  * 무통장 입금 신청 반려(거절) 처리
  */
 export async function rejectRechargeRequest(requestId: string, rejectReason?: string) {
-  const session = await auth();
-  const userRole = (session?.user as any)?.role;
-
-  if (!session?.user?.id || (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN')) {
+  const adminCheck = await verifyAdminPermission();
+  if (!adminCheck.success) {
     return { success: false, message: '관리자 권한이 없습니다.' };
   }
 
