@@ -31,7 +31,7 @@ export const DEFAULT_CS_SETTINGS: CsSettings = {
   messageInHours:
     '문의해 주셔서 감사합니다. 담당자가 확인 후 순서대로 답변드리겠습니다. 잠시만 기다려 주세요.',
   messageAfterHours:
-    '지금은 업무시간이 아닙니다. 남겨주신 문의는 업무 시작 후 순서대로 답변드리겠습니다. 감사합니다.',
+    '안녕하세요. 폭스몬 고객센터입니다. 업무시간 외에는 실시간 응대가 어려우니 1:1 문의를 남겨주시면 확인하는 대로 신속히 처리해 드리겠습니다.',
   automationEnabled: false,
   automationRulesJson: '[]',
 };
