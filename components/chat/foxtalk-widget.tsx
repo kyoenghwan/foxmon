@@ -32,6 +32,10 @@ interface Profile {
 }
 
 export function FoxTalkWidget() {
+    if (usePathname().startsWith('/cs') || usePathname().startsWith('/fox-office')) {
+        return null;
+    }
+
     const [appState, setAppState] = useState<AppState>('CLOSED');
     const [profile, setProfile] = useState<Profile | null>(null);
     const [rooms, setRooms] = useState<any[]>([]);

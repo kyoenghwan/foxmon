@@ -11,6 +11,9 @@ import { supabase } from '@/lib/supabase';
 
 export function CsAgentDock() {
   const pathname = usePathname();
+  if (pathname.startsWith('/cs') || pathname.startsWith('/fox-office')) {
+    return null;
+  }
   const { data: session, status } = useSession();
   const [eligible, setEligible] = useState(false);
   const [csAdminUserId, setCsAdminUserId] = useState<string | null>(null);

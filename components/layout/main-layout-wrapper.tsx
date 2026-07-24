@@ -20,6 +20,7 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
     // 헤더/배너 레이아웃 제외 경로 판단
     const isExcluded = 
         pathname.startsWith('/fox-office') ||
+        pathname.startsWith('/cs') ||
         pathname.startsWith('/biz') ||
         pathname.startsWith('/login') ||
         pathname.startsWith('/register') ||
