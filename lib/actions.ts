@@ -176,13 +176,39 @@ export async function requestPointRecharge(payload: { amount: number, depositor_
     }
 
     try {
+        // 1. inquiries 테이블에 포인트 충전 신청용 동반 문의글 자동 작성
+        let companionInquiryId: string | null = null;
+        try {
+            const { data: inquiry, error: inquiryErr } = await supabaseAdmin
+                .from('inquiries')
+                .insert({
+                    user_id: session.user.id,
+                    category: '포인트·환불',
+                    title: `[포인트 충전 신청] ${payload.amount.toLocaleString()} P`,
+                    content: `무통장 입금 방식의 포인트 충전 신청서가 접수되었습니다.\n\n• 입금자 실명: ${payload.depositor_name}\n• 신청금액: ${payload.amount.toLocaleString()} P\n\n담당자 확인 후 포인트 적립이 승인 또는 반려 처리될 예정입니다.`,
+                    status: 'PENDING'
+                })
+                .select('id')
+                .single();
+
+            if (!inquiryErr && inquiry) {
+                companionInquiryId = inquiry.id;
+            } else if (inquiryErr) {
+                console.error('Failed to create companion inquiry for recharge request:', inquiryErr.message);
+            }
+        } catch (e: any) {
+            console.error('Companion inquiry insert exception:', e.message);
+        }
+
+        // 2. point_recharge_requests 테이블에 무통장 입금 신청 저장 (inquiry_id 연동)
         const { error } = await supabaseAdmin
             .from('point_recharge_requests')
             .insert({
                 user_id: session.user.id,
                 amount: payload.amount,
                 depositor_name: payload.depositor_name,
-                status: 'PENDING'
+                status: 'PENDING',
+                inquiry_id: companionInquiryId
             });
 
         if (error) {

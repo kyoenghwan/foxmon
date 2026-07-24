@@ -136,6 +136,25 @@ export async function approveRechargeRequest(requestId: string) {
       // 포인트가 충전되었으므로 성공으로 응답을 주되 경고 기록
     }
 
+    // 4. 연동된 1:1 문의글이 존재할 경우 자동 답변 작성 및 완료 처리
+    if (request.inquiry_id) {
+      try {
+        await supabaseAdmin
+          .from('inquiries')
+          .update({
+            reply: `안녕하세요. 폭스몬 관리자입니다. 
+요청하신 포인트 충전(금액: ${request.amount.toLocaleString()} 원) 건의 무통장 입금이 정상 확인되어 승인 처리가 완료되었습니다. 
+
+포인트가 계정으로 즉시 지급 완료되었습니다. 이용해 주셔서 감사합니다.`,
+            status: 'ANSWERED',
+            replied_at: new Date().toISOString()
+          })
+          .eq('id', request.inquiry_id);
+      } catch (inqErr: any) {
+        nvLog('FW', '⚠️ 연동된 문의글 자동 답변 등록 실패 (승인)', inqErr.message);
+      }
+    }
+
     revalidatePath('/cs');
     return { 
       success: true, 
@@ -163,7 +182,7 @@ export async function rejectRechargeRequest(requestId: string, rejectReason?: st
   try {
     const { data: request } = await supabaseAdmin
       .from('point_recharge_requests')
-      .select('status')
+      .select('status, inquiry_id, amount')
       .eq('id', requestId)
       .single();
 
@@ -187,6 +206,28 @@ export async function rejectRechargeRequest(requestId: string, rejectReason?: st
     if (error) {
       nvLog('FW', '❌ 충전 반려 상태 변경 실패', error.message);
       return { success: false, message: '반려 처리에 실패했습니다.' };
+    }
+
+    // 4. 연동된 1:1 문의글이 존재할 경우 자동 답변(반려 사유) 작성 및 완료 처리
+    if (request && request.inquiry_id) {
+      try {
+        await supabaseAdmin
+          .from('inquiries')
+          .update({
+            reply: `안녕하세요. 폭스몬 관리자입니다. 
+요청하신 포인트 충전(금액: ${Number(request.amount || 0).toLocaleString()} 원) 건이 반려되었습니다.
+
+[반려 사유]
+${rejectReason?.trim() || '입금자명 불일치 또는 금액 상이'}
+
+내용을 확인하신 후 다시 신청해 주시기 바랍니다.`,
+            status: 'ANSWERED',
+            replied_at: new Date().toISOString()
+          })
+          .eq('id', request.inquiry_id);
+      } catch (inqErr: any) {
+        nvLog('FW', '⚠️ 연동된 문의글 자동 답변 등록 실패 (반려)', inqErr.message);
+      }
     }
 
     revalidatePath('/cs');
