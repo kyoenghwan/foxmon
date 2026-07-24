@@ -1,5 +1,6 @@
 import '@/app/globals.css';
 import { Inter } from 'next/font/google';
+import { GlobalAlertProvider } from '@/components/providers/global-alert-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -12,7 +13,9 @@ export default function CsLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
       <body className={`${inter.className} bg-gray-950 text-gray-100 min-h-screen overflow-x-hidden antialiased`}>
-        {children}
+        <GlobalAlertProvider>
+          {children}
+        </GlobalAlertProvider>
       </body>
     </html>
   );

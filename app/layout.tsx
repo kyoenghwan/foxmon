@@ -22,6 +22,7 @@ import { MaxWidthWrapper } from "@/src/components/layout/MaxWidthWrapper";
 import { JobGlobalModal } from "@/components/jobs/job-global-modal";
 import { MainLayoutWrapper } from "@/components/layout/main-layout-wrapper";
 import { NavigationObserver } from "@/components/common/NavigationObserver";
+import { GlobalAlertProvider } from "@/components/providers/global-alert-provider";
 import Script from "next/script";
 
 export const viewport: Viewport = {
@@ -80,19 +81,21 @@ export default function RootLayout({
       >
         <MaxWidthWrapper>
           <LanguageProvider>
-            <Suspense fallback={null}>
-              <NavigationObserver />
-            </Suspense>
-            <AutoLogoutWrapper>
-              <MainLayoutWrapper>
-                {children}
-              </MainLayoutWrapper>
-              {modal}
-              <FoxTalkWidget />
-              <CsAgentDock />
-              <JobGlobalModal />
-              <PushSubscriptionManager />
-            </AutoLogoutWrapper>
+            <GlobalAlertProvider>
+              <Suspense fallback={null}>
+                <NavigationObserver />
+              </Suspense>
+              <AutoLogoutWrapper>
+                <MainLayoutWrapper>
+                  {children}
+                </MainLayoutWrapper>
+                {modal}
+                <FoxTalkWidget />
+                <CsAgentDock />
+                <JobGlobalModal />
+                <PushSubscriptionManager />
+              </AutoLogoutWrapper>
+            </GlobalAlertProvider>
           </LanguageProvider>
         </MaxWidthWrapper>
         <Script src="https://cdn.iamport.kr/v1/iamport.js" strategy="afterInteractive" />
