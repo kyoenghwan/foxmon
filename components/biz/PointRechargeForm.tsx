@@ -54,6 +54,7 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
             return;
         }
 
+        // 1. 계좌 문의 선행 여부 체크
         if (!hasInquiredAccount) {
             showAlert('보안 및 오송금 방지를 위해, 충전 신청을 하시기 전에 반드시 먼저 상단의 [1:1 계좌 문의하기] 버튼을 눌러 계좌번호를 안내받으셔야 합니다.');
             return;
@@ -61,11 +62,19 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
         
         const finalAmount = amount === 'custom' ? customAmount : amount;
         
-        if (!finalAmount || !depositorName.trim()) {
-            showAlert('충전 금액과 입금자명을 모두 입력해주세요.');
+        // 2. 충전 금액 공란 체크
+        if (!finalAmount || finalAmount.trim() === '') {
+            showAlert('충전 금액을 선택하거나 직접 입력해 주세요.');
             return;
         }
 
+        // 3. 입금자명 공란 체크
+        if (!depositorName || depositorName.trim() === '') {
+            showAlert('입금자명을 입력해 주세요.');
+            return;
+        }
+
+        // 4. 올바른 숫자 값 체크
         const numericAmount = parseInt(finalAmount, 10);
         if (isNaN(numericAmount) || numericAmount <= 0) {
             showAlert('올바른 충전 금액을 입력해주세요.');
@@ -213,6 +222,7 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                                         setCustomAmount('');
                                     }
                                 }}
+                                required
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary font-medium"
                             >
                                 <option value="">금액 선택</option>
@@ -230,6 +240,7 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                                         type="number"
                                         value={customAmount}
                                         onChange={(e) => setCustomAmount(e.target.value)}
+                                        required
                                         className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[14px] outline-none focus:border-primary font-medium"
                                         placeholder="충전하실 금액을 입력해주세요 (예: 150000)"
                                         min="1"
