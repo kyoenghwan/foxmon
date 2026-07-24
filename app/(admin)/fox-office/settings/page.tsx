@@ -10,6 +10,7 @@ export default function AdminSettingsPage() {
     const [saving, setSaving] = useState(false);
     const [settings, setSettings] = useState({
         openai_api_key: '',
+        gemini_api_key: '',
         telegram_bot_token: '',
         telegram_bot_username: '',
         telegram_cs_bot_token: '',
@@ -26,6 +27,7 @@ export default function AdminSettingsPage() {
     
     // Toggle States for passwords
     const [showApiKey, setShowApiKey] = useState(false);
+    const [showGeminiApiKey, setShowGeminiApiKey] = useState(false);
     const [showTelegramToken, setShowTelegramToken] = useState(false);
     const [showTelegramCsToken, setShowTelegramCsToken] = useState(false);
     const [showDataGoKrKey, setShowDataGoKrKey] = useState(false);
@@ -36,6 +38,7 @@ export default function AdminSettingsPage() {
             if (success && data) {
                 setSettings({
                     openai_api_key: data.openai_api_key || '',
+                    gemini_api_key: data.gemini_api_key || '',
                     telegram_bot_token: data.telegram_bot_token || '',
                     telegram_bot_username: data.telegram_bot_username || '',
                     telegram_cs_bot_token: data.telegram_cs_bot_token || '',
@@ -137,6 +140,30 @@ export default function AdminSettingsPage() {
                         <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
                             <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                             AI 로고 자동 생성 및 이미지 생성을 위한 API 키를 입력하세요. 이 키는 클라이언트에 절대 노출되지 않으며 서버 엑션에서만 안전하게 사용됩니다.
+                        </p>
+                    </div>
+                    {/* Google Gemini API Key 설정 [NEW] */}
+                    <div>
+                        <label className="block text-[14px] font-bold text-gray-800 mb-2">Google Gemini API Key (무료 AI 답변 생성 권장)</label>
+                        <div className="relative">
+                            <input
+                                type={showGeminiApiKey ? "text" : "password"}
+                                value={settings.gemini_api_key}
+                                onChange={(e) => setSettings({ ...settings, gemini_api_key: e.target.value })}
+                                placeholder="AI Studio에서 발급받은 API Key"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight pr-10"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowGeminiApiKey(!showGeminiApiKey)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                {showGeminiApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                        </div>
+                        <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
+                            <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                            1:1 고객 문의의 AI 답변 자동 생성에 사용되는 구글 제미나이 API 키입니다. 무료 요금제(Free Tier)를 지원하므로 과금 걱정 없는 무료 CS 답변에 추천됩니다.
                         </p>
                     </div>
 

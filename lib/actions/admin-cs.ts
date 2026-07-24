@@ -237,3 +237,116 @@ ${rejectReason?.trim() || '입금자명 불일치 또는 금액 상이'}
     return { success: false, message: '반려 처리 중 오류가 발생했습니다.' };
   }
 }
+
+/**
+ * 1:1 고객 문의 AI 자동 답변 생성 (Gemini 또는 OpenAI 이용)
+ */
+export async function generateAiReply(payload: { inquiryId: string }): Promise<{ success: boolean; replyText?: string; message?: string }> {
+  const adminCheck = await verifyAdminPermission();
+  if (!adminCheck.success) {
+    return { success: false, message: '관리자 권한이 없습니다.' };
+  }
+
+  const inquiryId = payload.inquiryId;
+  if (!inquiryId) {
+    return { success: false, message: '문의 ID가 누락되었습니다.' };
+  }
+
+  try {
+    // 1. 문의글 정보 조회
+    const { data: inquiry, error: inqErr } = await supabaseAdmin
+      .from('inquiries')
+      .select('title, content')
+      .eq('id', inquiryId)
+      .single();
+
+    if (inqErr || !inquiry) {
+      return { success: false, message: '문의 내용을 찾을 수 없습니다.' };
+    }
+
+    // 2. 외부 API 키 조회 (site_settings)
+    const { data: settings } = await supabaseAdmin
+      .from('site_settings')
+      .select('key_name, key_value')
+      .in('key_name', ['gemini_api_key', 'openai_api_key']);
+
+    const settingsMap = (settings || []).reduce((acc, row) => {
+      acc[row.key_name] = row.key_value;
+      return acc;
+    }, {} as Record<string, string>);
+
+    const geminiApiKey = settingsMap['gemini_api_key']?.trim();
+    const openaiApiKey = settingsMap['openai_api_key']?.trim();
+
+    if (!geminiApiKey && !openaiApiKey) {
+      return { 
+        success: false, 
+        message: 'Google Gemini API Key 또는 OpenAI API Key를 [시스템 설정]에 먼저 등록해 주세요.' 
+      };
+    }
+
+    const systemInstruction = `당신은 구인구직 및 커뮤니티 플랫폼 '폭스몬'의 고객센터 전문 CS 상담사입니다. 회원의 1:1 문의 내용을 바탕으로, 매우 공손하고 정중하며 친절하게 도움이 되는 답변 초안을 한국어로 작성해 주세요. 
+반드시 문체는 정중한 경어체(~입니다, ~해 드리겠습니다)를 사용해야 합니다.
+답변 글자 이외의 어떠한 서론이나 설명, 메타 정보 등은 출력하지 마십시오. 오직 고객에게 보낼 최종 답변 본문만 응답하세요.`;
+
+    const userPrompt = `[문의 제목]\n${inquiry.title}\n\n[문의 내용]\n${inquiry.content}`;
+
+    // 1순위: Google Gemini API (무료 플랜 지원)
+    if (geminiApiKey) {
+      nvLog('FW', '🤖 Gemini API를 사용하여 CS 답변 생성 시도...');
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: `${systemInstruction}\n\n${userPrompt}` }]
+          }]
+        })
+      });
+
+      const resJson = await response.json();
+      const aiText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (aiText) {
+        return { success: true, replyText: aiText.trim() };
+      } else {
+        nvLog('FW', '⚠️ Gemini 응답 해석 실패. OpenAI 폴백 시도...', resJson);
+      }
+    }
+
+    // 2순위: OpenAI GPT-4o-mini (과금 저렴)
+    if (openaiApiKey) {
+      nvLog('FW', '🤖 OpenAI API (gpt-4o-mini)를 사용하여 CS 답변 생성 시도...');
+      const url = 'https://api.openai.com/v1/chat/completions';
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiApiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemInstruction },
+            { role: 'user', content: userPrompt }
+          ]
+        })
+      });
+
+      const resJson = await response.json();
+      const aiText = resJson.choices?.[0]?.message?.content;
+
+      if (aiText) {
+        return { success: true, replyText: aiText.trim() };
+      }
+    }
+
+    return { success: false, message: 'AI 답변 생성에 실패했습니다. API 키 상태를 확인해 주세요.' };
+  } catch (err: any) {
+    nvLog('FW', '❌ AI 답변 생성 예외 발생', err.message);
+    return { success: false, message: `답변 생성 중 오류가 발생했습니다. (${err.message})` };
+  }
+}

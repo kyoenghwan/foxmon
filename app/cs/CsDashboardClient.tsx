@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
-import { replyInquiry, approveRechargeRequest, rejectRechargeRequest } from '@/lib/actions/admin-cs';
+import { replyInquiry, approveRechargeRequest, rejectRechargeRequest, generateAiReply } from '@/lib/actions/admin-cs';
 import { logoutCsTerminal } from '@/lib/actions/admin-cs-auth';
 import { CsMessengerPanel } from '@/components/chat/CsMessengerPanel';
 import { useRouter } from 'next/navigation';
@@ -51,6 +51,7 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
   const [isPending, startTransition] = useTransition();
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [aiGeneratingId, setAiGeneratingId] = useState<string | null>(null);
 
   // 1:1 문의 검색 필터 상태
   const [showOnlyPendingInquiry, setShowOnlyPendingInquiry] = useState(false);
@@ -109,6 +110,23 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
       alert('로그아웃 중 오류가 발생했습니다.');
     } finally {
       setIsLoggingOut(false);
+    }
+  };
+
+  // AI 답변 자동 생성
+  const handleAiReplyGenerate = async (inquiryId: string) => {
+    setAiGeneratingId(inquiryId);
+    try {
+      const res = await generateAiReply({ inquiryId });
+      if (res.success && res.replyText) {
+        setReplyText(res.replyText);
+      } else {
+        alert(res.message || 'AI 답변을 생성하지 못했습니다.');
+      }
+    } catch (e) {
+      alert('AI 답변 생성 도중 오류가 발생했습니다.');
+    } finally {
+      setAiGeneratingId(null);
     }
   };
 
@@ -457,9 +475,29 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
                         </div>
 
                         <div className="space-y-2">
-                          <span className="text-[10px] font-bold text-gray-500">
-                            {inq.status === 'PENDING' ? '답변 작성:' : '작성된 답변 내용 (수정 가능):'}
-                          </span>
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] font-bold text-gray-500">
+                              {inq.status === 'PENDING' ? '답변 작성:' : '작성된 답변 내용 (수정 가능):'}
+                            </span>
+                            
+                            <button
+                              type="button"
+                              onClick={() => handleAiReplyGenerate(inq.id)}
+                              disabled={aiGeneratingId === inq.id}
+                              className="px-2.5 py-1 bg-purple-600/10 text-purple-400 hover:bg-purple-600 hover:text-white border border-purple-500/20 text-[10px] font-black rounded-lg transition-all flex items-center gap-1"
+                            >
+                              {aiGeneratingId === inq.id ? (
+                                <>
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                  초안 생성 중...
+                                </>
+                              ) : (
+                                <>
+                                  <span>🤖 AI 답변 초안 생성</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
                           
                           <textarea
                             rows={4}
