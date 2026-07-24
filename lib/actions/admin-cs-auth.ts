@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '@/lib/logger';
 import { RA_VERIFY_PASSWORD } from '@/src/atoms/ra/auth/RA_VERIFY_PASSWORD';
 import { cookies } from 'next/headers';
+import { isAdminRole } from '@/lib/normalize-user-role';
 
 /**
  * CS 독립 단말기 전용 로그인 실행
@@ -13,7 +14,7 @@ export async function loginCsTerminal(payload: {
   password?: string;
   deviceToken?: string;
 }) {
-  const username = payload.username?.trim();
+  const username = payload.username?.trim().toLowerCase();
   const password = payload.password;
   const deviceToken = payload.deviceToken;
 
@@ -22,40 +23,20 @@ export async function loginCsTerminal(payload: {
   }
 
   try {
-    // 1. 유저 조회 (하이브리드 마침표/언더바 자동 치환 대입 검색)
-    let user = null;
-    let userError = null;
-
-    const { data: directUser, error: directErr } = await supabaseAdmin
+    // 1. 유저 조회
+    const { data: user, error: userError } = await supabaseAdmin
       .from('users')
       .select('id, login_id, password, role')
       .eq('login_id', username)
       .single();
-
-    user = directUser;
-    userError = directErr;
-
-    // 만약 없는 회원이고 아이디에 언더바(_)가 들어있다면, 마침표(.)로 자동 치환해서 2차 검색
-    if ((userError || !user) && username.includes('_')) {
-      const fallbackUsername = username.replace(/_/g, '.');
-      const { data: fbUser, error: fbErr } = await supabaseAdmin
-        .from('users')
-        .select('id, login_id, password, role')
-        .eq('login_id', fallbackUsername)
-        .single();
-      if (fbUser) {
-        user = fbUser;
-        userError = null;
-      }
-    }
 
     if (userError || !user) {
       nvLog('FW', `❌ CS 로그인 실패: 존재하지 않는 계정 (${username})`);
       return { success: false, message: '존재하지 않는 계정입니다.' };
     }
 
-    // 2. 권한 검사 (무조건 어드민 계정이어야 함)
-    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+    // 2. 권한 검사 (무조건 어드민 계정이어야 함 - 공백 등 노멀라이징 헬퍼 적용)
+    if (!isAdminRole(user.role)) {
       nvLog('FW', `❌ CS 로그인 실패: 관리자 권한 없음 (${username})`);
       return { success: false, message: '관리자 권한이 없는 계정입니다.' };
     }
