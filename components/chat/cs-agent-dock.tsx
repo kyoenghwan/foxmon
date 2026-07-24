@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase';
 
 export function CsAgentDock() {
   const pathname = usePathname();
-  if (pathname.startsWith('/cs') || pathname.startsWith('/fox-office')) {
+  if (pathname.startsWith('/cs')) {
     return null;
   }
   const { data: session, status } = useSession();

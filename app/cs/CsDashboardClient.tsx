@@ -36,9 +36,10 @@ interface CsDashboardClientProps {
   initialInquiries: Inquiry[];
   initialRecharges: Recharge[];
   csAdminUserId: string;
+  csAdminName?: string;
 }
 
-export default function CsDashboardClient({ initialInquiries, initialRecharges, csAdminUserId }: CsDashboardClientProps) {
+export default function CsDashboardClient({ initialInquiries, initialRecharges, csAdminUserId, csAdminName }: CsDashboardClientProps) {
   const router = useRouter();
   // 디폴트를 실시간 메신저 상담('chat')으로 배치
   const [activeTab, setActiveTab] = useState<'chat' | 'cs' | 'recharge'>('chat');
@@ -136,18 +137,25 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
             순수 고객센터 실시간 관리용 웹앱
           </p>
         </div>
-        <button
-          onClick={handleLogout}
-          disabled={isLoggingOut}
-          className="h-8 px-3 bg-gray-900 border border-gray-800 hover:bg-gray-800 text-gray-400 hover:text-white text-[11px] font-black rounded-xl flex items-center gap-1 transition-all"
-        >
-          {isLoggingOut ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <LogOut className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-3">
+          {csAdminName && (
+            <span className="text-[11px] text-gray-400 font-bold bg-gray-900 border border-gray-800 px-2.5 py-1.5 rounded-xl">
+              👤 {csAdminName} 님
+            </span>
           )}
-          로그아웃
-        </button>
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="h-8 px-3 bg-gray-900 border border-gray-800 hover:bg-gray-800 text-gray-400 hover:text-white text-[11px] font-black rounded-xl flex items-center gap-1 transition-all"
+          >
+            {isLoggingOut ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <LogOut className="w-3.5 h-3.5" />
+            )}
+            로그아웃
+          </button>
+        </div>
       </div>
 
       {/* 2. 3분할 탭 네비게이션 */}
@@ -225,91 +233,93 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
               접수된 문의 내역이 없습니다.
             </div>
           ) : (
-            initialInquiries.map((inq) => {
-              const isExpanded = expandedInquiryId === inq.id;
-              const isLoading = actionLoadingId === inq.id;
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {initialInquiries.map((inq) => {
+                const isExpanded = expandedInquiryId === inq.id;
+                const isLoading = actionLoadingId === inq.id;
 
-              return (
-                <div
-                  key={inq.id}
-                  className={`bg-gray-900 border rounded-xl overflow-hidden transition-all ${
-                    inq.status === 'PENDING' ? 'border-amber-500/30 bg-amber-500/[0.02]' : 'border-gray-800 bg-gray-900/60'
-                  }`}
-                >
+                return (
                   <div
-                    onClick={() => {
-                      setExpandedInquiryId(isExpanded ? null : inq.id);
-                      setReplyText(inq.reply || '');
-                    }}
-                    className="p-4 cursor-pointer flex items-start justify-between gap-2 active:bg-gray-800/40"
+                    key={inq.id}
+                    className={`bg-gray-900 border rounded-xl overflow-hidden transition-all ${
+                      inq.status === 'PENDING' ? 'border-amber-500/30 bg-amber-500/[0.02]' : 'border-gray-800 bg-gray-900/60'
+                    }`}
                   >
-                    <div className="space-y-1.5 min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[9px] font-bold rounded border border-blue-500/20">
-                          {inq.category}
-                        </span>
-                        <span className={`px-2 py-0.5 text-[9px] font-bold rounded border ${
-                          inq.status === 'PENDING'
-                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                            : 'bg-green-500/10 text-green-400 border-green-500/20'
-                        }`}>
-                          {inq.status === 'PENDING' ? '답변 대기' : '답변 완료'}
-                        </span>
-                      </div>
-                      <h4 className="text-xs font-black text-white truncate min-w-0">
-                        {inq.title}
-                      </h4>
-                      <p className="text-[10px] text-gray-400">
-                        작성: {inq.userNickname} ({inq.userEmail}) • {new Date(inq.createdAt).toLocaleString('ko-KR', { hour12: false })}
-                      </p>
-                    </div>
-                    <div className="text-gray-500 pt-1">
-                      {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </div>
-                  </div>
-
-                  {isExpanded && (
-                    <div className="border-t border-gray-800 p-4 bg-gray-950/50 space-y-4 text-xs">
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-gray-500">문의 내용:</span>
-                        <p className="text-gray-200 bg-gray-900 p-3 rounded-lg border border-gray-800/80 whitespace-pre-wrap leading-relaxed">
-                          {inq.content}
+                    <div
+                      onClick={() => {
+                        setExpandedInquiryId(isExpanded ? null : inq.id);
+                        setReplyText(inq.reply || '');
+                      }}
+                      className="p-4 cursor-pointer flex items-start justify-between gap-2 active:bg-gray-800/40"
+                    >
+                      <div className="space-y-1.5 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[9px] font-bold rounded border border-blue-500/20">
+                            {inq.category}
+                          </span>
+                          <span className={`px-2 py-0.5 text-[9px] font-bold rounded border ${
+                            inq.status === 'PENDING'
+                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                              : 'bg-green-500/10 text-green-400 border-green-500/20'
+                          }`}>
+                            {inq.status === 'PENDING' ? '답변 대기' : '답변 완료'}
+                          </span>
+                        </div>
+                        <h4 className="text-xs font-black text-white truncate min-w-0">
+                          {inq.title}
+                        </h4>
+                        <p className="text-[10px] text-gray-400">
+                          작성: {inq.userNickname} ({inq.userEmail}) • {new Date(inq.createdAt).toLocaleString('ko-KR', { hour12: false })}
                         </p>
                       </div>
-
-                      <div className="space-y-2">
-                        <span className="text-[10px] font-bold text-gray-500">
-                          {inq.status === 'PENDING' ? '답변 작성:' : '작성된 답변 내용 (수정 가능):'}
-                        </span>
-                        
-                        <textarea
-                          rows={4}
-                          value={replyText}
-                          onChange={(e) => setReplyText(e.target.value)}
-                          placeholder="고객에게 전달할 답변을 입력해 주세요."
-                          className="w-full p-3 bg-gray-900 border border-gray-800 rounded-lg text-xs text-white placeholder-gray-600 focus:outline-none focus:border-blue-500"
-                        />
-
-                        <button
-                          onClick={() => handleReplySubmit(inq.id)}
-                          disabled={isLoading}
-                          className="w-full h-10 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-800 text-white font-bold rounded-lg transition-all flex items-center justify-center gap-1.5"
-                        >
-                          {isLoading ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              답변 전송 중...
-                            </>
-                          ) : (
-                            '답변 등록/수정 완료'
-                          )}
-                        </button>
+                      <div className="text-gray-500 pt-1">
+                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </div>
                     </div>
-                  )}
-                </div>
-              );
-            })
+
+                    {isExpanded && (
+                      <div className="border-t border-gray-800 p-4 bg-gray-950/50 space-y-4 text-xs">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-bold text-gray-500">문의 내용:</span>
+                          <p className="text-gray-200 bg-gray-900 p-3 rounded-lg border border-gray-800/80 whitespace-pre-wrap leading-relaxed">
+                            {inq.content}
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <span className="text-[10px] font-bold text-gray-500">
+                            {inq.status === 'PENDING' ? '답변 작성:' : '작성된 답변 내용 (수정 가능):'}
+                          </span>
+                          
+                          <textarea
+                            rows={4}
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            placeholder="고객에게 전달할 답변을 입력해 주세요."
+                            className="w-full p-3 bg-gray-900 border border-gray-800 rounded-lg text-xs text-white placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                          />
+
+                          <button
+                            onClick={() => handleReplySubmit(inq.id)}
+                            disabled={isLoading}
+                            className="w-full h-10 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-800 text-white font-bold rounded-lg transition-all flex items-center justify-center gap-1.5"
+                          >
+                            {isLoading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                답변 전송 중...
+                              </>
+                            ) : (
+                              '답변 등록/수정 완료'
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       )}
@@ -327,77 +337,79 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
               접수된 무통장 입금 충전 신청이 없습니다.
             </div>
           ) : (
-            initialRecharges.map((rec) => {
-              const isLoading = actionLoadingId === rec.id;
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {initialRecharges.map((rec) => {
+                const isLoading = actionLoadingId === rec.id;
 
-              return (
-                <div
-                  key={rec.id}
-                  className={`bg-gray-900 border rounded-xl p-4 transition-all ${
-                    rec.status === 'PENDING' ? 'border-amber-500/30 bg-amber-500/[0.01]' : 'border-gray-800 bg-gray-900/40'
-                  }`}
-                >
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className={`px-2 py-0.5 text-[9px] font-bold rounded border ${
-                        rec.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                        rec.status === 'APPROVED' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                        'bg-red-500/10 text-red-400 border-red-500/20'
-                      }`}>
-                        {rec.status === 'PENDING' ? '승인 대기' :
-                         rec.status === 'APPROVED' ? '승인 완료' : '반려됨'}
-                      </span>
-                      <span className="text-[10px] text-gray-500">
-                        {new Date(rec.createdAt).toLocaleString('ko-KR', { hour12: false })}
-                      </span>
+                return (
+                  <div
+                    key={rec.id}
+                    className={`bg-gray-900 border rounded-xl p-4 transition-all ${
+                      rec.status === 'PENDING' ? 'border-amber-500/30 bg-amber-500/[0.01]' : 'border-gray-800 bg-gray-900/40'
+                    }`}
+                  >
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={`px-2 py-0.5 text-[9px] font-bold rounded border ${
+                          rec.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                          rec.status === 'APPROVED' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                          'bg-red-500/10 text-red-400 border-red-500/20'
+                        }`}>
+                          {rec.status === 'PENDING' ? '승인 대기' :
+                           rec.status === 'APPROVED' ? '승인 완료' : '반려됨'}
+                        </span>
+                        <span className="text-[10px] text-gray-500">
+                          {new Date(rec.createdAt).toLocaleString('ko-KR', { hour12: false })}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between border-b border-gray-800/80 pb-1.5">
+                          <span className="text-gray-400">신청회원</span>
+                          <span className="font-bold text-white">{rec.userNickname} ({rec.userEmail})</span>
+                        </div>
+                        <div className="flex justify-between border-b border-gray-800/80 pb-1.5 pt-0.5">
+                          <span className="text-gray-400">입금자 실명</span>
+                          <span className="font-bold text-amber-400">{rec.depositorName}</span>
+                        </div>
+                        <div className="flex justify-between pt-0.5">
+                          <span className="text-gray-400">신청금액</span>
+                          <span className="font-extrabold text-white text-sm">{rec.amount.toLocaleString()} P</span>
+                        </div>
+                      </div>
+
+                      {rec.status === 'PENDING' && (
+                        <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-gray-800/80">
+                          <button
+                            onClick={() => handleRejectRecharge(rec.id)}
+                            disabled={isLoading}
+                            className="h-9 bg-gray-800 hover:bg-red-950/40 text-gray-400 hover:text-red-400 text-xs font-black rounded-lg border border-gray-700/80 hover:border-red-900/30 transition-all flex items-center justify-center gap-1"
+                          >
+                            <XCircle className="w-3.5 h-3.5 shrink-0" />
+                            반려
+                          </button>
+                          
+                          <button
+                            onClick={() => handleApproveRecharge(rec.id)}
+                            disabled={isLoading}
+                            className="h-9 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-800 text-white text-xs font-black rounded-lg shadow-md shadow-blue-500/10 transition-all flex items-center justify-center gap-1"
+                          >
+                            {isLoading ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <>
+                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                입금 승인
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
                     </div>
-
-                    <div className="space-y-1 text-xs">
-                      <div className="flex justify-between border-b border-gray-800/80 pb-1.5">
-                        <span className="text-gray-400">신청회원</span>
-                        <span className="font-bold text-white">{rec.userNickname} ({rec.userEmail})</span>
-                      </div>
-                      <div className="flex justify-between border-b border-gray-800/80 pb-1.5 pt-0.5">
-                        <span className="text-gray-400">입금자 실명</span>
-                        <span className="font-bold text-amber-400">{rec.depositorName}</span>
-                      </div>
-                      <div className="flex justify-between pt-0.5">
-                        <span className="text-gray-400">신청금액</span>
-                        <span className="font-extrabold text-white text-sm">{rec.amount.toLocaleString()} P</span>
-                      </div>
-                    </div>
-
-                    {rec.status === 'PENDING' && (
-                      <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-gray-800/80">
-                        <button
-                          onClick={() => handleRejectRecharge(rec.id)}
-                          disabled={isLoading}
-                          className="h-9 bg-gray-800 hover:bg-red-950/40 text-gray-400 hover:text-red-400 text-xs font-black rounded-lg border border-gray-700/80 hover:border-red-900/30 transition-all flex items-center justify-center gap-1"
-                        >
-                          <XCircle className="w-3.5 h-3.5 shrink-0" />
-                          반려
-                        </button>
-                        
-                        <button
-                          onClick={() => handleApproveRecharge(rec.id)}
-                          disabled={isLoading}
-                          className="h-9 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-800 text-white text-xs font-black rounded-lg shadow-md shadow-blue-500/10 transition-all flex items-center justify-center gap-1"
-                        >
-                          {isLoading ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <>
-                              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                              입금 승인
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    )}
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
       )}
