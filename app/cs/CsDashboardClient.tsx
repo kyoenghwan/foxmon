@@ -233,7 +233,7 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
               접수된 문의 내역이 없습니다.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-3">
               {initialInquiries.map((inq) => {
                 const isExpanded = expandedInquiryId === inq.id;
                 const isLoading = actionLoadingId === inq.id;
@@ -337,7 +337,7 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
               접수된 무통장 입금 충전 신청이 없습니다.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-3">
               {initialRecharges.map((rec) => {
                 const isLoading = actionLoadingId === rec.id;
 
