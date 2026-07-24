@@ -385,7 +385,8 @@ export default function PointHistoryManagementPage() {
                                         </tr>
                                     ) : (
                                         displayedTransactions.map((tx: any) => {
-                                            const isPositive = Number(tx.amount) >= 0 || tx.type === 'CHARGE';
+                                            const isDeduction = tx.type === 'DEDUCTION' || tx.type === 'SPEND' || tx.type === 'EXPIRE' || Number(tx.amount) < 0;
+                                            const isPositive = !isDeduction;
                                             const pointClassLabel = tx.pointClass === 'BIZ' ? '광고/유료' : '일반활동';
                                             const userObj = tx.user || {};
 

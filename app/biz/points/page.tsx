@@ -89,26 +89,30 @@ export default async function BizPointsPage() {
                     </div>
                 ) : (
                     <div className="space-y-2">
-                        {transactions.map((tx: any) => (
-                            <div key={tx.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50">
-                                <div className="flex items-center gap-3">
-                                    {tx.amount > 0 
-                                        ? <ArrowDownLeft className="w-5 h-5 text-green-500 shrink-0" />
-                                        : <ArrowUpRight className="w-5 h-5 text-red-400 shrink-0" />
-                                    }
-                                    <div>
-                                        <p className="font-bold text-[14px] text-gray-800">{tx.description}</p>
-                                        <p className="text-[12px] text-gray-400">{new Date(tx.created_at).toLocaleDateString()}</p>
+                        {transactions.map((tx: any) => {
+                            const isDeduction = tx.type === 'DEDUCTION' || tx.type === 'SPEND' || tx.type === 'EXPIRE' || tx.amount < 0;
+                            const displayAmount = Math.abs(tx.amount);
+                            return (
+                                <div key={tx.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50">
+                                    <div className="flex items-center gap-3">
+                                        {isDeduction 
+                                            ? <ArrowUpRight className="w-5 h-5 text-red-400 shrink-0" />
+                                            : <ArrowDownLeft className="w-5 h-5 text-green-500 shrink-0" />
+                                        }
+                                        <div>
+                                            <p className="font-bold text-[14px] text-gray-800">{tx.description}</p>
+                                            <p className="text-[12px] text-gray-400">{new Date(tx.created_at).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className={`font-black text-[15px] ${isDeduction ? 'text-red-500' : 'text-green-600'}`}>
+                                            {isDeduction ? '-' : '+'}{displayAmount.toLocaleString()}P
+                                        </p>
+                                        <p className="text-[12px] text-gray-400">잔액 {tx.balance_after?.toLocaleString()}P</p>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className={`font-black text-[15px] ${tx.amount > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                                        {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}P
-                                    </p>
-                                    <p className="text-[12px] text-gray-400">잔액 {tx.balance_after?.toLocaleString()}P</p>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
