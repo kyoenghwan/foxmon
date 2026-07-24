@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from 'react';
 import { replyInquiry, approveRechargeRequest, rejectRechargeRequest } from '@/lib/actions/admin-cs';
+import { logoutCsTerminal } from '@/lib/actions/admin-cs-auth';
 import { useRouter } from 'next/navigation';
-import { MessageSquare, CreditCard, ChevronDown, ChevronUp, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { MessageSquare, CreditCard, ChevronDown, ChevronUp, Loader2, CheckCircle2, XCircle, LogOut } from 'lucide-react';
 
 interface Inquiry {
   id: string;
@@ -43,6 +44,23 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
   
   const [isPending, startTransition] = useTransition();
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // 로그아웃 처리
+  const handleLogout = async () => {
+    if (!confirm('CS 터미널 로그아웃을 진행하시겠습니까?')) return;
+    setIsLoggingOut(true);
+    try {
+      const res = await logoutCsTerminal();
+      if (res.success) {
+        window.location.href = '/cs/login';
+      }
+    } catch (e) {
+      alert('로그아웃 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   // 1:1 문의 답변 처리
   const handleReplySubmit = async (inquiryId: string) => {
@@ -106,6 +124,30 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
 
   return (
     <div className="w-full space-y-4">
+      {/* 최상단 바 (앱 바 스타일 - 로그아웃 추가) */}
+      <div className="flex items-center justify-between border-b border-gray-900 pb-3 mb-2">
+        <div className="space-y-0.5">
+          <h1 className="text-base font-black text-white flex items-center gap-1.5">
+            🦊 FOXMON CS 터미널
+          </h1>
+          <p className="text-[10px] text-gray-500 font-bold">
+            보안 단말기 전용 실시간 응대 웹앱
+          </p>
+        </div>
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="h-8 px-3 bg-gray-900 border border-gray-800 hover:bg-gray-800 text-gray-400 hover:text-white text-[11px] font-black rounded-xl flex items-center gap-1 transition-all"
+        >
+          {isLoggingOut ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <LogOut className="w-3.5 h-3.5" />
+          )}
+          로그아웃
+        </button>
+      </div>
+
       {/* 탭 네비게이션 (모바일 세로 최적화) */}
       <div className="grid grid-cols-2 gap-2 bg-gray-900 p-1.5 rounded-xl border border-gray-800">
         <button
@@ -167,7 +209,6 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
                     inq.status === 'PENDING' ? 'border-amber-500/30 bg-amber-500/[0.02]' : 'border-gray-800 bg-gray-900/60'
                   }`}
                 >
-                  {/* 카드 요약 헤더 */}
                   <div
                     onClick={() => {
                       setExpandedInquiryId(isExpanded ? null : inq.id);
@@ -200,10 +241,8 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
                     </div>
                   </div>
 
-                  {/* 확장 아코디언 콘텐츠 */}
                   {isExpanded && (
                     <div className="border-t border-gray-800 p-4 bg-gray-950/50 space-y-4 text-xs">
-                      {/* 문의 본문 */}
                       <div className="space-y-1">
                         <span className="text-[10px] font-bold text-gray-500">문의 내용:</span>
                         <p className="text-gray-200 bg-gray-900 p-3 rounded-lg border border-gray-800/80 whitespace-pre-wrap leading-relaxed">
@@ -211,7 +250,6 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
                         </p>
                       </div>
 
-                      {/* 답변 양식 */}
                       <div className="space-y-2">
                         <span className="text-[10px] font-bold text-gray-500">
                           {inq.status === 'PENDING' ? '답변 작성:' : '작성된 답변 내용 (수정 가능):'}
@@ -273,7 +311,6 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
                   }`}
                 >
                   <div className="flex flex-col gap-3">
-                    {/* 상태 및 헤더 */}
                     <div className="flex items-center justify-between gap-2">
                       <span className={`px-2 py-0.5 text-[9px] font-bold rounded border ${
                         rec.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
@@ -288,7 +325,6 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
                       </span>
                     </div>
 
-                    {/* 입금 정보 요약 */}
                     <div className="space-y-1 text-xs">
                       <div className="flex justify-between border-b border-gray-800/80 pb-1.5">
                         <span className="text-gray-400">신청회원</span>
@@ -304,7 +340,6 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges }
                       </div>
                     </div>
 
-                    {/* 조작 버튼 영역 (대기 중일 때만 표시) */}
                     {rec.status === 'PENDING' && (
                       <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-gray-800/80">
                         <button

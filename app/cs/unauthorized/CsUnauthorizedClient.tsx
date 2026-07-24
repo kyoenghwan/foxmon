@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { requestDeviceRegistration } from '@/lib/actions/admin-devices';
 import { ShieldAlert, Laptop, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 
-// UUID 생성 헬퍼
 function generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0;
@@ -13,13 +12,11 @@ function generateUUID(): string {
   });
 }
 
-// 쿠키 쓰기 헬퍼
 function setCookie(name: string, value: string, days = 365) {
   const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
   document.cookie = `${name}=${value}; path=/; expires=${expires}; SameSite=Lax`;
 }
 
-// 쿠키 읽기 헬퍼
 function getCookie(name: string): string | null {
   const nameEQ = name + '=';
   const ca = document.cookie.split(';');
@@ -40,13 +37,11 @@ export default function CsUnauthorizedClient() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // 컴포넌트 마운트 시 기기 토큰 확인 및 발급
   useEffect(() => {
     async function initDevice() {
       try {
         let token = localStorage.getItem('cs_device_token');
         if (!token) {
-          // 쿠키에서도 시도
           token = getCookie('cs_device_token');
         }
 
@@ -55,14 +50,9 @@ export default function CsUnauthorizedClient() {
           localStorage.setItem('cs_device_token', token);
         }
 
-        // 쿠키에도 확실히 동기화
         setCookie('cs_device_token', token);
         setDeviceToken(token);
 
-        // DB에서 현재 기기의 인증 상태 가져오기
-        const res = await fetch(`/api/game/status`); // status API 혹은 다른 간단한 조회로 우회 가능하지만, 
-        // 그냥 supbaseAdmin으로 바로 조회하는 API 라우트를 cs/device-status 에 하나 만드는 게 제일 깔끔합니다.
-        // 여기서는 임시 fetch를 직접 하거나, API route를 활용하도록 설계하겠습니다.
         const statusRes = await fetch(`/api/cs-device/status?token=${token}`);
         const statusJson = await statusRes.json();
         
@@ -82,7 +72,6 @@ export default function CsUnauthorizedClient() {
     initDevice();
   }, []);
 
-  // 기기 등록 신청 제출
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!deviceName.trim()) {
@@ -124,14 +113,12 @@ export default function CsUnauthorizedClient() {
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col items-center justify-center p-4">
       <div className="max-w-md w-full bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-2xl space-y-6 text-center">
         
-        {/* 아이콘 피드백 */}
         <div className="flex justify-center">
           <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-500 animate-pulse">
             <ShieldAlert className="w-8 h-8" />
           </div>
         </div>
 
-        {/* 안내 텍스트 */}
         <div className="space-y-2">
           <h2 className="text-lg font-black text-white">미인증 기기 접근 차단됨</h2>
           <p className="text-xs text-gray-400 leading-relaxed">
@@ -139,7 +126,6 @@ export default function CsUnauthorizedClient() {
           </p>
         </div>
 
-        {/* 기기 정보 영역 */}
         <div className="bg-gray-950/80 border border-gray-800 rounded-2xl p-4 text-left space-y-3 text-xs">
           <div className="flex items-center gap-2 text-gray-400">
             <Laptop className="w-4 h-4 text-blue-400" />
@@ -150,7 +136,6 @@ export default function CsUnauthorizedClient() {
           </div>
         </div>
 
-        {/* 기기 상태에 따른 UI 분기 */}
         {deviceStatus === 'PENDING' && (
           <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl space-y-2 text-xs">
             <div className="flex items-center justify-center gap-1.5 text-amber-400 font-bold">
@@ -214,10 +199,10 @@ export default function CsUnauthorizedClient() {
               <span>기기 승인 완료</span>
             </div>
             <p className="text-[10px] text-gray-500 leading-relaxed">
-              본 기기는 승인된 안전 단말기입니다. 아래 버튼을 눌러 CS 대시보드로 즉시 진입하실 수 있습니다.
+              본 기기는 승인된 안전 단말기입니다. 아래 버튼을 눌러 로그인 및 CS 대시보드로 즉시 진입하실 수 있습니다.
             </p>
             <button
-              onClick={() => window.location.href = '/fox-office/cs'}
+              onClick={() => window.location.href = '/cs'}
               className="w-full h-10 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all"
             >
               CS 대시보드로 이동

@@ -30,7 +30,7 @@ const ADMIN_MENUS = [
   { id: 'accounting', label: '회계/정산 관리', icon: FileText, href: '/fox-office/accounting' },
   { id: 'points', label: '포인트 및 정책 관리', icon: ArrowLeftRight, href: '/fox-office/points' },
   { id: 'gift-cards', label: '상품권 교환 관리', icon: Gift, href: '/fox-office/gift-cards' },
-  { id: 'cs', label: '실시간 CS/무통장', icon: Bell, href: '/fox-office/cs' },
+  { id: 'cs', label: '실시간 CS/무통장', icon: Bell, href: '/cs' },
   { id: 'community', label: '커뮤니티 관리', icon: MessageSquare, href: '/fox-office/community' },
   { id: 'support', label: '고객센터', icon: HelpCircle, href: '/fox-office/support' },
   { id: 'help-content', label: '공지·FAQ·문의', icon: Bell, href: '/fox-office/help' },
