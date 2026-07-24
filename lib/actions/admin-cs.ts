@@ -1,0 +1,170 @@
+'use server';
+
+import { auth } from '@/auth';
+import { supabaseAdmin } from '@/lib/supabase';
+import { nvLog } from '@/lib/logger';
+import { FA_RECHARGE_POINT_FLOW } from '@/src/atoms/fa/points/FA_RECHARGE_POINT_FLOW';
+import { revalidatePath } from 'next/cache';
+
+/**
+ * 1:1 고객 문의에 관리자 답변 등록
+ */
+export async function replyInquiry(payload: {
+  inquiryId: string;
+  replyContent: string;
+}) {
+  const session = await auth();
+  const userRole = (session?.user as any)?.role;
+
+  if (!session?.user?.id || (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN')) {
+    return { success: false, message: '관리자 권한이 없습니다.' };
+  }
+
+  const { inquiryId, replyContent } = payload;
+  if (!inquiryId || !replyContent.trim()) {
+    return { success: false, message: '답변 내용을 입력해 주세요.' };
+  }
+
+  try {
+    const { error } = await supabaseAdmin
+      .from('inquiries')
+      .update({
+        reply: replyContent.trim(),
+        status: 'ANSWERED',
+        replied_at: new Date().toISOString(),
+      })
+      .eq('id', inquiryId);
+
+    if (error) {
+      nvLog('FW', '❌ 1:1 문의 답변 등록 실패', error.message);
+      return { success: false, message: '답변을 등록하지 못했습니다.' };
+    }
+
+    revalidatePath('/fox-office/cs');
+    return { success: true, message: '답변이 성공적으로 등록되었습니다.' };
+  } catch (err: any) {
+    nvLog('FW', '❌ 1:1 문의 답변 등록 오류', err.message);
+    return { success: false, message: '답변 등록 중 오류가 발생했습니다.' };
+  }
+}
+
+/**
+ * 무통장 입금 신청 건 최종 승인 및 포인트 지급
+ */
+export async function approveRechargeRequest(requestId: string) {
+  const session = await auth();
+  const userRole = (session?.user as any)?.role;
+
+  if (!session?.user?.id || (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN')) {
+    return { success: false, message: '관리자 권한이 없습니다.' };
+  }
+
+  if (!requestId) {
+    return { success: false, message: '요청 ID가 누락되었습니다.' };
+  }
+
+  try {
+    // 1. 신청 내역 조회
+    const { data: request, error: fetchError } = await supabaseAdmin
+      .from('point_recharge_requests')
+      .select('*')
+      .eq('id', requestId)
+      .single();
+
+    if (fetchError || !request) {
+      return { success: false, message: '충전 신청 내역을 찾을 수 없습니다.' };
+    }
+
+    if (request.status !== 'PENDING') {
+      return { success: false, message: `이미 처리 완료된 신청 건입니다. (현재 상태: ${request.status})` };
+    }
+
+    nvLog('FW', '💳 무통장 입금 승인 처리 진행', { requestId, userId: request.user_id, amount: request.amount });
+
+    // 2. 통합 포인트 충전 플로우(FA_RECHARGE_POINT_FLOW) 실행
+    // 이 플로우는 전역 포인트 정책 조회, 등급별 보너스 연산, DB 적립 및 로그 적재를 원자적으로 수행합니다.
+    const rechargeResult = await FA_RECHARGE_POINT_FLOW({
+      userId: request.user_id,
+      cashAmount: Number(request.amount),
+    });
+
+    if (!rechargeResult.success) {
+      nvLog('FW', '❌ FA_RECHARGE_POINT_FLOW 충전 실행 실패', rechargeResult.error);
+      return { success: false, message: rechargeResult.message || '포인트 지급 처리에 실패했습니다.' };
+    }
+
+    // 3. 신청 상태 APPROVED로 변경
+    const { error: updateError } = await supabaseAdmin
+      .from('point_recharge_requests')
+      .update({
+        status: 'APPROVED',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', requestId);
+
+    if (updateError) {
+      nvLog('FW', '⚠️ 충전 신청 테이블 상태 업데이트 에러 (포인트는 충전됨)', updateError.message);
+      // 포인트가 충전되었으므로 성공으로 응답을 주되 경고 기록
+    }
+
+    revalidatePath('/fox-office/cs');
+    return { 
+      success: true, 
+      message: `승인이 완료되었습니다. ${rechargeResult.message}` 
+    };
+  } catch (err: any) {
+    nvLog('FW', '❌ 무통장 입금 승인 중 예외 발생', err.message);
+    return { success: false, message: '승인 처리 중 오류가 발생했습니다.' };
+  }
+}
+
+/**
+ * 무통장 입금 신청 반려(거절) 처리
+ */
+export async function rejectRechargeRequest(requestId: string) {
+  const session = await auth();
+  const userRole = (session?.user as any)?.role;
+
+  if (!session?.user?.id || (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN')) {
+    return { success: false, message: '관리자 권한이 없습니다.' };
+  }
+
+  if (!requestId) {
+    return { success: false, message: '요청 ID가 누락되었습니다.' };
+  }
+
+  try {
+    const { data: request } = await supabaseAdmin
+      .from('point_recharge_requests')
+      .select('status')
+      .eq('id', requestId)
+      .single();
+
+    if (!request) {
+      return { success: false, message: '충전 신청 내역을 찾을 수 없습니다.' };
+    }
+
+    if (request.status !== 'PENDING') {
+      return { success: false, message: '대기 중인 신청 건만 반려할 수 있습니다.' };
+    }
+
+    const { error } = await supabaseAdmin
+      .from('point_recharge_requests')
+      .update({
+        status: 'REJECTED',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', requestId);
+
+    if (error) {
+      nvLog('FW', '❌ 충전 반려 상태 변경 실패', error.message);
+      return { success: false, message: '반려 처리에 실패했습니다.' };
+    }
+
+    revalidatePath('/fox-office/cs');
+    return { success: true, message: '정상적으로 반려 처리되었습니다.' };
+  } catch (err: any) {
+    nvLog('FW', '❌ 충전 반려 처리 오류', err.message);
+    return { success: false, message: '반려 처리 중 오류가 발생했습니다.' };
+  }
+}

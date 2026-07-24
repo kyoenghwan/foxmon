@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "@/lib/supabase";
-import { getSiteSettings } from "@/actions/admin/siteSettings";
+import { nvLog } from './logger';
 
 /**
  * 특정 유저(DB의 user_id)에게 텔레그램 메시지를 전송합니다.
@@ -116,4 +116,45 @@ export async function sendTelegramMessageDirect(chatId: string | number, message
         console.error("sendTelegramMessageDirect exception:", e);
         return false;
     }
+}
+
+/**
+ * 관리자 텔레그램 단체방으로 실시간 CS 및 결제 알림을 발송합니다.
+ * @param text 전송할 메시지 내용 (HTML 포맷 지원)
+ */
+export async function sendTelegramMessage(text: string): Promise<boolean> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!token || !chatId) {
+    nvLog('FW', '⚠️ TELEGRAM_BOT_TOKEN 또는 TELEGRAM_CHAT_ID 환경 변수가 구성되지 않아 알림 발송을 건너뜁니다.');
+    return false;
+  }
+
+  try {
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: text,
+        parse_mode: 'HTML', // HTML 태그 허용하여 가독성 증대
+      }),
+    });
+
+    const json = await res.json();
+    if (!res.ok || !json.ok) {
+      nvLog('FW', '❌ 텔레그램 메시지 발송 실패', json);
+      return false;
+    }
+
+    nvLog('FW', '✅ 텔레그램 메시지 발송 완료');
+    return true;
+  } catch (err: any) {
+    nvLog('FW', '❌ 텔레그램 발송 예외 발생', err.message);
+    return false;
+  }
 }

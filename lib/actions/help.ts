@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '@/lib/logger';
 import { format } from 'date-fns';
+import { sendTelegramMessage } from '@/lib/telegram';
 
 export type PublicNotice = {
   id: string;
@@ -282,6 +283,23 @@ export async function createInquiry(input: {
           : '';
       return { success: false, message: `문의 접수에 실패했습니다. (${error.message})${hint}` };
     }
+
+    // 텔레그램 실시간 알림 전송 (비동기 처리)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://foxmon.co.kr';
+    const nickname = session?.user?.name || '익명 회원';
+    const messageText = `
+<b>🔔 [폭스몬] 새로운 1:1 고객 문의가 접수되었습니다!</b>
+
+• <b>작성자</b>: ${nickname}
+• <b>카테고리</b>: ${category}
+• <b>제목</b>: ${title}
+• <b>내용 요약</b>: ${content.substring(0, 150)}${content.length > 150 ? '...' : ''}
+• <b>답변 대기 여부</b>: ${isAccountInquiry ? '자동 답변완료' : '대기중 (수동 답변 필요)'}
+
+👉 <a href="${appUrl}/fox-office/cs">모바일 관리자 CS 페이지 바로가기</a>
+`.trim();
+    sendTelegramMessage(messageText).catch(e => nvLog('FW', '⚠️ 텔레그램 발송 오류', e));
+
     return {
       success: true,
       message: isAccountInquiry 

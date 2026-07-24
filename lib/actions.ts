@@ -4,6 +4,7 @@ import { signIn, signOut, auth } from '@/auth';
 import { AuthError } from 'next-auth';
 import { cookies } from 'next/headers';
 import { invalidateAdCache } from '@/lib/ad-service';
+import { sendTelegramMessage } from '@/lib/telegram';
 
 import { FA_MANAGE_RESUME_FLOW } from '@/src/atoms/fa/resume/FA_MANAGE_RESUME_FLOW';
 import { ResumeData } from '@/src/atoms/oa/resume/OA_UPSERT_RESUME';
@@ -188,6 +189,21 @@ export async function requestPointRecharge(payload: { amount: number, depositor_
             console.error('Insert error:', error);
             throw error;
         }
+
+        // 텔레그램 실시간 알림 전송 (비동기 처리)
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://foxmon.co.kr';
+        const nickname = session?.user?.name || '익명 회원';
+        const messageText = `
+<b>🔔 [폭스몬] 새로운 무통장 입금 충전 신청이 접수되었습니다!</b>
+
+• <b>신청회원</b>: ${nickname}
+• <b>입금자명</b>: ${payload.depositor_name}
+• <b>신청금액</b>: ${payload.amount.toLocaleString()} P
+• <b>상태</b>: 승인 대기중 (PENDING)
+
+👉 <a href="${appUrl}/fox-office/cs">모바일 관리자 CS 페이지 바로가기</a>
+`.trim();
+        sendTelegramMessage(messageText).catch(e => console.error('Telegram notification error:', e));
 
         revalidatePath('/biz/points');
         return { success: true, message: '충전 신청이 완료되었습니다.' };
