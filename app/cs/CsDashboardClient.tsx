@@ -78,6 +78,14 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
   const [rechargeStartDate, setRechargeStartDate] = useState('');
   const [rechargeEndDate, setRechargeEndDate] = useState('');
 
+  // 탭 변경 시 자동으로 데이터 리프레시 실행
+  const handleTabChange = (tab: 'chat' | 'cs' | 'recharge') => {
+    setActiveTab(tab);
+    startTransition(() => {
+      router.refresh();
+    });
+  };
+
   // 1:1 문의 및 무통장 신청서 실시간 갱신 수신 설정
   useEffect(() => {
     // 1. 1:1 문의 채널
@@ -304,9 +312,9 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
       </div>
 
       {/* 2. 3분할 탭 네비게이션 */}
-      <div className="grid grid-cols-3 gap-1.5 bg-gray-900 p-1.5 rounded-xl border border-gray-800">
+      <div className="grid grid-cols-3 gap-1.5 bg-gray-950 p-1.5 rounded-xl border border-gray-800">
         <button
-          onClick={() => setActiveTab('chat')}
+          onClick={() => handleTabChange('chat')}
           className={`flex flex-col items-center justify-center py-2.5 rounded-lg text-[10px] font-black transition-all ${
             activeTab === 'chat'
               ? 'bg-blue-600 text-white shadow-md'
@@ -318,7 +326,7 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
         </button>
 
         <button
-          onClick={() => setActiveTab('cs')}
+          onClick={() => handleTabChange('cs')}
           className={`flex flex-col items-center justify-center py-2.5 rounded-lg text-[10px] font-black transition-all relative ${
             activeTab === 'cs'
               ? 'bg-blue-600 text-white shadow-md'
@@ -335,7 +343,7 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
         </button>
 
         <button
-          onClick={() => setActiveTab('recharge')}
+          onClick={() => handleTabChange('recharge')}
           className={`flex flex-col items-center justify-center py-2.5 rounded-lg text-[10px] font-black transition-all relative ${
             activeTab === 'recharge'
               ? 'bg-blue-600 text-white shadow-md'
