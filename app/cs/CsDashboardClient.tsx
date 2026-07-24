@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { replyInquiry, approveRechargeRequest, rejectRechargeRequest } from '@/lib/actions/admin-cs';
 import { logoutCsTerminal } from '@/lib/actions/admin-cs-auth';
 import { CsMessengerPanel } from '@/components/chat/CsMessengerPanel';
 import { useRouter } from 'next/navigation';
 import { MessageSquare, CreditCard, ChevronDown, ChevronUp, Loader2, CheckCircle2, XCircle, LogOut, MessageCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface Inquiry {
   id: string;
@@ -49,6 +50,38 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
   const [isPending, startTransition] = useTransition();
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // 1:1 문의 및 무통장 신청서 실시간 갱신 수신 설정
+  useEffect(() => {
+    // 1. 1:1 문의 채널
+    const inquiryChannel = supabase
+      .channel('realtime-inquiries')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'inquiries' },
+        () => {
+          router.refresh();
+        }
+      )
+      .subscribe();
+
+    // 2. 무통장 입금 신청 채널
+    const rechargeChannel = supabase
+      .channel('realtime-recharges')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'point_recharge_requests' },
+        () => {
+          router.refresh();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(inquiryChannel);
+      supabase.removeChannel(rechargeChannel);
+    };
+  }, [router]);
 
   // 로그아웃
   const handleLogout = async () => {
