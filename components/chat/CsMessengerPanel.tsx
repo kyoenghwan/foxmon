@@ -124,9 +124,40 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
     setLoadingMsg(false);
   }, []);
 
+  // 전체 방 목록 및 메시지 실시간 감지 구독
   useEffect(() => {
+    // 1. 초기 1회 로드
     void refreshRooms();
-  }, [refreshRooms]);
+
+    // 2. foxtalk_rooms 테이블 변경 감지 채널 (새 상담 개설 등)
+    const roomsChannel = supabase
+      .channel('realtime-cs-rooms-list')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'foxtalk_rooms' },
+        () => {
+          void refreshRooms(appliedFilters);
+        }
+      )
+      .subscribe();
+
+    // 3. foxtalk_messages 테이블 신규 등록 감지 채널 (다른 방 새 메시지 도착 등)
+    const msgsChannel = supabase
+      .channel('realtime-cs-messages-global')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'foxtalk_messages' },
+        () => {
+          void refreshRooms(appliedFilters);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(roomsChannel);
+      void supabase.removeChannel(msgsChannel);
+    };
+  }, [refreshRooms, appliedFilters]);
 
   useEffect(() => {
     if (!selectedId || !csAdminUserId) return;
