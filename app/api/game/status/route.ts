@@ -73,12 +73,12 @@ export async function GET() {
 
       const { data: user } = await supabaseAdmin
         .from('users')
-        .select('activity_points')
+        .select('paid_points, bonus_points')
         .eq('id', userId)
         .single();
 
       if (user) {
-        activityPoints = Number(user.activity_points);
+        activityPoints = Number(user.paid_points || 0) + Number(user.bonus_points || 0);
       }
 
       // 오늘 KST 기준 글쓰기 보상 적립 횟수 조회
