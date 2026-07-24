@@ -34,14 +34,22 @@ interface Recharge {
   userEmail: string;
 }
 
+interface CsTemplate {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+}
+
 interface CsDashboardClientProps {
   initialInquiries: Inquiry[];
   initialRecharges: Recharge[];
   csAdminUserId: string;
   csAdminName?: string;
+  templates: CsTemplate[];
 }
 
-export default function CsDashboardClient({ initialInquiries, initialRecharges, csAdminUserId, csAdminName }: CsDashboardClientProps) {
+export default function CsDashboardClient({ initialInquiries, initialRecharges, csAdminUserId, csAdminName, templates }: CsDashboardClientProps) {
   const router = useRouter();
   // 디폴트를 실시간 메신저 상담('chat')으로 배치
   const [activeTab, setActiveTab] = useState<'chat' | 'cs' | 'recharge'>('chat');
@@ -53,14 +61,19 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [aiGeneratingId, setAiGeneratingId] = useState<string | null>(null);
 
+  // 반려 전용 모달 상태
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectTargetId, setRejectTargetId] = useState<string | null>(null);
+  const [rejectReasonInput, setRejectReasonInput] = useState('');
+
   // 1:1 문의 검색 필터 상태
-  const [showOnlyPendingInquiry, setShowOnlyPendingInquiry] = useState(false);
+  const [showOnlyPendingInquiry, setShowOnlyPendingInquiry] = useState(true);
   const [inquirySearchKeyword, setInquirySearchKeyword] = useState('');
   const [inquiryStartDate, setInquiryStartDate] = useState('');
   const [inquiryEndDate, setInquiryEndDate] = useState('');
 
   // 무통장 승인 검색 필터 상태
-  const [showOnlyPendingRecharge, setShowOnlyPendingRecharge] = useState(false);
+  const [showOnlyPendingRecharge, setShowOnlyPendingRecharge] = useState(true);
   const [rechargeSearchKeyword, setRechargeSearchKeyword] = useState('');
   const [rechargeStartDate, setRechargeStartDate] = useState('');
   const [rechargeEndDate, setRechargeEndDate] = useState('');
@@ -169,21 +182,29 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
     });
   };
 
-  // 무통장 입금 반려
-  const handleRejectRecharge = async (requestId: string) => {
-    const reason = window.prompt('반려 사유를 입력해 주세요 (예: 입금자명 불일치, 금액 불일치 등):');
-    if (reason === null) return; // 취소
+  // 무통장 입금 반려 모달 활성화
+  const handleRejectRecharge = (requestId: string) => {
+    setRejectTargetId(requestId);
+    setRejectReasonInput('');
+    setIsRejectModalOpen(true);
+  };
 
-    const trimmedReason = reason.trim();
+  // 무통장 입금 반려 서버 전송
+  const submitRejectRecharge = async () => {
+    if (!rejectTargetId) return;
+    const trimmedReason = rejectReasonInput.trim();
     if (!trimmedReason) {
       alert('반려 사유를 반드시 입력해야 처리할 수 있습니다.');
       return;
     }
 
-    setActionLoadingId(requestId);
+    setActionLoadingId(rejectTargetId);
+    setIsRejectModalOpen(false);
     startTransition(async () => {
-      const res = await rejectRechargeRequest(requestId, trimmedReason);
+      const res = await rejectRechargeRequest(rejectTargetId, trimmedReason);
       setActionLoadingId(null);
+      setRejectTargetId(null);
+      setRejectReasonInput('');
       if (res.success) {
         alert(res.message);
         router.refresh();
@@ -499,6 +520,28 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
                             </button>
                           </div>
                           
+                          {/* 자주 쓰는 답변 매크로 리스트 */}
+                          <div className="flex flex-wrap gap-1.5 py-1">
+                            {templates
+                              .filter((t) => t.category === 'INQUIRY_REPLY' || t.category === 'GENERAL')
+                              .map((t) => (
+                                <button
+                                  key={t.id}
+                                  type="button"
+                                  onClick={() => {
+                                    if (!replyText.trim()) {
+                                      setReplyText(t.content);
+                                    } else {
+                                      setReplyText((prev) => prev + '\n\n' + t.content);
+                                    }
+                                  }}
+                                  className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 text-[10px] rounded-lg transition-all"
+                                >
+                                  📋 {t.title}
+                                </button>
+                              ))}
+                          </div>
+                          
                           <textarea
                             rows={4}
                             value={replyText}
@@ -689,6 +732,76 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* 6. 무통장 반려 전용 모달 (자주 쓰는 사유 선택 포함) */}
+      {isRejectModalOpen && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden text-white flex flex-col max-h-[90vh]">
+            <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/60">
+              <h3 className="text-sm font-bold text-gray-100 flex items-center gap-1.5">
+                <XCircle className="w-4 h-4 text-red-500" />
+                무통장 입금 신청 반려 처리
+              </h3>
+              <button 
+                onClick={() => setIsRejectModalOpen(false)}
+                className="text-gray-400 hover:text-white text-lg font-bold"
+              >
+                &times;
+              </button>
+            </div>
+            
+            <div className="p-4 space-y-4 overflow-y-auto">
+              {/* 자주 쓰는 반려 사유 리스트 */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-gray-500 block">자주 쓰는 반려 사유 선택:</span>
+                <div className="flex flex-col gap-1.5">
+                  {templates
+                    .filter((t) => t.category === 'RECHARGE_REJECT')
+                    .map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setRejectReasonInput(t.content)}
+                        className="w-full p-2.5 bg-gray-800 hover:bg-gray-700 text-left text-xs text-gray-200 border border-gray-700 rounded-xl transition-all"
+                      >
+                        📌 {t.title}
+                      </button>
+                    ))}
+                </div>
+              </div>
+
+              {/* 반려 사유 직접 입력/수정 */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-gray-500 block">반려 사유 상세 내용 (수정/직접 입력):</span>
+                <textarea
+                  rows={4}
+                  value={rejectReasonInput}
+                  onChange={(e) => setRejectReasonInput(e.target.value)}
+                  placeholder="회원에게 전송될 상세 반려 사유를 작성해 주세요."
+                  className="w-full p-3 bg-gray-950 border border-gray-850 rounded-xl text-xs text-white placeholder-gray-600 focus:outline-none focus:border-red-500 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-950/60 border-t border-gray-800 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setIsRejectModalOpen(false)}
+                className="h-10 bg-gray-850 hover:bg-gray-800 text-xs font-bold rounded-xl border border-gray-800 text-gray-400 transition-all"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={submitRejectRecharge}
+                className="h-10 bg-red-600 hover:bg-red-700 text-xs font-bold text-white rounded-xl shadow-lg shadow-red-500/10 transition-all"
+              >
+                반려 처리 완료
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

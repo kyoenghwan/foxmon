@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase';
 import CsDashboardClient from './CsDashboardClient';
+import { getCsTemplates } from '@/lib/actions/admin-cs';
 
 export const dynamic = 'force-dynamic';
 
@@ -100,6 +101,9 @@ export default async function CsPage() {
 
   const adminName = adminUser?.nickname || adminUser?.login_id || 'ADMIN';
 
+  // 5. 자주 쓰는 답변 템플릿 조회
+  const { templates } = await getCsTemplates();
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 py-6 px-4 md:px-8">
       {/* PC 접속 시 모바일이 아닌 넓은 PC 스크린에 최적화되도록 w-full 및 md:max-w-6xl 분기 지원 */}
@@ -109,6 +113,7 @@ export default async function CsPage() {
           initialRecharges={recharges} 
           csAdminUserId={adminUserId}
           csAdminName={adminName}
+          templates={templates || []}
         />
       </div>
     </div>

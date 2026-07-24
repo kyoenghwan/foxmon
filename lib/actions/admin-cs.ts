@@ -350,3 +350,28 @@ export async function generateAiReply(payload: { inquiryId: string }): Promise<{
     return { success: false, message: `답변 생성 중 오류가 발생했습니다. (${err.message})` };
   }
 }
+
+/**
+ * CS 답변 템플릿(자주 쓰는 답변) 조회
+ */
+export async function getCsTemplates(): Promise<{ success: boolean; templates: Array<{ id: string; title: string; content: string; category: string }> }> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('cs_templates')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    return { success: true, templates: data || [] };
+  } catch (err: any) {
+    // cs_templates 테이블이 아직 없거나 로드가 안 될 때의 안전한 폴백 매크로 리스트
+    const fallbacks = [
+      { id: 'fb1', title: '입금자명 불일치', content: '신청하신 입금자명과 실제 통장 입금자명이 달라 확인이 어렵습니다. 입금자명을 다시 확인하신 후 신청해 주세요.', category: 'RECHARGE_REJECT' },
+      { id: 'fb2', title: '신청금액 불일치', content: '신청하신 금액과 실제 통장에 송금된 금액이 일치하지 않아 반려되었습니다. 보낸 금액을 확인하신 후 재신청 부탁드립니다.', category: 'RECHARGE_REJECT' },
+      { id: 'fb3', title: '입금 내역 확인불가', content: '송금 완료 시간이 오래 경과되었거나 해당 입금 내역이 통장에 존재하지 않습니다. 입금 일시 및 송금 정보를 다시 확인해 주세요.', category: 'RECHARGE_REJECT' },
+      { id: 'fb4', title: '인증 서류 반려 안내', content: '제출해주신 신분증/사업자증 서류의 상태가 흐리거나 식별하기 곤란하여 보류되었습니다. 선명한 촬영 사진으로 재등록해 주세요.', category: 'INQUIRY_REPLY' },
+      { id: 'fb5', title: '광고 규정 준수 보류', content: '제출하신 광고 신청 글에 광고 등록 운영 규정에 저촉되는 문구(예: 과대광고, 금지어)가 포함되어 있습니다. 수정 후 재신청 바랍니다.', category: 'INQUIRY_REPLY' }
+    ];
+    return { success: true, templates: fallbacks };
+  }
+}
