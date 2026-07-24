@@ -5,7 +5,7 @@ import { replyInquiry, approveRechargeRequest, rejectRechargeRequest } from '@/l
 import { logoutCsTerminal } from '@/lib/actions/admin-cs-auth';
 import { CsMessengerPanel } from '@/components/chat/CsMessengerPanel';
 import { useRouter } from 'next/navigation';
-import { MessageSquare, CreditCard, ChevronDown, ChevronUp, Loader2, CheckCircle2, XCircle, LogOut, MessageCircle } from 'lucide-react';
+import { MessageSquare, CreditCard, ChevronDown, ChevronUp, Loader2, CheckCircle2, XCircle, LogOut, MessageCircle, Clock, Calendar, Search } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 interface Inquiry {
@@ -51,6 +51,18 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
   const [isPending, startTransition] = useTransition();
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // 1:1 문의 검색 필터 상태
+  const [showOnlyPendingInquiry, setShowOnlyPendingInquiry] = useState(false);
+  const [inquirySearchKeyword, setInquirySearchKeyword] = useState('');
+  const [inquiryStartDate, setInquiryStartDate] = useState('');
+  const [inquiryEndDate, setInquiryEndDate] = useState('');
+
+  // 무통장 승인 검색 필터 상태
+  const [showOnlyPendingRecharge, setShowOnlyPendingRecharge] = useState(false);
+  const [rechargeSearchKeyword, setRechargeSearchKeyword] = useState('');
+  const [rechargeStartDate, setRechargeStartDate] = useState('');
+  const [rechargeEndDate, setRechargeEndDate] = useState('');
 
   // 1:1 문의 및 무통장 신청서 실시간 갱신 수신 설정
   useEffect(() => {
@@ -166,6 +178,59 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
   const pendingInquiriesCount = initialInquiries.filter(i => i.status === 'PENDING').length;
   const pendingRechargesCount = initialRecharges.filter(r => r.status === 'PENDING').length;
 
+  // 1:1 문의 필터링 적용
+  const filteredInquiries = initialInquiries.filter((inq) => {
+    if (showOnlyPendingInquiry && inq.status !== 'PENDING') return false;
+    
+    if (inquirySearchKeyword.trim()) {
+      const keyword = inquirySearchKeyword.toLowerCase();
+      const matchNickname = inq.userNickname.toLowerCase().includes(keyword);
+      const matchEmail = inq.userEmail.toLowerCase().includes(keyword);
+      const matchTitle = inq.title.toLowerCase().includes(keyword);
+      const matchCategory = inq.category.toLowerCase().includes(keyword);
+      if (!matchNickname && !matchEmail && !matchTitle && !matchCategory) return false;
+    }
+
+    if (inquiryStartDate) {
+      const start = new Date(inquiryStartDate);
+      start.setHours(0, 0, 0, 0);
+      if (new Date(inq.createdAt) < start) return false;
+    }
+    if (inquiryEndDate) {
+      const end = new Date(inquiryEndDate);
+      end.setHours(23, 59, 59, 999);
+      if (new Date(inq.createdAt) > end) return false;
+    }
+
+    return true;
+  });
+
+  // 무통장 신청 필터링 적용
+  const filteredRecharges = initialRecharges.filter((rec) => {
+    if (showOnlyPendingRecharge && rec.status !== 'PENDING') return false;
+
+    if (rechargeSearchKeyword.trim()) {
+      const keyword = rechargeSearchKeyword.toLowerCase();
+      const matchNickname = rec.userNickname.toLowerCase().includes(keyword);
+      const matchEmail = rec.userEmail.toLowerCase().includes(keyword);
+      const matchDepositor = rec.depositorName.toLowerCase().includes(keyword);
+      if (!matchNickname && !matchEmail && !matchDepositor) return false;
+    }
+
+    if (rechargeStartDate) {
+      const start = new Date(rechargeStartDate);
+      start.setHours(0, 0, 0, 0);
+      if (new Date(rec.createdAt) < start) return false;
+    }
+    if (rechargeEndDate) {
+      const end = new Date(rechargeEndDate);
+      end.setHours(23, 59, 59, 999);
+      if (new Date(rec.createdAt) > end) return false;
+    }
+
+    return true;
+  });
+
   return (
     <div className="w-full space-y-4">
       {/* 1. 최상단 앱 바 */}
@@ -266,16 +331,80 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
         <div className="space-y-3">
           <div className="text-[11px] font-bold text-gray-500 flex justify-between px-1">
             <span>문의 답변 리스트</span>
-            <span>대기: {pendingInquiriesCount}건 / 완료: {initialInquiries.length - pendingInquiriesCount}건</span>
+            <span>대기: {pendingInquiriesCount}건 / 검색결과: {filteredInquiries.length}건</span>
           </div>
 
-          {initialInquiries.length === 0 ? (
-            <div className="bg-gray-900/40 border border-gray-800 rounded-xl p-8 text-center text-xs text-gray-500">
-              접수된 문의 내역이 없습니다.
+          {/* 1:1 문의 검색 및 필터 바 */}
+          <div className="bg-gray-900/40 border border-gray-850 p-3.5 rounded-xl flex flex-col gap-3">
+            <div className="flex flex-col md:flex-row gap-2.5 items-stretch md:items-center justify-between">
+              {/* 왼쪽: 검색어 입력 및 날짜 범위 */}
+              <div className="flex flex-1 flex-wrap gap-2 items-center">
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search className="w-3.5 h-3.5 text-gray-600 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="제목, ID, 닉네임, 카테고리 검색..."
+                    value={inquirySearchKeyword}
+                    onChange={(e) => setInquirySearchKeyword(e.target.value)}
+                    className="w-full h-9 pl-9 pr-3 bg-gray-950 border border-gray-800 text-xs text-white rounded-lg placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  <input
+                    type="date"
+                    value={inquiryStartDate}
+                    onChange={(e) => setInquiryStartDate(e.target.value)}
+                    className="h-9 px-2 bg-gray-950 border border-gray-800 text-xs text-white rounded-lg focus:outline-none focus:border-blue-500 font-sans"
+                  />
+                  <span className="text-gray-600 text-xs">~</span>
+                  <input
+                    type="date"
+                    value={inquiryEndDate}
+                    onChange={(e) => setInquiryEndDate(e.target.value)}
+                    className="h-9 px-2 bg-gray-950 border border-gray-800 text-xs text-white rounded-lg focus:outline-none focus:border-blue-500 font-sans"
+                  />
+                </div>
+              </div>
+
+              {/* 오른쪽: 필터 및 초기화 버튼 */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setShowOnlyPendingInquiry(!showOnlyPendingInquiry)}
+                  className={`h-9 px-3 text-xs font-bold rounded-lg border transition-all flex items-center gap-1.5 ${
+                    showOnlyPendingInquiry
+                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                      : 'bg-gray-950 text-gray-500 border-gray-850 hover:text-white'
+                  }`}
+                >
+                  <Clock className="w-3.5 h-3.5" />
+                  답변 대기만 보기
+                </button>
+
+                {(inquirySearchKeyword || inquiryStartDate || inquiryEndDate || showOnlyPendingInquiry) && (
+                  <button
+                    onClick={() => {
+                      setInquirySearchKeyword('');
+                      setInquiryStartDate('');
+                      setInquiryEndDate('');
+                      setShowOnlyPendingInquiry(false);
+                    }}
+                    className="h-9 px-2.5 bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 font-bold rounded-lg transition-all"
+                  >
+                    초기화
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {filteredInquiries.length === 0 ? (
+            <div className="bg-gray-900/40 border border-gray-850 rounded-xl p-8 text-center text-xs text-gray-500">
+              검색 조건에 일치하는 문의 내역이 없습니다.
             </div>
           ) : (
             <div className="space-y-3">
-              {initialInquiries.map((inq) => {
+              {filteredInquiries.map((inq) => {
                 const isExpanded = expandedInquiryId === inq.id;
                 const isLoading = actionLoadingId === inq.id;
 
@@ -370,16 +499,80 @@ export default function CsDashboardClient({ initialInquiries, initialRecharges, 
         <div className="space-y-3">
           <div className="text-[11px] font-bold text-gray-500 flex justify-between px-1">
             <span>무통장 충전 요청 목록 (최신순)</span>
-            <span>대기: {pendingRechargesCount}건</span>
+            <span>대기: {pendingRechargesCount}건 / 검색결과: {filteredRecharges.length}건</span>
           </div>
 
-          {initialRecharges.length === 0 ? (
-            <div className="bg-gray-900/40 border border-gray-800 rounded-xl p-8 text-center text-xs text-gray-500">
-              접수된 무통장 입금 충전 신청이 없습니다.
+          {/* 무통장 검색 및 필터 바 */}
+          <div className="bg-gray-900/40 border border-gray-850 p-3.5 rounded-xl flex flex-col gap-3">
+            <div className="flex flex-col md:flex-row gap-2.5 items-stretch md:items-center justify-between">
+              {/* 왼쪽: 검색어 입력 및 날짜 범위 */}
+              <div className="flex flex-1 flex-wrap gap-2 items-center">
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search className="w-3.5 h-3.5 text-gray-600 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="입금자 실명, ID, 닉네임 검색..."
+                    value={rechargeSearchKeyword}
+                    onChange={(e) => setRechargeSearchKeyword(e.target.value)}
+                    className="w-full h-9 pl-9 pr-3 bg-gray-950 border border-gray-800 text-xs text-white rounded-lg placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  <input
+                    type="date"
+                    value={rechargeStartDate}
+                    onChange={(e) => setRechargeStartDate(e.target.value)}
+                    className="h-9 px-2 bg-gray-950 border border-gray-800 text-xs text-white rounded-lg focus:outline-none focus:border-blue-500 font-sans"
+                  />
+                  <span className="text-gray-600 text-xs">~</span>
+                  <input
+                    type="date"
+                    value={rechargeEndDate}
+                    onChange={(e) => setRechargeEndDate(e.target.value)}
+                    className="h-9 px-2 bg-gray-950 border border-gray-800 text-xs text-white rounded-lg focus:outline-none focus:border-blue-500 font-sans"
+                  />
+                </div>
+              </div>
+
+              {/* 오른쪽: 필터 및 초기화 버튼 */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setShowOnlyPendingRecharge(!showOnlyPendingRecharge)}
+                  className={`h-9 px-3 text-xs font-bold rounded-lg border transition-all flex items-center gap-1.5 ${
+                    showOnlyPendingRecharge
+                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                      : 'bg-gray-950 text-gray-500 border-gray-850 hover:text-white'
+                  }`}
+                >
+                  <Clock className="w-3.5 h-3.5" />
+                  승인 대기만 보기
+                </button>
+
+                {(rechargeSearchKeyword || rechargeStartDate || rechargeEndDate || showOnlyPendingRecharge) && (
+                  <button
+                    onClick={() => {
+                      setRechargeSearchKeyword('');
+                      setRechargeStartDate('');
+                      setRechargeEndDate('');
+                      setShowOnlyPendingRecharge(false);
+                    }}
+                    className="h-9 px-2.5 bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 font-bold rounded-lg transition-all"
+                  >
+                    초기화
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {filteredRecharges.length === 0 ? (
+            <div className="bg-gray-900/40 border border-gray-850 rounded-xl p-8 text-center text-xs text-gray-500">
+              검색 조건에 일치하는 충전 신청이 없습니다.
             </div>
           ) : (
             <div className="space-y-3">
-              {initialRecharges.map((rec) => {
+              {filteredRecharges.map((rec) => {
                 const isLoading = actionLoadingId === rec.id;
 
                 return (
