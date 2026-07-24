@@ -25,6 +25,13 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
     const [autoReplyText, setAutoReplyText] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
 
+    // 커스텀 알럿 상태
+    const [customAlert, setCustomAlert] = useState<{ isOpen: boolean; message: string }>({ isOpen: false, message: '' });
+
+    const showAlert = (message: string) => {
+        setCustomAlert({ isOpen: true, message });
+    };
+
     // 계좌 문의 선행 여부 체크 (새로고침 시 유지되도록 sessionStorage 활용)
     const [hasInquiredAccount, setHasInquiredAccount] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -43,25 +50,25 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
         e.preventDefault();
         
         if (!isBusinessVerified) {
-            alert('사업자 또는 본인인증이 완료된 회원만 포인트 충전을 신청할 수 있습니다.');
+            showAlert('사업자 또는 본인인증이 완료된 회원만 포인트 충전을 신청할 수 있습니다.');
             return;
         }
 
         if (!hasInquiredAccount) {
-            alert('보안 및 오송금 방지를 위해, 충전 신청을 하시기 전에 반드시 먼저 상단의 [1:1 계좌 문의하기] 버튼을 눌러 계좌번호를 안내받으셔야 합니다.');
+            showAlert('보안 및 오송금 방지를 위해, 충전 신청을 하시기 전에 반드시 먼저 상단의 [1:1 계좌 문의하기] 버튼을 눌러 계좌번호를 안내받으셔야 합니다.');
             return;
         }
         
         const finalAmount = amount === 'custom' ? customAmount : amount;
         
         if (!finalAmount || !depositorName.trim()) {
-            alert('충전 금액과 입금자명을 모두 입력해주세요.');
+            showAlert('충전 금액과 입금자명을 모두 입력해주세요.');
             return;
         }
 
         const numericAmount = parseInt(finalAmount, 10);
         if (isNaN(numericAmount) || numericAmount <= 0) {
-            alert('올바른 충전 금액을 입력해주세요.');
+            showAlert('올바른 충전 금액을 입력해주세요.');
             return;
         }
 
@@ -73,15 +80,15 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
             });
 
             if (res.success) {
-                alert('충전 신청이 완료되었습니다.\n담당자 확인 후 1영업일 이내 포인트가 지급됩니다.');
+                showAlert('충전 신청이 완료되었습니다.\n담당자 확인 후 1영업일 이내 포인트가 지급됩니다.');
                 setAmount('');
                 setCustomAmount('');
             } else {
-                alert(`신청 실패: ${res.message}`);
+                showAlert(`신청 실패: ${res.message}`);
             }
         } catch (error) {
             console.error('충전 신청 에러:', error);
-            alert('오류가 발생했습니다. 다시 시도해주세요.');
+            showAlert('오류가 발생했습니다. 다시 시도해주세요.');
         } finally {
             setIsSubmitting(false);
         }
@@ -91,7 +98,7 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
     const handleSendInquiry = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!inquiryTitle.trim() || !inquiryContent.trim()) {
-            alert('문의 제목과 내용을 입력해 주세요.');
+            showAlert('문의 제목과 내용을 입력해 주세요.');
             return;
         }
 
@@ -117,11 +124,11 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                     setAutoReplyText('문의가 등록되었습니다. 담당자가 순차적으로 답변을 남겨 드리겠습니다.');
                 }
             } else {
-                alert(res.message || '문의 등록에 실패했습니다.');
+                showAlert(res.message || '문의 등록에 실패했습니다.');
             }
         } catch (err) {
             console.error('문의 전송 오류:', err);
-            alert('오류가 발생했습니다. 다시 시도해 주세요.');
+            showAlert('오류가 발생했습니다. 다시 시도해 주세요.');
         } finally {
             setIsSendingInquiry(false);
         }
@@ -372,6 +379,28 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                                 </div>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 화면 중앙 커스텀 알럿 모달 [NEW] */}
+            {customAlert.isOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-[999] flex items-center justify-center p-4 animate-in fade-in duration-250">
+                    <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+                        <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-2xl font-black mb-3">
+                            ⚠️
+                        </div>
+                        <h4 className="font-black text-[15px] text-gray-900">안내</h4>
+                        <p className="text-[13px] text-gray-650 mt-2.5 font-medium leading-relaxed whitespace-pre-line">
+                            {customAlert.message}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => setCustomAlert({ isOpen: false, message: '' })}
+                            className="mt-5 w-full h-11 bg-gray-950 hover:bg-black text-white text-[13px] font-black rounded-xl shadow active:scale-95 transition-all"
+                        >
+                            확인
+                        </button>
                     </div>
                 </div>
             )}
