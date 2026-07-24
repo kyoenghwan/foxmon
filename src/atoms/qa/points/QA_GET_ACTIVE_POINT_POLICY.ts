@@ -31,7 +31,7 @@ export const QA_GET_ACTIVE_POINT_POLICY = async (): Promise<{ success: boolean; 
       data: {
         firstChargeBonusRatio: 0.5,
         maxFirstBonus: 300000,
-        refundFeeRatio: 0.1,
+        refundFeeRatio: 0,
         refundDivisor: 1.5
       },
       error: error.message
@@ -47,7 +47,7 @@ export const QA_GET_ACTIVE_POINT_POLICY = async (): Promise<{ success: boolean; 
   const result = {
     firstChargeBonusRatio: getPolicyValue('FIRST_CHARGE_BONUS_RATIO', 0.5),
     maxFirstBonus: getPolicyValue('MAX_FIRST_CHARGE_BONUS', 300000),
-    refundFeeRatio: getPolicyValue('REFUND_FEE_RATIO', 0.1),
+    refundFeeRatio: getPolicyValue('REFUND_FEE_RATIO', 0),
     refundDivisor: getPolicyValue('REFUND_DIVISOR', 1.5)
   };
 
