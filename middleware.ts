@@ -80,16 +80,18 @@ export default auth((req) => {
         return NextResponse.redirect(new URL('/', nextUrl));
     }
 
+    const isCsPath = nextUrl.pathname.startsWith('/cs');
+
     // 1.5 Global Authentication Check (Strict Private Mode as requested by user)
-    // 로그인이 안 된 상태면 무조건 /login으로 리다이렉트 (회원가입, 로그인, 정적 파일, 홈페이지 제외)
-    if (!session?.user && !hasGuestSession && !isLoginPage && !isRegisterPage && !isPublicStatic && !isHomePage && !isFindAccountPage && !isResetPasswordPage && !isRenderBannersPage) {
+    // 로그인이 안 된 상태면 무조건 /login으로 리다이렉트 (회원가입, 로그인, 정적 파일, 홈페이지 및 CS 전용 터미널 제외)
+    if (!session?.user && !hasGuestSession && !isLoginPage && !isRegisterPage && !isPublicStatic && !isHomePage && !isFindAccountPage && !isResetPasswordPage && !isRenderBannersPage && !isCsPath) {
         const loginUrl = new URL('/login', nextUrl);
         loginUrl.searchParams.set('message', 'login_required');
         return NextResponse.redirect(loginUrl);
     }
  
-    // 2. Age Gate Check (Redirect all unverified users to /age-gate EXCEPT if they are trying to login, or access SEO/public pages)
-    if (!isAgeVerified && !isAgeGatePage && !isLoginPage && !isRegisterPage && !isSeoPath && !isPublicStatic && !isAdminPath && !isFindAccountPage && !isResetPasswordPage && !isRenderBannersPage) {
+    // 2. Age Gate Check (Redirect all unverified users to /age-gate EXCEPT if they are trying to login, or access SEO/public pages, or CS terminal)
+    if (!isAgeVerified && !isAgeGatePage && !isLoginPage && !isRegisterPage && !isSeoPath && !isPublicStatic && !isAdminPath && !isFindAccountPage && !isResetPasswordPage && !isRenderBannersPage && !isCsPath) {
         return NextResponse.redirect(new URL('/age-gate', nextUrl));
     }
  
