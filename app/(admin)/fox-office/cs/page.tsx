@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase';
-import CsDashboardClient from './CsDashboardClient';
+import CsDashboardClient from '@/app/(admin)/fox-office/cs/CsDashboardClient';
 
 export const dynamic = 'force-dynamic';
 
