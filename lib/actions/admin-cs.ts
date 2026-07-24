@@ -375,3 +375,66 @@ export async function getCsTemplates(): Promise<{ success: boolean; templates: A
     return { success: true, templates: fallbacks };
   }
 }
+
+/**
+ * CS 답변 템플릿 추가
+ */
+export async function addCsTemplate(payload: { title: string; content: string; category: string; inquiry_category?: string }): Promise<{ success: boolean; message: string }> {
+  const adminCheck = await verifyAdminPermission();
+  if (!adminCheck.success) {
+    return { success: false, message: '관리자 권한이 없습니다.' };
+  }
+
+  const { title, content, category, inquiry_category } = payload;
+  if (!title?.trim() || !content?.trim() || !category?.trim()) {
+    return { success: false, message: '제목, 내용, 카테고리는 필수 입력 항목입니다.' };
+  }
+
+  try {
+    const { error } = await supabaseAdmin
+      .from('cs_templates')
+      .insert({
+        title: title.trim(),
+        content: content.trim(),
+        category: category.trim(),
+        inquiry_category: inquiry_category?.trim() || null
+      });
+
+    if (error) throw error;
+    revalidatePath('/cs');
+    revalidatePath('/fox-office/support/staff');
+    return { success: true, message: '템플릿이 성공적으로 등록되었습니다.' };
+  } catch (err: any) {
+    nvLog('FW', '❌ 템플릿 등록 실패', err.message);
+    return { success: false, message: `템플릿 등록 중 오류가 발생했습니다. (${err.message})` };
+  }
+}
+
+/**
+ * CS 답변 템플릿 삭제
+ */
+export async function deleteCsTemplate(templateId: string): Promise<{ success: boolean; message: string }> {
+  const adminCheck = await verifyAdminPermission();
+  if (!adminCheck.success) {
+    return { success: false, message: '관리자 권한이 없습니다.' };
+  }
+
+  if (!templateId) {
+    return { success: false, message: '템플릿 ID가 누락되었습니다.' };
+  }
+
+  try {
+    const { error } = await supabaseAdmin
+      .from('cs_templates')
+      .delete()
+      .eq('id', templateId);
+
+    if (error) throw error;
+    revalidatePath('/cs');
+    revalidatePath('/fox-office/support/staff');
+    return { success: true, message: '템플릿이 삭제되었습니다.' };
+  } catch (err: any) {
+    nvLog('FW', '❌ 템플릿 삭제 실패', err.message);
+    return { success: false, message: `템플릿 삭제 중 오류가 발생했습니다. (${err.message})` };
+  }
+}

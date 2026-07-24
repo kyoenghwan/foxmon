@@ -7,6 +7,7 @@ import { isSupabaseServiceRoleConfigured, supabaseAdmin } from "@/lib/supabase";
 import { getSiteSettings, updateSiteSettings } from "@/actions/admin/siteSettings";
 import { updateUserStaffTeam } from "@/actions/admin/staffTeams";
 import DeviceManager from "@/src/components/admin/DeviceManager";
+import { addCsTemplate, deleteCsTemplate } from "@/lib/actions/admin-cs";
 import {
   parseCsSettings,
   csSettingsToPayload,
@@ -52,13 +53,17 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
     redirect("/");
   }
 
-  const [usersRes, settingsRes, devicesRes] = await Promise.all([
+  const [usersRes, settingsRes, devicesRes, templatesRes] = await Promise.all([
     QA_GET_SUPPORT_STAFF_USERS(),
     getSiteSettings(),
     supabaseAdmin
       .from('cs_approved_devices')
       .select('*')
       .order('created_at', { ascending: false }),
+    supabaseAdmin
+      .from('cs_templates')
+      .select('*')
+      .order('created_at', { ascending: true }),
   ]);
   const staffUsers = usersRes.success ? ((usersRes.data as unknown) as AdminUserRow[]) : [];
   const usersFetchError = usersRes.success ? null : usersRes.error;
@@ -67,6 +72,7 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
   const primaryCsAdminUserId = settings?.cs_admin_user_id || "";
   const csSettings = parseCsSettings(settings);
   const devices = devicesRes.data || [];
+  const templates = templatesRes.data || [];
   const dayOptions = [
     { v: 1, l: "월" },
     { v: 2, l: "화" },
@@ -152,6 +158,38 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
       );
     }
     redirect("/fox-office/support/staff?type=ok&msg=" + encodeURIComponent("업무시간·응대 메시지가 저장되었습니다."));
+  }
+
+  async function handleAddTemplate(formData: FormData) {
+    "use server";
+    const title = String(formData.get("title") || "").trim();
+    const content = String(formData.get("content") || "").trim();
+    const category = String(formData.get("category") || "GENERAL").trim();
+    const inquiry_category = String(formData.get("inquiry_category") || "").trim();
+
+    if (!title || !content) {
+      redirect("/fox-office/support/staff?type=error&msg=" + encodeURIComponent("제목과 내용을 입력해 주세요."));
+    }
+
+    const { success, message } = await addCsTemplate({ title, content, category, inquiry_category });
+    if (success) {
+      redirect("/fox-office/support/staff?type=ok&msg=" + encodeURIComponent("템플릿이 성공적으로 저장되었습니다."));
+    } else {
+      redirect("/fox-office/support/staff?type=error&msg=" + encodeURIComponent(message));
+    }
+  }
+
+  async function handleDeleteTemplate(formData: FormData) {
+    "use server";
+    const templateId = String(formData.get("template_id") || "").trim();
+    if (!templateId) return;
+
+    const { success, message } = await deleteCsTemplate(templateId);
+    if (success) {
+      redirect("/fox-office/support/staff?type=ok&msg=" + encodeURIComponent("템플릿이 정상적으로 삭제되었습니다."));
+    } else {
+      redirect("/fox-office/support/staff?type=error&msg=" + encodeURIComponent(message));
+    }
   }
 
   return (
@@ -465,6 +503,141 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
             업무시간·메시지·자동봇 저장
           </button>
         </form>
+      </div>
+
+      {/* 자주 쓰는 답변 템플릿 관리 영역 [NEW] */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-5">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="w-5 h-5 text-primary" />
+          <h3 className="font-black text-gray-900">고객센터 자주 쓰는 답변 관리</h3>
+        </div>
+        <p className="text-[12px] text-gray-500 font-medium -mt-2">
+          반려 사유 입력 모달 및 1:1 문의 답변란에서 마우스 클릭 한 번으로 자동 입력할 수 있는 템플릿 문구를 관리합니다.
+        </p>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 등록 폼 */}
+          <div className="lg:col-span-1 border border-gray-100 rounded-2xl p-4 bg-gray-50/50 space-y-4">
+            <h4 className="font-black text-[13px] text-gray-800">새 템플릿 등록</h4>
+            <form action={handleAddTemplate} className="space-y-3.5">
+              <div>
+                <label className="block text-[11px] font-black text-gray-600 mb-1">구분 제목</label>
+                <input
+                  type="text"
+                  name="title"
+                  required
+                  placeholder="예: 입금자명 불일치 반려"
+                  className="w-full h-10 px-3 border border-gray-200 rounded-xl text-[13px] font-bold bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black text-gray-600 mb-1">용도 분류</label>
+                <select
+                  name="category"
+                  className="w-full h-10 px-3 border border-gray-200 rounded-xl text-[13px] font-bold bg-white"
+                >
+                  <option value="RECHARGE_REJECT">무통장 충전 반려용</option>
+                  <option value="INQUIRY_REPLY">1:1 문의 답변용</option>
+                  <option value="GENERAL">공통 답변용</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black text-gray-600 mb-1">1:1 문의 카테고리 매핑 (선택)</label>
+                <select
+                  name="inquiry_category"
+                  className="w-full h-10 px-3 border border-gray-200 rounded-xl text-[13px] font-bold bg-white"
+                >
+                  <option value="">(전체/없음)</option>
+                  <option value="계좌 문의">계좌 문의</option>
+                  <option value="포인트·환불">포인트·환불</option>
+                  <option value="회원정보/인증">회원정보/인증</option>
+                  <option value="광고/배너">광고/배너</option>
+                  <option value="기타">기타</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black text-gray-600 mb-1">자주 쓰는 내용</label>
+                <textarea
+                  name="content"
+                  required
+                  rows={6}
+                  placeholder="클릭 시 자동으로 입력될 친절한 매크로 답변 본문을 입력하세요."
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-[13px] font-medium resize-y bg-white"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full h-11 rounded-xl bg-gray-900 hover:bg-black text-white font-black text-[13px] shadow transition"
+              >
+                새 템플릿 등록
+              </button>
+            </form>
+          </div>
+
+          {/* 목록 테이블 */}
+          <div className="lg:col-span-2 overflow-x-auto border border-gray-100 rounded-2xl">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-[#f8f9fa] border-b border-gray-100 text-[12px] font-bold text-gray-600">
+                <tr>
+                  <th className="p-3">제목</th>
+                  <th className="p-3">용도</th>
+                  <th className="p-3">매핑 카테고리</th>
+                  <th className="p-3">내용 요약</th>
+                  <th className="p-3">관리</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 text-[13px]">
+                {templates.map((t: any) => (
+                  <tr key={t.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="p-3 font-black text-gray-900">{t.title}</td>
+                    <td className="p-3">
+                      <span className={`px-2 py-0.5 text-[11px] font-bold rounded ${
+                        t.category === 'RECHARGE_REJECT' ? 'bg-red-50 text-red-700' :
+                        t.category === 'INQUIRY_REPLY' ? 'bg-blue-50 text-blue-700' :
+                        'bg-gray-50 text-gray-700'
+                      }`}>
+                        {t.category === 'RECHARGE_REJECT' ? '무통장 반려' :
+                         t.category === 'INQUIRY_REPLY' ? '1:1 답변' : '공통'}
+                      </span>
+                    </td>
+                    <td className="p-3 text-gray-600 font-medium">
+                      {t.inquiry_category || '-'}
+                    </td>
+                    <td className="p-3 text-gray-500 font-medium max-w-[200px] truncate">
+                      {t.content}
+                    </td>
+                    <td className="p-3">
+                      <form action={handleDeleteTemplate} onSubmit={(e) => {
+                        if(!confirm('정말로 이 답변 템플릿을 삭제하시겠습니까?')) {
+                          e.preventDefault();
+                        }
+                      }}>
+                        <input type="hidden" name="template_id" value={t.id} />
+                        <button
+                          type="submit"
+                          className="px-2.5 py-1 text-[12px] font-bold text-red-600 hover:bg-red-50 rounded-lg transition"
+                        >
+                          삭제
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                ))}
+                {templates.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-10 text-center text-gray-400 font-medium">
+                      등록된 자주 쓰는 답변 템플릿이 없습니다.
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       {/* CS 기기 승인 관리 영역 신설 */}
