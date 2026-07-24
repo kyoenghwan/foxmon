@@ -168,45 +168,53 @@ export function CsMessengerPanel({ csAdminUserId, compact, onCustomerMessage }: 
   useEffect(() => {
     if (!selectedId) return;
 
+    // Supabase Realtime 필터링 버그를 원천 차단하기 위해 
+    // 테이블 전체의 INSERT 이벤트를 구독하고 자바스크립트 단에서 selectedId 일치 여부를 검사합니다.
     const channel = supabase
-      .channel(`cs-panel:${selectedId}`)
+      .channel(`cs-panel-msgs:${selectedId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'foxtalk_messages',
-          filter: `room_id=eq.${selectedId}`,
         },
         async (payload) => {
-          const row = payload.new as CsMessage;
-          let participant = null;
-          if (row.participant_id) {
-            const { data: p } = await supabase
-              .from('foxtalk_participants')
-              .select('*')
-              .eq('id', row.participant_id)
-              .single();
-            participant = p;
+          const row = payload.new as any;
+          
+          // 현재 선택된 활성화 방의 메시지일 경우에만 실시간 대화창 최신화
+          if (row.room_id === selectedId) {
+            // 전체 메시지 조인 쿼리 재로드 실행
+            void loadMessages(selectedId);
+
+            // 고객 메시지인지 체크 (participant_id의 session_id가 csAdminUserId와 다를 경우)
+            let isCustomer = true;
+            if (row.participant_id) {
+              const { data: participant } = await supabase
+                .from('foxtalk_participants')
+                .select('session_id')
+                .eq('id', row.participant_id)
+                .maybeSingle();
+              if (participant && participant.session_id === csAdminUserId) {
+                isCustomer = false;
+              }
+            }
+
+            if (isCustomer) {
+              onCustomerMessage?.();
+              void markCsRoomRead(selectedId, csAdminUserId).then(() => refreshRooms(appliedFilters));
+            } else {
+              void refreshRooms(appliedFilters);
+            }
           }
-          const isCustomer = participant?.session_id !== csAdminUserId;
-          if (isCustomer) {
-            onCustomerMessage?.();
-            void markCsRoomRead(selectedId, csAdminUserId).then(() => refreshRooms(appliedFilters));
-          }
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === row.id)) return prev;
-            return [...prev, { ...row, participant }];
-          });
-          void refreshRooms(appliedFilters);
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
-  }, [selectedId, csAdminUserId, refreshRooms, onCustomerMessage, appliedFilters]);
+  }, [selectedId, csAdminUserId, loadMessages, refreshRooms, onCustomerMessage, appliedFilters]);
 
   const contentQuery = appliedFilters.content || '';
   const displayMessages = useMemo(() => {
