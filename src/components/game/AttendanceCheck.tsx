@@ -14,6 +14,8 @@ export default function AttendanceCheck({ isPlayedToday, activityPoints, onPlayS
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [checkedDates, setCheckedDates] = useState<string[]>([]);
+  const [isFetchLoading, setIsFetchLoading] = useState(true);
 
   // 달력 렌더링에 필요한 날짜 정보
   const today = new Date();
@@ -30,6 +32,24 @@ export default function AttendanceCheck({ isPlayedToday, activityPoints, onPlayS
 
   const calendarDays: Array<{ date: number; isCurrentMonth: boolean; isToday: boolean; isChecked: boolean }> = [];
 
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const monthStr = (month + 1).toString().padStart(2, '0');
+        const res = await fetch(`/api/attendance?year=${year}&month=${monthStr}`);
+        const json = await res.json();
+        if (json.success && json.dates) {
+          setCheckedDates(json.dates);
+        }
+      } catch (err) {
+        console.error('출석 현황 로드 에러', err);
+      } finally {
+        setIsFetchLoading(false);
+      }
+    };
+    fetchLogs();
+  }, [year, month]);
+
   // 1. 이전 달 날짜들로 빈 칸 채우기
   for (let i = firstDayIndex - 1; i >= 0; i--) {
     calendarDays.push({
@@ -41,10 +61,11 @@ export default function AttendanceCheck({ isPlayedToday, activityPoints, onPlayS
   }
 
   // 2. 이번 달 날짜들 채우기
+  const monthStr = (month + 1).toString().padStart(2, '0');
   for (let i = 1; i <= totalDays; i++) {
     const isToday = i === currentDate;
-    // 오늘이고 오늘 출석완료했다면 checked로 표시
-    const isChecked = (i < currentDate) || (isToday && isPlayedToday);
+    const dateStr = `${year}-${monthStr}-${i.toString().padStart(2, '0')}`;
+    const isChecked = checkedDates.includes(dateStr);
     calendarDays.push({
       date: i,
       isCurrentMonth: true,
@@ -71,10 +92,9 @@ export default function AttendanceCheck({ isPlayedToday, activityPoints, onPlayS
     setSuccessMsg(null);
 
     try {
-      const res = await fetch('/api/game/play', {
+      const res = await fetch('/api/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gameType: 'ATTENDANCE' }),
       });
 
       const json = await res.json();
@@ -82,8 +102,12 @@ export default function AttendanceCheck({ isPlayedToday, activityPoints, onPlayS
         throw new Error(json.message || '출석체크 진행 중 오류가 발생했습니다.');
       }
 
-      const { rewardAmount, balanceAfter } = json.data;
-      setSuccessMsg(`🎉 금일 출석체크가 정상 완료되었습니다! 100포인트가 적립되었습니다.`);
+      const { rewardAmount, balanceAfter, message } = json;
+      setSuccessMsg(`🎉 ${message}`);
+      
+      const kstTodayStr = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+      setCheckedDates(prev => prev.includes(kstTodayStr) ? prev : [...prev, kstTodayStr]);
+
       onPlaySuccess(rewardAmount, balanceAfter, true);
     } catch (err: any) {
       setError(err.message || '오류가 발생했습니다.');

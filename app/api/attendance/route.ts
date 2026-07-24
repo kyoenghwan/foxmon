@@ -91,6 +91,20 @@ export async function POST(req: Request) {
       });
     }
 
+    // 2-2. 게임 참여 로그(user_game_logs)에도 저장하여 대시보드 상태와 동기화
+    try {
+      await supabaseAdmin
+        .from('user_game_logs')
+        .insert({
+          user_id: userId,
+          game_type: 'ATTENDANCE',
+          participation_date: kstDateStr,
+          reward_amount: 100
+        });
+    } catch (logErr: any) {
+      nvLog('FW', '⚠️ user_game_logs 저장 중 에러 (무시)', logErr.message);
+    }
+
     // 3. 연속 출석체크 (Streak) 연산 및 추가 보너스 적립
     let streakMessage = '';
     let finalBalance = rpcResult.balance_after;
