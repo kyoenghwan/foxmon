@@ -12,6 +12,8 @@ export default function AdminSettingsPage() {
         openai_api_key: '',
         telegram_bot_token: '',
         telegram_bot_username: '',
+        telegram_cs_bot_token: '',
+        telegram_cs_bot_username: '',
         naver_map_client_id: '',
         naver_map_client_secret: '',
         data_go_kr_api_key: '',
@@ -24,6 +26,7 @@ export default function AdminSettingsPage() {
     // Toggle States for passwords
     const [showApiKey, setShowApiKey] = useState(false);
     const [showTelegramToken, setShowTelegramToken] = useState(false);
+    const [showTelegramCsToken, setShowTelegramCsToken] = useState(false);
     const [showDataGoKrKey, setShowDataGoKrKey] = useState(false);
 
     useEffect(() => {
@@ -34,6 +37,8 @@ export default function AdminSettingsPage() {
                     openai_api_key: data.openai_api_key || '',
                     telegram_bot_token: data.telegram_bot_token || '',
                     telegram_bot_username: data.telegram_bot_username || '',
+                    telegram_cs_bot_token: data.telegram_cs_bot_token || '',
+                    telegram_cs_bot_username: data.telegram_cs_bot_username || '',
                     naver_map_client_id: data.naver_map_client_id || '',
                     naver_map_client_secret: data.naver_map_client_secret || '',
                     data_go_kr_api_key: data.data_go_kr_api_key || '',
@@ -137,7 +142,7 @@ export default function AdminSettingsPage() {
 
                     {/* Telegram Bot Token 설정 */}
                     <div>
-                        <label className="block text-[14px] font-bold text-gray-800 mb-2">Telegram Bot Token & Username</label>
+                        <label className="block text-[14px] font-bold text-gray-800 mb-2">Telegram Bot Token & Username (일반 알림용)</label>
                         <div className="flex flex-col gap-3">
                             <input
                                 type="text"
@@ -166,6 +171,42 @@ export default function AdminSettingsPage() {
                         <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
                             <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                             텔레그램 BotFather에서 발급받은 봇 아이디와 토큰을 입력하세요. 사장님 푸시 알림 전송에 사용됩니다.
+                        </p>
+                    </div>
+
+                    <hr className="border-gray-100" />
+
+                    {/* Telegram CS Bot Token 설정 [NEW] */}
+                    <div>
+                        <label className="block text-[14px] font-bold text-gray-800 mb-2">Telegram CS Bot Token & Username (고객센터 전용)</label>
+                        <div className="flex flex-col gap-3">
+                            <input
+                                type="text"
+                                value={settings.telegram_cs_bot_username}
+                                onChange={(e) => setSettings({ ...settings, telegram_cs_bot_username: e.target.value })}
+                                placeholder="CS 봇 아이디 (예: @foxmon_cs_bot)"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight"
+                            />
+                            <div className="relative">
+                                <input
+                                    type={showTelegramCsToken ? "text" : "password"}
+                                    value={settings.telegram_cs_bot_token}
+                                    onChange={(e) => setSettings({ ...settings, telegram_cs_bot_token: e.target.value })}
+                                    placeholder="HTTP API Token (예: 8665942271:AAHPnfSabu3lU_zCe825IJ6uKGVXx-z39LM)"
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono tracking-tight pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTelegramCsToken(!showTelegramCsToken)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    {showTelegramCsToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
+                        </div>
+                        <p className="text-[12px] text-gray-500 flex items-start gap-1 mt-2">
+                            <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                            1:1 고객 문의 접수 시 관리자 답변 알림 및 신규 기기 등록 신청이 있을 때 알림 전송에 사용되는 CS 전용 봇 토큰과 아이디입니다.
                         </p>
                     </div>
 
