@@ -15,6 +15,7 @@ import {
   DEFAULT_CS_SETTINGS,
 } from "@/lib/cs-settings";
 import { isAdminRole } from "@/lib/normalize-user-role";
+import CsFlashAlert from "./CsFlashAlert";
 
 function staffTeamLabel(v?: string | null) {
   if (v === "CS") return "고객응대";
@@ -227,6 +228,8 @@ export default async function SupportStaffManagementPage({ searchParams }: PageP
           {flashMsg}
         </div>
       ) : null}
+
+      {flashMsg && <CsFlashAlert message={flashMsg} />}
 
       {usersFetchError ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] font-bold text-red-800">
