@@ -71,7 +71,7 @@ export async function replyInquiry(payload: {
       return { success: false, message: '답변을 등록하지 못했습니다.' };
     }
 
-    revalidatePath('/fox-office/cs');
+    revalidatePath('/cs');
     return { success: true, message: '답변이 성공적으로 등록되었습니다.' };
   } catch (err: any) {
     nvLog('FW', '❌ 1:1 문의 답변 등록 오류', err.message);
@@ -136,7 +136,7 @@ export async function approveRechargeRequest(requestId: string) {
       // 포인트가 충전되었으므로 성공으로 응답을 주되 경고 기록
     }
 
-    revalidatePath('/fox-office/cs');
+    revalidatePath('/cs');
     return { 
       success: true, 
       message: `승인이 완료되었습니다. ${rechargeResult.message}` 
@@ -189,7 +189,7 @@ export async function rejectRechargeRequest(requestId: string, rejectReason?: st
       return { success: false, message: '반려 처리에 실패했습니다.' };
     }
 
-    revalidatePath('/fox-office/cs');
+    revalidatePath('/cs');
     return { success: true, message: '정상적으로 반려 처리되었습니다.' };
   } catch (err: any) {
     nvLog('FW', '❌ 충전 반려 처리 오류', err.message);

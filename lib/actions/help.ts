@@ -296,7 +296,7 @@ export async function createInquiry(input: {
 • <b>내용 요약</b>: ${content.substring(0, 150)}${content.length > 150 ? '...' : ''}
 • <b>답변 대기 여부</b>: ${isAccountInquiry ? '자동 답변완료' : '대기중 (수동 답변 필요)'}
 
-👉 <a href="${appUrl}/fox-office/cs">모바일 관리자 CS 페이지 바로가기</a>
+👉 <a href="${appUrl}/cs">모바일 관리자 CS 페이지 바로가기</a>
 `.trim();
     sendTelegramMessage(messageText).catch(e => nvLog('FW', '⚠️ 텔레그램 발송 오류', e));
 

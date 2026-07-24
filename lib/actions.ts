@@ -201,7 +201,7 @@ export async function requestPointRecharge(payload: { amount: number, depositor_
 • <b>신청금액</b>: ${payload.amount.toLocaleString()} P
 • <b>상태</b>: 승인 대기중 (PENDING)
 
-👉 <a href="${appUrl}/fox-office/cs">모바일 관리자 CS 페이지 바로가기</a>
+👉 <a href="${appUrl}/cs">모바일 관리자 CS 페이지 바로가기</a>
 `.trim();
         sendTelegramMessage(messageText).catch(e => console.error('Telegram notification error:', e));
 
