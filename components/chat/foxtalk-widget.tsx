@@ -1137,10 +1137,25 @@ export function FoxTalkWidget() {
     };
 
     // Drag Handlers
-    const [pos, setPos] = useState({ right: 24, bottom: 24 });
+    const [pos, setPos] = useState({ right: 20, bottom: 24 });
     const isDragging = useRef(false);
     const dragStart = useRef({ x: 0, y: 0, right: 0, bottom: 0 });
     const isDragMoved = useRef(false);
+
+    useEffect(() => {
+        const updatePosition = () => {
+            if (typeof window !== 'undefined' && window.innerWidth >= 1280) {
+                const sideMargin = (window.innerWidth - 1071) / 2;
+                const rightPos = Math.max(20, Math.floor(sideMargin - 140));
+                setPos(prev => ({ ...prev, right: rightPos, bottom: 24 }));
+            } else {
+                setPos(prev => ({ ...prev, right: 20, bottom: 24 }));
+            }
+        };
+        updatePosition();
+        window.addEventListener('resize', updatePosition);
+        return () => window.removeEventListener('resize', updatePosition);
+    }, []);
 
     const handlePointerDown = (e: React.PointerEvent) => {
         isDragging.current = true;

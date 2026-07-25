@@ -114,7 +114,7 @@ export function CsAgentDock() {
         onClick={() => {
           window.location.href = '/cs';
         }}
-        className="fixed z-[70] right-5 bottom-6 flex items-center gap-2 h-14 pl-4 pr-5 rounded-full bg-gray-900 text-white shadow-2xl hover:bg-black transition-all border border-gray-800"
+        className="fixed z-[70] left-5 xl:left-[calc(50%-535px-140px)] bottom-6 flex items-center gap-2 h-14 pl-4 pr-5 rounded-full bg-gray-900 text-white shadow-2xl hover:bg-black transition-all border border-gray-800 pointer-events-auto"
         aria-label="고객센터 상담 답변 페이지 이동"
       >
         <Headset className="w-5 h-5 text-primary shrink-0 animate-bounce" />
