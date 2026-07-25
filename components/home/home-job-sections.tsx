@@ -61,6 +61,7 @@ interface HomeJobSectionsProps {
         specialJobs: AdItem[];
         lineJobs: AdItem[];
         generalJobs: AdItem[];
+        seekerAds?: any[];
     };
 }
 
@@ -323,9 +324,9 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                 )}
             </section>
 
-            {/* --- Bottom Board Section --- */}
+            {/* --- Bottom Board Section (실제 DB 구인정보 & 인재정보 2컬럼 리스트) --- */}
             <section className="border-t pt-10">
-                <div className={session?.user?.role === 'VIEWER' ? "grid md:grid-cols-2 gap-6 lg:gap-8" : "grid md:grid-cols-3 gap-6 lg:gap-8"}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                     {/* 1. 구인정보 리스트 */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between pb-2 border-b-2 border-gray-900">
@@ -337,21 +338,30 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                             </Link>
                         </div>
                         <ul className="space-y-1">
-                            {[
-                                { title: '[강남] 텐프로 주간/야간 급구',  info: '월 500 보장' },
-                                { title: '[해운대] 룸싸롱 초보 환영, 숙식 제공', info: '당일 지급' },
-                                { title: '[수원] 노래주점 식구 모집합니다',  info: '시급 7만' },
-                                { title: '[인천] 하이퍼 가라오케 최고 대우', info: '협의' },
-                                { title: '[제주] 로드샵 1인샵 단기 알바', info: '숙소 제공' },
-                                { title: '[일산] 퍼블릭 주간 매니저 급구', info: '일 30 보장' }
-                            ].map((job, i) => (
-                                <li key={i} className="group border-b border-gray-100 last:border-none">
-                                    <Link href="/jobs" className="flex items-center justify-between py-2.5 hover:translate-x-1 transition-transform">
-                                        <span className="text-[13px] text-gray-700 font-medium group-hover:text-primary truncate pr-4">{job.title}</span>
-                                        <span className="text-[11px] text-[#e53e3e] font-black whitespace-nowrap shrink-0">{job.info}</span>
-                                    </Link>
-                                </li>
-                            ))}
+                            {(() => {
+                                const realJobsList = [...generalJobs, ...lineJobs, ...premiumJobs, ...specialJobs].filter(j => j.title).slice(0, 6);
+                                if (realJobsList.length === 0) {
+                                    return <li className="py-6 text-center text-gray-400 text-[13px] font-medium">등록된 구인 공고가 없습니다.</li>;
+                                }
+                                return realJobsList.map((job: any, i: number) => {
+                                    const locationTag = job.location ? `[${job.location}] ` : '';
+                                    const payInfo = job.pay_type && job.pay_amount 
+                                        ? `${job.pay_type} ${Number(job.pay_amount).toLocaleString()}` 
+                                        : (job.pay_info || '협의');
+                                    return (
+                                        <li key={job.id || i} className="group border-b border-gray-100 last:border-none">
+                                            <Link href={`/jobs/${job.id}`} className="flex items-center justify-between py-2.5 hover:translate-x-1 transition-transform">
+                                                <span className="text-[13px] text-gray-700 font-medium group-hover:text-primary truncate pr-4">
+                                                    {locationTag}{job.title}
+                                                </span>
+                                                <span className="text-[11px] text-[#e53e3e] font-black whitespace-nowrap shrink-0">
+                                                    {payInfo}
+                                                </span>
+                                            </Link>
+                                        </li>
+                                    );
+                                });
+                            })()}
                         </ul>
                     </div>
 
@@ -366,54 +376,34 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                             </Link>
                         </div>
                         <ul className="space-y-1">
-                            {[
-                                { title: '경기/서울 투잡 구합니다 (주말만)', age: '24세' },
-                                { title: '경력 3년차 분위기 잘 맞춥니다', age: '27세' },
-                                { title: '초보인데 열심히 배우겠습니다', age: '21세' },
-                                { title: '출퇴근 자유로운 곳 찾아요', age: '25세' },
-                                { title: '단기 알바(1개월 급전) 구합니다', age: '22세' }
-                            ].map((seeker, i) => (
-                                <li key={i} className="group border-b border-gray-100 last:border-none">
-                                    <Link href="/seekers" className="flex items-center justify-between py-2.5 hover:translate-x-1 transition-transform">
-                                        <span className="text-[13px] text-gray-700 font-medium group-hover:text-primary truncate pr-4">{seeker.title}</span>
-                                        <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap shrink-0">{seeker.age}</span>
-                                    </Link>
-                                </li>
-                            ))}
+                            {(() => {
+                                const realSeekersList = (initialData?.seekerAds || []).slice(0, 6);
+                                if (realSeekersList.length === 0) {
+                                    return <li className="py-6 text-center text-gray-400 text-[13px] font-medium">등록된 인재 정보가 없습니다.</li>;
+                                }
+                                return realSeekersList.map((seeker, i) => {
+                                    const title = seeker.ad_title || seeker.resumes?.title || seeker.resumes?.desired_industry || '구직 정보';
+                                    const birthYear = seeker.resumes?.birth_year || (seeker.users?.birth_date ? new Date(seeker.users.birth_date).getFullYear() : null);
+                                    const ageInfo = birthYear 
+                                        ? `${new Date().getFullYear() - Number(birthYear) + 1}세` 
+                                        : (seeker.resumes?.desired_location || '상세보기');
+
+                                    return (
+                                        <li key={seeker.id || i} className="group border-b border-gray-100 last:border-none">
+                                            <Link href={`/seekers/${seeker.id}`} className="flex items-center justify-between py-2.5 hover:translate-x-1 transition-transform">
+                                                <span className="text-[13px] text-gray-700 font-medium group-hover:text-primary truncate pr-4">
+                                                    {title}
+                                                </span>
+                                                <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap shrink-0">
+                                                    {ageInfo}
+                                                </span>
+                                            </Link>
+                                        </li>
+                                    );
+                                });
+                            })()}
                         </ul>
                     </div>
-
-                    {/* 3. 커뮤니티 리스트 */}
-                    {session?.user?.role !== 'VIEWER' && (
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between pb-2 border-b-2 border-gray-900">
-                                <h3 className="font-black text-[16px] md:text-lg uppercase tracking-tight text-gray-900 flex items-center gap-2">
-                                    💬 커뮤니티 리스트
-                                </h3>
-                                <Link href="/community" className="text-[11px] font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-0.5">
-                                    더보기 <ChevronRight className="w-3.5 h-3.5" />
-                                </Link>
-                            </div>
-                            <ul className="space-y-1">
-                                {[
-                                    { title: '오늘 강남쪽 손님 많나요?', comments: 12 },
-                                    { title: '첫 출근인데 팁 좀 알려주세요 ㅠㅠ', comments: 34 },
-                                    { title: '진상 손님 대처법 공유합니다', comments: 8 },
-                                    { title: '이쪽 일 하면서 느낀점 (장문주의)', comments: 55 }
-                                ].map((post, i) => (
-                                    <li key={i} className="group border-b border-gray-100 last:border-none">
-                                        <Link href="/community" className="flex items-center justify-between py-2.5 hover:translate-x-1 transition-transform">
-                                            <div className="flex items-center gap-2 min-w-0 pr-2">
-                                                {i === 0 && <span className="bg-primary text-black text-[8px] font-black px-1 rounded-sm leading-none py-0.5 shrink-0">HOT</span>}
-                                                <span className="text-[13px] text-gray-700 font-medium group-hover:text-primary truncate">{post.title}</span>
-                                            </div>
-                                            <span className="text-[11px] text-purple-600 font-bold whitespace-nowrap shrink-0">[{post.comments}]</span>
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
                 </div>
             </section>
         </main>
