@@ -381,9 +381,8 @@ export function FoxTalkWidget() {
                 }
             }
 
-            // roomId가 없으면 로비 열기
-            setAppState('LOBBY');
-            setLobbyTab('1ON1');
+            // roomId가 없으면 폭스톡 vs 고객센터 선택 팝업 메뉴('MENU') 열기
+            setAppState('MENU');
         };
         window.addEventListener('open_foxtalk', handleOpenEvent);
         return () => window.removeEventListener('open_foxtalk', handleOpenEvent);
