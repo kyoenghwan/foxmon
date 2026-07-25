@@ -11,7 +11,16 @@ export const QA_GET_TOTAL_UNREAD_CHAT_COUNT = async (userId?: string) => {
         // 1. 유저가 참여 중인 채팅방 정보 및 마지막 읽은 시간 조회 (CS 고객센터 방 제외)
         const { data: participants, error: partError } = await supabaseAdmin
             .from('foxtalk_participants')
-            .select('id, room_id, last_read_at, foxtalk_rooms!inner(type)')
+            .select(`
+                id,
+                room_id,
+                last_read_at,
+                foxtalk_rooms!inner(
+                    id,
+                    type,
+                    last_message_at
+                )
+            `)
             .or(`session_id.eq.${rawUserId},session_id.eq.${normalizedUserId}`)
             .neq('foxtalk_rooms.type', 'CS');
 
@@ -20,27 +29,19 @@ export const QA_GET_TOTAL_UNREAD_CHAT_COUNT = async (userId?: string) => {
             return { success: true, data: 0 };
         }
 
-        // 2. 참여 중인 방들의 안읽은 메시지 개수를 병렬로 카운팅
-        const unreadCounts = await Promise.all(
-            participants.map(async (participant) => {
-                const lastReadAt = participant.last_read_at || '1970-01-01T00:00:00.000Z';
-                
-                const { count, error: countErr } = await supabaseAdmin
-                    .from('foxtalk_messages')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('room_id', participant.room_id)
-                    .neq('participant_id', participant.id)
-                    .gt('created_at', lastReadAt);
+        let totalUnreadCount = 0;
 
-                if (countErr) {
-                    console.error(`Count error for room ${participant.room_id}:`, countErr);
-                    return 0;
-                }
-                return (count && count > 0) ? 1 : 0;
-            })
-        );
+        participants.forEach((p: any) => {
+            const room = p.foxtalk_rooms;
+            if (!room || !room.last_message_at) return;
 
-        const totalUnreadCount = unreadCounts.reduce((sum, count) => sum + count, 0);
+            const lastReadTime = p.last_read_at ? new Date(p.last_read_at).getTime() : 0;
+            const lastMsgTime = new Date(room.last_message_at).getTime();
+
+            if (lastMsgTime > lastReadTime + 1000) {
+                totalUnreadCount += 1;
+            }
+        });
 
         return { success: true, data: totalUnreadCount };
     } catch (error: any) {

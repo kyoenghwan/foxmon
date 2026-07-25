@@ -10,7 +10,16 @@ export const QA_GET_WIDGET_UNREAD_COUNTS = async (userId?: string) => {
 
         const { data: participants, error: partError } = await supabaseAdmin
             .from('foxtalk_participants')
-            .select('id, room_id, last_read_at, foxtalk_rooms!inner(type)')
+            .select(`
+                id,
+                room_id,
+                last_read_at,
+                foxtalk_rooms!inner(
+                    id,
+                    type,
+                    last_message_at
+                )
+            `)
             .or(`session_id.eq.${rawUserId},session_id.eq.${normalizedUserId}`);
 
         if (partError || !participants) {
@@ -20,25 +29,21 @@ export const QA_GET_WIDGET_UNREAD_COUNTS = async (userId?: string) => {
         let foxTalkUnread = 0;
         let csUnread = 0;
 
-        await Promise.all(
-            participants.map(async (p: any) => {
-                const lastReadAt = p.last_read_at || '1970-01-01T00:00:00.000Z';
-                const { count, error: countErr } = await supabaseAdmin
-                    .from('foxtalk_messages')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('room_id', p.room_id)
-                    .neq('participant_id', p.id)
-                    .gt('created_at', lastReadAt);
+        participants.forEach((p: any) => {
+            const room = p.foxtalk_rooms;
+            if (!room || !room.last_message_at) return;
 
-                if (!countErr && count && count > 0) {
-                    if (p.foxtalk_rooms?.type === 'CS') {
-                        csUnread += 1;
-                    } else {
-                        foxTalkUnread += 1;
-                    }
+            const lastReadTime = p.last_read_at ? new Date(p.last_read_at).getTime() : 0;
+            const lastMsgTime = new Date(room.last_message_at).getTime();
+
+            if (lastMsgTime > lastReadTime + 1000) {
+                if (room.type === 'CS') {
+                    csUnread += 1;
+                } else {
+                    foxTalkUnread += 1;
                 }
-            })
-        );
+            }
+        });
 
         return {
             success: true,
