@@ -113,6 +113,7 @@ export function FoxTalkWidget() {
                     String(session.user.name || '').trim() ||
                     '고객';
                 setSessionChatUser({ id: session.user.id, nickname: nick });
+                void fetchUnreadCounts(session.user.id);
             }
         } else {
             setUserRole(null);
