@@ -160,8 +160,8 @@ export function FoxTalkWidget() {
 
     const [unreadCounts, setUnreadCounts] = useState({ foxTalkUnread: 0, csUnread: 0, totalUnread: 0 });
 
-    const fetchUnreadCounts = async () => {
-        const effectiveUserId = userId || sessionChatUser?.id || profile?.sessionId;
+    const fetchUnreadCounts = async (overrideUserId?: string) => {
+        const effectiveUserId = overrideUserId || sessionChatUser?.id || userId || (session?.user as any)?.id || profile?.sessionId;
         if (!effectiveUserId) {
             setUnreadCounts({ foxTalkUnread: 0, csUnread: 0, totalUnread: 0 });
             return;
@@ -179,7 +179,7 @@ export function FoxTalkWidget() {
         };
         window.addEventListener('foxtalk_unread_changed', handleUnreadChanged);
 
-        const effectiveUserId = userId || sessionChatUser?.id || profile?.sessionId;
+        const effectiveUserId = sessionChatUser?.id || userId || (session?.user as any)?.id || profile?.sessionId;
         let globalChannel: any = null;
 
         if (effectiveUserId) {
@@ -210,7 +210,7 @@ export function FoxTalkWidget() {
                 supabase.removeChannel(globalChannel);
             }
         };
-    }, [userId, sessionChatUser?.id, profile?.sessionId]);
+    }, [sessionChatUser?.id, userId, (session?.user as any)?.id, profile?.sessionId]);
 
     useEffect(() => {
         if (appState === 'LOBBY') {

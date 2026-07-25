@@ -328,8 +328,8 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
                             }`}>
                                 <MessageCircle className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                                 {unreadCount > 0 && (
-                                    <span className="absolute -bottom-1 -right-1 flex h-4 sm:h-4.5 min-w-[16px] sm:min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[8px] sm:text-[9px] font-black text-white border-2 border-white shadow-sm">
-                                        {unreadCount > 99 ? '99+' : unreadCount}
+                                    <span className="absolute -bottom-1 -right-1 flex h-4 w-4 sm:h-4.5 sm:w-4.5 items-center justify-center rounded-full bg-red-500 text-[9px] sm:text-[10px] font-black text-white border-2 border-white shadow-sm animate-pulse">
+                                        N
                                     </span>
                                 )}
                             </div>
