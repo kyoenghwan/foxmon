@@ -163,11 +163,20 @@ export function FoxTalkWidget() {
 
     const fetchUnreadCounts = async (overrideUserId?: string) => {
         const effectiveUserId = overrideUserId || sessionChatUser?.id || userId || (session?.user as any)?.id || profile?.sessionId;
+        console.log('[FoxTalkWidget] fetchUnreadCounts called:', {
+            overrideUserId,
+            sessionChatUserId: sessionChatUser?.id,
+            userId,
+            sessionUserId: (session?.user as any)?.id,
+            profileSessionId: profile?.sessionId,
+            effectiveUserId
+        });
         if (!effectiveUserId) {
             setUnreadCounts({ foxTalkUnread: 0, csUnread: 0, totalUnread: 0 });
             return;
         }
         const res = await QA_GET_WIDGET_UNREAD_COUNTS(effectiveUserId);
+        console.log('[FoxTalkWidget] QA_GET_WIDGET_UNREAD_COUNTS result:', { effectiveUserId, res });
         if (res.success && res.data) {
             setUnreadCounts(res.data);
         }
