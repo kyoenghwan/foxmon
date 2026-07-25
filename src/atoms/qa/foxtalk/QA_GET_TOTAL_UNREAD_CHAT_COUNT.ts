@@ -40,8 +40,7 @@ export const QA_GET_TOTAL_UNREAD_CHAT_COUNT = async (userId?: string) => {
                     last_message_at
                 )
             `)
-            .or(orConditions)
-            .neq('foxtalk_rooms.type', 'CS');
+            .or(orConditions);
 
         if (partError) throw partError;
         if (!participants || participants.length === 0) {
