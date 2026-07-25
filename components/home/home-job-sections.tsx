@@ -173,7 +173,7 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
     }
 
     return (
-        <main className="w-full xl:max-w-[828px] 2xl:max-w-[1040px] mx-auto px-4 py-6 md:py-8 space-y-8 md:space-y-10">
+        <main className="w-full mx-auto px-4 min-[600px]:max-w-[649px] min-[830px]:max-w-[860px] min-[1040px]:max-w-[1071px] py-6 md:py-8 space-y-8 md:space-y-10">
             {/* 1. Scrolling Notice Ticker */}
             <section className="bg-gray-50/60 border border-gray-100 rounded-2xl px-4 py-2.5 shadow-sm">
                 <div className="flex items-center gap-2 md:gap-3">
@@ -242,7 +242,7 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                 </div>
                 
                 {demoJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 min-[800px]:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-5 4xl:grid-cols-5 gap-2 lg:gap-4 w-fit mx-auto">
+                    <div className="grid grid-cols-2 min-[600px]:grid-cols-3 min-[830px]:grid-cols-4 min-[1040px]:grid-cols-5 gap-2 min-[600px]:gap-4 w-full mx-auto">
                         {demoJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
@@ -295,7 +295,7 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                     </div>
                 </div>
                 {lineJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 min-[800px]:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-5 4xl:grid-cols-5 gap-2 lg:gap-4 w-fit mx-auto">
+                    <div className="grid grid-cols-2 min-[600px]:grid-cols-3 min-[830px]:grid-cols-4 min-[1040px]:grid-cols-5 gap-2 min-[600px]:gap-4 w-full mx-auto">
                         {lineJobs.map((job, idx) => (
                             <div 
                                 key={job.id} 
