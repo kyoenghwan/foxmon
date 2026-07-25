@@ -119,11 +119,11 @@ export function PremiumMainBannerCard({
                     {/* [위쪽 영역]: 왼쪽 크게 로고 + 오른쪽 상호명 */}
                     <div className="relative z-20 flex items-center gap-3 w-full">
                         {hasLogo && (
-                            <div className="w-[84px] h-[56px] sm:w-[99px] sm:h-[66px] rounded-lg shadow-md shrink-0 overflow-hidden border border-white/20 bg-black/20">
+                            <div className="w-[90px] h-[60px] sm:w-[105px] sm:h-[70px] shrink-0 overflow-hidden rounded-lg shadow-sm">
                                 <img 
                                     src={logoUrl} 
                                     alt={companyDisplay} 
-                                    className="w-full h-full object-cover rounded-lg" 
+                                    className="w-full h-full object-fill rounded-lg block" 
                                 />
                             </div>
                         )}
