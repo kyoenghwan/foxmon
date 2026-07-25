@@ -119,7 +119,7 @@ export async function approveRechargeRequest(requestId: string) {
 
     if (!rechargeResult.success) {
       nvLog('FW', '❌ FA_RECHARGE_POINT_FLOW 충전 실행 실패', rechargeResult.error);
-      return { success: false, message: rechargeResult.message || '포인트 지급 처리에 실패했습니다.' };
+      return { success: false, message: rechargeResult.error || rechargeResult.message || '포인트 지급 처리에 실패했습니다.' };
     }
 
     // 3. 신청 상태 APPROVED로 변경

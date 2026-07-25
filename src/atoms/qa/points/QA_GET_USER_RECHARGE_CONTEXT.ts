@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '@/lib/logger';
 
 interface UserRechargeContext {
@@ -13,10 +13,8 @@ interface UserRechargeContext {
  * 결제 전 사용자의 첫 충전 여부 및 현재 등급에 따른 적립 혜택 정보를 조회합니다.
  */
 export const QA_GET_USER_RECHARGE_CONTEXT = async (userId: string): Promise<{ success: boolean; data: UserRechargeContext | null; error: string | null }> => {
-  const supabase = await createClient();
-
   // 💡 사용자의 기본 정보(첫 충전 여부, 등급) 조회
-  const { data: user, error: userError } = await supabase
+  const { data: user, error: userError } = await supabaseAdmin
     .from('users')
     .select('id, has_first_charged, merchant_tier')
     .eq('id', userId)
@@ -28,11 +26,11 @@ export const QA_GET_USER_RECHARGE_CONTEXT = async (userId: string): Promise<{ su
   }
 
   // 💡 현재 등급에 대한 설정 정보(적립율) 조회
-  const { data: tierConfig, error: tierError } = await supabase
+  const { data: tierConfig, error: tierError } = await supabaseAdmin
     .from('tier_configs')
     .select('bonus_ratio')
     .eq('tier_name', user.merchant_tier)
-    .single();
+    .maybeSingle();
 
   if (tierError) {
     nvLog('AT', `❌ QA_GET_USER_RECHARGE_CONTEXT 등급 설정 조회 실패`, tierError);

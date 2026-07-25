@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '@/lib/logger';
 
 interface ActivePointPolicy {
@@ -13,29 +13,17 @@ interface ActivePointPolicy {
  * 결제 시점(NOW)에 유효한 전역 포인트 정책(보너스 %, 상한선, 수수료 등)을 조회합니다.
  */
 export const QA_GET_ACTIVE_POINT_POLICY = async (): Promise<{ success: boolean; data: ActivePointPolicy | null; error: string | null }> => {
-  const supabase = await createClient();
   const now = new Date().toISOString();
 
-  // 💡 스케줄링 기반: effective_at <= NOW() 중 최신 항목 조회
-  const { data: policies, error } = await supabase
+  // 💡 스케줄링 기반: start_at <= NOW() 중 최신 항목 조회
+  const { data: policies, error } = await supabaseAdmin
     .from('point_policies')
     .select('config_key, config_value')
     .lte('start_at', now)
     .order('start_at', { ascending: false });
 
   if (error) {
-    nvLog('AT', `❌ QA_GET_ACTIVE_POINT_POLICY 에러`, error);
-    // 💡 기본값 폴백 (DB 장애 시 최소 안정성 보장)
-    return {
-      success: false,
-      data: {
-        firstChargeBonusRatio: 0.5,
-        maxFirstBonus: 300000,
-        refundFeeRatio: 0.1,
-        refundDivisor: 1.5
-      },
-      error: error.message
-    };
+    nvLog('AT', `❌ QA_GET_ACTIVE_POINT_POLICY 에러 (기본값 폴백)`, error);
   }
 
   // 💡 조회된 설정값 매핑 (키 기반)
