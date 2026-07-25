@@ -339,7 +339,7 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                         </div>
                         <ul className="space-y-1">
                             {(() => {
-                                const realJobsList = [...generalJobs, ...lineJobs, ...premiumJobs, ...specialJobs].filter(j => j.title).slice(0, 6);
+                                const realJobsList = [...generalJobs, ...lineJobs, ...premiumJobs, ...specialJobs].filter(j => j.isRealAd && j.title).slice(0, 6);
                                 if (realJobsList.length === 0) {
                                     return <li className="py-6 text-center text-gray-400 text-[13px] font-medium">등록된 구인 공고가 없습니다.</li>;
                                 }
