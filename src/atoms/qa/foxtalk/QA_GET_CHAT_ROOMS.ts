@@ -37,13 +37,10 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
         if (isAdmin) {
             // 관리자는 1ON1 방 중 본인이 포함된 방 + OPEN, SECRET, CS 방 전체를 볼 수 있음
             query = query.or(`type.in.(OPEN,SECRET,CS),and(type.eq.1ON1,employer_id.eq.${normalizedUserId}),and(type.eq.1ON1,seeker_id.eq.${normalizedUserId})`);
-        } else if (userRole === 'EMPLOYER') {
-            // 사장님은 본인이 연관된 1ON1 방만 보임
-            query = query.eq('type', '1ON1').eq('employer_id', normalizedUserId);
         } else {
-            // 일반 구직자는 본인이 연관된 1ON1 방이거나, OPEN/SECRET 방을 봄
+            // 일반 회원 / 업체 회원 공통: 본인이 연관된 1ON1 방이거나, OPEN/SECRET 방을 봄
             if (normalizedUserId) {
-                query = query.or(`type.in.(OPEN,SECRET),and(type.eq.1ON1,seeker_id.eq.${normalizedUserId})`);
+                query = query.or(`type.in.(OPEN,SECRET),and(type.eq.1ON1,employer_id.eq.${normalizedUserId}),and(type.eq.1ON1,seeker_id.eq.${normalizedUserId})`);
             } else {
                 query = query.in('type', ['OPEN', 'SECRET']);
             }
