@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, Pause, Play, Pencil, Clock, CreditCard } from 'lucide-react';
+import { Eye, Pause, Play, Pencil, Trash2, Clock, CreditCard } from 'lucide-react';
 import { BizAdPaymentModal } from '@/components/biz/BizAdPaymentModal';
+import { manageBizAdAction } from '@/lib/actions';
 
 const TierBadge = ({ tier }: { tier: string }) => {
     const styles: Record<string, string> = {
@@ -71,6 +72,28 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
     const router = useRouter();
     const [ads, setAds] = useState(initialAds);
     const [paymentAd, setPaymentAd] = useState<any | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    const handleDelete = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        if (!confirm('정말 이 광고/배너를 삭제하시겠습니까?')) return;
+
+        setDeletingId(id);
+        try {
+            const res = await manageBizAdAction('DELETE', undefined, id);
+            if (res.success) {
+                setAds(prev => prev.filter(ad => ad.id !== id));
+                alert('광고가 삭제되었습니다.');
+            } else {
+                alert('삭제 실패: ' + (res.message || '알 수 없는 오류'));
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('삭제 중 오류가 발생했습니다.');
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     const handlePaymentSuccess = () => {
         setPaymentAd(null);
@@ -132,17 +155,17 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
             `}} />
 
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px] border-collapse text-center table-fixed">
+                <table className="w-full min-w-[950px] border-collapse text-center table-fixed">
                     <thead>
                         <tr className="bg-gray-50/75 border-b border-gray-150 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
-                            <th className="px-4 py-4 text-center w-[110px] min-w-[110px]">배너 종류</th>
-                            <th className="px-4 py-4 text-center w-[85px] min-w-[85px]">로고</th>
-                            <th className="px-6 py-4 text-center w-[200px] min-w-[200px]">제목</th>
-                            <th className="px-4 py-4 text-center w-[110px] min-w-[110px]">업체명</th>
-                            <th className="px-4 py-4 text-center w-[100px] min-w-[100px]">근무지역</th>
-                            <th className="px-4 py-4 text-center w-[70px] min-w-[70px]">상태</th>
-                            <th className="px-4 py-4 text-center w-[105px] min-w-[105px]">노출 만료일</th>
-                            <th className="px-4 py-4 text-center w-[130px] min-w-[130px]">관리</th>
+                            <th className="px-3 py-4 text-center w-[110px] min-w-[110px]">배너 종류</th>
+                            <th className="px-3 py-4 text-center w-[85px] min-w-[85px]">로고</th>
+                            <th className="px-4 py-4 text-center w-[180px] min-w-[180px]">제목</th>
+                            <th className="px-3 py-4 text-center w-[100px] min-w-[100px]">업체명</th>
+                            <th className="px-3 py-4 text-center w-[90px] min-w-[90px]">근무지역</th>
+                            <th className="px-3 py-4 text-center w-[70px] min-w-[70px]">상태</th>
+                            <th className="px-3 py-4 text-center w-[100px] min-w-[100px]">노출 만료일</th>
+                            <th className="px-3 py-4 text-center w-[190px] min-w-[190px]">관리</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-[13px] text-gray-700">
@@ -219,9 +242,27 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                                         {formatDate(ad.expires_at)}
                                     </td>
 
-                                    {/* 관리 (수정 버튼 제거, 오직 결제 버튼만 제공) */}
-                                    <td className="px-4 py-4 whitespace-nowrap text-center">
-                                        <div className="flex items-center justify-center">
+                                    {/* 관리 (수정, 삭제, 결제 순서) */}
+                                    <td className="px-3 py-4 whitespace-nowrap text-center">
+                                        <div className="flex items-center justify-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                            {/* 1. 수정 버튼 */}
+                                            <button
+                                                onClick={() => router.push(`/biz/banners/${ad.id}/edit`)}
+                                                className="flex items-center justify-center gap-1 px-2.5 py-1.5 text-[11px] font-bold text-gray-700 bg-gray-50 rounded hover:bg-gray-100 transition-colors border border-gray-200"
+                                            >
+                                                <Pencil className="w-3 h-3" /> 수정
+                                            </button>
+
+                                            {/* 2. 삭제 버튼 */}
+                                            <button
+                                                disabled={deletingId === ad.id}
+                                                onClick={(e) => handleDelete(e, ad.id)}
+                                                className="flex items-center justify-center gap-1 px-2.5 py-1.5 text-[11px] font-bold text-red-600 bg-red-50/50 rounded hover:bg-red-50 transition-colors border border-red-100 disabled:opacity-50"
+                                            >
+                                                <Trash2 className="w-3 h-3" /> 삭제
+                                            </button>
+
+                                            {/* 3. 결제 버튼 (텍스트 '결제' 고정) */}
                                             {isPendingOrExpired ? (
                                                 <button 
                                                     onClick={(e) => { 
@@ -249,7 +290,7 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                                                      }}
                                                     className="text-[11px] font-black px-2.5 py-1.5 rounded flex items-center gap-1 transition-colors bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100"
                                                 >
-                                                    <CreditCard className="w-3 h-3" /> 결제 옵션 확인
+                                                    <CreditCard className="w-3 h-3" /> 결제
                                                 </button>
                                             )}
                                         </div>
