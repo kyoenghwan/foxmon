@@ -54,14 +54,7 @@ export default async function BizAdsPage() {
                         <ClaimAdButton />
                         <Link 
                             href="/biz/banners/new"
-                            className="flex items-center gap-2 px-4 py-2.5 bg-orange-500 text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95 shrink-0"
-                        >
-                            <Plus className="w-4 h-4" />
-                            새 배너 등록
-                        </Link>
-                        <Link 
-                            href="/biz/ads/new"
-                            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95 shrink-0"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95 shrink-0"
                         >
                             <Plus className="w-4 h-4" />
                             새 광고 등록
@@ -101,7 +94,7 @@ export default async function BizAdsPage() {
                     <div className="flex flex-wrap items-center justify-center gap-3">
                         <ClaimAdButton />
                         <Link 
-                            href="/biz/ads/new"
+                            href="/biz/banners/new"
                             className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-black text-[14px] rounded-xl hover:bg-orange-600 transition-all shadow-md"
                         >
                             <Plus className="w-4 h-4" />
