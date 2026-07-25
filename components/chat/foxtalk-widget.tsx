@@ -104,6 +104,7 @@ export function FoxTalkWidget() {
     const resolvedUserIdRef = useRef<string | null>(null);
 
     useEffect(() => {
+        console.log('[BADGE-1] session useEffect 실행:', { hasUser: !!session?.user, userId: session?.user?.id });
         if (session?.user) {
             if ((session.user as any).role) {
                 setUserRole((session.user as any).role);
@@ -111,14 +112,19 @@ export function FoxTalkWidget() {
             if (session.user.id) {
                 setUserId(session.user.id);
                 resolvedUserIdRef.current = session.user.id;
+                console.log('[BADGE-2] resolvedUserIdRef 설정:', session.user.id);
                 const nick =
                     String((session.user as { nickname?: string }).nickname || '').trim() ||
                     String(session.user.name || '').trim() ||
                     '고객';
                 setSessionChatUser({ id: session.user.id, nickname: nick });
+                console.log('[BADGE-3] fetchUnreadCounts 호출 시작 (userId:', session.user.id, ')');
                 void fetchUnreadCounts(session.user.id);
+            } else {
+                console.log('[BADGE-ERR] session.user 존재하나 id 없음:', session.user);
             }
         } else {
+            console.log('[BADGE-1B] session.user 없음 - 로그아웃 상태');
             setUserRole(null);
             setUserId(null);
             setSessionChatUser(null);
@@ -167,24 +173,46 @@ export function FoxTalkWidget() {
 
     const fetchUnreadCounts = async (overrideUserId?: string) => {
         const effectiveUserId = overrideUserId || resolvedUserIdRef.current || sessionChatUser?.id || userId || (session?.user as any)?.id || profile?.sessionId;
+        console.log('[BADGE-4] fetchUnreadCounts 진입:', {
+            overrideUserId,
+            refValue: resolvedUserIdRef.current,
+            sessionChatUserId: sessionChatUser?.id,
+            userId,
+            sessionId: (session?.user as any)?.id,
+            profileSessionId: profile?.sessionId,
+            '→ effectiveUserId': effectiveUserId
+        });
         if (!effectiveUserId) {
+            console.log('[BADGE-5-SKIP] effectiveUserId 없음 → 0으로 설정');
             setUnreadCounts({ foxTalkUnread: 0, csUnread: 0, totalUnread: 0 });
             return;
         }
-        const res = await QA_GET_WIDGET_UNREAD_COUNTS(effectiveUserId);
-        if (res.success && res.data) {
-            setUnreadCounts(res.data);
+        try {
+            console.log('[BADGE-5] 서버 호출 시작: QA_GET_WIDGET_UNREAD_COUNTS(', effectiveUserId, ')');
+            const res = await QA_GET_WIDGET_UNREAD_COUNTS(effectiveUserId);
+            console.log('[BADGE-6] 서버 응답:', JSON.stringify(res));
+            if (res.success && res.data) {
+                console.log('[BADGE-7] ✅ setUnreadCounts 호출:', res.data);
+                setUnreadCounts(res.data);
+            } else {
+                console.log('[BADGE-7-FAIL] 서버 응답 실패 또는 data 없음:', res);
+            }
+        } catch (err) {
+            console.error('[BADGE-ERR] fetchUnreadCounts 예외:', err);
         }
     };
 
     useEffect(() => {
+        console.log('[BADGE-8] unread useEffect 실행 (초기 fetch + Realtime 구독)');
         fetchUnreadCounts();
         const handleUnreadChanged = () => {
+            console.log('[BADGE-9] foxtalk_unread_changed 이벤트 수신 → fetchUnreadCounts 호출');
             fetchUnreadCounts();
         };
         window.addEventListener('foxtalk_unread_changed', handleUnreadChanged);
 
         const effectiveUserId = sessionChatUser?.id || userId || (session?.user as any)?.id || profile?.sessionId;
+        console.log('[BADGE-10] Realtime 구독용 effectiveUserId:', effectiveUserId);
         let globalChannel: any = null;
 
         if (effectiveUserId) {
@@ -1225,6 +1253,7 @@ export function FoxTalkWidget() {
                 )}
 
                 {/* FAB Button */}
+                {(() => { console.log('[BADGE-RENDER] FAB 렌더링:', { appState, unreadCounts, totalUnread: unreadCounts.totalUnread, showBadge: appState === 'CLOSED' && unreadCounts.totalUnread > 0 }); return null; })()}
                 <button 
                     onClick={onWidgetClick}
                     onPointerDown={handlePointerDown}
