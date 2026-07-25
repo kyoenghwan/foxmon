@@ -7,6 +7,27 @@ export const QA_GET_WIDGET_UNREAD_COUNTS = async (userId?: string) => {
         if (!userId) return { success: true, data: { foxTalkUnread: 0, csUnread: 0, totalUnread: 0 } };
         const rawUserId = userId.trim();
         const normalizedUserId = rawUserId.toLowerCase();
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawUserId);
+
+        const userIdsToMatch: string[] = [rawUserId, normalizedUserId];
+
+        let userData = null;
+        if (isUUID) {
+            const { data } = await supabaseAdmin.from('users').select('id, login_id, nickname').eq('id', rawUserId).maybeSingle();
+            userData = data;
+        } else {
+            const { data } = await supabaseAdmin.from('users').select('id, login_id, nickname').or(`login_id.eq.${rawUserId},login_id.eq.${normalizedUserId}`).maybeSingle();
+            userData = data;
+        }
+
+        if (userData) {
+            if (userData.id) userIdsToMatch.push(userData.id);
+            if (userData.login_id) userIdsToMatch.push(userData.login_id);
+            if (userData.nickname) userIdsToMatch.push(userData.nickname);
+        }
+
+        const uniqueUserIds = Array.from(new Set(userIdsToMatch.filter(Boolean)));
+        const orConditions = uniqueUserIds.map(id => `session_id.eq.${id}`).join(',');
 
         const { data: participants, error: partError } = await supabaseAdmin
             .from('foxtalk_participants')
@@ -20,7 +41,7 @@ export const QA_GET_WIDGET_UNREAD_COUNTS = async (userId?: string) => {
                     last_message_at
                 )
             `)
-            .or(`session_id.eq.${rawUserId},session_id.eq.${normalizedUserId}`);
+            .or(orConditions);
 
         if (partError || !participants) {
             return { success: true, data: { foxTalkUnread: 0, csUnread: 0, totalUnread: 0 } };
