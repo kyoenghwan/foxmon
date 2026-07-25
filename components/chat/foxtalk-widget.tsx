@@ -190,9 +190,18 @@ export function FoxTalkWidget() {
         try {
             console.log('[BADGE-5] 서버 호출 시작: QA_GET_WIDGET_UNREAD_COUNTS(', effectiveUserId, ')');
             const res = await QA_GET_WIDGET_UNREAD_COUNTS(effectiveUserId);
-            console.log('[BADGE-6] 서버 응답:', JSON.stringify(res));
+            console.log('[BADGE-6] 📊 서버 응답 요약:', {
+                foxTalkUnread: res.data?.foxTalkUnread,
+                csUnread: res.data?.csUnread,
+                totalUnread: res.data?.totalUnread,
+                matchedUserIds: res.data?.debug?.matchedUserIds,
+                participantsCount: res.data?.debug?.participantsCount
+            });
+            if (res.data?.debug?.details) {
+                console.log('[BADGE-6-DETAILS] 🔍 각 대화방별 상세 판정 내역:', res.data.debug.details);
+            }
             if (res.success && res.data) {
-                console.log('[BADGE-7] ✅ setUnreadCounts 호출:', res.data);
+                console.log('[BADGE-7] ✅ setUnreadCounts 호출 완료:', res.data);
                 setUnreadCounts(res.data);
             } else {
                 console.log('[BADGE-7-FAIL] 서버 응답 실패 또는 data 없음:', res);

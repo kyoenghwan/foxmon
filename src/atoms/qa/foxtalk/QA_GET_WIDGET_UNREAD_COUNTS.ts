@@ -49,6 +49,7 @@ export const QA_GET_WIDGET_UNREAD_COUNTS = async (userId?: string) => {
 
         let foxTalkUnread = 0;
         let csUnread = 0;
+        const details: any[] = [];
 
         participants.forEach((p: any) => {
             const room = p.foxtalk_rooms;
@@ -56,14 +57,25 @@ export const QA_GET_WIDGET_UNREAD_COUNTS = async (userId?: string) => {
 
             const lastReadTime = p.last_read_at ? new Date(p.last_read_at).getTime() : 0;
             const lastMsgTime = new Date(room.last_message_at).getTime();
+            const isUnread = lastMsgTime > lastReadTime;
 
-            if (lastMsgTime > lastReadTime) {
+            if (isUnread) {
                 if (room.type === 'CS') {
                     csUnread += 1;
                 } else {
                     foxTalkUnread += 1;
                 }
             }
+
+            details.push({
+                roomId: room.id,
+                type: room.type,
+                last_message_at: room.last_message_at,
+                last_read_at: p.last_read_at,
+                lastMsgTime,
+                lastReadTime,
+                isUnread
+            });
         });
 
         return {
@@ -71,7 +83,12 @@ export const QA_GET_WIDGET_UNREAD_COUNTS = async (userId?: string) => {
             data: {
                 foxTalkUnread,
                 csUnread,
-                totalUnread: foxTalkUnread + csUnread
+                totalUnread: foxTalkUnread + csUnread,
+                debug: {
+                    matchedUserIds: uniqueUserIds,
+                    participantsCount: participants.length,
+                    details
+                }
             }
         };
     } catch (error: any) {
