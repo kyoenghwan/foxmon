@@ -66,7 +66,7 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
 
             <main className="flex-1 flex flex-col w-full relative">
                 {/* 유저 로그인 정보 박스 (모바일 전용: 스크롤 영역 상단 배치로 스크롤 시 위로 이동) */}
-                <div className="block tablet:hidden w-full mx-auto px-4 pt-4 z-20">
+                <div className="block tablet:hidden w-full mx-auto px-4 min-[600px]:max-w-[649px] min-[830px]:max-w-[860px] min-[1040px]:max-w-[1071px] pt-4 z-20">
                     <LoginInfoBox session={session} />
                 </div>
                 {children}
