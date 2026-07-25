@@ -377,24 +377,30 @@ ${cancelDetail || '상세 사유 미기재'}
                                             );
                                         }
 
-                                        // 템플릿 모드 및 기본 메인 배너 카드
-                                        const hasLogo = !!(form.logo_url || form.image);
-                                        const logoUrl = form.logo_url || form.image;
+                                        // 템플릿 모드 및 기본 메인 배너 카드 (MainBanner.tsx와 100% 동일한 비주얼 구조)
+                                        const hasLogo = !!form.logo_url;
+                                        const logoUrl = form.logo_url;
+                                        const bannerImage = form.image;
                                         
                                         let payType = '';
-                                        let payAmount = form.pay || (form.salary_type ? `[${form.salary_type}] ${form.salary_amount}` : form.salary_amount) || (form.pay_amount ? `${form.pay_type} ${form.pay_amount}` : '급여 정보');
-                                        if (typeof payAmount === 'string' && payAmount.includes(']') && payAmount.startsWith('[')) {
-                                            const splitIndex = payAmount.indexOf(']');
-                                            payType = payAmount.substring(1, splitIndex).trim();
-                                            payAmount = payAmount.substring(splitIndex + 1).trim();
-                                        } else if (payAmount === '추후협의') {
-                                            payType = '협의';
-                                            payAmount = '추후협의';
-                                        } else {
-                                            const parts = String(payAmount).split(' ');
-                                            if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0])) {
-                                                payType = parts[0];
-                                                payAmount = parts.slice(1).join(' ');
+                                        let payAmount = '';
+                                        const rawPay = form.pay || (form.salary_type ? `[${form.salary_type}] ${form.salary_amount}` : (form.salary_amount ? form.salary_amount : (form.pay_amount ? `${form.pay_type || ''} ${form.pay_amount}` : '')));
+                                        if (rawPay && typeof rawPay === 'string' && rawPay.trim() !== '') {
+                                            if (rawPay.includes(']') && rawPay.startsWith('[')) {
+                                                const splitIndex = rawPay.indexOf(']');
+                                                payType = rawPay.substring(1, splitIndex).trim();
+                                                payAmount = rawPay.substring(splitIndex + 1).trim();
+                                            } else if (rawPay === '추후협의') {
+                                                payType = '협의';
+                                                payAmount = '추후협의';
+                                            } else {
+                                                const parts = rawPay.split(' ');
+                                                if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0])) {
+                                                    payType = parts[0];
+                                                    payAmount = parts.slice(1).join(' ');
+                                                } else {
+                                                    payAmount = rawPay;
+                                                }
                                             }
                                         }
 
@@ -414,11 +420,12 @@ ${cancelDetail || '상세 사유 미기재'}
 
                                         return (
                                             <div className="flex justify-center w-full">
-                                                <div className={`flex-shrink-0 w-[400px] max-w-full h-[180px] rounded-2xl ${bgGradient} p-5 shadow-md relative overflow-hidden group`}>
-                                                    {form.image && form.premium_banner_mode !== 'upload' && (
+                                                <div className={`flex-shrink-0 w-[400px] max-w-full h-[200px] rounded-2xl ${bgGradient} p-5 shadow-md relative overflow-hidden group`}>
+                                                    {/* 템플릿 모드 배경 이미지 */}
+                                                    {bannerImage && (
                                                         <div 
-                                                            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 mix-blend-overlay opacity-60"
-                                                            style={{ backgroundImage: `url(${form.image})` }}
+                                                            className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-60"
+                                                            style={{ backgroundImage: `url(${bannerImage})` }}
                                                         />
                                                     )}
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
@@ -440,18 +447,22 @@ ${cancelDetail || '상세 사유 미기재'}
                                                         </div>
                                                         <div className="flex flex-col gap-1 mt-auto">
                                                             <p className="text-white/70 text-[10px] font-bold tracking-wider">{form.location || '지역'}</p>
-                                                            <div className="flex items-center gap-1.5">
-                                                                {payType && (
-                                                                    <span className="px-1.5 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[10px] font-black tracking-wide border border-white/10 shadow-sm">
-                                                                        {payType}
+                                                            {payAmount && (
+                                                                <div className="flex items-center gap-1.5">
+                                                                    {payType && (
+                                                                        <span className="px-1.5 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[10px] font-black tracking-wide border border-white/10 shadow-sm">
+                                                                            {payType}
+                                                                        </span>
+                                                                    )}
+                                                                    <span className="text-white font-black text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                                                        {payAmount}
                                                                     </span>
-                                                                )}
-                                                                <span className="text-white font-black text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                                                                    {payAmount}
-                                                                </span>
-                                                            </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
+                                                    {/* 장식용 글로우 원형 오버레이 */}
+                                                    <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
                                                 </div>
                                             </div>
                                         );
