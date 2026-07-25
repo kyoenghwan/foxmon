@@ -214,11 +214,26 @@ export function FoxTalkWidget() {
     useEffect(() => {
         console.log('[BADGE-8] unread useEffect 실행 (초기 fetch + Realtime 구독)');
         fetchUnreadCounts();
+
         const handleUnreadChanged = () => {
             console.log('[BADGE-9] foxtalk_unread_changed 이벤트 수신 → fetchUnreadCounts 호출');
             fetchUnreadCounts();
         };
         window.addEventListener('foxtalk_unread_changed', handleUnreadChanged);
+
+        const handleGlobalSync = (e: any) => {
+            const count = Number(e.detail?.count || 0);
+            console.log('[BADGE-GLOBAL-SYNC] ⚡ 상단 유저인포에서 실시간 N 뱃지 신호 수신! count:', count);
+            if (count > 0) {
+                setUnreadCounts(prev => ({
+                    ...prev,
+                    foxTalkUnread: Math.max(prev.foxTalkUnread, count),
+                    totalUnread: Math.max(prev.totalUnread, count)
+                }));
+            }
+            fetchUnreadCounts();
+        };
+        window.addEventListener('foxtalk_global_unread_sync', handleGlobalSync);
 
         const effectiveUserId = sessionChatUser?.id || userId || (session?.user as any)?.id || profile?.sessionId;
         console.log('[BADGE-10] Realtime 구독용 effectiveUserId:', effectiveUserId);
@@ -248,6 +263,7 @@ export function FoxTalkWidget() {
 
         return () => {
             window.removeEventListener('foxtalk_unread_changed', handleUnreadChanged);
+            window.removeEventListener('foxtalk_global_unread_sync', handleGlobalSync);
             if (globalChannel) {
                 supabase.removeChannel(globalChannel);
             }

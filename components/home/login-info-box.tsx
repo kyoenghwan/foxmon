@@ -74,6 +74,9 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         const res = await QA_GET_TOTAL_UNREAD_CHAT_COUNT(userId);
         if (res.success && res.data !== undefined) {
             setUnreadCount(res.data);
+            window.dispatchEvent(new CustomEvent('foxtalk_global_unread_sync', {
+                detail: { count: res.data }
+            }));
         }
     };
 
