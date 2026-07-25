@@ -95,7 +95,10 @@ export function MainBanner() {
     }, [isPremiumMainAdsLoaded, fetchPremiumMainAds]);
 
     const originalLength = ads.length;
-    const extendedBanners = [...ads, ...ads, ...ads];
+    let extendedBanners = [...ads];
+    while (extendedBanners.length > 0 && extendedBanners.length < 6) {
+        extendedBanners = [...extendedBanners, ...ads];
+    }
 
     useEffect(() => {
         if (originalLength === 0 || isHovered) return;
@@ -154,114 +157,6 @@ export function MainBanner() {
                         <Button variant="outline" size="sm" className="font-bold">광고 등록하기</Button>
                     </Link>
                 )}
-            </div>
-        );
-    }
-
-    // 광고가 1개만 등록되어 있을 경우 2개 중복 노출을 방지하고 단일 풀 래퍼 배너로 깔끔하게 노출
-    if (ads.length === 1) {
-        const banner = ads[0];
-        const logoUrl = (banner as any).logo_url || (banner as any).logo;
-        const hasLogo = !!logoUrl;
-        const bannerImage = (banner.image && banner.image !== logoUrl) ? banner.image : null;
-        const isUploadMode = banner.theme === 'UPLOAD';
-
-        const themeMap: Record<string, string> = {
-            gold: 'from-yellow-900 via-orange-900 to-black',
-            platinum: 'from-slate-700 via-gray-900 to-black',
-            diamond: 'from-cyan-900 via-blue-900 to-black',
-            ruby: 'from-rose-900 via-red-900 to-black',
-            sapphire: 'from-blue-900 via-indigo-900 to-black',
-            emerald: 'from-emerald-900 via-green-900 to-black',
-            amethyst: 'from-purple-900 via-fuchsia-900 to-black',
-            obsidian: 'from-gray-900 via-black to-black'
-        };
-        const bgClass = banner.theme && banner.theme !== 'none' && themeMap[banner.theme] 
-            ? `bg-gradient-to-br ${themeMap[banner.theme]}` 
-            : 'bg-gradient-to-br from-indigo-900 via-purple-900 to-black';
-
-        let payType = '';
-        let payAmount = banner.pay || ((banner as any).salary_type ? `[${(banner as any).salary_type}] ${(banner as any).salary_amount}` : (banner as any).salary_amount) || ((banner as any).pay_amount ? `${(banner as any).pay_type || ''} ${(banner as any).pay_amount}` : '');
-        if (payAmount?.includes(']') && payAmount?.startsWith('[')) {
-            const splitIndex = payAmount.indexOf(']');
-            payType = payAmount.substring(1, splitIndex).trim();
-            payAmount = payAmount.substring(splitIndex + 1).trim();
-        } else if (payAmount === '추후협의') {
-            payType = '협의';
-            payAmount = '추후협의';
-        } else if (payAmount) {
-            const parts = payAmount.split(' ');
-            if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0] || '')) {
-                payType = parts[0];
-                payAmount = parts.slice(1).join(' ');
-            }
-        }
-
-        return (
-            <div 
-                id="main-banner-container"
-                className="relative w-full h-full overflow-hidden rounded-xl cursor-pointer"
-                onClick={() => handleAdClick(banner)}
-            >
-                <div className={`w-full h-full rounded-2xl ${isUploadMode ? 'bg-black' : bgClass} ${isUploadMode ? '' : 'p-4 sm:p-6'} shadow-md relative overflow-hidden group`}>
-                    {isUploadMode && banner.image ? (
-                        <div className="w-full h-full relative">
-                            <div 
-                                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                                style={{ backgroundImage: `url(${banner.image})` }}
-                            />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-15" />
-                        </div>
-                    ) : (
-                        <>
-                            {bannerImage && (
-                                <div 
-                                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 mix-blend-overlay opacity-60"
-                                    style={{ backgroundImage: `url(${bannerImage})` }}
-                                />
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
-
-                            <div className="relative z-20 h-full flex flex-col justify-between">
-                                <div className="space-y-1.5 sm:space-y-3">
-                                    <div className="flex items-center gap-2 sm:gap-3 mb-0.5 sm:mb-1">
-                                        {hasLogo && (
-                                            <div className="w-10 h-7 sm:w-[60px] sm:h-[40px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
-                                                <div 
-                                                    className="w-full h-full bg-contain bg-center bg-no-repeat" 
-                                                    style={{ backgroundImage: `url(${logoUrl})` }} 
-                                                />
-                                            </div>
-                                        )}
-                                        <h3 className="text-white font-black text-lg sm:text-xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                                            {banner.company || (banner as any).company_name}
-                                        </h3>
-                                    </div>
-                                    <p className="text-white/95 text-xs sm:text-sm font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
-                                        {banner.title}
-                                    </p>
-                                </div>
-
-                                <div className="flex flex-col gap-1 sm:gap-1.5 mt-auto">
-                                    <p className="text-white/70 text-[10px] sm:text-[11px] font-bold tracking-wider">{banner.location || '전지역'}</p>
-                                    {payAmount && (
-                                        <div className="flex items-center gap-1.5 sm:gap-2">
-                                            {payType && (
-                                                <span className="px-1.5 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[9px] sm:text-[11px] font-black tracking-wide border border-white/10 shadow-sm">
-                                                    {payType}
-                                                </span>
-                                            )}
-                                            <span className="text-white font-black text-base sm:text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                                                {payAmount}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-                        </>
-                    )}
-                </div>
             </div>
         );
     }
