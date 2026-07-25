@@ -95,7 +95,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             return {
                 ...roomData,
                 // 로비에서는 최신 메시지 텍스트를 로딩하지 않으므로 null 처리하거나 기본 안내
-                latest_message: room.last_message_at ? "새로운 대화가 있습니다." : "대화 내용이 없습니다.",
+                latest_message: hasNew ? "새로운 대화가 있습니다." : (room.last_message_at ? "최근 대화내용이 있습니다." : "대화 내용이 없습니다."),
                 latest_message_at: room.last_message_at || null,
                 // 프론트 호환성을 위해 unread_count가 1이상이면 뱃지를 띄우게 세팅 (뱃지 내부 텍스트는 N으로 표시될 것임)
                 unread_count: hasNew ? 1 : 0,

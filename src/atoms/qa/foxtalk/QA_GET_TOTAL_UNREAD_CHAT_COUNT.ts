@@ -8,11 +8,12 @@ export const QA_GET_TOTAL_UNREAD_CHAT_COUNT = async (userId?: string) => {
         const rawUserId = userId.trim();
         const normalizedUserId = rawUserId.toLowerCase();
 
-        // 1. 유저가 참여 중인 채팅방 정보 및 마지막 읽은 시간 조회
+        // 1. 유저가 참여 중인 채팅방 정보 및 마지막 읽은 시간 조회 (CS 고객센터 방 제외)
         const { data: participants, error: partError } = await supabaseAdmin
             .from('foxtalk_participants')
-            .select('id, room_id, last_read_at')
-            .or(`session_id.eq.${rawUserId},session_id.eq.${normalizedUserId}`);
+            .select('id, room_id, last_read_at, foxtalk_rooms!inner(type)')
+            .or(`session_id.eq.${rawUserId},session_id.eq.${normalizedUserId}`)
+            .neq('foxtalk_rooms.type', 'CS');
 
         if (partError) throw partError;
         if (!participants || participants.length === 0) {
