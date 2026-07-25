@@ -714,17 +714,17 @@ export function FoxTalkWidget() {
 
     // LIVE_CHAT 상태에서 실시간 메시지 수신 (기존 ROOM과 동일 로직)
     useEffect(() => {
-        if (appState !== 'LIVE_CHAT' || !currentRoom) return;
+        if (appState !== 'LIVE_CHAT' || !currentRoom?.id) return;
 
-        const channel = supabase.channel(`live-messages:${currentRoom.id}`)
+        const targetRoomId = currentRoom.id;
+        const channel = supabase.channel(`live-messages:${targetRoomId}`)
             .on('postgres_changes', {
                 event: 'INSERT',
                 schema: 'public',
-                table: 'foxtalk_messages',
-                filter: `room_id=eq.${currentRoom.id}`
+                table: 'foxtalk_messages'
             }, async (payload) => {
                 const newMessage = payload.new as any;
-                if (!newMessage) return;
+                if (!newMessage || newMessage.room_id !== targetRoomId) return;
 
                 let participant = newMessage.participant_id ? participantsMapRef.current[newMessage.participant_id] : null;
                 if (!participant && newMessage.participant_id) {
@@ -732,7 +732,7 @@ export function FoxTalkWidget() {
                         .from('foxtalk_participants')
                         .select('*')
                         .eq('id', newMessage.participant_id)
-                        .single();
+                        .maybeSingle();
                     if (p) {
                         setParticipantsMap(prev => ({ ...prev, [p.id]: p }));
                         participant = p;
@@ -749,7 +749,7 @@ export function FoxTalkWidget() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [appState, currentRoom]);
+    }, [appState, currentRoom?.id]);
 
     // CS Chat Methods
     const handleOpenCS = async () => {
@@ -873,6 +873,17 @@ export function FoxTalkWidget() {
             });
             
             if (res.success) {
+                if (res.data) {
+                    const realMsg = {
+                        ...res.data,
+                        participant: tempMsg.participant
+                    };
+                    setMessages(prev => prev.map(m => m.id === tempId ? realMsg : m));
+                }
+                // 자동 안내 및 최신 메시지 갱신을 위해 약간의 시차 후 목록 재조회
+                setTimeout(() => {
+                    if (currentRoom?.id) loadCSMessages(currentRoom.id);
+                }, 300);
                 window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
             } else {
                 // 실패 시 롤백
@@ -889,17 +900,18 @@ export function FoxTalkWidget() {
 
     // Supabase Realtime Subscription
     useEffect(() => {
-        if ((appState !== 'ROOM' && appState !== 'CS_CHAT') || !currentRoom) return;
+        if ((appState !== 'ROOM' && appState !== 'CS_CHAT') || !currentRoom?.id) return;
         
-        const channel = supabase.channel(`room:${currentRoom.id}`)
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'foxtalk_messages', filter: `room_id=eq.${currentRoom.id}` }, async (payload) => {
-                const newMessage = payload.new as Record<string, unknown> & { id?: string; participant_id?: string; content?: string };
-                if (!newMessage?.id) return;
+        const targetRoomId = currentRoom.id;
+        const channel = supabase.channel(`room:${targetRoomId}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'foxtalk_messages' }, async (payload) => {
+                const newMessage = payload.new as Record<string, unknown> & { id?: string; room_id?: string; participant_id?: string; content?: string; message_type?: string };
+                if (!newMessage?.id || newMessage.room_id !== targetRoomId) return;
                 
                 // 상대방 메시지 수신 시 읽음 처리 수행
                 if (profile?.sessionId) {
                     await OA_UPDATE_PARTICIPANT_READ({
-                        room_id: currentRoom.id,
+                        room_id: targetRoomId,
                         session_id: profile.sessionId
                     });
                     window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
@@ -911,7 +923,7 @@ export function FoxTalkWidget() {
                         .from('foxtalk_participants')
                         .select('*')
                         .eq('id', newMessage.participant_id)
-                        .single();
+                        .maybeSingle();
                     if (p) {
                         setParticipantsMap(prev => ({ ...prev, [p.id]: p }));
                         participant = p;
@@ -926,7 +938,7 @@ export function FoxTalkWidget() {
 
                 // 알림음 + 브라우저 알림 (타인 메시지만, 설정에서 켠 경우만)
                 const isMyMsg = participant?.session_id === profile?.sessionId;
-                if (!isMyMsg && (newMessage as any).message_type !== 'SYSTEM_JOIN') {
+                if (!isMyMsg && newMessage.message_type !== 'SYSTEM_JOIN') {
                     if (localStorage.getItem('foxmon_notif_sound') === '1') {
                         playNotificationSound();
                     }
@@ -941,7 +953,7 @@ export function FoxTalkWidget() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [appState, currentRoom, profile]);
+    }, [appState, currentRoom?.id, profile?.sessionId]);
 
     const sendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -996,6 +1008,13 @@ export function FoxTalkWidget() {
                 setMessages(prev => prev.filter(m => m.id !== tempId));
                 alert('메시지 전송에 실패했습니다.');
             } else {
+                if (res.data) {
+                    const realMsg = {
+                        ...res.data,
+                        participant: tempMsg.participant
+                    };
+                    setMessages(prev => prev.map(m => m.id === tempId ? realMsg : m));
+                }
                 // 내가 메시지를 보냈으므로 내 읽음 상태 갱신
                 if (profile?.sessionId) {
                     await OA_UPDATE_PARTICIPANT_READ({
