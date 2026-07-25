@@ -20,9 +20,13 @@ const sections: SidebarSection[] = [
 export function BizSidebar({ isMobile = false }: { isMobile?: boolean }) {
     const pathname = usePathname();
 
-    const activeId = pathname === '/biz'
+    let activeId = pathname === '/biz'
         ? '/biz'
         : sections[0].items.find(item => item.href && item.href !== '/biz' && pathname.startsWith(item.href))?.id || '/biz';
+
+    if (pathname?.startsWith('/biz/banners')) {
+        activeId = '/biz/ads';
+    }
 
     
     if (isMobile) {
