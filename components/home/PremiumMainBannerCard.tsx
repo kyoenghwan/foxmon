@@ -96,13 +96,21 @@ export function PremiumMainBannerCard({
             onClick={onClick}
         >
             {isUploadMode && image ? (
-                /* 1) 직접 업로드 모드: 전체 이미지 꽉 채움 */
-                <div className="w-full h-full relative">
-                    <div 
-                        className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                        style={{ backgroundImage: `url(${image})` }}
+                /* 1) 직접 업로드 모드: 꽉 찬 반투명 블러 배경 + 원본 비율 왜곡 없는 중앙 이미지 (GIF 애니메이션 지원) */
+                <div className="w-full h-full relative overflow-hidden bg-black flex items-center justify-center">
+                    {/* 1. 배경 레이어: 2:1 영역을 꽉 채우는 반투명 블러 오버레이 */}
+                    <img 
+                        src={image} 
+                        alt="" 
+                        className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60 pointer-events-none" 
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-15" />
+                    {/* 2. 전면 레이어: 1.5:1 등 원본 비율 100% 유지 (깨짐 방지 / GIF 동작) */}
+                    <img 
+                        src={image} 
+                        alt={titleDisplay || "배너 이미지"} 
+                        className="relative z-10 max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105" 
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-20 pointer-events-none" />
                 </div>
             ) : (
                 /* 2) 템플릿 모드: 위(로고+상호), 중간(제목 마키), 아래(지역/직종 + 오른쪽 끝 급여) */

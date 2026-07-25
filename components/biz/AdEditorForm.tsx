@@ -1040,11 +1040,22 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         if (!file) return;
         
         try {
+            // GIF 애니메이션 보존을 위해 GIF 파일은 직접 읽기
+            if (file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const gifBase64 = event.target?.result as string;
+                    update('logo_url', gifBase64);
+                };
+                reader.readAsDataURL(file);
+                return;
+            }
+
             // 로고는 최대 300px 크기로 충분하며 PNG 포맷 유지(투명도 지원)
             const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 300, quality: 0.9, format: 'image/png' });
             update('logo_url', compressedBase64);
         } catch (error) {
-            console.error('로고 이미지 압축 실패:', error);
+            console.error('로고 이미지 처리 실패:', error);
             alert('이미지 처리 중 오류가 발생했습니다.');
         }
     };
@@ -1054,12 +1065,22 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         if (!file) return;
         
         try {
-            // 풀사이즈 배너 이미지는 가로 800px 정도 권장, JPEG 포맷으로 용량 최적화
-            const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 800, quality: 0.85, format: 'image/jpeg' });
-            // image 필드를 풀사이즈 배너 이미지 용도로 사용
+            // GIF 애니메이션 보존을 위해 GIF 파일은 압축 생략 후 원본 그대로 로드
+            if (file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const gifBase64 = event.target?.result as string;
+                    update('image', gifBase64);
+                };
+                reader.readAsDataURL(file);
+                return;
+            }
+
+            // 일반 정지 이미지(PNG/JPG 등)는 1200px 압축
+            const compressedBase64 = await compressImageFile(file, { maxWidthOrHeight: 1200, quality: 0.9, format: 'image/png' });
             update('image', compressedBase64);
         } catch (error) {
-            console.error('배너 이미지 압축 실패:', error);
+            console.error('배너 이미지 처리 실패:', error);
             alert('이미지 처리 중 오류가 발생했습니다.');
         }
     };
@@ -1231,14 +1252,27 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                 // PREMIUM_MAIN 이면서 직접 업로드 모드일 때
                                                 if (form.tier === 'PREMIUM_MAIN' && form.premium_banner_mode === 'upload') {
                                                     return (
-                                                        <label className="w-[800px] max-w-full aspect-[2/1] rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary hover:bg-blue-50/50 transition-all pointer-events-auto">
+                                                        <label className="w-[800px] max-w-full aspect-[2/1] rounded-2xl border-2 border-dashed border-gray-300 bg-gray-900 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-all pointer-events-auto relative group">
                                                             {form.image ? (
-                                                                <img src={form.image} alt="배너 이미지" className="w-full h-full object-cover" />
+                                                                <div className="w-full h-full relative overflow-hidden bg-black flex items-center justify-center">
+                                                                    {/* 1. 배경 레이어: 반투명 블러 오버레이 */}
+                                                                    <img 
+                                                                        src={form.image} 
+                                                                        alt="" 
+                                                                        className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60 pointer-events-none" 
+                                                                    />
+                                                                    {/* 2. 전면 레이어: 원본 비율 100% 유지 (깨짐 방지 / GIF 동작) */}
+                                                                    <img 
+                                                                        src={form.image} 
+                                                                        alt="배너 이미지" 
+                                                                        className="relative z-10 max-w-full max-h-full object-contain shadow-md" 
+                                                                    />
+                                                                </div>
                                                             ) : (
                                                                 <div className="flex flex-col items-center gap-2 p-6 text-center">
                                                                     <Upload className="w-10 h-10 text-gray-400 group-hover:text-primary transition-colors" />
                                                                     <span className="text-gray-500 font-bold">여기를 클릭하여 메인 배너를 업로드하세요</span>
-                                                                    <span className="text-[12px] text-gray-400">권장 사이즈: 가로 800px, 세로 400px (2:1 비율)</span>
+                                                                    <span className="text-[12px] text-gray-400">GIF 움직이는 배너, JPG, PNG 모두 지원 (비율 왜곡 자동 보정)</span>
                                                                 </div>
                                                             )}
                                                             <input type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
