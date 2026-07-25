@@ -23,6 +23,7 @@ import { QA_GET_USER_GENDER } from '@/src/atoms/qa/auth/QA_GET_USER_GENDER';
 import { playNotificationSound, showBrowserNotification } from '@/lib/notification-sound';
 import { QA_SEARCH_USERS_FOR_DM } from '@/src/atoms/qa/foxtalk/QA_SEARCH_USERS_FOR_DM';
 import { OA_CREATE_DM_ROOM } from '@/src/atoms/oa/foxtalk/OA_CREATE_DM_ROOM';
+import { QA_GET_WIDGET_UNREAD_COUNTS } from '@/src/atoms/qa/foxtalk/QA_GET_WIDGET_UNREAD_COUNTS';
 
 type AppState = 'CLOSED' | 'MENU' | 'SETUP' | 'LOBBY' | 'CREATE_ROOM' | 'ROOM' | 'CS_SETUP' | 'CS_CHAT' | 'LIVE_CHAT';
 
@@ -156,6 +157,29 @@ export function FoxTalkWidget() {
             }
         }
     }, [sessionChatUser]);
+
+    const [unreadCounts, setUnreadCounts] = useState({ foxTalkUnread: 0, csUnread: 0, totalUnread: 0 });
+
+    const fetchUnreadCounts = async () => {
+        const effectiveUserId = userId || sessionChatUser?.id || profile?.sessionId;
+        if (!effectiveUserId) {
+            setUnreadCounts({ foxTalkUnread: 0, csUnread: 0, totalUnread: 0 });
+            return;
+        }
+        const res = await QA_GET_WIDGET_UNREAD_COUNTS(effectiveUserId);
+        if (res.success && res.data) {
+            setUnreadCounts(res.data);
+        }
+    };
+
+    useEffect(() => {
+        fetchUnreadCounts();
+        const handleUnreadChanged = () => {
+            fetchUnreadCounts();
+        };
+        window.addEventListener('foxtalk_unread_changed', handleUnreadChanged);
+        return () => window.removeEventListener('foxtalk_unread_changed', handleUnreadChanged);
+    }, [userId, sessionChatUser?.id, profile?.sessionId]);
 
     useEffect(() => {
         if (appState === 'LOBBY') {
@@ -1098,33 +1122,49 @@ export function FoxTalkWidget() {
                             onClick={() => {
                                 handleOpen();
                             }}
-                            className="w-full text-left flex items-center gap-3.5 px-3 py-3.5 hover:bg-orange-50/50 rounded-2xl transition-colors group"
+                            className="w-full text-left flex items-center justify-between gap-3.5 px-3 py-3.5 hover:bg-orange-50/50 rounded-2xl transition-colors group"
                         >
-                            <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 group-hover:bg-primary group-hover:text-white transition-colors shrink-0">
-                                <MessageCircle className="w-5 h-5" />
+                            <div className="flex items-center gap-3.5 overflow-hidden">
+                                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 group-hover:bg-primary group-hover:text-white transition-colors shrink-0">
+                                    <MessageCircle className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col overflow-hidden">
+                                    <span className="font-black text-[15px] text-gray-900 leading-tight mb-0.5">
+                                        폭스톡 <span className="bg-primary/10 text-primary text-[9px] px-1.5 py-0.5 rounded-full ml-1">Beta</span>
+                                    </span>
+                                    <span className="text-[11px] font-medium text-gray-500 truncate">
+                                        {!userRole ? '로그인 후 시작하기' : userRole === 'EMPLOYER' ? '지원자와 실시간 대화하기' : '1:1 구직 대화 및 여우 오픈채팅'}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="font-black text-[15px] text-gray-900 leading-tight mb-0.5">폭스톡 <span className="bg-primary/10 text-primary text-[9px] px-1.5 py-0.5 rounded-full ml-1">Beta</span></span>
-                                <span className="text-[11px] font-medium text-gray-500">
-                                    {!userRole ? '로그인 후 시작하기' : userRole === 'EMPLOYER' ? '지원자와 실시간 대화하기' : '1:1 구직 대화 및 여우 오픈채팅'}
-                                </span>
-                            </div>
+                            {unreadCounts.foxTalkUnread > 0 && (
+                                <div className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center shrink-0 animate-pulse ml-2 shadow-sm">
+                                    N
+                                </div>
+                            )}
                         </button>
 
                         {/* Customer Service Button */}
                         <button 
                             onClick={handleOpenCS}
-                            className="w-full text-left flex items-center gap-3.5 px-3 py-3.5 hover:bg-blue-50/50 rounded-2xl transition-colors group mt-1"
+                            className="w-full text-left flex items-center justify-between gap-3.5 px-3 py-3.5 hover:bg-blue-50/50 rounded-2xl transition-colors group mt-1"
                         >
-                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors shrink-0">
-                                <Headset className="w-5 h-5" />
+                            <div className="flex items-center gap-3.5 overflow-hidden">
+                                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors shrink-0">
+                                    <Headset className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col overflow-hidden">
+                                    <span className="font-black text-[15px] text-gray-900 leading-tight mb-0.5">폭스몬 고객센터</span>
+                                    <span className="text-[11px] font-medium text-gray-500 truncate">
+                                        {!userRole ? '비회원 이용 문의' : userRole === 'EMPLOYER' ? '광고/결제 및 이용 문의' : '일반 이용 문의'}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="font-black text-[15px] text-gray-900 leading-tight mb-0.5">폭스몬 고객센터</span>
-                                <span className="text-[11px] font-medium text-gray-500">
-                                    {!userRole ? '비회원 이용 문의' : userRole === 'EMPLOYER' ? '광고/결제 및 이용 문의' : '일반 이용 문의'}
-                                </span>
-                            </div>
+                            {unreadCounts.csUnread > 0 && (
+                                <div className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center shrink-0 animate-pulse ml-2 shadow-sm">
+                                    N
+                                </div>
+                            )}
                         </button>
                     </div>
                 )}
@@ -1140,7 +1180,11 @@ export function FoxTalkWidget() {
                 >
                     {appState === 'CLOSED' ? (
                         <>
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse border border-white"></div>
+                            {unreadCounts.totalUnread > 0 && (
+                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full animate-pulse border-2 border-white flex items-center justify-center shadow-md">
+                                    <span className="text-[10px] font-black text-white leading-none">N</span>
+                                </div>
+                            )}
                             <MessageCircle className="w-8 h-8 text-white group-hover:rotate-12 transition-transform" />
                         </>
                     ) : (
