@@ -108,7 +108,7 @@ export function PremiumMainBannerCard({
                     <img 
                         src={image} 
                         alt={titleDisplay || "배너 이미지"} 
-                        className="relative z-10 max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105" 
+                        className="relative z-10 w-full h-full object-contain drop-shadow-md transition-transform duration-500 group-hover:scale-105" 
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-20 pointer-events-none" />
                 </div>

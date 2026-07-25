@@ -1265,7 +1265,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                                     <img 
                                                                         src={form.image} 
                                                                         alt="배너 이미지" 
-                                                                        className="relative z-10 max-w-full max-h-full object-contain shadow-md" 
+                                                                        className="relative z-10 w-full h-full object-contain drop-shadow-md" 
                                                                     />
                                                                 </div>
                                                             ) : (
