@@ -1226,7 +1226,7 @@ export function FoxTalkWidget() {
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}
                     onPointerCancel={handlePointerUp}
-                    className={`w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all group border-2 border-white touch-none pointer-events-auto ${appState === 'MENU' ? 'bg-gray-800 rotate-90 scale-95' : 'bg-gradient-to-tr from-primary to-orange-400 hover:scale-110'}`}
+                    className={`relative w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all group border-2 border-white touch-none pointer-events-auto ${appState === 'MENU' ? 'bg-gray-800 rotate-90 scale-95' : 'bg-gradient-to-tr from-primary to-orange-400 hover:scale-110'}`}
                 >
                     {appState === 'CLOSED' ? (
                         <>
