@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { X, MessageCircle, Send, Plus, Users, Shield, ArrowLeft, Headset, LogOut, MoreVertical, Radio, Search, UserPlus } from 'lucide-react';
@@ -32,6 +33,11 @@ interface Profile {
 }
 
 export function FoxTalkWidget() {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     if (usePathname().startsWith('/cs') || usePathname().startsWith('/fox-office')) {
         return null;
     }
@@ -1073,9 +1079,10 @@ export function FoxTalkWidget() {
     if (shouldHide) return null;
 
     if (appState === 'CLOSED' || appState === 'MENU') {
-        return (
+        if (!mounted || typeof document === 'undefined') return null;
+        return createPortal(
             <div 
-                className="fixed z-[9999] flex flex-col items-end gap-3 pointer-events-none"
+                className="fixed z-[999999] flex flex-col items-end gap-3 pointer-events-none"
                 style={{ right: `${pos.right}px`, bottom: `${pos.bottom}px` }}
             >
                 {/* Menu Popup */}
@@ -1139,13 +1146,15 @@ export function FoxTalkWidget() {
                         <X className="w-7 h-7 text-white -rotate-90" />
                     )}
                 </button>
-            </div>
+            </div>,
+            document.body
         );
     }
 
-    return (
+    if (!mounted || typeof document === 'undefined') return null;
+    return createPortal(
         <div 
-            className="fixed w-full max-w-[360px] h-[600px] max-h-[80vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-[9999] border border-gray-100 flex-col animate-in slide-in-from-bottom-10 fade-in duration-300"
+            className="fixed w-full max-w-[360px] h-[600px] max-h-[80vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-[999999] border border-gray-100 animate-in slide-in-from-bottom-10 fade-in duration-300 pointer-events-auto"
             style={{ right: `${pos.right}px`, bottom: `${pos.bottom}px` }}
         >
             {/* Header (Drag Handle) */}
@@ -1776,6 +1785,7 @@ export function FoxTalkWidget() {
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
