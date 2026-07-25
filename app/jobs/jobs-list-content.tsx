@@ -338,9 +338,19 @@ export function JobsListContent({ isEmployer: propIsEmployer, searchQuery }: Job
         );
     }
 
-    // Pagination logic
-    const totalPages = Math.ceil(generalJobs.length / ITEMS_PER_PAGE);
-    const paginatedTableJobs = generalJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+    // Pagination logic (배너 광고 등록 업체도 구인글 리스트에 서비스 자동 통합 노출)
+    const allRealAds = [...generalJobs, ...lineJobs, ...premiumJobs, ...specialJobs].filter(j => j.isRealAd);
+    const nonRealGeneral = generalJobs.filter(j => !j.isRealAd);
+    
+    const uniqueMap = new Map();
+    allRealAds.forEach(item => uniqueMap.set(item.id, item));
+    nonRealGeneral.forEach(item => {
+        if (!uniqueMap.has(item.id)) uniqueMap.set(item.id, item);
+    });
+    
+    const combinedTableJobs = Array.from(uniqueMap.values());
+    const totalPages = Math.ceil(combinedTableJobs.length / ITEMS_PER_PAGE);
+    const paginatedTableJobs = combinedTableJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     return (
         <div className="space-y-6 md:space-y-12">
@@ -716,7 +726,7 @@ export function JobsListContent({ isEmployer: propIsEmployer, searchQuery }: Job
                         </Link>
                     )}
                 </div>
-                {generalJobs.length > 0 ? (
+                {combinedTableJobs.length > 0 ? (
                     <div className="flex flex-col gap-4">
                         {/* PC 뷰 (테이블 형태) */}
                         <div className="hidden md:block bg-white border-t-2 border-gray-900 shadow-sm rounded-b-xl overflow-x-auto">

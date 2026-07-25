@@ -63,6 +63,23 @@ export default async function BizAdsPage() {
                 )}
             </div>
 
+            {/* 🎁 1석 2조 자동 구인글 연동 서비스 안내 혜택 바 */}
+            <div className="bg-orange-50/80 border border-orange-200/80 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-orange-500 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-sm">
+                        🎁
+                    </div>
+                    <div>
+                        <h4 className="font-black text-sm text-gray-900">
+                            1석 2조 특전: 배너 광고 등록 시 [구인정보 리스트] 자동 무료 연동!
+                        </h4>
+                        <p className="text-[12px] font-bold text-gray-600 mt-0.5">
+                            메인/사이드/프리미엄/일반 배너 광고를 등록하시면 추가 비용 없이 구인정보 목록 및 홈 하단 구인글 리스트에 자동으로 100% 함께 노출됩니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* 법적 차단막 (비사업자 / 미인증 회원) */}
             {!isVerifiedEmployer ? (
                 <div className="bg-white rounded-2xl border border-gray-150 p-8 shadow-sm flex flex-col items-center justify-center text-center gap-6 max-w-2xl mx-auto my-6">
