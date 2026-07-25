@@ -5,6 +5,7 @@ import { Crown, X, Eye, DollarSign, Loader2, Clock, Zap, Layers } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { AdFormData } from '@/components/biz/AdEditorForm';
 import { PremiumJobCard } from '@/components/home/premium-job-card';
+import { PremiumMainBannerCard } from '@/components/home/PremiumMainBannerCard';
 import { getUserPointsAction } from '@/app/actions/pointActions';
 import { manageBizAdAction, getActiveFixedAdCountAction } from '@/lib/actions';
 import { GET_POINT_POLICIES } from '@/app/actions/pointPolicyActions';
@@ -368,101 +369,24 @@ ${cancelDetail || '상세 사유 미기재'}
 
                                     // 1) PREMIUM_MAIN (상단 고정 배너 메인)일 때
                                     if (isPremiumMain) {
-                                        // PREMIUM_MAIN 이면서 직접 업로드 모드이거나 이미지가 등록된 경우
-                                        if (form.premium_banner_mode === 'upload' && form.image) {
-                                            return (
-                                                <div className="w-[400px] max-w-full aspect-[2/1] rounded-2xl overflow-hidden shadow-md border border-gray-200">
-                                                    <img src={form.image} alt="배너 이미지" className="w-full h-full object-cover" />
-                                                </div>
-                                            );
-                                        }
-
-                                        // 템플릿 모드 및 기본 메인 배너 카드 (MainBanner.tsx와 100% 동일한 비주얼 구조)
-                                        const hasLogo = !!form.logo_url;
-                                        const logoUrl = form.logo_url;
-                                        const bannerImage = form.image;
-                                        
-                                        let payType = '';
-                                        let payAmount = '';
-                                        const rawPay = form.pay || (form.salary_type ? `[${form.salary_type}] ${form.salary_amount}` : (form.salary_amount ? form.salary_amount : (form.pay_amount ? `${form.pay_type || ''} ${form.pay_amount}` : '')));
-                                        if (rawPay && typeof rawPay === 'string' && rawPay.trim() !== '') {
-                                            if (rawPay.includes(']') && rawPay.startsWith('[')) {
-                                                const splitIndex = rawPay.indexOf(']');
-                                                payType = rawPay.substring(1, splitIndex).trim();
-                                                payAmount = rawPay.substring(splitIndex + 1).trim();
-                                            } else if (rawPay === '추후협의') {
-                                                payType = '협의';
-                                                payAmount = '추후협의';
-                                            } else {
-                                                const parts = rawPay.split(' ');
-                                                if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0])) {
-                                                    payType = parts[0];
-                                                    payAmount = parts.slice(1).join(' ');
-                                                } else {
-                                                    payAmount = rawPay;
-                                                }
-                                            }
-                                        }
-
-                                        const themeMap: Record<string, string> = {
-                                            gold: 'from-yellow-900 via-orange-900 to-black',
-                                            platinum: 'from-slate-700 via-gray-900 to-black',
-                                            diamond: 'from-cyan-900 via-blue-900 to-black',
-                                            ruby: 'from-rose-900 via-red-900 to-black',
-                                            sapphire: 'from-blue-900 via-indigo-900 to-black',
-                                            emerald: 'from-emerald-900 via-green-900 to-black',
-                                            amethyst: 'from-purple-900 via-fuchsia-900 to-black',
-                                            obsidian: 'from-gray-900 via-black to-black'
-                                        };
-                                        const bgGradient = form.theme && form.theme !== 'none' && themeMap[form.theme] 
-                                            ? `bg-gradient-to-br ${themeMap[form.theme]}` 
-                                            : 'bg-gradient-to-br from-indigo-900 via-purple-900 to-black';
-
                                         return (
                                             <div className="flex justify-center w-full">
-                                                <div className={`flex-shrink-0 w-[400px] max-w-full h-[200px] rounded-2xl ${bgGradient} p-5 shadow-md relative overflow-hidden group`}>
-                                                    {/* 템플릿 모드 배경 이미지 */}
-                                                    {bannerImage && (
-                                                        <div 
-                                                            className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-60"
-                                                            style={{ backgroundImage: `url(${bannerImage})` }}
-                                                        />
-                                                    )}
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
-                                                    <div className="relative z-20 h-full flex flex-col justify-between">
-                                                        <div className="space-y-2">
-                                                            <div className="flex items-center gap-3 mb-1">
-                                                                {hasLogo && (
-                                                                    <div className="w-[50px] h-[34px] bg-white rounded-md p-1 shadow-sm shrink-0 flex items-center justify-center overflow-hidden">
-                                                                        <div className="w-full h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoUrl})` }} />
-                                                                    </div>
-                                                                )}
-                                                                <h3 className="text-white font-black text-xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                                                                    {form.company_name || form.company || form.business_name || '테스트상호'}
-                                                                </h3>
-                                                            </div>
-                                                            <p className="text-white/95 text-sm font-bold line-clamp-2 max-w-[95%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
-                                                                {form.title || '배너 제목이 표시됩니다'}
-                                                            </p>
-                                                        </div>
-                                                        <div className="flex flex-col gap-1 mt-auto">
-                                                            <p className="text-white/70 text-[10px] font-bold tracking-wider">{form.location || '지역'}</p>
-                                                            {payAmount && (
-                                                                <div className="flex items-center gap-1.5">
-                                                                    {payType && (
-                                                                        <span className="px-1.5 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[10px] font-black tracking-wide border border-white/10 shadow-sm">
-                                                                            {payType}
-                                                                        </span>
-                                                                    )}
-                                                                    <span className="text-white font-black text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                                                                        {payAmount}
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    {/* 장식용 글로우 원형 오버레이 */}
-                                                    <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                                                <div className="w-[400px] max-w-full h-[200px]">
+                                                    <PremiumMainBannerCard
+                                                        company={form.company_name || form.company || form.business_name || '테스트상호'}
+                                                        title={form.title || '배너 제목이 표시됩니다'}
+                                                        location={form.location || '지역'}
+                                                        category={form.category1 || form.category}
+                                                        pay={form.pay}
+                                                        salary_type={form.salary_type}
+                                                        salary_amount={form.salary_amount}
+                                                        pay_type={form.pay_type}
+                                                        pay_amount={form.pay_amount}
+                                                        logo_url={form.logo_url}
+                                                        image={form.image}
+                                                        theme={form.theme}
+                                                        premium_banner_mode={form.premium_banner_mode}
+                                                    />
                                                 </div>
                                             </div>
                                         );
