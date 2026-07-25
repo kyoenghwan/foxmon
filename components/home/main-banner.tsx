@@ -161,13 +161,27 @@ export function MainBanner() {
     // 광고가 1개만 등록되어 있을 경우 2개 중복 노출을 방지하고 단일 풀 래퍼 배너로 깔끔하게 노출
     if (ads.length === 1) {
         const banner = ads[0];
-        const hasLogo = !!(banner as any).logo_url;
-        const logoUrl = (banner as any).logo_url;
+        const logoUrl = (banner as any).logo_url || (banner as any).logo;
+        const hasLogo = !!logoUrl;
+        const bannerImage = (banner.image && banner.image !== logoUrl) ? banner.image : null;
         const isUploadMode = banner.theme === 'UPLOAD';
-        const bgClass = 'bg-gradient-to-br from-indigo-900 via-purple-900 to-black';
+
+        const themeMap: Record<string, string> = {
+            gold: 'from-yellow-900 via-orange-900 to-black',
+            platinum: 'from-slate-700 via-gray-900 to-black',
+            diamond: 'from-cyan-900 via-blue-900 to-black',
+            ruby: 'from-rose-900 via-red-900 to-black',
+            sapphire: 'from-blue-900 via-indigo-900 to-black',
+            emerald: 'from-emerald-900 via-green-900 to-black',
+            amethyst: 'from-purple-900 via-fuchsia-900 to-black',
+            obsidian: 'from-gray-900 via-black to-black'
+        };
+        const bgClass = banner.theme && banner.theme !== 'none' && themeMap[banner.theme] 
+            ? `bg-gradient-to-br ${themeMap[banner.theme]}` 
+            : 'bg-gradient-to-br from-indigo-900 via-purple-900 to-black';
 
         let payType = '';
-        let payAmount = banner.pay || '';
+        let payAmount = banner.pay || ((banner as any).salary_type ? `[${(banner as any).salary_type}] ${(banner as any).salary_amount}` : (banner as any).salary_amount) || ((banner as any).pay_amount ? `${(banner as any).pay_type || ''} ${(banner as any).pay_amount}` : '');
         if (payAmount?.includes(']') && payAmount?.startsWith('[')) {
             const splitIndex = payAmount.indexOf(']');
             payType = payAmount.substring(1, splitIndex).trim();
@@ -175,7 +189,7 @@ export function MainBanner() {
         } else if (payAmount === '추후협의') {
             payType = '협의';
             payAmount = '추후협의';
-        } else {
+        } else if (payAmount) {
             const parts = payAmount.split(' ');
             if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0] || '')) {
                 payType = parts[0];
@@ -200,10 +214,10 @@ export function MainBanner() {
                         </div>
                     ) : (
                         <>
-                            {banner.image && (
+                            {bannerImage && (
                                 <div 
                                     className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 mix-blend-overlay opacity-60"
-                                    style={{ backgroundImage: `url(${banner.image})` }}
+                                    style={{ backgroundImage: `url(${bannerImage})` }}
                                 />
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
@@ -220,7 +234,7 @@ export function MainBanner() {
                                             </div>
                                         )}
                                         <h3 className="text-white font-black text-lg sm:text-xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                                            {banner.company}
+                                            {banner.company || (banner as any).company_name}
                                         </h3>
                                     </div>
                                     <p className="text-white/95 text-xs sm:text-sm font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
@@ -229,7 +243,7 @@ export function MainBanner() {
                                 </div>
 
                                 <div className="flex flex-col gap-1 sm:gap-1.5 mt-auto">
-                                    <p className="text-white/70 text-[10px] sm:text-[11px] font-bold tracking-wider">{banner.location}</p>
+                                    <p className="text-white/70 text-[10px] sm:text-[11px] font-bold tracking-wider">{banner.location || '전지역'}</p>
                                     {payAmount && (
                                         <div className="flex items-center gap-1.5 sm:gap-2">
                                             {payType && (
@@ -268,21 +282,27 @@ export function MainBanner() {
                 }}
             >
                 {extendedBanners.map((banner, idx) => {
-                    const hasLogo = !!(banner as any).logo_url;
-                    const logoUrl = (banner as any).logo_url;
+                    const logoUrl = (banner as any).logo_url || (banner as any).logo;
+                    const hasLogo = !!logoUrl;
+                    const bannerImage = (banner.image && banner.image !== logoUrl) ? banner.image : null;
                     
-                    // 이미지가 없을 때 사용할 프리미엄 AI 느낌의 fallback 그라데이션 배열
-                    const fallbackGradients = [
-                        'bg-gradient-to-br from-indigo-900 via-purple-900 to-black',
-                        'bg-gradient-to-br from-slate-900 via-sky-900 to-black',
-                        'bg-gradient-to-br from-rose-900 via-fuchsia-900 to-black',
-                        'bg-gradient-to-br from-emerald-900 via-teal-900 to-black',
-                    ];
-                    const bgClass = fallbackGradients[idx % fallbackGradients.length];
+                    const themeMap: Record<string, string> = {
+                        gold: 'from-yellow-900 via-orange-900 to-black',
+                        platinum: 'from-slate-700 via-gray-900 to-black',
+                        diamond: 'from-cyan-900 via-blue-900 to-black',
+                        ruby: 'from-rose-900 via-red-900 to-black',
+                        sapphire: 'from-blue-900 via-indigo-900 to-black',
+                        emerald: 'from-emerald-900 via-green-900 to-black',
+                        amethyst: 'from-purple-900 via-fuchsia-900 to-black',
+                        obsidian: 'from-gray-900 via-black to-black'
+                    };
 
-                    // 급여 파싱 로직
+                    const bgClass = banner.theme && banner.theme !== 'none' && themeMap[banner.theme] 
+                        ? `bg-gradient-to-br ${themeMap[banner.theme]}` 
+                        : 'bg-gradient-to-br from-indigo-900 via-purple-900 to-black';
+
                     let payType = '';
-                    let payAmount = banner.pay || '';
+                    let payAmount = banner.pay || ((banner as any).salary_type ? `[${(banner as any).salary_type}] ${(banner as any).salary_amount}` : (banner as any).salary_amount) || ((banner as any).pay_amount ? `${(banner as any).pay_type || ''} ${(banner as any).pay_amount}` : '');
                     if (payAmount?.includes(']') && payAmount?.startsWith('[')) {
                         const splitIndex = payAmount.indexOf(']');
                         payType = payAmount.substring(1, splitIndex).trim();
@@ -290,7 +310,7 @@ export function MainBanner() {
                     } else if (payAmount === '추후협의') {
                         payType = '협의';
                         payAmount = '추후협의';
-                    } else {
+                    } else if (payAmount) {
                         const parts = payAmount.split(' ');
                         if (parts.length > 1 && ['시급', '일급', '주급', '월급', '건당', '협의', '기타'].includes(parts[0] || '')) {
                             payType = parts[0];
@@ -323,11 +343,11 @@ export function MainBanner() {
                             ) : (
                                 /* 기존 템플릿 모드 */
                                 <>
-                                    {/* 템플릿 모드 배경 이미지 */}
-                                    {banner.image && (
+                                    {/* 템플릿 모드 배경 이미지 (로고 이미지와 같지 않을 때만 오버레이) */}
+                                    {bannerImage && (
                                         <div 
                                             className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 mix-blend-overlay opacity-60"
-                                            style={{ backgroundImage: `url(${banner.image})` }}
+                                            style={{ backgroundImage: `url(${bannerImage})` }}
                                         />
                                     )}
                                     {/* 가독성을 위한 어두운 그라데이션 오버레이 (강화) */}
@@ -347,7 +367,7 @@ export function MainBanner() {
                                                     </div>
                                                 )}
                                                 <h3 className="text-white font-black text-lg sm:text-xl line-clamp-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform origin-left duration-300">
-                                                    {banner.company}
+                                                    {banner.company || (banner as any).company_name}
                                                 </h3>
                                             </div>
                                             <p className="text-white/95 text-xs sm:text-sm font-bold line-clamp-2 max-w-[90%] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] leading-snug">
@@ -356,17 +376,19 @@ export function MainBanner() {
                                         </div>
 
                                         <div className="flex flex-col gap-1 sm:gap-1.5 mt-auto">
-                                            <p className="text-white/70 text-[10px] sm:text-[11px] font-bold tracking-wider">{banner.location}</p>
-                                            <div className="flex items-center gap-1.5 sm:gap-2">
-                                                {payType && (
-                                                    <span className="px-1.5 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[9px] sm:text-[11px] font-black tracking-wide border border-white/10 shadow-sm">
-                                                        {payType}
+                                            <p className="text-white/70 text-[10px] sm:text-[11px] font-bold tracking-wider">{banner.location || '전지역'}</p>
+                                            {payAmount && (
+                                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                                    {payType && (
+                                                        <span className="px-1.5 py-0.5 rounded bg-white/20 backdrop-blur-md text-white text-[9px] sm:text-[11px] font-black tracking-wide border border-white/10 shadow-sm">
+                                                            {payType}
+                                                        </span>
+                                                    )}
+                                                    <span className="text-white font-black text-base sm:text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                                                        {payAmount}
                                                     </span>
-                                                )}
-                                                <span className="text-white font-black text-base sm:text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                                                    {payAmount}
-                                                </span>
-                                            </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
