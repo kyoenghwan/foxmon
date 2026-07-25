@@ -45,7 +45,7 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
 
             {/* 메인 배너 & 데스크톱 로그인 정보 (스크롤 시 상단으로 흘러 올라가도록 고정 해제) */}
             <div className="w-full shrink-0">
-                <div className="container mx-auto px-4 py-2.5 md:py-3.5">
+                <div className="w-full xl:max-w-[828px] 2xl:max-w-[1040px] mx-auto px-4 py-2.5 md:py-3.5">
                     <div className="bg-gray-50 border border-gray-100 rounded-2xl p-3 md:p-4 shadow-sm">
                         <div className="relative flex flex-col tablet:flex-row gap-3 tablet:gap-6 items-stretch tablet:h-[203px]">
                             {/* 메인 배너: 스크롤 시 위로 이동 */}
@@ -66,7 +66,7 @@ export function MainLayoutWrapper({ children }: MainLayoutWrapperProps) {
 
             <main className="flex-1 flex flex-col w-full relative">
                 {/* 유저 로그인 정보 박스 (모바일 전용: 스크롤 영역 상단 배치로 스크롤 시 위로 이동) */}
-                <div className="block tablet:hidden w-full container mx-auto px-4 pt-4 z-20">
+                <div className="block tablet:hidden w-full mx-auto px-4 pt-4 z-20">
                     <LoginInfoBox session={session} />
                 </div>
                 {children}

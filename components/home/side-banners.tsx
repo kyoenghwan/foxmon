@@ -129,7 +129,7 @@ export function SideBanners() {
 
     return (
         <div className="fixed top-[220px] left-0 w-full z-[45] pointer-events-none flex justify-center">
-            <div ref={containerRef} className="container relative h-0">
+            <div ref={containerRef} className="w-full xl:max-w-[828px] 2xl:max-w-[1040px] mx-auto relative h-0">
                 {/* Left Wing */}
                 <div 
                     className="hidden xl:flex flex-col gap-3 absolute top-0 right-full mr-4 pointer-events-auto transition-all duration-300 w-[130px]"

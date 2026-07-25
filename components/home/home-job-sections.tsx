@@ -173,7 +173,7 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
     }
 
     return (
-        <main className="container px-4 lg:px-6 py-6 md:py-8 space-y-8 md:space-y-10">
+        <main className="w-full xl:max-w-[828px] 2xl:max-w-[1040px] mx-auto px-4 py-6 md:py-8 space-y-8 md:space-y-10">
             {/* 1. Scrolling Notice Ticker */}
             <section className="bg-gray-50/60 border border-gray-100 rounded-2xl px-4 py-2.5 shadow-sm">
                 <div className="flex items-center gap-2 md:gap-3">

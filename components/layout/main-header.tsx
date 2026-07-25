@@ -152,7 +152,7 @@ export function MainHeader({ session }: MainHeaderProps) {
         <header className="bg-white border-b z-50 relative">
             {/* 상단 툴바 (Top Utility Bar) */}
             <div className="bg-gray-50 border-b border-gray-100">
-                <div className="container mx-auto px-1.5 sm:px-4 lg:px-8 h-9 flex items-center justify-between text-[11px] sm:text-xs font-bold text-gray-500 overflow-x-auto scrollbar-hide whitespace-nowrap">
+                <div className="w-full xl:max-w-[828px] 2xl:max-w-[1040px] mx-auto px-4 h-9 flex items-center justify-between text-[11px] sm:text-xs font-bold text-gray-500 overflow-x-auto scrollbar-hide whitespace-nowrap">
                     <div className="flex items-center gap-1 sm:gap-3 lg:gap-4 min-w-0">
                         <button onClick={() => alert('💻 PC: [Ctrl + D] (Mac은 Cmd + D)를 누르시면 즐겨찾기에 등록됩니다!')} className="hover:text-primary transition-colors flex items-center gap-1 shrink-0">
                             ⭐️ 즐겨찾기
@@ -241,7 +241,7 @@ export function MainHeader({ session }: MainHeaderProps) {
             </div>
 
             {/* 1단: 로고(좌) · 검색창 & 키워드(세로 스택) · 회원정보/로그인(우) */}
-            <div className="container mx-auto px-4 lg:px-8 py-3 md:py-4">
+            <div className="w-full xl:max-w-[828px] 2xl:max-w-[1040px] mx-auto px-4 py-3 md:py-4">
                 <div className="flex flex-row items-center justify-between gap-3 md:gap-6 w-full">
                     {/* 좌측: 로고 */}
                     <div className="flex items-center shrink-0">
@@ -375,7 +375,7 @@ export function MainHeader({ session }: MainHeaderProps) {
 
             {/* 2단: 네비게이션 메뉴 바 */}
             <div className="border-t border-gray-100 bg-white">
-                <div className="container mx-auto px-4 lg:px-8">
+                <div className="w-full xl:max-w-[828px] 2xl:max-w-[1040px] mx-auto px-4">
                     <nav className="flex items-center justify-between min-h-[3.5rem] lg:h-14 py-1.5 lg:py-0 relative w-full">
                         <div className="flex items-center gap-4 sm:gap-6 md:gap-8 h-full w-full min-w-0">
                             {/* 햄버거 메뉴 (전체) */}
