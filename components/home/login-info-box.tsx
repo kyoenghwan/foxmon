@@ -100,39 +100,22 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
         const initRealtime = async () => {
             const normalizedUserId = userId.toLowerCase().trim();
             
-            // 유저가 참여 중인 활성 대화방 ID 리스트 조회
-            const { data: participants } = await supabase
-                .from('foxtalk_participants')
-                .select('room_id')
-                .eq('session_id', normalizedUserId);
-
-            const activeRoomIds = (participants || []).map(p => p.room_id).filter(Boolean);
-
-            channel = supabase.channel(`unread-count-box:${normalizedUserId}`);
-
-            // 본인이 속한 방에 새로운 메시지가 추가된 경우만 감지하여 갱신
-            activeRoomIds.forEach((roomId) => {
-                channel.on('postgres_changes', {
+            channel = supabase.channel(`unread-count-box:${normalizedUserId}`)
+                .on('postgres_changes', {
                     event: 'INSERT',
                     schema: 'public',
-                    table: 'foxtalk_messages',
-                    filter: `room_id=eq.${roomId}`
+                    table: 'foxtalk_messages'
                 }, () => {
                     fetchUnreadCount();
-                });
-            });
-
-            // 내 참여 상태나 읽음 상태가 변경(UPDATE)될 때 감지하여 갱신
-            channel.on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'foxtalk_participants',
-                filter: `session_id=eq.${normalizedUserId}`
-            }, () => {
-                fetchUnreadCount();
-            });
-
-            channel.subscribe();
+                })
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'foxtalk_participants'
+                }, () => {
+                    fetchUnreadCount();
+                })
+                .subscribe();
         };
 
         initRealtime();

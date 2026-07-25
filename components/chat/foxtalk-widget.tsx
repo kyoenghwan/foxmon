@@ -178,7 +178,38 @@ export function FoxTalkWidget() {
             fetchUnreadCounts();
         };
         window.addEventListener('foxtalk_unread_changed', handleUnreadChanged);
-        return () => window.removeEventListener('foxtalk_unread_changed', handleUnreadChanged);
+
+        const effectiveUserId = userId || sessionChatUser?.id || profile?.sessionId;
+        let globalChannel: any = null;
+
+        if (effectiveUserId) {
+            const normalizedUserId = effectiveUserId.toLowerCase().trim();
+            globalChannel = supabase.channel(`widget-unread-realtime:${normalizedUserId}`)
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'foxtalk_messages'
+                }, () => {
+                    fetchUnreadCounts();
+                    window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
+                })
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'foxtalk_participants'
+                }, () => {
+                    fetchUnreadCounts();
+                    window.dispatchEvent(new CustomEvent('foxtalk_unread_changed'));
+                })
+                .subscribe();
+        }
+
+        return () => {
+            window.removeEventListener('foxtalk_unread_changed', handleUnreadChanged);
+            if (globalChannel) {
+                supabase.removeChannel(globalChannel);
+            }
+        };
     }, [userId, sessionChatUser?.id, profile?.sessionId]);
 
     useEffect(() => {
