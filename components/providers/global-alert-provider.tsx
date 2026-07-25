@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
+import { createPortal } from 'react-dom';
 
 const GlobalAlertContext = createContext<(message: string) => void>(() => {});
 
@@ -9,6 +10,7 @@ export const useGlobalAlert = () => useContext(GlobalAlertContext);
 export function GlobalAlertProvider({ children }: { children: React.ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState('');
+    const [mounted, setMounted] = useState(false);
 
     const showAlert = (msg: string) => {
         setMessage(msg);
@@ -21,6 +23,7 @@ export function GlobalAlertProvider({ children }: { children: React.ReactNode })
     };
 
     useEffect(() => {
+        setMounted(true);
         if (typeof window !== 'undefined') {
             // 브라우저 기본 alert를 커스텀 alert로 덮어씌웁니다.
             window.alert = (msg: string) => {
@@ -34,9 +37,9 @@ export function GlobalAlertProvider({ children }: { children: React.ReactNode })
             {children}
             
             {/* 전역 정중앙 커스텀 알럿 모달 */}
-            {isOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-gray-150 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+            {isOpen && mounted && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-[99999] flex items-center justify-center p-4 animate-in fade-in duration-200 pointer-events-auto">
+                    <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-gray-150 flex flex-col items-center text-center animate-in zoom-in-95 duration-200 pointer-events-auto">
                         {/* 폭스몬 🦊 마스코트 이모지 */}
                         <div className="w-12 h-12 bg-orange-50 text-orange-650 rounded-full flex items-center justify-center text-2xl font-black mb-3">
                             🦊
@@ -53,7 +56,8 @@ export function GlobalAlertProvider({ children }: { children: React.ReactNode })
                             확인
                         </button>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </GlobalAlertContext.Provider>
     );
