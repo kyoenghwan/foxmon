@@ -11,11 +11,14 @@ export const OA_UPDATE_PARTICIPANT_READ = async (
     data: UpdateReadData
 ) => {
     try {
+        const rawSessionId = data.session_id ? data.session_id.trim() : '';
+        const lowerSessionId = rawSessionId.toLowerCase();
+
         const { error } = await supabaseAdmin
             .from('foxtalk_participants')
             .update({ last_read_at: new Date().toISOString() })
             .eq('room_id', data.room_id)
-            .eq('session_id', data.session_id);
+            .or(`session_id.eq.${rawSessionId},session_id.eq.${lowerSessionId}`);
 
         if (error) throw error;
         

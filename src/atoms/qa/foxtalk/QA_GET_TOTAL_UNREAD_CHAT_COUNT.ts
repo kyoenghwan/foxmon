@@ -1,17 +1,18 @@
 'use server';
 
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const QA_GET_TOTAL_UNREAD_CHAT_COUNT = async (userId?: string) => {
     try {
         if (!userId) return { success: true, data: 0 };
-        const normalizedUserId = userId.toLowerCase().trim();
+        const rawUserId = userId.trim();
+        const normalizedUserId = rawUserId.toLowerCase();
 
         // 1. 유저가 참여 중인 채팅방 정보 및 마지막 읽은 시간 조회
-        const { data: participants, error: partError } = await supabase
+        const { data: participants, error: partError } = await supabaseAdmin
             .from('foxtalk_participants')
             .select('id, room_id, last_read_at')
-            .eq('session_id', normalizedUserId);
+            .or(`session_id.eq.${rawUserId},session_id.eq.${normalizedUserId}`);
 
         if (partError) throw partError;
         if (!participants || participants.length === 0) {
@@ -23,7 +24,7 @@ export const QA_GET_TOTAL_UNREAD_CHAT_COUNT = async (userId?: string) => {
             participants.map(async (participant) => {
                 const lastReadAt = participant.last_read_at || '1970-01-01T00:00:00.000Z';
                 
-                const { count, error: countErr } = await supabase
+                const { count, error: countErr } = await supabaseAdmin
                     .from('foxtalk_messages')
                     .select('*', { count: 'exact', head: true })
                     .eq('room_id', participant.room_id)

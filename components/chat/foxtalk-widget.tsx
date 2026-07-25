@@ -246,12 +246,13 @@ export function FoxTalkWidget() {
                     
                     // 4. 읽음 처리 수행 시간 측정
                     const t7 = performance.now();
-                    if (room.type === '1ON1') {
+                    if (currentProfile?.sessionId) {
                         await OA_UPDATE_PARTICIPANT_READ({
                             room_id: room.id,
                             session_id: currentProfile.sessionId
                         });
-                    } else {
+                    }
+                    if (room.type !== '1ON1') {
                         await OA_INSERT_CHAT_MESSAGE({
                             room_id: room.id,
                             content: `${currentProfile.nickname}님이 입장하셨습니다.`,
@@ -528,7 +529,7 @@ export function FoxTalkWidget() {
 
         // 4. 읽음 처리 수행 시간 측정
         const t7 = performance.now();
-        if (profile?.sessionId && room.type === '1ON1') {
+        if (profile?.sessionId) {
             await OA_UPDATE_PARTICIPANT_READ({
                 room_id: room.id,
                 session_id: profile.sessionId
@@ -872,7 +873,7 @@ export function FoxTalkWidget() {
                 if (!newMessage?.id) return;
                 
                 // 상대방 메시지 수신 시 읽음 처리 수행
-                if (profile?.sessionId && currentRoom.type === '1ON1') {
+                if (profile?.sessionId) {
                     await OA_UPDATE_PARTICIPANT_READ({
                         room_id: currentRoom.id,
                         session_id: profile.sessionId
@@ -972,7 +973,7 @@ export function FoxTalkWidget() {
                 alert('메시지 전송에 실패했습니다.');
             } else {
                 // 내가 메시지를 보냈으므로 내 읽음 상태 갱신
-                if (profile?.sessionId && currentRoom.type === '1ON1') {
+                if (profile?.sessionId) {
                     await OA_UPDATE_PARTICIPANT_READ({
                         room_id: currentRoom.id,
                         session_id: profile.sessionId
