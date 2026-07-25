@@ -525,6 +525,12 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 .single();
 
             if (error) throw error;
+            try {
+                const { revalidatePath } = await import('next/cache');
+                revalidatePath('/', 'layout');
+                revalidatePath('/jobs', 'page');
+                revalidatePath('/biz/ads', 'page');
+            } catch (e) {}
             return { success: true, message: '구인 공고가 수정되었습니다.', data };
         }
 

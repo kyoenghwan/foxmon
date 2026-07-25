@@ -246,7 +246,7 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                     <div className="grid grid-cols-2 min-[600px]:grid-cols-3 min-[830px]:grid-cols-4 min-[1040px]:grid-cols-5 gap-2 min-[600px]:gap-4 w-full mx-auto">
                         {demoJobs.map((job, idx) => (
                             <div 
-                                key={job.id} 
+                                key={`${job.id}-${idx}`} 
                                 className={`w-full ${
                                     !showAllPremium ? getResponsiveHideClass(idx, 5) : ''
                                 }`}
