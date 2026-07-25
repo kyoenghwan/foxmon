@@ -100,6 +100,8 @@ export function FoxTalkWidget() {
     const [userId, setUserId] = useState<string | null>(null);
     /** 로그인 시 고객센터/폭스톡에 쓸 안정적인 식별자·표시명 (DB session_id = user.id) */
     const [sessionChatUser, setSessionChatUser] = useState<{ id: string; nickname: string } | null>(null);
+    /** stale closure 방지: fetchUnreadCounts 등에서 항상 최신 userId를 참조 */
+    const resolvedUserIdRef = useRef<string | null>(null);
 
     useEffect(() => {
         if (session?.user) {
@@ -108,6 +110,7 @@ export function FoxTalkWidget() {
             }
             if (session.user.id) {
                 setUserId(session.user.id);
+                resolvedUserIdRef.current = session.user.id;
                 const nick =
                     String((session.user as { nickname?: string }).nickname || '').trim() ||
                     String(session.user.name || '').trim() ||
@@ -119,6 +122,7 @@ export function FoxTalkWidget() {
             setUserRole(null);
             setUserId(null);
             setSessionChatUser(null);
+            resolvedUserIdRef.current = null;
         }
     }, [session]);
 
@@ -162,21 +166,12 @@ export function FoxTalkWidget() {
     const [unreadCounts, setUnreadCounts] = useState({ foxTalkUnread: 0, csUnread: 0, totalUnread: 0 });
 
     const fetchUnreadCounts = async (overrideUserId?: string) => {
-        const effectiveUserId = overrideUserId || sessionChatUser?.id || userId || (session?.user as any)?.id || profile?.sessionId;
-        console.log('[FoxTalkWidget] fetchUnreadCounts called:', {
-            overrideUserId,
-            sessionChatUserId: sessionChatUser?.id,
-            userId,
-            sessionUserId: (session?.user as any)?.id,
-            profileSessionId: profile?.sessionId,
-            effectiveUserId
-        });
+        const effectiveUserId = overrideUserId || resolvedUserIdRef.current || sessionChatUser?.id || userId || (session?.user as any)?.id || profile?.sessionId;
         if (!effectiveUserId) {
             setUnreadCounts({ foxTalkUnread: 0, csUnread: 0, totalUnread: 0 });
             return;
         }
         const res = await QA_GET_WIDGET_UNREAD_COUNTS(effectiveUserId);
-        console.log('[FoxTalkWidget] QA_GET_WIDGET_UNREAD_COUNTS result:', { effectiveUserId, res });
         if (res.success && res.data) {
             setUnreadCounts(res.data);
         }
