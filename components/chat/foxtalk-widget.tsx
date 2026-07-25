@@ -1254,27 +1254,27 @@ export function FoxTalkWidget() {
 
                 {/* FAB Button */}
                 {(() => { console.log('[BADGE-RENDER] FAB 렌더링:', { appState, unreadCounts, totalUnread: unreadCounts.totalUnread, showBadge: appState === 'CLOSED' && unreadCounts.totalUnread > 0 }); return null; })()}
-                <button 
-                    onClick={onWidgetClick}
-                    onPointerDown={handlePointerDown}
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={handlePointerUp}
-                    onPointerCancel={handlePointerUp}
-                    className={`relative w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all group border-2 border-white touch-none pointer-events-auto ${appState === 'MENU' ? 'bg-gray-800 rotate-90 scale-95' : 'bg-gradient-to-tr from-primary to-orange-400 hover:scale-110'}`}
-                >
-                    {appState === 'CLOSED' ? (
-                        <>
-                            {unreadCounts.totalUnread > 0 && (
-                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full animate-pulse border-2 border-white flex items-center justify-center shadow-md">
-                                    <span className="text-[10px] font-black text-white leading-none">N</span>
-                                </div>
-                            )}
-                            <MessageCircle className="w-8 h-8 text-white group-hover:rotate-12 transition-transform" />
-                        </>
-                    ) : (
-                        <X className="w-7 h-7 text-white -rotate-90" />
+                <div className="relative pointer-events-auto">
+                    {appState === 'CLOSED' && unreadCounts.totalUnread > 0 && (
+                        <div className="absolute -top-1 -right-1 z-10 w-5 h-5 bg-red-500 rounded-full animate-pulse border-2 border-white flex items-center justify-center shadow-md pointer-events-none">
+                            <span className="text-[10px] font-black text-white leading-none">N</span>
+                        </div>
                     )}
-                </button>
+                    <button 
+                        onClick={onWidgetClick}
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerUp}
+                        className={`w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all group border-2 border-white touch-none ${appState === 'MENU' ? 'bg-gray-800 rotate-90 scale-95' : 'bg-gradient-to-tr from-primary to-orange-400 hover:scale-110'}`}
+                    >
+                        {appState === 'CLOSED' ? (
+                            <MessageCircle className="w-8 h-8 text-white group-hover:rotate-12 transition-transform" />
+                        ) : (
+                            <X className="w-7 h-7 text-white -rotate-90" />
+                        )}
+                    </button>
+                </div>
             </div>,
             document.body
         );
