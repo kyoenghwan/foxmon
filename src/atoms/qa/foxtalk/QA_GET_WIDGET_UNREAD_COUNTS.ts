@@ -57,7 +57,7 @@ export const QA_GET_WIDGET_UNREAD_COUNTS = async (userId?: string) => {
             const lastReadTime = p.last_read_at ? new Date(p.last_read_at).getTime() : 0;
             const lastMsgTime = new Date(room.last_message_at).getTime();
 
-            if (lastMsgTime > lastReadTime + 1000) {
+            if (lastMsgTime > lastReadTime) {
                 if (room.type === 'CS') {
                     csUnread += 1;
                 } else {
