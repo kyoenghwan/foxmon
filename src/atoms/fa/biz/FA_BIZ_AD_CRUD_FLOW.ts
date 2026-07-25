@@ -99,11 +99,13 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             // 생성 시에는 무조건 결제 전(임시저장) 상태이므로 즉시 만료 연도 2000년으로 지정 (노출 차단)
             const expiresAtStr = '2000-01-01T00:00:00.000+09:00';
 
+            const isUploadMode = payload.premium_banner_mode === 'upload' || payload.theme === 'UPLOAD';
             const dbPayload = {
                 user_id: userId,
                 title: payload.title,
                 location: payload.location,
                 address: payload.address,
+                image_url: payload.image || null,
                 
                 // 상세 컬럼 (DB 스키마에 추가된 컬럼들)
                 company_name: payload.company || payload.business_name,
@@ -128,7 +130,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 detail_bg_image: payload.detail_bg_image,
                 
                 tier: payload.tier || 'GENERAL',
-                theme: payload.premium_banner_mode === 'upload' ? 'UPLOAD' : (payload.theme || null),
+                theme: isUploadMode ? 'UPLOAD' : (payload.theme || null),
                 effect_intensity: payload.effect_intensity || null,
                 color: payload.color || null,
                 
@@ -371,14 +373,16 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             }
 
             // 3. 업데이트 데이터 구성
+            const isUploadMode = payload.premium_banner_mode === 'upload' || payload.theme === 'UPLOAD';
             const updatePayload: any = {
                 title: payload.title,
                 location: payload.location,
                 address: payload.address,
+                image_url: payload.image !== undefined ? payload.image : undefined,
                 company_name: payload.company || payload.business_name,
                 salary_type: payload.pay_type,
                 salary_amount: payload.pay_amount,
-                logo_url: payload.logo_url || payload.image,
+                logo_url: payload.logo_url !== undefined ? payload.logo_url : undefined,
                 contact_name: payload.manager_name,
                 contact_phone: payload.contact_phone,
                 kakao_id: payload.kakao_id,
@@ -396,7 +400,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 detail_bg_color: payload.color,
                 detail_bg_image: payload.detail_bg_image,
                 tier: payload.tier || 'GENERAL',
-                theme: payload.premium_banner_mode === 'upload' ? 'UPLOAD' : (payload.theme || null),
+                theme: isUploadMode ? 'UPLOAD' : (payload.theme || null),
                 effect_intensity: payload.effect_intensity || null,
                 color: payload.color || null,
                 claim_code: payload.claim_code !== undefined ? (payload.claim_code || null) : undefined,

@@ -982,6 +982,8 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
 
             const payload = {
                 ...form,
+                theme: form.premium_banner_mode === 'upload' || form.theme === 'UPLOAD' ? 'UPLOAD' : form.theme,
+                premium_banner_mode: (form.premium_banner_mode === 'upload' || form.theme === 'UPLOAD' ? 'upload' : form.premium_banner_mode) as 'upload' | 'template',
                 detail_content: finalDetailContent,
                 keywords: mergeSelectedTagCodes(form.keywords, form.amenities),
                 amenities: [] as string[],
@@ -1065,6 +1067,9 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
         if (!file) return;
         
         try {
+            update('premium_banner_mode', 'upload');
+            update('theme', 'UPLOAD');
+
             // GIF 애니메이션 보존을 위해 GIF 파일은 압축 생략 후 원본 그대로 로드
             if (file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
                 const reader = new FileReader();
@@ -1174,18 +1179,26 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                     <div className="bg-gray-50 rounded-xl p-2 flex gap-1 w-full sm:w-fit mb-2 border border-gray-100 shadow-sm mx-auto">
                                         <button
                                             type="button"
-                                            onClick={() => update('premium_banner_mode', 'template')}
+                                            onClick={() => {
+                                                update('premium_banner_mode', 'template');
+                                                if (form.theme === 'UPLOAD') {
+                                                    update('theme', 'gold');
+                                                }
+                                            }}
                                             className={`flex-1 sm:flex-none px-6 py-2.5 rounded-lg text-[13px] font-bold transition-all ${
-                                                form.premium_banner_mode !== 'upload' ? 'bg-white text-primary shadow-sm ring-1 ring-primary/20' : 'text-gray-500 hover:text-gray-800'
+                                                form.premium_banner_mode !== 'upload' && form.theme !== 'UPLOAD' ? 'bg-white text-primary shadow-sm ring-1 ring-primary/20' : 'text-gray-500 hover:text-gray-800'
                                             }`}
                                         >
                                             ✨ 템플릿으로 만들기
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => update('premium_banner_mode', 'upload')}
+                                            onClick={() => {
+                                                update('premium_banner_mode', 'upload');
+                                                update('theme', 'UPLOAD');
+                                            }}
                                             className={`flex-1 sm:flex-none px-6 py-2.5 rounded-lg text-[13px] font-bold transition-all ${
-                                                form.premium_banner_mode === 'upload' ? 'bg-white text-primary shadow-sm ring-1 ring-primary/20' : 'text-gray-500 hover:text-gray-800'
+                                                form.premium_banner_mode === 'upload' || form.theme === 'UPLOAD' ? 'bg-white text-primary shadow-sm ring-1 ring-primary/20' : 'text-gray-500 hover:text-gray-800'
                                             }`}
                                         >
                                             🖼️ 배너 직접 업로드
