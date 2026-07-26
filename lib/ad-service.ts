@@ -277,7 +277,10 @@ async function fetchAdsFromDBInternal(
             const checkOpt = (val: any, exp: string | null | undefined) => {
                 if (!val) return false;
                 if (!exp) return true;
-                return new Date(exp).getTime() > nowTime;
+                const expTime = new Date(exp).getTime();
+                if (expTime > nowTime) return true;
+                if (item.expires_at && new Date(item.expires_at).getTime() > nowTime) return true;
+                return false;
             };
 
             return {

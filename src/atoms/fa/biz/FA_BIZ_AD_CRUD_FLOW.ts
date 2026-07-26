@@ -452,7 +452,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 // 연속 노출 옵션
                 if (payload.option_double_slot !== undefined) {
                     updatePayload.option_double_slot = !!payload.option_double_slot;
-                    if (updatePayload.option_double_slot && !existingJob.option_double_slot) {
+                    if (updatePayload.option_double_slot) {
                         updatePayload.option_double_slot_expires_at = isAlreadyPaid && !isExtension
                             ? existingJob.expires_at
                             : getOptionExpiresAt(p);
