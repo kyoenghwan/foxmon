@@ -33,6 +33,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
     // 모달 전용 상태 (초기값 설정)
     const [form, setForm] = useState<Partial<AdFormData>>({
         ...initialData,
+        option_general_icons: safeIconsArray(initialData.option_general_icons),
         exposure_period: initialData.exposure_period || 30 // 기본값 30일
     });
 
