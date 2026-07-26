@@ -37,8 +37,19 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         ? Math.max(1, Math.ceil((currentExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
         : 0;
 
+    // 옵션 적용 기간 상태 (기본값: 노출중이면 공고 남은 날짜, 미노출이면 30일)
+    const [optionPeriodType, setOptionPeriodType] = useState<string>(isCurrentlyActive ? 'MATCH_AD' : '30');
+    const [customOptionDays, setCustomOptionDays] = useState<number>(30);
+
+    // 실제 적용 일수 (1일 단위)
+    const effectiveOptionDays = optionPeriodType === 'MATCH_AD'
+        ? (isCurrentlyActive ? remainingDays : (Number(initialData?.exposure_period) || 30))
+        : optionPeriodType === 'CUSTOM'
+            ? Math.max(1, Number(customOptionDays || 1))
+            : Number(optionPeriodType || 30);
+
     // 모달 전용 상태 (노출 중이면 기본값 0: 기간 연장 안 함)
-    const [form, setForm] = useState<Partial<AdFormData>>({
+    const [form, setForm] = useState<Partial<AdFormData> & { _optionPeriodDays?: number }>({
         ...initialData,
         option_general_icons: safeIconsArray(initialData?.option_general_icons),
         exposure_period: isCurrentlyActive ? 0 : (initialData?.exposure_period || 30)
@@ -159,14 +170,13 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
             });
         }
 
-        // 2. 추가 옵션 금액
-        const isProrated = period === 0 && isCurrentlyActive;
-        const ratio = isProrated ? (remainingDays / 30) : 1;
+        // 2. 추가 옵션 금액 (선택된 옵션 적용 일수 비례 계산)
+        const optionRatio = effectiveOptionDays / 30;
 
         const calcOptionPrice = (isOptionChecked: boolean, wasOptionChecked: boolean, key: string, defaultPrice: number, optionName: string) => {
             if (!isOptionChecked) return;
 
-            if (isProrated && wasOptionChecked) {
+            if (isCurrentlyActive && period === 0 && wasOptionChecked && optionPeriodType === 'MATCH_AD') {
                 items.push({
                     label: `${optionName} (기존 유효)`,
                     amount: 0,
@@ -176,22 +186,13 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
             }
 
             const baseUnitPrice = getPrice(key, defaultPrice);
-            let finalPrice = baseUnitPrice;
+            const finalPrice = Math.floor(baseUnitPrice * optionRatio);
 
-            if (isProrated) {
-                finalPrice = Math.floor(baseUnitPrice * ratio);
-                items.push({
-                    label: `${optionName} (남은 ${remainingDays}일 일할 계산)`,
-                    amount: finalPrice,
-                    desc: `${baseUnitPrice.toLocaleString()} P × (${remainingDays}/30일)`
-                });
-            } else {
-                items.push({
-                    label: `${optionName}`,
-                    amount: finalPrice,
-                    desc: `${period > 0 ? period : 30}일 적용`
-                });
-            }
+            items.push({
+                label: `${optionName} (${effectiveOptionDays}일 적용)`,
+                amount: finalPrice,
+                desc: `${baseUnitPrice.toLocaleString()} P × (${effectiveOptionDays}/30일)`
+            });
             total += finalPrice;
         };
 
@@ -201,20 +202,20 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         calcOptionPrice(!!form.option_highlight, !!initialData?.option_highlight, 'OPTION_PRICE_HIGHLIGHT', 15000, '형광펜 효과');
         calcOptionPrice(!!form.option_icon, !!initialData?.option_icon, 'OPTION_PRICE_ICON', 15000, '🚨 급구 아이콘');
 
-        // 일반 아이콘 (개수 비례)
+        // 일반 아이콘 (개수 및 기간 비례)
         const currentIcons = selectedGeneralIcons;
         const initIcons = safeIconsArray(initialData?.option_general_icons);
         if (currentIcons.length > 0) {
             const baseUnitPrice = getPrice('OPTION_PRICE_GENERAL_ICONS', 10000);
             
-            if (isProrated) {
+            if (isCurrentlyActive && period === 0 && optionPeriodType === 'MATCH_AD') {
                 const newIconsCount = currentIcons.filter(ic => !initIcons.includes(ic)).length;
                 if (newIconsCount > 0) {
-                    const iconPrice = Math.floor(baseUnitPrice * newIconsCount * ratio);
+                    const iconPrice = Math.floor(baseUnitPrice * newIconsCount * optionRatio);
                     items.push({
-                        label: `일반 아이콘 ${newIconsCount}개 신규 추가 (남은 ${remainingDays}일 일할 계산)`,
+                        label: `일반 아이콘 ${newIconsCount}개 신규 추가 (${effectiveOptionDays}일 적용)`,
                         amount: iconPrice,
-                        desc: `${baseUnitPrice.toLocaleString()} P × ${newIconsCount}개 × (${remainingDays}/30일)`
+                        desc: `${baseUnitPrice.toLocaleString()} P × ${newIconsCount}개 × (${effectiveOptionDays}/30일)`
                     });
                     total += iconPrice;
                 }
@@ -227,11 +228,11 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                     });
                 }
             } else {
-                const iconPrice = baseUnitPrice * currentIcons.length;
+                const iconPrice = Math.floor(baseUnitPrice * currentIcons.length * optionRatio);
                 items.push({
-                    label: `일반 아이콘 ${currentIcons.length}개`,
+                    label: `일반 아이콘 ${currentIcons.length}개 (${effectiveOptionDays}일 적용)`,
                     amount: iconPrice,
-                    desc: `${baseUnitPrice.toLocaleString()} P × ${currentIcons.length}개`
+                    desc: `${baseUnitPrice.toLocaleString()} P × ${currentIcons.length}개 × (${effectiveOptionDays}/30일)`
                 });
                 total += iconPrice;
             }
@@ -252,7 +253,11 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
     const handleFinalSubmit = async () => {
         setSaving(true);
         try {
-            const res = await manageAdAction('UPDATE', { ...form, _isPayment: true }, jobId);
+            const res = await manageAdAction('UPDATE', { 
+                ...form, 
+                _isPayment: true,
+                _optionPeriodDays: effectiveOptionDays 
+            }, jobId);
             if (!res.success) {
                 throw new Error(res.message || "결제 처리에 실패했습니다.");
             }
@@ -455,11 +460,37 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
 
                         {/* 부가 옵션 선택 */}
                         <section className="order-1">
-                            <h4 className="text-[15px] font-black text-gray-800 mb-3 flex items-center justify-between">
+                            <h4 className="text-[15px] font-black text-gray-800 mb-3 flex flex-wrap items-center justify-between gap-2">
                                 <span>1. 주목도 100배! 추가 옵션</span>
-                                <span className="text-[12px] font-bold text-gray-400">
-                                    {form.exposure_period === 0 ? `남은 ${remainingDays}일 일할 비례 적용` : `선택한 기간 적용`}
-                                </span>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="text-[11.5px] font-bold text-gray-500">적용 기간:</span>
+                                    <select
+                                        value={optionPeriodType}
+                                        onChange={(e) => setOptionPeriodType(e.target.value)}
+                                        className="text-[11.5px] font-black bg-white border border-indigo-200 text-indigo-700 rounded-lg px-2 py-1 focus:outline-none focus:border-indigo-500 shadow-2xs cursor-pointer"
+                                    >
+                                        {isCurrentlyActive && (
+                                            <option value="MATCH_AD">🔗 공고 남은기간에 맞춤 ({remainingDays}일)</option>
+                                        )}
+                                        <option value="30">🗓️ 30일 적용</option>
+                                        <option value="60">🗓️ 60일 적용</option>
+                                        <option value="90">🗓️ 90일 적용</option>
+                                        <option value="CUSTOM">✏️ 직접 입력 (1일 단위)</option>
+                                    </select>
+                                    {optionPeriodType === 'CUSTOM' && (
+                                        <div className="flex items-center gap-1 bg-white border border-indigo-300 rounded-lg px-2 py-0.5 shadow-2xs">
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                max="365"
+                                                value={customOptionDays}
+                                                onChange={(e) => setCustomOptionDays(Math.max(1, Number(e.target.value)))}
+                                                className="w-12 text-[11.5px] font-black text-indigo-600 text-center outline-none"
+                                            />
+                                            <span className="text-[11.5px] font-bold text-gray-600">일</span>
+                                        </div>
+                                    )}
+                                </div>
                             </h4>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                 {optionsList.map(opt => {
@@ -469,11 +500,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                         : !!form[fieldKey];
                                     
                                     const unitPrice = getPrice(opt.priceKey, opt.defaultPrice);
-                                    let displayPrice = unitPrice;
-
-                                    if (form.exposure_period === 0 && isCurrentlyActive) {
-                                        displayPrice = Math.floor(unitPrice * (remainingDays / 30));
-                                    }
+                                    let displayPrice = Math.floor(unitPrice * (effectiveOptionDays / 30));
 
                                     if (opt.id === 'general_icons' && selectedGeneralIcons.length > 0) {
                                         displayPrice = displayPrice * selectedGeneralIcons.length;

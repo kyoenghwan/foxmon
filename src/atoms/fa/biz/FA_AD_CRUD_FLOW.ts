@@ -212,14 +212,18 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                     totalPoints += basePrice;
                 }
 
-                const isProrated = p === 0 && isCurrentlyActive;
-                const ratio = isProrated ? (remainingDays / 30) : 1;
+                const customDays = (payload as any)._optionPeriodDays;
+                const optionDays = customDays && customDays > 0 
+                    ? Number(customDays) 
+                    : (p === 0 && isCurrentlyActive ? remainingDays : (p > 0 ? p : 30));
+
+                const ratio = optionDays / 30;
 
                 const calcOpt = (isOpt: boolean, wasOpt: boolean, key: string, defP: number) => {
                     if (!isOpt) return;
-                    if (isProrated && wasOpt) return; // 이미 적용되었던 옵션은 0원
+                    if (p === 0 && isCurrentlyActive && wasOpt && (!customDays || customDays === remainingDays)) return;
                     const unitP = getPrice(key, defP);
-                    totalPoints += isProrated ? Math.floor(unitP * ratio) : unitP;
+                    totalPoints += Math.floor(unitP * ratio);
                 };
 
                 calcOpt(!!payload.option_bold, !!existingJob.option_bold, 'OPTION_PRICE_BOLD', 30000);
@@ -232,13 +236,13 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 const initGenIcons = safeIconsArray(existingJob.option_general_icons);
                 if (safeGenIcons.length > 0) {
                     const unitP = getPrice('OPTION_PRICE_GENERAL_ICONS', 10000);
-                    if (isProrated) {
+                    if (p === 0 && isCurrentlyActive && (!customDays || customDays === remainingDays)) {
                         const newCount = safeGenIcons.filter(ic => !initGenIcons.includes(ic)).length;
                         if (newCount > 0) {
                             totalPoints += Math.floor(unitP * newCount * ratio);
                         }
                     } else {
-                        totalPoints += unitP * safeGenIcons.length;
+                        totalPoints += Math.floor(unitP * safeGenIcons.length * ratio);
                     }
                 }
 

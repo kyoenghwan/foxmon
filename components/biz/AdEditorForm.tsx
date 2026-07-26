@@ -146,6 +146,7 @@ export interface AdFormData {
     
     // 결제 업데이트 플래그
     _isPayment?: boolean;
+    _optionPeriodDays?: number;
     
     // 소유권 양도용 핀코드
     claim_code?: string;

@@ -83,6 +83,7 @@ export interface AdFormData {
     
     // 결제 업데이트 플래그
     _isPayment?: boolean;
+    _optionPeriodDays?: number;
 }
 
 // 프리미엄 테마 목록 (premium-job-card.tsx THEME_CONFIG 기반)
