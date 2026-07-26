@@ -175,12 +175,12 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
             // DB 업데이트 로직
             const res = await manageAdAction('UPDATE', { ...form, _isPayment: true }, jobId);
             if (!res.success) {
-                throw new Error(res.message);
+                throw new Error(res.message || "결제 처리에 실패했습니다.");
             }
             onSuccess();
-        } catch (err) {
+        } catch (err: any) {
             console.error("결제 처리 중 오류", err);
-            alert("결제 처리 중 오류가 발생했습니다.");
+            alert(err?.message || "결제 처리 중 오류가 발생했습니다.");
         } finally {
             setSaving(false);
         }

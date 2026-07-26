@@ -191,25 +191,28 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
                 const policiesRes = await GET_POINT_POLICIES();
                 const policies = policiesRes.success && policiesRes.data ? policiesRes.data : [];
-                const getPrice = (key: string, def: number = 0) => policies.find(p => p.config_key === key)?.config_value || def;
+                const getPrice = (key: string, def: number = 0) => {
+                    const found = policies.find(p => p.config_key === key);
+                    return found ? Number(found.config_value) : def;
+                };
 
-                const p = payload.exposure_period as 30 | 60 | 90;
-                totalPoints = getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, 0);
+                const p = (payload.exposure_period || 30) as 30 | 60 | 90;
+                totalPoints = getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, 70000);
                 
                 if (payload.is_subscription) {
                     totalPoints = Math.floor(totalPoints * 0.95);
                 }
                 
-                if (payload.option_bold) totalPoints += getPrice(`OPTION_PRICE_BOLD_${payload.option_bold_period || 30}`, 0);
-                if (payload.option_color) totalPoints += getPrice(`OPTION_PRICE_COLOR_${payload.option_color_period || 30}`, 0);
-                if (payload.option_bg) totalPoints += getPrice(`OPTION_PRICE_BG_${payload.option_bg_period || 30}`, 0);
-                if (payload.option_highlight) totalPoints += getPrice(`OPTION_PRICE_HIGHLIGHT_${payload.option_highlight_period || 30}`, 0);
-                if (payload.option_icon) totalPoints += getPrice(`OPTION_PRICE_ICON_${payload.option_icon_period || 30}`, 0);
+                if (payload.option_bold) totalPoints += getPrice('OPTION_PRICE_BOLD', 30000);
+                if (payload.option_color) totalPoints += getPrice('OPTION_PRICE_COLOR', 15000);
+                if (payload.option_bg) totalPoints += getPrice('OPTION_PRICE_BG', 15000);
+                if (payload.option_highlight) totalPoints += getPrice('OPTION_PRICE_HIGHLIGHT', 15000);
+                if (payload.option_icon) totalPoints += getPrice('OPTION_PRICE_ICON', 15000);
                 const safeGeneralIcons = safeIconsArray(payload.option_general_icons);
                 if (safeGeneralIcons.length > 0) {
-                    totalPoints += getPrice(`OPTION_PRICE_GENERAL_ICONS_${payload.option_general_icons_period || 30}`, 0) * safeGeneralIcons.length;
+                    totalPoints += getPrice('OPTION_PRICE_GENERAL_ICONS', 10000) * safeGeneralIcons.length;
                 }
-                if (payload.option_jump) totalPoints += getPrice(`OPTION_PRICE_JUMP_${payload.option_jump_period || 30}`, 0);
+                if (payload.option_jump) totalPoints += getPrice('OPTION_PRICE_JUMP', 30000);
 
                 if (totalPoints > 0) {
                     const { FA_DEDUCT_POINT_FOR_AD } = await import('@/src/atoms/fa/points/FA_DEDUCT_POINT_FOR_AD');
@@ -266,14 +269,14 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
 
             // 결제 연장인 경우 만료일 및 옵션 갱신
             if (isPaymentUpdate) {
-                const p = payload.exposure_period as 30 | 60 | 90;
+                const p = (payload.exposure_period || 30) as 30 | 60 | 90;
                 
                 // 베이스 (공고 자체) 만료일 계산 (기존 남은 기간에 연장)
                 const expiresAt = existingJob.expires_at ? new Date(existingJob.expires_at) : new Date();
                 if (expiresAt < new Date()) expiresAt.setTime(new Date().getTime());
                 expiresAt.setDate(expiresAt.getDate() + p);
                 
-                // 개별 옵션 만료일 계산 헬퍼 함수 (옵션은 현재 결제 시점부터 시작)
+                // 개별 옵션 만료일 계산 헬퍼 함수
                 const getOptionExpiresAt = (period: 30 | 60 | 90) => {
                     const optDate = new Date();
                     optDate.setDate(optDate.getDate() + period);
@@ -287,40 +290,38 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 
                 if (payload.option_bold !== undefined) {
                     updatePayload.option_bold = !!payload.option_bold;
-                    if (updatePayload.option_bold) updatePayload.option_bold_expires_at = getOptionExpiresAt(payload.option_bold_period || 30);
+                    updatePayload.option_bold_expires_at = updatePayload.option_bold ? getOptionExpiresAt(payload.option_bold_period || 30) : null;
                 }
                 if (payload.option_color !== undefined) {
                     updatePayload.option_color = !!payload.option_color;
                     updatePayload.option_color_value = payload.option_color_value || null;
-                    if (updatePayload.option_color) updatePayload.option_color_expires_at = getOptionExpiresAt(payload.option_color_period || 30);
+                    updatePayload.option_color_expires_at = updatePayload.option_color ? getOptionExpiresAt(payload.option_color_period || 30) : null;
                 }
                 if (payload.option_bg !== undefined) {
                     updatePayload.option_bg = !!payload.option_bg;
                     updatePayload.option_bg_value = payload.option_bg_value || null;
-                    if (updatePayload.option_bg) updatePayload.option_bg_expires_at = getOptionExpiresAt(payload.option_bg_period || 30);
+                    updatePayload.option_bg_expires_at = updatePayload.option_bg ? getOptionExpiresAt(payload.option_bg_period || 30) : null;
                 }
                 if (payload.option_highlight !== undefined) {
                     updatePayload.option_highlight = !!payload.option_highlight;
                     updatePayload.option_highlight_value = payload.option_highlight_value || null;
-                    if (updatePayload.option_highlight) updatePayload.option_highlight_expires_at = getOptionExpiresAt(payload.option_highlight_period || 30);
+                    updatePayload.option_highlight_expires_at = updatePayload.option_highlight ? getOptionExpiresAt(payload.option_highlight_period || 30) : null;
                 }
                 if (payload.option_icon !== undefined) {
                     updatePayload.option_icon = !!payload.option_icon;
-                    if (updatePayload.option_icon) updatePayload.option_icon_expires_at = getOptionExpiresAt(payload.option_icon_period || 30);
+                    updatePayload.option_icon_expires_at = updatePayload.option_icon ? getOptionExpiresAt(payload.option_icon_period || 30) : null;
                 }
                 if (payload.option_general_icons !== undefined) {
                     const safeGeneralIconsUpdate = safeIconsArray(payload.option_general_icons);
                     updatePayload.option_general_icons = safeGeneralIconsUpdate;
-                    if (safeGeneralIconsUpdate.length > 0) {
-                        updatePayload.option_general_icons_expires_at = getOptionExpiresAt(payload.option_general_icons_period || 30);
-                    }
+                    updatePayload.option_general_icons_expires_at = safeGeneralIconsUpdate.length > 0 ? getOptionExpiresAt(payload.option_general_icons_period || 30) : null;
                 }
                 if (payload.option_jump !== undefined) {
                     updatePayload.option_jump = !!payload.option_jump;
                     updatePayload.jump_interval = updatePayload.option_jump ? 1 : 4;
                     updatePayload.last_jumped_at = new Date().toISOString();
                     updatePayload.last_exposed_at = new Date().toISOString();
-                    if (updatePayload.option_jump) updatePayload.option_jump_expires_at = getOptionExpiresAt(payload.option_jump_period || 30);
+                    updatePayload.option_jump_expires_at = updatePayload.option_jump ? getOptionExpiresAt(payload.option_jump_period || 30) : null;
                 }
 
                 updatePayload.total_points = totalPoints;
