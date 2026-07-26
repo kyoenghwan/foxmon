@@ -44,22 +44,34 @@ export const QA_GET_DEDUCTION_CONTEXT = async (userId: string): Promise<{ succes
       throw new Error(`충전 이력 조회 실패: ${rechargeError.message}`);
     }
 
-    // 💡 3. 데이터 정합성 검증 및 이상 증상 관리자 메모 등록
+    // 💡 3. 데이터 정합성 검증 및 부족분 충전 영수증 자동 생성 (관리자 수동 지급 포인트 호환)
     const paidPoints = Number(user.paid_points);
     const totalHistoryAmount = recharges.reduce((sum, r) => sum + Number(r.remained_point), 0);
     
-    if (paidPoints > 0 && totalHistoryAmount !== paidPoints) {
-        // 백그라운드 비동기로 관리자 메모(admin_memo) 업데이트 (실패해도 결제 흐름 방해 안 함)
-        (async () => {
-            try {
-                await supabaseAdmin.from('users').update({
-                    admin_memo: `[🚨포인트 불일치 경고] 유저의 잔여 유료포인트(${paidPoints}P)와 실제 충전 영수증 총합(${totalHistoryAmount}P)이 일치하지 않습니다. 관리자가 수동으로 유료 포인트를 지급할 때 영수증 처리가 누락되었거나, 보너스로 주어야 할 포인트를 유료 포인트로 잘못 입력했을 수 있습니다.`
-                }).eq('id', userId);
-                nvLog('AT', '⚠️ 관리자 메모(admin_memo) 비동기 기록 완료');
-            } catch (err) {
-                nvLog('AT', '⚠️ 관리자 메모 기록 중 에러 발생 (무시됨)', err);
+    if (paidPoints > totalHistoryAmount) {
+        const diff = paidPoints - totalHistoryAmount;
+        nvLog('AT', `⚠️ 유료 포인트 잔액(${paidPoints}P) 대비 충전 이력(${totalHistoryAmount}P) 부족 (${diff}P). 보정 충전이력 생성...`);
+        
+        try {
+            const { data: newRecharge, error: createRechargeErr } = await supabaseAdmin
+                .from('point_recharge_history')
+                .insert({
+                    user_id: userId,
+                    charge_point: diff,
+                    remained_point: diff,
+                    payment_method: 'SYSTEM_ADJUSTMENT',
+                    status: 'COMPLETED',
+                    description: '관리자 지급 / 시스템 보정 유료 포인트'
+                })
+                .select('id, remained_point, created_at')
+                .single();
+
+            if (!createRechargeErr && newRecharge) {
+                recharges.push(newRecharge);
             }
-        })();
+        } catch (err) {
+            nvLog('AT', '⚠️ 보정 영수증 생성 중 오류 발생 (무시)', err);
+        }
     }
 
     const result = {

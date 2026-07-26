@@ -69,7 +69,7 @@ export const FA_DEDUCT_POINT_FOR_AD = async (input: DeductFlowInput): Promise<De
     return {
       success: false,
       error: error.message,
-      message: '포인트 결제에 실패했습니다. 잔액을 확인해 주세요.'
+      message: error?.message || '포인트 결제 처리 중 오류가 발생했습니다.'
     };
   }
 };
