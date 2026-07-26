@@ -1,5 +1,6 @@
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { AdFormData } from '@/components/biz/AdEditorForm';
+import { safeIconsArray } from '@/lib/ad-service';
 
 interface AdCrudInput {
     actionType: 'CREATE' | 'UPDATE' | 'DELETE' | 'GET' | 'GET_ONE';
@@ -145,7 +146,13 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            return { success: true, data };
+            
+            const sanitized = (data || []).map(item => ({
+                ...item,
+                option_general_icons: safeIconsArray(item.option_general_icons)
+            }));
+
+            return { success: true, data: sanitized };
         }
 
         if (actionType === 'GET_ONE') {
@@ -157,6 +164,9 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 .single();
 
             if (error) throw error;
+            if (data) {
+                data.option_general_icons = safeIconsArray(data.option_general_icons);
+            }
             return { success: true, data };
         }
 
@@ -195,8 +205,9 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 if (payload.option_bg) totalPoints += getPrice(`OPTION_PRICE_BG_${payload.option_bg_period || 30}`, 0);
                 if (payload.option_highlight) totalPoints += getPrice(`OPTION_PRICE_HIGHLIGHT_${payload.option_highlight_period || 30}`, 0);
                 if (payload.option_icon) totalPoints += getPrice(`OPTION_PRICE_ICON_${payload.option_icon_period || 30}`, 0);
-                if (payload.option_general_icons && payload.option_general_icons.length > 0) {
-                    totalPoints += getPrice(`OPTION_PRICE_GENERAL_ICONS_${payload.option_general_icons_period || 30}`, 0) * payload.option_general_icons.length;
+                const safeGeneralIcons = safeIconsArray(payload.option_general_icons);
+                if (safeGeneralIcons.length > 0) {
+                    totalPoints += getPrice(`OPTION_PRICE_GENERAL_ICONS_${payload.option_general_icons_period || 30}`, 0) * safeGeneralIcons.length;
                 }
                 if (payload.option_jump) totalPoints += getPrice(`OPTION_PRICE_JUMP_${payload.option_jump_period || 30}`, 0);
 
@@ -298,8 +309,9 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                     if (updatePayload.option_icon) updatePayload.option_icon_expires_at = getOptionExpiresAt(payload.option_icon_period || 30);
                 }
                 if (payload.option_general_icons !== undefined) {
-                    updatePayload.option_general_icons = payload.option_general_icons;
-                    if (updatePayload.option_general_icons && updatePayload.option_general_icons.length > 0) {
+                    const safeGeneralIconsUpdate = safeIconsArray(payload.option_general_icons);
+                    updatePayload.option_general_icons = safeGeneralIconsUpdate;
+                    if (safeGeneralIconsUpdate.length > 0) {
                         updatePayload.option_general_icons_expires_at = getOptionExpiresAt(payload.option_general_icons_period || 30);
                     }
                 }
