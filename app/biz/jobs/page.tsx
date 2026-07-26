@@ -49,48 +49,14 @@ const StatusBadge = ({ expiresAt }: { expiresAt: string | null | undefined }) =>
     }
 };
 
-const getActiveOptions = (ad: any) => {
-    const now = Date.now();
-    const checkActive = (val: any, expiresAt: any) => {
-        if (!val) return false;
-        if (Array.isArray(val) && val.length === 0) return false;
-        if (expiresAt) {
-            const expTime = new Date(expiresAt).getTime();
-            if (!isNaN(expTime) && expTime <= now) return false;
-        }
-        return true;
-    };
-
-    const list = [];
-    if (checkActive(ad.option_icon, ad.option_icon_expires_at)) {
-        list.push({ label: '🚨 급구', color: 'bg-red-50 text-red-650 border-red-200 animate-pulse' });
+const isOptionActive = (val: any, expiresAt: any) => {
+    if (!val) return false;
+    if (Array.isArray(val) && val.length === 0) return false;
+    if (expiresAt) {
+        const expTime = new Date(expiresAt).getTime();
+        if (!isNaN(expTime) && expTime <= Date.now()) return false;
     }
-    if (checkActive(ad.option_bold, ad.option_bold_expires_at)) {
-        list.push({ label: '굵은글씨', color: 'bg-slate-100 text-slate-700 border-slate-300' });
-    }
-    if (checkActive(ad.option_color, ad.option_color_expires_at)) {
-        list.push({ label: '제목컬러', color: 'bg-orange-50 text-orange-600 border-orange-200' });
-    }
-    if (checkActive(ad.option_highlight, ad.option_highlight_expires_at)) {
-        list.push({ label: '형광펜', color: 'bg-yellow-50 text-yellow-700 border-yellow-300' });
-    }
-    if (checkActive(ad.option_bg, ad.option_bg_expires_at)) {
-        list.push({ label: '배경색', color: 'bg-amber-50/50 text-amber-700 border-amber-200' });
-    }
-    if (checkActive(ad.option_jump, ad.option_jump_expires_at)) {
-        list.push({ label: '자동점프 ⚡', color: 'bg-blue-50 text-blue-600 border-blue-200' });
-    }
-    
-    if (checkActive(ad.option_general_icons, ad.option_general_icons_expires_at)) {
-        const icons = safeIconsArray(ad.option_general_icons);
-        icons.forEach(ic => {
-            if (ic && ic !== 'undefined') {
-                list.push({ label: ic, color: 'bg-white text-gray-500 border-gray-200' });
-            }
-        });
-    }
-
-    return list;
+    return true;
 };
 
 const formatKoreanAmount = (amountVal: number): string => {
@@ -244,13 +210,21 @@ export default async function BizJobsPage() {
                             white-space: nowrap;
                             animation: jobMarquee 15s linear infinite;
                         }
+                        @keyframes siren {
+                            0% { transform: rotate(-20deg) scale(0.9); }
+                            100% { transform: rotate(20deg) scale(1.2); }
+                        }
+                        .animate-siren {
+                            display: inline-block;
+                            animation: siren 0.4s ease-in-out infinite alternate;
+                        }
                     `}</style>
                     <table className="w-full hidden md:table table-fixed">
                         <thead>
                             <tr className="border-b border-gray-100 bg-gray-50">
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">근무지역</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">직종</th>
-                                <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500 w-[180px]">제목</th>
+                                <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500 w-[200px]">제목</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">업소명</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">급여</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">마감일</th>
@@ -258,176 +232,239 @@ export default async function BizJobsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {mockAds.map((ad) => (
-                                <tr key={ad.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                                    <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
-                                        {ad.location || ad.address || '-'}
-                                    </td>
-                                    <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
-                                        {ad.category1 || '-'}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col gap-1 min-w-0">
-                                            <div className="flex items-center gap-3">
-                                                {ad.image && (
-                                                    <img src={ad.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
-                                                )}
-                                                <div className="w-[150px] overflow-hidden relative h-5 flex items-center justify-start">
-                                                    {ad.title.length > 5 ? (
-                                                        <div className="absolute w-max flex items-center gap-4 animate-job-marquee">
-                                                            <span className="font-bold text-[14px] text-gray-900">{ad.title}</span>
-                                                            <span className="font-bold text-[14px] text-gray-900">{ad.title}</span>
-                                                        </div>
-                                                    ) : (
-                                                        <span className="font-bold text-[14px] text-gray-900 w-full text-left truncate">{ad.title}</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            {/* 적용 옵션 표시 */}
-                                            {(() => {
-                                                const activeOpts = getActiveOptions(ad);
-                                                if (activeOpts.length === 0) return null;
-                                                return (
-                                                    <div className="flex flex-wrap gap-1 mt-1">
-                                                        {activeOpts.map((opt, idx) => (
-                                                            <span key={idx} className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border ${opt.color}`}>
-                                                                {opt.label}
+                            {mockAds.map((ad) => {
+                                const isBgActive = isOptionActive(ad.option_bg, ad.option_bg_expires_at);
+                                const isBoldActive = isOptionActive(ad.option_bold, ad.option_bold_expires_at);
+                                const isColorActive = isOptionActive(ad.option_color, ad.option_color_expires_at);
+                                const isHighlightActive = isOptionActive(ad.option_highlight, ad.option_highlight_expires_at);
+                                const isUrgentActive = isOptionActive(ad.option_icon, ad.option_icon_expires_at);
+                                const generalIcons = isOptionActive(ad.option_general_icons, ad.option_general_icons_expires_at) 
+                                    ? safeIconsArray(ad.option_general_icons) 
+                                    : [];
+
+                                const rowBgColor = isBgActive ? (ad.option_bg_value || '#fff7ed') : undefined;
+                                const textColor = isColorActive ? (ad.option_color_value || '#f97316') : '#111827';
+                                const highlightBg = isHighlightActive ? (ad.option_highlight_value || '#fef08a') : undefined;
+
+                                return (
+                                    <tr 
+                                        key={ad.id} 
+                                        className="border-b border-gray-100 transition-colors"
+                                        style={rowBgColor ? { backgroundColor: rowBgColor } : {}}
+                                    >
+                                        <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
+                                            {ad.location || ad.address || '-'}
+                                        </td>
+                                        <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
+                                            {ad.category1 || '-'}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col gap-1 min-w-0 items-start">
+                                                {/* 상단 실제 아이콘들 (급구 + 일반아이콘) */}
+                                                {(isUrgentActive || generalIcons.length > 0) && (
+                                                    <div className="flex flex-wrap items-center gap-1 mb-0.5">
+                                                        {isUrgentActive && (
+                                                            <span className="inline-flex items-center gap-1 bg-red-500 text-white text-[10.5px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0">
+                                                                <span className="animate-siren">🚨</span> 급구
+                                                            </span>
+                                                        )}
+                                                        {generalIcons.map((ic, i) => (
+                                                            <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10.5px] font-extrabold bg-white text-gray-800 border border-gray-250 shadow-2xs shrink-0">
+                                                                {ic}
                                                             </span>
                                                         ))}
                                                     </div>
-                                                );
-                                            })()}
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-4 text-center">
-                                        <div className="w-[110px] overflow-hidden relative h-5 flex items-center justify-center mx-auto">
-                                            {ad.company_name && ad.company_name.length > 5 ? (
-                                                <div className="absolute w-max flex items-center gap-4 animate-job-marquee">
-                                                    <span className="text-[13.5px] font-bold text-gray-700">{ad.company_name}</span>
-                                                    <span className="text-[13.5px] font-bold text-gray-700">{ad.company_name}</span>
+                                                )}
+
+                                                {/* 실제 적용된 제목 스타일 */}
+                                                <div className="flex items-center gap-2 max-w-full overflow-hidden">
+                                                    {ad.image && (
+                                                        <img src={ad.image} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
+                                                    )}
+                                                    <div className="w-[170px] overflow-hidden relative h-6 flex items-center justify-start">
+                                                        {ad.title.length > 8 ? (
+                                                            <div className="absolute w-max flex items-center gap-4 animate-job-marquee">
+                                                                <span 
+                                                                    className={`text-[14px] leading-snug px-1 rounded ${isBoldActive ? 'font-black' : 'font-semibold'}`}
+                                                                    style={{ color: textColor, backgroundColor: highlightBg }}
+                                                                >
+                                                                    {ad.title}
+                                                                </span>
+                                                                <span 
+                                                                    className={`text-[14px] leading-snug px-1 rounded ${isBoldActive ? 'font-black' : 'font-semibold'}`}
+                                                                    style={{ color: textColor, backgroundColor: highlightBg }}
+                                                                >
+                                                                    {ad.title}
+                                                                </span>
+                                                            </div>
+                                                        ) : (
+                                                            <span 
+                                                                className={`text-[14px] leading-snug truncate px-1 rounded ${isBoldActive ? 'font-black' : 'font-semibold'}`}
+                                                                style={{ color: textColor, backgroundColor: highlightBg }}
+                                                            >
+                                                                {ad.title}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-4 text-center">
+                                            <div className="w-[110px] overflow-hidden relative h-5 flex items-center justify-center mx-auto">
+                                                {ad.company_name && ad.company_name.length > 5 ? (
+                                                    <div className="absolute w-max flex items-center gap-4 animate-job-marquee">
+                                                        <span className="text-[13.5px] font-bold text-gray-700">{ad.company_name}</span>
+                                                        <span className="text-[13.5px] font-bold text-gray-700">{ad.company_name}</span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[13.5px] font-bold text-gray-700 w-full text-center truncate">
+                                                        {ad.company_name || ad.company || ad.business_name || '-'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-4 text-center">
+                                            <div className="flex items-center justify-center gap-1.5">
+                                                {ad.salary_type && (
+                                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black shrink-0 ${
+                                                        ad.salary_type === '시급' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
+                                                        ad.salary_type === '일급' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                                                        ad.salary_type === '월급' ? 'bg-green-50 text-green-600 border border-green-100' :
+                                                        ad.salary_type === '주급' ? 'bg-purple-50 text-purple-600 border border-purple-100' :
+                                                        ad.salary_type === '건당' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
+                                                        'bg-gray-50 text-gray-600 border border-gray-150'
+                                                    }`}>
+                                                        {ad.salary_type}
+                                                    </span>
+                                                )}
+                                                <span className="font-extrabold text-[13.5px] text-gray-900 whitespace-nowrap">
+                                                    {ad.salary_amount
+                                                        ? formatKoreanAmount(Number(String(ad.salary_amount).replace(/[^0-9]/g, '')))
+                                                        : ad.pay || '-'}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-4 text-center">
+                                            {(!ad.close_date || ad.close_date === '상시채용') ? (
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-teal-50 text-teal-600 border border-teal-150 whitespace-nowrap">
+                                                    상시채용
+                                                </span>
                                             ) : (
-                                                <span className="text-[13.5px] font-bold text-gray-700 w-full text-center truncate">
-                                                    {ad.company_name || ad.company || ad.business_name || '-'}
+                                                <span className="inline-flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500 whitespace-nowrap">
+                                                    <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                                    {ad.close_date}
                                                 </span>
                                             )}
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-4 text-center">
-                                        <div className="flex items-center justify-center gap-1.5">
-                                            {ad.salary_type && (
-                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black shrink-0 ${
-                                                    ad.salary_type === '시급' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
-                                                    ad.salary_type === '일급' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
-                                                    ad.salary_type === '월급' ? 'bg-green-50 text-green-600 border border-green-100' :
-                                                    ad.salary_type === '주급' ? 'bg-purple-50 text-purple-600 border border-purple-100' :
-                                                    ad.salary_type === '건당' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
-                                                    'bg-gray-50 text-gray-600 border border-gray-150'
-                                                }`}>
-                                                    {ad.salary_type}
-                                                </span>
-                                            )}
-                                            <span className="font-extrabold text-[13.5px] text-gray-900 whitespace-nowrap">
-                                                {ad.salary_amount
-                                                    ? formatKoreanAmount(Number(String(ad.salary_amount).replace(/[^0-9]/g, '')))
-                                                    : ad.pay || '-'}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-4 text-center">
-                                        {(!ad.close_date || ad.close_date === '상시채용') ? (
-                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-teal-50 text-teal-600 border border-teal-150 whitespace-nowrap">
-                                                상시채용
-                                            </span>
-                                        ) : (
-                                            <span className="inline-flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500 whitespace-nowrap">
-                                                <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                                {ad.close_date}
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <Link href={`/biz/jobs/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200" title="수정">
-                                                <Pencil className="w-4 h-4 text-gray-600" />
-                                            </Link>
-                                            <PaymentModalTrigger ad={ad} />
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <Link href={`/biz/jobs/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200" title="수정">
+                                                    <Pencil className="w-4 h-4 text-gray-600" />
+                                                </Link>
+                                                <PaymentModalTrigger ad={ad} />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
 
                     {/* 모바일용 카드 리스트 뷰 */}
                     <div className="md:hidden space-y-3.5">
                         {mockAds.map((ad) => {
-                            const activeOpts = getActiveOptions(ad);
+                            const isBgActive = isOptionActive(ad.option_bg, ad.option_bg_expires_at);
+                            const isBoldActive = isOptionActive(ad.option_bold, ad.option_bold_expires_at);
+                            const isColorActive = isOptionActive(ad.option_color, ad.option_color_expires_at);
+                            const isHighlightActive = isOptionActive(ad.option_highlight, ad.option_highlight_expires_at);
+                            const isUrgentActive = isOptionActive(ad.option_icon, ad.option_icon_expires_at);
+                            const generalIcons = isOptionActive(ad.option_general_icons, ad.option_general_icons_expires_at) 
+                                ? safeIconsArray(ad.option_general_icons) 
+                                : [];
+
+                            const rowBgColor = isBgActive ? (ad.option_bg_value || '#fff7ed') : '#ffffff';
+                            const textColor = isColorActive ? (ad.option_color_value || '#f97316') : '#111827';
+                            const highlightBg = isHighlightActive ? (ad.option_highlight_value || '#fef08a') : undefined;
+
                             return (
-                                <div key={ad.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3.5">
+                                <div 
+                                    key={ad.id} 
+                                    className="p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3.5 transition-all"
+                                    style={{ backgroundColor: rowBgColor }}
+                                >
                                     <div className="flex items-start justify-between gap-3">
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-3 min-w-0">
                                             {ad.image && (
                                                 <img src={ad.image} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0 border border-gray-100" />
                                             )}
-                                            <div>
-                                                <h4 className="font-extrabold text-[14px] text-gray-900 leading-snug">{ad.title}</h4>
-                                                <p className="text-[11.5px] text-gray-400 mt-1 font-bold">
-                                                    {ad.company_name || ad.company || ad.business_name} | {ad.location}
-                                                </p>
-                                                {activeOpts.length > 0 && (
-                                                    <div className="flex flex-wrap gap-1 mt-2">
-                                                        {activeOpts.map((opt, idx) => (
-                                                            <span key={idx} className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border ${opt.color}`}>
-                                                                {opt.label}
+                                            <div className="min-w-0">
+                                                {(isUrgentActive || generalIcons.length > 0) && (
+                                                    <div className="flex flex-wrap items-center gap-1 mb-1">
+                                                        {isUrgentActive && (
+                                                            <span className="inline-flex items-center gap-1 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm">
+                                                                <span className="animate-siren">🚨</span> 급구
+                                                            </span>
+                                                        )}
+                                                        {generalIcons.map((ic, i) => (
+                                                            <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-white text-gray-800 border border-gray-250">
+                                                                {ic}
                                                             </span>
                                                         ))}
                                                     </div>
                                                 )}
+                                                <h4 
+                                                    className={`text-[14px] leading-snug truncate px-1 rounded ${isBoldActive ? 'font-black' : 'font-extrabold'}`}
+                                                    style={{ color: textColor, backgroundColor: highlightBg }}
+                                                >
+                                                    {ad.title}
+                                                </h4>
+                                                <p className="text-[11.5px] text-gray-400 mt-1 font-bold">
+                                                    {ad.company_name || ad.company || ad.business_name} | {ad.location}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center justify-between border-t border-gray-50 pt-3 text-[11px] font-bold text-gray-500">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <div className="flex items-center gap-1">
-                                            {ad.salary_type && (
-                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-black shrink-0 ${
-                                                    ad.salary_type === '시급' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
-                                                    ad.salary_type === '일급' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
-                                                    ad.salary_type === '월급' ? 'bg-green-50 text-green-600 border border-green-100' :
-                                                    ad.salary_type === '주급' ? 'bg-purple-50 text-purple-600 border border-purple-100' :
-                                                    ad.salary_type === '건당' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
-                                                    'bg-gray-50 text-gray-600 border border-gray-150'
-                                                }`}>
-                                                    {ad.salary_type}
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <div className="flex items-center gap-1">
+                                                {ad.salary_type && (
+                                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-black shrink-0 ${
+                                                        ad.salary_type === '시급' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
+                                                        ad.salary_type === '일급' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                                                        ad.salary_type === '월급' ? 'bg-green-50 text-green-600 border border-green-100' :
+                                                        ad.salary_type === '주급' ? 'bg-purple-50 text-purple-600 border border-purple-100' :
+                                                        ad.salary_type === '건당' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
+                                                        'bg-gray-50 text-gray-600 border border-gray-150'
+                                                    }`}>
+                                                        {ad.salary_type}
+                                                    </span>
+                                                )}
+                                                <span className="font-extrabold text-[12px] text-gray-900">
+                                                    {ad.salary_amount
+                                                        ? formatKoreanAmount(Number(String(ad.salary_amount).replace(/[^0-9]/g, '')))
+                                                        : ad.pay || '-'}
+                                                </span>
+                                            </div>
+                                            {(!ad.close_date || ad.close_date === '상시채용') ? (
+                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9.5px] font-black bg-teal-50 text-teal-600 border border-teal-100 whitespace-nowrap">
+                                                    상시
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-1 text-gray-400">
+                                                    <Clock className="w-3 h-3" />
+                                                    {ad.close_date}
                                                 </span>
                                             )}
-                                            <span className="font-extrabold text-[12px] text-gray-900">
-                                                {ad.salary_amount
-                                                    ? formatKoreanAmount(Number(String(ad.salary_amount).replace(/[^0-9]/g, '')))
-                                                    : ad.pay || '-'}
-                                            </span>
                                         </div>
-                                        {(!ad.close_date || ad.close_date === '상시채용') ? (
-                                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9.5px] font-black bg-teal-50 text-teal-600 border border-teal-100 whitespace-nowrap">
-                                                상시
-                                            </span>
-                                        ) : (
-                                            <span className="flex items-center gap-1 text-gray-400">
-                                                <Clock className="w-3 h-3" />
-                                                {ad.close_date}
-                                            </span>
-                                        )}
-                                    </div>
 
-                                    <div className="flex items-center gap-2 shrink-0">
-                                        <Link href={`/biz/jobs/${ad.id}`} className="p-2 bg-gray-50 hover:bg-gray-100 border border-gray-200/60 rounded-xl transition-colors" title="수정">
-                                            <Pencil className="w-3.5 h-3.5 text-gray-600" />
-                                        </Link>
-                                        <PaymentModalTrigger ad={ad} />
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <Link href={`/biz/jobs/${ad.id}`} className="p-2 bg-gray-50 hover:bg-gray-100 border border-gray-200/60 rounded-xl transition-colors" title="수정">
+                                                <Pencil className="w-3.5 h-3.5 text-gray-600" />
+                                            </Link>
+                                            <PaymentModalTrigger ad={ad} />
+                                        </div>
                                     </div>
-                                </div>
                             </div>
                         );
                     })}
