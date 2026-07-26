@@ -463,7 +463,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                     {form.exposure_period === 0 ? `남은 ${remainingDays}일 일할 비례 적용` : `선택한 기간 적용`}
                                 </span>
                             </h4>
-                            <div className="flex flex-col gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                 {optionsList.map(opt => {
                                     const fieldKey = `option_${opt.id}` as keyof AdFormData;
                                     const isChecked = opt.id === 'general_icons' 
@@ -501,36 +501,38 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     }
                                                 }
                                             }}
-                                            className={`flex items-center justify-between py-2 px-3.5 rounded-xl border transition-all cursor-pointer select-none ${
+                                            className={`flex items-center justify-between py-2.5 px-3 rounded-xl border transition-all cursor-pointer select-none ${
                                                 isChecked 
                                                     ? 'border-indigo-500 bg-indigo-50/20 shadow-xs' 
                                                     : 'border-[#f1f1f5] bg-[#fafafc] hover:bg-white hover:border-gray-300'
                                             }`}
                                         >
-                                            <div className="flex items-center gap-2.5 min-w-0">
-                                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${
                                                     isChecked 
                                                         ? 'bg-indigo-600 border-indigo-600 text-white' 
                                                         : 'border-gray-300 bg-white'
                                                 }`}>
-                                                    {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                                                    {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                                                 </div>
-                                                <span className={`text-[13px] font-black tracking-tight shrink-0 ${isChecked ? 'text-gray-900' : 'text-gray-700'}`}>
-                                                    {opt.label}
-                                                </span>
-                                                <span className="text-[10px] text-gray-400 font-medium truncate hidden md:inline ml-1">
-                                                    {opt.desc}
-                                                </span>
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className={`text-[13px] font-black tracking-tight truncate ${isChecked ? 'text-gray-900' : 'text-gray-700'}`}>
+                                                        {opt.label}
+                                                    </span>
+                                                    <span className="text-[10.5px] text-gray-400 font-medium truncate">
+                                                        {opt.desc}
+                                                    </span>
+                                                </div>
                                             </div>
 
-                                            <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                            <div className="flex items-center gap-1.5 shrink-0 ml-1" onClick={e => e.stopPropagation()}>
                                                 {isChecked && (opt.id === 'color' || opt.id === 'highlight' || opt.id === 'bg') && (
-                                                    <div className="relative w-5 h-5 rounded-full overflow-hidden border border-gray-300 shadow-xs cursor-pointer shrink-0" title="색상 변경">
+                                                    <div className="relative w-4 h-4 rounded-full overflow-hidden border border-gray-300 shadow-xs cursor-pointer shrink-0" title="색상 변경">
                                                         <input 
                                                             type="color" 
                                                             value={form[`option_${opt.id}_value` as keyof AdFormData] as string || '#ffffff'}
                                                             onChange={(e) => update(`option_${opt.id}_value` as keyof AdFormData, e.target.value)}
-                                                            className="absolute -top-2 -left-2 w-10 h-10 cursor-pointer border-0 p-0"
+                                                            className="absolute -top-2 -left-2 w-8 h-8 cursor-pointer border-0 p-0"
                                                         />
                                                     </div>
                                                 )}
@@ -540,7 +542,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                         <button 
                                                             type="button" 
                                                             onClick={(e) => { e.stopPropagation(); setActivePicker(activePicker === opt.id ? null : opt.id); }}
-                                                            className="px-2 py-0.5 rounded border border-gray-300 bg-white text-[11px] font-bold text-gray-600 hover:bg-gray-50 shadow-xs"
+                                                            className="px-1.5 py-0.5 rounded border border-gray-300 bg-white text-[10.5px] font-bold text-gray-600 hover:bg-gray-50 shadow-xs"
                                                         >
                                                             선택
                                                         </button>
@@ -578,7 +580,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     </div>
                                                 )}
 
-                                                <span className="text-[13px] font-black text-indigo-600 min-w-[65px] text-right">+{displayPrice.toLocaleString()} P</span>
+                                                <span className="text-[12.5px] font-black text-indigo-600 text-right whitespace-nowrap">+{displayPrice.toLocaleString()} P</span>
                                             </div>
                                         </div>
                                     );
