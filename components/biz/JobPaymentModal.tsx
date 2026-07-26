@@ -253,12 +253,25 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                             display: inline-block;
                                             animation: marqueeAlternate 6s ease-in-out infinite alternate;
                                         }
+                                        @keyframes siren {
+                                            0% { transform: rotate(-20deg) scale(0.9); }
+                                            100% { transform: rotate(20deg) scale(1.2); }
+                                        }
+                                        .animate-siren {
+                                            display: inline-block;
+                                            animation: siren 0.4s ease-in-out infinite alternate;
+                                        }
                                     `}} />
 
                                     {/* 아이콘 영역 */}
                                     {(form.option_icon || selectedGeneralIcons.length > 0) && (
                                         <div ref={iconsWrapperRef} className="flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                            {form.option_icon && <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 animate-pulse">급구</span>}
+                                            {form.option_icon && (
+                                                <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 flex items-center gap-0.5">
+                                                    <span className="animate-siren origin-center mr-0.5">🚨</span>
+                                                    급구
+                                                </span>
+                                            )}
                                             {selectedGeneralIcons.map(icon => (
                                                 <span key={icon} className="text-[12px] font-black shrink-0 px-1 py-0.5 rounded border border-gray-200 bg-white">{icon}</span>
                                             ))}

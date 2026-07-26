@@ -114,9 +114,20 @@ export function GeneralJobListRow(job: AdItem) {
                     </div>
                 )}
                 <div className="flex items-start gap-2">
+                    <style dangerouslySetInnerHTML={{__html: `
+                        @keyframes siren {
+                            0% { transform: rotate(-20deg) scale(0.9); }
+                            100% { transform: rotate(20deg) scale(1.2); }
+                        }
+                        .animate-siren {
+                            display: inline-block;
+                            animation: siren 0.4s ease-in-out infinite alternate;
+                        }
+                    `}} />
                     {option_icon && (
-                        <span className="bg-red-500 text-white text-[10px] sm:text-[11px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 flex items-center gap-0.5 animate-pulse mt-0.5">
-                            🚨 급구
+                        <span className="bg-red-500 text-white text-[10px] sm:text-[11px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 flex items-center gap-0.5 mt-0.5">
+                            <span className="animate-siren origin-center mr-0.5">🚨</span>
+                            급구
                         </span>
                     )}
                     <h3 className={`text-[14px] sm:text-[15px] leading-snug group-hover:text-primary transition-colors whitespace-pre-wrap break-all flex-1 ${option_bold ? 'font-black' : 'font-bold'}`}>
@@ -195,8 +206,9 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
                     )}
                     <div className="flex items-center gap-2 w-full mt-0.5 overflow-hidden">
                         {option_icon && (
-                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-xs shrink-0 flex items-center gap-0.5 animate-pulse">
-                                🚨 급구
+                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-xs shrink-0 flex items-center gap-0.5">
+                                <span className="animate-siren origin-center mr-0.5">🚨</span>
+                                급구
                             </span>
                         )}
                         <span 
