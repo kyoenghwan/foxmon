@@ -191,32 +191,31 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
                             ))}
                         </div>
                     )}
-                    <div className="flex items-center gap-2 w-full mt-0.5 overflow-hidden group/title">
+                    <div className="flex items-center gap-2 w-full mt-0.5 overflow-hidden">
                         {option_icon && (
                             <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 flex items-center gap-0.5 animate-pulse">
                                 🚨 급구
                             </span>
                         )}
-                        <div className="relative overflow-hidden w-full">
-                            <span 
-                                className={`inline-block text-[14px] md:text-[15px] whitespace-nowrap tracking-tight transition-transform duration-[3500ms] ease-linear group-hover/title:-translate-x-[60%] group-hover:-translate-x-[60%] ${option_bold ? 'font-black' : 'font-bold'} ${!option_color_value && !option_highlight_value ? 'text-gray-900 group-hover:text-primary' : ''}`}
-                                style={{
-                                    color: (option_color && option_color_value) ? option_color_value : undefined,
-                                    backgroundColor: (option_highlight && option_highlight_value) ? option_highlight_value : undefined,
-                                    padding: (option_highlight && option_highlight_value) ? '2px 6px' : undefined,
-                                    borderRadius: (option_highlight && option_highlight_value) ? '4px' : undefined,
-                                }}
-                            >
-                                {title}
-                            </span>
-                        </div>
+                        <span 
+                            title={title}
+                            className={`text-[14px] md:text-[15px] truncate tracking-tight transition-colors ${option_bold ? 'font-black' : 'font-bold'} ${!option_color_value && !option_highlight_value ? 'text-gray-900 group-hover:text-primary' : ''}`}
+                            style={{
+                                color: (option_color && option_color_value) ? option_color_value : undefined,
+                                backgroundColor: (option_highlight && option_highlight_value) ? option_highlight_value : undefined,
+                                padding: (option_highlight && option_highlight_value) ? '2px 6px' : undefined,
+                                borderRadius: (option_highlight && option_highlight_value) ? '4px' : undefined,
+                            }}
+                        >
+                            {title}
+                        </span>
                     </div>
                 </div>
             </td>
 
             <td className="py-4 px-2 font-bold text-gray-800 text-center text-[13px] md:text-[14px]">
-                <div className="relative overflow-hidden w-full max-w-[140px] mx-auto group/comp">
-                    <span className="inline-block whitespace-nowrap transition-transform duration-[3500ms] ease-linear group-hover/comp:-translate-x-[50%] group-hover:-translate-x-[50%]">
+                <div className="truncate max-w-[150px] mx-auto" title={company}>
+                    <span className="truncate">
                         {company}
                     </span>
                 </div>
