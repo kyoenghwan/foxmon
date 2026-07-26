@@ -30,40 +30,56 @@ const TierBadge = ({ tier }: { tier: string }) => {
 };
 
 const StatusBadge = ({ ad, isVerified }: { ad: any, isVerified: boolean }) => {
-    const isPending = new Date(ad.expires_at).getFullYear() === 2000;
-    const isExpired = new Date(ad.expires_at) < new Date() && !isPending;
-    
-    // claim_code가 있다면 업체 광고 수락 대기 상태 (수락 대기중)
+    const expiresAt = ad.expires_at ? new Date(ad.expires_at) : null;
+    const isPending = !expiresAt || isNaN(expiresAt.getTime()) || expiresAt.getFullYear() === 2000;
+    const isExposed = !!expiresAt && !isPending && expiresAt.getTime() > Date.now();
     const hasClaimCode = !!ad.claim_code;
-    
-    // 사업자 검증이 안 되었으면서 결제 대기 상태인 경우
-    let status = (isPending || isExpired) && !isVerified ? 'UNVERIFIED' : isPending ? 'PENDING' : isExpired ? 'EXPIRED' : 'ACTIVE';
 
     if (hasClaimCode) {
-        status = 'CLAIM_PENDING';
+        return (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-black bg-purple-50 text-purple-700 border border-purple-200">
+                <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
+                수락 대기중
+            </span>
+        );
     }
 
-    const styles: Record<string, string> = {
-        ACTIVE: 'bg-green-100 text-green-700',
-        PAUSED: 'bg-gray-100 text-gray-500',
-        EXPIRED: 'bg-red-100 text-red-600',
-        PENDING: 'bg-yellow-100 text-yellow-700 border border-yellow-300',
-        UNVERIFIED: 'bg-red-50 text-red-600 border border-red-200',
-        CLAIM_PENDING: 'bg-purple-100 text-purple-700 border border-purple-300',
-    };
-    const labels: Record<string, string> = {
-        ACTIVE: '진행 중',
-        PAUSED: '일시정지',
-        EXPIRED: '노출 종료',
-        PENDING: '결제 대기중',
-        UNVERIFIED: '사업자 검증 중',
-        CLAIM_PENDING: '수락 대기중',
-    };
+    if (isPending) {
+        if (!isVerified) {
+            return (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-black bg-red-50 text-red-600 border border-red-200">
+                    사업자 검증 중
+                </span>
+            );
+        }
+        return (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-black bg-yellow-50 text-yellow-700 border border-yellow-200">
+                결제 대기중
+            </span>
+        );
+    }
+
+    if (isExposed) {
+        const remainingDays = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        const dDayStr = remainingDays <= 0 ? 'D-Day' : `D-${remainingDays}`;
+        const expDateStr = `${expiresAt.getFullYear()}.${String(expiresAt.getMonth() + 1).padStart(2, '0')}.${String(expiresAt.getDate()).padStart(2, '0')}`;
+
+        return (
+            <div className="flex flex-col items-center">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-blue-50 text-blue-600 border border-blue-200">
+                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                    노출중 ({dDayStr})
+                </span>
+                <span className="text-[10.5px] font-extrabold text-blue-600 mt-0.5">
+                    ~{expDateStr}
+                </span>
+            </div>
+        );
+    }
+
     return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${styles[status] || ''}`}>
-            {status === 'ACTIVE' && <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />}
-            {status === 'CLAIM_PENDING' && <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />}
-            {labels[status] || status}
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gray-50 text-gray-400 border border-gray-200">
+            미노출
         </span>
     );
 };
@@ -160,11 +176,10 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                         <tr className="bg-gray-50/75 border-b border-gray-150 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
                             <th className="px-3 py-4 text-center w-[110px] min-w-[110px]">배너 종류</th>
                             <th className="px-3 py-4 text-center w-[85px] min-w-[85px]">로고</th>
-                            <th className="px-4 py-4 text-center w-[180px] min-w-[180px]">제목</th>
-                            <th className="px-3 py-4 text-center w-[100px] min-w-[100px]">업체명</th>
-                            <th className="px-3 py-4 text-center w-[90px] min-w-[90px]">근무지역</th>
-                            <th className="px-3 py-4 text-center w-[70px] min-w-[70px]">상태</th>
-                            <th className="px-3 py-4 text-center w-[100px] min-w-[100px]">노출 만료일</th>
+                            <th className="px-4 py-4 text-center w-[220px] min-w-[220px]">제목</th>
+                            <th className="px-3 py-4 text-center w-[110px] min-w-[110px]">업체명</th>
+                            <th className="px-3 py-4 text-center w-[95px] min-w-[95px]">근무지역</th>
+                            <th className="px-3 py-4 text-center w-[140px] min-w-[140px]">노출 상태</th>
                             <th className="px-3 py-4 text-center w-[190px] min-w-[190px]">관리</th>
                         </tr>
                     </thead>
@@ -206,8 +221,8 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                                     <td className="px-6 py-4 text-center">
                                         <TickerText 
                                             text={ad.title} 
-                                            maxWidth="180px" 
-                                            limit={12}
+                                            maxWidth="200px" 
+                                            limit={14}
                                             className="font-black text-gray-900" 
                                         />
                                     </td>
@@ -216,8 +231,8 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                                     <td className="px-4 py-4 text-center">
                                         <TickerText 
                                             text={ad.company || ad.company_name} 
-                                            maxWidth="95px" 
-                                            limit={6}
+                                            maxWidth="105px" 
+                                            limit={7}
                                             className="font-bold text-gray-600" 
                                         />
                                     </td>
@@ -226,20 +241,15 @@ export default function BizAdsList({ initialAds, isVerified, isAgent }: { initia
                                     <td className="px-4 py-4 text-center">
                                         <TickerText 
                                             text={ad.location || '전지역'} 
-                                            maxWidth="85px" 
-                                            limit={5}
+                                            maxWidth="90px" 
+                                            limit={6}
                                             className="text-gray-500 font-medium" 
                                         />
                                     </td>
 
-                                    {/* 상태 */}
+                                    {/* 노출 상태 */}
                                     <td className="px-4 py-4 whitespace-nowrap text-center">
                                         <StatusBadge ad={ad} isVerified={!!isVerified} />
-                                    </td>
-
-                                    {/* 노출 만료일 */}
-                                    <td className="px-4 py-4 whitespace-nowrap text-center font-bold text-gray-600">
-                                        {formatDate(ad.expires_at)}
                                     </td>
 
                                     {/* 관리 (수정, 삭제, 결제 순서) */}
