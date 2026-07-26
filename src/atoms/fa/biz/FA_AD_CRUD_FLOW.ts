@@ -203,7 +203,11 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 };
 
                 const p = Number(payload.exposure_period || 0);
+                const totalExposureDays = isCurrentlyActive 
+                    ? (remainingDays + p) 
+                    : (p > 0 ? p : 30);
 
+                // 1. 노출 기간 연장 패키지 금액
                 if (p > 0) {
                     let basePrice = getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, p === 30 ? 70000 : p === 60 ? 125000 : 189000);
                     if (payload.is_subscription) {
@@ -212,18 +216,23 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                     totalPoints += basePrice;
                 }
 
-                const customDays = (payload as any)._optionPeriodDays;
-                const optionDays = customDays && customDays > 0 
-                    ? Number(customDays) 
-                    : (p === 0 && isCurrentlyActive ? remainingDays : (p > 0 ? p : 30));
-
-                const ratio = optionDays / 30;
-
+                // 2. 부가 옵션 금액 (프론트엔드와 100% 동일한 정밀 일할 계산)
                 const calcOpt = (isOpt: boolean, wasOpt: boolean, key: string, defP: number) => {
-                    if (!isOpt) return;
-                    if (p === 0 && isCurrentlyActive && wasOpt && (!customDays || customDays === remainingDays)) return;
-                    const unitP = getPrice(key, defP);
-                    totalPoints += Math.floor(unitP * ratio);
+                    const baseUnitPrice = getPrice(key, defP);
+
+                    if (isOpt) {
+                        if (wasOpt && isCurrentlyActive) {
+                            if (p > 0) {
+                                totalPoints += Math.floor(baseUnitPrice * (p / 30));
+                            }
+                        } else {
+                            totalPoints += Math.floor(baseUnitPrice * (totalExposureDays / 30));
+                        }
+                    } else if (wasOpt && isCurrentlyActive) {
+                        const remainingValue = Math.floor(baseUnitPrice * (remainingDays / 30));
+                        const fee = Math.floor(remainingValue * 0.05);
+                        totalPoints -= (remainingValue - fee);
+                    }
                 };
 
                 calcOpt(!!payload.option_bold, !!existingJob.option_bold, 'OPTION_PRICE_BOLD', 30000);
@@ -232,18 +241,26 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 calcOpt(!!payload.option_highlight, !!existingJob.option_highlight, 'OPTION_PRICE_HIGHLIGHT', 15000);
                 calcOpt(!!payload.option_icon, !!existingJob.option_icon, 'OPTION_PRICE_ICON', 15000);
 
+                // 일반 아이콘 정밀 계산
                 const safeGenIcons = safeIconsArray(payload.option_general_icons);
                 const initGenIcons = safeIconsArray(existingJob.option_general_icons);
-                if (safeGenIcons.length > 0) {
-                    const unitP = getPrice('OPTION_PRICE_GENERAL_ICONS', 10000);
-                    if (p === 0 && isCurrentlyActive && (!customDays || customDays === remainingDays)) {
-                        const newCount = safeGenIcons.filter(ic => !initGenIcons.includes(ic)).length;
-                        if (newCount > 0) {
-                            totalPoints += Math.floor(unitP * newCount * ratio);
-                        }
-                    } else {
-                        totalPoints += Math.floor(unitP * safeGenIcons.length * ratio);
-                    }
+                const iconUnitPrice = getPrice('OPTION_PRICE_GENERAL_ICONS', 10000);
+
+                const addedIcons = safeGenIcons.filter(ic => !initGenIcons.includes(ic));
+                if (addedIcons.length > 0) {
+                    totalPoints += Math.floor(iconUnitPrice * addedIcons.length * (totalExposureDays / 30));
+                }
+
+                const removedIcons = initGenIcons.filter(ic => !safeGenIcons.includes(ic));
+                if (removedIcons.length > 0 && isCurrentlyActive) {
+                    const val = Math.floor(iconUnitPrice * removedIcons.length * (remainingDays / 30));
+                    const fee = Math.floor(val * 0.05);
+                    totalPoints -= (val - fee);
+                }
+
+                const keptIcons = safeGenIcons.filter(ic => initGenIcons.includes(ic));
+                if (keptIcons.length > 0 && p > 0) {
+                    totalPoints += Math.floor(iconUnitPrice * keptIcons.length * (p / 30));
                 }
 
                 calcOpt(!!payload.option_jump, !!existingJob.option_jump, 'OPTION_PRICE_JUMP', 30000);
