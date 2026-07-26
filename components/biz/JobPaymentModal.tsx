@@ -280,7 +280,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                     </button>
                 </div>
                 
-                <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-6 md:gap-8 bg-gray-50/50">
+                <div className="flex-1 overflow-y-auto p-4 md:p-5 flex flex-col gap-4 bg-gray-50/50">
                     {/* 1. 라이브 프리뷰 (가로형 리스트 UI) */}
                     <div className="w-full shrink-0 flex flex-col gap-4">
                         <h4 className="font-bold text-gray-700 flex items-center gap-2"><Eye className="w-4 h-4 text-primary" /> 라이브 프리뷰 (리스트 노출 화면)</h4>
@@ -396,19 +396,19 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                     <div className="w-full flex flex-col gap-6">
                         {/* 노출 기간 선택 */}
                         <section className="order-2">
-                            <h4 className="text-[15px] font-black text-gray-800 mb-3 flex items-center justify-between">
+                            <h4 className="text-[15px] font-black text-gray-800 mb-2 flex items-center justify-between">
                                 <span>2. 노출 기간 패키지 {isCurrentlyActive ? '(선택)' : '(필수)'}</span>
-                                <span className="text-[12px] font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                                <span className="text-[11.5px] font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
                                     {isCurrentlyActive ? `기존 기간유지 또는 연장 선택` : `장기 결제 시 최대 20% 할인!`}
                                 </span>
                             </h4>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                 {[
                                     ...(isCurrentlyActive ? [{ id: 0, label: '기간 연장 안 함', sub: false, isZero: true }] : []),
                                     { id: 30, label: '30일', sub: false, isZero: false },
-                                    { id: 60, label: '60일', sub: false, isZero: false },
-                                    { id: 90, label: '90일', sub: false, isZero: false },
-                                    { id: 'sub', label: '매월 자동 연장 (구독)', sub: true, isZero: false },
+                                    { id: 60, label: '60일', sub: false, isZero: false, badge: '10% OFF' },
+                                    { id: 90, label: '90일', sub: false, isZero: false, badge: '20% OFF' },
+                                    { id: 'sub', label: '매월 자동 연장 (구독)', sub: true, isZero: false, badge: '5% OFF' },
                                 ].map(opt => {
                                     const isSelected = opt.isZero 
                                         ? (form.exposure_period === 0 && !form.is_subscription)
@@ -436,18 +436,16 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     update('exposure_period', opt.id as 30|60|90);
                                                 }
                                             }}
-                                            className={`flex flex-col items-center justify-center p-3.5 rounded-2xl border-2 transition-all ${isSelected ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                                            className={`flex flex-col items-center justify-center py-2 px-2.5 rounded-xl border-2 transition-all ${isSelected ? 'border-primary bg-primary/5 shadow-xs scale-[1.01]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
                                         >
-                                            <div className="flex items-center justify-center gap-1.5 mb-1">
-                                                {opt.sub && <Clock className={`w-4 h-4 ${isSelected ? 'text-primary' : 'text-gray-400'}`} />}
-                                                <span className={`text-[14.5px] font-black ${isSelected ? 'text-primary' : 'text-gray-700'}`}>{opt.label}</span>
+                                            <div className="flex items-center justify-center gap-1 mb-0.5">
+                                                {opt.sub && <Clock className={`w-3.5 h-3.5 ${isSelected ? 'text-primary' : 'text-gray-400'}`} />}
+                                                <span className={`text-[13px] font-black ${isSelected ? 'text-primary' : 'text-gray-700'}`}>{opt.label}</span>
                                             </div>
-                                            <div className="flex items-center gap-1.5 text-center">
-                                                {opt.isZero && <span className="text-[11px] font-bold text-gray-500">기존 남은 {remainingDays}일 유지 (0 P)</span>}
-                                                {opt.sub && <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">첫 달 5% 할인</span>}
-                                                {!opt.sub && !opt.isZero && days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
-                                                {!opt.sub && !opt.isZero && days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
-                                                {!opt.isZero && <span className="text-[13.5px] font-bold text-gray-500">{price.toLocaleString()} P</span>}
+                                            <div className="flex items-center justify-center gap-1 text-center">
+                                                {opt.isZero && <span className="text-[10.5px] font-bold text-gray-500">기존 {remainingDays}일 유지 (0 P)</span>}
+                                                {opt.badge && <span className="text-[9.5px] font-black bg-red-100 text-red-600 px-1 py-0.2 rounded">{opt.badge}</span>}
+                                                {!opt.isZero && <span className="text-[12px] font-extrabold text-gray-600">{price.toLocaleString()} P</span>}
                                             </div>
                                         </button>
                                     );
