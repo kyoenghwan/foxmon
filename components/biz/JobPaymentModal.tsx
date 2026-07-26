@@ -94,7 +94,22 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
 
     // 필드 업데이트
     const update = (field: keyof AdFormData, value: any) => {
-        setForm(prev => ({ ...prev, [field]: value }));
+        console.log(`[JobPaymentModal DEBUG] update() called with field="${String(field)}", value:`, value);
+        if (field === 'option_general_icons') {
+            const sanitized = safeIconsArray(value);
+            console.log(`[JobPaymentModal DEBUG] option_general_icons sanitized:`, sanitized);
+            setForm(prev => {
+                const next = { ...prev, [field]: sanitized };
+                console.log(`[JobPaymentModal DEBUG] next form state:`, next);
+                return next;
+            });
+        } else {
+            setForm(prev => {
+                const next = { ...prev, [field]: value };
+                console.log(`[JobPaymentModal DEBUG] next form state:`, next);
+                return next;
+            });
+        }
     };
 
     // 데이터(포인트 및 마스터코드) 로드
@@ -177,6 +192,8 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
     const deadlineDate = new Date();
     deadlineDate.setDate(deadlineDate.getDate() + (form.exposure_period || 30));
     const deadlineString = `${deadlineDate.getFullYear()}-${String(deadlineDate.getMonth() + 1).padStart(2, '0')}-${String(deadlineDate.getDate()).padStart(2, '0')}`;
+
+    console.log("[JobPaymentModal DEBUG] Render component. Selected general icons array:", selectedGeneralIcons, "option_general_icons raw:", form.option_general_icons, "type:", typeof form.option_general_icons, "is_array:", Array.isArray(form.option_general_icons));
 
     return (
         <div className="fixed inset-0 z-[9999] bg-black/80 flex flex-col items-center justify-center p-4" onClick={onClose}>
