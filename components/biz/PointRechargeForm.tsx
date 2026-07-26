@@ -287,9 +287,9 @@ export function PointRechargeForm({ isBusinessVerified, defaultDepositorName }: 
                             </h3>
                             <button 
                                 onClick={handleCloseInquiryModal}
-                                className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-lg"
+                                className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-700 hover:text-gray-900 rounded-xl text-[12px] font-black transition-all shrink-0"
                             >
-                                <X className="w-5 h-5" />
+                                닫기
                             </button>
                         </div>
 

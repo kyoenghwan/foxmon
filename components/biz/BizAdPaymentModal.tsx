@@ -341,14 +341,9 @@ ${cancelDetail || '상세 사유 미기재'}
                     </h3>
                     <button
                         onClick={onClose}
-                        className="focus:outline-none focus-visible:outline-none focus:ring-0 shrink-0"
+                        className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-700 hover:text-gray-900 rounded-xl text-[13px] font-black transition-all shrink-0"
                     >
-                        <span className="hidden md:flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors">
-                            <X className="w-5 h-5" />
-                        </span>
-                        <span className="md:hidden inline-block px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 hover:text-gray-900 rounded-full text-[12px] font-black transition-all">
-                            닫기
-                        </span>
+                        닫기
                     </button>
                 </div>
                 
@@ -809,8 +804,11 @@ ${cancelDetail || '상세 사유 미기재'}
                                 <h3 className="font-black text-gray-900 text-lg flex items-center gap-2">
                                     <span className="text-red-500 font-extrabold">⚠️</span> 광고 취소/철회
                                 </h3>
-                                <button onClick={() => setIsCancelModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
-                                    <X className="w-5 h-5" />
+                                <button 
+                                    onClick={() => setIsCancelModalOpen(false)} 
+                                    className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-700 hover:text-gray-900 rounded-xl text-[12px] font-black transition-all shrink-0"
+                                >
+                                    닫기
                                 </button>
                             </div>
                             
