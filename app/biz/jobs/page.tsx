@@ -249,13 +249,14 @@ export default async function BizJobsPage() {
                     <table className="w-full hidden md:table table-fixed">
                         <thead>
                             <tr className="border-b border-gray-100 bg-gray-50">
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">근무지역</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">직종</th>
-                                <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500 w-[200px]">제목</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[140px]">노출기간 / 마감일</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">업소명</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">급여</th>
-                                <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500 w-[150px]">관리</th>
+                                <th className="text-center px-2 py-4 text-[12px] font-black text-gray-500 w-[80px]">근무지역</th>
+                                <th className="text-center px-2 py-4 text-[12px] font-black text-gray-500 w-[80px]">직종</th>
+                                <th className="text-left px-5 py-4 text-[12px] font-black text-gray-500 w-[220px]">제목</th>
+                                <th className="text-center px-2 py-4 text-[12px] font-black text-gray-500 w-[130px]">노출 상태</th>
+                                <th className="text-center px-2 py-4 text-[12px] font-black text-gray-500 w-[110px]">업소명</th>
+                                <th className="text-center px-2 py-4 text-[12px] font-black text-gray-500 w-[110px]">급여</th>
+                                <th className="text-center px-2 py-4 text-[12px] font-black text-gray-500 w-[90px]">마감일</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -277,19 +278,23 @@ export default async function BizJobsPage() {
                                 const dDayStr = getDDay(ad.expires_at);
                                 const isExposed = ad.expires_at && new Date(ad.expires_at).getTime() > Date.now();
 
+                                // 근무지역 2줄 처리
+                                const rawLoc = ad.location || ad.address || '-';
+                                const locDisplay = rawLoc.includes(' ') ? rawLoc.replace(' ', '\n') : rawLoc;
+
                                 return (
                                     <tr 
                                         key={ad.id} 
                                         className="border-b border-gray-100 transition-colors"
                                         style={rowBgColor ? { backgroundColor: rowBgColor } : {}}
                                     >
-                                        <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
-                                            {ad.location || ad.address || '-'}
+                                        <td className="px-2 py-4 text-center text-[12.5px] font-medium text-gray-700 leading-snug whitespace-pre-line break-keep">
+                                            {locDisplay}
                                         </td>
-                                        <td className="px-4 py-4 text-center text-[13px] font-medium text-gray-600 truncate">
+                                        <td className="px-2 py-4 text-center text-[12.5px] font-medium text-gray-700 truncate">
                                             {ad.category1 || '-'}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-5 py-4">
                                             <div className="flex flex-col gap-1 min-w-0 items-start">
                                                 {/* 상단 실제 아이콘들 (급구 + 일반아이콘) */}
                                                 {(isUrgentActive || generalIcons.length > 0) && (
@@ -312,7 +317,7 @@ export default async function BizJobsPage() {
                                                     {ad.image && (
                                                         <img src={ad.image} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
                                                     )}
-                                                    <div className="w-[170px] overflow-hidden relative h-6 flex items-center justify-start">
+                                                    <div className="w-[190px] overflow-hidden relative h-6 flex items-center justify-start">
                                                         {ad.title.length > 8 ? (
                                                             <div className="absolute w-max flex items-center gap-4 animate-job-marquee">
                                                                 <span 
@@ -340,46 +345,41 @@ export default async function BizJobsPage() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-4 text-center">
-                                            <div className="flex flex-col items-center gap-1">
-                                                {isExposed ? (
-                                                    <div className="flex flex-col items-center">
-                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-black bg-blue-50 text-blue-600 border border-blue-200">
-                                                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-                                                            노출중 ({dDayStr})
-                                                        </span>
-                                                        <span className="text-[11px] font-extrabold text-blue-600 mt-0.5">
-                                                            ~{expDateStr}
-                                                        </span>
-                                                    </div>
-                                                ) : (
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-black bg-gray-50 text-gray-400 border border-gray-200">
-                                                        미노출
+                                        <td className="px-2 py-4 text-center">
+                                            {isExposed ? (
+                                                <div className="flex flex-col items-center">
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-black bg-blue-50 text-blue-600 border border-blue-200">
+                                                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                                                        노출중 ({dDayStr})
                                                     </span>
-                                                )}
-                                                <span className="text-[10px] font-bold text-gray-400">
-                                                    (채용: {ad.close_date || '상시'})
+                                                    <span className="text-[10.5px] font-extrabold text-blue-600 mt-0.5">
+                                                        ~{expDateStr}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-black bg-gray-50 text-gray-400 border border-gray-200">
+                                                    미노출
                                                 </span>
-                                            </div>
+                                            )}
                                         </td>
-                                        <td className="px-4 py-4 text-center">
-                                            <div className="w-[110px] overflow-hidden relative h-5 flex items-center justify-center mx-auto">
+                                        <td className="px-2 py-4 text-center">
+                                            <div className="w-[100px] overflow-hidden relative h-5 flex items-center justify-center mx-auto">
                                                 {ad.company_name && ad.company_name.length > 5 ? (
                                                     <div className="absolute w-max flex items-center gap-4 animate-job-marquee">
-                                                        <span className="text-[13.5px] font-bold text-gray-700">{ad.company_name}</span>
-                                                        <span className="text-[13.5px] font-bold text-gray-700">{ad.company_name}</span>
+                                                        <span className="text-[13px] font-bold text-gray-700">{ad.company_name}</span>
+                                                        <span className="text-[13px] font-bold text-gray-700">{ad.company_name}</span>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-[13.5px] font-bold text-gray-700 w-full text-center truncate">
+                                                    <span className="text-[13px] font-bold text-gray-700 w-full text-center truncate">
                                                         {ad.company_name || ad.company || ad.business_name || '-'}
                                                     </span>
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-4 py-4 text-center">
-                                            <div className="flex items-center justify-center gap-1.5">
+                                        <td className="px-2 py-4 text-center">
+                                            <div className="flex flex-col items-center justify-center gap-0.5">
                                                 {ad.salary_type && (
-                                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black shrink-0 ${
+                                                    <span className={`inline-flex items-center px-1.5 py-0.2 rounded text-[9.5px] font-black shrink-0 ${
                                                         ad.salary_type === '시급' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
                                                         ad.salary_type === '일급' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
                                                         ad.salary_type === '월급' ? 'bg-green-50 text-green-600 border border-green-100' :
@@ -390,29 +390,29 @@ export default async function BizJobsPage() {
                                                         {ad.salary_type}
                                                     </span>
                                                 )}
-                                                <span className="font-extrabold text-[13.5px] text-gray-900 whitespace-nowrap">
+                                                <span className="font-extrabold text-[12.5px] text-gray-900 whitespace-nowrap">
                                                     {ad.salary_amount
                                                         ? formatKoreanAmount(Number(String(ad.salary_amount).replace(/[^0-9]/g, '')))
                                                         : ad.pay || '-'}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-4 text-center">
+                                        <td className="px-2 py-4 text-center">
                                             {(!ad.close_date || ad.close_date === '상시채용') ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-teal-50 text-teal-600 border border-teal-150 whitespace-nowrap">
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-black bg-teal-50 text-teal-600 border border-teal-150 whitespace-nowrap">
                                                     상시채용
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center justify-center gap-1 text-[13px] font-medium text-gray-500 whitespace-nowrap">
-                                                    <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                                <span className="inline-flex items-center justify-center gap-1 text-[12px] font-medium text-gray-500 whitespace-nowrap">
+                                                    <Clock className="w-3 h-3 text-gray-400" />
                                                     {ad.close_date}
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <Link href={`/biz/jobs/${ad.id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200" title="수정">
-                                                    <Pencil className="w-4 h-4 text-gray-600" />
+                                        <td className="px-4 py-4 text-center">
+                                            <div className="flex items-center justify-center gap-1.5">
+                                                <Link href={`/biz/jobs/${ad.id}`} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200" title="수정">
+                                                    <Pencil className="w-3.5 h-3.5 text-gray-600" />
                                                 </Link>
                                                 <PaymentModalTrigger ad={ad} />
                                             </div>
