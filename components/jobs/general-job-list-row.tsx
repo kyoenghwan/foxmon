@@ -172,20 +172,20 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
             }`}
             style={bgStyle}
         >
-            <td className="py-4 px-3 text-gray-800 text-center font-bold text-[13px] md:text-[14px] whitespace-nowrap">
+            <td className="py-3 px-3 text-gray-700 text-center font-medium text-[12px] md:text-[13px] whitespace-nowrap">
                 {location || '지역무관'}
             </td>
 
-            <td className="py-4 px-2 text-gray-600 text-center font-medium truncate max-w-[100px]">
+            <td className="py-3 px-2 text-gray-500 text-center font-normal text-[12px] md:text-[13px] truncate max-w-[100px]">
                 {category1 || '-'}
             </td>
             
-            <td className="py-4 px-4 text-left overflow-hidden">
+            <td className="py-3 px-4 text-left overflow-hidden">
                 <div className="flex flex-col gap-1 min-w-0">
                     {hasIcons && (
                         <div className="flex flex-wrap items-center gap-1.5">
                             {option_general_icons?.map((icon, idx) => (
-                                <span key={idx} className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-white text-gray-700 border border-gray-200 shadow-sm whitespace-nowrap">
+                                <span key={idx} className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white text-gray-700 border border-gray-200 shadow-xs whitespace-nowrap">
                                     {icon}
                                 </span>
                             ))}
@@ -193,13 +193,13 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
                     )}
                     <div className="flex items-center gap-2 w-full mt-0.5 overflow-hidden">
                         {option_icon && (
-                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 flex items-center gap-0.5 animate-pulse">
+                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-xs shrink-0 flex items-center gap-0.5 animate-pulse">
                                 🚨 급구
                             </span>
                         )}
                         <span 
                             title={title}
-                            className={`text-[14px] md:text-[15px] truncate tracking-tight transition-colors ${option_bold ? 'font-black' : 'font-bold'} ${!option_color_value && !option_highlight_value ? 'text-gray-900 group-hover:text-primary' : ''}`}
+                            className={`text-[13px] md:text-[14px] truncate tracking-tight transition-colors ${option_bold ? 'font-extrabold' : 'font-semibold'} ${!option_color_value && !option_highlight_value ? 'text-gray-900 group-hover:text-primary' : ''}`}
                             style={{
                                 color: (option_color && option_color_value) ? option_color_value : undefined,
                                 backgroundColor: (option_highlight && option_highlight_value) ? option_highlight_value : undefined,
@@ -213,25 +213,25 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
                 </div>
             </td>
 
-            <td className="py-4 px-2 font-bold text-gray-800 text-center text-[13px] md:text-[14px]">
-                <div className="truncate max-w-[150px] mx-auto" title={company}>
+            <td className="py-3 px-2 font-medium text-gray-700 text-center text-[12px] md:text-[13px]">
+                <div className="truncate max-w-[140px] mx-auto" title={company}>
                     <span className="truncate">
                         {company}
                     </span>
                 </div>
             </td>
             
-            <td className="py-4 px-2 text-center">
-                <span className="text-[15px] font-black text-[#ff3b30] tracking-tighter whitespace-nowrap">{formatPay(job)}</span>
+            <td className="py-3 px-2 text-center">
+                <span className="text-[13px] md:text-[14px] font-extrabold text-[#ff3b30] tracking-tight whitespace-nowrap">{formatPay(job)}</span>
             </td>
 
-            <td className="py-4 px-2 text-center text-[13px]">
+            <td className="py-3 px-2 text-center text-[12px]">
                 {(!close_date || close_date === '상시채용') ? (
-                    <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-pink-50 text-pink-500 border border-pink-200/50 text-[11px] font-black leading-none whitespace-nowrap tracking-tight">
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 rounded bg-pink-50 text-pink-500 border border-pink-200/50 text-[10px] font-bold leading-none whitespace-nowrap tracking-tight">
                         상시채용
                     </span>
                 ) : (
-                    <span className="text-gray-500 font-semibold">
+                    <span className="text-gray-400 font-medium">
                         {close_date}
                     </span>
                 )}

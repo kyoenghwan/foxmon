@@ -730,15 +730,15 @@ export function JobsListContent({ isEmployer: propIsEmployer, searchQuery }: Job
                     <div className="flex flex-col gap-4">
                         {/* PC 뷰 (테이블 형태) */}
                         <div className="hidden md:block bg-white border-t-2 border-gray-900 shadow-sm rounded-b-xl overflow-x-auto">
-                            <table className="w-full min-w-[800px] text-center text-[13px] md:text-[14px]">
-                                <thead className="border-b border-gray-200 text-gray-700 font-bold bg-white">
+                            <table className="w-full min-w-[800px] text-center text-[12px] md:text-[13px]">
+                                <thead className="border-b border-gray-200 text-gray-500 font-bold bg-gray-50/60">
                                     <tr>
-                                        <th className="py-3.5 px-3 w-[18%] font-extrabold text-gray-900 text-center whitespace-nowrap">근무지역</th>
-                                        <th className="py-3.5 px-2 w-[10%] font-semibold text-center">직종</th>
-                                        <th className="py-3.5 px-4 w-[36%] text-left font-semibold">제목</th>
-                                        <th className="py-3.5 px-2 w-[16%] font-semibold text-center">업소명</th>
-                                        <th className="py-3.5 px-2 w-[12%] font-semibold text-gray-500 text-center">급여</th>
-                                        <th className="py-3.5 px-2 w-[8%] font-semibold text-gray-500 text-center">마감일</th>
+                                        <th className="py-2.5 px-3 w-[18%] font-bold text-gray-700 text-center whitespace-nowrap">근무지역</th>
+                                        <th className="py-2.5 px-2 w-[10%] font-bold text-center">직종</th>
+                                        <th className="py-2.5 px-4 w-[36%] font-bold text-left">제목</th>
+                                        <th className="py-2.5 px-2 w-[16%] font-bold text-center">업소명</th>
+                                        <th className="py-2.5 px-2 w-[12%] font-bold text-center">급여</th>
+                                        <th className="py-2.5 px-2 w-[8%] font-bold text-center">마감일</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
