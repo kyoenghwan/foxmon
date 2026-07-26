@@ -49,6 +49,21 @@ export interface AdItem {
     salary_amount?: string;
 }
 
+export const safeIconsArray = (icons: any): string[] => {
+    if (!icons) return [];
+    if (Array.isArray(icons)) return icons;
+    if (typeof icons === 'string') {
+        try {
+            const parsed = JSON.parse(icons);
+            if (Array.isArray(parsed)) return parsed;
+            return [icons];
+        } catch (e) {
+            return [icons];
+        }
+    }
+    return [];
+};
+
 const IS_SUPABASE_ENABLED = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 /**
@@ -299,7 +314,7 @@ async function fetchAdsFromDBInternal(
                 option_icon: checkOpt(item.option_icon, item.option_icon_expires_at),
                 option_jump: checkOpt(item.option_jump, item.option_jump_expires_at),
                 option_highlight: checkOpt(item.option_highlight, item.option_highlight_expires_at),
-                option_general_icons: checkOpt(item.option_general_icons, item.option_general_icons_expires_at) ? item.option_general_icons : null,
+                option_general_icons: checkOpt(item.option_general_icons, item.option_general_icons_expires_at) ? safeIconsArray(item.option_general_icons) : [],
                 option_double_slot: checkOpt(item.option_double_slot, item.option_double_slot_expires_at)
             };
         });

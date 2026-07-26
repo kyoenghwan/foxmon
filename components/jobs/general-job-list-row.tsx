@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { AdItem } from '@/lib/ad-service';
+import { AdItem, safeIconsArray } from '@/lib/ad-service';
 
 const formatKoreanAmount = (amountVal: number): string => {
     if (isNaN(amountVal) || amountVal <= 0) return '-';
@@ -41,7 +41,8 @@ export function GeneralJobListRow(job: AdItem) {
     
     // 지역 축약
     const shortLocation = location?.split(' ').slice(0, 2).join(' ') || location || '지역무관';
-    const hasIcons = option_general_icons && option_general_icons.length > 0;
+    const generalIcons = safeIconsArray(option_general_icons);
+    const hasIcons = generalIcons.length > 0;
 
     // 리스트 배경색 스타일
     const hasBg = option_bg && option_bg_value;
@@ -104,7 +105,7 @@ export function GeneralJobListRow(job: AdItem) {
             <div className="flex flex-col gap-1.5">
                 {hasIcons && (
                     <div className="flex flex-wrap items-center gap-1.5">
-                        {option_general_icons?.map((icon, idx) => (
+                        {generalIcons.map((icon, idx) => (
                             <span key={idx} className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-white text-gray-700 border border-gray-200 shadow-sm whitespace-nowrap">
                                 {icon}
                             </span>
@@ -148,8 +149,8 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
     } = job;
     
     // 지역 축약
-    const shortLocation = location?.split(' ').slice(0, 2).join(' ') || location || '지역무관';
-    const hasIcons = option_general_icons && option_general_icons.length > 0;
+    const generalIcons = safeIconsArray(option_general_icons);
+    const hasIcons = generalIcons.length > 0;
 
     // 리스트 배경색 스타일
     const hasBg = option_bg && option_bg_value;
@@ -184,7 +185,7 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
                 <div className="flex flex-col gap-1 min-w-0">
                     {hasIcons && (
                         <div className="flex flex-wrap items-center gap-1.5">
-                            {option_general_icons?.map((icon, idx) => (
+                            {generalIcons.map((icon, idx) => (
                                 <span key={idx} className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white text-gray-700 border border-gray-200 shadow-xs whitespace-nowrap">
                                     {icon}
                                 </span>

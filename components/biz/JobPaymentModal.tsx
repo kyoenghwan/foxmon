@@ -8,6 +8,7 @@ import { getUserPointsAction } from '@/app/actions/pointActions';
 import { manageAdAction } from '@/lib/actions';
 import { QA_GET_COMMON_CODES } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { GET_POINT_POLICIES, PointPolicyItem } from '@/app/actions/pointPolicyActions';
+import { safeIconsArray } from '@/lib/ad-service';
 
 interface JobPaymentModalProps {
     initialData: Partial<AdFormData>;
@@ -34,6 +35,18 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         ...initialData,
         exposure_period: initialData.exposure_period || 30 // 기본값 30일
     });
+
+    const selectedGeneralIcons = safeIconsArray(form.option_general_icons);
+
+    const optionsList = [
+        { id: 'bold', label: '굵은 글씨', desc: '제목을 굵게 표시', priceKey: 'OPTION_PRICE_BOLD' },
+        { id: 'color', label: '제목 컬러', desc: '제목 브랜드 컬러 적용', priceKey: 'OPTION_PRICE_COLOR' },
+        { id: 'highlight', label: '형광펜 효과', desc: '글씨 뒷배경 형광펜 강조', priceKey: 'OPTION_PRICE_HIGHLIGHT' },
+        { id: 'bg', label: '리스트 배경색', desc: '공고 영역 전체 배경색 강조', priceKey: 'OPTION_PRICE_BG' },
+        { id: 'icon', label: '급구 아이콘', desc: '🚨급구 마크 표시', priceKey: 'OPTION_PRICE_ICON' },
+        { id: 'general_icons', label: '일반 아이콘', desc: '뱃지 중복 선택 (개당 비용)', priceKey: 'OPTION_PRICE_GENERAL_ICONS' },
+        { id: 'jump', label: '자동 점프', desc: '하루 24번(1시간 마다) 자동 상단 끌어올림', priceKey: 'OPTION_PRICE_JUMP' },
+    ];
 
     const containerRef = useRef<HTMLDivElement>(null);
     const iconsWrapperRef = useRef<HTMLDivElement>(null);
@@ -133,8 +146,8 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         if (form.option_bg) total += getPrice('OPTION_PRICE_BG', p);
         if (form.option_highlight) total += getPrice('OPTION_PRICE_HIGHLIGHT', p);
         if (form.option_icon) total += getPrice('OPTION_PRICE_ICON', p);
-        if (form.option_general_icons && form.option_general_icons.length > 0) {
-            total += getPrice('OPTION_PRICE_GENERAL_ICONS', p) * form.option_general_icons.length;
+        if (selectedGeneralIcons.length > 0) {
+            total += getPrice('OPTION_PRICE_GENERAL_ICONS', p) * selectedGeneralIcons.length;
         }
         if (form.option_jump) total += getPrice('OPTION_PRICE_JUMP', p);
         return total;
@@ -225,10 +238,10 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                     `}} />
 
                                     {/* 아이콘 영역 */}
-                                    {(form.option_icon || (form.option_general_icons && form.option_general_icons.length > 0)) && (
+                                    {(form.option_icon || selectedGeneralIcons.length > 0) && (
                                         <div ref={iconsWrapperRef} className="flex items-center gap-1 shrink-0 whitespace-nowrap">
                                             {form.option_icon && <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 animate-pulse">급구</span>}
-                                            {form.option_general_icons?.map(icon => (
+                                            {selectedGeneralIcons.map(icon => (
                                                 <span key={icon} className="text-[12px] font-black shrink-0 px-1 py-0.5 rounded border border-gray-200 bg-white">{icon}</span>
                                             ))}
                                         </div>
@@ -348,21 +361,13 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                 <span className="text-[12px] font-medium text-gray-400">선택한 기간({form.exposure_period}일) 적용</span>
                             </h4>
                             <div className="flex flex-col gap-2">
-                                {[
-                                    { id: 'bold', label: '굵은 글씨', desc: '제목을 굵게 표시', key: 'OPTION_PRICE_BOLD' },
-                                    { id: 'color', label: '제목 컬러', desc: '제목 브랜드 컬러 적용', key: 'OPTION_PRICE_COLOR' },
-                                    { id: 'highlight', label: '형광펜 효과', desc: '글씨 뒷배경 형광펜 강조', key: 'OPTION_PRICE_HIGHLIGHT' },
-                                    { id: 'bg', label: '리스트 배경색', desc: '공고 영역 전체 배경색 강조', key: 'OPTION_PRICE_BG' },
-                                    { id: 'icon', label: '급구 아이콘', desc: '🚨급구 마크 표시', key: 'OPTION_PRICE_ICON' },
-                                    { id: 'general_icons', label: '일반 아이콘', desc: '뱃지 중복 선택 (개당 비용)', key: 'OPTION_PRICE_GENERAL_ICONS' },
-                                    { id: 'jump', label: '자동 점프', desc: '하루 24번(1시간 마다) 자동 상단 끌어올림', key: 'OPTION_PRICE_JUMP' },
-                                ].map(opt => {
+                                {optionsList.map(opt => {
                                     const isChecked = !!form[`option_${opt.id}` as keyof AdFormData];
                                     const periodKey = `option_${opt.id}_period` as keyof AdFormData;
                                     const currentPeriod = form[periodKey] || 30;
-                                    const price = getPrice(opt.key, currentPeriod as number);
+                                    const price = getPrice(opt.priceKey, currentPeriod as number);
                                     const isGeneralIcons = opt.id === 'general_icons';
-                                    const finalPrice = isGeneralIcons && isChecked ? price * (form.option_general_icons?.length || 1) : price;
+                                    const finalPrice = isGeneralIcons && isChecked ? price * (selectedGeneralIcons.length || 1) : price;
                                     
                                     return (
                                         <div 
@@ -375,14 +380,14 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     if (opt.id === 'color' && !form.option_color_value) update('option_color_value', TITLE_COLORS[0]);
                                                     if (opt.id === 'bg' && !form.option_bg_value) update('option_bg_value', BG_COLORS[0]);
                                                     if (opt.id === 'highlight' && !form.option_highlight_value) update('option_highlight_value', HIGHLIGHT_COLORS[0]);
-                                                    if (opt.id === 'general_icons' && (!form.option_general_icons || form.option_general_icons.length === 0)) {
+                                                    if (opt.id === 'general_icons' && selectedGeneralIcons.length === 0) {
                                                         update('option_general_icons', generalIcons.length > 0 ? [generalIcons[0]] : []);
                                                     }
                                                 }
                                             }}
                                             className={`flex items-center justify-between py-2 px-3.5 rounded-xl border transition-all cursor-pointer select-none ${
                                                 isChecked 
-                                                    ? 'border-indigo-500 bg-indigo-50/20 shadow-sm' 
+                                                    ? 'border-indigo-500 bg-indigo-50/20 shadow-xs' 
                                                     : 'border-[#f1f1f5] bg-[#fafafc] hover:bg-white hover:border-gray-300'
                                             }`}
                                         >
@@ -402,12 +407,12 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     {opt.desc}
                                                 </span>
                                             </div>
- 
+
                                             {/* 우측: 도구 및 금액 */}
                                             <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
                                                 {/* 색상 선택 (OS 기본 컬러 피커) */}
                                                 {isChecked && (opt.id === 'color' || opt.id === 'highlight' || opt.id === 'bg') && (
-                                                    <div className="relative w-5 h-5 rounded-full overflow-hidden border border-gray-300 shadow-sm cursor-pointer transition-transform hover:scale-110 shrink-0" title="색상 변경">
+                                                    <div className="relative w-5 h-5 rounded-full overflow-hidden border border-gray-300 shadow-xs cursor-pointer transition-transform hover:scale-110 shrink-0" title="색상 변경">
                                                         <input 
                                                             type="color" 
                                                             value={form[`option_${opt.id}_value` as keyof AdFormData] as string || '#ffffff'}
@@ -423,7 +428,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                         <button 
                                                             type="button" 
                                                             onClick={(e) => { e.stopPropagation(); setActivePicker(activePicker === opt.id ? null : opt.id); }}
-                                                            className="px-2 py-0.5 rounded border border-gray-300 bg-white text-[11px] font-bold text-gray-600 hover:bg-gray-50 shadow-sm"
+                                                            className="px-2 py-0.5 rounded border border-gray-300 bg-white text-[11px] font-bold text-gray-600 hover:bg-gray-50 shadow-xs"
                                                         >
                                                             선택
                                                         </button>
@@ -437,11 +442,11 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                                     {generalIcons.length === 0 ? (
                                                                         <span className="text-gray-400 text-xs py-2">등록된 아이콘이 없습니다.</span>
                                                                     ) : generalIcons.map(icon => {
-                                                                        const selected = form.option_general_icons?.includes(icon) || false;
+                                                                        const selected = selectedGeneralIcons.includes(icon);
                                                                         return (
                                                                             <button key={icon} type="button"
                                                                                 onClick={() => {
-                                                                                    let current = form.option_general_icons || [];
+                                                                                    let current = [...selectedGeneralIcons];
                                                                                     if (selected) {
                                                                                         current = current.filter(x => x !== icon);
                                                                                         if (current.length === 0) return; // 최소 1개는 유지
