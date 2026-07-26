@@ -18,6 +18,7 @@ const nextConfig: any = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  turbopack: {},
   webpack: (config, { dev, isServer }) => {
     if (dev) {
       // 개발 환경에서 파일시스템 캐시 비활성화
