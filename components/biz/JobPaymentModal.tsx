@@ -37,25 +37,22 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         ? Math.max(1, Math.ceil((currentExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
         : 0;
 
-    // 옵션 적용 기간 상태 (기본값: 노출중이면 공고 남은 날짜, 미노출이면 30일)
-    const [optionPeriodType, setOptionPeriodType] = useState<string>(isCurrentlyActive ? 'MATCH_AD' : '30');
-    const [customOptionDays, setCustomOptionDays] = useState<number>(30);
-
-    // 실제 적용 일수 (1일 단위)
-    const effectiveOptionDays = optionPeriodType === 'MATCH_AD'
-        ? (isCurrentlyActive ? remainingDays : (Number(initialData?.exposure_period) || 30))
-        : optionPeriodType === 'CUSTOM'
-            ? Math.max(1, Number(customOptionDays || 1))
-            : Number(optionPeriodType || 30);
-
     // 모달 전용 상태 (노출 중이면 기본값 0: 기간 연장 안 함)
-    const [form, setForm] = useState<Partial<AdFormData> & { _optionPeriodDays?: number }>({
+    const [form, setForm] = useState<Partial<AdFormData>>({
         ...initialData,
         option_general_icons: safeIconsArray(initialData?.option_general_icons),
         exposure_period: isCurrentlyActive ? 0 : (initialData?.exposure_period || 30)
     });
 
     const selectedGeneralIcons = safeIconsArray(form.option_general_icons);
+
+    // 이번 결제에서 추가 선택한 노출 연장 일수 (0일, 30일, 60일, 90일)
+    const addedExtensionDays = Number(form.exposure_period || 0);
+
+    // 공고의 총 노출 일수 (기존 남은 일수 + 추가 연장 일수)
+    const totalExposureDays = isCurrentlyActive 
+        ? (remainingDays + addedExtensionDays) 
+        : (addedExtensionDays > 0 ? addedExtensionDays : 30);
 
     const optionsList = [
         { id: 'bold', label: '굵은 글씨', desc: '제목을 굵게 표시', priceKey: 'OPTION_PRICE_BOLD', defaultPrice: 30000 },
@@ -144,25 +141,25 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
 
     const getPrice = (key: string, defVal: number = 0) => policies[key] || defVal;
 
-    // 상세 계산 내역 (Breakdown) 및 총 포인트 산정
+    // 상세 계산 내역 (Breakdown) 및 총 포인트 산정 (공고 총 노출일수와 완전 동기화)
     const calculateBreakdown = () => {
         const items: { label: string; amount: number; desc?: string }[] = [];
         let total = 0;
-        const period = Number(form.exposure_period || 0);
+        const addedPeriod = Number(form.exposure_period || 0);
 
-        // 1. 노출 기간 패키지 금액
-        if (period > 0) {
-            let basePrice = getPrice(`OPTION_PRICE_BASE_PERIOD_${period}`, period === 30 ? 70000 : period === 60 ? 125000 : 189000);
+        // 1. 노출 기간 연장 패키지 금액
+        if (addedPeriod > 0) {
+            let basePrice = getPrice(`OPTION_PRICE_BASE_PERIOD_${addedPeriod}`, addedPeriod === 30 ? 70000 : addedPeriod === 60 ? 125000 : 189000);
             if (form.is_subscription) {
                 basePrice = Math.floor(basePrice * 0.95);
             }
             items.push({
-                label: `노출 기간 연장 (${form.is_subscription ? '구독' : period + '일'})`,
+                label: `노출 기간 연장 (${form.is_subscription ? '구독' : addedPeriod + '일'})`,
                 amount: basePrice,
-                desc: isCurrentlyActive ? `기존 만료일(~${initialData.expires_at?.split('T')[0]})에 +${period}일 추가 연장` : `오늘부터 ${period}일 노출`
+                desc: isCurrentlyActive ? `기존 만료일(~${initialData.expires_at?.split('T')[0]})에 +${addedPeriod}일 추가 연장` : `오늘부터 ${addedPeriod}일 노출`
             });
             total += basePrice;
-        } else {
+        } else if (isCurrentlyActive) {
             items.push({
                 label: `노출 기간 연장 안 함`,
                 amount: 0,
@@ -170,30 +167,48 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
             });
         }
 
-        // 2. 추가 옵션 금액 (선택된 옵션 적용 일수 비례 계산)
-        const optionRatio = effectiveOptionDays / 30;
-
+        // 2. 부가 옵션 금액 계산 (공고 총 노출일수 totalExposureDays 에 자동 동기화)
         const calcOptionPrice = (isOptionChecked: boolean, wasOptionChecked: boolean, key: string, defaultPrice: number, optionName: string) => {
-            if (!isOptionChecked) return;
-
-            if (isCurrentlyActive && period === 0 && wasOptionChecked && optionPeriodType === 'MATCH_AD') {
-                items.push({
-                    label: `${optionName} (기존 유효)`,
-                    amount: 0,
-                    desc: `이미 적용 중인 옵션`
-                });
-                return;
-            }
-
             const baseUnitPrice = getPrice(key, defaultPrice);
-            const finalPrice = Math.floor(baseUnitPrice * optionRatio);
 
-            items.push({
-                label: `${optionName} (${effectiveOptionDays}일 적용)`,
-                amount: finalPrice,
-                desc: `${baseUnitPrice.toLocaleString()} P × (${effectiveOptionDays}/30일)`
-            });
-            total += finalPrice;
+            if (isOptionChecked) {
+                if (wasOptionChecked && isCurrentlyActive) {
+                    if (addedPeriod === 0) {
+                        items.push({
+                            label: `${optionName} (기존 유효)`,
+                            amount: 0,
+                            desc: `남은 ${remainingDays}일간 계속 유지`
+                        });
+                    } else {
+                        const addOptPrice = Math.floor(baseUnitPrice * (addedPeriod / 30));
+                        items.push({
+                            label: `${optionName} (+${addedPeriod}일 연장)`,
+                            amount: addOptPrice,
+                            desc: `노출기간 연장에 따른 옵션 연장 (${baseUnitPrice.toLocaleString()} P × ${addedPeriod}/30일)`
+                        });
+                        total += addOptPrice;
+                    }
+                } else {
+                    const newOptPrice = Math.floor(baseUnitPrice * (totalExposureDays / 30));
+                    items.push({
+                        label: `${optionName} (${totalExposureDays}일 신규 적용)`,
+                        amount: newOptPrice,
+                        desc: `${baseUnitPrice.toLocaleString()} P × (${totalExposureDays}/30일)`
+                    });
+                    total += newOptPrice;
+                }
+            } else if (wasOptionChecked && isCurrentlyActive) {
+                const remainingValue = Math.floor(baseUnitPrice * (remainingDays / 30));
+                const fee = Math.floor(remainingValue * 0.05);
+                const refundAmount = remainingValue - fee;
+                
+                items.push({
+                    label: `${optionName} 해제 (환불)`,
+                    amount: -refundAmount,
+                    desc: `남은 ${remainingDays}일 가치 ${remainingValue.toLocaleString()} P - 수수료 5%(${fee.toLocaleString()} P)`
+                });
+                total -= refundAmount;
+            }
         };
 
         calcOptionPrice(!!form.option_bold, !!initialData?.option_bold, 'OPTION_PRICE_BOLD', 30000, '굵은 글씨');
@@ -202,39 +217,51 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         calcOptionPrice(!!form.option_highlight, !!initialData?.option_highlight, 'OPTION_PRICE_HIGHLIGHT', 15000, '형광펜 효과');
         calcOptionPrice(!!form.option_icon, !!initialData?.option_icon, 'OPTION_PRICE_ICON', 15000, '🚨 급구 아이콘');
 
-        // 일반 아이콘 (개수 및 기간 비례)
+        // 일반 아이콘 계산
         const currentIcons = selectedGeneralIcons;
         const initIcons = safeIconsArray(initialData?.option_general_icons);
-        if (currentIcons.length > 0) {
-            const baseUnitPrice = getPrice('OPTION_PRICE_GENERAL_ICONS', 10000);
-            
-            if (isCurrentlyActive && period === 0 && optionPeriodType === 'MATCH_AD') {
-                const newIconsCount = currentIcons.filter(ic => !initIcons.includes(ic)).length;
-                if (newIconsCount > 0) {
-                    const iconPrice = Math.floor(baseUnitPrice * newIconsCount * optionRatio);
-                    items.push({
-                        label: `일반 아이콘 ${newIconsCount}개 신규 추가 (${effectiveOptionDays}일 적용)`,
-                        amount: iconPrice,
-                        desc: `${baseUnitPrice.toLocaleString()} P × ${newIconsCount}개 × (${effectiveOptionDays}/30일)`
-                    });
-                    total += iconPrice;
-                }
-                const keptIconsCount = currentIcons.length - newIconsCount;
-                if (keptIconsCount > 0) {
-                    items.push({
-                        label: `일반 아이콘 ${keptIconsCount}개 (기존 유효)`,
-                        amount: 0,
-                        desc: `이미 적용된 아이콘`
-                    });
-                }
-            } else {
-                const iconPrice = Math.floor(baseUnitPrice * currentIcons.length * optionRatio);
+        const baseUnitPrice = getPrice('OPTION_PRICE_GENERAL_ICONS', 10000);
+
+        const addedIcons = currentIcons.filter(ic => !initIcons.includes(ic));
+        if (addedIcons.length > 0) {
+            const addIconPrice = Math.floor(baseUnitPrice * addedIcons.length * (totalExposureDays / 30));
+            items.push({
+                label: `일반 아이콘 ${addedIcons.length}개 신규 추가 (${totalExposureDays}일 적용)`,
+                amount: addIconPrice,
+                desc: `${baseUnitPrice.toLocaleString()} P × ${addedIcons.length}개 × (${totalExposureDays}/30일)`
+            });
+            total += addIconPrice;
+        }
+
+        const removedIcons = initIcons.filter(ic => !currentIcons.includes(ic));
+        if (removedIcons.length > 0 && isCurrentlyActive) {
+            const val = Math.floor(baseUnitPrice * removedIcons.length * (remainingDays / 30));
+            const fee = Math.floor(val * 0.05);
+            const ref = val - fee;
+            items.push({
+                label: `일반 아이콘 ${removedIcons.length}개 해제 (환불)`,
+                amount: -ref,
+                desc: `남은 ${remainingDays}일 가치 ${val.toLocaleString()} P - 수수료 5%(${fee.toLocaleString()} P)`
+            });
+            total -= ref;
+        }
+
+        const keptIcons = currentIcons.filter(ic => initIcons.includes(ic));
+        if (keptIcons.length > 0) {
+            if (addedPeriod > 0) {
+                const addPrice = Math.floor(baseUnitPrice * keptIcons.length * (addedPeriod / 30));
                 items.push({
-                    label: `일반 아이콘 ${currentIcons.length}개 (${effectiveOptionDays}일 적용)`,
-                    amount: iconPrice,
-                    desc: `${baseUnitPrice.toLocaleString()} P × ${currentIcons.length}개 × (${effectiveOptionDays}/30일)`
+                    label: `일반 아이콘 ${keptIcons.length}개 (+${addedPeriod}일 연장)`,
+                    amount: addPrice,
+                    desc: `${baseUnitPrice.toLocaleString()} P × ${keptIcons.length}개 × ${addedPeriod}/30일`
                 });
-                total += iconPrice;
+                total += addPrice;
+            } else if (isCurrentlyActive) {
+                items.push({
+                    label: `일반 아이콘 ${keptIcons.length}개 (기존 유효)`,
+                    amount: 0,
+                    desc: `남은 ${remainingDays}일간 계속 유지`
+                });
             }
         }
 
@@ -256,7 +283,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
             const res = await manageAdAction('UPDATE', { 
                 ...form, 
                 _isPayment: true,
-                _optionPeriodDays: effectiveOptionDays 
+                _optionPeriodDays: totalExposureDays 
             }, jobId);
             if (!res.success) {
                 throw new Error(res.message || "결제 처리에 실패했습니다.");
@@ -460,37 +487,11 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
 
                         {/* 부가 옵션 선택 */}
                         <section className="order-1">
-                            <h4 className="text-[15px] font-black text-gray-800 mb-3 flex flex-wrap items-center justify-between gap-2">
+                            <h4 className="text-[15px] font-black text-gray-800 mb-3 flex items-center justify-between">
                                 <span>1. 주목도 100배! 추가 옵션</span>
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <span className="text-[11.5px] font-bold text-gray-500">적용 기간:</span>
-                                    <select
-                                        value={optionPeriodType}
-                                        onChange={(e) => setOptionPeriodType(e.target.value)}
-                                        className="text-[11.5px] font-black bg-white border border-indigo-200 text-indigo-700 rounded-lg px-2 py-1 focus:outline-none focus:border-indigo-500 shadow-2xs cursor-pointer"
-                                    >
-                                        {isCurrentlyActive && (
-                                            <option value="MATCH_AD">🔗 공고 남은기간에 맞춤 ({remainingDays}일)</option>
-                                        )}
-                                        <option value="30">🗓️ 30일 적용</option>
-                                        <option value="60">🗓️ 60일 적용</option>
-                                        <option value="90">🗓️ 90일 적용</option>
-                                        <option value="CUSTOM">✏️ 직접 입력 (1일 단위)</option>
-                                    </select>
-                                    {optionPeriodType === 'CUSTOM' && (
-                                        <div className="flex items-center gap-1 bg-white border border-indigo-300 rounded-lg px-2 py-0.5 shadow-2xs">
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                max="365"
-                                                value={customOptionDays}
-                                                onChange={(e) => setCustomOptionDays(Math.max(1, Number(e.target.value)))}
-                                                className="w-12 text-[11.5px] font-black text-indigo-600 text-center outline-none"
-                                            />
-                                            <span className="text-[11.5px] font-bold text-gray-600">일</span>
-                                        </div>
-                                    )}
-                                </div>
+                                <span className="text-[12px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                                    {isCurrentlyActive ? `공고 노출기간(${totalExposureDays}일) 자동 동기화` : `선택한 기간 적용`}
+                                </span>
                             </h4>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                 {optionsList.map(opt => {
@@ -498,12 +499,32 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                     const isChecked = opt.id === 'general_icons' 
                                         ? selectedGeneralIcons.length > 0
                                         : !!form[fieldKey];
+
+                                    const wasChecked = opt.id === 'general_icons'
+                                        ? safeIconsArray(initialData?.option_general_icons).length > 0
+                                        : !!initialData?.[fieldKey];
                                     
                                     const unitPrice = getPrice(opt.priceKey, opt.defaultPrice);
-                                    let displayPrice = Math.floor(unitPrice * (effectiveOptionDays / 30));
+                                    let displayPrice = 0;
+                                    let isRefund = false;
 
-                                    if (opt.id === 'general_icons' && selectedGeneralIcons.length > 0) {
-                                        displayPrice = displayPrice * selectedGeneralIcons.length;
+                                    if (isChecked) {
+                                        if (wasChecked && isCurrentlyActive) {
+                                            displayPrice = Math.floor(unitPrice * (addedExtensionDays / 30));
+                                        } else {
+                                            displayPrice = Math.floor(unitPrice * (totalExposureDays / 30));
+                                        }
+
+                                        if (opt.id === 'general_icons' && selectedGeneralIcons.length > 0) {
+                                            const addedCount = selectedGeneralIcons.filter(ic => !safeIconsArray(initialData?.option_general_icons).includes(ic)).length;
+                                            const keptCount = selectedGeneralIcons.filter(ic => safeIconsArray(initialData?.option_general_icons).includes(ic)).length;
+                                            displayPrice = Math.floor(unitPrice * addedCount * (totalExposureDays / 30)) + Math.floor(unitPrice * keptCount * (addedExtensionDays / 30));
+                                        }
+                                    } else if (wasChecked && isCurrentlyActive) {
+                                        const remainingValue = Math.floor(unitPrice * (remainingDays / 30));
+                                        const fee = Math.floor(remainingValue * 0.05);
+                                        displayPrice = remainingValue - fee;
+                                        isRefund = true;
                                     }
 
                                     return (
@@ -605,7 +626,15 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     </div>
                                                 )}
 
-                                                <span className="text-[12.5px] font-black text-indigo-600 text-right whitespace-nowrap">+{displayPrice.toLocaleString()} P</span>
+                                                <span className={`text-[12.5px] font-black text-right whitespace-nowrap ${
+                                                    isRefund 
+                                                        ? 'text-emerald-600' 
+                                                        : isChecked && displayPrice > 0 
+                                                            ? 'text-indigo-600' 
+                                                            : 'text-gray-400'
+                                                }`}>
+                                                    {isRefund ? `-${displayPrice.toLocaleString()} P (환불)` : `+${displayPrice.toLocaleString()} P`}
+                                                </span>
                                             </div>
                                         </div>
                                     );
