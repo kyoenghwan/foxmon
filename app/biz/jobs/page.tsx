@@ -6,6 +6,7 @@ import { manageAdAction } from '@/lib/actions';
 import { supabaseAdmin } from '@/lib/supabase';
 import { OpenMyPageButton } from '@/components/biz/OpenMyPageButton';
 import { PaymentModalTrigger } from '@/components/biz/PaymentModalTrigger';
+import { safeIconsArray } from '@/lib/utils';
 
 const TierBadge = ({ tier }: { tier: string }) => {
     const styles: Record<string, string> = {
@@ -47,6 +48,51 @@ const StatusBadge = ({ expiresAt }: { expiresAt: string | null | undefined }) =>
         );
     }
 };
+
+const getActiveOptions = (ad: any) => {
+    const now = Date.now();
+    const checkActive = (val: any, expiresAt: any) => {
+        if (!val) return false;
+        if (Array.isArray(val) && val.length === 0) return false;
+        if (expiresAt) {
+            const expTime = new Date(expiresAt).getTime();
+            if (!isNaN(expTime) && expTime <= now) return false;
+        }
+        return true;
+    };
+
+    const list = [];
+    if (checkActive(ad.option_icon, ad.option_icon_expires_at)) {
+        list.push({ label: '🚨 급구', color: 'bg-red-50 text-red-650 border-red-200 animate-pulse' });
+    }
+    if (checkActive(ad.option_bold, ad.option_bold_expires_at)) {
+        list.push({ label: '굵은글씨', color: 'bg-slate-100 text-slate-700 border-slate-300' });
+    }
+    if (checkActive(ad.option_color, ad.option_color_expires_at)) {
+        list.push({ label: '제목컬러', color: 'bg-orange-50 text-orange-600 border-orange-200' });
+    }
+    if (checkActive(ad.option_highlight, ad.option_highlight_expires_at)) {
+        list.push({ label: '형광펜', color: 'bg-yellow-50 text-yellow-700 border-yellow-300' });
+    }
+    if (checkActive(ad.option_bg, ad.option_bg_expires_at)) {
+        list.push({ label: '배경색', color: 'bg-amber-50/50 text-amber-700 border-amber-200' });
+    }
+    if (checkActive(ad.option_jump, ad.option_jump_expires_at)) {
+        list.push({ label: '자동점프 ⚡', color: 'bg-blue-50 text-blue-600 border-blue-200' });
+    }
+    
+    if (checkActive(ad.option_general_icons, ad.option_general_icons_expires_at)) {
+        const icons = safeIconsArray(ad.option_general_icons);
+        icons.forEach(ic => {
+            if (ic && ic !== 'undefined') {
+                list.push({ label: ic, color: 'bg-white text-gray-500 border-gray-200' });
+            }
+        });
+    }
+
+    return list;
+};
+
 const formatKoreanAmount = (amountVal: number): string => {
     if (isNaN(amountVal) || amountVal <= 0) return '-';
     
@@ -221,20 +267,36 @@ export default async function BizJobsPage() {
                                         {ad.category1 || '-'}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            {ad.image && (
-                                                <img src={ad.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
-                                            )}
-                                            <div className="w-[150px] overflow-hidden relative h-5 flex items-center justify-start">
-                                                {ad.title.length > 5 ? (
-                                                    <div className="absolute w-max flex items-center gap-4 animate-job-marquee">
-                                                        <span className="font-bold text-[14px] text-gray-900">{ad.title}</span>
-                                                        <span className="font-bold text-[14px] text-gray-900">{ad.title}</span>
-                                                    </div>
-                                                ) : (
-                                                    <span className="font-bold text-[14px] text-gray-900 w-full text-left truncate">{ad.title}</span>
+                                        <div className="flex flex-col gap-1 min-w-0">
+                                            <div className="flex items-center gap-3">
+                                                {ad.image && (
+                                                    <img src={ad.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
                                                 )}
+                                                <div className="w-[150px] overflow-hidden relative h-5 flex items-center justify-start">
+                                                    {ad.title.length > 5 ? (
+                                                        <div className="absolute w-max flex items-center gap-4 animate-job-marquee">
+                                                            <span className="font-bold text-[14px] text-gray-900">{ad.title}</span>
+                                                            <span className="font-bold text-[14px] text-gray-900">{ad.title}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="font-bold text-[14px] text-gray-900 w-full text-left truncate">{ad.title}</span>
+                                                    )}
+                                                </div>
                                             </div>
+                                            {/* 적용 옵션 표시 */}
+                                            {(() => {
+                                                const activeOpts = getActiveOptions(ad);
+                                                if (activeOpts.length === 0) return null;
+                                                return (
+                                                    <div className="flex flex-wrap gap-1 mt-1">
+                                                        {activeOpts.map((opt, idx) => (
+                                                            <span key={idx} className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border ${opt.color}`}>
+                                                                {opt.label}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
                                     </td>
                                     <td className="px-4 py-4 text-center">
@@ -299,24 +361,34 @@ export default async function BizJobsPage() {
 
                     {/* 모바일용 카드 리스트 뷰 */}
                     <div className="md:hidden space-y-3.5">
-                        {mockAds.map((ad) => (
-                            <div key={ad.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3.5">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="flex items-center gap-3">
-                                        {ad.image && (
-                                            <img src={ad.image} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0 border border-gray-100" />
-                                        )}
-                                        <div>
-                                            <h4 className="font-extrabold text-[14px] text-gray-900 leading-snug">{ad.title}</h4>
-                                            <p className="text-[11.5px] text-gray-400 mt-1 font-bold">
-                                                {ad.company_name || ad.company || ad.business_name} | {ad.location}
-                                            </p>
+                        {mockAds.map((ad) => {
+                            const activeOpts = getActiveOptions(ad);
+                            return (
+                                <div key={ad.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3.5">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="flex items-center gap-3">
+                                            {ad.image && (
+                                                <img src={ad.image} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0 border border-gray-100" />
+                                            )}
+                                            <div>
+                                                <h4 className="font-extrabold text-[14px] text-gray-900 leading-snug">{ad.title}</h4>
+                                                <p className="text-[11.5px] text-gray-400 mt-1 font-bold">
+                                                    {ad.company_name || ad.company || ad.business_name} | {ad.location}
+                                                </p>
+                                                {activeOpts.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 mt-2">
+                                                        {activeOpts.map((opt, idx) => (
+                                                            <span key={idx} className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border ${opt.color}`}>
+                                                                {opt.label}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 
-                                </div>
-
-                                <div className="flex items-center justify-between border-t border-gray-50 pt-3 text-[11px] font-bold text-gray-500">
+                                    <div className="flex items-center justify-between border-t border-gray-50 pt-3 text-[11px] font-bold text-gray-500">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <div className="flex items-center gap-1">
                                             {ad.salary_type && (
@@ -357,7 +429,8 @@ export default async function BizJobsPage() {
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                        );
+                    })}
                     </div>
                 </div>
             )}

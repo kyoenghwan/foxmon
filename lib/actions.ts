@@ -115,12 +115,22 @@ export async function manageAdAction(
         return { success: false, message: '로그인이 필요합니다.' };
     }
 
-    return FA_AD_CRUD_FLOW({
+    const res = await FA_AD_CRUD_FLOW({
         actionType,
         userId: session.user.id,
         jobId,
         payload
     });
+
+    if (res.success && ['CREATE', 'UPDATE', 'DELETE'].includes(actionType)) {
+        invalidateAdCache();
+        revalidatePath('/');
+        revalidatePath('/jobs');
+        revalidatePath('/biz/jobs');
+        revalidatePath('/biz/ads');
+    }
+
+    return res;
 }
 
 export async function manageBizAdAction(

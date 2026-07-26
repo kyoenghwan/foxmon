@@ -27,6 +27,7 @@ export function PaymentModalTrigger({ ad }: { ad: any }) {
                     onSuccess={() => {
                         setOpen(false);
                         router.refresh();
+                        window.location.reload();
                     }} 
                 />
             )}
