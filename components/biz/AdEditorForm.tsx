@@ -114,7 +114,7 @@ export interface AdFormData {
     total_points?: number;
     
     // 결제 및 부가 옵션 (팝업)
-    exposure_period?: 30 | 60 | 90;
+    exposure_period?: 0 | 30 | 60 | 90;
     option_fixed?: boolean;
     
     option_bold?: boolean;

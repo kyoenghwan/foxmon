@@ -74,7 +74,7 @@ export interface AdFormData {
     close_date?: string;
     
     // 결제 및 부가 옵션 (팝업)
-    exposure_period?: 30 | 60 | 90;
+    exposure_period?: 0 | 30 | 60 | 90;
     option_bold?: boolean;
     option_color?: boolean;
     option_bg?: boolean;

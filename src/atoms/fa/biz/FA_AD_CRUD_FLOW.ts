@@ -176,16 +176,22 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             // 1. 기존 공고 확인
             const { data: existingJob, error: checkError } = await supabase
                 .from('jobs')
-                .select('user_id, expires_at')
+                .select('*')
                 .eq('id', jobId)
                 .single();
             
             if (checkError || !existingJob) return { success: false, message: '공고를 찾을 수 없습니다.' };
             if (existingJob.user_id !== userId) return { success: false, message: '수정 권한이 없습니다.' };
 
-            // 2. 결제 여부 확인 (pay=true 딥링크 등을 통해 넘어온 유료 옵션 변경인지)
+            // 2. 결제 여부 및 일할 비례(Pro-rata) 계산
+            const currentExpiresAt = existingJob.expires_at ? new Date(existingJob.expires_at) : null;
+            const isCurrentlyActive = currentExpiresAt && currentExpiresAt.getTime() > Date.now();
+            const remainingDays = isCurrentlyActive 
+                ? Math.max(1, Math.ceil((currentExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+                : 0;
+
             let totalPoints = 0;
-            const isPaymentUpdate = !!payload.exposure_period && payload._isPayment === true;
+            const isPaymentUpdate = payload._isPayment === true;
 
             if (isPaymentUpdate) {
                 const { GET_POINT_POLICIES } = await import('@/app/actions/pointPolicyActions');
@@ -196,30 +202,54 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                     return found ? Number(found.config_value) : def;
                 };
 
-                const p = (payload.exposure_period || 30) as 30 | 60 | 90;
-                totalPoints = getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, 70000);
-                
-                if (payload.is_subscription) {
-                    totalPoints = Math.floor(totalPoints * 0.95);
+                const p = Number(payload.exposure_period || 0);
+
+                if (p > 0) {
+                    let basePrice = getPrice(`OPTION_PRICE_BASE_PERIOD_${p}`, p === 30 ? 70000 : p === 60 ? 125000 : 189000);
+                    if (payload.is_subscription) {
+                        basePrice = Math.floor(basePrice * 0.95);
+                    }
+                    totalPoints += basePrice;
                 }
-                
-                if (payload.option_bold) totalPoints += getPrice('OPTION_PRICE_BOLD', 30000);
-                if (payload.option_color) totalPoints += getPrice('OPTION_PRICE_COLOR', 15000);
-                if (payload.option_bg) totalPoints += getPrice('OPTION_PRICE_BG', 15000);
-                if (payload.option_highlight) totalPoints += getPrice('OPTION_PRICE_HIGHLIGHT', 15000);
-                if (payload.option_icon) totalPoints += getPrice('OPTION_PRICE_ICON', 15000);
-                const safeGeneralIcons = safeIconsArray(payload.option_general_icons);
-                if (safeGeneralIcons.length > 0) {
-                    totalPoints += getPrice('OPTION_PRICE_GENERAL_ICONS', 10000) * safeGeneralIcons.length;
+
+                const isProrated = p === 0 && isCurrentlyActive;
+                const ratio = isProrated ? (remainingDays / 30) : 1;
+
+                const calcOpt = (isOpt: boolean, wasOpt: boolean, key: string, defP: number) => {
+                    if (!isOpt) return;
+                    if (isProrated && wasOpt) return; // 이미 적용되었던 옵션은 0원
+                    const unitP = getPrice(key, defP);
+                    totalPoints += isProrated ? Math.floor(unitP * ratio) : unitP;
+                };
+
+                calcOpt(!!payload.option_bold, !!existingJob.option_bold, 'OPTION_PRICE_BOLD', 30000);
+                calcOpt(!!payload.option_color, !!existingJob.option_color, 'OPTION_PRICE_COLOR', 15000);
+                calcOpt(!!payload.option_bg, !!existingJob.option_bg, 'OPTION_PRICE_BG', 15000);
+                calcOpt(!!payload.option_highlight, !!existingJob.option_highlight, 'OPTION_PRICE_HIGHLIGHT', 15000);
+                calcOpt(!!payload.option_icon, !!existingJob.option_icon, 'OPTION_PRICE_ICON', 15000);
+
+                const safeGenIcons = safeIconsArray(payload.option_general_icons);
+                const initGenIcons = safeIconsArray(existingJob.option_general_icons);
+                if (safeGenIcons.length > 0) {
+                    const unitP = getPrice('OPTION_PRICE_GENERAL_ICONS', 10000);
+                    if (isProrated) {
+                        const newCount = safeGenIcons.filter(ic => !initGenIcons.includes(ic)).length;
+                        if (newCount > 0) {
+                            totalPoints += Math.floor(unitP * newCount * ratio);
+                        }
+                    } else {
+                        totalPoints += unitP * safeGenIcons.length;
+                    }
                 }
-                if (payload.option_jump) totalPoints += getPrice('OPTION_PRICE_JUMP', 30000);
+
+                calcOpt(!!payload.option_jump, !!existingJob.option_jump, 'OPTION_PRICE_JUMP', 30000);
 
                 if (totalPoints > 0) {
                     const { FA_DEDUCT_POINT_FOR_AD } = await import('@/src/atoms/fa/points/FA_DEDUCT_POINT_FOR_AD');
                     const deductResult = await FA_DEDUCT_POINT_FOR_AD({
                         userId,
                         adPrice: totalPoints,
-                        description: `구인 공고 연장/옵션 변경 (${p}일)`
+                        description: p > 0 ? `구인 공고 연장/옵션 (${p}일)` : `구인 공고 옵션 추가 (남은 ${remainingDays}일 일할 비례)`
                     });
 
                     if (!deductResult.success) {
@@ -269,25 +299,33 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
 
             // 결제 연장인 경우 만료일 및 옵션 갱신
             if (isPaymentUpdate) {
-                const p = (payload.exposure_period || 30) as 30 | 60 | 90;
+                const p = Number(payload.exposure_period || 0);
                 
-                // 베이스 (공고 자체) 만료일 계산 (기존 남은 기간에 연장)
-                const expiresAt = existingJob.expires_at ? new Date(existingJob.expires_at) : new Date();
-                if (expiresAt < new Date()) expiresAt.setTime(new Date().getTime());
-                expiresAt.setDate(expiresAt.getDate() + p);
-                
-                // 개별 옵션 만료일 계산 헬퍼 함수
-                const getOptionExpiresAt = (period: 30 | 60 | 90) => {
-                    const optDate = new Date();
-                    optDate.setDate(optDate.getDate() + period);
-                    return optDate.toISOString();
-                };
+                let expiresAt = existingJob.expires_at ? new Date(existingJob.expires_at) : new Date();
+                if (expiresAt < new Date()) expiresAt = new Date();
 
-                updatePayload.exposure_period = p;
+                if (p > 0) {
+                    expiresAt.setDate(expiresAt.getDate() + p);
+                    updatePayload.exposure_period = p;
+                    updatePayload.expires_at = expiresAt.toISOString();
+                } else if (!existingJob.expires_at) {
+                    expiresAt.setDate(expiresAt.getDate() + 30);
+                    updatePayload.expires_at = expiresAt.toISOString();
+                }
+
                 if (payload.is_subscription !== undefined) {
                     updatePayload.is_subscription = !!payload.is_subscription;
                 }
-                
+
+                const getOptionExpiresAt = (period: number) => {
+                    if (p > 0) {
+                        const optDate = new Date();
+                        optDate.setDate(optDate.getDate() + period);
+                        return optDate.toISOString();
+                    }
+                    return expiresAt.toISOString();
+                };
+
                 if (payload.option_bold !== undefined) {
                     updatePayload.option_bold = !!payload.option_bold;
                     updatePayload.option_bold_expires_at = updatePayload.option_bold ? getOptionExpiresAt(payload.option_bold_period || 30) : null;
@@ -325,7 +363,6 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                 }
 
                 updatePayload.total_points = totalPoints;
-                updatePayload.expires_at = expiresAt.toISOString();
             }
 
             if (payload.option_jump !== undefined && !isPaymentUpdate) {

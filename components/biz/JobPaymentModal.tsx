@@ -30,23 +30,30 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
     const [generalIcons, setGeneralIcons] = useState<string[]>([]);
     const [policies, setPolicies] = useState<Record<string, number>>({});
 
-    // 모달 전용 상태 (초기값 설정)
+    // 기존 공고 노출 상태 및 남은 기간 계산
+    const currentExpiresAt = initialData?.expires_at ? new Date(initialData.expires_at) : null;
+    const isCurrentlyActive = !!(currentExpiresAt && currentExpiresAt.getTime() > Date.now());
+    const remainingDays = isCurrentlyActive 
+        ? Math.max(1, Math.ceil((currentExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+        : 0;
+
+    // 모달 전용 상태 (노출 중이면 기본값 0: 기간 연장 안 함)
     const [form, setForm] = useState<Partial<AdFormData>>({
         ...initialData,
-        option_general_icons: safeIconsArray(initialData.option_general_icons),
-        exposure_period: initialData.exposure_period || 30 // 기본값 30일
+        option_general_icons: safeIconsArray(initialData?.option_general_icons),
+        exposure_period: isCurrentlyActive ? 0 : (initialData?.exposure_period || 30)
     });
 
     const selectedGeneralIcons = safeIconsArray(form.option_general_icons);
 
     const optionsList = [
-        { id: 'bold', label: '굵은 글씨', desc: '제목을 굵게 표시', priceKey: 'OPTION_PRICE_BOLD' },
-        { id: 'color', label: '제목 컬러', desc: '제목 브랜드 컬러 적용', priceKey: 'OPTION_PRICE_COLOR' },
-        { id: 'highlight', label: '형광펜 효과', desc: '글씨 뒷배경 형광펜 강조', priceKey: 'OPTION_PRICE_HIGHLIGHT' },
-        { id: 'bg', label: '리스트 배경색', desc: '공고 영역 전체 배경색 강조', priceKey: 'OPTION_PRICE_BG' },
-        { id: 'icon', label: '급구 아이콘', desc: '🚨급구 마크 표시', priceKey: 'OPTION_PRICE_ICON' },
-        { id: 'general_icons', label: '일반 아이콘', desc: '뱃지 중복 선택 (개당 비용)', priceKey: 'OPTION_PRICE_GENERAL_ICONS' },
-        { id: 'jump', label: '자동 점프', desc: '하루 24번(1시간 마다) 자동 상단 끌어올림', priceKey: 'OPTION_PRICE_JUMP' },
+        { id: 'bold', label: '굵은 글씨', desc: '제목을 굵게 표시', priceKey: 'OPTION_PRICE_BOLD', defaultPrice: 30000 },
+        { id: 'color', label: '제목 컬러', desc: '제목 브랜드 컬러 적용', priceKey: 'OPTION_PRICE_COLOR', defaultPrice: 15000 },
+        { id: 'highlight', label: '형광펜 효과', desc: '글씨 뒷배경 형광펜 강조', priceKey: 'OPTION_PRICE_HIGHLIGHT', defaultPrice: 15000 },
+        { id: 'bg', label: '리스트 배경색', desc: '공고 영역 전체 배경색 강조', priceKey: 'OPTION_PRICE_BG', defaultPrice: 15000 },
+        { id: 'icon', label: '급구 아이콘', desc: '🚨급구 마크 표시', priceKey: 'OPTION_PRICE_ICON', defaultPrice: 15000 },
+        { id: 'general_icons', label: '일반 아이콘', desc: '뱃지 중복 선택 (개당 비용)', priceKey: 'OPTION_PRICE_GENERAL_ICONS', defaultPrice: 10000 },
+        { id: 'jump', label: '자동 점프', desc: '하루 24번(1시간 마다) 자동 상단 끌어올림', priceKey: 'OPTION_PRICE_JUMP', defaultPrice: 30000 },
     ];
 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -58,20 +65,13 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
     useEffect(() => {
         const checkLayout = () => {
             if (containerRef.current) {
-                const containerWidth = containerRef.current.getBoundingClientRect().width;
-                
-                let iconsWidth = 0;
-                if (iconsWrapperRef.current) {
-                    iconsWidth = iconsWrapperRef.current.getBoundingClientRect().width;
-                }
-                
-                const isTwo = iconsWidth > containerWidth * 0.5;
-                setShowTwoLines(isTwo);
-                
+                const containerWidth = containerRef.current.clientWidth;
+                const iconsWidth = iconsWrapperRef.current ? iconsWrapperRef.current.clientWidth : 0;
+                setShowTwoLines(iconsWidth > containerWidth * 0.45);
+
                 if (titleRef.current) {
-                    const parentWidth = titleRef.current.parentElement?.getBoundingClientRect().width || containerWidth;
+                    const parentWidth = titleRef.current.parentElement?.clientWidth || containerWidth;
                     const scrollW = titleRef.current.scrollWidth;
-                    
                     if (scrollW > parentWidth) {
                         setMarqueeDistance(parentWidth - scrollW);
                     } else {
@@ -84,9 +84,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         checkLayout();
 
         if (containerRef.current) {
-            const observer = new ResizeObserver(() => {
-                checkLayout();
-            });
+            const observer = new ResizeObserver(() => checkLayout());
             observer.observe(containerRef.current);
             return () => observer.disconnect();
         }
@@ -94,41 +92,28 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
 
     // 필드 업데이트
     const update = (field: keyof AdFormData, value: any) => {
-        console.log(`[JobPaymentModal DEBUG] update() called with field="${String(field)}", value:`, value);
         if (field === 'option_general_icons') {
             const sanitized = safeIconsArray(value);
-            console.log(`[JobPaymentModal DEBUG] option_general_icons sanitized:`, sanitized);
-            setForm(prev => {
-                const next = { ...prev, [field]: sanitized };
-                console.log(`[JobPaymentModal DEBUG] next form state:`, next);
-                return next;
-            });
+            setForm(prev => ({ ...prev, [field]: sanitized }));
         } else {
-            setForm(prev => {
-                const next = { ...prev, [field]: value };
-                console.log(`[JobPaymentModal DEBUG] next form state:`, next);
-                return next;
-            });
+            setForm(prev => ({ ...prev, [field]: value }));
         }
     };
 
-    // 데이터(포인트 및 마스터코드) 로드
+    // 데이터 로드
     useEffect(() => {
         const loadData = async () => {
             try {
-                // 포인트 로드
                 const res = await getUserPointsAction();
                 if (res.success && res.points !== undefined) {
                     setUserPoints(res.points);
                 }
                 
-                // 일반 아이콘 리스트 로드 (DB 공통코드)
                 const codesRes = await QA_GET_COMMON_CODES('AD_GENERAL_ICONS', true);
                 if (codesRes.success && codesRes.data) {
                     setGeneralIcons(codesRes.data.map(c => c.code_name));
                 }
 
-                // 포인트 정책 로드
                 const policiesRes = await GET_POINT_POLICIES();
                 if (policiesRes.success && policiesRes.data) {
                     const policyMap: Record<string, number> = {};
@@ -146,33 +131,127 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
         loadData();
     }, []);
 
-    // 예상 결제 포인트 (이제 30, 60, 90일 키가 DB에 각각 저장되어 있으므로 그대로 가져옵니다)
-    const getPrice = (key: string, period: number) => policies[`${key}_${period}`] || 0;
-    
-    const calculateTotalPoints = () => {
-        const p = form.exposure_period || 30;
-        let total = getPrice('OPTION_PRICE_BASE_PERIOD', p);
-        
-        if (form.is_subscription) {
-            total = Math.floor(total * 0.95);
+    const getPrice = (key: string, defVal: number = 0) => policies[key] || defVal;
+
+    // 상세 계산 내역 (Breakdown) 및 총 포인트 산정
+    const calculateBreakdown = () => {
+        const items: { label: string; amount: number; desc?: string }[] = [];
+        let total = 0;
+        const period = Number(form.exposure_period || 0);
+
+        // 1. 노출 기간 패키지 금액
+        if (period > 0) {
+            let basePrice = getPrice(`OPTION_PRICE_BASE_PERIOD_${period}`, period === 30 ? 70000 : period === 60 ? 125000 : 189000);
+            if (form.is_subscription) {
+                basePrice = Math.floor(basePrice * 0.95);
+            }
+            items.push({
+                label: `노출 기간 연장 (${form.is_subscription ? '구독' : period + '일'})`,
+                amount: basePrice,
+                desc: isCurrentlyActive ? `기존 만료일(~${initialData.expires_at?.split('T')[0]})에 +${period}일 추가 연장` : `오늘부터 ${period}일 노출`
+            });
+            total += basePrice;
+        } else {
+            items.push({
+                label: `노출 기간 연장 안 함`,
+                amount: 0,
+                desc: `기존 남은 노출기간 ${remainingDays}일(~${initialData?.expires_at ? initialData.expires_at.split('T')[0] : ''}) 유지`
+            });
         }
-        
-        if (form.option_bold) total += getPrice('OPTION_PRICE_BOLD', p);
-        if (form.option_color) total += getPrice('OPTION_PRICE_COLOR', p);
-        if (form.option_bg) total += getPrice('OPTION_PRICE_BG', p);
-        if (form.option_highlight) total += getPrice('OPTION_PRICE_HIGHLIGHT', p);
-        if (form.option_icon) total += getPrice('OPTION_PRICE_ICON', p);
-        if (selectedGeneralIcons.length > 0) {
-            total += getPrice('OPTION_PRICE_GENERAL_ICONS', p) * selectedGeneralIcons.length;
+
+        // 2. 추가 옵션 금액
+        const isProrated = period === 0 && isCurrentlyActive;
+        const ratio = isProrated ? (remainingDays / 30) : 1;
+
+        const calcOptionPrice = (isOptionChecked: boolean, wasOptionChecked: boolean, key: string, defaultPrice: number, optionName: string) => {
+            if (!isOptionChecked) return;
+
+            if (isProrated && wasOptionChecked) {
+                items.push({
+                    label: `${optionName} (기존 유효)`,
+                    amount: 0,
+                    desc: `이미 적용 중인 옵션`
+                });
+                return;
+            }
+
+            const baseUnitPrice = getPrice(key, defaultPrice);
+            let finalPrice = baseUnitPrice;
+
+            if (isProrated) {
+                finalPrice = Math.floor(baseUnitPrice * ratio);
+                items.push({
+                    label: `${optionName} (남은 ${remainingDays}일 일할 계산)`,
+                    amount: finalPrice,
+                    desc: `${baseUnitPrice.toLocaleString()} P × (${remainingDays}/30일)`
+                });
+            } else {
+                items.push({
+                    label: `${optionName}`,
+                    amount: finalPrice,
+                    desc: `${period > 0 ? period : 30}일 적용`
+                });
+            }
+            total += finalPrice;
+        };
+
+        calcOptionPrice(!!form.option_bold, !!initialData?.option_bold, 'OPTION_PRICE_BOLD', 30000, '굵은 글씨');
+        calcOptionPrice(!!form.option_color, !!initialData?.option_color, 'OPTION_PRICE_COLOR', 15000, '제목 컬러');
+        calcOptionPrice(!!form.option_bg, !!initialData?.option_bg, 'OPTION_PRICE_BG', 15000, '리스트 배경색');
+        calcOptionPrice(!!form.option_highlight, !!initialData?.option_highlight, 'OPTION_PRICE_HIGHLIGHT', 15000, '형광펜 효과');
+        calcOptionPrice(!!form.option_icon, !!initialData?.option_icon, 'OPTION_PRICE_ICON', 15000, '🚨 급구 아이콘');
+
+        // 일반 아이콘 (개수 비례)
+        const currentIcons = selectedGeneralIcons;
+        const initIcons = safeIconsArray(initialData?.option_general_icons);
+        if (currentIcons.length > 0) {
+            const baseUnitPrice = getPrice('OPTION_PRICE_GENERAL_ICONS', 10000);
+            
+            if (isProrated) {
+                const newIconsCount = currentIcons.filter(ic => !initIcons.includes(ic)).length;
+                if (newIconsCount > 0) {
+                    const iconPrice = Math.floor(baseUnitPrice * newIconsCount * ratio);
+                    items.push({
+                        label: `일반 아이콘 ${newIconsCount}개 신규 추가 (남은 ${remainingDays}일 일할 계산)`,
+                        amount: iconPrice,
+                        desc: `${baseUnitPrice.toLocaleString()} P × ${newIconsCount}개 × (${remainingDays}/30일)`
+                    });
+                    total += iconPrice;
+                }
+                const keptIconsCount = currentIcons.length - newIconsCount;
+                if (keptIconsCount > 0) {
+                    items.push({
+                        label: `일반 아이콘 ${keptIconsCount}개 (기존 유효)`,
+                        amount: 0,
+                        desc: `이미 적용된 아이콘`
+                    });
+                }
+            } else {
+                const iconPrice = baseUnitPrice * currentIcons.length;
+                items.push({
+                    label: `일반 아이콘 ${currentIcons.length}개`,
+                    amount: iconPrice,
+                    desc: `${baseUnitPrice.toLocaleString()} P × ${currentIcons.length}개`
+                });
+                total += iconPrice;
+            }
         }
-        if (form.option_jump) total += getPrice('OPTION_PRICE_JUMP', p);
-        return total;
+
+        calcOptionPrice(!!form.option_jump, !!initialData?.option_jump, 'OPTION_PRICE_JUMP', 30000, '자동 점프');
+
+        return { items, total };
     };
+
+    const breakdown = calculateBreakdown();
+
+    const payText = form.pay || (form.pay_amount ? `[${form.pay_type}] ${form.pay_amount}원` : '협의');
+    const deadlineDate = new Date();
+    deadlineDate.setDate(deadlineDate.getDate() + (form.exposure_period || 30));
+    const deadlineString = `${deadlineDate.getFullYear()}-${String(deadlineDate.getMonth() + 1).padStart(2, '0')}-${String(deadlineDate.getDate()).padStart(2, '0')}`;
 
     const handleFinalSubmit = async () => {
         setSaving(true);
         try {
-            // DB 업데이트 로직
             const res = await manageAdAction('UPDATE', { ...form, _isPayment: true }, jobId);
             if (!res.success) {
                 throw new Error(res.message || "결제 처리에 실패했습니다.");
@@ -185,15 +264,6 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
             setSaving(false);
         }
     };
-
-    // 급여 표시 처리
-    const payText = form.pay || (form.pay_amount ? `[${form.pay_type}] ${form.pay_amount}원` : '협의');
-    // 마감일 계산 (현재일 + exposure_period)
-    const deadlineDate = new Date();
-    deadlineDate.setDate(deadlineDate.getDate() + (form.exposure_period || 30));
-    const deadlineString = `${deadlineDate.getFullYear()}-${String(deadlineDate.getMonth() + 1).padStart(2, '0')}-${String(deadlineDate.getDate()).padStart(2, '0')}`;
-
-    console.log("[JobPaymentModal DEBUG] Render component. Selected general icons array:", selectedGeneralIcons, "option_general_icons raw:", form.option_general_icons, "type:", typeof form.option_general_icons, "is_array:", Array.isArray(form.option_general_icons));
 
     return (
         <div className="fixed inset-0 z-[9999] bg-black/80 flex flex-col items-center justify-center p-4" onClick={onClose}>
@@ -238,7 +308,6 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                     className={`col-span-2 flex gap-1.5 ${showTwoLines ? 'flex-col items-start' : 'flex-row items-center truncate'} ${form.option_bold ? 'font-black' : 'font-medium'}`}
                                     style={form.option_color && form.option_color_value ? { color: form.option_color_value } : form.option_color ? { color: '#f97316' } : { color: '#111827' }}
                                 >
-                                    {/* Style Tag 주입 */}
                                     <style dangerouslySetInnerHTML={{__html: `
                                         @keyframes marqueeAlternate {
                                             0%, 15% { transform: translateX(0); }
@@ -302,19 +371,23 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                         <div className="bg-orange-50 border border-orange-200/80 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-[12.5px] shadow-2xs">
                             <div className="flex items-center gap-2 font-bold text-gray-700">
                                 <Clock className="w-4 h-4 text-orange-500 shrink-0" />
-                                <span>현재 공고 노출 상태: {initialData?.expires_at && new Date(initialData.expires_at).getTime() > Date.now() ? (
-                                    <span className="text-blue-600 font-extrabold">노출 중 (~{initialData.expires_at.split('T')[0]})</span>
+                                <span>현재 공고 노출 상태: {isCurrentlyActive ? (
+                                    <span className="text-blue-600 font-extrabold">노출 중 (남은 {remainingDays}일, ~{initialData?.expires_at?.split('T')[0]})</span>
                                 ) : (
                                     <span className="text-gray-500 font-medium">미노출 / 만료됨</span>
                                 )}</span>
                             </div>
                             <div className="font-black text-orange-600 bg-white px-3 py-1 rounded-lg border border-orange-200 shadow-2xs">
-                                결제 완료 시 노출 종료 예정일: ~{(() => {
-                                    const base = (initialData?.expires_at && new Date(initialData.expires_at).getTime() > Date.now()) ? new Date(initialData.expires_at) : new Date();
-                                    const addDays = form.is_subscription ? 30 : (form.exposure_period || 30);
-                                    base.setDate(base.getDate() + addDays);
-                                    return base.toISOString().split('T')[0];
-                                })()} <span className="text-[11px] font-bold text-orange-500">({initialData?.expires_at && new Date(initialData.expires_at).getTime() > Date.now() ? '기존 만료일에서' : '오늘부터'} +{form.is_subscription ? 30 : form.exposure_period}일 연장)</span>
+                                {form.exposure_period === 0 ? (
+                                    `기존 노출만료일 유지: ~${initialData?.expires_at?.split('T')[0]}`
+                                ) : (
+                                    `결제 완료 시 노출 종료일: ~${(() => {
+                                        const base = isCurrentlyActive ? new Date(initialData.expires_at) : new Date();
+                                        const addDays = form.is_subscription ? 30 : (form.exposure_period || 30);
+                                        base.setDate(base.getDate() + addDays);
+                                        return base.toISOString().split('T')[0];
+                                    })()} (+${form.is_subscription ? 30 : form.exposure_period}일 연장)`
+                                )}
                             </div>
                         </div>
                     </div>
@@ -324,19 +397,27 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                         {/* 노출 기간 선택 */}
                         <section className="order-2">
                             <h4 className="text-[15px] font-black text-gray-800 mb-3 flex items-center justify-between">
-                                <span>2. 노출 기간 패키지 (필수)</span>
-                                <span className="text-[12px] font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">장기 결제 시 최대 20% 할인!</span>
+                                <span>2. 노출 기간 패키지 {isCurrentlyActive ? '(선택)' : '(필수)'}</span>
+                                <span className="text-[12px] font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                                    {isCurrentlyActive ? `기존 기간유지 또는 연장 선택` : `장기 결제 시 최대 20% 할인!`}
+                                </span>
                             </h4>
                             <div className="grid grid-cols-2 gap-3">
                                 {[
-                                    { id: 30, label: '30일', sub: false },
-                                    { id: 60, label: '60일', sub: false },
-                                    { id: 90, label: '90일', sub: false },
-                                    { id: 'sub', label: '매월 자동 연장 (구독)', sub: true },
+                                    ...(isCurrentlyActive ? [{ id: 0, label: '기간 연장 안 함', sub: false, isZero: true }] : []),
+                                    { id: 30, label: '30일', sub: false, isZero: false },
+                                    { id: 60, label: '60일', sub: false, isZero: false },
+                                    { id: 90, label: '90일', sub: false, isZero: false },
+                                    { id: 'sub', label: '매월 자동 연장 (구독)', sub: true, isZero: false },
                                 ].map(opt => {
-                                    const isSelected = opt.sub ? form.is_subscription : (!form.is_subscription && form.exposure_period === opt.id);
+                                    const isSelected = opt.isZero 
+                                        ? (form.exposure_period === 0 && !form.is_subscription)
+                                        : opt.sub 
+                                            ? form.is_subscription 
+                                            : (!form.is_subscription && form.exposure_period === opt.id);
+
                                     const days = opt.sub ? 30 : opt.id as number;
-                                    let price = getPrice('OPTION_PRICE_BASE_PERIOD', days);
+                                    let price = opt.isZero ? 0 : getPrice(`OPTION_PRICE_BASE_PERIOD_${days}`, days === 30 ? 70000 : days === 60 ? 125000 : 189000);
                                     if (opt.sub) price = Math.floor(price * 0.95);
 
                                     return (
@@ -344,7 +425,10 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                             key={opt.id}
                                             type="button"
                                             onClick={() => {
-                                                if (opt.sub) {
+                                                if (opt.isZero) {
+                                                    update('is_subscription', false);
+                                                    update('exposure_period', 0);
+                                                } else if (opt.sub) {
                                                     update('is_subscription', true);
                                                     update('exposure_period', 30);
                                                 } else {
@@ -352,77 +436,68 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     update('exposure_period', opt.id as 30|60|90);
                                                 }
                                             }}
-                                            className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${isSelected ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                                            className={`flex flex-col items-center justify-center p-3.5 rounded-2xl border-2 transition-all ${isSelected ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
                                         >
-                                            <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                                            <div className="flex items-center justify-center gap-1.5 mb-1">
                                                 {opt.sub && <Clock className={`w-4 h-4 ${isSelected ? 'text-primary' : 'text-gray-400'}`} />}
-                                                <span className={`text-[15px] font-black ${isSelected ? 'text-primary' : 'text-gray-700'}`}>{opt.label}</span>
+                                                <span className={`text-[14.5px] font-black ${isSelected ? 'text-primary' : 'text-gray-700'}`}>{opt.label}</span>
                                             </div>
-                                            <div className="flex items-center gap-1.5">
+                                            <div className="flex items-center gap-1.5 text-center">
+                                                {opt.isZero && <span className="text-[11px] font-bold text-gray-500">기존 남은 {remainingDays}일 유지 (0 P)</span>}
                                                 {opt.sub && <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">첫 달 5% 할인</span>}
-                                                {!opt.sub && days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
-                                                {!opt.sub && days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
-                                                <span className="text-[14px] font-bold text-gray-500">{price.toLocaleString()} P</span>
+                                                {!opt.sub && !opt.isZero && days === 60 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">10% OFF</span>}
+                                                {!opt.sub && !opt.isZero && days === 90 && <span className="text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded">20% OFF</span>}
+                                                {!opt.isZero && <span className="text-[13.5px] font-bold text-gray-500">{price.toLocaleString()} P</span>}
                                             </div>
                                         </button>
                                     );
                                 })}
                             </div>
-
-                            {form.is_subscription && (
-                                <div className="mt-3 p-4 bg-blue-50/50 border border-blue-100 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2">
-                                    <p className="text-[13px] font-bold text-blue-800 mb-3 flex items-center gap-2">
-                                        <Zap className="w-4 h-4 text-blue-500" />
-                                        구독 유지 기간에 따른 놀라운 추가 할인 혜택!
-                                    </p>
-                                    <div className="grid grid-cols-6 gap-1.5 text-center">
-                                        {[
-                                            { m: '1개월', d: '5%' },
-                                            { m: '2개월', d: '10%' },
-                                            { m: '3개월', d: '15%' },
-                                            { m: '4개월', d: '20%' },
-                                            { m: '5개월', d: '25%' },
-                                            { m: '6개월~', d: '30%' },
-                                        ].map((item, idx) => (
-                                            <div key={idx} className="flex flex-col bg-white border border-blue-100 rounded py-2">
-                                                <span className="text-[10px] text-gray-500">{item.m}</span>
-                                                <span className="text-[12px] font-black text-blue-600">{item.d}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <p className="text-[11px] text-gray-400 mt-2 text-center">* 위 할인은 결제 연장(갱신) 시점부터 자동으로 순차 적용됩니다.</p>
-                                </div>
-                            )}
                         </section>
 
                         {/* 부가 옵션 선택 */}
                         <section className="order-1">
                             <h4 className="text-[15px] font-black text-gray-800 mb-3 flex items-center justify-between">
                                 <span>1. 주목도 100배! 추가 옵션</span>
-                                <span className="text-[12px] font-medium text-gray-400">선택한 기간({form.exposure_period}일) 적용</span>
+                                <span className="text-[12px] font-bold text-gray-400">
+                                    {form.exposure_period === 0 ? `남은 ${remainingDays}일 일할 비례 적용` : `선택한 기간 적용`}
+                                </span>
                             </h4>
                             <div className="flex flex-col gap-2">
                                 {optionsList.map(opt => {
-                                    const isChecked = !!form[`option_${opt.id}` as keyof AdFormData];
-                                    const periodKey = `option_${opt.id}_period` as keyof AdFormData;
-                                    const currentPeriod = form[periodKey] || 30;
-                                    const price = getPrice(opt.priceKey, currentPeriod as number);
-                                    const isGeneralIcons = opt.id === 'general_icons';
-                                    const finalPrice = isGeneralIcons && isChecked ? price * (selectedGeneralIcons.length || 1) : price;
+                                    const fieldKey = `option_${opt.id}` as keyof AdFormData;
+                                    const isChecked = opt.id === 'general_icons' 
+                                        ? selectedGeneralIcons.length > 0
+                                        : !!form[fieldKey];
                                     
+                                    const unitPrice = getPrice(opt.priceKey, opt.defaultPrice);
+                                    let displayPrice = unitPrice;
+
+                                    if (form.exposure_period === 0 && isCurrentlyActive) {
+                                        displayPrice = Math.floor(unitPrice * (remainingDays / 30));
+                                    }
+
+                                    if (opt.id === 'general_icons' && selectedGeneralIcons.length > 0) {
+                                        displayPrice = displayPrice * selectedGeneralIcons.length;
+                                    }
+
                                     return (
                                         <div 
                                             key={opt.id} 
                                             onClick={() => {
-                                                const newVal = !isChecked;
-                                                update(`option_${opt.id}` as keyof AdFormData, newVal);
-                                                if (newVal) {
-                                                    update(periodKey, 30);
-                                                    if (opt.id === 'color' && !form.option_color_value) update('option_color_value', TITLE_COLORS[0]);
-                                                    if (opt.id === 'bg' && !form.option_bg_value) update('option_bg_value', BG_COLORS[0]);
-                                                    if (opt.id === 'highlight' && !form.option_highlight_value) update('option_highlight_value', HIGHLIGHT_COLORS[0]);
-                                                    if (opt.id === 'general_icons' && selectedGeneralIcons.length === 0) {
-                                                        update('option_general_icons', generalIcons.length > 0 ? [generalIcons[0]] : []);
+                                                if (opt.id === 'general_icons') {
+                                                    if (selectedGeneralIcons.length > 0) {
+                                                        update('option_general_icons', []);
+                                                    } else {
+                                                        update('option_general_icons', [generalIcons[0] || '🔥핫이슈']);
+                                                    }
+                                                } else {
+                                                    const newVal = !isChecked;
+                                                    update(fieldKey, newVal);
+                                                    if (newVal) {
+                                                        if (opt.id === 'color' && !form.option_color_value) update('option_color_value', TITLE_COLORS[0]);
+                                                        if (opt.id === 'bg' && !form.option_bg_value) update('option_bg_value', BG_COLORS[0]);
+                                                        if (opt.id === 'highlight' && !form.option_highlight_value) update('option_highlight_value', HIGHLIGHT_COLORS[0]);
                                                     }
                                                 }
                                             }}
@@ -432,7 +507,6 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     : 'border-[#f1f1f5] bg-[#fafafc] hover:bg-white hover:border-gray-300'
                                             }`}
                                         >
-                                            {/* 좌측: 원형 체크박스 + 옵션명 */}
                                             <div className="flex items-center gap-2.5 min-w-0">
                                                 <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
                                                     isChecked 
@@ -449,11 +523,9 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                 </span>
                                             </div>
 
-                                            {/* 우측: 도구 및 금액 */}
                                             <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                                                {/* 색상 선택 (OS 기본 컬러 피커) */}
                                                 {isChecked && (opt.id === 'color' || opt.id === 'highlight' || opt.id === 'bg') && (
-                                                    <div className="relative w-5 h-5 rounded-full overflow-hidden border border-gray-300 shadow-xs cursor-pointer transition-transform hover:scale-110 shrink-0" title="색상 변경">
+                                                    <div className="relative w-5 h-5 rounded-full overflow-hidden border border-gray-300 shadow-xs cursor-pointer shrink-0" title="색상 변경">
                                                         <input 
                                                             type="color" 
                                                             value={form[`option_${opt.id}_value` as keyof AdFormData] as string || '#ffffff'}
@@ -463,7 +535,6 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     </div>
                                                 )}
 
-                                                {/* 일반 아이콘 팝오버 트리거 */}
                                                 {isChecked && opt.id === 'general_icons' && (
                                                     <div className="relative">
                                                         <button 
@@ -480,9 +551,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                                     <button type="button" className="text-gray-400 hover:text-gray-600 text-[14px]" onClick={() => setActivePicker(null)}>✕</button>
                                                                 </div>
                                                                 <div className="flex flex-wrap gap-2">
-                                                                    {generalIcons.length === 0 ? (
-                                                                        <span className="text-gray-400 text-xs py-2">등록된 아이콘이 없습니다.</span>
-                                                                    ) : generalIcons.map(icon => {
+                                                                    {generalIcons.map(icon => {
                                                                         const selected = selectedGeneralIcons.includes(icon);
                                                                         return (
                                                                             <button key={icon} type="button"
@@ -490,7 +559,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                                                     let current = [...selectedGeneralIcons];
                                                                                     if (selected) {
                                                                                         current = current.filter(x => x !== icon);
-                                                                                        if (current.length === 0) return; // 최소 1개는 유지
+                                                                                        if (current.length === 0) return;
                                                                                     } else {
                                                                                         if (current.length >= 2) return alert('일반 아이콘은 최대 2개까지만 선택 가능합니다.');
                                                                                         current = [...current, icon];
@@ -509,18 +578,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                     </div>
                                                 )}
 
-                                                {isChecked && (
-                                                    <select
-                                                        className="text-[11px] font-bold border border-gray-300 rounded-md px-1.5 py-0.5 outline-none focus:border-indigo-500 bg-white cursor-pointer"
-                                                        value={currentPeriod as number}
-                                                        onChange={(e) => update(periodKey, Number(e.target.value))}
-                                                    >
-                                                        <option value={30}>30일</option>
-                                                        <option value={60}>60일 (-10%)</option>
-                                                        <option value={90}>90일 (-20%)</option>
-                                                    </select>
-                                                )}
-                                                <span className="text-[13px] font-black text-indigo-600 min-w-[65px] text-right">+{finalPrice.toLocaleString()} P</span>
+                                                <span className="text-[13px] font-black text-indigo-600 min-w-[65px] text-right">+{displayPrice.toLocaleString()} P</span>
                                             </div>
                                         </div>
                                     );
@@ -530,34 +588,60 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                     </div>
                 </div>
 
-                {/* 하단 결제 바 */}
-                <div className="p-4 md:p-6 border-t border-gray-200 bg-white shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="flex flex-col items-center sm:items-start">
-                        <span className="text-[13px] text-gray-500 font-bold mb-1">총 예상 결제 포인트 ({form.exposure_period}일)</span>
-                        <div className="text-2xl md:text-3xl font-black text-primary tracking-tight flex items-baseline gap-2">
-                            {calculateTotalPoints().toLocaleString()} <span className="text-lg font-bold">P</span>
+                {/* 하단 결제 바 및 상세 결제 내역 (Breakdown) */}
+                <div className="p-4 md:p-6 border-t border-gray-200 bg-white shrink-0 flex flex-col gap-3">
+                    {/* 상세 결제 포인트 계산 내역 카드 */}
+                    <div className="w-full bg-gray-50 rounded-xl p-3.5 border border-gray-200/80">
+                        <div className="text-[12.5px] font-black text-gray-700 mb-2 flex items-center justify-between">
+                            <span>📊 결제 포인트 상세 계산 내역</span>
+                            <span className="text-[11px] font-bold text-gray-500">
+                                {form.exposure_period === 0 ? `(남은 ${remainingDays}일 일할 비례 적용)` : `(${form.exposure_period || 30}일 연장 기준)`}
+                            </span>
                         </div>
-                        <div className="mt-1 flex items-center gap-2">
-                            <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded font-medium">내 잔여 포인트: {loadingPoints ? '조회 중...' : `${userPoints.toLocaleString()} P`}</span>
-                            {calculateTotalPoints() > userPoints && !loadingPoints && (
-                                <span className="text-[12px] text-red-500 font-bold animate-pulse">잔액 부족!</span>
-                            )}
+                        <div className="space-y-1.5 text-[12px]">
+                            {breakdown.items.map((it, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-gray-600">
+                                    <span className="font-semibold text-gray-800">• {it.label} <span className="text-[10.5px] text-gray-400 font-normal">({it.desc})</span></span>
+                                    <span className={`font-bold ${it.amount > 0 ? 'text-indigo-600' : 'text-gray-400'}`}>
+                                        {it.amount > 0 ? `+${it.amount.toLocaleString()} P` : '0 P'}
+                                    </span>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                    <div className="flex gap-2 w-full sm:w-auto">
-                        <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-14 px-6 rounded-xl font-bold text-[15px] border-gray-300">
-                            취소
-                        </Button>
-                        {calculateTotalPoints() > userPoints && !loadingPoints ? (
-                            <Button onClick={() => alert('포인트 충전 페이지로 이동합니다. (구현 예정)')} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-orange-500 hover:bg-orange-600 text-white">
-                                포인트 충전하기
+
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-1">
+                        <div className="flex flex-col items-center sm:items-start">
+                            <span className="text-[13px] text-gray-500 font-bold mb-0.5">총 예상 결제 포인트</span>
+                            <div className="text-2xl md:text-3xl font-black text-primary tracking-tight flex items-baseline gap-2">
+                                {breakdown.total.toLocaleString()} <span className="text-lg font-bold">P</span>
+                            </div>
+                            <div className="mt-1 flex items-center gap-2">
+                                <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded font-medium">내 잔여 포인트: {loadingPoints ? '조회 중...' : `${userPoints.toLocaleString()} P`}</span>
+                                {breakdown.total > userPoints && !loadingPoints && (
+                                    <span className="text-[12px] text-red-500 font-bold animate-pulse">잔액 부족!</span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="flex gap-2 w-full sm:w-auto">
+                            <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-14 px-6 rounded-xl font-bold text-[15px] border-gray-300">
+                                취소
                             </Button>
-                        ) : (
-                            <Button onClick={handleFinalSubmit} disabled={saving || loadingPoints} className="flex-1 sm:flex-none h-14 px-8 rounded-xl font-black text-[16px] shadow-xl bg-gray-900 hover:bg-black text-white">
-                                {saving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <DollarSign className="w-5 h-5 mr-2" />}
-                                결제 및 최종 등록하기
+                            <Button 
+                                onClick={handleFinalSubmit}
+                                disabled={saving || (breakdown.total > userPoints && !loadingPoints)}
+                                className="flex-1 sm:flex-none h-14 px-8 bg-primary hover:bg-orange-600 text-white rounded-xl font-black text-[16px] shadow-lg shadow-primary/30 transition-all flex items-center gap-2"
+                            >
+                                {saving ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                        처리 중...
+                                    </>
+                                ) : (
+                                    '결제 및 최종 등록하기'
+                                )}
                             </Button>
-                        )}
+                        </div>
                     </div>
                 </div>
             </div>
