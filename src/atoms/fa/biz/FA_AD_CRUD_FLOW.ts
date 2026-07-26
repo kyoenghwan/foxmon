@@ -253,12 +253,35 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                     const deductResult = await FA_DEDUCT_POINT_FOR_AD({
                         userId,
                         adPrice: totalPoints,
-                        description: p > 0 ? `구인 공고 연장/옵션 (${p}일)` : `구인 공고 옵션 추가 (남은 ${remainingDays}일 일할 비례)`
+                        description: p > 0 ? `구인 공고 연장/옵션 (${p}일)` : `구인 공고 옵션 추가/변경`
                     });
 
                     if (!deductResult.success) {
                         return { success: false, message: deductResult.message || '포인트가 부족합니다.' };
                     }
+                } else if (totalPoints < 0) {
+                    const refundAmount = Math.abs(totalPoints);
+                    const { data: userBefore } = await supabase.from('users').select('paid_points, bonus_points').eq('id', userId).single();
+                    const currentPaid = Number(userBefore?.paid_points || 0);
+                    const currentBonus = Number(userBefore?.bonus_points || 0);
+
+                    // 유료 포인트로 환불 처리 (수수료 5% 차감 완료된 수량)
+                    await supabase.from('users').update({ paid_points: currentPaid + refundAmount }).eq('id', userId);
+                    await supabase.from('point_recharge_history').insert({
+                        user_id: userId,
+                        charge_point: refundAmount,
+                        remained_point: refundAmount,
+                        payment_method: 'OPTION_REFUND',
+                        status: 'COMPLETED',
+                        description: '구인 공고 옵션 해제 환불 (수수료 5% 차감 후)'
+                    });
+                    await supabase.from('point_transactions').insert({
+                        user_id: userId,
+                        type: 'REFUND',
+                        amount: refundAmount,
+                        balance_after: currentPaid + currentBonus + refundAmount,
+                        description: '구인 공고 옵션 해제 포인트 환급'
+                    });
                 }
             }
 

@@ -633,7 +633,7 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                                                             ? 'text-indigo-600' 
                                                             : 'text-gray-400'
                                                 }`}>
-                                                    {isRefund ? `-${displayPrice.toLocaleString()} P (환불)` : `+${displayPrice.toLocaleString()} P`}
+                                                    {isRefund ? `${displayPrice.toLocaleString()} P (환불)` : `+${displayPrice.toLocaleString()} P`}
                                                 </span>
                                             </div>
                                         </div>
@@ -658,8 +658,8 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                             {breakdown.items.map((it, idx) => (
                                 <div key={idx} className="flex items-center justify-between text-gray-600">
                                     <span className="font-semibold text-gray-800">• {it.label} <span className="text-[10.5px] text-gray-400 font-normal">({it.desc})</span></span>
-                                    <span className={`font-bold ${it.amount > 0 ? 'text-indigo-600' : 'text-gray-400'}`}>
-                                        {it.amount > 0 ? `+${it.amount.toLocaleString()} P` : '0 P'}
+                                    <span className={`font-bold ${it.amount > 0 ? 'text-indigo-600' : it.amount < 0 ? 'text-emerald-600' : 'text-gray-400'}`}>
+                                        {it.amount > 0 ? `+${it.amount.toLocaleString()} P` : it.amount < 0 ? `${Math.abs(it.amount).toLocaleString()} P (환불)` : '0 P'}
                                     </span>
                                 </div>
                             ))}
@@ -668,9 +668,14 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
 
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-1">
                         <div className="flex flex-col items-center sm:items-start">
-                            <span className="text-[13px] text-gray-500 font-bold mb-0.5">총 예상 결제 포인트</span>
-                            <div className="text-2xl md:text-3xl font-black text-primary tracking-tight flex items-baseline gap-2">
-                                {breakdown.total.toLocaleString()} <span className="text-lg font-bold">P</span>
+                            <span className="text-[13px] text-gray-500 font-bold mb-0.5">
+                                {breakdown.total > 0 ? '총 예상 차감 포인트' : breakdown.total < 0 ? '총 예상 환급 포인트' : '총 예상 결제 포인트'}
+                            </span>
+                            <div className={`text-2xl md:text-3xl font-black tracking-tight flex items-baseline gap-1.5 ${
+                                breakdown.total > 0 ? 'text-[#ff5c00]' : breakdown.total < 0 ? 'text-emerald-600' : 'text-gray-700'
+                            }`}>
+                                {breakdown.total > 0 ? `- ${breakdown.total.toLocaleString()}` : breakdown.total < 0 ? `+ ${Math.abs(breakdown.total).toLocaleString()}` : '0'} 
+                                <span className="text-lg font-bold">P</span>
                             </div>
                             <div className="mt-1 flex items-center gap-2">
                                 <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded font-medium">내 잔여 포인트: {loadingPoints ? '조회 중...' : `${userPoints.toLocaleString()} P`}</span>
@@ -686,13 +691,17 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                             <Button 
                                 onClick={handleFinalSubmit}
                                 disabled={saving || (breakdown.total > userPoints && !loadingPoints)}
-                                className="flex-1 sm:flex-none h-14 px-8 bg-primary hover:bg-orange-600 text-white rounded-xl font-black text-[16px] shadow-lg shadow-primary/30 transition-all flex items-center gap-2"
+                                className={`flex-1 sm:flex-none h-14 px-8 text-white rounded-xl font-black text-[16px] shadow-lg transition-all flex items-center gap-2 ${
+                                    breakdown.total < 0 ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30' : 'bg-primary hover:bg-orange-600 shadow-primary/30'
+                                }`}
                             >
                                 {saving ? (
                                     <>
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                                         처리 중...
                                     </>
+                                ) : breakdown.total < 0 ? (
+                                    '환불 받고 변경사항 등록하기'
                                 ) : (
                                     '결제 및 최종 등록하기'
                                 )}
