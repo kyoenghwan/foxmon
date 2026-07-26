@@ -30,20 +30,47 @@ const TierBadge = ({ tier }: { tier: string }) => {
     );
 };
 
+const formatDateOnly = (dateStr: string | null | undefined) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}.${mm}.${dd}`;
+};
+
+const getDDay = (dateStr: string | null | undefined) => {
+    if (!dateStr) return null;
+    const target = new Date(dateStr).getTime();
+    if (isNaN(target)) return null;
+    const diffDays = Math.ceil((target - Date.now()) / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return '만료';
+    if (diffDays === 0) return 'D-Day';
+    return `D-${diffDays}`;
+};
+
 const StatusBadge = ({ expiresAt }: { expiresAt: string | null | undefined }) => {
     const isPaid = expiresAt && new Date(expiresAt).getTime() > Date.now();
+    const formattedDate = formatDateOnly(expiresAt);
+    const dDay = getDDay(expiresAt);
     
     if (isPaid) {
         return (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-black bg-blue-50 text-blue-600 border border-blue-200">
-                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-                ON
-            </span>
+            <div className="flex flex-col items-center gap-0.5">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-black bg-blue-50 text-blue-600 border border-blue-200 shadow-2xs">
+                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                    노출중 ({dDay})
+                </span>
+                <span className="text-[10px] font-extrabold text-blue-600/80">
+                    ~{formattedDate} 까지
+                </span>
+            </div>
         );
     } else {
         return (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-black bg-gray-50 text-gray-400 border border-gray-200">
-                OFF
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-black bg-gray-50 text-gray-400 border border-gray-200">
+                미노출 (OFF)
             </span>
         );
     }
@@ -225,9 +252,9 @@ export default async function BizJobsPage() {
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">근무지역</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">직종</th>
                                 <th className="text-left px-6 py-4 text-[12px] font-black text-gray-500 w-[200px]">제목</th>
+                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[140px]">노출기간 / 마감일</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">업소명</th>
                                 <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[120px]">급여</th>
-                                <th className="text-center px-4 py-4 text-[12px] font-black text-gray-500 w-[110px]">마감일</th>
                                 <th className="text-center px-6 py-4 text-[12px] font-black text-gray-500 w-[150px]">관리</th>
                             </tr>
                         </thead>
@@ -245,6 +272,10 @@ export default async function BizJobsPage() {
                                 const rowBgColor = isBgActive ? (ad.option_bg_value || '#fff7ed') : undefined;
                                 const textColor = isColorActive ? (ad.option_color_value || '#f97316') : '#111827';
                                 const highlightBg = isHighlightActive ? (ad.option_highlight_value || '#fef08a') : undefined;
+
+                                const expDateStr = formatDateOnly(ad.expires_at);
+                                const dDayStr = getDDay(ad.expires_at);
+                                const isExposed = ad.expires_at && new Date(ad.expires_at).getTime() > Date.now();
 
                                 return (
                                     <tr 
@@ -307,6 +338,28 @@ export default async function BizJobsPage() {
                                                         )}
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-4 text-center">
+                                            <div className="flex flex-col items-center gap-1">
+                                                {isExposed ? (
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-black bg-blue-50 text-blue-600 border border-blue-200">
+                                                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                                                            노출중 ({dDayStr})
+                                                        </span>
+                                                        <span className="text-[11px] font-extrabold text-blue-600 mt-0.5">
+                                                            ~{expDateStr}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-black bg-gray-50 text-gray-400 border border-gray-200">
+                                                        미노출
+                                                    </span>
+                                                )}
+                                                <span className="text-[10px] font-bold text-gray-400">
+                                                    (채용: {ad.close_date || '상시'})
+                                                </span>
                                             </div>
                                         </td>
                                         <td className="px-4 py-4 text-center">

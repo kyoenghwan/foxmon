@@ -299,8 +299,23 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
                             </div>
                         </div>
                         
-                        <div className="text-[12px] text-gray-400 text-center bg-gray-100/50 py-2 rounded-lg">
-                            실제 노출 화면과 약간의 차이가 있을 수 있습니다.
+                        <div className="bg-orange-50 border border-orange-200/80 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-[12.5px] shadow-2xs">
+                            <div className="flex items-center gap-2 font-bold text-gray-700">
+                                <Clock className="w-4 h-4 text-orange-500 shrink-0" />
+                                <span>현재 공고 노출 상태: {initialData?.expires_at && new Date(initialData.expires_at).getTime() > Date.now() ? (
+                                    <span className="text-blue-600 font-extrabold">노출 중 (~{initialData.expires_at.split('T')[0]})</span>
+                                ) : (
+                                    <span className="text-gray-500 font-medium">미노출 / 만료됨</span>
+                                )}</span>
+                            </div>
+                            <div className="font-black text-orange-600 bg-white px-3 py-1 rounded-lg border border-orange-200 shadow-2xs">
+                                결제 완료 시 노출 종료 예정일: ~{(() => {
+                                    const base = (initialData?.expires_at && new Date(initialData.expires_at).getTime() > Date.now()) ? new Date(initialData.expires_at) : new Date();
+                                    const addDays = form.is_subscription ? 30 : (form.exposure_period || 30);
+                                    base.setDate(base.getDate() + addDays);
+                                    return base.toISOString().split('T')[0];
+                                })()} <span className="text-[11px] font-bold text-orange-500">({initialData?.expires_at && new Date(initialData.expires_at).getTime() > Date.now() ? '기존 만료일에서' : '오늘부터'} +{form.is_subscription ? 30 : form.exposure_period}일 연장)</span>
+                            </div>
                         </div>
                     </div>
 
