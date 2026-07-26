@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { AdItem, safeIconsArray } from '@/lib/ad-service';
+import { AdItem } from '@/lib/ad-service';
+import { safeIconsArray } from '@/lib/utils';
 
 const formatKoreanAmount = (amountVal: number): string => {
     if (isNaN(amountVal) || amountVal <= 0) return '-';

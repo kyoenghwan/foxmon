@@ -12,3 +12,25 @@ export function maskName(name: string) {
     // 4글자 이상: 앞 2글자만 노출하고 나머지는 *
     return name.substring(0, 2) + '*'.repeat(name.length - 2);
 }
+
+export const safeIconsArray = (icons: any): string[] => {
+    if (!icons) return [];
+    if (Array.isArray(icons)) return icons;
+    if (typeof icons === 'string') {
+        try {
+            const trimmed = icons.trim();
+            if (trimmed.startsWith('[')) {
+                const parsed = JSON.parse(trimmed);
+                if (Array.isArray(parsed)) return parsed.map(String);
+            }
+            if (trimmed.includes(',')) {
+                return trimmed.split(',').map(s => s.trim()).filter(Boolean);
+            }
+            return [trimmed].filter(Boolean);
+        } catch (e) {
+            console.error("Failed to parse icons string:", icons, e);
+            return [icons.trim()].filter(Boolean);
+        }
+    }
+    return [];
+};

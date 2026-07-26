@@ -1,6 +1,6 @@
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { AdFormData } from '@/components/biz/AdEditorForm';
-import { safeIconsArray } from '@/lib/ad-service';
+import { safeIconsArray } from '@/lib/utils';
 
 interface AdCrudInput {
     actionType: 'CREATE' | 'UPDATE' | 'DELETE' | 'GET' | 'GET_ONE';

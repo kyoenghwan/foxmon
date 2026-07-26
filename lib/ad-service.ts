@@ -3,6 +3,7 @@
 import { supabase, supabaseAdmin } from './supabase';
 import { applyRollingLogic } from './ad-rolling-logic';
 import { unstable_cache } from 'next/cache';
+import { safeIconsArray } from './utils';
 
 export interface AdItem {
     id: string;
@@ -49,20 +50,7 @@ export interface AdItem {
     salary_amount?: string;
 }
 
-export const safeIconsArray = (icons: any): string[] => {
-    if (!icons) return [];
-    if (Array.isArray(icons)) return icons;
-    if (typeof icons === 'string') {
-        try {
-            const parsed = JSON.parse(icons);
-            if (Array.isArray(parsed)) return parsed;
-            return [icons];
-        } catch (e) {
-            return [icons];
-        }
-    }
-    return [];
-};
+
 
 const IS_SUPABASE_ENABLED = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
 

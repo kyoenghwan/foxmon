@@ -8,7 +8,7 @@ import { getUserPointsAction } from '@/app/actions/pointActions';
 import { manageAdAction } from '@/lib/actions';
 import { QA_GET_COMMON_CODES } from '@/src/atoms/qa/master/QA_GET_COMMON_CODES';
 import { GET_POINT_POLICIES, PointPolicyItem } from '@/app/actions/pointPolicyActions';
-import { safeIconsArray } from '@/lib/ad-service';
+import { safeIconsArray } from '@/lib/utils';
 
 interface JobPaymentModalProps {
     initialData: Partial<AdFormData>;
