@@ -172,13 +172,15 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
             }`}
             style={bgStyle}
         >
-            <td className="py-4 px-2 text-gray-500 text-center">{shortLocation}</td>
+            <td className="py-4 px-3 text-gray-800 text-center font-bold text-[13px] md:text-[14px] whitespace-nowrap">
+                {location || '지역무관'}
+            </td>
 
             <td className="py-4 px-2 text-gray-600 text-center font-medium truncate max-w-[100px]">
                 {category1 || '-'}
             </td>
             
-            <td className="py-4 px-4 text-left">
+            <td className="py-4 px-4 text-left overflow-hidden">
                 <div className="flex flex-col gap-1 min-w-0">
                     {hasIcons && (
                         <div className="flex flex-wrap items-center gap-1.5">
@@ -189,28 +191,36 @@ export function GeneralJobListRowDesktop({ job, onClick }: { job: AdItem; onClic
                             ))}
                         </div>
                     )}
-                    <div className="flex items-center gap-2 truncate w-full mt-0.5">
+                    <div className="flex items-center gap-2 w-full mt-0.5 overflow-hidden group/title">
                         {option_icon && (
                             <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 flex items-center gap-0.5 animate-pulse">
                                 🚨 급구
                             </span>
                         )}
-                        <span 
-                            className={`text-[15px] md:text-[16px] truncate tracking-tight transition-colors ${option_bold ? 'font-black' : 'font-bold'} ${!option_color_value && !option_highlight_value ? 'text-gray-900 group-hover:text-primary' : ''}`}
-                            style={{
-                                color: (option_color && option_color_value) ? option_color_value : undefined,
-                                backgroundColor: (option_highlight && option_highlight_value) ? option_highlight_value : undefined,
-                                padding: (option_highlight && option_highlight_value) ? '2px 6px' : undefined,
-                                borderRadius: (option_highlight && option_highlight_value) ? '4px' : undefined,
-                            }}
-                        >
-                            {title}
-                        </span>
+                        <div className="relative overflow-hidden w-full">
+                            <span 
+                                className={`inline-block text-[14px] md:text-[15px] whitespace-nowrap tracking-tight transition-transform duration-[3500ms] ease-linear group-hover/title:-translate-x-[60%] group-hover:-translate-x-[60%] ${option_bold ? 'font-black' : 'font-bold'} ${!option_color_value && !option_highlight_value ? 'text-gray-900 group-hover:text-primary' : ''}`}
+                                style={{
+                                    color: (option_color && option_color_value) ? option_color_value : undefined,
+                                    backgroundColor: (option_highlight && option_highlight_value) ? option_highlight_value : undefined,
+                                    padding: (option_highlight && option_highlight_value) ? '2px 6px' : undefined,
+                                    borderRadius: (option_highlight && option_highlight_value) ? '4px' : undefined,
+                                }}
+                            >
+                                {title}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </td>
 
-            <td className="py-4 px-2 font-bold text-gray-800 text-center truncate max-w-[150px]">{company}</td>
+            <td className="py-4 px-2 font-bold text-gray-800 text-center text-[13px] md:text-[14px]">
+                <div className="relative overflow-hidden w-full max-w-[140px] mx-auto group/comp">
+                    <span className="inline-block whitespace-nowrap transition-transform duration-[3500ms] ease-linear group-hover/comp:-translate-x-[50%] group-hover:-translate-x-[50%]">
+                        {company}
+                    </span>
+                </div>
+            </td>
             
             <td className="py-4 px-2 text-center">
                 <span className="text-[15px] font-black text-[#ff3b30] tracking-tighter whitespace-nowrap">{formatPay(job)}</span>
