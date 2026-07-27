@@ -56,6 +56,7 @@ export function FoxTalkWidget() {
     const participantsMapRef = useRef<Record<string, any>>({});
     const [myParticipant, setMyParticipant] = useState<any | null>(null);
     const [isSending, setIsSending] = useState(false);
+    const [isOpponentLeft, setIsOpponentLeft] = useState(false);
 
     // DM 검색 관련 상태
     const [dmSearchKeyword, setDmSearchKeyword] = useState('');
@@ -599,6 +600,7 @@ export function FoxTalkWidget() {
     // Join Room
     const joinRoom = async (room: any) => {
         if (!profile) return;
+        setIsOpponentLeft(false);
         console.log(`[FoxTalk] ===== 대화방 진입 프로세스 시작 (방 ID: ${room.id}) =====`);
         const tStart = performance.now();
 
@@ -682,8 +684,23 @@ export function FoxTalkWidget() {
             });
             setParticipantsMap(pMap);
             if (myP) setMyParticipant(myP);
+
+            // 1:1 대화방일 때 상대방이 나갔는지 여부 판별
+            const is1ON1 = currentRoom?.type === '1ON1' || rooms.find(r => r.id === roomId)?.type === '1ON1';
+            if (is1ON1 && targetProfile) {
+                const opponent = pList.find(p => p.session_id !== targetProfile.sessionId);
+                if (opponent && opponent.left_at) {
+                    setIsOpponentLeft(true);
+                } else {
+                    setIsOpponentLeft(false);
+                }
+            } else {
+                setIsOpponentLeft(false);
+            }
+
             return pMap;
         }
+        setIsOpponentLeft(false);
         return {};
     };
 
@@ -1036,6 +1053,23 @@ export function FoxTalkWidget() {
                     }
                 }
             })
+            // 💡 [추가] 상대방 퇴장(left_at 업데이트) 실시간 감지
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'foxtalk_participants',
+                filter: `room_id=eq.${targetRoomId}`
+            }, () => {
+                loadParticipants(targetRoomId, profile);
+            })
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'foxtalk_participants',
+                filter: `room_id=eq.${targetRoomId}`
+            }, () => {
+                loadParticipants(targetRoomId, profile);
+            })
             .subscribe();
 
         return () => {
@@ -1126,6 +1160,7 @@ export function FoxTalkWidget() {
         const res = await OA_LEAVE_CHAT_ROOM(currentRoom.id, profile.sessionId, profile.nickname);
         if (res.success) {
             setAppState('LOBBY');
+            setIsOpponentLeft(false);
             loadRooms();
             setCurrentRoom(null);
             setShowLeaveConfirm(false);
@@ -1932,24 +1967,46 @@ export function FoxTalkWidget() {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        <form onSubmit={sendMessage} className="p-3 bg-white border-t shrink-0">
-                            <div className="relative flex items-center">
-                                <input
-                                    type="text"
-                                    value={msgInput}
-                                    onChange={(e) => setMsgInput(e.target.value)}
-                                    placeholder="메시지를 입력하세요..."
-                                    className="w-full bg-gray-100 border-transparent focus:bg-white focus:border-primary focus:ring-0 rounded-full pl-4 pr-12 py-2.5 text-[13px] font-medium transition-all"
-                                />
+                        {isOpponentLeft ? (
+                            <div className="p-3 bg-orange-50 border-t shrink-0 flex flex-col items-center gap-2">
+                                <span className="text-[11px] font-bold text-orange-500">상대방이 퇴장하여 더 이상 대화할 수 없습니다.</span>
                                 <button
-                                    type="submit"
-                                    disabled={!msgInput.trim()}
-                                    className="absolute right-1 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white disabled:opacity-50 disabled:bg-gray-300 transition-colors shadow-sm"
+                                    onClick={async (e) => {
+                                        e.preventDefault();
+                                        const opponentId = currentRoom.employer_id === userId ? currentRoom.seeker_id : currentRoom.employer_id;
+                                        if (opponentId) {
+                                            await handleStartDm({ id: opponentId });
+                                        } else {
+                                            setAppState('LOBBY');
+                                            setCurrentRoom(null);
+                                        }
+                                    }}
+                                    className="w-full py-2.5 bg-primary hover:bg-primary/95 text-black font-black rounded-full text-[12px] flex items-center justify-center gap-1.5 shadow-sm transition-all"
                                 >
-                                    <Send className="w-4 h-4 ml-0.5" />
+                                    <MessageCircle className="w-4 h-4" />
+                                    새로운 대화 시작하기
                                 </button>
                             </div>
-                        </form>
+                        ) : (
+                            <form onSubmit={sendMessage} className="p-3 bg-white border-t shrink-0">
+                                <div className="relative flex items-center">
+                                    <input
+                                        type="text"
+                                        value={msgInput}
+                                        onChange={(e) => setMsgInput(e.target.value)}
+                                        placeholder="메시지를 입력하세요..."
+                                        className="w-full bg-gray-100 border-transparent focus:bg-white focus:border-primary focus:ring-0 rounded-full pl-4 pr-12 py-2.5 text-[13px] font-medium transition-all"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={!msgInput.trim()}
+                                        className="absolute right-1 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white disabled:opacity-50 disabled:bg-gray-300 transition-colors shadow-sm"
+                                    >
+                                        <Send className="w-4 h-4 ml-0.5" />
+                                    </button>
+                                </div>
+                            </form>
+                        )}
                     </div>
                 )}
             </div>

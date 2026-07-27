@@ -17,7 +17,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
                 *,
                 employer:employer_id(id, login_id, nickname, name, business_name),
                 seeker:seeker_id(id, login_id, nickname, name),
-                foxtalk_participants(id, last_read_at, session_id)
+                foxtalk_participants(id, last_read_at, left_at, session_id)
             `)
             .eq('is_active', true);
 
@@ -102,11 +102,21 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
                 my_participant: myPart ? [myPart] : []
             };
         });
+        
+        // 💡 내가 대화방을 나갔으면(left_at이 채워져 있거나 참여 정보가 없으면) 로비 목록에서 숨김!
+        const filteredRooms = decoratedRooms.filter((room: any) => {
+            const myPart = room.my_participant?.[0];
+            if (!myPart || myPart.left_at) {
+                return false;
+            }
+            return true;
+        });
+
         perfStats['step4_decorate_ms'] = performance.now() - tStep4Start;
 
         return { 
             success: true, 
-            data: decoratedRooms,
+            data: filteredRooms,
             performance: {
                 ...perfStats,
                 server_total_ms: performance.now() - tServerStart

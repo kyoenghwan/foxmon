@@ -19,10 +19,10 @@ export async function OA_CREATE_DM_ROOM(targetUserId: string) {
             return { success: false, error: '자기 자신과는 대화할 수 없습니다.' };
         }
 
-        // 기존 DM 방이 있는지 확인 (양방향 모두 확인)
+        // 기존 DM 방이 있는지 확인 (양방향 모두 확인 + 참여 정보 조인)
         const { data: existing } = await supabaseAdmin
             .from('foxtalk_rooms')
-            .select('*')
+            .select('*, foxtalk_participants(id, session_id, left_at)')
             .eq('type', '1ON1')
             .eq('is_active', true)
             .or(
@@ -32,7 +32,17 @@ export async function OA_CREATE_DM_ROOM(targetUserId: string) {
             .maybeSingle();
 
         if (existing) {
-            return { success: true, data: existing, isExisting: true };
+            const hasSomeoneLeft = existing.foxtalk_participants?.some((p: any) => p.left_at !== null);
+            if (hasSomeoneLeft) {
+                // 어느 한 쪽이라도 퇴장한 흔적이 있다면 기존 방을 비활성화 처리하고 아래에서 새 방을 만들도록 유도
+                await supabaseAdmin
+                    .from('foxtalk_rooms')
+                    .update({ is_active: false })
+                    .eq('id', existing.id);
+            } else {
+                const { foxtalk_participants, ...roomOnly } = existing;
+                return { success: true, data: roomOnly, isExisting: true };
+            }
         }
 
         // 대상 사용자 정보 조회

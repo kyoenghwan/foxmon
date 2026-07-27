@@ -14,35 +14,20 @@ export const OA_LEAVE_CHAT_ROOM = async (roomId: string, sessionId: string, nick
 
         if (!room) throw new Error('방을 찾을 수 없습니다.');
 
-        if (room.type === '1ON1') {
-            // 1:1 방은 한쪽이 나가면 방 자체를 비활성화 (is_active = false) 하여 양쪽 목록에서 숨김 처리
-            // 시스템 메시지 남기기
-            await OA_INSERT_CHAT_MESSAGE({
-                room_id: roomId,
-                content: `대화가 종료되었습니다.`,
-                message_type: 'SYSTEM_LEAVE'
-            });
+        // 시스템 메시지 기록
+        const leaveMessage = nickname ? `${nickname}님이 퇴장하셨습니다.` : '상대방이 퇴장하셨습니다.';
+        await OA_INSERT_CHAT_MESSAGE({
+            room_id: roomId,
+            content: leaveMessage,
+            message_type: 'SYSTEM_LEAVE'
+        });
 
-            await supabaseAdmin
-                .from('foxtalk_rooms')
-                .update({ is_active: false })
-                .eq('id', roomId);
-        } else {
-            // 오픈방/비밀방의 경우 내 참가 정보만 삭제
-            if (nickname) {
-                await OA_INSERT_CHAT_MESSAGE({
-                    room_id: roomId,
-                    content: `${nickname}님이 퇴장하셨습니다.`,
-                    message_type: 'SYSTEM_LEAVE'
-                });
-            }
-
-            await supabaseAdmin
-                .from('foxtalk_participants')
-                .delete()
-                .eq('room_id', roomId)
-                .eq('session_id', sessionId);
-        }
+        // 1:1 방이든 오픈방이든 나간 사람의 참가 정보만 left_at 으로 업데이트하여 목록에서 퇴장 처리
+        await supabaseAdmin
+            .from('foxtalk_participants')
+            .update({ left_at: new Date().toISOString() })
+            .eq('room_id', roomId)
+            .eq('session_id', sessionId);
 
         return { success: true };
     } catch (error: any) {
