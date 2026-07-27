@@ -166,13 +166,18 @@ export function LoginInfoBox({ session }: LoginInfoBoxProps) {
 
         fetchGameStatus();
 
-        const handlePlayModalClose = () => {
+        const handleGameUpdate = () => {
             fetchGameStatus();
         };
 
-        window.addEventListener('play-modal-closed', handlePlayModalClose);
+        window.addEventListener('play-modal-closed', handleGameUpdate);
+        window.addEventListener('game-played', handleGameUpdate);
+        window.addEventListener('attendance-updated', handleGameUpdate);
+
         return () => {
-            window.removeEventListener('play-modal-closed', handlePlayModalClose);
+            window.removeEventListener('play-modal-closed', handleGameUpdate);
+            window.removeEventListener('game-played', handleGameUpdate);
+            window.removeEventListener('attendance-updated', handleGameUpdate);
         };
     }, [session?.user?.id]);
 
