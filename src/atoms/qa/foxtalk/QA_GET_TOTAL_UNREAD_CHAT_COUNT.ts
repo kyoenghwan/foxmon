@@ -38,7 +38,7 @@ export const QA_GET_TOTAL_UNREAD_CHAT_COUNT = async (userId?: string) => {
                 last_message_at,
                 employer_id,
                 seeker_id,
-                foxtalk_participants(id, last_read_at, session_id)
+                foxtalk_participants(id, last_read_at, left_at, session_id)
             `)
             .eq('is_active', true)
             .or(filterOr);
@@ -51,13 +51,16 @@ export const QA_GET_TOTAL_UNREAD_CHAT_COUNT = async (userId?: string) => {
         roomList.forEach((room: any) => {
             if (!room.last_message_at) return;
 
-            // 내 참여 정보 매칭
+            // 내 참여 정보 매칭 (foxtalk_participants 에 내가 없거나 나간 대화방이면 제외)
             const myPart = room.foxtalk_participants?.find((p: any) => {
                 const sId = p.session_id ? p.session_id.toLowerCase().trim() : '';
                 return uniqueUserIds.includes(sId);
             });
 
-            const lastReadTime = myPart?.last_read_at ? new Date(myPart.last_read_at).getTime() : 0;
+            // 💡 내가 대화방을 나갔거나(myPart 미존재 또는 left_at 존재) 더 이상 참여자가 아니면 안읽은 방 계산에서 완벽히 제외!
+            if (!myPart || myPart.left_at) return;
+
+            const lastReadTime = myPart.last_read_at ? new Date(myPart.last_read_at).getTime() : 0;
             const lastMsgTime = new Date(room.last_message_at).getTime();
 
             if (lastMsgTime > lastReadTime) {
