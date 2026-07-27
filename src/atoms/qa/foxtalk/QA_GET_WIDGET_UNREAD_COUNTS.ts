@@ -35,6 +35,7 @@ export const QA_GET_WIDGET_UNREAD_COUNTS = async (userId?: string) => {
                 id,
                 room_id,
                 last_read_at,
+                left_at,
                 foxtalk_rooms!inner(
                     id,
                     type,
@@ -52,6 +53,9 @@ export const QA_GET_WIDGET_UNREAD_COUNTS = async (userId?: string) => {
         const details: any[] = [];
 
         participants.forEach((p: any) => {
+            // 💡 내가 대화방을 나갔으면(left_at 이 찍혔으면) 안읽은 계산에서 완전 제외
+            if (p.left_at) return;
+
             const room = p.foxtalk_rooms;
             if (!room || !room.last_message_at) return;
 
