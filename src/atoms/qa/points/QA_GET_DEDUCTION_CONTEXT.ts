@@ -18,11 +18,9 @@ interface DeductionContext {
  * 포인트 차감을 위해 사용자의 현재 잔액과 잔액이 남아있는 충전 이력(FIFO용)을 조회합니다.
  */
 export const QA_GET_DEDUCTION_CONTEXT = async (userId: string): Promise<{ success: boolean; data: DeductionContext | null; error: string | null }> => {
-  const supabase = await createClient();
-
   try {
-    // 💡 1. 사용자의 현재 잔액 조회
-    const { data: user, error: userError } = await supabase
+    // 💡 1. 사용자의 현재 잔액 조회 (Admin Client)
+    const { data: user, error: userError } = await supabaseAdmin
       .from('users')
       .select('id, bonus_points, paid_points')
       .eq('id', userId)
@@ -32,8 +30,8 @@ export const QA_GET_DEDUCTION_CONTEXT = async (userId: string): Promise<{ succes
       throw new Error(`사용자 잔액 조회 실패: ${userError?.message}`);
     }
 
-    // 💡 2. 잔액이 남아있는 충전 이력 조회 (오래된 순서 - FIFO)
-    const { data: recharges, error: rechargeError } = await supabase
+    // 💡 2. 잔액이 남아있는 충전 이력 조회 (Admin Client - FIFO)
+    const { data: recharges, error: rechargeError } = await supabaseAdmin
       .from('point_recharge_history')
       .select('id, remained_point, created_at')
       .eq('user_id', userId)
@@ -44,13 +42,15 @@ export const QA_GET_DEDUCTION_CONTEXT = async (userId: string): Promise<{ succes
       throw new Error(`충전 이력 조회 실패: ${rechargeError.message}`);
     }
 
-    // 💡 3. 데이터 정합성 검증 및 부족분 충전 영수증 자동 생성 (관리자 수동 지급 포인트 호환)
-    const paidPoints = Number(user.paid_points);
-    const totalHistoryAmount = recharges.reduce((sum, r) => sum + Number(r.remained_point), 0);
+    const rechargeList = recharges || [];
+
+    // 💡 3. 데이터 정합성 검증 및 부족분 충전 영수증 자동 생성 (관리자 수동/테스트 지급 포인트 호환)
+    const paidPoints = Number(user.paid_points || 0);
+    const totalHistoryAmount = rechargeList.reduce((sum, r) => sum + Number(r.remained_point || 0), 0);
     
     if (paidPoints > totalHistoryAmount) {
         const diff = paidPoints - totalHistoryAmount;
-        nvLog('AT', `⚠️ 유료 포인트 잔액(${paidPoints}P) 대비 충전 이력(${totalHistoryAmount}P) 부족 (${diff}P). 보정 충전이력 생성...`);
+        console.log(`⚠️ [QA_GET_DEDUCTION_CONTEXT] 유료 잔액(${paidPoints}P) 대비 충전 이력(${totalHistoryAmount}P) 부족 (${diff}P). 보정 이력 자동 생성...`);
         
         try {
             const { data: newRecharge, error: createRechargeErr } = await supabaseAdmin
@@ -61,26 +61,28 @@ export const QA_GET_DEDUCTION_CONTEXT = async (userId: string): Promise<{ succes
                     remained_point: diff,
                     payment_method: 'SYSTEM_ADJUSTMENT',
                     status: 'COMPLETED',
-                    description: '관리자 지급 / 시스템 보정 유료 포인트'
+                    description: '시스템 보정 / 수동 지급 유료 포인트'
                 })
                 .select('id, remained_point, created_at')
                 .single();
 
             if (!createRechargeErr && newRecharge) {
-                recharges.push(newRecharge);
+                rechargeList.push(newRecharge);
+            } else if (createRechargeErr) {
+                console.error("⚠️ 보정 충전이력 생성 에러:", createRechargeErr);
             }
         } catch (err) {
-            nvLog('AT', '⚠️ 보정 영수증 생성 중 오류 발생 (무시)', err);
+            console.error('⚠️ 보정 영수증 생성 예외 (무시):', err);
         }
     }
 
     const result = {
       userId: user.id,
-      bonusPoints: Number(user.bonus_points),
-      paidPoints: Number(user.paid_points),
-      activeRecharges: recharges.map(r => ({
+      bonusPoints: Number(user.bonus_points || 0),
+      paidPoints: paidPoints,
+      activeRecharges: rechargeList.map(r => ({
         id: r.id,
-        remained_point: Number(r.remained_point),
+        remained_point: Number(r.remained_point || 0),
         created_at: r.created_at
       }))
     };

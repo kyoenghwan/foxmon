@@ -61,9 +61,10 @@ export const RA_CALC_DEDUCTION_FIFO = (input: DeductionInput): DeductionOutput =
 
   // 💡 3단계: 최종 검증 (잔액 부족 여부)
   if (remainingToDeduct > 0) {
+    const totalAvailable = bonusDeduction + paidDeductionList.reduce((sum, item) => sum + item.deductAmount, 0);
     return {
       isValid: false,
-      error: '잔액이 부족하여 결제를 진행할 수 없습니다.'
+      error: `잔액이 부족합니다. (결제 필요: ${requiredPoints.toLocaleString()} P, 차감 가능 총액: ${totalAvailable.toLocaleString()} P, 부족액: ${remainingToDeduct.toLocaleString()} P)`
     };
   }
 
