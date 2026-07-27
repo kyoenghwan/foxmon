@@ -85,11 +85,17 @@ export const QA_GET_DEDUCTION_CONTEXT = async (userId: string): Promise<{ succes
       }))
     };
 
-    nvLog('AT', `▶️ QA_GET_DEDUCTION_CONTEXT 조회 완료`, { userId, activeCount: recharges.length });
+    console.log(`🔍 [QA_GET_DEDUCTION_CONTEXT] 유저 포인트 상태:`, {
+      userId,
+      bonusPoints: result.bonusPoints,
+      paidPoints: result.paidPoints,
+      activeRechargesCount: result.activeRecharges.length,
+      activeRechargesTotal: totalHistoryAmount
+    });
 
     return { success: true, data: result, error: null };
   } catch (error: any) {
-    nvLog('AT', `❌ QA_GET_DEDUCTION_CONTEXT 에러`, error.message);
+    console.error(`❌ [QA_GET_DEDUCTION_CONTEXT 에러]`, error.message);
     return { success: false, data: null, error: error.message };
   }
 };

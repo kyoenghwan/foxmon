@@ -279,18 +279,30 @@ export function JobPaymentModal({ initialData, jobId, onClose, onSuccess }: JobP
 
     const handleFinalSubmit = async () => {
         setSaving(true);
+        console.log("🚀 [FRONTEND 1/3] 결제 요청 시작 - jobId:", jobId, "계산된 차감 포인트:", breakdown.total, "전송 payload:", {
+            ...form,
+            _isPayment: true,
+            _optionPeriodDays: totalExposureDays
+        });
+
         try {
             const res = await manageAdAction('UPDATE', { 
                 ...form, 
                 _isPayment: true,
                 _optionPeriodDays: totalExposureDays 
             }, jobId);
+            
+            console.log("🚀 [FRONTEND 2/3] 결제 서버 응답 수신:", res);
+
             if (!res.success) {
+                console.error("❌ [FRONTEND 3/3 실패] 결제 실패 원인:", res.message);
                 throw new Error(res.message || "결제 처리에 실패했습니다.");
             }
+            
+            console.log("✅ [FRONTEND 3/3 성공] 결제 성공!");
             onSuccess();
         } catch (err: any) {
-            console.error("결제 처리 중 오류", err);
+            console.error("❌ [FRONTEND 결제 예외 발생]", err);
             alert(err?.message || "결제 처리 중 오류가 발생했습니다.");
         } finally {
             setSaving(false);

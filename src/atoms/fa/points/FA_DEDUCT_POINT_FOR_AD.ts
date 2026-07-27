@@ -23,14 +23,16 @@ export const FA_DEDUCT_POINT_FOR_AD = async (input: DeductFlowInput): Promise<De
   const { userId, adPrice, description } = input;
 
   try {
-    nvLog('AT', `▶️ FA_DEDUCT_POINT_FOR_AD 시작`, input);
+    console.log(`💳 [FA_DEDUCT_POINT_FOR_AD 1/3] 포인트 차감 진입 - 유저ID: ${userId}, 차감요청: ${adPrice.toLocaleString()} P, 설명: ${description}`);
 
     // 💡 1단계: 차감 대상 데이터 조회 (QA)
     const contextResult = await QA_GET_DEDUCTION_CONTEXT(userId);
     if (!contextResult.success || !contextResult.data) {
+      console.error(`❌ [FA_DEDUCT_POINT_FOR_AD 1/3 실패] QA_GET_DEDUCTION_CONTEXT 실패:`, contextResult);
       throw new Error(contextResult.error || '사용자 포인트 정보를 조회할 수 없습니다.');
     }
     const context = contextResult.data;
+    console.log(`💳 [FA_DEDUCT_POINT_FOR_AD 1/3 성공] 컨텍스트 - 보너스: ${context.bonusPoints}P, 유료 DB 잔액: ${context.paidPoints}P, 내역 차감가능 총액: ${context.activeRecharges.reduce((acc: number, r: any) => acc + r.remained_point, 0)}P`);
 
     // 💡 2단계: FIFO 차감 계획 시뮬레이션 (RA - Pure Logic)
     const calculationResult = RA_CALC_DEDUCTION_FIFO({
@@ -40,9 +42,11 @@ export const FA_DEDUCT_POINT_FOR_AD = async (input: DeductFlowInput): Promise<De
     });
 
     if (!calculationResult.isValid || !calculationResult.data) {
-      throw new Error(calculationResult.error || '잔액이 부족하여 결제를 진행할 수 없습니다.');
+      console.error(`❌ [FA_DEDUCT_POINT_FOR_AD 2/3 실패] RA_CALC_DEDUCTION_FIFO 실패:`, calculationResult);
+      throw new Error(calculationResult.error || `잔액이 부족합니다. (요청: ${adPrice.toLocaleString()} P, 보유 보너스: ${context.bonusPoints} P, 유료 잔액: ${context.paidPoints} P)`);
     }
     const calculation = calculationResult.data;
+    console.log(`💳 [FA_DEDUCT_POINT_FOR_AD 2/3 성공] 차감 플랜 시뮬레이션 완료:`, calculation);
 
     // 💡 3단계: DB 차감 트랜잭션 실행 (OA)
     const result = await OA_EXECUTE_BATCH_DEDUCTION({
@@ -54,18 +58,18 @@ export const FA_DEDUCT_POINT_FOR_AD = async (input: DeductFlowInput): Promise<De
     });
 
     if (!result.success) {
-      // 롤백 로직이 필요한 다중 OA라면 여기서 보상 트랜잭션 수행
+      console.error(`❌ [FA_DEDUCT_POINT_FOR_AD 3/3 실패] OA_EXECUTE_BATCH_DEDUCTION 실패:`, result);
       throw new Error(result.error || '포인트 차감 처리 중 오류가 발생했습니다.');
     }
 
-    nvLog('AT', `✅ FA_DEDUCT_POINT_FOR_AD 성공`, { userId, adPrice });
+    console.log(`✅ [FA_DEDUCT_POINT_FOR_AD 3/3 성공] 최종 차감 성공! (${adPrice.toLocaleString()} P 차감 완료)`);
 
     return {
       success: true,
       message: `성공적으로 ${adPrice}포인트가 차감되었습니다.`
     };
   } catch (error: any) {
-    nvLog('AT', `❌ FA_DEDUCT_POINT_FOR_AD 에러`, error.message);
+    console.error(`❌ [FA_DEDUCT_POINT_FOR_AD 최종 예외 발생]`, error);
     return {
       success: false,
       error: error.message,

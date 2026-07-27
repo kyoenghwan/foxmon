@@ -265,7 +265,10 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
 
                 calcOpt(!!payload.option_jump, !!existingJob.option_jump, 'OPTION_PRICE_JUMP', 30000);
 
+                console.log(`💳 [FA_AD_CRUD_FLOW 1/3] 계산 완료 - 최종 결제액: ${totalPoints} P (유저: ${userId}, 공고: ${jobId || '신규'})`);
+
                 if (totalPoints > 0) {
+                    console.log(`💳 [FA_AD_CRUD_FLOW 2/3] FA_DEDUCT_POINT_FOR_AD 차감 요청 시작 - 요청액: ${totalPoints} P`);
                     const { FA_DEDUCT_POINT_FOR_AD } = await import('@/src/atoms/fa/points/FA_DEDUCT_POINT_FOR_AD');
                     const deductResult = await FA_DEDUCT_POINT_FOR_AD({
                         userId,
@@ -273,11 +276,17 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
                         description: p > 0 ? `구인 공고 연장/옵션 (${p}일)` : `구인 공고 옵션 추가/변경`
                     });
 
+                    console.log(`💳 [FA_AD_CRUD_FLOW 3/3] FA_DEDUCT_POINT_FOR_AD 결과:`, deductResult);
+
                     if (!deductResult.success) {
-                        return { success: false, message: deductResult.message || '포인트가 부족합니다.' };
+                        return { 
+                            success: false, 
+                            message: deductResult.message || `잔액이 부족하여 결제를 진행할 수 없습니다. (필요: ${totalPoints.toLocaleString()} P)` 
+                        };
                     }
                 } else if (totalPoints < 0) {
                     const refundAmount = Math.abs(totalPoints);
+                    console.log(`💳 [FA_AD_CRUD_FLOW 2/3] 포인트 환불 처리 시작 - 환불액: ${refundAmount} P`);
                     const { data: userBefore } = await supabase.from('users').select('paid_points, bonus_points').eq('id', userId).single();
                     const currentPaid = Number(userBefore?.paid_points || 0);
                     const currentBonus = Number(userBefore?.bonus_points || 0);
