@@ -5,8 +5,8 @@ const supabase = createClient('https://kgwvftaebjkjwwpsftqv.supabase.co', 'eyJhb
 // But we can check if there's an RPC.
 async function alter() {
     const sql = `
-        ALTER TABLE public.biz_ads ADD COLUMN IF NOT EXISTS claim_code VARCHAR(10) NULL;
-        CREATE UNIQUE INDEX IF NOT EXISTS idx_biz_ads_claim_code ON public.biz_ads (claim_code) WHERE claim_code IS NOT NULL;
+        ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS linked_ad_id UUID REFERENCES public.biz_ads(id) ON DELETE CASCADE;
+        CREATE INDEX IF NOT EXISTS idx_jobs_linked_ad_id ON public.jobs (linked_ad_id);
     `;
     const { data, error } = await supabase.rpc('execute_sql', { sql });
     console.log(error || data || "성공적으로 적용되었습니다.");

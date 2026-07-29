@@ -297,8 +297,13 @@ export default async function BizJobsPage() {
                                         <td className="px-5 py-4">
                                             <div className="flex flex-col gap-1 min-w-0 items-start">
                                                 {/* 상단 실제 아이콘들 (급구 + 일반아이콘) */}
-                                                {(isUrgentActive || generalIcons.length > 0) && (
+                                                {(ad.linked_ad_id || isUrgentActive || generalIcons.length > 0) && (
                                                     <div className="flex flex-wrap items-center gap-1 mb-0.5">
+                                                        {ad.linked_ad_id && (
+                                                            <span className="inline-flex items-center gap-0.5 bg-indigo-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0">
+                                                                광고 연동
+                                                            </span>
+                                                        )}
                                                         {isUrgentActive && (
                                                             <span className="inline-flex items-center gap-1 bg-red-500 text-white text-[10.5px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0">
                                                                 <span className="animate-siren">🚨</span> 급구
@@ -411,9 +416,19 @@ export default async function BizJobsPage() {
                                         </td>
                                         <td className="px-4 py-4 text-center">
                                             <div className="flex items-center justify-center gap-1.5">
-                                                <Link href={`/biz/jobs/${ad.id}`} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200" title="수정">
-                                                    <Pencil className="w-3.5 h-3.5 text-gray-600" />
-                                                </Link>
+                                                 {ad.linked_ad_id ? (
+                                                     <button 
+                                                         onClick={() => alert('이 공고는 광고와 연동되어 자동 관리되는 글입니다. 광고 관리 탭에서 수정해 주세요.')}
+                                                         className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200" 
+                                                         title="광고 연동으로 수정 불가"
+                                                     >
+                                                         <Pencil className="w-3.5 h-3.5 text-gray-400" />
+                                                     </button>
+                                                 ) : (
+                                                     <Link href={`/biz/jobs/${ad.id}`} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200" title="수정">
+                                                         <Pencil className="w-3.5 h-3.5 text-gray-600" />
+                                                     </Link>
+                                                 )}
                                                 <PaymentModalTrigger ad={ad} />
                                             </div>
                                         </td>
@@ -451,8 +466,13 @@ export default async function BizJobsPage() {
                                                 <img src={ad.image} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0 border border-gray-100" />
                                             )}
                                             <div className="min-w-0">
-                                                {(isUrgentActive || generalIcons.length > 0) && (
+                                                {(ad.linked_ad_id || isUrgentActive || generalIcons.length > 0) && (
                                                     <div className="flex flex-wrap items-center gap-1 mb-1">
+                                                        {ad.linked_ad_id && (
+                                                            <span className="inline-flex items-center gap-0.5 bg-indigo-500 text-white text-[9.5px] font-black px-1.5 py-0.5 rounded shadow-sm">
+                                                                광고 연동
+                                                            </span>
+                                                        )}
                                                         {isUrgentActive && (
                                                             <span className="inline-flex items-center gap-1 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm">
                                                                 <span className="animate-siren">🚨</span> 급구
@@ -512,11 +532,21 @@ export default async function BizJobsPage() {
                                         </div>
 
                                         <div className="flex items-center gap-2 shrink-0">
-                                            <Link href={`/biz/jobs/${ad.id}`} className="p-2 bg-gray-50 hover:bg-gray-100 border border-gray-200/60 rounded-xl transition-colors" title="수정">
-                                                <Pencil className="w-3.5 h-3.5 text-gray-600" />
-                                            </Link>
-                                            <PaymentModalTrigger ad={ad} />
-                                        </div>
+                                             {ad.linked_ad_id ? (
+                                                 <button 
+                                                     onClick={() => alert('이 공고는 광고와 연동되어 자동 관리되는 글입니다. 광고 관리 탭에서 수정해 주세요.')}
+                                                     className="p-2 bg-gray-50 hover:bg-gray-100 border border-gray-200/60 rounded-xl transition-colors" 
+                                                     title="광고 연동으로 수정 불가"
+                                                 >
+                                                     <Pencil className="w-3.5 h-3.5 text-gray-400" />
+                                                 </button>
+                                             ) : (
+                                                 <Link href={`/biz/jobs/${ad.id}`} className="p-2 bg-gray-50 hover:bg-gray-100 border border-gray-200/60 rounded-xl transition-colors" title="수정">
+                                                     <Pencil className="w-3.5 h-3.5 text-gray-600" />
+                                                 </Link>
+                                             )}
+                                             <PaymentModalTrigger ad={ad} />
+                                         </div>
                                     </div>
                             </div>
                         );

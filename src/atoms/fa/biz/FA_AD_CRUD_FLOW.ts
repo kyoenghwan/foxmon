@@ -182,6 +182,10 @@ export async function FA_AD_CRUD_FLOW({ actionType, userId, jobId, payload }: Ad
             
             if (checkError || !existingJob) return { success: false, message: '공고를 찾을 수 없습니다.' };
             if (existingJob.user_id !== userId) return { success: false, message: '수정 권한이 없습니다.' };
+            
+            if (existingJob.linked_ad_id) {
+                return { success: false, message: '이 공고는 광고와 연동되어 자동 관리되는 글입니다. 광고 관리 메뉴에서 수정해 주세요.' };
+            }
 
             // 2. 결제 여부 및 일할 비례(Pro-rata) 계산
             const currentExpiresAt = existingJob.expires_at ? new Date(existingJob.expires_at) : null;

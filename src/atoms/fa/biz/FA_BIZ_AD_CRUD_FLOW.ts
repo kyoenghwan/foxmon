@@ -155,6 +155,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 .single();
 
             if (error) throw error;
+            await syncLinkedJob(data);
             return { success: true, message: '구인 공고가 등록되었습니다.', data };
         }
 
@@ -525,6 +526,7 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
                 .single();
 
             if (error) throw error;
+            await syncLinkedJob(data);
             try {
                 const { revalidatePath } = await import('next/cache');
                 revalidatePath('/', 'layout');
@@ -534,11 +536,120 @@ export async function FA_BIZ_AD_CRUD_FLOW({ actionType, userId, jobId, payload }
             return { success: true, message: '구인 공고가 수정되었습니다.', data };
         }
 
-        // TODO: DELETE 구현
+        if (actionType === 'DELETE') {
+            if (!jobId) return { success: false, message: 'jobId가 필요합니다.' };
+
+            // 연동된 구인글 먼저 삭제 (CASCADE 처리되어 있어 자동으로도 삭제되지만 안정성 보강)
+            await supabase
+                .from('jobs')
+                .delete()
+                .eq('linked_ad_id', jobId);
+
+            const { data, error } = await supabase
+                .from('biz_ads')
+                .delete()
+                .eq('id', jobId)
+                .select()
+                .single();
+
+            if (error) throw error;
+            try {
+                const { revalidatePath } = await import('next/cache');
+                revalidatePath('/', 'layout');
+                revalidatePath('/jobs', 'page');
+                revalidatePath('/biz/ads', 'page');
+            } catch (e) {}
+            return { success: true, message: '광고 및 연동된 구인글이 삭제되었습니다.', data };
+        }
+
         return { success: false, message: '지원하지 않는 액션입니다.' };
 
     } catch (error: any) {
         console.error(`❌ [FA_BIZ_AD_CRUD_FLOW] ${actionType} 에러:`, error);
         return { success: false, message: error.message || '서버 오류가 발생했습니다.' };
+    }
+}
+
+// 💡 광고와 구인글을 100% 실시간 연동/동기화하는 헬퍼 함수
+async function syncLinkedJob(ad: any) {
+    try {
+        console.log(`🔗 [syncLinkedJob] 광고 ${ad.id}에 연동된 구인글 동기화 시작`);
+        
+        // 1. 이미 연동된 구인글이 있는지 확인
+        const { data: existingJob } = await supabase
+            .from('jobs')
+            .select('id')
+            .eq('linked_ad_id', ad.id)
+            .maybeSingle();
+
+        const jobPayload = {
+            user_id: ad.user_id,
+            linked_ad_id: ad.id,
+            title: ad.title,
+            company_name: ad.company_name,
+            location: ad.location,
+            address: ad.address,
+            salary_type: ad.salary_type,
+            salary_amount: ad.salary_amount,
+            logo_url: ad.logo_url,
+            image_url: ad.image_url,
+            contact_name: ad.contact_name,
+            contact_phone: ad.contact_phone,
+            kakao_id: ad.kakao_id,
+            line_id: ad.line_id,
+            telegram_id: ad.telegram_id,
+            wechat_id: ad.wechat_id,
+            employment_type: ad.employment_type,
+            category1: ad.category1,
+            category2: ad.category2,
+            work_time: ad.work_time,
+            amenities: ad.amenities || [],
+            keywords: ad.keywords || [],
+            design_mode: ad.design_mode,
+            content: ad.detail_content, // jobs.content 에 매핑
+            detail_content: ad.detail_content,
+            detail_bg_color: ad.detail_bg_color,
+            detail_bg_image: ad.detail_bg_image,
+            
+            tier: ad.tier || 'GENERAL',
+            status: ad.status || 'PAUSED',
+            expires_at: ad.expires_at,
+            exposure_period: ad.exposure_period || 30,
+            is_subscription: ad.is_subscription,
+
+            // 광고 옵션 효과들이 일반 구인글 카드에도 동일 연동되도록 매핑
+            option_bold: ad.option_double_slot || false,
+            option_jump: ad.option_jump || false,
+            jump_interval: ad.jump_interval || 4,
+            last_jumped_at: ad.last_jumped_at,
+            last_exposed_at: ad.last_exposed_at,
+            total_points: 0,
+        };
+
+        if (existingJob) {
+            // 2. 존재하면 업데이트
+            const { error: updateErr } = await supabase
+                .from('jobs')
+                .update({
+                    ...jobPayload,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', existingJob.id);
+
+            if (updateErr) throw updateErr;
+            console.log(`🔗 [syncLinkedJob] 기존 연동 구인글 업데이트 완료 (Job ID: ${existingJob.id})`);
+        } else {
+            // 3. 존재하지 않으면 신규 생성
+            const { data: newJob, error: insertErr } = await supabase
+                .from('jobs')
+                .insert([jobPayload])
+                .select('id')
+                .single();
+
+            if (insertErr) throw insertErr;
+            console.log(`🔗 [syncLinkedJob] 신규 연동 구인글 생성 완료 (Job ID: ${newJob.id})`);
+        }
+    } catch (err) {
+        console.error(`❌ [syncLinkedJob] 구인글 연동 동기화 실패:`, err);
     }
 }
