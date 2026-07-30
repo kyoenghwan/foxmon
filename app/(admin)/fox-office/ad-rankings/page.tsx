@@ -25,7 +25,7 @@ const TIER_LABELS: Record<string, string> = {
 
 export default function AdRankingsPage() {
     const [activeTab, setActiveTab] = useState<'monitoring' | 'history' | 'manage' | 'trash'>('monitoring');
-    const [tier, setTier] = useState<any>('ALL');
+    const [tier, setTier] = useState<any>('PREMIUM_MAIN');
     const [rankings, setRankings] = useState<RankingSimResult[]>([]);
     const [allAds, setAllAds] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -220,7 +220,7 @@ export default function AdRankingsPage() {
                             {activeTab === 'monitoring' ? '노출 순위 현황' : activeTab === 'history' ? '옵션/변경 내역' : '전체 광고/공고 목록 관리'}
                         </h2>
                         <div className="flex flex-wrap gap-2">
-                            {['ALL', 'PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'AD_GENERAL', 'GENERAL'].map(t => (
+                            {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'AD_GENERAL', 'GENERAL'].map(t => (
                                 <button 
                                     key={t}
                                     onClick={() => setTier(t)}
