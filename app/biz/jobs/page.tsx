@@ -35,9 +35,16 @@ const formatDateOnly = (dateStr: string | null | undefined) => {
     if (!dateStr) return null;
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return null;
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
+    const formatter = new Intl.DateTimeFormat('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    });
+    const parts = formatter.formatToParts(d);
+    const yyyy = parts.find(p => p.type === 'year')?.value;
+    const mm = parts.find(p => p.type === 'month')?.value;
+    const dd = parts.find(p => p.type === 'day')?.value;
     return `${yyyy}.${mm}.${dd}`;
 };
 

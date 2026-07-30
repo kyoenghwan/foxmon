@@ -62,7 +62,17 @@ const StatusBadge = ({ ad, isVerified }: { ad: any, isVerified: boolean }) => {
     if (isExposed) {
         const remainingDays = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
         const dDayStr = remainingDays <= 0 ? 'D-Day' : `D-${remainingDays}`;
-        const expDateStr = `${expiresAt.getFullYear()}.${String(expiresAt.getMonth() + 1).padStart(2, '0')}.${String(expiresAt.getDate()).padStart(2, '0')}`;
+        const formatter = new Intl.DateTimeFormat('ko-KR', {
+            timeZone: 'Asia/Seoul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        });
+        const parts = formatter.formatToParts(expiresAt);
+        const yyyy = parts.find(p => p.type === 'year')?.value;
+        const mm = parts.find(p => p.type === 'month')?.value;
+        const dd = parts.find(p => p.type === 'day')?.value;
+        const expDateStr = `${yyyy}.${mm}.${dd}`;
 
         return (
             <div className="flex flex-col items-center">
