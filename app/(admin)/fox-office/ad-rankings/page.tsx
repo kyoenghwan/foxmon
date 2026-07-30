@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Crown, ArrowUp, ArrowDown, Minus, RefreshCw, Timer, Pencil, Trash2, Edit3, Search, Sparkles, Filter, RotateCcw, AlertTriangle, Trash } from 'lucide-react';
+import { Crown, ArrowUp, ArrowDown, ArrowUpDown, Minus, RefreshCw, Timer, Pencil, Trash2, Edit3, Search, Sparkles, Filter, RotateCcw, AlertTriangle, Trash } from 'lucide-react';
 import { getAdRankingSimulation, RankingSimResult, getAdHistoryLogs, AdHistoryLog } from '@/lib/ad-ranking-service';
 import { AdminAdEditModal } from '@/components/admin/AdminAdEditModal';
 import { AdminFullAdEditorModal } from '@/components/admin/AdminFullAdEditorModal';
@@ -9,7 +9,8 @@ import {
     adminSoftDeleteAdAction, 
     adminHardDeleteAdAction, 
     adminRestoreAdAction, 
-    adminPurgeOldDeletedAdsAction 
+    adminPurgeOldDeletedAdsAction,
+    adminChangeAdRankAction
 } from '@/lib/actions/admin-ad-actions';
 import { QA_GET_ALL_BIZ_ADS } from '@/src/atoms/qa/admin/QA_GET_ALL_BIZ_ADS';
 
@@ -72,6 +73,26 @@ export default function AdRankingsPage() {
             loadRankings();
         } else {
             alert(res.message || '복구 실패');
+        }
+    };
+
+    // 순위 변경 핸들러
+    const handleChangeRank = async (ad: any, currentRank: number) => {
+        const input = prompt(`'${ad.title}' 광고의 이동할 목표 순위를 입력하세요 (현재 ${currentRank}위):`, String(currentRank));
+        if (!input) return;
+        const targetRank = parseInt(input.trim(), 10);
+        if (isNaN(targetRank) || targetRank <= 0) {
+            alert('올바른 순위 숫자(1 이상)를 입력해 주세요.');
+            return;
+        }
+
+        const isJob = ad.is_job || ad.tier === 'GENERAL';
+        const res = await adminChangeAdRankAction(ad.id.replace('_dup', ''), targetRank, isJob);
+        if (res.success) {
+            alert(res.message);
+            loadRankings();
+        } else {
+            alert(res.message || '순위 변경 실패');
         }
     };
 
@@ -283,6 +304,14 @@ export default function AdRankingsPage() {
                                     <td className="p-4 text-center border-l border-gray-100">
                                         <div className="flex items-center justify-center gap-1.5">
                                             <button
+                                                onClick={() => handleChangeRank(item.ad, item.currentRank)}
+                                                className="p-1.5 text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors border border-purple-200 text-[11px] font-bold flex items-center gap-1"
+                                                title="노출 순위 변경"
+                                            >
+                                                <ArrowUpDown className="w-3.5 h-3.5 text-purple-600" />
+                                                순위 변경
+                                            </button>
+                                            <button
                                                 onClick={() => setEditingAd(item.ad)}
                                                 className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200 text-[11px] font-bold flex items-center gap-1"
                                                 title="수정"
@@ -296,7 +325,7 @@ export default function AdRankingsPage() {
                                                 title="1차 삭제 (휴지통으로 이동)"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
-                                                휴지통 이동
+                                                삭제
                                             </button>
                                         </div>
                                     </td>

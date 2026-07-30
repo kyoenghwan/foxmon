@@ -133,6 +133,73 @@ export async function adminPurgeOldDeletedAdsAction() {
     }
 }
 
+/**
+ * 광고 순위 직접 변경 (최상단 점프 또는 특정 순위 지정)
+ */
+export async function adminChangeAdRankAction(id: string, targetRank: number = 1, isJob: boolean = false) {
+    try {
+        const now = new Date().toISOString();
+        const table = isJob ? 'jobs' : 'biz_ads';
+
+        if (targetRank <= 1) {
+            // 최상단 (1위) 점프
+            await supabaseAdmin.from(table).update({ last_exposed_at: now, updated_at: now }).eq('id', id);
+            if (!isJob) {
+                await supabaseAdmin.from('jobs').update({ last_exposed_at: now, updated_at: now }).eq('linked_ad_id', id);
+            } else {
+                const { data: job } = await supabaseAdmin.from('jobs').select('linked_ad_id').eq('id', id).single();
+                if (job?.linked_ad_id) {
+                    await supabaseAdmin.from('biz_ads').update({ last_exposed_at: now, updated_at: now }).eq('id', job.linked_ad_id);
+                }
+            }
+        } else {
+            // 지정 순위 (targetRank위) 이동
+            const { data: list } = await supabaseAdmin
+                .from(table)
+                .select('id, last_exposed_at, created_at')
+                .neq('status', 'DELETED')
+                .order('last_exposed_at', { ascending: false, nullsFirst: false });
+
+            if (list && list.length > 0) {
+                const filtered = list.filter(item => item.id !== id);
+                const targetIdx = Math.min(Math.max(0, targetRank - 1), filtered.length);
+
+                let calcTimeMs = Date.now();
+                if (targetIdx === 0) {
+                    const topTime = new Date(filtered[0]?.last_exposed_at || filtered[0]?.created_at || Date.now()).getTime();
+                    calcTimeMs = topTime + 1000;
+                } else if (targetIdx >= filtered.length) {
+                    const bottomTime = new Date(filtered[filtered.length - 1]?.last_exposed_at || filtered[filtered.length - 1]?.created_at || Date.now()).getTime();
+                    calcTimeMs = bottomTime - 1000;
+                } else {
+                    const prevTime = new Date(filtered[targetIdx - 1]?.last_exposed_at || filtered[targetIdx - 1]?.created_at || Date.now()).getTime();
+                    const nextTime = new Date(filtered[targetIdx]?.last_exposed_at || filtered[targetIdx]?.created_at || Date.now()).getTime();
+                    calcTimeMs = Math.floor((prevTime + nextTime) / 2);
+                }
+
+                const calculatedIso = new Date(calcTimeMs).toISOString();
+                await supabaseAdmin.from(table).update({ last_exposed_at: calculatedIso, updated_at: now }).eq('id', id);
+                if (!isJob) {
+                    await supabaseAdmin.from('jobs').update({ last_exposed_at: calculatedIso, updated_at: now }).eq('linked_ad_id', id);
+                } else {
+                    const { data: job } = await supabaseAdmin.from('jobs').select('linked_ad_id').eq('id', id).single();
+                    if (job?.linked_ad_id) {
+                        await supabaseAdmin.from('biz_ads').update({ last_exposed_at: calculatedIso, updated_at: now }).eq('id', job.linked_ad_id);
+                    }
+                }
+            }
+        }
+
+        await invalidateAdCache();
+        revalidatePath('/', 'layout');
+        revalidatePath('/fox-office/ad-rankings', 'page');
+        return { success: true, message: `노출 순위가 성공적으로 변경되었습니다.` };
+    } catch (error: any) {
+        console.error('adminChangeAdRankAction error:', error);
+        return { success: false, message: error.message || '순위 변경 도중 오류가 발생했습니다.' };
+    }
+}
+
 export async function adminDeleteAdAction(id: string, isJob: boolean = false) {
     return adminSoftDeleteAdAction(id, isJob);
 }
