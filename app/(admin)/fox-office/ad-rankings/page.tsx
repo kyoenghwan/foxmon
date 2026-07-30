@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Crown, ArrowUp, ArrowDown, Minus, RefreshCw, Timer, Pencil, Trash2 } from 'lucide-react';
+import { Crown, ArrowUp, ArrowDown, Minus, RefreshCw, Timer, Pencil, Trash2, Edit3, Search, Sparkles, Filter } from 'lucide-react';
 import { getAdRankingSimulation, RankingSimResult, getAdHistoryLogs, AdHistoryLog } from '@/lib/ad-ranking-service';
 import { AdminAdEditModal } from '@/components/admin/AdminAdEditModal';
+import { AdminFullAdEditorModal } from '@/components/admin/AdminFullAdEditorModal';
 import { adminDeleteAdAction } from '@/lib/actions/admin-ad-actions';
+import { QA_GET_ALL_BIZ_ADS } from '@/src/atoms/qa/admin/QA_GET_ALL_BIZ_ADS';
 
 const TIER_LABELS: Record<string, string> = {
     PREMIUM_MAIN: '메인',
@@ -15,18 +17,22 @@ const TIER_LABELS: Record<string, string> = {
 };
 
 export default function AdRankingsPage() {
-    const [activeTab, setActiveTab] = useState<'monitoring' | 'history'>('monitoring');
+    const [activeTab, setActiveTab] = useState<'monitoring' | 'history' | 'manage'>('monitoring');
     const [tier, setTier] = useState<any>('PREMIUM_MAIN');
     const [rankings, setRankings] = useState<RankingSimResult[]>([]);
+    const [allAds, setAllAds] = useState<any[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('ALL');
     const [loading, setLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState(60);
 
     const [historyLogs, setHistoryLogs] = useState<AdHistoryLog[]>([]);
     const [editingAd, setEditingAd] = useState<any | null>(null);
+    const [fullEditingAd, setFullEditingAd] = useState<any | null>(null);
 
     const handleDelete = async (ad: any) => {
         if (!confirm(`'${ad.title}' 광고를 정말 삭제하시겠습니까? (삭제 후 복구할 수 없습니다)`)) return;
-        const isJob = ad.tier === 'GENERAL';
+        const isJob = ad.is_job || ad.tier === 'GENERAL';
         const res = await adminDeleteAdAction(ad.id.replace('_dup', ''), isJob);
         if (res.success) {
             alert(res.message);
@@ -42,9 +48,14 @@ export default function AdRankingsPage() {
             if (activeTab === 'monitoring') {
                 const data = await getAdRankingSimulation(tier);
                 setRankings(data);
-            } else {
+            } else if (activeTab === 'history') {
                 const logs = await getAdHistoryLogs(tier);
                 setHistoryLogs(logs);
+            } else if (activeTab === 'manage') {
+                const res = await QA_GET_ALL_BIZ_ADS();
+                if (res.success && res.data) {
+                    setAllAds(res.data);
+                }
             }
         } catch (e) {
             console.error(e);
@@ -113,6 +124,17 @@ export default function AdRankingsPage() {
                     }`}
                 >
                     옵션/변경 내역
+                </button>
+                <button
+                    onClick={() => setActiveTab('manage')}
+                    className={`px-6 py-3 text-[14px] font-bold border-b-2 transition-colors flex items-center gap-1.5 ${
+                        activeTab === 'manage' 
+                            ? 'border-primary text-primary bg-orange-50/40' 
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                >
+                    <Edit3 className="w-4 h-4 text-primary" />
+                    전체 광고/공고 직접 관리
                 </button>
             </div>
 
@@ -235,7 +257,7 @@ export default function AdRankingsPage() {
                         </tbody>
                     </table>
                 </div>
-            ) : (
+            ) : activeTab === 'history' ? (
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse min-w-[700px]">
                         <thead>
@@ -283,6 +305,123 @@ export default function AdRankingsPage() {
                         </tbody>
                     </table>
                 </div>
+            ) : (
+                <div className="space-y-4">
+                    {/* 검색 및 상태 필터 바 */}
+                    <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <div className="relative flex-1">
+                            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                                type="text"
+                                placeholder="공고 제목, 업체명, 주소 검색..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-9 pr-4 py-2 text-xs font-bold bg-white border border-gray-200 rounded-lg outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="px-3 py-2 text-xs font-bold bg-white border border-gray-200 rounded-lg outline-hidden"
+                            >
+                                <option value="ALL">전체 상태</option>
+                                <option value="ACTIVE">ACTIVE (노출중)</option>
+                                <option value="PAUSED">PAUSED (중지)</option>
+                                <option value="EXPIRED">EXPIRED (만료)</option>
+                            </select>
+                            <button
+                                onClick={loadRankings}
+                                className="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
+                            >
+                                <RefreshCw className="w-3.5 h-3.5" /> 새로고침
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 전체 공고 목록 테이블 */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                                <tr className="border-b-2 border-gray-100 bg-gray-50/50">
+                                    <th className="p-4 text-[12px] font-black text-gray-400">광고/공고 제목</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-36">업체 정보</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-28 text-center">광고 티어</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-28 text-center">노출 상태</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-36 text-center">만료 일시</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-52 text-center">원클릭 직접 관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {allAds
+                                    .filter((ad) => {
+                                        if (statusFilter !== 'ALL' && ad.status !== statusFilter) return false;
+                                        if (searchQuery) {
+                                            const q = searchQuery.toLowerCase();
+                                            const t = (ad.title || '').toLowerCase();
+                                            const c = (ad.company_name || ad.company || '').toLowerCase();
+                                            return t.includes(q) || c.includes(q);
+                                        }
+                                        return true;
+                                    })
+                                    .map((ad) => (
+                                        <tr key={ad.id} className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
+                                            <td className="p-4">
+                                                <div className="font-bold text-[14px] text-gray-900 line-clamp-1">{ad.title}</div>
+                                                <div className="text-[12px] text-gray-500 mt-0.5">{ad.pay || (ad.salary_type ? `[${ad.salary_type}] ${ad.salary_amount}` : '')}</div>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="font-bold text-[13px] text-gray-900">{ad.company_name || ad.company}</div>
+                                                <div className="text-[11px] text-gray-400">{ad.location}</div>
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <span className="text-[11px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                                                    {ad.tier || 'GENERAL'}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <span className={`text-[11px] font-black px-2 py-0.5 rounded ${
+                                                    ad.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
+                                                    ad.status === 'PAUSED' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                                                }`}>
+                                                    {ad.status || 'ACTIVE'}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 text-center text-[12px] text-gray-500 font-mono">
+                                                {ad.expires_at ? new Date(ad.expires_at).toLocaleDateString('ko-KR') : '-'}
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <div className="flex items-center justify-center gap-1.5">
+                                                    <button
+                                                        onClick={() => setFullEditingAd(ad)}
+                                                        className="px-2.5 py-1.5 bg-gradient-to-r from-primary to-orange-600 text-white hover:opacity-90 rounded-lg text-[11px] font-black transition-all shadow-xs flex items-center gap-1"
+                                                        title="사용자가 입력한 전체 폼(본문/디자인/옵션) 그대로 수정"
+                                                    >
+                                                        <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                                                        사용자 폼 그대로 수정
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setEditingAd(ad)}
+                                                        className="p-1.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg text-[11px] font-bold transition-colors"
+                                                        title="빠른 정보 수정"
+                                                    >
+                                                        <Pencil className="w-3.5 h-3.5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(ad)}
+                                                        className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-[11px] font-bold transition-colors"
+                                                        title="삭제"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             )}
             </div>
 
@@ -290,6 +429,14 @@ export default function AdRankingsPage() {
                 <AdminAdEditModal
                     ad={editingAd}
                     onClose={() => setEditingAd(null)}
+                    onSuccess={() => loadRankings()}
+                />
+            )}
+
+            {fullEditingAd && (
+                <AdminFullAdEditorModal
+                    ad={fullEditingAd}
+                    onClose={() => setFullEditingAd(null)}
                     onSuccess={() => loadRankings()}
                 />
             )}
