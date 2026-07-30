@@ -7,6 +7,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { OpenMyPageButton } from '@/components/biz/OpenMyPageButton';
 import { PaymentModalTrigger } from '@/components/biz/PaymentModalTrigger';
 import { safeIconsArray } from '@/lib/utils';
+import { EditLinkedAdButton } from '@/components/biz/EditLinkedAdButton';
 
 const TierBadge = ({ tier }: { tier: string }) => {
     const styles: Record<string, string> = {
@@ -417,13 +418,7 @@ export default async function BizJobsPage() {
                                         <td className="px-4 py-4 text-center">
                                             <div className="flex items-center justify-center gap-1.5">
                                                  {ad.linked_ad_id ? (
-                                                     <button 
-                                                         onClick={() => alert('이 공고는 광고와 연동되어 자동 관리되는 글입니다. 광고 관리 탭에서 수정해 주세요.')}
-                                                         className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200" 
-                                                         title="광고 연동으로 수정 불가"
-                                                     >
-                                                         <Pencil className="w-3.5 h-3.5 text-gray-400" />
-                                                     </button>
+                                                     <EditLinkedAdButton />
                                                  ) : (
                                                      <Link href={`/biz/jobs/${ad.id}`} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200" title="수정">
                                                          <Pencil className="w-3.5 h-3.5 text-gray-600" />
@@ -533,13 +528,7 @@ export default async function BizJobsPage() {
 
                                         <div className="flex items-center gap-2 shrink-0">
                                              {ad.linked_ad_id ? (
-                                                 <button 
-                                                     onClick={() => alert('이 공고는 광고와 연동되어 자동 관리되는 글입니다. 광고 관리 탭에서 수정해 주세요.')}
-                                                     className="p-2 bg-gray-50 hover:bg-gray-100 border border-gray-200/60 rounded-xl transition-colors" 
-                                                     title="광고 연동으로 수정 불가"
-                                                 >
-                                                     <Pencil className="w-3.5 h-3.5 text-gray-400" />
-                                                 </button>
+                                                 <EditLinkedAdButton className="p-2 bg-gray-50 hover:bg-gray-100 border border-gray-200/60 rounded-xl transition-colors" />
                                              ) : (
                                                  <Link href={`/biz/jobs/${ad.id}`} className="p-2 bg-gray-50 hover:bg-gray-100 border border-gray-200/60 rounded-xl transition-colors" title="수정">
                                                      <Pencil className="w-3.5 h-3.5 text-gray-600" />
