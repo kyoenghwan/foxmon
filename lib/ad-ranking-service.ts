@@ -14,13 +14,31 @@ export interface RankingSimResult {
 export async function getAdRankingSimulation(tier: 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'LINE' | 'GENERAL' | 'AD_GENERAL' = 'PREMIUM_MAIN'): Promise<RankingSimResult[]> {
     const targetTable = tier === 'GENERAL' ? 'jobs' : 'biz_ads';
 
-    const { data, error } = await supabaseAdmin
+    let rawAds: AdItem[] = [];
+    
+    const { data: mainData } = await supabaseAdmin
         .from(targetTable)
         .select('*')
         .eq('tier', tier);
 
-    let rawAds: AdItem[] = [];
-    if (!error && data && data.length > 0) {
+    const otherTable = targetTable === 'biz_ads' ? 'jobs' : 'biz_ads';
+    const { data: subData } = await supabaseAdmin
+        .from(otherTable)
+        .select('*')
+        .eq('tier', tier);
+
+    const merged = [...(mainData || []), ...(subData || [])];
+    const uniqueMap = new Map<string, any>();
+    merged.forEach(item => {
+        const key = item.linked_ad_id || item.id;
+        if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, item);
+        }
+    });
+
+    const data = Array.from(uniqueMap.values());
+
+    if (data && data.length > 0) {
         rawAds = data.map((item: any) => ({
             ...item,
             company: item.company || item.company_name || '업체명 없음',

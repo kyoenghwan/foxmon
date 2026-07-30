@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Crown, ArrowUp, ArrowDown, Minus, RefreshCw, Timer } from 'lucide-react';
+import { Crown, ArrowUp, ArrowDown, Minus, RefreshCw, Timer, Pencil, Trash2 } from 'lucide-react';
 import { getAdRankingSimulation, RankingSimResult, getAdHistoryLogs, AdHistoryLog } from '@/lib/ad-ranking-service';
+import { AdminAdEditModal } from '@/components/admin/AdminAdEditModal';
+import { adminDeleteAdAction } from '@/lib/actions/admin-ad-actions';
 
 const TIER_LABELS: Record<string, string> = {
     PREMIUM_MAIN: '메인',
@@ -20,6 +22,19 @@ export default function AdRankingsPage() {
     const [timeLeft, setTimeLeft] = useState(60);
 
     const [historyLogs, setHistoryLogs] = useState<AdHistoryLog[]>([]);
+    const [editingAd, setEditingAd] = useState<any | null>(null);
+
+    const handleDelete = async (ad: any) => {
+        if (!confirm(`'${ad.title}' 광고를 정말 삭제하시겠습니까? (삭제 후 복구할 수 없습니다)`)) return;
+        const isJob = ad.tier === 'GENERAL';
+        const res = await adminDeleteAdAction(ad.id.replace('_dup', ''), isJob);
+        if (res.success) {
+            alert(res.message);
+            loadRankings();
+        } else {
+            alert(res.message || '삭제 실패');
+        }
+    };
 
     const loadRankings = async () => {
         setLoading(true);
@@ -142,11 +157,13 @@ export default function AdRankingsPage() {
                                 <th className="p-4 text-[13px] font-black text-gray-400">광고 정보</th>
                                 <th className="p-4 text-[13px] font-black text-gray-400 w-32">옵션 현황</th>
                                 <th className="p-4 text-[13px] font-black text-gray-400 w-48 text-center" colSpan={2}>노출 순위 이력</th>
+                                <th className="p-4 text-[13px] font-black text-gray-400 w-28 text-center">관리 조작</th>
                             </tr>
                             <tr className="border-b border-gray-100 bg-gray-50/50">
                                 <th colSpan={3}></th>
                                 <th className="p-2 text-[12px] font-bold text-gray-400 text-center border-l border-gray-100">1분 전 대비</th>
                                 <th className="p-2 text-[12px] font-bold text-gray-400 text-center border-l border-gray-100">5분 전 대비</th>
+                                <th className="border-l border-gray-100"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -185,6 +202,26 @@ export default function AdRankingsPage() {
                                     </td>
                                     <td className="p-4 text-center border-l border-gray-100">
                                         {getRankChange(item.currentRank, item.prev5Rank)}
+                                    </td>
+                                    <td className="p-4 text-center border-l border-gray-100">
+                                        <div className="flex items-center justify-center gap-1.5">
+                                            <button
+                                                onClick={() => setEditingAd(item.ad)}
+                                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200 text-[11px] font-bold flex items-center gap-1"
+                                                title="수정"
+                                            >
+                                                <Pencil className="w-3.5 h-3.5" />
+                                                수정
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(item.ad)}
+                                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200 text-[11px] font-bold flex items-center gap-1"
+                                                title="삭제"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                                삭제
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -248,6 +285,14 @@ export default function AdRankingsPage() {
                 </div>
             )}
             </div>
+
+            {editingAd && (
+                <AdminAdEditModal
+                    ad={editingAd}
+                    onClose={() => setEditingAd(null)}
+                    onSuccess={() => loadRankings()}
+                />
+            )}
         </div>
     );
 }

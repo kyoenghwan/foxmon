@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FileText, Clock, ExternalLink, CreditCard, RotateCcw, X, HelpCircle } from 'lucide-react';
+import { FileText, Clock, ExternalLink, CreditCard, RotateCcw, X, HelpCircle, Pencil, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { QA_GET_ALL_BIZ_ADS } from '@/src/atoms/qa/admin/QA_GET_ALL_BIZ_ADS';
 import { adminCancelAdAction, estimateAdRefund, AdRefundEstimation } from '@/lib/actions/admin-cancel-ad';
+import { AdminAdEditModal } from '@/components/admin/AdminAdEditModal';
+import { adminDeleteAdAction } from '@/lib/actions/admin-ad-actions';
 
 type TabType = 'ALL' | 'PREMIUM_MAIN' | 'SIDE' | 'PREMIUM' | 'SPECIAL' | 'AD_GENERAL' | 'GENERAL';
 
@@ -19,6 +21,19 @@ export default function AdminJobsPage() {
     const [selectedAd, setSelectedAd] = useState<any | null>(null);
     const [refundEst, setRefundEst] = useState<AdRefundEstimation | null>(null);
     const [isCancelling, setIsCancelling] = useState(false);
+    const [editingAd, setEditingAd] = useState<any | null>(null);
+
+    const handleDelete = async (job: any) => {
+        if (!confirm(`'${job.title}' 공고를 정말 삭제하시겠습니까? (삭제 후 복구할 수 없습니다)`)) return;
+        const isJob = job.is_job || job.tier === 'GENERAL';
+        const res = await adminDeleteAdAction(job.id, isJob);
+        if (res.success) {
+            alert(res.message);
+            loadJobs();
+        } else {
+            alert(res.message || '삭제 실패');
+        }
+    };
 
     const loadJobs = async () => {
         setLoading(true);
@@ -184,18 +199,29 @@ export default function AdminJobsPage() {
                                             )}
                                         </td>
                                         <td className="p-4 text-center">
-                                            <div className="flex items-center justify-center gap-2">
-                                                {/* 결제 대기중이거나 노출 진행 중인 경우 취소 및 철회 가능 */}
+                                            <div className="flex items-center justify-center gap-1.5">
+                                                <button 
+                                                    onClick={() => setEditingAd(job)}
+                                                    className="px-2 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md text-[11px] font-bold transition-colors flex items-center gap-1 border border-blue-200"
+                                                    title="관리자 수정"
+                                                >
+                                                    <Pencil className="w-3 h-3" /> 수정
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDelete(job)}
+                                                    className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-[11px] font-bold transition-colors flex items-center gap-1 border border-red-200"
+                                                    title="삭제"
+                                                >
+                                                    <Trash2 className="w-3 h-3" /> 삭제
+                                                </button>
                                                 {!isExpired && (
                                                     <button 
                                                         onClick={() => handleOpenCancelModal(job)}
-                                                        className="px-2.5 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-[11px] font-black transition-colors flex items-center gap-1 border border-red-200"
+                                                        className="px-2 py-1 bg-orange-50 text-orange-700 hover:bg-orange-100 rounded-md text-[11px] font-bold transition-colors flex items-center gap-1 border border-orange-200"
+                                                        title="취소/환불"
                                                     >
-                                                        <RotateCcw className="w-3 h-3" /> 광고 취소/철회
+                                                        <RotateCcw className="w-3 h-3" /> 환불
                                                     </button>
-                                                )}
-                                                {isExpired && (
-                                                    <span className="text-[11px] text-gray-400 font-bold">액션 없음</span>
                                                 )}
                                             </div>
                                         </td>
@@ -319,6 +345,14 @@ export default function AdminJobsPage() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {editingAd && (
+                <AdminAdEditModal
+                    ad={editingAd}
+                    onClose={() => setEditingAd(null)}
+                    onSuccess={() => loadJobs()}
+                />
             )}
         </div>
     );
