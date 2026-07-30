@@ -1,11 +1,16 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Crown, ArrowUp, ArrowDown, Minus, RefreshCw, Timer, Pencil, Trash2, Edit3, Search, Sparkles, Filter } from 'lucide-react';
+import { Crown, ArrowUp, ArrowDown, Minus, RefreshCw, Timer, Pencil, Trash2, Edit3, Search, Sparkles, Filter, RotateCcw, AlertTriangle, Trash } from 'lucide-react';
 import { getAdRankingSimulation, RankingSimResult, getAdHistoryLogs, AdHistoryLog } from '@/lib/ad-ranking-service';
 import { AdminAdEditModal } from '@/components/admin/AdminAdEditModal';
 import { AdminFullAdEditorModal } from '@/components/admin/AdminFullAdEditorModal';
-import { adminDeleteAdAction } from '@/lib/actions/admin-ad-actions';
+import { 
+    adminSoftDeleteAdAction, 
+    adminHardDeleteAdAction, 
+    adminRestoreAdAction, 
+    adminPurgeOldDeletedAdsAction 
+} from '@/lib/actions/admin-ad-actions';
 import { QA_GET_ALL_BIZ_ADS } from '@/src/atoms/qa/admin/QA_GET_ALL_BIZ_ADS';
 
 const TIER_LABELS: Record<string, string> = {
@@ -18,7 +23,7 @@ const TIER_LABELS: Record<string, string> = {
 };
 
 export default function AdRankingsPage() {
-    const [activeTab, setActiveTab] = useState<'monitoring' | 'history' | 'manage'>('monitoring');
+    const [activeTab, setActiveTab] = useState<'monitoring' | 'history' | 'manage' | 'trash'>('monitoring');
     const [tier, setTier] = useState<any>('ALL');
     const [rankings, setRankings] = useState<RankingSimResult[]>([]);
     const [allAds, setAllAds] = useState<any[]>([]);
@@ -31,16 +36,51 @@ export default function AdRankingsPage() {
     const [editingAd, setEditingAd] = useState<any | null>(null);
     const [fullEditingAd, setFullEditingAd] = useState<any | null>(null);
 
-    const handleDelete = async (ad: any) => {
-        if (!confirm(`'${ad.title}' 광고를 정말 삭제하시겠습니까? (삭제 후 복구할 수 없습니다)`)) return;
+    // 1차 소프트 삭제 (휴지통 이동)
+    const handleSoftDelete = async (ad: any) => {
+        if (!confirm(`'${ad.title}' 광고를 휴지통으로 이동(1차 삭제)하시겠습니까? (30일 후 자동/수동 완전 삭제)`)) return;
         const isJob = ad.is_job || ad.tier === 'GENERAL';
-        const res = await adminDeleteAdAction(ad.id.replace('_dup', ''), isJob);
+        const res = await adminSoftDeleteAdAction(ad.id.replace('_dup', ''), isJob);
         if (res.success) {
             alert(res.message);
             loadRankings();
         } else {
-            alert(res.message || '삭제 실패');
+            alert(res.message || '1차 삭제 실패');
         }
+    };
+
+    // 2차 영구 완전 삭제
+    const handleHardDelete = async (ad: any) => {
+        if (!confirm(`'${ad.title}' 광고를 DB에서 영구히 완전 삭제하시겠습니까? (삭제 후 절대 복구 불가)`)) return;
+        const isJob = ad.is_job || ad.tier === 'GENERAL';
+        const res = await adminHardDeleteAdAction(ad.id.replace('_dup', ''), isJob);
+        if (res.success) {
+            alert(res.message);
+            loadRankings();
+        } else {
+            alert(res.message || '영구 삭제 실패');
+        }
+    };
+
+    // 복구
+    const handleRestore = async (ad: any) => {
+        if (!confirm(`'${ad.title}' 광고를 다시 정상 노출(ACTIVE) 상태로 복구하시겠습니까?`)) return;
+        const isJob = ad.is_job || ad.tier === 'GENERAL';
+        const res = await adminRestoreAdAction(ad.id.replace('_dup', ''), isJob);
+        if (res.success) {
+            alert(res.message);
+            loadRankings();
+        } else {
+            alert(res.message || '복구 실패');
+        }
+    };
+
+    // 30일 경과 항목 일괄 영구 삭제
+    const handlePurgeOld = async () => {
+        if (!confirm('1차 삭제 후 30일이 넘게 경과된 항목을 일괄 영구 완전 삭제하시겠습니까?')) return;
+        const res = await adminPurgeOldDeletedAdsAction();
+        alert(res.message);
+        loadRankings();
     };
 
     const loadRankings = async () => {
@@ -53,7 +93,7 @@ export default function AdRankingsPage() {
             } else if (activeTab === 'history') {
                 const logs = await getAdHistoryLogs(queryTier);
                 setHistoryLogs(logs);
-            } else if (activeTab === 'manage') {
+            } else if (activeTab === 'manage' || activeTab === 'trash') {
                 const res = await QA_GET_ALL_BIZ_ADS();
                 if (res.success && res.data) {
                     setAllAds(res.data);
@@ -137,6 +177,17 @@ export default function AdRankingsPage() {
                 >
                     <Edit3 className="w-4 h-4 text-primary" />
                     전체 광고/공고 직접 관리
+                </button>
+                <button
+                    onClick={() => setActiveTab('trash')}
+                    className={`px-6 py-3 text-[14px] font-bold border-b-2 transition-colors flex items-center gap-1.5 ${
+                        activeTab === 'trash' 
+                            ? 'border-red-600 text-red-600 bg-red-50/40' 
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                >
+                    <Trash className="w-4 h-4 text-red-600" />
+                    휴지통 (1차 삭제 목록)
                 </button>
             </div>
 
@@ -240,12 +291,12 @@ export default function AdRankingsPage() {
                                                 수정
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(item.ad)}
+                                                onClick={() => handleSoftDelete(item.ad)}
                                                 className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200 text-[11px] font-bold flex items-center gap-1"
-                                                title="삭제"
+                                                title="1차 삭제 (휴지통으로 이동)"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
-                                                삭제
+                                                휴지통 이동
                                             </button>
                                         </div>
                                     </td>
@@ -359,6 +410,7 @@ export default function AdRankingsPage() {
                             <tbody>
                                 {allAds
                                     .filter((ad) => {
+                                        if (ad.status === 'DELETED') return false; // manage 탭에서는 1차 삭제된 항목 제외
                                         if (tier !== 'ALL') {
                                             if (tier === 'GENERAL') {
                                                 if (!ad.is_job && ad.tier !== 'GENERAL') return false;
@@ -419,17 +471,19 @@ export default function AdRankingsPage() {
                                                         <Pencil className="w-3.5 h-3.5" />
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDelete(ad)}
-                                                        className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-[11px] font-bold transition-colors"
-                                                        title="삭제"
+                                                        onClick={() => handleSoftDelete(ad)}
+                                                        className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
+                                                        title="1차 삭제 (휴지통으로 이동)"
                                                     >
                                                         <Trash2 className="w-3.5 h-3.5" />
+                                                        휴지통 이동
                                                     </button>
                                                 </div>
                                             </td>
                                         </tr>
                                     ))}
                                 {allAds.filter((ad) => {
+                                    if (ad.status === 'DELETED') return false;
                                     if (tier !== 'ALL') {
                                         if (tier === 'GENERAL') {
                                             if (!ad.is_job && ad.tier !== 'GENERAL') return false;
@@ -449,6 +503,137 @@ export default function AdRankingsPage() {
                                     <tr>
                                         <td colSpan={6} className="p-12 text-center text-gray-400 font-bold text-xs">
                                             해당 티어 및 조건에 해당하는 광고/공고가 존재하지 않습니다.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* 4th Tab: Trash (1차 삭제 목록 및 2차 영구 삭제 관리) */}
+            {activeTab === 'trash' && (
+                <div className="space-y-4">
+                    <div className="bg-red-50/70 border border-red-200 rounded-xl p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-red-100 rounded-lg text-red-600">
+                                <AlertTriangle className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-sm text-red-900">1차 삭제 (휴지통) 보관소</h4>
+                                <p className="text-xs text-red-700 mt-0.5">
+                                    여기 있는 항목은 1차 삭제되어 일반 사용자 화면에 노출되지 않으며, <strong>삭제 후 30일이 지나면 자동 영구 삭제</strong> 처리됩니다.
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={handlePurgeOld}
+                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            30일 지난 항목 일괄 영구 삭제
+                        </button>
+                    </div>
+
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xs">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b-2 border-gray-100 bg-gray-50/50">
+                                    <th className="p-4 text-[12px] font-black text-gray-400">삭제된 광고/공고 제목</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-36">업체 정보</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-28 text-center">티어</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-36 text-center">1차 삭제 일시</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-36 text-center">영구 삭제 예정일</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-44 text-center">수동 영구/복구 관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {allAds
+                                    .filter((ad) => {
+                                        if (ad.status !== 'DELETED') return false;
+                                        if (tier !== 'ALL') {
+                                            if (tier === 'GENERAL') {
+                                                if (!ad.is_job && ad.tier !== 'GENERAL') return false;
+                                            } else {
+                                                if (ad.tier !== tier) return false;
+                                            }
+                                        }
+                                        if (searchQuery) {
+                                            const q = searchQuery.toLowerCase();
+                                            const t = (ad.title || '').toLowerCase();
+                                            const c = (ad.company_name || ad.company || '').toLowerCase();
+                                            return t.includes(q) || c.includes(q);
+                                        }
+                                        return true;
+                                    })
+                                    .map((ad) => {
+                                        const deletedDate = ad.updated_at ? new Date(ad.updated_at) : new Date();
+                                        const autoPurgeDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+                                        return (
+                                            <tr key={ad.id} className="border-b border-gray-50 hover:bg-red-50/30 transition-colors">
+                                                <td className="p-4">
+                                                    <div className="font-bold text-[14px] text-gray-800 line-through line-clamp-1">{ad.title}</div>
+                                                    <div className="text-[11px] text-red-500 font-bold mt-0.5">[1차 삭제됨 (휴지통)]</div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="font-bold text-[13px] text-gray-900">{ad.company_name || ad.company}</div>
+                                                    <div className="text-[11px] text-gray-400">{ad.location}</div>
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <span className="text-[11px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                                                        {ad.tier || 'GENERAL'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 text-center text-[12px] text-gray-500 font-mono">
+                                                    {deletedDate.toLocaleDateString('ko-KR')}
+                                                </td>
+                                                <td className="p-4 text-center text-[12px] text-red-600 font-mono font-bold">
+                                                    {autoPurgeDate.toLocaleDateString('ko-KR')}
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <div className="flex items-center justify-center gap-1.5">
+                                                        <button
+                                                            onClick={() => handleRestore(ad)}
+                                                            className="px-2.5 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
+                                                            title="정상 노출(ACTIVE) 상태로 복구"
+                                                        >
+                                                            <RotateCcw className="w-3.5 h-3.5" />
+                                                            복구
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleHardDelete(ad)}
+                                                            className="px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
+                                                            title="2차 영구 완전 삭제 (DB 삭제)"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                            영구 삭제
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                {allAds.filter((ad) => {
+                                    if (ad.status !== 'DELETED') return false;
+                                    if (tier !== 'ALL') {
+                                        if (tier === 'GENERAL') {
+                                            if (!ad.is_job && ad.tier !== 'GENERAL') return false;
+                                        } else {
+                                            if (ad.tier !== tier) return false;
+                                        }
+                                    }
+                                    if (searchQuery) {
+                                        const q = searchQuery.toLowerCase();
+                                        const t = (ad.title || '').toLowerCase();
+                                        const c = (ad.company_name || ad.company || '').toLowerCase();
+                                        return t.includes(q) || c.includes(q);
+                                    }
+                                    return true;
+                                }).length === 0 && !loading && (
+                                    <tr>
+                                        <td colSpan={6} className="p-12 text-center text-gray-400 font-bold text-xs">
+                                            휴지통에 보관된 1차 삭제 항목이 없습니다.
                                         </td>
                                     </tr>
                                 )}
