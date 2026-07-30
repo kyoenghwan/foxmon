@@ -9,16 +9,17 @@ import { adminDeleteAdAction } from '@/lib/actions/admin-ad-actions';
 import { QA_GET_ALL_BIZ_ADS } from '@/src/atoms/qa/admin/QA_GET_ALL_BIZ_ADS';
 
 const TIER_LABELS: Record<string, string> = {
+    ALL: '전체',
     PREMIUM_MAIN: '메인',
     SIDE: '사이드',
     PREMIUM: '프리미엄',
-    SPECIAL: '스페셜',
-    GENERAL: '일반'
+    AD_GENERAL: '일반 배너',
+    GENERAL: '구인글'
 };
 
 export default function AdRankingsPage() {
     const [activeTab, setActiveTab] = useState<'monitoring' | 'history' | 'manage'>('monitoring');
-    const [tier, setTier] = useState<any>('PREMIUM_MAIN');
+    const [tier, setTier] = useState<any>('ALL');
     const [rankings, setRankings] = useState<RankingSimResult[]>([]);
     const [allAds, setAllAds] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -45,11 +46,12 @@ export default function AdRankingsPage() {
     const loadRankings = async () => {
         setLoading(true);
         try {
+            const queryTier = tier === 'ALL' ? 'PREMIUM_MAIN' : tier;
             if (activeTab === 'monitoring') {
-                const data = await getAdRankingSimulation(tier);
+                const data = await getAdRankingSimulation(queryTier);
                 setRankings(data);
             } else if (activeTab === 'history') {
-                const logs = await getAdHistoryLogs(tier);
+                const logs = await getAdHistoryLogs(queryTier);
                 setHistoryLogs(logs);
             } else if (activeTab === 'manage') {
                 const res = await QA_GET_ALL_BIZ_ADS();
@@ -142,13 +144,15 @@ export default function AdRankingsPage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">
                 <div className="flex justify-between items-end border-b border-gray-100 pb-4">
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">{activeTab === 'monitoring' ? '노출 순위 현황' : '옵션/변경 내역'}</h2>
-                        <div className="flex gap-2">
-                            {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'GENERAL'].map(t => (
+                        <h2 className="text-lg font-bold text-gray-900 mb-4">
+                            {activeTab === 'monitoring' ? '노출 순위 현황' : activeTab === 'history' ? '옵션/변경 내역' : '전체 광고/공고 목록 관리'}
+                        </h2>
+                        <div className="flex flex-wrap gap-2">
+                            {['ALL', 'PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'AD_GENERAL', 'GENERAL'].map(t => (
                                 <button 
                                     key={t}
                                     onClick={() => setTier(t)}
-                                    className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-colors ${tier === t ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                    className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-colors ${tier === t ? 'bg-gray-900 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                                 >
                                     {TIER_LABELS[t]}
                                 </button>
@@ -355,6 +359,13 @@ export default function AdRankingsPage() {
                             <tbody>
                                 {allAds
                                     .filter((ad) => {
+                                        if (tier !== 'ALL') {
+                                            if (tier === 'GENERAL') {
+                                                if (!ad.is_job && ad.tier !== 'GENERAL') return false;
+                                            } else {
+                                                if (ad.tier !== tier) return false;
+                                            }
+                                        }
                                         if (statusFilter !== 'ALL' && ad.status !== statusFilter) return false;
                                         if (searchQuery) {
                                             const q = searchQuery.toLowerCase();
@@ -418,6 +429,29 @@ export default function AdRankingsPage() {
                                             </td>
                                         </tr>
                                     ))}
+                                {allAds.filter((ad) => {
+                                    if (tier !== 'ALL') {
+                                        if (tier === 'GENERAL') {
+                                            if (!ad.is_job && ad.tier !== 'GENERAL') return false;
+                                        } else {
+                                            if (ad.tier !== tier) return false;
+                                        }
+                                    }
+                                    if (statusFilter !== 'ALL' && ad.status !== statusFilter) return false;
+                                    if (searchQuery) {
+                                        const q = searchQuery.toLowerCase();
+                                        const t = (ad.title || '').toLowerCase();
+                                        const c = (ad.company_name || ad.company || '').toLowerCase();
+                                        return t.includes(q) || c.includes(q);
+                                    }
+                                    return true;
+                                }).length === 0 && !loading && (
+                                    <tr>
+                                        <td colSpan={6} className="p-12 text-center text-gray-400 font-bold text-xs">
+                                            해당 티어 및 조건에 해당하는 광고/공고가 존재하지 않습니다.
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
