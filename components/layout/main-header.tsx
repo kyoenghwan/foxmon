@@ -215,7 +215,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                             {(session.user?.role === 'ADMIN' || session.user?.role === 'SUPER_ADMIN') && (
                                 <>
                                     <span className="text-gray-300 shrink-0 mx-1">|</span>
-                                    <Link href="/fox-office" className="hover:text-primary transition-colors text-[10px] sm:text-[11px] shrink-0 font-bold">관리자홈</Link>
+                                    <a href="/fox-office" className="hover:text-primary transition-colors text-[10px] sm:text-[11px] shrink-0 font-bold">관리자홈</a>
                                 </>
                             )}
 
