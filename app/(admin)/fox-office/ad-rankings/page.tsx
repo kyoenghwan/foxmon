@@ -302,30 +302,14 @@ export default function AdRankingsPage() {
                                         {getRankChange(item.currentRank, item.prev5Rank)}
                                     </td>
                                     <td className="p-4 text-center border-l border-gray-100">
-                                        <div className="flex items-center justify-center gap-1.5">
+                                        <div className="flex items-center justify-center">
                                             <button
                                                 onClick={() => handleChangeRank(item.ad, item.currentRank)}
-                                                className="p-1.5 text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors border border-purple-200 text-[11px] font-bold flex items-center gap-1"
+                                                className="px-2.5 py-1.5 text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors border border-purple-200 text-[11px] font-bold flex items-center gap-1"
                                                 title="노출 순위 변경"
                                             >
                                                 <ArrowUpDown className="w-3.5 h-3.5 text-purple-600" />
                                                 순위 변경
-                                            </button>
-                                            <button
-                                                onClick={() => setEditingAd(item.ad)}
-                                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200 text-[11px] font-bold flex items-center gap-1"
-                                                title="수정"
-                                            >
-                                                <Pencil className="w-3.5 h-3.5" />
-                                                수정
-                                            </button>
-                                            <button
-                                                onClick={() => handleSoftDelete(item.ad)}
-                                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200 text-[11px] font-bold flex items-center gap-1"
-                                                title="1차 삭제 (휴지통으로 이동)"
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                                삭제
                                             </button>
                                         </div>
                                     </td>
