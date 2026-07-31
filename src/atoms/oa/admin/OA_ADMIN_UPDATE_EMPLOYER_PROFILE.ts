@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '@/lib/logger';
 import { auth } from '@/auth';
 import { isAdminRole } from '@/lib/normalize-user-role';
@@ -43,10 +43,8 @@ export const OA_ADMIN_UPDATE_EMPLOYER_PROFILE = async (params: UpdateEmployerPar
       return { success: false, message: '수정할 회원을 식별할 수 없습니다.' };
     }
 
-    const supabase = await createClient();
-
-    // 2. DB 업데이트 실행
-    const { data, error } = await supabase
+    // 2. DB 업데이트 실행 (RLS 우회)
+    const { data, error } = await supabaseAdmin
       .from('users')
       .update({
         verified_business_name: verified_business_name.trim(),
