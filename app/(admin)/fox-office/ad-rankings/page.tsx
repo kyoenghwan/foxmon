@@ -105,20 +105,23 @@ export default function AdRankingsPage() {
         loadRankings();
     };
 
-    const loadRankings = async () => {
+    const loadRankings = async (currentTab = activeTab, currentTier = tier) => {
         setLoading(true);
         try {
-            const queryTier = tier === 'ALL' ? 'PREMIUM_MAIN' : tier;
-            if (activeTab === 'monitoring') {
+            const queryTier = currentTier === 'ALL' ? 'PREMIUM_MAIN' : currentTier;
+            if (currentTab === 'monitoring') {
                 const data = await getAdRankingSimulation(queryTier);
                 setRankings(data);
-            } else if (activeTab === 'history') {
+            } else if (currentTab === 'history') {
                 const logs = await getAdHistoryLogs(queryTier);
                 setHistoryLogs(logs);
-            } else if (activeTab === 'manage' || activeTab === 'trash') {
+            } else if (currentTab === 'manage' || currentTab === 'trash') {
                 const res = await QA_GET_ALL_BIZ_ADS();
                 if (res.success && res.data) {
                     setAllAds(res.data);
+                } else {
+                    console.error('QA_GET_ALL_BIZ_ADS 실패:', res.error);
+                    setAllAds([]);
                 }
             }
         } catch (e) {
@@ -129,14 +132,14 @@ export default function AdRankingsPage() {
     };
 
     useEffect(() => {
-        loadRankings();
-        if (activeTab === 'history') return; // 히스토리 탭은 자동 갱신 중지
+        loadRankings(activeTab, tier);
+        if (activeTab === 'history') return;
 
         setTimeLeft(60);
         const timerId = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
-                    loadRankings();
+                    loadRankings(activeTab, tier);
                     return 60;
                 }
                 return prev - 1;
@@ -198,7 +201,7 @@ export default function AdRankingsPage() {
                     }`}
                 >
                     <Edit3 className="w-4 h-4 text-primary" />
-                    전체 광고/공고 직접 관리
+                    광고/공고 관리
                 </button>
                 <button
                     onClick={() => setActiveTab('trash')}
@@ -218,7 +221,7 @@ export default function AdRankingsPage() {
                 <div className="flex justify-between items-end border-b border-gray-100 pb-4">
                     <div>
                         <h2 className="text-lg font-bold text-gray-900 mb-4">
-                            {activeTab === 'monitoring' ? '노출 순위 현황' : activeTab === 'history' ? '옵션/변경 내역' : '전체 광고/공고 목록 관리'}
+                            {activeTab === 'monitoring' ? '노출 순위 현황' : activeTab === 'history' ? '옵션/변경 내역' : '광고/공고 관리'}
                         </h2>
                         <div className="flex flex-wrap gap-2">
                             {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'SPECIAL', 'AD_GENERAL', 'GENERAL'].map(t => (
