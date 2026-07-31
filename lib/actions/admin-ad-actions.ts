@@ -17,8 +17,6 @@ export async function adminSoftDeleteAdAction(id: string, isJob: boolean = false
         if (err2) throw err2;
         const { error: err3 } = await supabaseAdmin.from('biz_ads').update({ status: 'DELETED', updated_at: now }).eq('id', id);
         if (err3) throw err3;
-        const { error: err4 } = await supabaseAdmin.from('biz_ads').update({ status: 'DELETED', updated_at: now }).eq('linked_ad_id', id);
-        if (err4) throw err4;
 
         await invalidateAdCache();
         revalidatePath('/', 'layout');
@@ -42,8 +40,6 @@ export async function adminHardDeleteAdAction(id: string, isJob: boolean = false
         if (err2) throw err2;
         const { error: err3 } = await supabaseAdmin.from('biz_ads').delete().eq('id', id);
         if (err3) throw err3;
-        const { error: err4 } = await supabaseAdmin.from('biz_ads').delete().eq('linked_ad_id', id);
-        if (err4) throw err4;
 
         await invalidateAdCache();
         revalidatePath('/', 'layout');
@@ -68,8 +64,6 @@ export async function adminRestoreAdAction(id: string, isJob: boolean = false) {
         if (err2) throw err2;
         const { error: err3 } = await supabaseAdmin.from('biz_ads').update({ status: 'ACTIVE', updated_at: now }).eq('id', id);
         if (err3) throw err3;
-        const { error: err4 } = await supabaseAdmin.from('biz_ads').update({ status: 'ACTIVE', updated_at: now }).eq('linked_ad_id', id);
-        if (err4) throw err4;
 
         await invalidateAdCache();
         revalidatePath('/', 'layout');
