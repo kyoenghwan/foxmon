@@ -164,6 +164,40 @@ export async function getPublicFaqs(categoryName?: string): Promise<PublicFaq[]>
     const session = await auth();
     const userRole = session?.user?.role || 'GUEST';
 
+    // 💡 포인트 정책 및 등급 혜택 비율 실시간 조회 (RLS 우회)
+    const [refundRes, tierRes] = await Promise.all([
+      supabaseAdmin.from('point_policies').select('config_value').eq('config_key', 'REFUND_FEE_RATIO').maybeSingle(),
+      supabaseAdmin.from('tier_configs').select('tier_name, bonus_ratio')
+    ]);
+
+    let refundPercent = 10; // 기본값
+    if (refundRes.data?.config_value != null) {
+      const val = Number(refundRes.data.config_value);
+      refundPercent = val < 1 ? Math.round(val * 100) : Math.round(val);
+    }
+
+    let vipBonus = 10;
+    let vvipBonus = 20;
+    let vvvipBonus = 30;
+    if (tierRes.data) {
+      const vip = tierRes.data.find(t => t.tier_name === 'VIP');
+      const vvip = tierRes.data.find(t => t.tier_name === 'VVIP');
+      const vvvip = tierRes.data.find(t => t.tier_name === 'VVVIP');
+
+      if (vip) {
+        const v = Number(vip.bonus_ratio);
+        vipBonus = v < 1 ? Math.round(v * 100) : Math.round(v);
+      }
+      if (vvip) {
+        const v = Number(vvip.bonus_ratio);
+        vvipBonus = v < 1 ? Math.round(v * 100) : Math.round(v);
+      }
+      if (vvvip) {
+        const v = Number(vvvip.bonus_ratio);
+        vvvipBonus = v < 1 ? Math.round(v * 100) : Math.round(v);
+      }
+    }
+
     let q = supabase
       .from('faqs')
       .select('id, category, category_id, question, answer, answer_format, sort_order, target_role, faq_categories(name)')
@@ -192,12 +226,25 @@ export async function getPublicFaqs(categoryName?: string): Promise<PublicFaq[]>
     }
     return (data || []).map((row: Record<string, unknown>) => {
       const joined = row.faq_categories as { name?: string } | null;
+      let rawAnswer = (row.answer as string) || '';
+
+      // 💡 동적 정책 값 치환 (환불 수수료 및 등급 보너스 비율)
+      if (rawAnswer.includes('환불 수수료')) {
+        rawAnswer = rawAnswer.replace(/10%\s*(의\s*)?환불\s*수수료/g, `${refundPercent}%$1환불 수수료`);
+      }
+      if (rawAnswer.includes('등급은')) {
+        rawAnswer = rawAnswer
+          .replace(/우수\s*등급은\s*10%/g, `우수 등급은 ${vipBonus}%`)
+          .replace(/으뜸\s*등급은\s*20%/g, `으뜸 등급은 ${vvipBonus}%`)
+          .replace(/명가\s*등급은\s*30%/g, `명가 등급은 ${vvvipBonus}%`);
+      }
+
       return {
         id: row.id as string,
         category: joined?.name || (row.category as string) || '기타',
         category_id: row.category_id as string | null,
         question: row.question as string,
-        answer: row.answer as string,
+        answer: rawAnswer,
         answer_format: (row.answer_format as string) || 'markdown',
         sort_order: (row.sort_order as number) ?? 0,
         target_role: (row.target_role as 'ALL' | 'EMPLOYER' | 'GENERAL') || 'ALL',
