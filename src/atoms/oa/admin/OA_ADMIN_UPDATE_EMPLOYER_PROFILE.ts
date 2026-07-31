@@ -50,7 +50,7 @@ export const OA_ADMIN_UPDATE_EMPLOYER_PROFILE = async (params: UpdateEmployerPar
         verified_business_name: verified_business_name.trim(),
         verified_ceo_name: verified_ceo_name.trim(),
         business_registration_number: business_registration_number.trim(),
-        email: email.trim(),
+        email: email.trim() === '' ? null : email.trim(),
         nickname: nickname.trim(),
         merchant_tier
       })
