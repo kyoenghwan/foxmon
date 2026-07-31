@@ -3,13 +3,21 @@ import { QA_GET_EMPLOYER_LIST } from '../../qa/admin/QA_GET_EMPLOYER_LIST';
 import { OA_TOGGLE_BUSINESS_VERIFY } from '../../oa/admin/OA_TOGGLE_BUSINESS_VERIFY';
 
 export interface AdminEmployerFlowInput {
-    actionType: 'GET_LIST' | 'TOGGLE_VERIFY' | 'GIVE_POINTS' | 'GET_POINT_HISTORY';
+    actionType: 'GET_LIST' | 'TOGGLE_VERIFY' | 'GIVE_POINTS' | 'GET_POINT_HISTORY' | 'UPDATE_PROFILE';
     adminId: string;
     targetUserId?: string;
     isVerified?: boolean;
     paidPointsDiff?: number;
     bonusPointsDiff?: number;
     description?: string;
+    profileData?: {
+        verified_business_name: string;
+        verified_ceo_name: string;
+        business_registration_number: string;
+        email: string;
+        nickname: string;
+        merchant_tier: 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP';
+    };
 }
 
 export async function FA_ADMIN_EMPLOYER_FLOW(input: AdminEmployerFlowInput) {
@@ -47,6 +55,17 @@ export async function FA_ADMIN_EMPLOYER_FLOW(input: AdminEmployerFlowInput) {
                     bonusPointsDiff: input.bonusPointsDiff,
                     description: input.description,
                     adminId: input.adminId
+                });
+                return result;
+            }
+            case 'UPDATE_PROFILE': {
+                if (!input.targetUserId || !input.profileData) {
+                    return { success: false, message: '필수 파라미터 누락' };
+                }
+                const { OA_ADMIN_UPDATE_EMPLOYER_PROFILE } = await import('../../oa/admin/OA_ADMIN_UPDATE_EMPLOYER_PROFILE');
+                const result = await OA_ADMIN_UPDATE_EMPLOYER_PROFILE({
+                    targetUserId: input.targetUserId,
+                    ...input.profileData
                 });
                 return result;
             }

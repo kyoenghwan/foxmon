@@ -24,6 +24,31 @@ export default function EmployersManagementPage() {
     const [pointDesc, setPointDesc] = useState('');
     const [isSubmittingPoint, setIsSubmittingPoint] = useState(false);
 
+    // 업체 정보 수정 모달 상태
+    const [editingEmployer, setEditingEmployer] = useState<EmployerListItem | null>(null);
+    const [editForm, setEditForm] = useState({
+        verified_business_name: '',
+        verified_ceo_name: '',
+        business_registration_number: '',
+        email: '',
+        nickname: '',
+        merchant_tier: 'NORMAL' as 'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP'
+    });
+    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+    useEffect(() => {
+        if (editingEmployer) {
+            setEditForm({
+                verified_business_name: editingEmployer.verified_business_name || '',
+                verified_ceo_name: editingEmployer.verified_ceo_name || '',
+                business_registration_number: editingEmployer.business_registration_number || '',
+                email: editingEmployer.email || '',
+                nickname: editingEmployer.nickname || '',
+                merchant_tier: (editingEmployer.merchant_tier as any) || 'NORMAL'
+            });
+        }
+    }, [editingEmployer]);
+
     // 포인트 내역 모달 상태
     const [historyModalEmployer, setHistoryModalEmployer] = useState<EmployerListItem | null>(null);
 
@@ -38,6 +63,36 @@ export default function EmployersManagementPage() {
             console.error(error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleUpdateEmployer = async () => {
+        if (!editingEmployer) return;
+        
+        if (!editForm.verified_business_name.trim() || !editForm.verified_ceo_name.trim()) {
+            alert('상호명과 대표자명은 필수 입력 항목입니다.');
+            return;
+        }
+
+        setIsUpdatingProfile(true);
+        try {
+            const res = await adminEmployerAction({
+                actionType: 'UPDATE_PROFILE',
+                targetUserId: editingEmployer.id,
+                profileData: editForm
+            });
+
+            if (res.success) {
+                alert('업체 정보 수정이 완료되었습니다.');
+                setEditingEmployer(null);
+                fetchEmployers();
+            } else {
+                alert(`수정 실패: ${'message' in res ? res.message : '알 수 없는 오류'}`);
+            }
+        } catch (e) {
+            alert('수정 중 오류가 발생했습니다.');
+        } finally {
+            setIsUpdatingProfile(false);
         }
     };
 
@@ -128,10 +183,10 @@ export default function EmployersManagementPage() {
                 <div>
                     <h1 className="text-[24px] font-black text-gray-900 tracking-tight flex items-center gap-2">
                         <Building2 className="w-7 h-7 text-primary" />
-                        업체/인증 관리
+                        업체 관리
                     </h1>
                     <p className="text-[14px] text-gray-500 font-medium mt-1">
-                        사업자등록증 업로드 내역을 확인하고 유흥업종 여부를 2차 검수합니다. 포인트 지급도 가능합니다.
+                        등록된 업체의 정보를 수정하고, 등급 산정 요건 및 자동갱신 위험도를 모니터링합니다. 포인트 제어와 사업자 인증 검수도 가능합니다.
                     </p>
                 </div>
             </div>
@@ -205,8 +260,12 @@ export default function EmployersManagementPage() {
                                             {format(new Date(emp.created_at), 'yyyy-MM-dd HH:mm')}
                                         </td>
                                         <td className="py-4 px-6">
-                                            <div className="font-bold text-gray-900">{emp.verified_business_name || '미기재'}</div>
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <div className="font-bold text-gray-900">{emp.verified_business_name || '미기재'}</div>
+                                                <MerchantTierBadge tier={emp.merchant_tier} />
+                                            </div>
                                             <div className="text-[12px] text-gray-500">{emp.verified_ceo_name || '미기재'}</div>
+                                            <EmployerAlertFlags emp={emp} />
                                         </td>
                                         <td className="py-4 px-6">
                                             <div className="font-mono text-[13px] text-gray-600">
@@ -293,6 +352,105 @@ export default function EmployersManagementPage() {
                                         </td>
                                         <td className="py-4 px-6 text-right whitespace-nowrap">
                                             <div className="flex items-center justify-end gap-2">
+                                                {/* ① 업체 정보 수정 모달 */}
+                                                <Dialog open={editingEmployer?.id === emp.id} onOpenChange={(open) => !open && setEditingEmployer(null)}>
+                                                    <DialogTrigger asChild>
+                                                        <Button 
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => setEditingEmployer(emp)}
+                                                            className="h-8 border-gray-200 text-gray-700 hover:bg-gray-50 font-bold"
+                                                        >
+                                                            수정
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-[450px] bg-white p-6 rounded-2xl shadow-2xl border-0">
+                                                        <div className="space-y-4">
+                                                            <div>
+                                                                <h3 className="font-black text-lg text-gray-900 text-left">업체 정보 수정</h3>
+                                                                <p className="text-[12px] text-gray-400 font-medium text-left">업체의 정보와 멤버십 등급을 수정합니다.</p>
+                                                            </div>
+                                                            
+                                                            <div className="space-y-3 pt-2 text-left">
+                                                                <div>
+                                                                    <label className="text-[11px] font-bold text-gray-500 mb-1 block">상호명</label>
+                                                                    <input 
+                                                                        type="text" 
+                                                                        value={editForm.verified_business_name} 
+                                                                        onChange={e => setEditForm(prev => ({ ...prev, verified_business_name: e.target.value }))}
+                                                                        className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-[14px] font-bold"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="text-[11px] font-bold text-gray-500 mb-1 block">대표자명</label>
+                                                                    <input 
+                                                                        type="text" 
+                                                                        value={editForm.verified_ceo_name} 
+                                                                        onChange={e => setEditForm(prev => ({ ...prev, verified_ceo_name: e.target.value }))}
+                                                                        className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-[14px] font-bold"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="text-[11px] font-bold text-gray-500 mb-1 block">사업자 등록 번호</label>
+                                                                    <input 
+                                                                        type="text" 
+                                                                        value={editForm.business_registration_number} 
+                                                                        onChange={e => setEditForm(prev => ({ ...prev, business_registration_number: e.target.value }))}
+                                                                        className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-[14px] font-mono"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="text-[11px] font-bold text-gray-500 mb-1 block">이메일</label>
+                                                                    <input 
+                                                                        type="email" 
+                                                                        value={editForm.email} 
+                                                                        onChange={e => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                                                                        className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-[14px]"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="text-[11px] font-bold text-gray-500 mb-1 block">닉네임</label>
+                                                                    <input 
+                                                                        type="text" 
+                                                                        value={editForm.nickname} 
+                                                                        onChange={e => setEditForm(prev => ({ ...prev, nickname: e.target.value }))}
+                                                                        className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-[14px]"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="text-[11px] font-bold text-gray-500 mb-1 block">업체 등급 (인증 메달)</label>
+                                                                    <select 
+                                                                        value={editForm.merchant_tier} 
+                                                                        onChange={e => setEditForm(prev => ({ ...prev, merchant_tier: e.target.value as any }))}
+                                                                        className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-[14px] font-bold bg-white"
+                                                                    >
+                                                                        <option value="NORMAL">NORMAL (일반)</option>
+                                                                        <option value="VIP">VIP (🎖️ 우수)</option>
+                                                                        <option value="VVIP">VVIP (🏆 으뜸)</option>
+                                                                        <option value="VVVIP">VVVIP (👑 명가)</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div className="flex gap-2 pt-4">
+                                                                <Button 
+                                                                    variant="outline" 
+                                                                    onClick={() => setEditingEmployer(null)}
+                                                                    className="flex-1 font-bold h-11"
+                                                                >취소</Button>
+                                                                <Button 
+                                                                    onClick={handleUpdateEmployer}
+                                                                    disabled={isUpdatingProfile}
+                                                                    className="flex-1 font-black h-11 bg-primary text-white hover:bg-primary/90"
+                                                                >
+                                                                    {isUpdatingProfile ? '저장 중...' : '저장하기'}
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
+
+                                                {/* ② 포인트 수동 제어 모달 */}
                                                 <Dialog open={selectedEmployer?.id === emp.id} onOpenChange={(open) => !open && setSelectedEmployer(null)}>
                                                     <DialogTrigger asChild>
                                                         <Button 
@@ -306,7 +464,7 @@ export default function EmployersManagementPage() {
                                                         </Button>
                                                     </DialogTrigger>
                                                     <DialogContent className="sm:max-w-[425px]">
-                                                        <div className="p-4">
+                                                        <div className="p-4 text-left">
                                                             <h3 className="font-black text-lg mb-1 flex items-center gap-2">
                                                                 <Coins className="text-blue-500" /> 포인트 수동 제어
                                                             </h3>
@@ -361,6 +519,7 @@ export default function EmployersManagementPage() {
                                                     </DialogContent>
                                                 </Dialog>
 
+                                                {/* ③ 수동 검수 승인 버튼 */}
                                                 <Button
                                                     onClick={() => toggleVerification(emp.id, emp.is_cert_verified)}
                                                     variant={emp.is_cert_verified ? "outline" : "default"}
@@ -392,3 +551,116 @@ export default function EmployersManagementPage() {
         </div>
     );
 }
+
+const MerchantTierBadge = ({ tier }: { tier?: string | null }) => {
+    if (tier === 'VIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded text-[8px] font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-amber-950 border border-amber-300/40 shadow-sm shrink-0 select-none">
+                🎖️ 우수
+            </span>
+        );
+    }
+    if (tier === 'VVIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded text-[8px] font-black bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 text-white border border-fuchsia-400/40 shadow-sm shrink-0 select-none">
+                🏆 으뜸
+            </span>
+        );
+    }
+    if (tier === 'VVVIP') {
+        return (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded text-[8px] font-black bg-gradient-to-r from-rose-500 via-amber-400 to-blue-600 text-white border border-amber-300/50 shadow-sm shrink-0 select-none">
+                👑 명가
+            </span>
+        );
+    }
+    return (
+        <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded text-[8px] font-bold bg-slate-100 text-slate-400 border border-slate-200 select-none">
+            일반
+        </span>
+    );
+};
+
+const EmployerAlertFlags = ({ emp }: { emp: EmployerListItem }) => {
+    const now = new Date();
+    
+    // 1. 활성 광고 수 계산
+    const activeJobs = emp.jobs?.filter(j => j.status === 'ACTIVE' && (!j.expires_at || new Date(j.expires_at) > now)) || [];
+    const activeAds = emp.biz_ads?.filter(a => a.status === 'ACTIVE' && (!a.expires_at || new Date(a.expires_at) > now)) || [];
+    const totalActive = activeJobs.length + activeAds.length;
+
+    // 2. 자동 갱신 예정 비용 계산
+    const getTierPrice = (tier: string) => {
+        const prices: Record<string, number> = {
+            PREMIUM_MAIN: 800000,
+            SIDE: 200000,
+            PREMIUM: 300000,
+            SPECIAL: 150000,
+            GENERAL: 50000,
+            AD_GENERAL: 30000
+        };
+        return prices[tier] || 0;
+    };
+
+    const autoRenewJobs = emp.jobs?.filter(j => j.auto_renew && j.status === 'ACTIVE' && (!j.expires_at || new Date(j.expires_at) > now)) || [];
+    const autoRenewAds = emp.biz_ads?.filter(a => a.auto_renew && a.status === 'ACTIVE' && (!a.expires_at || new Date(a.expires_at) > now)) || [];
+    
+    let totalRenewCost = 0;
+    autoRenewJobs.forEach(j => { totalRenewCost += getTierPrice(j.tier); });
+    autoRenewAds.forEach(a => { totalRenewCost += getTierPrice(a.tier); });
+
+    const totalPoints = (emp.paid_points || 0) + (emp.bonus_points || 0);
+    const isPointInsufficient = totalRenewCost > totalPoints;
+
+    // 3. 등급 강등 위험 (VIP 등급인데 활성 광고 없음)
+    const isUnderGradingRisk = emp.merchant_tier && emp.merchant_tier !== 'NORMAL' && totalActive === 0;
+
+    return (
+        <div className="flex flex-wrap gap-1 mt-1.5">
+            {isUnderGradingRisk && (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-black bg-rose-50 text-rose-600 border border-rose-200 cursor-help">
+                                ⚠️ 광고 미등록 (강등 위험)
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-rose-600 text-white border-rose-700 text-[11px] p-2 max-w-[250px]">
+                            {emp.merchant_tier} 등급 상태이나 현재 노출 중인 활성 광고가 없어 다음 등급 판정 시 강등될 수 있습니다.
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            )}
+            
+            {totalRenewCost > 0 && isPointInsufficient && (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200 cursor-help animate-pulse">
+                                ⚠️ 포인트 부족 (갱신 실패 예상)
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-amber-600 text-white border-amber-700 text-[11px] p-2 max-w-[250px]">
+                            자동 갱신 대상 광고가 존재하나 보유 포인트({totalPoints.toLocaleString()}P)가 예상 갱신 비용({totalRenewCost.toLocaleString()}P)보다 부족합니다. (부족분: {(totalRenewCost - totalPoints).toLocaleString()}P)
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            )}
+            
+            {totalRenewCost > 0 && !isPointInsufficient && (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-700 border border-green-200 cursor-help">
+                                ✓ 자동갱신 예정 ({totalRenewCost.toLocaleString()}P 필요)
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-green-700 text-white border-green-800 text-[11px] p-2 max-w-[250px]">
+                            보유 포인트({totalPoints.toLocaleString()}P)로 다음 자동 갱신 비용({totalRenewCost.toLocaleString()}P) 결제가 가능합니다.
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            )}
+        </div>
+    );
+};
