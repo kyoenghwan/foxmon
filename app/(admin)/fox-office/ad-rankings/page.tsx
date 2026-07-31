@@ -427,7 +427,7 @@ export default function AdRankingsPage() {
                                         if (ad.status === 'DELETED') return false; // manage 탭에서는 1차 삭제된 항목 제외
                                         if (tier !== 'ALL') {
                                             if (tier === 'AD_GENERAL') {
-                                                if (ad.is_job || (ad.tier !== 'AD_GENERAL' && ad.tier !== 'GENERAL')) return false;
+                                                if (ad.tier !== 'AD_GENERAL' && (ad.is_job || ad.tier !== 'GENERAL')) return false;
                                             } else if (tier === 'GENERAL') {
                                                 if (!ad.is_job && ad.tier !== 'GENERAL') return false;
                                             } else {
@@ -473,11 +473,11 @@ export default function AdRankingsPage() {
                                                 <div className="flex items-center justify-center gap-1.5">
                                                     <button
                                                         onClick={() => setFullEditingAd(ad)}
-                                                        className="px-2.5 py-1.5 bg-gradient-to-r from-primary to-orange-600 text-white hover:opacity-90 rounded-lg text-[11px] font-black transition-all shadow-xs flex items-center gap-1"
+                                                        className="p-2 bg-gradient-to-r from-primary to-orange-600 text-white hover:opacity-90 rounded-lg transition-all shadow-xs flex items-center justify-center"
                                                         title="사용자가 입력한 전체 폼(본문/디자인/옵션) 그대로 수정"
                                                     >
                                                         <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-                                                        사용자 폼 그대로 수정
+
                                                     </button>
                                                     <button
                                                         onClick={() => setEditingAd(ad)}
@@ -502,7 +502,7 @@ export default function AdRankingsPage() {
                                     if (ad.status === 'DELETED') return false;
                                     if (tier !== 'ALL') {
                                         if (tier === 'AD_GENERAL') {
-                                            if (ad.is_job || (ad.tier !== 'AD_GENERAL' && ad.tier !== 'GENERAL')) return false;
+                                            if (ad.tier !== 'AD_GENERAL' && (ad.is_job || ad.tier !== 'GENERAL')) return false;
                                         } else if (tier === 'GENERAL') {
                                             if (!ad.is_job && ad.tier !== 'GENERAL') return false;
                                         } else {
