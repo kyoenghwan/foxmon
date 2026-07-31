@@ -202,7 +202,7 @@ const TIER_GROUPS: { title: string; options: TierOption[] }[] = [
         title: '본문 리스트 광고 (시선 강탈용)',
         options: [
             { value: 'PREMIUM' as const, label: '프리미엄', price: 300000, priceLabel: '300,000P', desc: '본문 최상단 테마 강조 노출', emoji: '💎' },
-            { value: 'AD_GENERAL' as const, label: '일반 광고', price: 50000, priceLabel: '50,000P', desc: '기본 리스트 노출', emoji: '📋' },
+            { value: 'SPECIAL' as const, label: '스페셜', price: 150000, priceLabel: '150,000P', desc: '스페셜 리스트 강조 노출', emoji: '✨' },
         ]
     }
 ];
