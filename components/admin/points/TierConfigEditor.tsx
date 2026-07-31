@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Crown, Save, TrendingUp, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { GET_TIER_CONFIGS, UPDATE_TIER_CONFIGS } from '@/app/actions/pointPolicyActions';
 
 interface TierConfig {
   tier_name: string;
@@ -60,6 +61,16 @@ export function TierConfigEditor() {
   ]);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  useEffect(() => {
+    const loadTierConfigs = async () => {
+      const res = await GET_TIER_CONFIGS();
+      if (res.success && res.data && res.data.length > 0) {
+        setTierConfigs(res.data);
+      }
+    };
+    loadTierConfigs();
+  }, []);
+
   const handleValueChange = (index: number, field: keyof TierConfig, value: string) => {
     const newConfigs = [...tierConfigs];
     (newConfigs[index] as any)[field] = field === 'bonus_ratio' ? parseFloat(value) : parseInt(value);
@@ -68,11 +79,19 @@ export function TierConfigEditor() {
 
   const handleSave = async () => {
     setIsUpdating(true);
-    // 💡 OA_UPDATE_TIER_CONFIGS 연동 지점
-    setTimeout(() => {
+    try {
+      const res = await UPDATE_TIER_CONFIGS(tierConfigs);
+      if (res.success) {
+        alert('등급 정책이 성공적으로 업데이트되었습니다. 🦊');
+      } else {
+        alert('업데이트 실패: ' + res.error);
+      }
+    } catch (error: any) {
+      console.error(error);
+      alert('업데이트 중 오류 발생: ' + error.message);
+    } finally {
       setIsUpdating(false);
-      alert('등급 정책이 성공적으로 업데이트되었습니다. 🦊');
-    }, 1000);
+    }
   };
 
   return (

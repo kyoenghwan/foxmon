@@ -13,6 +13,7 @@ import {
     isTagSelected,
     mergeSelectedTagCodes,
 } from '@/lib/tag-options';
+import { GET_TIER_CONFIGS } from '@/app/actions/pointPolicyActions';
 import { userSettingsAction } from '@/lib/actions';
 import { compressImageFile } from '@/lib/image-utils';
 import { LoadMyDataModal } from './LoadMyDataModal';
@@ -398,6 +399,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
     const [isManualAddress, setIsManualAddress] = useState(false);
     const [activeModal, setActiveModal] = useState<'basic' | 'theme' | 'animation' | 'color' | 'mainDesign' | null>('basic');
     const [userMerchantTier, setUserMerchantTier] = useState<'NORMAL' | 'VIP' | 'VVIP' | 'VVVIP'>('NORMAL');
+    const [dbTierConfigs, setDbTierConfigs] = useState<any[]>([]);
     
     // 동적 SNS 계정 연결 상태 (업체 프로필과 연동)
     const [snsLinks, setSnsLinks] = useState<{type: string; value: string}[]>([]);
@@ -758,9 +760,21 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
             }
         };
 
+        const fetchTierConfigs = async () => {
+            try {
+                const res = await GET_TIER_CONFIGS();
+                if (res.success && res.data) {
+                    setDbTierConfigs(res.data);
+                }
+            } catch (err) {
+                console.error("❌ [AdEditorForm] fetchTierConfigs failed:", err);
+            }
+        };
+
         fetchMasterData();
         fetchUserProfile();
         fetchTierPrices();
+        fetchTierConfigs();
     }, [isNew]);
 
     useEffect(() => {
@@ -1360,27 +1374,38 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                                                 광고 상품 등급과 무관하게, Foxmon에서 꾸준히 신뢰를 쌓아온 우수 업체를 우대해 드리는 상생 인증 마크입니다.
                                             </p>
                                             <div className="space-y-2.5 pt-1">
-                                                <div className="flex items-start gap-2">
-                                                    <span className="inline-flex items-center justify-center text-[10px] font-black bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 px-1.5 py-0.5 rounded shadow-sm shrink-0 w-[50px] h-[18px]">🎖️ 우수</span>
-                                                    <div className="text-[10px] leading-snug">
-                                                        <p className="font-extrabold text-gray-700">연속 광고 3개월 이상</p>
-                                                        <p className="text-gray-400">또는 누적 현금 결제 100만 원 이상</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-start gap-2">
-                                                    <span className="inline-flex items-center justify-center text-[10px] font-black bg-gradient-to-r from-violet-600 to-pink-500 text-white px-1.5 py-0.5 rounded shadow-sm shrink-0 w-[50px] h-[18px]">🏆 으뜸</span>
-                                                    <div className="text-[10px] leading-snug">
-                                                        <p className="font-extrabold text-gray-700">연속 광고 6개월 이상</p>
-                                                        <p className="text-gray-400">또는 누적 현금 결제 300만 원 이상</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-start gap-2">
-                                                    <span className="inline-flex items-center justify-center text-[10px] font-black bg-gradient-to-r from-rose-500 via-amber-400 to-blue-600 text-white px-1.5 py-0.5 rounded shadow-sm shrink-0 w-[50px] h-[18px]">👑 명가</span>
-                                                    <div className="text-[10px] leading-snug">
-                                                        <p className="font-extrabold text-gray-700">연속 광고 12개월 이상</p>
-                                                        <p className="text-gray-400">또는 누적 현금 결제 500만 원 이상</p>
-                                                    </div>
-                                                </div>
+                                                {(() => {
+                                                    const fallbackConfigs = [
+                                                        { tier_name: 'VIP', min_months: 3, min_spend: 300000, bonus_ratio: 0.1 },
+                                                        { tier_name: 'VVIP', min_months: 6, min_spend: 1000000, bonus_ratio: 0.2 },
+                                                        { tier_name: 'VVVIP', min_months: 12, min_spend: 2000000, bonus_ratio: 0.3 }
+                                                    ];
+                                                    const displayConfigs = dbTierConfigs.length > 0
+                                                        ? dbTierConfigs.filter(c => c.tier_name !== 'NORMAL')
+                                                        : fallbackConfigs;
+                                                    
+                                                    const badgeConfigs: Record<string, { label: string; style: string }> = {
+                                                        VIP: { label: '🎖️ 우수', style: 'from-amber-400 to-amber-500 text-amber-950' },
+                                                        VVIP: { label: '🏆 으뜸', style: 'from-violet-600 to-pink-500 text-white' },
+                                                        VVVIP: { label: '👑 명가', style: 'from-rose-500 via-amber-400 to-blue-600 text-white' }
+                                                    };
+
+                                                    return displayConfigs.map((cfg) => {
+                                                        const badge = badgeConfigs[cfg.tier_name] || { label: cfg.tier_name, style: 'from-gray-400 to-gray-500 text-white' };
+                                                        return (
+                                                            <div key={cfg.tier_name} className="flex items-start gap-2">
+                                                                <span className={`inline-flex items-center justify-center text-[10px] font-black bg-gradient-to-r ${badge.style} px-1.5 py-0.5 rounded shadow-sm shrink-0 w-[50px] h-[18px]`}>
+                                                                    {badge.label}
+                                                                </span>
+                                                                <div className="text-[10px] leading-snug">
+                                                                    <p className="font-extrabold text-gray-700">연속 광고 {cfg.min_months}개월 이상</p>
+                                                                    <p className="text-gray-400">또는 누적 {formatKoreanAmount(cfg.min_spend)} 이상</p>
+                                                                    <p className="text-primary font-black mt-0.5">🔥 혜택: 충전 시 +{Math.round(cfg.bonus_ratio * 100)}% 추가 적립</p>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    });
+                                                })()}
                                             </div>
                                         </div>
                                         <p className="text-[9px] text-gray-400 leading-normal pt-1.5 border-t border-dashed mt-3">

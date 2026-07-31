@@ -211,3 +211,100 @@ export async function UPDATE_POINT_POLICIES(policies: PointPolicyItem[]) {
         return { success: false, error: err.message };
     }
 }
+
+export interface TierConfigItem {
+    tier_name: string;
+    min_months: number;
+    min_spend: number;
+    bonus_ratio: number;
+}
+
+const DEFAULT_TIER_CONFIGS = [
+    { tier_name: 'NORMAL', min_months: 0, min_spend: 0, bonus_ratio: 0 },
+    { tier_name: 'VIP', min_months: 3, min_spend: 300000, bonus_ratio: 0.1 },
+    { tier_name: 'VVIP', min_months: 6, min_spend: 1000000, bonus_ratio: 0.2 },
+    { tier_name: 'VVVIP', min_months: 12, min_spend: 2000000, bonus_ratio: 0.3 }
+];
+
+export async function GET_TIER_CONFIGS() {
+    nvLog('AT', '▶️ GET_TIER_CONFIGS 시작');
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('tier_configs')
+            .select('*')
+            .order('bonus_ratio', { ascending: true });
+
+        if (error) {
+            nvLog('AT', '❌ GET_TIER_CONFIGS 에러', error.message);
+            return { success: false, data: [] };
+        }
+
+        let existingData = data || [];
+        if (existingData.length === 0) {
+            nvLog('AT', '💡 tier_configs 기본값 삽입 시작');
+            const { error: insertError } = await supabaseAdmin
+                .from('tier_configs')
+                .insert(DEFAULT_TIER_CONFIGS);
+                
+            if (insertError) {
+                nvLog('AT', '❌ tier_configs 기본값 삽입 에러', insertError.message);
+                return { success: true, data: DEFAULT_TIER_CONFIGS };
+            } else {
+                const { data: reData } = await supabaseAdmin
+                    .from('tier_configs')
+                    .select('*')
+                    .order('bonus_ratio', { ascending: true });
+                if (reData) existingData = reData;
+            }
+        }
+
+        return { success: true, data: existingData as TierConfigItem[] };
+    } catch (err: any) {
+        nvLog('AT', '❌ GET_TIER_CONFIGS 예외', err.message);
+        return { success: false, data: [] };
+    }
+}
+
+export async function UPDATE_TIER_CONFIGS(configs: TierConfigItem[]) {
+    nvLog('AT', '▶️ UPDATE_TIER_CONFIGS 시작 (RLS 우회 RPC 사용)');
+    try {
+        if (!configs || configs.length === 0) {
+            return { success: true };
+        }
+
+        // 트랜잭션 안전 처리를 위해 execute_sql rpc 활용
+        let safeSql = `DELETE FROM tier_configs;\n`;
+        
+        const insertRows = configs.map(c => {
+            const minMonths = typeof c.min_months === 'number' ? c.min_months : parseInt(c.min_months as any) || 0;
+            const minSpend = typeof c.min_spend === 'number' ? c.min_spend : parseInt(c.min_spend as any) || 0;
+            const bonusRatio = typeof c.bonus_ratio === 'number' ? c.bonus_ratio : parseFloat(c.bonus_ratio as any) || 0;
+            const tierName = c.tier_name.replace(/[^a-zA-Z0-9_]/g, '');
+            return `('${tierName}', ${minMonths}, ${minSpend}, ${bonusRatio})`;
+        }).join(',\n');
+        
+        safeSql += `INSERT INTO tier_configs (tier_name, min_months, min_spend, bonus_ratio) VALUES \n${insertRows};`;
+
+        const { error } = await supabaseAdmin.rpc('execute_sql', { sql: safeSql });
+        
+        if (error) {
+            nvLog('AT', '❌ UPDATE_TIER_CONFIGS RPC 에러', error.message);
+            // RPC 실패 시 단일 insert 시도
+            const { error: deleteError } = await supabaseAdmin.from('tier_configs').delete().neq('tier_name', '');
+            if (!deleteError) {
+                const { error: insertError } = await supabaseAdmin.from('tier_configs').insert(configs);
+                if (insertError) {
+                    return { success: false, error: insertError.message };
+                }
+            } else {
+                return { success: false, error: deleteError.message };
+            }
+        }
+        
+        nvLog('AT', '✅ UPDATE_TIER_CONFIGS 완료');
+        return { success: true };
+    } catch (err: any) {
+        nvLog('AT', '❌ UPDATE_TIER_CONFIGS 예외', err.message);
+        return { success: false, error: err.message };
+    }
+}
