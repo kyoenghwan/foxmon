@@ -270,7 +270,59 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                 )}
             </section>
 
-
+            {/* --- Tier 2: Special Jobs --- */}
+            <section>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2 border-b pb-4">
+                    <div className="flex flex-row flex-wrap items-center gap-x-3 gap-y-2">
+                        <div className="flex items-center gap-1 sm:gap-2">
+                            <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 fill-orange-500 animate-pulse" />
+                            <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap">
+                                스페셜 광고
+                            </h2>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 sm:gap-3 ml-auto">
+                        {session?.user?.role !== 'VIEWER' && (
+                            <Link href="/biz/ads/new">
+                                <span className="text-xs sm:text-sm font-black text-white bg-primary hover:bg-orange-600 px-3 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1">
+                                    <Plus className="w-3.5 h-3.5" /> 광고 등록
+                                </span>
+                            </Link>
+                        )}
+                        <button 
+                            onClick={() => setShowAllSpecial(!showAllSpecial)}
+                            className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
+                        >
+                            {showAllSpecial ? '접기' : (t.common.viewAll || '전체보기')} {showAllSpecial ? <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                        </button>
+                    </div>
+                </div>
+                
+                {specialJobs.length > 0 ? (
+                    <div className="grid grid-cols-2 min-[600px]:grid-cols-3 min-[830px]:grid-cols-4 min-[1040px]:grid-cols-5 gap-2 min-[600px]:gap-4 w-full mx-auto">
+                        {specialJobs.map((job, idx) => (
+                            <div 
+                                key={job.id} 
+                                className={`w-full ${
+                                    !showAllSpecial ? getResponsiveHideClass(idx, 5) : ''
+                                }`}
+                            >
+                                <PremiumJobCard 
+                                    {...(job as any)} 
+                                    impactType="emerald" 
+                                    effectIntensity="medium" 
+                                    tier="SPECIAL" 
+                                    rawAd={job}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
+                        <p className="text-gray-400 font-bold">등록된 스페셜 광고가 없습니다.</p>
+                    </div>
+                )}
+            </section>
 
             {/* --- Tier 3: General Jobs --- */}
             <section>
