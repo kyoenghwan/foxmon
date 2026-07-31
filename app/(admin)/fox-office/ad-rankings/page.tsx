@@ -221,7 +221,7 @@ export default function AdRankingsPage() {
                             {activeTab === 'monitoring' ? '노출 순위 현황' : activeTab === 'history' ? '옵션/변경 내역' : '전체 광고/공고 목록 관리'}
                         </h2>
                         <div className="flex flex-wrap gap-2">
-                            {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'SPECIAL', 'GENERAL'].map(t => (
+                            {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'SPECIAL', 'AD_GENERAL', 'GENERAL'].map(t => (
                                 <button 
                                     key={t}
                                     onClick={() => setTier(t)}
