@@ -11,16 +11,10 @@ import { invalidateAdCache } from '../ad-service';
 export async function adminSoftDeleteAdAction(id: string, isJob: boolean = false) {
     try {
         const now = new Date().toISOString();
-        if (isJob) {
-            const { data: job } = await supabaseAdmin.from('jobs').select('linked_ad_id').eq('id', id).single();
-            await supabaseAdmin.from('jobs').update({ status: 'DELETED', updated_at: now }).eq('id', id);
-            if (job?.linked_ad_id) {
-                await supabaseAdmin.from('biz_ads').update({ status: 'DELETED', updated_at: now }).eq('id', job.linked_ad_id);
-            }
-        } else {
-            await supabaseAdmin.from('biz_ads').update({ status: 'DELETED', updated_at: now }).eq('id', id);
-            await supabaseAdmin.from('jobs').update({ status: 'DELETED', updated_at: now }).eq('linked_ad_id', id);
-        }
+        await supabaseAdmin.from('jobs').update({ status: 'DELETED', updated_at: now }).eq('id', id);
+        await supabaseAdmin.from('jobs').update({ status: 'DELETED', updated_at: now }).eq('linked_ad_id', id);
+        await supabaseAdmin.from('biz_ads').update({ status: 'DELETED', updated_at: now }).eq('id', id);
+        await supabaseAdmin.from('biz_ads').update({ status: 'DELETED', updated_at: now }).eq('linked_ad_id', id);
 
         await invalidateAdCache();
         revalidatePath('/', 'layout');
@@ -38,16 +32,10 @@ export async function adminSoftDeleteAdAction(id: string, isJob: boolean = false
  */
 export async function adminHardDeleteAdAction(id: string, isJob: boolean = false) {
     try {
-        if (isJob) {
-            const { data: job } = await supabaseAdmin.from('jobs').select('linked_ad_id').eq('id', id).single();
-            await supabaseAdmin.from('jobs').delete().eq('id', id);
-            if (job?.linked_ad_id) {
-                await supabaseAdmin.from('biz_ads').delete().eq('id', job.linked_ad_id);
-            }
-        } else {
-            await supabaseAdmin.from('biz_ads').delete().eq('id', id);
-            await supabaseAdmin.from('jobs').delete().eq('linked_ad_id', id);
-        }
+        await supabaseAdmin.from('jobs').delete().eq('id', id);
+        await supabaseAdmin.from('jobs').delete().eq('linked_ad_id', id);
+        await supabaseAdmin.from('biz_ads').delete().eq('id', id);
+        await supabaseAdmin.from('biz_ads').delete().eq('linked_ad_id', id);
 
         await invalidateAdCache();
         revalidatePath('/', 'layout');
@@ -66,16 +54,10 @@ export async function adminHardDeleteAdAction(id: string, isJob: boolean = false
 export async function adminRestoreAdAction(id: string, isJob: boolean = false) {
     try {
         const now = new Date().toISOString();
-        if (isJob) {
-            const { data: job } = await supabaseAdmin.from('jobs').select('linked_ad_id').eq('id', id).single();
-            await supabaseAdmin.from('jobs').update({ status: 'ACTIVE', updated_at: now }).eq('id', id);
-            if (job?.linked_ad_id) {
-                await supabaseAdmin.from('biz_ads').update({ status: 'ACTIVE', updated_at: now }).eq('id', job.linked_ad_id);
-            }
-        } else {
-            await supabaseAdmin.from('biz_ads').update({ status: 'ACTIVE', updated_at: now }).eq('id', id);
-            await supabaseAdmin.from('jobs').update({ status: 'ACTIVE', updated_at: now }).eq('linked_ad_id', id);
-        }
+        await supabaseAdmin.from('jobs').update({ status: 'ACTIVE', updated_at: now }).eq('id', id);
+        await supabaseAdmin.from('jobs').update({ status: 'ACTIVE', updated_at: now }).eq('linked_ad_id', id);
+        await supabaseAdmin.from('biz_ads').update({ status: 'ACTIVE', updated_at: now }).eq('id', id);
+        await supabaseAdmin.from('biz_ads').update({ status: 'ACTIVE', updated_at: now }).eq('linked_ad_id', id);
 
         await invalidateAdCache();
         revalidatePath('/', 'layout');

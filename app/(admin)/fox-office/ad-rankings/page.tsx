@@ -488,11 +488,11 @@ export default function AdRankingsPage() {
                                                     </button>
                                                     <button
                                                         onClick={() => handleSoftDelete(ad)}
-                                                        className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
+                                                        className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-[11px] font-bold transition-colors flex items-center justify-center"
                                                         title="1차 삭제 (휴지통으로 이동)"
                                                     >
                                                         <Trash2 className="w-3.5 h-3.5" />
-                                                        휴지통 이동
+
                                                     </button>
                                                 </div>
                                             </td>
