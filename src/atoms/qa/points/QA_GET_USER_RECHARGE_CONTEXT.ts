@@ -13,6 +13,10 @@ interface UserRechargeContext {
  * 결제 전 사용자의 첫 충전 여부 및 현재 등급에 따른 적립 혜택 정보를 조회합니다.
  */
 export const QA_GET_USER_RECHARGE_CONTEXT = async (userId: string): Promise<{ success: boolean; data: UserRechargeContext | null; error: string | null }> => {
+  // 💡 30일 광고 무등록 등급 강등 체크 실시간 반영
+  const { applyTierDowngradeCheck } = await import('@/lib/tierDowngradeService');
+  await applyTierDowngradeCheck(userId);
+
   // 💡 사용자의 기본 정보(첫 충전 여부, 등급) 조회
   const { data: user, error: userError } = await supabaseAdmin
     .from('users')

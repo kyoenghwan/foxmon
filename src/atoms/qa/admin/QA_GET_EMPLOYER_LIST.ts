@@ -45,6 +45,22 @@ export async function QA_GET_EMPLOYER_LIST() {
             return { success: false, data: [], error: userError.message };
         }
 
+        // 1.5. 30일 무등록 회원 등급 자동 강등 체크 (비동기 일괄 진단)
+        const { applyTierDowngradeCheck } = await import('@/lib/tierDowngradeService');
+        const downgradePromises = (users || [])
+            .filter(u => u.merchant_tier && u.merchant_tier !== 'NORMAL')
+            .map(async (u) => {
+                const res = await applyTierDowngradeCheck(u.id);
+                if (res.downgraded && res.nextTier) {
+                    u.merchant_tier = res.nextTier;
+                    const sysMemo = `[시스템] 30일 무등록 자동 강등 (${new Date().toISOString().slice(0, 10)})`;
+                    u.admin_memo = u.admin_memo 
+                        ? `${u.admin_memo.trim()}\n${sysMemo}`
+                        : sysMemo;
+                }
+            });
+        await Promise.all(downgradePromises);
+
         const allUsers: EmployerListItem[] = (users || []).map(u => ({
             ...u,
             jobs: [],
