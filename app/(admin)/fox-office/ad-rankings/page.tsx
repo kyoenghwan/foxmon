@@ -493,7 +493,7 @@ export default function AdRankingsPage() {
                                 <option value="EXPIRED">EXPIRED (만료)</option>
                             </select>
                             <button
-                                onClick={loadRankings}
+                                onClick={() => loadRankings()}
                                 className="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
                             >
                                 <RefreshCw className="w-3.5 h-3.5" /> 새로고침
