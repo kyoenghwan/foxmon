@@ -44,12 +44,13 @@ export default function AdRankingsPage() {
 
     // 1차 소프트 삭제 (휴지통 이동)
     const handleSoftDelete = async (ad: any) => {
-        if (!confirm(`'${ad.title}' 광고를 휴지통으로 이동(1차 삭제)하시겠습니까? (30일 후 자동/수동 완전 삭제)`)) return;
+        if (!confirm(`'${ad.title}' 광고를 휴지통으로 이동하시겠습니까?`)) return;
         const isJob = ad.is_job || ad.tier === 'GENERAL';
-        const res = await adminSoftDeleteAdAction(ad.id.replace('_dup', ''), isJob);
+        const cleanId = ad.id.replace('_dup', '');
+        const res = await adminSoftDeleteAdAction(cleanId, isJob);
         if (res.success) {
-            alert(res.message);
-            loadRankings();
+            // 즉시 UI 반영: 해당 항목 status를 DELETED로 변경
+            setAllAds(prev => prev.map(a => a.id === cleanId ? { ...a, status: 'DELETED' } : a));
         } else {
             alert(res.message || '1차 삭제 실패');
         }
@@ -59,10 +60,11 @@ export default function AdRankingsPage() {
     const handleHardDelete = async (ad: any) => {
         if (!confirm(`'${ad.title}' 광고를 DB에서 영구히 완전 삭제하시겠습니까? (삭제 후 절대 복구 불가)`)) return;
         const isJob = ad.is_job || ad.tier === 'GENERAL';
-        const res = await adminHardDeleteAdAction(ad.id.replace('_dup', ''), isJob);
+        const cleanId = ad.id.replace('_dup', '');
+        const res = await adminHardDeleteAdAction(cleanId, isJob);
         if (res.success) {
-            alert(res.message);
-            loadRankings();
+            // 즉시 UI 반영: 해당 항목을 목록에서 완전 제거
+            setAllAds(prev => prev.filter(a => a.id !== cleanId));
         } else {
             alert(res.message || '영구 삭제 실패');
         }
@@ -72,10 +74,11 @@ export default function AdRankingsPage() {
     const handleRestore = async (ad: any) => {
         if (!confirm(`'${ad.title}' 광고를 다시 정상 노출(ACTIVE) 상태로 복구하시겠습니까?`)) return;
         const isJob = ad.is_job || ad.tier === 'GENERAL';
-        const res = await adminRestoreAdAction(ad.id.replace('_dup', ''), isJob);
+        const cleanId = ad.id.replace('_dup', '');
+        const res = await adminRestoreAdAction(cleanId, isJob);
         if (res.success) {
-            alert(res.message);
-            loadRankings();
+            // 즉시 UI 반영: 해당 항목 status를 ACTIVE로 변경
+            setAllAds(prev => prev.map(a => a.id === cleanId ? { ...a, status: 'ACTIVE' } : a));
         } else {
             alert(res.message || '복구 실패');
         }
