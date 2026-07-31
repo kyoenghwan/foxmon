@@ -27,6 +27,7 @@ export type FaqRow = {
   answer_format?: string;
   sort_order: number;
   is_active: boolean;
+  target_role?: 'ALL' | 'EMPLOYER' | 'GENERAL';
 };
 
 export function FaqAdminPanel({
@@ -35,7 +36,7 @@ export function FaqAdminPanel({
 }: {
   categories: FaqCategoryRow[];
   faqs: FaqRow[];
-}) {
+ }) {
   const router = useRouter();
   const reload = () => router.refresh();
 
@@ -56,6 +57,7 @@ export function FaqAdminPanel({
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
+  const [targetRole, setTargetRole] = useState<'ALL' | 'EMPLOYER' | 'GENERAL'>('ALL');
   const [saving, setSaving] = useState(false);
 
   const sortedCategories = useMemo(
@@ -80,6 +82,7 @@ export function FaqAdminPanel({
     setQuestion('');
     setAnswer('');
     setSortOrder(0);
+    setTargetRole('ALL');
     setFormOpen(true);
   };
 
@@ -89,6 +92,7 @@ export function FaqAdminPanel({
     setQuestion(f.question);
     setAnswer(f.answer);
     setSortOrder(f.sort_order ?? 0);
+    setTargetRole(f.target_role || 'ALL');
     setFormOpen(true);
   };
 
@@ -105,6 +109,7 @@ export function FaqAdminPanel({
       answer,
       sort_order: sortOrder,
       answer_format: 'markdown',
+      target_role: targetRole,
     });
     setSaving(false);
     if (res.success) {
@@ -237,7 +242,7 @@ export function FaqAdminPanel({
         <div className="bg-white rounded-2xl border-2 border-primary/20 p-5 space-y-4 shadow-sm">
           <h4 className="font-black text-gray-900">{editFaq ? 'FAQ 수정' : 'FAQ 등록'}</h4>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <label className="block">
               <span className="text-[12px] font-bold text-gray-600">폴더(항목) *</span>
               <select
@@ -252,6 +257,20 @@ export function FaqAdminPanel({
                 ))}
               </select>
             </label>
+            
+            <label className="block">
+              <span className="text-[12px] font-bold text-gray-600">노출 권한 *</span>
+              <select
+                value={targetRole}
+                onChange={(e) => setTargetRole(e.target.value as 'ALL' | 'EMPLOYER' | 'GENERAL')}
+                className="mt-1 w-full h-10 px-3 border border-orange-200 bg-orange-50 text-primary rounded-lg text-[13px] font-bold"
+              >
+                <option value="ALL">전체 공개 (ALL)</option>
+                <option value="EMPLOYER">업체 회원 전용 (EMPLOYER)</option>
+                <option value="GENERAL">일반 회원 전용 (GENERAL)</option>
+              </select>
+            </label>
+
             <label className="block">
               <span className="text-[12px] font-bold text-gray-600">정렬 순서</span>
               <input

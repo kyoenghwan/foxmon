@@ -37,6 +37,7 @@ export async function adminUpsertNotice(input: {
   is_pinned: boolean;
   author_name?: string;
   content_format?: string;
+  target_role?: "ALL" | "EMPLOYER" | "GENERAL";
 }) {
   const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error };
@@ -48,6 +49,7 @@ export async function adminUpsertNotice(input: {
     is_pinned: input.is_pinned,
     author_name: input.author_name?.trim() || "영자",
     author_id: gate.userId,
+    target_role: input.target_role || "ALL",
     updated_at: new Date().toISOString(),
   };
   if (!row.title || !row.content) {
@@ -146,6 +148,7 @@ export async function adminUpsertFaq(input: {
   sort_order?: number;
   is_active?: boolean;
   answer_format?: string;
+  target_role?: "ALL" | "EMPLOYER" | "GENERAL";
 }) {
   const gate = await assertHelpCenterStaff();
   if (!gate.ok) return { success: false, error: gate.error };
@@ -165,6 +168,7 @@ export async function adminUpsertFaq(input: {
     answer_format: input.answer_format || "markdown",
     sort_order: input.sort_order ?? 0,
     is_active: input.is_active !== false,
+    target_role: input.target_role || "ALL",
   };
   if (!row.question || !row.answer) {
     return { success: false, error: "질문과 답변을 입력해주세요." };

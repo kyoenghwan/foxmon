@@ -16,6 +16,7 @@ export type PublicNotice = {
   created_at: string;
   view_count: number;
   is_pinned: boolean;
+  target_role?: 'ALL' | 'EMPLOYER' | 'GENERAL';
 };
 
 export type PublicFaqCategory = {
@@ -32,6 +33,7 @@ export type PublicFaq = {
   answer: string;
   answer_format?: string;
   sort_order: number;
+  target_role?: 'ALL' | 'EMPLOYER' | 'GENERAL';
 };
 
 export type UserInquiry = {
@@ -69,17 +71,32 @@ const noticeCache: Record<string, NoticeCacheItem> = {};
 const NOTICE_CACHE_TTL = 60 * 1000; // 60초 캐시 (1분)
 
 export async function getPublicNotices(category?: string): Promise<PublicNotice[]> {
-  const cacheKey = category || 'all';
+  const session = await auth();
+  const userRole = session?.user?.role || 'GUEST';
+  
+  const cacheKey = `${userRole}_${category || 'all'}`;
   const now = Date.now();
   const cached = noticeCache[cacheKey];
 
   if (cached && (now - cached.lastFetched < NOTICE_CACHE_TTL)) {
-    nvLog('AT', '⚡ [Cache Hit] getPublicNotices', { category });
+    nvLog('AT', '⚡ [Cache Hit] getPublicNotices', { category, userRole });
     return cached.data;
   }
 
   try {
     let q = supabase.from('notices').select('*').order('is_pinned', { ascending: false }).order('created_at', { ascending: false });
+    
+    // 권한별 노출 조건 추가
+    if (userRole === 'ADMIN') {
+      // 모든 글 열람 가능
+    } else if (userRole === 'EMPLOYER') {
+      q = q.in('target_role', ['ALL', 'EMPLOYER']);
+    } else if (userRole === 'GENERAL') {
+      q = q.in('target_role', ['ALL', 'GENERAL']);
+    } else {
+      q = q.eq('target_role', 'ALL');
+    }
+
     if (category && category !== '전체') {
       q = q.eq('category', category);
     }
@@ -98,6 +115,7 @@ export async function getPublicNotices(category?: string): Promise<PublicNotice[
       created_at: formatNoticeDate(n.created_at),
       view_count: n.view_count ?? 0,
       is_pinned: !!n.is_pinned,
+      target_role: (n.target_role as 'ALL' | 'EMPLOYER' | 'GENERAL') || 'ALL',
     }));
 
     noticeCache[cacheKey] = {
@@ -143,12 +161,27 @@ export async function getPublicFaqCategories(): Promise<PublicFaqCategory[]> {
 
 export async function getPublicFaqs(categoryName?: string): Promise<PublicFaq[]> {
   try {
+    const session = await auth();
+    const userRole = session?.user?.role || 'GUEST';
+
     let q = supabase
       .from('faqs')
-      .select('id, category, category_id, question, answer, answer_format, sort_order, faq_categories(name)')
+      .select('id, category, category_id, question, answer, answer_format, sort_order, target_role, faq_categories(name)')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true });
+
+    // 권한별 노출 조건 추가
+    if (userRole === 'ADMIN') {
+      // 모든 FAQ 노출
+    } else if (userRole === 'EMPLOYER') {
+      q = q.in('target_role', ['ALL', 'EMPLOYER']);
+    } else if (userRole === 'GENERAL') {
+      q = q.in('target_role', ['ALL', 'GENERAL']);
+    } else {
+      q = q.eq('target_role', 'ALL');
+    }
+
     if (categoryName && categoryName !== '전체') {
       q = q.eq('category', categoryName);
     }
@@ -167,6 +200,7 @@ export async function getPublicFaqs(categoryName?: string): Promise<PublicFaq[]>
         answer: row.answer as string,
         answer_format: (row.answer_format as string) || 'markdown',
         sort_order: (row.sort_order as number) ?? 0,
+        target_role: (row.target_role as 'ALL' | 'EMPLOYER' | 'GENERAL') || 'ALL',
       };
     });
   } catch (err) {

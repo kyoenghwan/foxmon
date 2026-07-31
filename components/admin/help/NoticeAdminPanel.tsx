@@ -10,6 +10,7 @@ type NoticeRow = {
   content: string;
   content_format?: string;
   is_pinned: boolean;
+  target_role?: 'ALL' | 'EMPLOYER' | 'GENERAL';
 };
 
 export function NoticeForm({
@@ -28,6 +29,7 @@ export function NoticeForm({
     content: string;
     is_pinned: boolean;
     content_format: string;
+    target_role: 'ALL' | 'EMPLOYER' | 'GENERAL';
   }) => Promise<{ success: boolean; error?: string }>;
 }) {
   const [open, setOpen] = useState(!compact);
@@ -35,6 +37,7 @@ export function NoticeForm({
   const [title, setTitle] = useState(edit?.title || '');
   const [content, setContent] = useState(edit?.content || '');
   const [isPinned, setIsPinned] = useState(!!edit?.is_pinned);
+  const [targetRole, setTargetRole] = useState<'ALL' | 'EMPLOYER' | 'GENERAL'>(edit?.target_role || 'ALL');
   const [saving, setSaving] = useState(false);
 
   if (compact && !open) {
@@ -59,6 +62,17 @@ export function NoticeForm({
           <option value="이벤트">이벤트</option>
           <option value="기타">기타</option>
         </select>
+        
+        <select
+          value={targetRole}
+          onChange={(e) => setTargetRole(e.target.value as 'ALL' | 'EMPLOYER' | 'GENERAL')}
+          className="h-10 px-3 border border-orange-200 bg-orange-50 text-primary rounded-lg text-[13px] font-bold"
+        >
+          <option value="ALL">전체 공개 (ALL)</option>
+          <option value="EMPLOYER">업체 회원 전용 (EMPLOYER)</option>
+          <option value="GENERAL">일반 회원 전용 (GENERAL)</option>
+        </select>
+
         <label className="inline-flex items-center gap-2 text-[12px] font-bold text-gray-700 h-10">
           <input type="checkbox" checked={isPinned} onChange={(e) => setIsPinned(e.target.checked)} />
           상단 고정(알림)
@@ -92,6 +106,7 @@ export function NoticeForm({
             content,
             is_pinned: isPinned,
             content_format: 'markdown',
+            target_role: targetRole,
           });
           setSaving(false);
           if (res.success) {
