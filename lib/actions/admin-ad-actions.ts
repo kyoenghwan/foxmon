@@ -116,6 +116,56 @@ export async function adminPurgeOldDeletedAdsAction() {
 }
 
 /**
+ * 광고/공고 옵션 직접 수정 (관리자 전용)
+ * biz_ads + jobs(linked) 양쪽 동시 업데이트
+ */
+export async function adminUpdateAdOptionsAction(id: string, isJob: boolean, options: {
+    status?: string;
+    expires_at?: string | null;
+    option_jump?: boolean;
+    option_jump_expires_at?: string | null;
+    jump_interval?: number;
+    option_double_slot?: boolean;
+    option_double_slot_expires_at?: string | null;
+    option_bold?: boolean;
+    option_bold_expires_at?: string | null;
+    option_highlight?: boolean;
+    option_highlight_value?: string;
+    option_highlight_expires_at?: string | null;
+    option_color?: boolean;
+    option_color_value?: string;
+    option_color_expires_at?: string | null;
+    option_bg?: boolean;
+    option_bg_value?: string;
+    option_bg_expires_at?: string | null;
+}) {
+    try {
+        const now = new Date().toISOString();
+        const updateData = { ...options, updated_at: now };
+
+        if (isJob) {
+            // jobs 테이블 업데이트
+            await supabaseAdmin.from('jobs').update(updateData).eq('id', id);
+            // 연결된 biz_ads도 동기화
+            await supabaseAdmin.from('biz_ads').update(updateData).eq('linked_ad_id', id);
+        } else {
+            // biz_ads 테이블 업데이트
+            await supabaseAdmin.from('biz_ads').update(updateData).eq('id', id);
+            // 연결된 jobs도 동기화
+            await supabaseAdmin.from('jobs').update(updateData).eq('linked_ad_id', id);
+        }
+
+        await invalidateAdCache();
+        revalidatePath('/', 'layout');
+        revalidatePath('/fox-office/ad-rankings', 'page');
+        return { success: true, message: '옵션이 업데이트되었습니다.' };
+    } catch (error: any) {
+        console.error('adminUpdateAdOptionsAction error:', error);
+        return { success: false, message: error.message || '옵션 업데이트 도중 오류가 발생했습니다.' };
+    }
+}
+
+/**
  * 광고 순위 직접 변경 (최상단 점프 또는 특정 순위 지정)
  */
 export async function adminChangeAdRankAction(id: string, targetRank: number = 1, isJob: boolean = false) {

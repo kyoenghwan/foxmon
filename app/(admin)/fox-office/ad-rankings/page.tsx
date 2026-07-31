@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Crown, ArrowUp, ArrowDown, ArrowUpDown, Minus, RefreshCw, Timer, Pencil, Trash2, Edit3, Search, Sparkles, Filter, RotateCcw, AlertTriangle, Trash } from 'lucide-react';
+import { Crown, ArrowUp, ArrowDown, ArrowUpDown, Minus, RefreshCw, Timer, Pencil, Trash2, Edit3, Search, Sparkles, Filter, RotateCcw, AlertTriangle, Trash, Settings, X, Save, Clock, Zap, LayersIcon, Bold } from 'lucide-react';
 import { getAdRankingSimulation, RankingSimResult, getAdHistoryLogs, AdHistoryLog } from '@/lib/ad-ranking-service';
 import { AdminAdEditModal } from '@/components/admin/AdminAdEditModal';
 import { AdminFullAdEditorModal } from '@/components/admin/AdminFullAdEditorModal';
@@ -10,7 +10,8 @@ import {
     adminHardDeleteAdAction, 
     adminRestoreAdAction, 
     adminPurgeOldDeletedAdsAction,
-    adminChangeAdRankAction
+    adminChangeAdRankAction,
+    adminUpdateAdOptionsAction
 } from '@/lib/actions/admin-ad-actions';
 import { QA_GET_ALL_BIZ_ADS } from '@/src/atoms/qa/admin/QA_GET_ALL_BIZ_ADS';
 
@@ -37,6 +38,9 @@ export default function AdRankingsPage() {
     const [historyLogs, setHistoryLogs] = useState<AdHistoryLog[]>([]);
     const [editingAd, setEditingAd] = useState<any | null>(null);
     const [fullEditingAd, setFullEditingAd] = useState<any | null>(null);
+    const [optionEditingAd, setOptionEditingAd] = useState<any | null>(null);
+    const [optionForm, setOptionForm] = useState<any>({});
+    const [savingOptions, setSavingOptions] = useState(false);
 
     // 1차 소프트 삭제 (휴지통 이동)
     const handleSoftDelete = async (ad: any) => {
@@ -113,7 +117,13 @@ export default function AdRankingsPage() {
                 const data = await getAdRankingSimulation(queryTier);
                 setRankings(data);
             } else if (currentTab === 'history') {
-                const logs = await getAdHistoryLogs(queryTier);
+                // 광고 목록 + 변경 이력 동시 로드
+                const [res, logs] = await Promise.all([
+                    QA_GET_ALL_BIZ_ADS(),
+                    getAdHistoryLogs(queryTier)
+                ]);
+                if (res.success && res.data) setAllAds(res.data);
+                else setAllAds([]);
                 setHistoryLogs(logs);
             } else if (currentTab === 'manage' || currentTab === 'trash') {
                 const res = await QA_GET_ALL_BIZ_ADS();
@@ -329,55 +339,126 @@ export default function AdRankingsPage() {
                         </tbody>
                     </table>
                 </div>
-            ) : activeTab === 'history' ? (
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[700px]">
-                        <thead>
-                            <tr className="border-b-2 border-gray-100">
-                                <th className="p-4 text-[13px] font-black text-gray-400 w-40">발생 일시</th>
-                                <th className="p-4 text-[13px] font-black text-gray-400">광고/업체 정보</th>
-                                <th className="p-4 text-[13px] font-black text-gray-400 w-32">이벤트 유형</th>
-                                <th className="p-4 text-[13px] font-black text-gray-400">상세 내용</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {historyLogs.map((log) => (
-                                <tr key={log.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                                    <td className="p-4 text-[13px] text-gray-600 font-mono">
-                                        {new Date(log.created_at).toLocaleString('ko-KR')}
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="font-bold text-[14px] text-gray-900">{log.company}</div>
-                                        <div className="text-[12px] text-gray-500 mt-0.5">{log.title}</div>
-                                    </td>
-                                    <td className="p-4">
-                                        <span className={`text-[11px] font-bold px-2 py-1 rounded w-fit ${
-                                            log.event_type === 'NEW_ENTRY' ? 'bg-purple-100 text-purple-700' :
-                                            log.event_type === 'OPTION_JUMP' ? 'bg-blue-100 text-blue-700' :
-                                            log.event_type === 'OPTION_DOUBLE' ? 'bg-indigo-100 text-indigo-700' :
-                                            'bg-gray-100 text-gray-700'
-                                        }`}>
-                                            {log.event_type === 'NEW_ENTRY' ? '신규 진입' :
-                                             log.event_type === 'OPTION_JUMP' ? '오토 점프' :
-                                             log.event_type === 'OPTION_DOUBLE' ? '더블 슬롯' : log.event_type}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-[13px] text-gray-700">
-                                        {log.message}
-                                    </td>
+            ) : activeTab === 'history' ? (() => {
+                // ad_id → 최근 변경 이력 맵
+                const logMap = new Map<string, AdHistoryLog[]>();
+                historyLogs.forEach(log => {
+                    if (!logMap.has(log.ad_id)) logMap.set(log.ad_id, []);
+                    logMap.get(log.ad_id)!.push(log);
+                });
+
+                const filteredAds = allAds.filter(ad => {
+                    if (ad.status === 'DELETED') return false;
+                    if (tier !== 'ALL') {
+                        const itemTier = (ad.tier || '').toUpperCase();
+                        const targetTier = tier.toUpperCase();
+                        if (targetTier === 'AD_GENERAL') {
+                            if (itemTier !== 'AD_GENERAL' && (ad.is_job || itemTier !== 'GENERAL')) return false;
+                        } else if (targetTier === 'GENERAL') {
+                            if (!ad.is_job && itemTier !== 'GENERAL') return false;
+                        } else {
+                            if (itemTier !== targetTier) return false;
+                        }
+                    }
+                    return true;
+                });
+
+                return (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse min-w-[900px]">
+                            <thead>
+                                <tr className="border-b-2 border-gray-100 bg-gray-50/50">
+                                    <th className="p-4 text-[12px] font-black text-gray-400">광고/공고 제목</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-28 text-center">티어</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-28 text-center">만료일</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-48 text-center">현재 옵션</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-36 text-center">변경 이력</th>
+                                    <th className="p-4 text-[12px] font-black text-gray-400 w-24 text-center">옵션 수정</th>
                                 </tr>
-                            ))}
-                            {historyLogs.length === 0 && !loading && (
-                                <tr>
-                                    <td colSpan={4} className="p-8 text-center text-gray-500 text-[14px]">
-                                        최근 변경 내역이 없습니다.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            ) : (
+                            </thead>
+                            <tbody>
+                                {filteredAds.map(ad => {
+                                    const logs = logMap.get(ad.id) || [];
+                                    const hasLogs = logs.length > 0;
+                                    const latestLog = logs[0];
+                                    return (
+                                        <tr key={ad.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                            <td className="p-4">
+                                                <div className="font-bold text-[13px] text-gray-900 line-clamp-1">{ad.title || '제목 없음'}</div>
+                                                <div className="text-[11px] text-gray-400 mt-0.5">{ad.company_name || ad.company}</div>
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <span className="text-[11px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                                                    {ad.tier || 'GENERAL'}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 text-center text-[12px] text-gray-500 font-mono">
+                                                {ad.expires_at ? new Date(ad.expires_at).toLocaleDateString('ko-KR') : '-'}
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <div className="flex flex-wrap gap-1 justify-center">
+                                                    {ad.option_double_slot && <span className="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded">더블슬롯</span>}
+                                                    {ad.option_jump && <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">오토점프</span>}
+                                                    {ad.option_bold && <span className="text-[10px] font-bold bg-yellow-50 text-yellow-700 px-1.5 py-0.5 rounded">볼드</span>}
+                                                    {ad.option_highlight && <span className="text-[10px] font-bold bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded">하이라이트</span>}
+                                                    {!ad.option_double_slot && !ad.option_jump && !ad.option_bold && !ad.option_highlight && <span className="text-[11px] text-gray-400">-</span>}
+                                                </div>
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                {hasLogs ? (
+                                                    <div>
+                                                        <span className="text-[10px] font-bold bg-green-50 text-green-700 px-1.5 py-0.5 rounded-full">
+                                                            최근 {logs.length}건
+                                                        </span>
+                                                        <div className="text-[10px] text-gray-400 mt-0.5">
+                                                            {new Date(latestLog.created_at).toLocaleDateString('ko-KR')}
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[11px] text-gray-300">없음</span>
+                                                )}
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <button
+                                                    onClick={() => {
+                                                        setOptionEditingAd(ad);
+                                                        setOptionForm({
+                                                            status: ad.status || 'ACTIVE',
+                                                            expires_at: ad.expires_at ? ad.expires_at.slice(0, 10) : '',
+                                                            option_jump: !!ad.option_jump,
+                                                            option_jump_expires_at: ad.option_jump_expires_at ? ad.option_jump_expires_at.slice(0, 10) : '',
+                                                            jump_interval: ad.jump_interval || 30,
+                                                            option_double_slot: !!ad.option_double_slot,
+                                                            option_double_slot_expires_at: ad.option_double_slot_expires_at ? ad.option_double_slot_expires_at.slice(0, 10) : '',
+                                                            option_bold: !!ad.option_bold,
+                                                            option_bold_expires_at: ad.option_bold_expires_at ? ad.option_bold_expires_at.slice(0, 10) : '',
+                                                            option_highlight: !!ad.option_highlight,
+                                                            option_highlight_value: ad.option_highlight_value || '',
+                                                            option_highlight_expires_at: ad.option_highlight_expires_at ? ad.option_highlight_expires_at.slice(0, 10) : '',
+                                                        });
+                                                    }}
+                                                    className="p-2 bg-violet-50 text-violet-600 hover:bg-violet-100 rounded-lg transition-colors"
+                                                    title="옵션 수정"
+                                                >
+                                                    <Settings className="w-4 h-4" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                                {filteredAds.length === 0 && !loading && (
+                                    <tr>
+                                        <td colSpan={6} className="p-8 text-center text-gray-500 text-[14px]">
+                                            해당 조건의 광고/공고가 없습니다.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                );
+            })() : (
+
                 <div className="space-y-4">
                     {/* 검색 및 상태 필터 바 */}
                     <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
@@ -679,6 +760,241 @@ export default function AdRankingsPage() {
                     onClose={() => setFullEditingAd(null)}
                     onSuccess={() => loadRankings()}
                 />
+            )}
+
+            {/* 옵션 직접 수정 모달 */}
+            {optionEditingAd && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white z-10">
+                            <div>
+                                <h3 className="text-[16px] font-black text-gray-900">옵션 직접 수정</h3>
+                                <p className="text-[12px] text-gray-500 mt-0.5 line-clamp-1">{optionEditingAd.title}</p>
+                            </div>
+                            <button onClick={() => setOptionEditingAd(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                                <X className="w-5 h-5 text-gray-500" />
+                            </button>
+                        </div>
+
+                        <div className="p-5 space-y-5">
+                            {/* 기본 정보 */}
+                            <div className="space-y-3">
+                                <h4 className="text-[13px] font-black text-gray-700 flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-gray-500" /> 기본 설정
+                                </h4>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-[11px] font-bold text-gray-500 block mb-1">상태</label>
+                                        <select
+                                            value={optionForm.status}
+                                            onChange={e => setOptionForm((f: any) => ({ ...f, status: e.target.value }))}
+                                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-violet-300"
+                                        >
+                                            <option value="ACTIVE">ACTIVE (노출)</option>
+                                            <option value="PAUSED">PAUSED (일시정지)</option>
+                                            <option value="EXPIRED">EXPIRED (만료)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-[11px] font-bold text-gray-500 block mb-1">광고 만료일</label>
+                                        <input
+                                            type="date"
+                                            value={optionForm.expires_at}
+                                            onChange={e => setOptionForm((f: any) => ({ ...f, expires_at: e.target.value }))}
+                                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-violet-300"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 오토 점프 */}
+                            <div className="space-y-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-[13px] font-black text-blue-700 flex items-center gap-2">
+                                        <Zap className="w-4 h-4" /> 오토 점프
+                                    </h4>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={optionForm.option_jump}
+                                            onChange={e => setOptionForm((f: any) => ({ ...f, option_jump: e.target.checked }))}
+                                            className="w-4 h-4 accent-blue-500"
+                                        />
+                                        <span className="text-[12px] font-bold text-blue-600">{optionForm.option_jump ? 'ON' : 'OFF'}</span>
+                                    </label>
+                                </div>
+                                {optionForm.option_jump && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="text-[11px] font-bold text-gray-500 block mb-1">점프 만료일</label>
+                                            <input
+                                                type="date"
+                                                value={optionForm.option_jump_expires_at}
+                                                onChange={e => setOptionForm((f: any) => ({ ...f, option_jump_expires_at: e.target.value }))}
+                                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[11px] font-bold text-gray-500 block mb-1">점프 간격 (분)</label>
+                                            <input
+                                                type="number"
+                                                min="5"
+                                                max="1440"
+                                                value={optionForm.jump_interval}
+                                                onChange={e => setOptionForm((f: any) => ({ ...f, jump_interval: parseInt(e.target.value) || 30 }))}
+                                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 더블 슬롯 */}
+                            <div className="space-y-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-[13px] font-black text-indigo-700 flex items-center gap-2">
+                                        <LayersIcon className="w-4 h-4" /> 더블 슬롯
+                                    </h4>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={optionForm.option_double_slot}
+                                            onChange={e => setOptionForm((f: any) => ({ ...f, option_double_slot: e.target.checked }))}
+                                            className="w-4 h-4 accent-indigo-500"
+                                        />
+                                        <span className="text-[12px] font-bold text-indigo-600">{optionForm.option_double_slot ? 'ON' : 'OFF'}</span>
+                                    </label>
+                                </div>
+                                {optionForm.option_double_slot && (
+                                    <div>
+                                        <label className="text-[11px] font-bold text-gray-500 block mb-1">더블 슬롯 만료일</label>
+                                        <input
+                                            type="date"
+                                            value={optionForm.option_double_slot_expires_at}
+                                            onChange={e => setOptionForm((f: any) => ({ ...f, option_double_slot_expires_at: e.target.value }))}
+                                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 볼드 */}
+                            <div className="space-y-3 bg-yellow-50/50 p-4 rounded-xl border border-yellow-100">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-[13px] font-black text-yellow-700 flex items-center gap-2">
+                                        <Bold className="w-4 h-4" /> 볼드 강조
+                                    </h4>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={optionForm.option_bold}
+                                            onChange={e => setOptionForm((f: any) => ({ ...f, option_bold: e.target.checked }))}
+                                            className="w-4 h-4 accent-yellow-500"
+                                        />
+                                        <span className="text-[12px] font-bold text-yellow-700">{optionForm.option_bold ? 'ON' : 'OFF'}</span>
+                                    </label>
+                                </div>
+                                {optionForm.option_bold && (
+                                    <div>
+                                        <label className="text-[11px] font-bold text-gray-500 block mb-1">볼드 만료일</label>
+                                        <input
+                                            type="date"
+                                            value={optionForm.option_bold_expires_at}
+                                            onChange={e => setOptionForm((f: any) => ({ ...f, option_bold_expires_at: e.target.value }))}
+                                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 하이라이트 */}
+                            <div className="space-y-3 bg-orange-50/50 p-4 rounded-xl border border-orange-100">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-[13px] font-black text-orange-700 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4" /> 하이라이트
+                                    </h4>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={optionForm.option_highlight}
+                                            onChange={e => setOptionForm((f: any) => ({ ...f, option_highlight: e.target.checked }))}
+                                            className="w-4 h-4 accent-orange-500"
+                                        />
+                                        <span className="text-[12px] font-bold text-orange-600">{optionForm.option_highlight ? 'ON' : 'OFF'}</span>
+                                    </label>
+                                </div>
+                                {optionForm.option_highlight && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="text-[11px] font-bold text-gray-500 block mb-1">하이라이트 색상</label>
+                                            <input
+                                                type="text"
+                                                placeholder="#FF6B00"
+                                                value={optionForm.option_highlight_value}
+                                                onChange={e => setOptionForm((f: any) => ({ ...f, option_highlight_value: e.target.value }))}
+                                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[11px] font-bold text-gray-500 block mb-1">하이라이트 만료일</label>
+                                            <input
+                                                type="date"
+                                                value={optionForm.option_highlight_expires_at}
+                                                onChange={e => setOptionForm((f: any) => ({ ...f, option_highlight_expires_at: e.target.value }))}
+                                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="p-5 border-t border-gray-100 flex gap-3">
+                            <button
+                                onClick={() => setOptionEditingAd(null)}
+                                className="flex-1 py-2.5 border border-gray-200 text-gray-600 text-[13px] font-bold rounded-xl hover:bg-gray-50 transition-colors"
+                            >
+                                취소
+                            </button>
+                            <button
+                                disabled={savingOptions}
+                                onClick={async () => {
+                                    setSavingOptions(true);
+                                    try {
+                                        const isJob = optionEditingAd.is_job || optionEditingAd.tier === 'GENERAL';
+                                        const payload: any = {
+                                            status: optionForm.status,
+                                            expires_at: optionForm.expires_at || null,
+                                            option_jump: optionForm.option_jump,
+                                            option_jump_expires_at: optionForm.option_jump ? (optionForm.option_jump_expires_at || null) : null,
+                                            jump_interval: optionForm.jump_interval,
+                                            option_double_slot: optionForm.option_double_slot,
+                                            option_double_slot_expires_at: optionForm.option_double_slot ? (optionForm.option_double_slot_expires_at || null) : null,
+                                            option_bold: optionForm.option_bold,
+                                            option_bold_expires_at: optionForm.option_bold ? (optionForm.option_bold_expires_at || null) : null,
+                                            option_highlight: optionForm.option_highlight,
+                                            option_highlight_value: optionForm.option_highlight_value || null,
+                                            option_highlight_expires_at: optionForm.option_highlight ? (optionForm.option_highlight_expires_at || null) : null,
+                                        };
+                                        const res = await adminUpdateAdOptionsAction(optionEditingAd.id, isJob, payload);
+                                        if (res.success) {
+                                            setOptionEditingAd(null);
+                                            loadRankings(activeTab, tier);
+                                        } else {
+                                            alert(res.message);
+                                        }
+                                    } finally {
+                                        setSavingOptions(false);
+                                    }
+                                }}
+                                className="flex-1 py-2.5 bg-violet-600 text-white text-[13px] font-bold rounded-xl hover:bg-violet-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                <Save className="w-4 h-4" />
+                                {savingOptions ? '저장 중...' : '저장'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
