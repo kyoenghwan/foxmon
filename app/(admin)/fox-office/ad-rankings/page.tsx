@@ -234,7 +234,13 @@ export default function AdRankingsPage() {
                 <div className="flex justify-between items-end border-b border-gray-100 pb-4">
                     <div>
                         <h2 className="text-lg font-bold text-gray-900 mb-4">
-                            {activeTab === 'monitoring' ? '노출 순위 현황' : activeTab === 'history' ? '옵션/변경 내역' : '광고/공고 관리'}
+                            {activeTab === 'monitoring' 
+                                ? '노출 순위 현황' 
+                                : activeTab === 'history' 
+                                ? '옵션/변경 내역' 
+                                : activeTab === 'manage' 
+                                ? '광고/공고 관리' 
+                                : '휴지통 (1차 삭제 목록)'}
                         </h2>
                         <div className="flex flex-wrap gap-2">
                             {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'SPECIAL', 'AD_GENERAL', 'GENERAL'].map(t => (
@@ -460,7 +466,7 @@ export default function AdRankingsPage() {
                         </table>
                     </div>
                 );
-            })() : (
+            })() : activeTab === 'manage' ? (
 
                 <div className="space-y-4">
                     {/* 검색 및 상태 필터 바 */}
@@ -615,10 +621,7 @@ export default function AdRankingsPage() {
                         </table>
                     </div>
                 </div>
-            )}
-
-            {/* 4th Tab: Trash (1차 삭제 목록 및 2차 영구 삭제 관리) */}
-            {activeTab === 'trash' && (
+            ) : (
                 <div className="space-y-4">
                     <div className="bg-red-50/70 border border-red-200 rounded-xl p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
