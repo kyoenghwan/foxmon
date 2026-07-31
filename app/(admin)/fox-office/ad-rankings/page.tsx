@@ -426,8 +426,10 @@ export default function AdRankingsPage() {
                                     .filter((ad) => {
                                         if (ad.status === 'DELETED') return false; // manage 탭에서는 1차 삭제된 항목 제외
                                         if (tier !== 'ALL') {
-                                            if (tier === 'AD_GENERAL' || tier === 'GENERAL') {
-                                                if (!ad.is_job && ad.tier !== 'GENERAL' && ad.tier !== 'AD_GENERAL') return false;
+                                            if (tier === 'AD_GENERAL') {
+                                                if (ad.is_job || (ad.tier !== 'AD_GENERAL' && ad.tier !== 'GENERAL')) return false;
+                                            } else if (tier === 'GENERAL') {
+                                                if (!ad.is_job && ad.tier !== 'GENERAL') return false;
                                             } else {
                                                 if (ad.tier !== tier) return false;
                                             }
@@ -499,8 +501,10 @@ export default function AdRankingsPage() {
                                 {allAds.filter((ad) => {
                                     if (ad.status === 'DELETED') return false;
                                     if (tier !== 'ALL') {
-                                        if (tier === 'AD_GENERAL' || tier === 'GENERAL') {
-                                            if (!ad.is_job && ad.tier !== 'GENERAL' && ad.tier !== 'AD_GENERAL') return false;
+                                        if (tier === 'AD_GENERAL') {
+                                            if (ad.is_job || (ad.tier !== 'AD_GENERAL' && ad.tier !== 'GENERAL')) return false;
+                                        } else if (tier === 'GENERAL') {
+                                            if (!ad.is_job && ad.tier !== 'GENERAL') return false;
                                         } else {
                                             if (ad.tier !== tier) return false;
                                         }
