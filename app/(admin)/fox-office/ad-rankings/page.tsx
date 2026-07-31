@@ -431,7 +431,7 @@ export default function AdRankingsPage() {
                                             } else if (tier === 'GENERAL') {
                                                 if (!ad.is_job && ad.tier !== 'GENERAL') return false;
                                             } else {
-                                                if (ad.tier !== tier) return false;
+                                                if ((ad.tier || '').toUpperCase() !== tier.toUpperCase()) return false;
                                             }
                                         }
                                         if (statusFilter !== 'ALL' && ad.status !== statusFilter) return false;
@@ -506,7 +506,7 @@ export default function AdRankingsPage() {
                                         } else if (tier === 'GENERAL') {
                                             if (!ad.is_job && ad.tier !== 'GENERAL') return false;
                                         } else {
-                                            if (ad.tier !== tier) return false;
+                                            if ((ad.tier || '').toUpperCase() !== tier.toUpperCase()) return false;
                                         }
                                     }
                                     if (statusFilter !== 'ALL' && ad.status !== statusFilter) return false;
