@@ -1727,7 +1727,7 @@ export function AdEditorForm({ initialData, onSubmit, isNew = false, mode = 'AD'
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-black text-[18px] text-gray-800 flex items-center gap-2">
                                     <Crown className={`w-5 h-5 ${form.tier === 'PREMIUM' ? 'text-yellow-500' : form.tier === 'SPECIAL' ? 'text-purple-500' : 'text-gray-500'}`} />
-                                    {form.tier === 'PREMIUM' ? '프리미엄' : form.tier === 'SPECIAL' ? '스페셜' : '일반 광고'} 테마 설정
+                                    {form.tier === 'PREMIUM' ? '프리미엄' : form.tier === 'SPECIAL' ? '스페셜' : '기본'} 테마 설정
                                 </h3>
                                 <button type="button" onClick={() => setActiveModal(null)} className="text-gray-400 hover:text-gray-600">
                                     <X className="w-5 h-5" />
