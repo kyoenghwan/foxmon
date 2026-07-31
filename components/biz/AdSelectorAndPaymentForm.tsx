@@ -13,7 +13,7 @@ interface AdSelectorAndPaymentFormProps {
 
 export function AdSelectorAndPaymentForm({ initialBanners }: AdSelectorAndPaymentFormProps) {
     const router = useRouter();
-    const [banners, setBanners] = useState<any[]>(initialBanners);
+    const [banners, setBanners] = useState<any[]>(initialBanners.filter((b: any) => b.tier !== 'GENERAL' && b.tier !== 'AD_GENERAL'));
     const [selectedAd, setSelectedAd] = useState<any | null>(null);
 
     // 포인트 및 요금 관련 상태
@@ -62,7 +62,8 @@ export function AdSelectorAndPaymentForm({ initialBanners }: AdSelectorAndPaymen
             if (res.success && res.data) {
                 const draftBanners = res.data.filter((ad: any) => {
                     const expiresYear = ad.expires_at ? new Date(ad.expires_at).getFullYear() : 2000;
-                    return !ad.expires_at || expiresYear === 2000 || ad.is_draft === true;
+                    const isDraft = !ad.expires_at || expiresYear === 2000 || ad.is_draft === true;
+                    return isDraft && ad.tier !== 'GENERAL' && ad.tier !== 'AD_GENERAL';
                 });
                 setBanners(draftBanners);
                 if (selectedAd) {

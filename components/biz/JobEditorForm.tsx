@@ -114,7 +114,6 @@ const PREMIUM_THEMES = [
 
 const TIER_OPTIONS = [
     { value: 'PREMIUM' as const, label: '프리미엄', price: 300000, priceLabel: '300,000P', desc: '최상단 테마 강조 노출', emoji: '👑' },
-    { value: 'GENERAL' as const, label: '일반', price: 50000, priceLabel: '50,000P', desc: '기본 노출', emoji: '📋' },
 ];
 
 const COLOR_PALETTE = [

@@ -324,57 +324,6 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                 )}
             </section>
 
-            {/* --- Tier 3: General Jobs --- */}
-            <section>
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-lg sm:text-2xl font-black text-gray-900 italic uppercase whitespace-nowrap flex items-center gap-1 sm:gap-2">
-                        <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" /> {t.sections.generalJobsTitle}
-                    </h2>
-                    <div className="flex items-center gap-1.5 sm:gap-3">
-
-                        {session?.user?.role !== 'VIEWER' && (
-                            <Link href="/biz/ads/new">
-                                <span className="text-xs sm:text-sm font-black text-white bg-primary hover:bg-orange-600 px-3 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1">
-                                    <Plus className="w-3.5 h-3.5" /> 광고 등록
-                                </span>
-                            </Link>
-                        )}
-                        <button 
-                            onClick={() => setShowAllGeneral(!showAllGeneral)}
-                            className="text-xs sm:text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap"
-                        >
-                            {showAllGeneral ? '접기' : (t.common.viewAll || '전체보기')} {showAllGeneral ? <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                        </button>
-                    </div>
-                </div>
-                {lineJobs.length > 0 ? (
-                    <div className="grid grid-cols-2 min-[600px]:grid-cols-3 min-[830px]:grid-cols-4 min-[1040px]:grid-cols-5 gap-2 min-[600px]:gap-4 w-full mx-auto">
-                        {lineJobs.map((job, idx) => (
-                            <div 
-                                key={job.id} 
-                                className={`w-full ${
-                                    !showAllGeneral ? getResponsiveHideClass(idx, 5) : ''
-                                }`}
-                            >
-                                <PremiumJobCard 
-                                    {...(job as any)} 
-                                    impactType="none" 
-                                    effectIntensity="none" 
-                                    hideLogo={true} 
-                                    tier="GENERAL" 
-                                    customColor={(job as any).color} 
-                                    bgOpacity={(job as any).bg_opacity}
-                                    rawAd={job}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="py-12 bg-gray-50 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center">
-                        <p className="text-gray-400 font-bold">등록된 일반 광고가 없습니다.</p>
-                    </div>
-                )}
-            </section>
 
             {/* --- Bottom Board Section (실제 DB 구인정보 & 인재정보 2컬럼 리스트) --- */}
             <section className="border-t pt-10">
@@ -391,7 +340,7 @@ export function HomeJobSections({ initialData }: HomeJobSectionsProps) {
                         </div>
                         <ul className="space-y-1">
                             {(() => {
-                                const realJobsList = [...generalJobs, ...lineJobs, ...premiumJobs, ...specialJobs].filter(j => j.isRealAd && j.title).slice(0, 6);
+                                const realJobsList = [...premiumJobs, ...specialJobs].filter(j => j.isRealAd && j.title).slice(0, 6);
                                 if (realJobsList.length === 0) {
                                     return <li className="py-6 text-center text-gray-400 text-[13px] font-medium">등록된 구인 공고가 없습니다.</li>;
                                 }

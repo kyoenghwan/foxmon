@@ -243,7 +243,7 @@ export default function AdRankingsPage() {
                                 : '휴지통 (1차 삭제 목록)'}
                         </h2>
                         <div className="flex flex-wrap gap-2">
-                            {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'SPECIAL', 'AD_GENERAL', 'GENERAL'].map(t => (
+                            {['PREMIUM_MAIN', 'SIDE', 'PREMIUM', 'SPECIAL'].map(t => (
                                 <button 
                                     key={t}
                                     onClick={() => setTier(t)}

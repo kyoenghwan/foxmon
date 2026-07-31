@@ -7,15 +7,13 @@ import { getRotatedAds } from '@/lib/ad-service';
 export default async function Home() {
   console.time('⏳ [Performance] Home Server Components Load');
   
-  const [activePopups, [sideAds, premiumMainAds, premiumJobs, specialJobs, lineJobs, generalJobs], seekerRes] = await Promise.all([
+  const [activePopups, [sideAds, premiumMainAds, premiumJobs, specialJobs], seekerRes] = await Promise.all([
       QA_GET_ACTIVE_BANNERS('POPUP'),
       Promise.all([
           getRotatedAds('SIDE', 8),
           getRotatedAds('PREMIUM_MAIN', 5),
           getRotatedAds('PREMIUM', 50),
-          getRotatedAds('SPECIAL', 50),
-          getRotatedAds('AD_GENERAL', 50),
-          getRotatedAds('GENERAL', 50)
+          getRotatedAds('SPECIAL', 50)
       ]),
       QA_GET_PUBLIC_SEEKER_ADS()
   ]);
@@ -33,8 +31,8 @@ export default async function Home() {
               premiumMainAds,
               premiumJobs,
               specialJobs,
-              lineJobs,
-              generalJobs,
+              lineJobs: [],
+              generalJobs: [],
               seekerAds
           }}
       />
