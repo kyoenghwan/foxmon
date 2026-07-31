@@ -55,13 +55,10 @@ export async function QA_GET_EMPLOYER_LIST() {
             return { success: true, data: [], error: null };
         }
 
-        const userIds = allUsers.map(u => u.id);
-
-        // 2. jobs 정보 조회
+        // 2. jobs 정보 전체 조회 (PostgreSQL UUID 타입 캐스팅 버그 우회를 위해 전체 조회 후 JS 단 매핑)
         const { data: jobsData, error: jobsError } = await supabaseAdmin
             .from('jobs')
-            .select('id, user_id, status, expires_at, auto_renew, tier')
-            .in('user_id', userIds);
+            .select('id, user_id, status, expires_at, auto_renew, tier');
 
         if (jobsError) {
             nvLog('AT', '⚠️ QA_GET_EMPLOYER_LIST jobs 조회 에러', jobsError.message);
@@ -81,11 +78,10 @@ export async function QA_GET_EMPLOYER_LIST() {
             });
         }
 
-        // 3. biz_ads 정보 조회
+        // 3. biz_ads 정보 전체 조회 (PostgreSQL UUID 타입 캐스팅 버그 우회를 위해 전체 조회 후 JS 단 매핑)
         const { data: adsData, error: adsError } = await supabaseAdmin
             .from('biz_ads')
-            .select('id, user_id, status, expires_at, option_subscription, tier')
-            .in('user_id', userIds);
+            .select('id, user_id, status, expires_at, option_subscription, tier');
 
         if (adsError) {
             nvLog('AT', '⚠️ QA_GET_EMPLOYER_LIST biz_ads 조회 에러', adsError.message);
