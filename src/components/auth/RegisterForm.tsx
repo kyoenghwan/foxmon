@@ -435,12 +435,12 @@ export function RegisterForm() {
           if (step > 1) {
             handlePrev();
           } else {
-            router.push('/age-gate');
+            router.push('/login');
           }
         }}
         type="button"
         className="absolute top-5 left-5 z-20 flex items-center justify-center w-10 h-10 rounded-full bg-white/80 hover:bg-purple-100 text-gray-500 hover:text-purple-700 transition-all shadow-sm backdrop-blur-md border border-purple-100"
-        title={step > 1 ? "이전 단계로 가기" : "연령인증 화면으로 돌아가기"}
+        title={step > 1 ? "이전 단계로 가기" : "로그인 화면으로 돌아가기"}
       >
         <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
       </button>
