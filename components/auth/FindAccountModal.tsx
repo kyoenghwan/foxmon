@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,14 @@ export function FindAccountModal({ isOpen, onClose, defaultTab = 'find-id' }: Fi
     setResetForm({ loginId: '', newPassword: '', confirmPassword: '' });
     setVerifiedCi('');
   };
+
+  // 모달이 열리거나 defaultTab prop이 변경될 때 활성화 탭 동기화 및 폼 초기화
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(defaultTab);
+      resetAllState();
+    }
+  }, [isOpen, defaultTab]);
 
   const handleTabChange = (tab: 'find-id' | 'find-pw') => {
     setActiveTab(tab);
