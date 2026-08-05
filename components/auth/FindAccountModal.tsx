@@ -77,29 +77,73 @@ export function FindAccountModal({ isOpen, onClose, defaultTab = 'find-id' }: Fi
     }
   };
 
-  // 2. [비밀번호 찾기] 1단계: 아이디 존재 확인 및 본인인증 단계 진입
-  const handlePwInputIdSubmit = (e: React.FormEvent) => {
+  // 2. [비밀번호 찾기] 1단계: 아이디 존재 여부 1차 사전 체크
+  const handlePwInputIdSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resetForm.loginId.trim()) {
+    const loginId = resetForm.loginId.trim();
+    if (!loginId) {
       setMessage({ type: 'error', text: '아이디를 입력해 주세요.' });
       return;
     }
+    setIsLoading(true);
     setMessage(null);
-    setPwResetStep('verify');
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'check-id', loginId }),
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        setPwResetStep('verify');
+      } else {
+        setMessage({ type: 'error', text: result.message || '존재하지 않는 아이디입니다.' });
+      }
+    } catch {
+      setMessage({ type: 'error', text: '서버 통신 오류가 발생했습니다.' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // [비밀번호 찾기] 2단계: 본인인증 성공 시 CI 저장 후 새 비밀번호 입력 단계 진입
-  const handlePwVerifySuccess = (data: any) => {
-    if (!data.ci) {
-      setMessage({ type: 'error', text: '인증 정보(CI)를 가져오지 못했습니다.' });
+  // [비밀번호 찾기] 2단계: 본인인증 성공 시 2차 소유자 사전 검증 후 새 비밀번호 단계 진입
+  const handlePwVerifySuccess = async (data: any) => {
+    if (!data.ci && !data.phoneNumber) {
+      setMessage({ type: 'error', text: '인증 정보를 가져오지 못했습니다.' });
       return;
     }
-    setVerifiedCi(data.ci);
-    setPwResetStep('new-password');
+    setIsLoading(true);
     setMessage(null);
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'verify-owner',
+          loginId: resetForm.loginId.trim(),
+          ci: data.ci,
+          phoneNumber: data.phoneNumber,
+        }),
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        setVerifiedCi(data.ci || '');
+        setPwResetStep('new-password');
+      } else {
+        setMessage({ type: 'error', text: result.message || '입력하신 아이디와 본인 인증 정보가 일치하지 않습니다.' });
+      }
+    } catch {
+      setMessage({ type: 'error', text: '소유자 확인 중 오류가 발생했습니다.' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // [비밀번호 찾기] 3단계: 새 비밀번호 변경 처리
+  // [비밀번호 찾기] 3단계: 새 비밀번호 최종 변경 처리
   const handleResetPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resetForm.newPassword || resetForm.newPassword.length < 4) {
@@ -253,9 +297,10 @@ export function FindAccountModal({ isOpen, onClose, defaultTab = 'find-id' }: Fi
                 </div>
                 <Button
                   type="submit"
+                  disabled={isLoading}
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white h-11 rounded-xl font-black text-xs"
                 >
-                  다음 (본인인증 진행)
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : '다음 (본인인증 진행)'}
                 </Button>
               </form>
             )}
