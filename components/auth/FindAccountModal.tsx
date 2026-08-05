@@ -44,10 +44,10 @@ export function FindAccountModal({ isOpen, onClose, defaultTab = 'find-id' }: Fi
     resetAllState();
   };
 
-  // 1. [아이디 찾기] 본인인증 성공 시 CI로 아이디 조회
+  // 1. [아이디 찾기] 본인인증 성공 시 CI 및 휴대폰 번호로 아이디 조회
   const handleIdFindVerifySuccess = async (data: any) => {
-    if (!data.ci) {
-      setMessage({ type: 'error', text: '인증 정보(CI)를 가져오지 못했습니다.' });
+    if (!data.ci && !data.phoneNumber) {
+      setMessage({ type: 'error', text: '인증 정보를 가져오지 못했습니다.' });
       return;
     }
     setIsLoading(true);
@@ -56,7 +56,11 @@ export function FindAccountModal({ isOpen, onClose, defaultTab = 'find-id' }: Fi
       const res = await fetch('/api/auth/find-id', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ method: 'phone', ci: data.ci }),
+        body: JSON.stringify({ 
+          method: 'phone', 
+          ci: data.ci, 
+          phoneNumber: data.phoneNumber 
+        }),
       });
       const result = await res.json();
 

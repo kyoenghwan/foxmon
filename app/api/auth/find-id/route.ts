@@ -9,13 +9,13 @@ export async function POST(req: Request) {
     const { method } = body; // 'phone' | 'email'
 
     if (method === 'phone') {
-      // 본인인증으로 아이디 찾기 — CI로 조회
-      const { ci } = body;
-      if (!ci) {
-        return NextResponse.json({ success: false, message: 'CI 정보가 없습니다.' }, { status: 400 });
+      // 본인인증으로 아이디 찾기 — CI 및 휴대폰 번호로 통합 조회
+      const { ci, phoneNumber } = body;
+      if (!ci && !phoneNumber) {
+        return NextResponse.json({ success: false, message: '인증 정보가 올바르지 않습니다.' }, { status: 400 });
       }
 
-      const result = await QA_FIND_USER_BY_CI(ci);
+      const result = await QA_FIND_USER_BY_CI(ci, phoneNumber);
       if (result.error) {
         return NextResponse.json({ success: false, message: '조회 중 오류가 발생했습니다.' }, { status: 500 });
       }
