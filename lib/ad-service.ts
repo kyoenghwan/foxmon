@@ -211,6 +211,11 @@ async function fetchAdsFromDBInternal(
 
         if (!data || data.length === 0) {
             queryLogs.push(`[DB Query Result] Empty. 0 records returned from Supabase.`);
+            if (tier === 'SIDE') {
+                queryLogs.push(`[DB Fallback] Returning MOCK_ADS for SIDE tier to prevent blank side banners.`);
+                const fallback = MOCK_ADS.filter(ad => ad.tier === 'SIDE');
+                return { ads: fallback, queryLogs };
+            }
             return { ads: [], queryLogs };
         }
 
