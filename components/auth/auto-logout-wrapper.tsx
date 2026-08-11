@@ -222,6 +222,96 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [status]);
 
+  // 인터넷 오프라인 감지 및 5초 카운트다운 상태
+  const [isOffline, setIsOffline] = useState(false);
+  const [offlineCountdown, setOfflineCountdown] = useState(5);
+  const offlineIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isOfflineRef = useRef(false);
+
+  useEffect(() => {
+    const triggerOfflineModal = () => {
+      if (isOfflineRef.current) return;
+      isOfflineRef.current = true;
+      setIsOffline(true);
+      setOfflineCountdown(5);
+
+      if (offlineIntervalRef.current) clearInterval(offlineIntervalRef.current);
+
+      offlineIntervalRef.current = setInterval(() => {
+        setOfflineCountdown((prev) => {
+          if (prev <= 1) {
+            if (offlineIntervalRef.current) clearInterval(offlineIntervalRef.current);
+            window.location.href = '/login?reason=offline';
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    };
+
+    const handleOffline = () => {
+      triggerOfflineModal();
+    };
+
+    const handleOnline = () => {
+      if (offlineIntervalRef.current) clearInterval(offlineIntervalRef.current);
+      isOfflineRef.current = false;
+      setIsOffline(false);
+      setOfflineCountdown(5);
+    };
+
+    // 1. 초기 마운트 시 브라우저가 이미 오프라인인지 확인
+    if (typeof window !== 'undefined' && !navigator.onLine) {
+      triggerOfflineModal();
+    }
+
+    // 2. 브라우저 OS 오프라인/온라인 이벤트 수신기 등록
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+
+    // 3. 가짜 온라인(Fake Online) 방지를 위한 5초 간격 네트워크 핑(Ping) 체크
+    const pingInterval = setInterval(async () => {
+      if (typeof window === 'undefined') return;
+      
+      // 이미 OS 수준에서 오프라인이면 핑 생략
+      if (!navigator.onLine) {
+        triggerOfflineModal();
+        return;
+      }
+
+      try {
+        // 캐시 없이 가벼운 헤더 핑 체크 (타임아웃 3초)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const res = await fetch('/robots.txt', {
+          method: 'HEAD',
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok && res.status !== 404) {
+          // 인터넷이 끊겼거나 응답 불가
+          triggerOfflineModal();
+        } else if (isOfflineRef.current) {
+          // 통신이 다시 연결된 경우 복구
+          handleOnline();
+        }
+      } catch (err) {
+        // 네트워크 연결 실패 (Failed to fetch) -> 오프라인으로 판정
+        triggerOfflineModal();
+      }
+    }, 5000);
+
+    return () => {
+      if (offlineIntervalRef.current) clearInterval(offlineIntervalRef.current);
+      clearInterval(pingInterval);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
+
   const handleExtendSession = () => {
     resetIdleState();
     resetTimer(true);
@@ -231,34 +321,59 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
     void performLogout();
   };
 
-  if (status !== 'authenticated') {
-    return <>{children}</>;
-  }
-
   return (
     <>
-      <Dialog open={showWarning} onOpenChange={(open) => {
-        // 사용자가 외부 클릭으로 모달을 닫는 것을 방지
-        if (!open) return; 
-      }}>
-        <DialogContent className="sm:max-w-md !z-[99999]" overlayClassName="!z-[99999]" aria-describedby="auto-logout-desc">
+      {/* 1. 무동작 자동 로그아웃 경고 모달 */}
+      {status === 'authenticated' && (
+        <Dialog open={showWarning} onOpenChange={(open) => {
+          if (!open) return; 
+        }}>
+          <DialogContent className="sm:max-w-md !z-[99999]" overlayClassName="!z-[99999]" aria-describedby="auto-logout-desc">
+            <DialogHeader>
+              <DialogTitle>자동 로그아웃 안내</DialogTitle>
+              <DialogDescription id="auto-logout-desc">
+                아무런 작업이 감지되지 않아 보호를 위해 <strong className="text-red-500 font-bold">{remainingSeconds}초</strong> 후 자동으로 로그아웃 됩니다.<br/>
+                계속 이용하시려면 연장 버튼을 눌러주세요.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex flex-row justify-end space-x-2 sm:space-x-2">
+              <Button variant="outline" onClick={handleLogoutNow}>
+                로그아웃
+              </Button>
+              <Button onClick={handleExtendSession}>
+                 연장하기
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* 2. 인터넷 끊김 5초 카운트다운 강제 리다이렉트 모달 */}
+      <Dialog open={isOffline} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md !z-[999999] border-red-200 bg-red-50/90 backdrop-blur-md" overlayClassName="!z-[999999]" aria-describedby="offline-desc">
           <DialogHeader>
-            <DialogTitle>자동 로그아웃 안내</DialogTitle>
-            <DialogDescription id="auto-logout-desc">
-              아무런 작업이 감지되지 않아 보호를 위해 <strong className="text-red-500 font-bold">{remainingSeconds}초</strong> 후 자동으로 로그아웃 됩니다.<br/>
-              계속 이용하시려면 연장 버튼을 눌러주세요.
+            <DialogTitle className="text-red-600 font-black flex items-center gap-2">
+              🌐 인터넷 연결 해제 안내
+            </DialogTitle>
+            <DialogDescription id="offline-desc" className="text-gray-800 pt-2 font-medium">
+              네트워크 연결이 끊어졌습니다.<br/>
+              안전한 이용을 위해 <strong className="text-red-600 font-black text-lg px-1">{offlineCountdown}초</strong> 후 로그인 페이지로 이동합니다.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex flex-row justify-end space-x-2 sm:space-x-2">
-            <Button variant="outline" onClick={handleLogoutNow}>
-              로그아웃
-            </Button>
-            <Button onClick={handleExtendSession}>
-               연장하기
+          <DialogFooter className="flex flex-row justify-end space-x-2 pt-2">
+            <Button
+              variant="destructive"
+              className="w-full font-bold"
+              onClick={() => {
+                window.location.href = '/login?reason=offline';
+              }}
+            >
+              지금 로그인 페이지로 이동
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
       {children}
     </>
   );
