@@ -222,10 +222,8 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [status]);
 
-  // 인터넷 오프라인 감지 및 5초 카운트다운 상태
+  // 인터넷 오프라인 감지 및 경고 팝업 상태 (브라우저 하얀 화면 방지)
   const [isOffline, setIsOffline] = useState(false);
-  const [offlineCountdown, setOfflineCountdown] = useState(5);
-  const offlineIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isOfflineRef = useRef(false);
 
   useEffect(() => {
@@ -233,20 +231,6 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
       if (isOfflineRef.current) return;
       isOfflineRef.current = true;
       setIsOffline(true);
-      setOfflineCountdown(5);
-
-      if (offlineIntervalRef.current) clearInterval(offlineIntervalRef.current);
-
-      offlineIntervalRef.current = setInterval(() => {
-        setOfflineCountdown((prev) => {
-          if (prev <= 1) {
-            if (offlineIntervalRef.current) clearInterval(offlineIntervalRef.current);
-            window.location.href = '/login?reason=offline';
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
     };
 
     const handleOffline = () => {
@@ -254,13 +238,11 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
     };
 
     const handleOnline = () => {
-      if (offlineIntervalRef.current) clearInterval(offlineIntervalRef.current);
       isOfflineRef.current = false;
       setIsOffline(false);
-      setOfflineCountdown(5);
     };
 
-    // 1. 초기 마운트 시 브라우저가 이미 오프라인인지 확인
+    // 1. 초기 마운트 시 오프라인 여부 확인
     if (typeof window !== 'undefined' && !navigator.onLine) {
       triggerOfflineModal();
     }
@@ -269,18 +251,16 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
     window.addEventListener('offline', handleOffline);
     window.addEventListener('online', handleOnline);
 
-    // 3. 가짜 온라인(Fake Online) 방지를 위한 5초 간격 네트워크 핑(Ping) 체크
+    // 3. 5초 간격 실시간 네트워크 패킷 핑 체크
     const pingInterval = setInterval(async () => {
       if (typeof window === 'undefined') return;
       
-      // 이미 OS 수준에서 오프라인이면 핑 생략
       if (!navigator.onLine) {
         triggerOfflineModal();
         return;
       }
 
       try {
-        // 캐시 없이 가벼운 헤더 핑 체크 (타임아웃 3초)
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
         
@@ -292,20 +272,18 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
         clearTimeout(timeoutId);
 
         if (!res.ok && res.status !== 404) {
-          // 인터넷이 끊겼거나 응답 불가
           triggerOfflineModal();
         } else if (isOfflineRef.current) {
-          // 통신이 다시 연결된 경우 복구
+          // 인터넷이 끊겼다가 다시 연결된 경우 경고 모달 자동 닫기
           handleOnline();
         }
       } catch (err) {
-        // 네트워크 연결 실패 (Failed to fetch) -> 오프라인으로 판정
+        // 네트워크 통신 불가 감지 -> 경고 모달 노출 (페이지 이동 안함)
         triggerOfflineModal();
       }
     }, 5000);
 
     return () => {
-      if (offlineIntervalRef.current) clearInterval(offlineIntervalRef.current);
       clearInterval(pingInterval);
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
@@ -348,27 +326,31 @@ function AutoLogoutLogic({ children }: { children: React.ReactNode }) {
         </Dialog>
       )}
 
-      {/* 2. 인터넷 끊김 5초 카운트다운 강제 리다이렉트 모달 */}
+      {/* 2. 인터넷 끊김 안내 모달 (브라우저 에러 페이지 튕김 방지) */}
       <Dialog open={isOffline} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md !z-[999999] border-red-200 bg-red-50/90 backdrop-blur-md" overlayClassName="!z-[999999]" aria-describedby="offline-desc">
+        <DialogContent className="sm:max-w-md !z-[999999] border-red-200 bg-white/95 backdrop-blur-md shadow-2xl" overlayClassName="!z-[999999]" aria-describedby="offline-desc">
           <DialogHeader>
-            <DialogTitle className="text-red-600 font-black flex items-center gap-2">
-              🌐 인터넷 연결 해제 안내
+            <DialogTitle className="text-red-600 font-black text-lg flex items-center gap-2">
+              🌐 인터넷 연결이 끊어졌습니다
             </DialogTitle>
-            <DialogDescription id="offline-desc" className="text-gray-800 pt-2 font-medium">
-              네트워크 연결이 끊어졌습니다.<br/>
-              안전한 이용을 위해 <strong className="text-red-600 font-black text-lg px-1">{offlineCountdown}초</strong> 후 로그인 페이지로 이동합니다.
+            <DialogDescription id="offline-desc" className="text-gray-700 pt-2 font-medium leading-relaxed">
+              네트워크 상태를 확인해 주세요.<br/>
+              인터넷이 다시 연결되면 <strong className="text-primary font-bold">자동으로 화면이 정상 복구</strong>됩니다.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex flex-row justify-end space-x-2 pt-2">
+          <DialogFooter className="flex flex-row justify-end space-x-2 pt-3">
             <Button
-              variant="destructive"
-              className="w-full font-bold"
+              variant="default"
+              className="w-full font-bold bg-primary hover:bg-primary/90"
               onClick={() => {
-                window.location.href = '/login?reason=offline';
+                if (navigator.onLine) {
+                  window.location.reload();
+                } else {
+                  alert('아직 인터넷이 연결되지 않았습니다. 와이파이나 네트워크 연결을 확인해 주세요.');
+                }
               }}
             >
-              지금 로그인 페이지로 이동
+              🔄 연결 재시도
             </Button>
           </DialogFooter>
         </DialogContent>
