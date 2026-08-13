@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Bell, HelpCircle, MessageCircle, Gift } from 'lucide-react';
+import { Bell, HelpCircle, MessageCircle, Gift, Megaphone } from 'lucide-react';
 import { SidebarNav, SidebarSection } from '@/components/layout/SidebarNav';
 import Link from 'next/link';
 
@@ -11,7 +11,8 @@ const sections: SidebarSection[] = [
             { id: '/help', label: '공지사항', icon: Bell, href: '/help' },
             { id: '/help?tab=event', label: '이벤트', icon: Gift, href: '/help?tab=event' },
             { id: '/help/faq', label: '자주 묻는 질문', icon: HelpCircle, href: '/help/faq' },
-            { id: '/help/inquiry', label: '1:1 문의', icon: MessageCircle, href: '/help/inquiry' },
+            { id: '/help/inquiry', label: '1:1 문의 / 질문답변', icon: MessageCircle, href: '/help/inquiry' },
+            { id: '/jobs/post', label: '광고 상품 안내', icon: Megaphone, href: '/jobs/post' },
         ],
     },
 ];

@@ -506,8 +506,8 @@ export function MainHeader({ session }: MainHeaderProps) {
                         <div className="space-y-4">
                             <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4 text-base">고객센터</h4>
                             <div className="grid grid-cols-1 gap-y-3 text-[14px] font-medium text-gray-600">
-                                <Link href="/help" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">질문답변</Link>
-                                <Link href="/help" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">자주묻는질문</Link>
+                                <Link href="/help/inquiry" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">질문답변 (1:1 문의)</Link>
+                                <Link href="/help/faq" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">자주묻는질문</Link>
                                 <Link href="/help" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">공지사항</Link>
                                 <Link href="/jobs/post" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors flex items-center gap-1">
                                     광고상품안내 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span>
@@ -619,8 +619,8 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 </button>
                                 {mobileExpanded === 'help' && (
                                     <div className="flex flex-col gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
-                                        <Link href="/help" onClick={() => setShowMobileMenu(false)}>질문답변</Link>
-                                        <Link href="/help" onClick={() => setShowMobileMenu(false)}>자주묻는질문</Link>
+                                        <Link href="/help/inquiry" onClick={() => setShowMobileMenu(false)}>질문답변 (1:1 문의)</Link>
+                                        <Link href="/help/faq" onClick={() => setShowMobileMenu(false)}>자주묻는질문</Link>
                                         <Link href="/help" onClick={() => setShowMobileMenu(false)}>공지사항</Link>
                                         <Link href="/jobs/post" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-2">광고상품안내 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
                                     </div>
