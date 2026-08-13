@@ -40,8 +40,8 @@ export function HelpCenterAdminClient({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-black text-gray-900">고객센터 콘텐츠</h2>
-        <p className="text-[13px] text-gray-500 mt-1">공지·FAQ·1:1 문의 답변을 관리합니다. (/help 에 반영)</p>
+        <h2 className="text-2xl font-black text-gray-900">고객센터 콘텐츠 관리</h2>
+        <p className="text-[13px] text-gray-500 mt-1">공지사항 · 자주하는 질문(FAQ) · 1:1 문의 답변을 관리합니다. (사용자 /help 페이지에 반영)</p>
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -55,7 +55,7 @@ export function HelpCenterAdminClient({
             }`}
           >
             <t.icon className="w-4 h-4" />
-            {t.label}
+            {t.id === 'faqs' ? '자주하는 질문 (FAQ)' : t.label}
           </button>
         ))}
       </div>
