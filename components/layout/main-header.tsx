@@ -444,64 +444,54 @@ export function MainHeader({ session }: MainHeaderProps) {
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
-                    <div className="container mx-auto px-4 lg:px-8 py-8 flex justify-between gap-4">
-                        {/* Column 1 */}
+                    <div className="container mx-auto px-4 lg:px-8 py-8 grid grid-cols-4 gap-8">
+                        {/* Column 1: 지역별 구인정보 */}
                         <div className="space-y-4">
-                            <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4">지역별 구인정보</h4>
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-[14px] font-medium text-gray-600">
-                                <Link href="#" className="hover:text-primary transition-colors">서울</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">경기</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">인천</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">대전</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">대구</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">부산</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">울산</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">광주</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">세종</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">제주</Link>
+                            <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4 text-base">지역별 구인정보</h4>
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-[14px] font-medium text-gray-600">
+                                {['서울', '경기', '인천', '대전', '대구', '부산', '울산', '광주', '세종', '제주'].map((loc) => (
+                                    <Link 
+                                        key={`job-${loc}`} 
+                                        href={`/jobs?region=${encodeURIComponent(loc)}`}
+                                        onClick={() => setShowMegaMenu(false)}
+                                        className="hover:text-primary transition-colors hover:font-bold"
+                                    >
+                                        {loc}
+                                    </Link>
+                                ))}
                             </div>
                         </div>
 
-                        {/* Column 2 */}
+                        {/* Column 2: 지역별 인재정보 */}
                         <div className="space-y-4">
-                            <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4">업종별 구인정보</h4>
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-[14px] font-medium text-gray-600">
-                                <Link href="#" className="hover:text-primary transition-colors">스웨디시</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">1인샵</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">왁싱</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">아로마마사지</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">스포츠마사지</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">피부관리</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">타이마사지</Link>
+                            <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4 text-base">지역별 인재정보</h4>
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-[14px] font-medium text-gray-600">
+                                {['서울', '경기', '인천', '대전', '대구', '부산', '울산', '광주', '세종', '제주'].map((loc) => (
+                                    <Link 
+                                        key={`seeker-${loc}`} 
+                                        href={`/seekers?region=${encodeURIComponent(loc)}`}
+                                        onClick={() => setShowMegaMenu(false)}
+                                        className="hover:text-primary transition-colors hover:font-bold"
+                                    >
+                                        {loc}
+                                    </Link>
+                                ))}
                             </div>
                         </div>
 
-                        {/* Column 3 */}
-                        <div className="space-y-4">
-                            <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4">지역별 인재정보</h4>
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-[14px] font-medium text-gray-600">
-                                <Link href="#" className="hover:text-primary transition-colors">서울</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">경기</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">인천</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">대전</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">대구</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">부산</Link>
-                            </div>
-                        </div>
-
-                        {/* Column 4: 커뮤니티 */}
-                        {session?.user?.role !== 'VIEWER' && (
+                        {/* Column 3: 커뮤니티 */}
+                        {session?.user?.role !== 'VIEWER' ? (
                             <div className="space-y-4">
-                                <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4">커뮤니티</h4>
+                                <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4 text-base">커뮤니티</h4>
                                 <div className="grid grid-cols-1 gap-y-3 text-[14px] font-medium text-gray-600">
-                                    <Link href="/community?tab=free" className="hover:text-primary transition-colors">자유게시판</Link>
-                                    <Link href="/community?tab=freemarket" className="hover:text-primary transition-colors">자유장터</Link>
-                                    <Link href="/community?tab=foxtalk" className="hover:text-primary transition-colors flex items-center gap-1">
+                                    <Link href="/community?tab=free" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">자유게시판</Link>
+                                    <Link href="/community?tab=freemarket" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">자유장터</Link>
+                                    <Link href="/community?tab=foxtalk" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors flex items-center gap-1">
                                         폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span>
                                     </Link>
-                                    <Link href="/community?tab=foxmarket" className="hover:text-primary transition-colors">폭스장터</Link>
-                                    <Link href="/community?tab=business" className="hover:text-primary transition-colors">업소장터</Link>
-                                    <Link href="/community?tab=reviews" className="hover:text-primary transition-colors">업소후기·제보</Link>
+                                    <Link href="/community?tab=foxmarket" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">폭스장터</Link>
+                                    <Link href="/community?tab=business" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">업소장터</Link>
+                                    <Link href="/community?tab=reviews" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">업소후기·제보</Link>
                                     <button 
                                         onClick={() => {
                                             setShowMegaMenu(false);
@@ -513,16 +503,16 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     </button>
                                 </div>
                             </div>
-                        )}
+                        ) : <div />}
 
-                        {/* Column 5: 고객센터 */}
+                        {/* Column 4: 고객센터 */}
                         <div className="space-y-4">
-                            <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4">고객센터</h4>
+                            <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4 text-base">고객센터</h4>
                             <div className="grid grid-cols-1 gap-y-3 text-[14px] font-medium text-gray-600">
-                                <Link href="#" className="hover:text-primary transition-colors">질문답변</Link>
-                                <Link href="#" className="hover:text-primary transition-colors">자주묻는질문</Link>
-                                <Link href="/help" className="hover:text-primary transition-colors">공지사항</Link>
-                                <Link href="/jobs/post" className="hover:text-primary transition-colors flex items-center gap-1">
+                                <Link href="/help" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">질문답변</Link>
+                                <Link href="/help" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">자주묻는질문</Link>
+                                <Link href="/help" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">공지사항</Link>
+                                <Link href="/jobs/post" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors flex items-center gap-1">
                                     광고상품안내 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span>
                                 </Link>
                             </div>
@@ -554,7 +544,7 @@ export function MainHeader({ session }: MainHeaderProps) {
 
                         {/* 모바일 아코디언 전체 메뉴 */}
                         <div className="px-4 py-2">
-                            {/* 지역별 구인정보 */}
+                            {/* 1. 지역별 구인정보 */}
                             <div className="border-b border-gray-100">
                                 <button onClick={() => setMobileExpanded(mobileExpanded === 'region' ? null : 'region')} className="w-full flex items-center justify-between py-4 font-black text-gray-900">
                                     <span>지역별 구인정보</span>
@@ -562,31 +552,43 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 </button>
                                 {mobileExpanded === 'region' && (
                                     <div className="grid grid-cols-3 gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
-                                        <Link href="#" className="py-1">서울</Link><Link href="#" className="py-1">경기</Link><Link href="#" className="py-1">인천</Link>
-                                        <Link href="#" className="py-1">대전</Link><Link href="#" className="py-1">대구</Link><Link href="#" className="py-1">부산</Link>
-                                        <Link href="#" className="py-1">울산</Link><Link href="#" className="py-1">광주</Link><Link href="#" className="py-1">세종</Link>
-                                        <Link href="#" className="py-1">제주</Link>
+                                        {['서울', '경기', '인천', '대전', '대구', '부산', '울산', '광주', '세종', '제주'].map((loc) => (
+                                            <Link 
+                                                key={`m-job-${loc}`} 
+                                                href={`/jobs?region=${encodeURIComponent(loc)}`}
+                                                onClick={() => setShowMobileMenu(false)}
+                                                className="py-1 text-center bg-gray-50 rounded-lg hover:bg-primary/10 hover:text-primary"
+                                            >
+                                                {loc}
+                                            </Link>
+                                        ))}
                                     </div>
                                 )}
                             </div>
 
-                            {/* 업종별 구인정보 */}
+                            {/* 2. 지역별 인재정보 */}
                             <div className="border-b border-gray-100">
-                                <button onClick={() => setMobileExpanded(mobileExpanded === 'job' ? null : 'job')} className="w-full flex items-center justify-between py-4 font-black text-gray-900">
-                                    <span>업종별 구인정보</span>
-                                    <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${mobileExpanded === 'job' ? 'rotate-90 text-primary' : ''}`} />
+                                <button onClick={() => setMobileExpanded(mobileExpanded === 'seeker' ? null : 'seeker')} className="w-full flex items-center justify-between py-4 font-black text-gray-900">
+                                    <span>지역별 인재정보</span>
+                                    <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${mobileExpanded === 'seeker' ? 'rotate-90 text-primary' : ''}`} />
                                 </button>
-                                {mobileExpanded === 'job' && (
-                                    <div className="grid grid-cols-2 gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
-                                        <Link href="#" className="py-1">스웨디시</Link><Link href="#" className="py-1">1인샵</Link>
-                                        <Link href="#" className="py-1">왁싱</Link><Link href="#" className="py-1">아로마마사지</Link>
-                                        <Link href="#" className="py-1">스포츠마사지</Link><Link href="#" className="py-1">피부관리</Link>
-                                        <Link href="#" className="py-1">타이마사지</Link>
+                                {mobileExpanded === 'seeker' && (
+                                    <div className="grid grid-cols-3 gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
+                                        {['서울', '경기', '인천', '대전', '대구', '부산', '울산', '광주', '세종', '제주'].map((loc) => (
+                                            <Link 
+                                                key={`m-seeker-${loc}`} 
+                                                href={`/seekers?region=${encodeURIComponent(loc)}`}
+                                                onClick={() => setShowMobileMenu(false)}
+                                                className="py-1 text-center bg-gray-50 rounded-lg hover:bg-primary/10 hover:text-primary"
+                                            >
+                                                {loc}
+                                            </Link>
+                                        ))}
                                     </div>
                                 )}
                             </div>
 
-                            {/* 커뮤니티 */}
+                            {/* 3. 커뮤니티 */}
                             {session?.user?.role !== 'VIEWER' && (
                                 <div className="border-b border-gray-100">
                                     <button onClick={() => setMobileExpanded(mobileExpanded === 'community' ? null : 'community')} className="w-full flex items-center justify-between py-4 font-black text-gray-900">
@@ -595,12 +597,12 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     </button>
                                     {mobileExpanded === 'community' && (
                                         <div className="flex flex-col gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
-                                            <Link href="/community?tab=free">자유게시판</Link>
-                                            <Link href="/community?tab=freemarket">자유장터</Link>
-                                            <Link href="/community?tab=foxtalk" className="flex items-center gap-2">폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
-                                            <Link href="/community?tab=foxmarket">폭스장터</Link>
-                                            <Link href="/community?tab=business">업소장터</Link>
-                                            <Link href="/community?tab=reviews">업소후기·제보</Link>
+                                            <Link href="/community?tab=free" onClick={() => setShowMobileMenu(false)}>자유게시판</Link>
+                                            <Link href="/community?tab=freemarket" onClick={() => setShowMobileMenu(false)}>자유장터</Link>
+                                            <Link href="/community?tab=foxtalk" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-2">폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
+                                            <Link href="/community?tab=foxmarket" onClick={() => setShowMobileMenu(false)}>폭스장터</Link>
+                                            <Link href="/community?tab=business" onClick={() => setShowMobileMenu(false)}>업소장터</Link>
+                                            <Link href="/community?tab=reviews" onClick={() => setShowMobileMenu(false)}>업소후기·제보</Link>
                                             <button 
                                                 onClick={() => {
                                                     setShowMobileMenu(false);
@@ -615,7 +617,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 </div>
                             )}
 
-                            {/* 고객센터 */}
+                            {/* 4. 고객센터 */}
                             <div className="border-b border-gray-100">
                                 <button onClick={() => setMobileExpanded(mobileExpanded === 'help' ? null : 'help')} className="w-full flex items-center justify-between py-4 font-black text-gray-900">
                                     <span>고객센터</span>
@@ -623,10 +625,10 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 </button>
                                 {mobileExpanded === 'help' && (
                                     <div className="flex flex-col gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
-                                        <Link href="#">질문답변</Link>
-                                        <Link href="#">자주묻는질문</Link>
-                                        <Link href="/help">공지사항</Link>
-                                        <Link href="/jobs/post" className="flex items-center gap-2">광고상품안내 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
+                                        <Link href="/help" onClick={() => setShowMobileMenu(false)}>질문답변</Link>
+                                        <Link href="/help" onClick={() => setShowMobileMenu(false)}>자주묻는질문</Link>
+                                        <Link href="/help" onClick={() => setShowMobileMenu(false)}>공지사항</Link>
+                                        <Link href="/jobs/post" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-2">광고상품안내 <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
                                     </div>
                                 )}
                             </div>
