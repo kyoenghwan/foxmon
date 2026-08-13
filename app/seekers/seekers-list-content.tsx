@@ -174,25 +174,38 @@ export function SeekersListContent({ isEmployer: propIsEmployer, session: propSe
 
     // URL 파라미터가 변경되면 로컬 상태 동기화 및 자동 확장 처리
     useEffect(() => {
-        if (dbRegions2.length > 0) {
-            const matchedSigungu = dbRegions2.find(
-                r => r.code_value.toLowerCase() === regionParam.toLowerCase()
-            );
-            if (matchedSigungu) {
-                setSelectedSido(matchedSigungu.parent_code_value || 'all');
-                setSelectedSigungu(matchedSigungu.code_value);
-            } else {
-                const matchedSido = dbRegions1.find(
-                    r => r.code_value.toLowerCase() === regionParam.toLowerCase()
+        if (regionParam && regionParam !== 'all') {
+            let matchedSidoCode = regionParam;
+            if (dbRegions1.length > 0) {
+                const foundSido = dbRegions1.find(
+                    r => r.code_value.toLowerCase() === regionParam.toLowerCase() ||
+                         r.code_name === regionParam ||
+                         r.code_name.toLowerCase() === regionParam.toLowerCase()
                 );
-                if (matchedSido) {
-                    setSelectedSido(matchedSido.code_value);
-                    setSelectedSigungu('all');
-                } else {
-                    setSelectedSido('all');
-                    setSelectedSigungu('all');
+                if (foundSido) {
+                    matchedSidoCode = foundSido.code_value;
                 }
             }
+
+            if (dbRegions2.length > 0) {
+                const matchedSigungu = dbRegions2.find(
+                    r => r.code_value.toLowerCase() === regionParam.toLowerCase() ||
+                         r.code_name === regionParam
+                );
+                if (matchedSigungu) {
+                    setSelectedSido(matchedSigungu.parent_code_value || matchedSidoCode);
+                    setSelectedSigungu(matchedSigungu.code_value);
+                } else {
+                    setSelectedSido(matchedSidoCode);
+                    setSelectedSigungu('all');
+                }
+            } else {
+                setSelectedSido(matchedSidoCode);
+                setSelectedSigungu('all');
+            }
+
+            setIsRegionOpen(true);
+            setIsFilterExpanded(true);
         } else {
             setSelectedSido('all');
             setSelectedSigungu('all');
@@ -207,18 +220,17 @@ export function SeekersListContent({ isEmployer: propIsEmployer, session: propSe
         setSelectedKeyword(keywordParam);
         setSearchKeyword(qParam);
 
-        // 파라미터가 비어있지 않으면 해당 패널 자동 열기
-        if (regionParam && regionParam !== 'all') {
-            setIsRegionOpen(true);
-        }
         if (industryParam && industryParam !== 'all') {
             setIsIndustryOpen(true);
+            setIsFilterExpanded(true);
         }
         if (keywordParam && keywordParam !== 'all') {
             setIsKeywordOpen(true);
+            setIsFilterExpanded(true);
         }
         if (qParam && qParam.trim() !== '') {
             setIsSearchTermOpen(true);
+            setIsFilterExpanded(true);
         }
     }, [qParam, regionParam, industryParam, keywordParam, dbRegions1, dbRegions2, dbIndustries]);
 
@@ -245,17 +257,37 @@ export function SeekersListContent({ isEmployer: propIsEmployer, session: propSe
         async function fetchJobs() {
             // 시/도 및 시/군/구 코드를 한글 텍스트 검색어로 변환
             let regionText = '';
-            if (dbRegions2.length > 0) {
-                const sigungu = dbRegions2.find(r => r.code_value.toLowerCase() === regionParam.toLowerCase());
-                if (sigungu) {
-                    const sido = dbRegions1.find(r => r.code_value === sigungu.parent_code_value);
-                    const sidoName = sido ? sido.code_name : '';
-                    const sigunguName = sigungu.code_name !== '전체' ? sigungu.code_name : '';
-                    regionText = [sidoName, sigunguName].filter(Boolean).join(' ');
+            if (regionParam && regionParam !== 'all') {
+                if (dbRegions2.length > 0) {
+                    const sigungu = dbRegions2.find(
+                        r => r.code_value.toLowerCase() === regionParam.toLowerCase() ||
+                             r.code_name === regionParam
+                    );
+                    if (sigungu) {
+                        const sido = dbRegions1.find(r => r.code_value === sigungu.parent_code_value);
+                        const sidoName = sido ? sido.code_name : '';
+                        const sigunguName = sigungu.code_name !== '전체' ? sigungu.code_name : '';
+                        regionText = [sidoName, sigunguName].filter(Boolean).join(' ');
+                    } else {
+                        const sido = dbRegions1.find(
+                            r => r.code_value.toLowerCase() === regionParam.toLowerCase() ||
+                                 r.code_name === regionParam
+                        );
+                        if (sido) {
+                            regionText = sido.code_name;
+                        } else {
+                            regionText = regionParam;
+                        }
+                    }
                 } else {
-                    const sido = dbRegions1.find(r => r.code_value.toLowerCase() === regionParam.toLowerCase());
+                    const sido = dbRegions1.find(
+                        r => r.code_value.toLowerCase() === regionParam.toLowerCase() ||
+                             r.code_name === regionParam
+                    );
                     if (sido) {
                         regionText = sido.code_name;
+                    } else {
+                        regionText = regionParam;
                     }
                 }
             }
@@ -677,6 +709,9 @@ export function SeekersListContent({ isEmployer: propIsEmployer, session: propSe
                                                     {r.code_name}
                                                 </option>
                                             ))}
+                                            {selectedSido !== 'all' && !dbRegions1.some(r => r.code_value === selectedSido) && (
+                                                <option value={selectedSido}>{selectedSido}</option>
+                                            )}
                                         </select>
                                     </div>
 
