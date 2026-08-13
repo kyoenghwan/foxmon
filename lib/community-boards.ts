@@ -18,13 +18,16 @@ export const COMMUNITY_AUDIENCE_LABELS: Record<CommunityAudience, string> = {
   employer: '업소(사업자) 전용',
 };
 
+/** 장터 기능 오픈 여부 (초기 유저 확보 시까지 임시 비활성화 플래그 - true로 변경 시 즉시 전면 오픈) */
+export const IS_MARKET_OPEN = false;
+
 export const COMMUNITY_BOARDS: CommunityBoardDef[] = [
   { id: 'free', label: '자유게시판', prefix: '💬자유', audience: 'all', sectionTitle: '전체 이용' },
-  { id: 'freemarket', label: '자유장터', prefix: '🛒자유장터', audience: 'all', sectionTitle: '전체 이용' },
+  ...(IS_MARKET_OPEN ? [{ id: 'freemarket', label: '자유장터', prefix: '🛒자유장터', audience: 'all' as CommunityAudience, sectionTitle: '전체 이용' }] : []),
   { id: 'foxtalk', label: '폭스수다', prefix: '🦊폭스수다', audience: 'women', sectionTitle: '여성 회원 전용' },
-  { id: 'foxmarket', label: '폭스장터', prefix: '🛍️폭스장터', audience: 'women', sectionTitle: '여성 회원 전용' },
+  ...(IS_MARKET_OPEN ? [{ id: 'foxmarket', label: '폭스장터', prefix: '🛍️폭스장터', audience: 'women' as CommunityAudience, sectionTitle: '여성 회원 전용' }] : []),
   { id: 'reviews', label: '업소후기·제보', prefix: '⭐후기·제보', audience: 'women', sectionTitle: '여성 회원 전용' },
-  { id: 'business', label: '업소장터', prefix: '🏪업소장터', audience: 'employer', sectionTitle: '업소(사업자) 전용' },
+  ...(IS_MARKET_OPEN ? [{ id: 'business', label: '업소장터', prefix: '🏪업소장터', audience: 'employer' as CommunityAudience, sectionTitle: '업소(사업자) 전용' }] : []),
 ];
 
 const BOARD_MAP = Object.fromEntries(COMMUNITY_BOARDS.map((b) => [b.id, b])) as Record<
@@ -69,7 +72,7 @@ export function canAccessCommunityBoard(boardId: string, role?: string | null): 
 
 export function getDefaultCommunityTab(role?: string | null): string {
   const r = normalizeRole(role);
-  if (r === 'EMPLOYER') return 'business';
+  if (r === 'EMPLOYER' && IS_MARKET_OPEN) return 'business';
   return 'free';
 }
 

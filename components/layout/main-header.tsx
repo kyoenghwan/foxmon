@@ -485,12 +485,9 @@ export function MainHeader({ session }: MainHeaderProps) {
                                 <h4 className="font-black text-gray-900 border-b-2 border-primary w-fit pb-1 mb-4 text-base">커뮤니티</h4>
                                 <div className="grid grid-cols-1 gap-y-3 text-[14px] font-medium text-gray-600">
                                     <Link href="/community?tab=free" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">자유게시판</Link>
-                                    <Link href="/community?tab=freemarket" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">자유장터</Link>
                                     <Link href="/community?tab=foxtalk" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors flex items-center gap-1">
                                         폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span>
                                     </Link>
-                                    <Link href="/community?tab=foxmarket" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">폭스장터</Link>
-                                    <Link href="/community?tab=business" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">업소장터</Link>
                                     <Link href="/community?tab=reviews" onClick={() => setShowMegaMenu(false)} className="hover:text-primary transition-colors">업소후기·제보</Link>
                                     <button 
                                         onClick={() => {
@@ -598,10 +595,7 @@ export function MainHeader({ session }: MainHeaderProps) {
                                     {mobileExpanded === 'community' && (
                                         <div className="flex flex-col gap-3 pb-4 px-2 text-sm font-medium text-gray-600">
                                             <Link href="/community?tab=free" onClick={() => setShowMobileMenu(false)}>자유게시판</Link>
-                                            <Link href="/community?tab=freemarket" onClick={() => setShowMobileMenu(false)}>자유장터</Link>
                                             <Link href="/community?tab=foxtalk" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-2">폭스수다 <span className="bg-primary text-black text-[9px] px-1.5 py-0.5 rounded-full font-black">HOT</span></Link>
-                                            <Link href="/community?tab=foxmarket" onClick={() => setShowMobileMenu(false)}>폭스장터</Link>
-                                            <Link href="/community?tab=business" onClick={() => setShowMobileMenu(false)}>업소장터</Link>
                                             <Link href="/community?tab=reviews" onClick={() => setShowMobileMenu(false)}>업소후기·제보</Link>
                                             <button 
                                                 onClick={() => {
