@@ -402,8 +402,9 @@ export async function getRotatedAdsWithLogs(
         cachedAds = mockAdsForTier;
     }
 
-    // 일반 구인공고(GENERAL) 티어만 검색어 필터링을 수행하고, 배너 광고 등급은 검색어와 무관하게 무조건 전체 노출
-    let ads = (tier === 'GENERAL') ? filterBySearch(cachedAds, searchQuery) : cachedAds;
+    // 검색어/지역 필터가 존재하는 경우, SIDE 배너 및 PREMIUM_MAIN을 제외한 모든 구인 공고 티어(PREMIUM, SPECIAL, AD_GENERAL, GENERAL)에 필터링을 적용
+    const isBannerTier = tier === 'SIDE' || tier === 'PREMIUM_MAIN';
+    let ads = (searchQuery && !isBannerTier) ? filterBySearch(cachedAds, searchQuery) : cachedAds;
 
     // 롤링 알고리즘 적용 (더블 슬롯 옵션이 2칸을 차지할 수 있도록 limitCount 전달)
     let rolledAds = applyRollingLogic(ads, limitCount);

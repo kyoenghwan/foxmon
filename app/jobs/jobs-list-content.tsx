@@ -380,7 +380,14 @@ export function JobsListContent({ isEmployer: propIsEmployer, searchQuery }: Job
         if (!uniqueMap.has(item.id)) uniqueMap.set(item.id, item);
     });
     
-    const combinedTableJobs = Array.from(uniqueMap.values());
+    let combinedTableJobs = Array.from(uniqueMap.values());
+    if (regionParam && regionParam !== 'all') {
+        const lowerRegion = regionParam.toLowerCase();
+        combinedTableJobs = combinedTableJobs.filter(j => {
+            const loc = j.location?.toLowerCase() || '';
+            return loc.includes(lowerRegion) || loc.includes('전국');
+        });
+    }
     const totalPages = Math.ceil(combinedTableJobs.length / ITEMS_PER_PAGE);
     const paginatedTableJobs = combinedTableJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
