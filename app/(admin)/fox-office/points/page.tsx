@@ -19,7 +19,8 @@ import {
   Clock, 
   Save,
   Trash2,
-  Coins
+  Coins,
+  Pencil
 } from 'lucide-react';
 import { PolicyFormModal } from '@/components/admin/points/PolicyFormModal';
 import { TierConfigEditor } from '@/components/admin/points/TierConfigEditor';
@@ -259,17 +260,62 @@ export default function AdminPointsPolicyPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOverride, setIsOverride] = useState(false);
+  const [editingPolicy, setEditingPolicy] = useState<any | null>(null);
 
   // 💡 포인트 가격 상태
   const [pricingOptions, setPricingOptions] = useState<PointPolicyItem[]>([]);
 
-  // 💡 정책 데이터 (Mock)
+  // 💡 정책 데이터
   const [policies, setPolicies] = useState([
     { id: '1', key: 'FIRST_CHARGE_BONUS_RATIO', value: 0.5, start: '2026-04-01 00:00', end: '9999-12-31', status: 'ACTIVE' },
     { id: '2', key: 'MAX_FIRST_CHARGE_BONUS', value: 300000, start: '2026-04-01 00:00', end: '9999-12-31', status: 'ACTIVE' },
     { id: '3', key: 'REFUND_FEE_RATIO', value: 0.1, start: '2026-04-01 00:00', end: '9999-12-31', status: 'ACTIVE' },
     { id: '4', key: 'TIER_VIP_BONUS_RATIO', value: 0.15, start: '2026-06-01 09:00', end: '9999-12-31', status: 'UPCOMING' },
   ]);
+
+  const handleOpenCreateModal = () => {
+    setEditingPolicy(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (policy: any) => {
+    setEditingPolicy(policy);
+    setIsModalOpen(true);
+  };
+
+  const handleDeletePolicy = (id: string) => {
+    if (confirm('해당 정책 항목을 삭제할까요?')) {
+      setPolicies(prev => prev.filter(p => p.id !== id));
+    }
+  };
+
+  const handleSavePolicy = (newPolicyData: any) => {
+    if (newPolicyData.id) {
+      setPolicies(prev => prev.map(p => {
+        if (p.id === newPolicyData.id) {
+          return {
+            ...p,
+            key: newPolicyData.configKey,
+            value: newPolicyData.configValue,
+            start: newPolicyData.isOverride ? '즉시 적용 중' : (newPolicyData.startAt || p.start),
+          };
+        }
+        return p;
+      }));
+      alert('선택한 정책 수치가 성공적으로 수정되었습니다.');
+    } else {
+      const newPolicy = {
+        id: Date.now().toString(),
+        key: newPolicyData.configKey,
+        value: newPolicyData.configValue,
+        start: newPolicyData.isOverride ? '즉시 적용 중' : (newPolicyData.startAt || '2026-04-01 00:00'),
+        end: '9999-12-31',
+        status: newPolicyData.isOverride ? 'ACTIVE' : 'UPCOMING'
+      };
+      setPolicies(prev => [newPolicy, ...prev]);
+      alert(newPolicyData.isOverride ? '신규 정책이 즉시 반영되었습니다.' : '신규 정책 예약이 등록되었습니다.');
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -495,7 +541,7 @@ export default function AdminPointsPolicyPage() {
                   <Settings2 className="text-primary h-6 w-6" />
                   글로벌 정책 타임라인
                 </h2>
-                <Button onClick={() => setIsModalOpen(true)} className="font-bold h-10 px-4" size="sm">
+                <Button onClick={handleOpenCreateModal} className="font-bold h-10 px-4" size="sm">
                   <Plus className="mr-2 h-4 w-4" /> 신규 정책 예약
                 </Button>
               </div>
@@ -528,6 +574,14 @@ export default function AdminPointsPolicyPage() {
                               <div className="text-[12px] font-black text-gray-700">{policy.start}</div>
                             </div>
                             <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-0 font-black">실행 중</Badge>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleOpenEditModal(policy)}
+                              className="h-9 px-3 text-[13px] font-black border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 gap-1.5 active:scale-95 transition-all shadow-sm"
+                            >
+                              <Pencil className="w-4 h-4" /> 수정
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -549,8 +603,15 @@ export default function AdminPointsPolicyPage() {
                               <div className="text-[10px] text-orange-500 font-bold uppercase tracking-tighter italic">예약된 시작 시간</div>
                               <div className="text-[12px] font-black text-orange-600">{policy.start}</div>
                             </div>
-                            <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-50"><Settings2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDeletePolicy(policy.id)} className="text-red-500 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleOpenEditModal(policy)}
+                              className="h-9 px-3 text-[13px] font-black border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 gap-1.5 active:scale-95 transition-all shadow-sm"
+                            >
+                              <Pencil className="w-4 h-4" /> 수정
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -705,13 +766,15 @@ export default function AdminPointsPolicyPage() {
         </TabsContent>
       </Tabs>
 
-      {/* 🚀 정책 등록 모달 연동 */}
+      {/* 🚀 정책 등록 및 수정 모달 연동 */}
       <PolicyFormModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSave={(policy) => {
-          console.log('New policy saved:', policy);
-        }}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingPolicy(null);
+        }} 
+        editingPolicy={editingPolicy}
+        onSave={handleSavePolicy}
       />
     </div>
   );

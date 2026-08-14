@@ -14,32 +14,52 @@ interface PolicyFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (policy: any) => void;
+  editingPolicy?: any | null;
 }
 
 /**
  * [Admin Component] PolicyFormModal
- * 신규 정책(보너스, 수수료 등)을 예약 등록하거나 즉시 적용하는 관리자 전용 팝업입니다.
+ * 신규 정책(보너스, 수수료 등)을 예약 등록하거나 기존 정책 수치를 즉시 수정/교체하는 관리자 전용 팝업입니다.
  */
-export function PolicyFormModal({ isOpen, onClose, onSave }: PolicyFormModalProps) {
+export function PolicyFormModal({ isOpen, onClose, onSave, editingPolicy }: PolicyFormModalProps) {
   const [configKey, setConfigKey] = useState('FIRST_CHARGE_BONUS_RATIO');
   const [configValue, setConfigValue] = useState('');
   const [startAt, setStartAt] = useState('');
   const [isOverride, setIsOverride] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (editingPolicy) {
+      setConfigKey(editingPolicy.key || editingPolicy.config_key || 'FIRST_CHARGE_BONUS_RATIO');
+      setConfigValue(String(editingPolicy.value ?? editingPolicy.config_value ?? ''));
+      setStartAt(editingPolicy.start || '');
+      setIsOverride(editingPolicy.status === 'ACTIVE' || false);
+    } else {
+      setConfigKey('FIRST_CHARGE_BONUS_RATIO');
+      setConfigValue('');
+      setStartAt('');
+      setIsOverride(false);
+    }
+  }, [editingPolicy, isOpen]);
+
   const handleSubmit = async () => {
-    if (!configKey || !configValue || (!startAt && !isOverride)) {
+    if (!configKey || configValue === '' || (!startAt && !isOverride)) {
       alert('필수 정보를 모두 입력해 주세요.');
       return;
     }
 
     setIsSubmitting(true);
-    // 💡 OA_EXECUTE_POLICY_UPSERT 연동 지점
     setTimeout(() => {
-      onSave({ configKey, configValue, startAt, isOverride });
+      onSave({ 
+        id: editingPolicy?.id,
+        configKey, 
+        configValue: parseFloat(configValue) || configValue, 
+        startAt, 
+        isOverride 
+      });
       setIsSubmitting(false);
       onClose();
-    }, 1000);
+    }, 300);
   };
 
   return (
@@ -48,7 +68,7 @@ export function PolicyFormModal({ isOpen, onClose, onSave }: PolicyFormModalProp
         <DialogHeader>
           <DialogTitle className="text-xl font-black flex items-center gap-2 italic">
             <Calculator className="h-5 w-5 text-primary" />
-            신규 포인트 정책 예약/등록
+            {editingPolicy ? '포인트 정책 수정' : '신규 포인트 정책 예약/등록'}
           </DialogTitle>
           <DialogDescription>
             시스템 전체의 보너스 비율 또는 수수료 정책을 새롭게 정의합니다. 🦊
