@@ -1,6 +1,7 @@
 "use server";
 
 import { supabaseAdmin } from '@/lib/supabase';
+import { getChatActor } from '@/lib/chat-authorization';
 import { sendTelegramAlert } from '@/lib/telegram';
 
 export interface ChatRoomData {
@@ -17,6 +18,10 @@ export interface ChatRoomData {
 
 export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
     try {
+        const actor = await getChatActor();
+        if (data.created_by !== actor || !['OPEN', 'SECRET', '1ON1'].includes(data.type)) throw new Error('방 생성 권한이 없습니다.');
+        if (data.type === '1ON1' && (!data.employer_id || !data.seeker_id ||
+            ![data.employer_id, data.seeker_id].includes(actor))) throw new Error('대화 당사자만 방을 만들 수 있습니다.');
         // 1:1 방의 경우, 이미 존재하는 방이 있는지 먼저 확인하여 중복 생성을 방지합니다.
         if (data.type === '1ON1' && data.seeker_id && data.employer_id) {
             const { data: existingRoom } = await supabaseAdmin
@@ -51,29 +56,6 @@ export const OA_INSERT_CHAT_ROOM = async (data: ChatRoomData) => {
             .select()
             .single();
 
-        // 1차 시도에서 외래키 오류 발생 시 처리
-        if (result.error && result.error.message.includes('violates foreign key constraint')) {
-            const isJobIdError = result.error.message.includes('job_id');
-            const isEmployerIdError = result.error.message.includes('employer_id');
-            
-            console.warn('Foreign key violation detected in foxtalk_rooms. Retrying...', result.error.message);
-            result = await supabaseAdmin
-                .from('foxtalk_rooms')
-                .insert([{
-                    title: data.title,
-                    type: data.type,
-                    room_code: data.room_code || null,
-                    password_hash: data.password_hash || null,
-                    max_participants: data.max_participants,
-                    created_by: data.created_by,
-                    is_active: true,
-                    job_id: isJobIdError ? null : (data.job_id || null),
-                    employer_id: isEmployerIdError ? null : (data.employer_id || null),
-                    seeker_id: data.seeker_id || null
-                }])
-                .select()
-                .single();
-        }
 
         if (result.error) throw result.error;
         const room = result.data;

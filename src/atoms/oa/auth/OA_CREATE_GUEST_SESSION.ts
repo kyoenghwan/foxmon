@@ -1,24 +1,25 @@
 import { cookies } from 'next/headers';
+import { createGuestToken } from '@/lib/guest-session';
+import { RA_PARSE_EXTERNAL_AUTH_DATA } from '@/src/atoms/ra/auth/RA_PARSE_EXTERNAL_AUTH_DATA';
 import { nvLog } from '../../../../lib/logger';
 
 export async function OA_CREATE_GUEST_SESSION(parsedData: any) {
-  nvLog('AT', '▶️ OA_CREATE_GUEST_SESSION 시작', { name: parsedData.name });
+  nvLog('AT', '▶️ OA_CREATE_GUEST_SESSION 시작');
 
   try {
     const cookieStore = cookies();
     
-    // In a real app, this should be a signed JWT containing { id, name, birthDate, isGuest: true }
-    // For MVP, we serialize it as a base64 or JSON string and set HTTP-only cookie.
-    
-    const sessionData = {
-      isGuest: true,
+    const checked = await RA_PARSE_EXTERNAL_AUTH_DATA(parsedData.verifiedMethod, parsedData);
+    if (!checked.success) return { success: false, error: checked.error };
+    const sessionString = await createGuestToken({
       name: parsedData.name,
       birthDate: parsedData.birthDate,
+      phoneNumber: parsedData.phoneNumber,
+      gender: parsedData.gender,
+      nationality: parsedData.nationality,
+      ci: parsedData.ci,
       verifiedMethod: parsedData.verifiedMethod,
-      timestamp: Date.now()
-    };
-
-    const sessionString = Buffer.from(JSON.stringify(sessionData)).toString('base64');
+    });
 
     (await cookieStore).set('foxmon_guest_session', sessionString, {
       httpOnly: true,
@@ -38,7 +39,7 @@ export async function OA_CREATE_GUEST_SESSION(parsedData: any) {
     });
 
     nvLog('AT', '✅ OA_CREATE_GUEST_SESSION 성공: 쿠키 발급 완료');
-    return { success: true, token: sessionString };
+    return { success: true };
   } catch (error: any) {
     nvLog('AT', '❌ OA_CREATE_GUEST_SESSION 시스템 에러', error.message);
     return { success: false, error: '세션 생성에 실패했습니다.' };

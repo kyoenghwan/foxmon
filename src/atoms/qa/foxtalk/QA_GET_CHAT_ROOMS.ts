@@ -90,7 +90,7 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
             }
 
             // 프론트 전달 시 foxtalk_participants 필드는 제외하여 패이로드 크기 축소 (보안 및 데이터 최소화)
-            const { foxtalk_participants, ...roomData } = room;
+            const { foxtalk_participants, password_hash, ...roomData } = room;
 
             return {
                 ...roomData,
@@ -134,4 +134,3 @@ export const QA_GET_CHAT_ROOMS = async (userId?: string, userRole?: string) => {
         };
     }
 };
-

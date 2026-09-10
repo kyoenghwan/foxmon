@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { nvLog } from '@/lib/logger';
+import { requireCronAuthorization } from '@/lib/api-authorization';
 
 // 1시간마다 호출되는 Vercel Cron Job 용 API
 export async function GET(request: Request) {
+    const denied = requireCronAuthorization(request);
+    if (denied) return denied;
     nvLog('AT', '▶️ CRON: auto-jump 실행 시작');
 
     const autoJumpQuery = `

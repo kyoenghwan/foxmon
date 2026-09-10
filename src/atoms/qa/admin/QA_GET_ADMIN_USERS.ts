@@ -5,7 +5,7 @@ import { nvLog } from '../../../../lib/logger';
 const ADMIN_ROLES = ['ADMIN', 'SUPER_ADMIN'] as const;
 
 const BASE_SELECT =
-  'id, login_id, name, nickname, role, is_age_verified, created_at, phone_number';
+  'id, login_id, name, nickname, role, is_age_verified, created_at, phone_number, staff_team';
 
 /**
  * QA_GET_ADMIN_USERS: 관리자(ADMIN/SUPER_ADMIN) 계정만 조회
@@ -30,23 +30,11 @@ export async function QA_GET_ADMIN_USERS() {
       };
     }
 
-    let selectCols = `${BASE_SELECT}, staff_team`;
-    let { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('users')
-      .select(selectCols)
+      .select(BASE_SELECT)
       .in('role', [...ADMIN_ROLES])
       .order('created_at', { ascending: false });
-
-    if (error && /staff_team/i.test(error.message)) {
-      selectCols = BASE_SELECT;
-      const retry = await supabaseAdmin
-        .from('users')
-        .select(selectCols)
-        .in('role', [...ADMIN_ROLES])
-        .order('created_at', { ascending: false });
-      data = retry.data?.map((row) => ({ ...row, staff_team: 'OPS' })) ?? null;
-      error = retry.error;
-    }
 
     if (error) throw error;
 

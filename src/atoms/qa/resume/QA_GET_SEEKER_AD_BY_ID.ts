@@ -46,8 +46,14 @@ export async function QA_GET_SEEKER_AD_BY_ID(id: string): Promise<{ success: boo
       return { success: false, data: null, error: error.message };
     }
 
+    // 다대일 관계가 배열로 반환되는 경우도 단일 이력서 계약으로 정규화합니다.
+    if (Array.isArray(data.resumes) && data.resumes.length > 1) {
+      return { success: false, data: null, error: '구직 광고에 여러 이력서가 연결되어 있습니다.' };
+    }
+    const resume = Array.isArray(data.resumes) ? data.resumes[0] ?? null : data.resumes;
+    const normalizedData = { ...data, resumes: resume };
     // 공통 코드 치환 (키워드)
-    if (data && data.resumes) {
+    if (resume) {
       try {
         const { QA_GET_COMMON_CODES } = await import('@/src/atoms/qa/master/QA_GET_COMMON_CODES');
         const { data: commonCodes } = await QA_GET_COMMON_CODES(undefined, true);
@@ -61,8 +67,8 @@ export async function QA_GET_SEEKER_AD_BY_ID(id: string): Promise<{ success: boo
             );
             return match ? match.code_name : code;
           };
-          if (Array.isArray(data.resumes.keywords)) {
-            data.resumes.keywords = data.resumes.keywords.map(resolveTag);
+          if (Array.isArray(resume.keywords)) {
+            resume.keywords = resume.keywords.map(resolveTag);
           }
         }
       } catch (codeError) {
@@ -71,7 +77,7 @@ export async function QA_GET_SEEKER_AD_BY_ID(id: string): Promise<{ success: boo
     }
 
     nvLog('AT', `✅ QA_GET_SEEKER_AD_BY_ID 성공: ${id}`);
-    return { success: true, data, error: null };
+    return { success: true, data: normalizedData, error: null };
   } catch (error: any) {
     nvLog('FW', 'QA_GET_SEEKER_AD_BY_ID 예외 발생:', error);
     return { success: false, data: null, error: error.message };

@@ -7,6 +7,7 @@ interface GuestAuthInput {
   authMethod: 'PHONE' | 'MOBILE' | 'IPIN' | 'FOREIGNER';
   userRawData: {
     imp_uid?: string;
+    ci?: string;
     name?: string;
     birthDate?: string;
     gender?: string;
@@ -42,11 +43,12 @@ export async function FA_GUEST_AUTH(input: GuestAuthInput): Promise<{ success: b
         birthDate: certResult.data.birthDate,
         gender: certResult.data.gender,
         phoneNumber: certResult.data.phoneNumber,
-        nationality: certResult.data.nationality
+        nationality: certResult.data.nationality,
+        ci: certResult.data.unique_key,
       };
-      nvLog('AT', '✅ 포트원 API 데이터 조회 및 검증 완료', { name: verifiedRawData.name });
+      nvLog('AT', '✅ 포트원 API 데이터 조회 및 검증 완료');
     } else {
-      nvLog('AT', '⚠️ imp_uid 누락. 로컬 Mock 본인인증 데이터를 검증합니다.');
+      return { success: false, message: '본인인증 확인 번호가 필요합니다.' };
     }
 
     // Step 2: Parse and Validate External/PortOne Data

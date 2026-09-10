@@ -32,6 +32,15 @@ interface DeductionOutput {
 export const RA_CALC_DEDUCTION_FIFO = (input: DeductionInput): DeductionOutput => {
   const { requiredPoints, currentBonusBalance, activeRecharges } = input;
 
+  if (!Number.isSafeInteger(requiredPoints) || requiredPoints <= 0 ||
+      !Number.isSafeInteger(currentBonusBalance) || currentBonusBalance < 0 ||
+      !Array.isArray(activeRecharges) || activeRecharges.some(item =>
+        !item || typeof item.id !== 'string' || !item.id.trim() ||
+        !Number.isSafeInteger(item.remained_point) || item.remained_point < 0) ||
+      new Set(activeRecharges.map(item => item.id)).size !== activeRecharges.length) {
+    return { isValid: false, error: '차감 금액 또는 충전 이력이 유효하지 않습니다.' };
+  }
+
   let remainingToDeduct = requiredPoints;
   let bonusDeduction = 0;
   const paidDeductionList: DeductionPlan[] = [];

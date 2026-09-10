@@ -178,6 +178,9 @@ export default function RetroDrawGame({
     }
   };
 
+  // 로딩 상태에서도 Hook 호출 순서를 유지합니다.
+  const [showInsufficientPopup, setShowInsufficientPopup] = useState(false);
+
   if (!board) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -185,9 +188,6 @@ export default function RetroDrawGame({
       </div>
     );
   }
-
-  // 포인트 부족 팝업 상태
-  const [showInsufficientPopup, setShowInsufficientPopup] = useState(false);
 
   const handlePullSlotClick = (slotNumber: number) => {
     if (pullingSlot !== null) return;

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
+import { verifyGuestToken } from '@/lib/guest-session';
 import {
     canAccessFoxOfficeAdmin,
     canAccessFoxOfficeSupportRoutes,
@@ -10,12 +11,12 @@ import {
 
 const { auth } = NextAuth(authConfig);
 
-export default auth((req) => {
+export default auth(async (req) => {
     const { nextUrl, cookies, auth: session } = req;
     
-    const hasGuestSession = cookies.has('foxmon_guest_session');
+    const hasGuestSession = !!await verifyGuestToken(cookies.get('foxmon_guest_session')?.value);
     const isSessionVerified = session?.user && (session.user as any).is_age_verified;
-    const isAgeVerified = isSessionVerified || (cookies.has('age_verified') && hasGuestSession);
+    const isAgeVerified = isSessionVerified || hasGuestSession;
 
     const isAgeGatePage = nextUrl.pathname === '/age-gate';
     const isRegisterPage = nextUrl.pathname === '/register';
@@ -84,7 +85,7 @@ export default auth((req) => {
 
     // 1.5 Global Authentication Check (Strict Private Mode as requested by user)
     // 로그인이 안 된 상태면 무조건 /login으로 리다이렉트 (회원가입, 로그인, 정적 파일, 홈페이지 및 CS 전용 터미널 제외)
-    if (!session?.user && !hasGuestSession && !isLoginPage && !isRegisterPage && !isPublicStatic && !isHomePage && !isFindAccountPage && !isResetPasswordPage && !isRenderBannersPage && !isCsPath) {
+    if (!session?.user && !hasGuestSession && !isAgeGatePage && !isLoginPage && !isRegisterPage && !isPublicStatic && !isHomePage && !isFindAccountPage && !isResetPasswordPage && !isRenderBannersPage && !isCsPath) {
         const loginUrl = new URL('/login', nextUrl);
         loginUrl.searchParams.set('message', 'login_required');
         return NextResponse.redirect(loginUrl);

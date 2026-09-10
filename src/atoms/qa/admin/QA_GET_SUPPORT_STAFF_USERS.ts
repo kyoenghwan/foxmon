@@ -3,7 +3,7 @@ import { isSupabaseServiceRoleConfigured, supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '../../../../lib/logger';
 
 const BASE_SELECT =
-  'id, login_id, name, nickname, role, is_age_verified, created_at, phone_number';
+  'id, login_id, name, nickname, role, is_age_verified, created_at, phone_number, staff_team';
 
 /**
  * 고객센터 담당자 지정 화면용 계정 목록
@@ -34,23 +34,11 @@ export async function QA_GET_SUPPORT_STAFF_USERS() {
     const orFilter =
       'role.in.(ADMIN,SUPER_ADMIN),staff_team.eq.CS,login_id.ilike.foxmon_%';
 
-    let selectCols = `${BASE_SELECT}, staff_team`;
-    let { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('users')
-      .select(selectCols)
+      .select(BASE_SELECT)
       .or(orFilter)
       .order('created_at', { ascending: false });
-
-    if (error && /staff_team/i.test(error.message)) {
-      selectCols = BASE_SELECT;
-      const retry = await supabaseAdmin
-        .from('users')
-        .select(selectCols)
-        .or('role.in.(ADMIN,SUPER_ADMIN),login_id.ilike.foxmon_%')
-        .order('created_at', { ascending: false });
-      data = retry.data?.map((row) => ({ ...row, staff_team: 'OPS' })) ?? null;
-      error = retry.error;
-    }
 
     if (error) throw error;
 

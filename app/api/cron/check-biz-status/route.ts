@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { nvLog } from '@/lib/logger';
+import { requireCronAuthorization } from '@/lib/api-authorization';
 
 // Vercel Cron Job 호출 전용 API
 // 참고: vercel.json에 crons 설정 추가 필요
 export async function GET(request: Request) {
+    const denied = requireCronAuthorization(request);
+    if (denied) return denied;
     nvLog('AT', '▶️ CRON: check-biz-status 실행 시작');
 
     // Vercel Cron 보안 검증 (실제 프로덕션에서 활성화 필요)

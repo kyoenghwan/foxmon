@@ -12,6 +12,7 @@ import { OA_UPDATE_PARTICIPANT_READ } from '@/src/atoms/oa/foxtalk/OA_UPDATE_PAR
 import { OA_INSERT_CHAT_MESSAGE } from '@/src/atoms/oa/foxtalk/OA_INSERT_CHAT_MESSAGE';
 import { OA_LEAVE_CHAT_ROOM } from '@/src/atoms/oa/foxtalk/OA_LEAVE_CHAT_ROOM';
 import { QA_GET_CHAT_ROOMS } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_ROOMS';
+import { QA_GET_CHAT_ACTOR } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_ACTOR';
 import { QA_GET_CHAT_MESSAGES } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_MESSAGES';
 import { QA_GET_LIVE_CHAT_ROOM } from '@/src/atoms/qa/foxtalk/QA_GET_LIVE_CHAT_ROOM';
 import { QA_GET_CHAT_PROFILE } from '@/src/atoms/qa/foxtalk/QA_GET_CHAT_PROFILE';
@@ -34,14 +35,16 @@ interface Profile {
 }
 
 export function FoxTalkWidget() {
+    const pathname = usePathname();
+    if (pathname.startsWith('/cs') || pathname.startsWith('/fox-office')) return null;
+    return <FoxTalkWidgetContent />;
+}
+
+function FoxTalkWidgetContent() {
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
         setMounted(true);
     }, []);
-
-    if (usePathname().startsWith('/cs') || usePathname().startsWith('/fox-office')) {
-        return null;
-    }
 
     const [appState, setAppState] = useState<AppState>('CLOSED');
     const [profile, setProfile] = useState<Profile | null>(null);
@@ -143,11 +146,18 @@ export function FoxTalkWidget() {
     const [newPass, setNewPass] = useState('');
 
     useEffect(() => {
-        // Init profile from localStorage
-        const saved = localStorage.getItem('foxtalk_profile');
-        if (saved) {
-            setProfile(JSON.parse(saved));
-        }
+        let active = true;
+        void QA_GET_CHAT_ACTOR().then(actor => {
+            if (!active || !actor.success) return;
+            const saved = localStorage.getItem('foxtalk_profile');
+            if (!saved) return;
+            try {
+                const restored = { ...JSON.parse(saved), sessionId: actor.id };
+                localStorage.setItem('foxtalk_profile', JSON.stringify(restored));
+                setProfile(restored);
+            } catch { console.error('폭스톡 프로필 복원 실패'); }
+        });
+        return () => { active = false; };
     }, []);
 
     useEffect(() => {
@@ -321,25 +331,23 @@ export function FoxTalkWidget() {
                     setMessages([]); // 이전 대화 내용 즉시 청소
                     
                     // 최신 프로필 정보로 joinRoom 로직 직접 실행 (Stale Closure 방지)
-                    if (room.type === 'SECRET' && room.created_by !== currentProfile.sessionId) {
-                        const pass = prompt('비밀방입니다. 비밀번호를 입력해주세요.');
-                        if (pass !== room.password_hash) {
-                            alert('비밀번호가 틀렸습니다.');
-                            return;
-                        }
-                    }
+                    const password = room.type === 'SECRET' && room.created_by !== currentProfile.sessionId
+                        ? prompt('비밀방입니다. 비밀번호를 입력해주세요.') : undefined;
+                    if (password === null) return;
                     
                     console.log(`[FoxTalk-Event] ===== 이벤트 트리거 대화방 진입 프로세스 시작 (방 ID: ${room.id}) =====`);
                     const tStart = performance.now();
 
                     // 1. 참여자 등록 시간 측정
                     const t1 = performance.now();
-                    await OA_INSERT_CHAT_PARTICIPANT({
+                    const joined = await OA_INSERT_CHAT_PARTICIPANT({
                         room_id: room.id,
                         session_id: currentProfile.sessionId,
                         nickname: currentProfile.nickname,
-                        avatar_type: currentProfile.avatarType
+                        avatar_type: currentProfile.avatarType,
+                        password,
                     });
+                    if (!joined.success) { alert(joined.error); return; }
                     const t2 = performance.now();
                     console.log(`[FoxTalk-Event] Step 1: 참여자 등록 완료 - 소요 시간: ${(t2 - t1).toFixed(2)}ms`);
 
@@ -512,10 +520,12 @@ export function FoxTalkWidget() {
     }, [sessionChatUser?.id]);
 
     // Save Profile
-    const saveProfile = () => {
+    const saveProfile = async () => {
         if (!setupNick) return;
+        const actor = await QA_GET_CHAT_ACTOR();
+        if (!actor.success) { alert('로그인 또는 본인인증을 먼저 진행해주세요.'); return; }
         const newProfile = {
-            sessionId: crypto.randomUUID(),
+            sessionId: actor.id,
             nickname: setupNick,
             avatarType: setupAv
         };
@@ -606,23 +616,20 @@ export function FoxTalkWidget() {
 
         setMessages([]); // 이전 대화 내용 즉시 청소
 
-        if (room.type === 'SECRET' && room.created_by !== profile.sessionId) {
-            const pass = prompt('비밀방입니다. 비밀번호를 입력해주세요.');
-            // (간단 데모용 평문 비교. 실제론 해시 비교 필요)
-            if (pass !== room.password_hash) {
-                alert('비밀번호가 틀렸습니다.');
-                return;
-            }
-        }
+        const password = room.type === 'SECRET' && room.created_by !== profile.sessionId
+            ? prompt('비밀방입니다. 비밀번호를 입력해주세요.') : undefined;
+        if (password === null) return;
         
         // 1. 참여자 등록 시간 측정
         const t1 = performance.now();
-        await OA_INSERT_CHAT_PARTICIPANT({
+        const joined = await OA_INSERT_CHAT_PARTICIPANT({
             room_id: room.id,
             session_id: profile.sessionId,
             nickname: profile.nickname,
-            avatar_type: profile.avatarType
+            avatar_type: profile.avatarType,
+            password,
         });
+        if (!joined.success) { alert(joined.error); return; }
         const t2 = performance.now();
         console.log(`[FoxTalk] Step 1: 참여자 등록 완료 - 소요 시간: ${(t2 - t1).toFixed(2)}ms`);
 
@@ -764,12 +771,13 @@ export function FoxTalkWidget() {
             setProfile(currentProfile);
             localStorage.setItem('foxtalk_profile', JSON.stringify(currentProfile));
 
-            await OA_INSERT_CHAT_PARTICIPANT({
+            const joined = await OA_INSERT_CHAT_PARTICIPANT({
                 room_id: liveRoom.id,
                 session_id: userId,
                 nickname: liveChatNick.trim(),
                 avatar_type: liveChatAvatar
             });
+            if (!joined.success) { alert(joined.error); return; }
 
             setMessages([]);
             setCurrentRoom(liveRoom);

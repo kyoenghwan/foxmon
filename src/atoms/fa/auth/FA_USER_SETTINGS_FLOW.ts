@@ -110,7 +110,7 @@ export async function FA_USER_SETTINGS_FLOW(input: UserSettingsFlowInput) {
                 // 0. 사업자 실시간 검증 트리거 연동 (DATA_GO_KR_API_KEY가 주입된 경우 활성화)
                 if (updatePayload.business_type === '사업자' && updatePayload.business_registration_number) {
                     const { QA_GET_USER_PROFILE } = await import('@/src/atoms/qa/auth/QA_GET_USER_PROFILE');
-                    const currentProfile = await QA_GET_USER_PROFILE({ userId: input.userId });
+                    const currentProfile = await QA_GET_USER_PROFILE(input.userId);
                     
                     const isAlreadyVerified = currentProfile.success && 
                         currentProfile.data?.is_business_verified && 

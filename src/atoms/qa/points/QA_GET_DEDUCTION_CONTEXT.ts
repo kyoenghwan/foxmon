@@ -44,38 +44,16 @@ export const QA_GET_DEDUCTION_CONTEXT = async (userId: string): Promise<{ succes
 
     const rechargeList = recharges || [];
 
-    // 💡 3. 데이터 정합성 검증 및 부족분 충전 영수증 자동 생성 (관리자 수동/테스트 지급 포인트 호환)
-    const paidPoints = Number(user.paid_points || 0);
-    const totalHistoryAmount = rechargeList.reduce((sum, r) => sum + Number(r.remained_point || 0), 0);
-    
-    if (paidPoints > totalHistoryAmount) {
-        const diff = paidPoints - totalHistoryAmount;
-        console.log(`⚠️ [QA_GET_DEDUCTION_CONTEXT] 유료 잔액(${paidPoints}P) 대비 충전 이력(${totalHistoryAmount}P) 부족 (${diff}P). 보정 이력 자동 생성...`);
-        
-        try {
-            const { data: newRecharge, error: createRechargeErr } = await supabaseAdmin
-                .from('point_recharge_history')
-                .insert({
-                    user_id: userId,
-                    charge_point: diff,
-                    remained_point: diff,
-                    payment_method: 'SYSTEM_ADJUSTMENT',
-                    status: 'COMPLETED',
-                    description: '시스템 보정 / 수동 지급 유료 포인트'
-                })
-                .select('id, remained_point, created_at')
-                .single();
-
-            if (!createRechargeErr && newRecharge) {
-                rechargeList.push(newRecharge);
-            } else if (createRechargeErr) {
-                console.error("⚠️ 보정 충전이력 생성 에러:", createRechargeErr);
-            }
-        } catch (err) {
-            console.error('⚠️ 보정 영수증 생성 예외 (무시):', err);
-        }
+    // 조회 중 임의 보정 이력을 생성하지 않고 정합성 오류를 명시합니다.
+    const paidPoints = Number(user.paid_points);
+    const bonusPoints = Number(user.bonus_points);
+    const totalHistoryAmount = rechargeList.reduce((sum, r) => sum + Number(r.remained_point), 0);
+    if (!Number.isSafeInteger(paidPoints) || paidPoints < 0 ||
+        !Number.isSafeInteger(bonusPoints) || bonusPoints < 0 ||
+        rechargeList.some(r => !Number.isSafeInteger(Number(r.remained_point)) || Number(r.remained_point) <= 0) ||
+        paidPoints !== totalHistoryAmount) {
+      throw new Error('포인트 잔액과 충전 이력이 일치하지 않습니다. 관리자 확인이 필요합니다.');
     }
-
     const result = {
       userId: user.id,
       bonusPoints: Number(user.bonus_points || 0),

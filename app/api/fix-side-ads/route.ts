@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { requireMaintenanceAdmin } from '@/lib/api-authorization';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  return NextResponse.json({ success: false, error: 'POST 요청이 필요합니다.' }, { status: 405, headers: { Allow: 'POST' } });
+}
+
+export async function POST(request: Request) {
+  const denied = await requireMaintenanceAdmin(request);
+  if (denied) return denied;
   try {
     const { data, error } = await supabaseAdmin
       .from('biz_ads')

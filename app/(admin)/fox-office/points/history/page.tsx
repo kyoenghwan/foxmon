@@ -30,7 +30,7 @@ export default function PointHistoryManagementPage() {
             setLoading(true);
             try {
                 const res = await adminUserAction('GET_ALL_POINT_HISTORY');
-                if (res.success && res.data) {
+                if (res.success && 'data' in res && Array.isArray(res.data)) {
                     setTxList(res.data);
                 }
             } catch (e) {
@@ -48,7 +48,7 @@ export default function PointHistoryManagementPage() {
             setUsersLoading(true);
             try {
                 const res = await adminUserAction('GET_LIST');
-                if (res.success && res.data) {
+                if (res.success && 'data' in res && Array.isArray(res.data)) {
                     setUsers(res.data);
                 }
             } catch (e) {
@@ -121,7 +121,7 @@ export default function PointHistoryManagementPage() {
                 
                 // 선택된 유저의 최신 잔액 정보 업데이트를 위해 유저 목록 및 최근 기록 갱신
                 const updatedUsersRes = await adminUserAction('GET_LIST');
-                if (updatedUsersRes.success && updatedUsersRes.data) {
+                if (updatedUsersRes.success && 'data' in updatedUsersRes && Array.isArray(updatedUsersRes.data)) {
                     setUsers(updatedUsersRes.data);
                     const updated = updatedUsersRes.data.find((u: any) => u.id === selectedUser.id);
                     if (updated) setSelectedUser(updated);

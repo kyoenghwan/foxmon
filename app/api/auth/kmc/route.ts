@@ -25,6 +25,9 @@ export async function POST(req: Request) {
     }
 
     const isTestMode = process.env.NEXT_PUBLIC_KMC_TEST_MODE === 'true';
+    if (process.env.NODE_ENV === 'production' && isTestMode) {
+      return NextResponse.json({ success: false, message: '운영 본인인증 설정을 확인해주세요.' }, { status: 503 });
+    }
     const isMock = isTestMode && ((await isMockMode()) || params.isMock === true);
 
     if (isMock) {

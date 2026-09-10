@@ -37,7 +37,7 @@ export const QA_PORTONE_GET_CERTIFICATION = async (input: {
     const httpsAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
     
     if (proxyUrl) {
-      nvLog('AT', '🔗 Fixie 프록시 적용 요청', { proxyUrl });
+      nvLog('AT', '🔗 Fixie 프록시 적용 요청');
     }
 
     const client = axios.create({
@@ -58,7 +58,7 @@ export const QA_PORTONE_GET_CERTIFICATION = async (input: {
 
     const tokenData = tokenRes.data;
     if (tokenData.code !== 0 || !tokenData.response?.access_token) {
-      nvLog('AT', '❌ 포트원 Access Token 발급 실패', tokenData);
+      nvLog('AT', '❌ 포트원 Access Token 발급 실패');
       return {
         success: false,
         errorCode: 'EXTERNAL_SERVICE_ERROR',
@@ -79,7 +79,7 @@ export const QA_PORTONE_GET_CERTIFICATION = async (input: {
 
     const certData = certRes.data;
     if (certData.code !== 0 || !certData.response) {
-      nvLog('AT', '❌ 본인인증 상세 조회 실패', certData);
+      nvLog('AT', '❌ 본인인증 상세 조회 실패');
       return {
         success: false,
         errorCode: 'EXTERNAL_SERVICE_ERROR',
@@ -88,9 +88,12 @@ export const QA_PORTONE_GET_CERTIFICATION = async (input: {
     }
 
     const res = certData.response;
+    if (res.certified !== true || res.imp_uid !== input.imp_uid) {
+      return { success: false, errorCode: 'EXTERNAL_SERVICE_ERROR', message: '완료된 본인인증이 아닙니다.' };
+    }
     
     // 생년월일 정규화
-    let birthDate = '19900101';
+    let birthDate = '';
     if (res.birthday) {
       birthDate = res.birthday.replace(/-/g, '');
     } else if (res.birth) {
@@ -125,7 +128,7 @@ export const QA_PORTONE_GET_CERTIFICATION = async (input: {
       unique_in_site: res.unique_in_site
     };
 
-    nvLog('AT', '✅ QA_PORTONE_GET_CERTIFICATION 완료', { name: normalizedData.name });
+    nvLog('AT', '✅ QA_PORTONE_GET_CERTIFICATION 완료');
     return {
       success: true,
       data: normalizedData

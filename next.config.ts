@@ -6,17 +6,11 @@ const withPWA = require("next-pwa")({
   skipWaiting: true,
 });
 
-const nextConfig: any = {
+const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: '5mb',
     },
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
   },
   turbopack: {},
   webpack: (config, { dev, isServer }) => {

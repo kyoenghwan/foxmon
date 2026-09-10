@@ -1,4 +1,6 @@
 import { RA_HASH_PASSWORD } from '@/src/atoms/ra/auth/RA_HASH_PASSWORD';
+import { cookies } from 'next/headers';
+import { verifyGuestToken } from '@/lib/guest-session';
 import { RA_VALIDATE_LOGIN_ID } from '@/src/atoms/ra/auth/RA_LOGIN_ID';
 import { QA_CHECK_ID_NICKNAME_EXISTS } from '@/src/atoms/qa/auth/QA_CHECK_ID_NICKNAME_EXISTS';
 import { OA_CREATE_USER } from '@/src/atoms/oa/auth/OA_CREATE_USER';
@@ -13,7 +15,7 @@ interface RegisterInput {
   email?: string;
   name: string;
   nickname: string;
-  role: 'GENERAL' | 'EMPLOYER' | 'ADMIN' | 'SUPER_ADMIN';
+  role: 'GENERAL' | 'EMPLOYER';
   birthDate: string;
   gender: string;
   phoneNumber: string;
@@ -39,6 +41,17 @@ export async function FA_REGISTER_FLOW(input: RegisterInput): Promise<{ success:
   nvLog('AT', '▶️ FA_REGISTER_FLOW 시작', { loginId: input.loginId, role: input.role });
 
   try {
+    if (!['GENERAL', 'EMPLOYER'].includes(input.role)) {
+      return { success: false, message: '허용되지 않은 가입 유형입니다.' };
+    }
+    const identity = await verifyGuestToken((await cookies()).get('foxmon_guest_session')?.value);
+    if (!identity || !identity.ci) {
+      return { success: false, message: '본인인증을 다시 진행해주세요.' };
+    }
+    // 가입자 신원은 요청 본문이 아니라 서버에서 검증한 인증 결과만 사용합니다.
+    input = { ...input, name: identity.name, birthDate: identity.birthDate,
+      phoneNumber: identity.phoneNumber, gender: identity.gender, nationality: identity.nationality,
+      ci: identity.ci, is_age_verified: true };
     const loginIdCheck = RA_VALIDATE_LOGIN_ID(input.loginId);
     if (!loginIdCheck.isValid) {
       return { success: false, message: loginIdCheck.error || '사용할 수 없는 아이디입니다.' };
