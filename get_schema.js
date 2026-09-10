@@ -11,7 +11,7 @@ envFile.split('\n').forEach(line => {
 const supabase = createClient(url, key);
 
 async function check() {
-    const { data, error } = await supabase.from('jobs').select('*').limit(1);
+    const { data, error } = await supabase.from('biz_ads').select('*').limit(1);
     if (error) {
         console.error(error);
         return;

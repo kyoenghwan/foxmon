@@ -1,6 +1,6 @@
-const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
+import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 
 const keyPassword = 'Rudghks!1';
 const keyFilePath = path.resolve('./keys/mok_keyInfo.dat');
